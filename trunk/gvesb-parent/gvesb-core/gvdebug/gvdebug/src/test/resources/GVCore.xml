@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+
+<GVCore version="1.0">
+    <GVCryptoHelper name="CRYPTO_HELPER" type="module">
+        <KeyStoreID id="WSS_service" key-store-name="service.jks" key-store-prv="SUN"
+                    key-store-pwd="{3DES}41OE8r5rJLM=" key-store-type="JKS"/>
+        <KeyStoreID id="WSS_client" key-store-name="client.jks" key-store-prv="SUN"
+                    key-store-pwd="{3DES}oh2yh6P0/L8=" key-store-type="JKS"/>
+    </GVCryptoHelper>
+    <GVXPath name="XPATH" type="module">
+        <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
+            <Description>Extension functions and namespaces for XPath.</Description>
+            <XPathExtension class="it.greenvulcano.util.xpath.search.extension.ExternalDocumentXPathFunction"
+                            function-name="document">
+                <Description>Accede ad un documento esterno. Uso: gvf:document(&apos;xml file path&apos;)</Description>
+            </XPathExtension>
+            <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+            <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema-instance"
+                            prefix="xsi"/>
+            <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/soap/"
+                            prefix="soap"/>
+            <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl"/>
+            <XPathNamespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j"/>
+            <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml"/>
+            <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano"
+                            prefix="gvesbws"/>
+            <XPathNamespace namespace="http://www.eaisoftware.it/jarad" prefix="jarad"/>
+            <XPathNamespace namespace="http://www.credit.com/services" prefix="cred"/>
+            <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc"/>
+            <XPathNamespace namespace="http://drools.org/drools-5.0/change-set"
+                            prefix="drools-cs"/>
+        </XPath>
+    </GVXPath>
+    <GVForwards name="JMS_FORWARD" type="module">
+        <ForwardConfiguration dump-message="true" enabled="true"
+                              forwardName="FWD_TOUPPER_A"
+                              ref-dp="ReadString_JMSBytesMessageDataProvider">
+            <ForwardDeployment connection-factory="java:/XAConnectionFactory"
+                               destination="gvesb/jms/queue/TOUPPER_A_Request_Queue"
+                               destination-type="queue" reconnect-interval-sec="10"
+                               transacted="true" transaction-timeout-sec="30">
+                <XAHelper auto-enlist="false" transaction-status="TMSUCCESS"/>
+            </ForwardDeployment>
+        </ForwardConfiguration>
+    </GVForwards>
+    <GVPoolManager name="POOL_MANAGER" type="module">
+        <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
+                          maximum-size="5" shrink-timeout="120000"
+                          subsystem="J2EEGreenVulcano"/>
+        <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
+                          maximum-size="5" shrink-timeout="120000" subsystem="JMSForward"/>
+        <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
+                          maximum-size="5" shrink-timeout="120000"
+                          subsystem="GreenVulcano-TimerTask"/>
+        <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
+                          maximum-size="5" shrink-timeout="120000"
+                          subsystem="GreenVulcano-WebServices"/>
+    </GVPoolManager>
+    <GVServices name="SERVICES" type="module">
+    	<BpelEngineConfiguration startServer="false" deployMentUnitProcess="" transactionTimeout="">
+    	<EngineProperties name="" value=""/>
+    	</BpelEngineConfiguration>
+    	<Management call-administration-on-init="no"/>
+        <Persistence enabled="true" jdbc-connection-name="pool_persistence">
+            <SequenceSQL>select recovery_seq.nextval from dual</SequenceSQL>
+        </Persistence>
+        <Groups>
+            <Description>This section contains all the service groups.</Description>
+            <Group group-activation="on" id-group="DEFAULT_GRP"/>
+            <Group group-activation="on" id-group="CREDIT_GRP"/>
+        </Groups>
+        <Services>
+            <Description>This section contains a list of all services provided by GreenVulcano ESB</Description>
+            <Service group-name="DEFAULT_GRP" id-service="TOUPPER" service-activation="on"
+                     statistics="off">
+                <Operation name="RequestReply" operation-activation="on"
+                           out-check-type="sys-svc-id" type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+                    <Description>VulCon generated Operation</Description>
+                    <Participant id-channel="TEST_CHANNEL" id-system="GVESB"/>
+               <Flow first-node="id_5" point-x="40" point-y="270">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         id="request" id-system="GVESB" input="input_test"
+                                         next-node-id="check_status" op-type="call"
+                                         operation-name="toupper_call" output="output_test"
+                                         point-x="333" point-y="70" type="flow-node"/>
+                        <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
+                                     default-id="return_status" id="check_status"
+                                     input="output_test" on-exception-id="return_error"
+                                     op-type="check" point-x="536" point-y="146"
+                                     type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_status" op-type="end" output="output_test"
+                                   point-x="700" point-y="50" type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_error" op-type="end" output="output_test"
+                                   point-x="700" point-y="250" type="flow-node"/>
+                        <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
+                                     default-id="request" id="id_5" input="input_test"
+                                     on-exception-id="return_error" op-type="check"
+                                     point-x="160" point-y="146" type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
+        </Services>
+    </GVServices>
+    <GVSystems name="SYSTEMS" type="module">
+        <Systems>
+            <Description>This section contains a list of all systems connected to GreenVulcano ESB</Description>
+            <System id-system="GVESB" system-activation="on">
+                <Channel id-channel="TEST_CHANNEL">
+                    <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall"
+                                       name="toupper_call" service="toupper"
+                                       sleep-on-init="75" sleep-on-perform="50"
+                                       type="call"/>
+                </Channel>
+            </System>
+        </Systems>
+    </GVSystems>
+    <GVPolicy name="POLICY_MANAGER" type="module">
+        <Roles>
+            <Role name="ROLE_A">
+                <Description>Role description</Description>
+            </Role>
+            <Role name="ROLE_B"/>
+            <Role name="ROLE_C"/>
+        </Roles>
+        <Addresses>
+            <AddressSet name="local">
+                <Description>AddressSet description</Description>
+                <Address address="127.0.0.1"/>
+                <Address address="192.174.100.10"/>
+            </AddressSet>
+        </Addresses>
+        <ACLGreenVulcano type="acl-manager" class="it.greenvulcano.gvesb.policy.impl.ACLGreenVulcano">
+            <DefaultRes type="resource">
+            </DefaultRes>
+            <ServiceRes type="resource" service="CCardQuery">
+                <ACL>
+                    <RoleRef name="ROLE_A"/>
+                    <AddressSetRef name="local"/>
+                </ACL>
+            </ServiceRes>
+            <ServiceRes type="resource" service="CCardPay">
+                <ACL>
+                    <RoleRef name="ROLE_A"/>
+                    <AddressSetRef name="local"/>
+                </ACL>
+            </ServiceRes>
+        </ACLGreenVulcano>
+    </GVPolicy>
+    <GVConcurrencyHandler name="CONCURRENCY_HANDLER" type="module">
+        <SubSystems>
+            <SubSystem name="GVCore">
+                <ConcurrentService max-concurrency="5" service="TOUPPER"/>
+            </SubSystem>
+        </SubSystems>
+    </GVConcurrencyHandler>
+    <GVBufferDump log-dump-size="-1" name="BUFFER_DUMP" type="module"/>
+    <GVDataTransformation name="GVDT" type="module">
+        <DataSourceSets>
+            <DataSourceSet name="Default">
+                <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource"
+                                   formatHandled="xsl" name="DefaultXSL"
+                                   repositoryHome="${{gv.app.home}}"
+                                   type="datasource" />
+            </DataSourceSet>
+        </DataSourceSets>
+        <Transformations>
+        </Transformations>
+    </GVDataTransformation>
+    <GVTaskManagerConfiguration name="GVTASKS" type="module">
+        <GVSchedulerBuilder class="it.greenvulcano.scheduler.util.quartz.impl.GVSchedulerBuilder"
+                            maxThreads="3" type="scheduler-builder">
+            <RamStore type="quartz-store"/>
+        </GVSchedulerBuilder>
+        <TaskGroups>
+        </TaskGroups>
+    </GVTaskManagerConfiguration>
+</GVCore>

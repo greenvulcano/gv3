@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+  <GVDataProviderManager name="GVDP" type="module">
+    <Description>Elenco dei Data Providers</Description>
+    <DataProviders>
+      <HttpMethodDataProvider name="testHTTPMethodDP" class="it.greenvulcano.gvesb.gvhttp.impl.HttpMethodDataProvider" type="dataProvider">
+        <Field key="test" direction="OUT" type="field">
+          <Expression type="ognl">
+#parts = new org.apache.commons.httpclient.methods.multipart.Part[] {new org.apache.commons.httpclient.methods.multipart.StringPart(&apos;mainBody&apos;,&apos;This is the a multipart message in MIME format&apos;),
+new org.apache.commons.httpclient.methods.multipart.FilePart(&apos;response.txt&apos;, new org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource
+(&apos;response.txt&apos;, #input.object), &apos;text/plain&apos;, &apos;UTF-8&apos;)},
+#multipartRequestEntity = new org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity(#parts, getParams()),
+setRequestEntity(#multipartRequestEntity)
+          </Expression>
+        </Field>
+      </HttpMethodDataProvider>
+      <HttpMethodDataProvider name="testHTTPMethodSimpleDP" class="it.greenvulcano.gvesb.gvhttp.impl.HttpMethodDataProvider" type="dataProvider">
+        <Field key="test" direction="OUT" type="field">
+          <Expression type="ognl">
+setRequestEntity(new org.apache.commons.httpclient.methods.ByteArrayRequestEntity(#input.object))
+          </Expression>
+        </Field>
+      </HttpMethodDataProvider>
+    </DataProviders>
+  </GVDataProviderManager>
+</GVAdapters>

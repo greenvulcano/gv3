@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+    </RSHServiceClientConfiguration>
+
+    <GVRulesConfigManager name="RULES_CFG" type="module" version="1.0">
+        <GVKnowledgeBaseConfig class="it.greenvulcano.gvesb.gvrules.drools.config.impl.GVKnowledgeBaseConfig"
+                               name="figureFilterOutColl" type="knwl-config">
+            <RuleResource resourceType="DRL" type="knwl-resource"
+                          url="file:${{gv.app.home}}/Rules/figure/figureFilterOutColl.drl"/>
+        </GVKnowledgeBaseConfig>
+        <GVKnowledgeBaseConfig class="it.greenvulcano.gvesb.gvrules.drools.config.impl.GVKnowledgeBaseConfig"
+                               name="figureFilterOut" type="knwl-config">
+            <RuleResource resourceType="DRL" type="knwl-resource"
+                          url="file:${{gv.app.home}}/Rules/figure/figureFilterOut.drl"/>
+        </GVKnowledgeBaseConfig>
+        <GVKnowledgeBaseConfig class="it.greenvulcano.gvesb.gvrules.drools.config.impl.GVKnowledgeBaseConfig"
+                               name="figureFilter" type="knwl-config">
+            <RuleResource resourceType="DRL" type="knwl-resource"
+                          url="file:${{gv.app.home}}/Rules/figure/figureFilter.drl"/>
+        </GVKnowledgeBaseConfig>
+    </GVRulesConfigManager>
+</GVAdapters>

@@ -1,0 +1,362 @@
+<!DOCTYPE taglib
+    PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+	"http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_2.dtd">
+
+<taglib>
+  <tlibversion>1.0</tlibversion>
+  <jspversion>1.2</jspversion>
+  <shortname>max</shortname>
+  <uri>/WEB-INF/maxime.tld</uri>
+  <info>
+	Maxime Informatica tag library
+  </info>
+
+  <!-- content  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Legge un contenuto descritto dal record corrente della collezione che si
+  sta iterando con il tag loop (vedi).
+
+  'id'   identificativo del loop. E' usato per evitare ambiguita' in caso
+         di loop annidati.
+         Se non specificato si riferisce al tag loop piu' vicino.
+
+  -->
+
+  <tag>
+    <name>content</name>
+    <tagclass>max.taglib.ContentTag</tagclass>
+	<attribute>
+		<name>id</name>
+	</attribute>
+  </tag>
+
+  <!-- data - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Estrae uno o piu' campi dal record corrente della collezione che si sta
+  iterando con il tag loop (vedi).
+
+  'id'   identificativo del loop. E' usato per evitare ambiguita' in caso
+         di loop annidati.
+         Se non specificato si riferisce al tag loop piu' vicino.
+  'fld'  lista di campi separati da virgola. Il campo '#' indica l'indice
+         della riga. Il campo '*' indica un indice specificabile a tempo
+         di visualizzazione (vedi tag 'idxLoop').
+  'fmt'  formato da applicare (to do).
+
+  -->
+
+  <tag>
+    <name>data</name>
+    <tagclass>max.taglib.DataTag</tagclass>
+	<attribute>
+		<name>fld</name>
+		<required>true</required>
+		<rtexprvalue>true</rtexprvalue>
+	</attribute>
+	<attribute>
+		<name>id</name>
+	</attribute>
+	<attribute>
+		<name>fmt</name>
+	</attribute>
+  </tag>
+
+  <!-- extraLoop  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Questo tag esegue il suo body solo se il loop che lo contiene sta eseguendo
+  l'extra-loop (vedi tag 'loop').
+
+  'id'     identificativo del loop. E' usato per evitare ambiguita'
+           in caso di loop annidati (vedi tag 'loop').
+  'empty'  se specificato deve valere 'yes' oppure 'no'.
+           Se 'yes' allora il body e' valutato solo se la collezione del
+           loop era vuota.
+           Se 'no' allora il body e' valutato solo se la collezione del
+           loop non era vuota.
+           Se non specificato allora il body e' valutato in ogni caso di
+           extraLoop.
+  -->
+
+  <tag>
+    <name>extraLoop</name>
+    <tagclass>max.taglib.ExtraLoopTag</tagclass>
+	<attribute>
+		<name>id</name>
+	</attribute>
+	<attribute>
+		<name>empty</name>
+	</attribute>
+  </tag>
+
+  <!-- firstLoop  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Questo tag esegue il suo body solo se il loop che lo contiene e' nella
+  prima esecuzione e la collezione non e' vuota(vedi tag 'loop').
+
+  'id'         identificativo del loop. E' usato per evitare ambiguita'
+               in caso di loop annidati (vedi tag 'loop').
+
+  -->
+
+  <tag>
+    <name>firstLoop</name>
+    <tagclass>max.taglib.FirstLoopTag</tagclass>
+	<attribute>
+		<name>id</name>
+	</attribute>
+  </tag>
+
+  <!-- grant - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Questo tag specifica i ruoli che hanno i grants sul corpo del tag.
+  Questo tag ha corpo.
+
+  'roles'     e' l'attributo obbligatorio che specifica i ruoli abilitati separati
+              da virgola.
+  -->
+
+  <tag>
+    <name>grant</name>
+    <tagclass>max.taglib.GrantTag</tagclass>
+	<attribute>
+		<name>roles</name>
+        <required>true</required>
+	</attribute>
+  </tag>
+
+  <!-- idxLoop  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Questo tag imposta o incrementa il campo user-index ('*') del tag 'loop'.
+
+  'id'     identificativo del loop. E' usato per evitare ambiguita'
+           in caso di loop annidati (vedi tag 'loop').
+  'op'     puo' essere 'set' oppure 'add' (default).
+  'value'  numero intero che imposta o definisce l'incremento. Default: 1.
+
+  -->
+
+  <tag>
+    <name>idxLoop</name>
+    <tagclass>max.taglib.IdxLoopTag</tagclass>
+	<attribute>
+		<name>id</name>
+	</attribute>
+	<attribute>
+		<name>op</name>
+	</attribute>
+	<attribute>
+		<name>value</name>
+	</attribute>
+  </tag>
+
+  <!-- loop - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Questo tag esegue il suo body un numero di volte pari al numero di
+  elementi di una collezione.
+  La collezione deve essere un'attributo del page context (con un qualsiasi
+  scope: APPLICATION_SCOPE, SESSION_SCOPE, REQUEST_SCOPE, PAGE_SCOPE; il
+  default e' SESSION_SCOPE).
+
+  Una collezione puo' essere un max.db.ResultSetEx, un java.sql.ResultSet,
+  una qualsiasi classe che implementa java.util.Collection, un array di
+  Object o un singolo Object. Nel caso di un singolo object viene trattato
+  come un array di un solo elemento.
+
+  'attribute'   nome dell'attributo contenente la collezione
+  'scope'       scope dell'attributo. Puo' essere 'application', 'session',
+                'request' o 'page'
+  'id'          identificativo del loop. E' usato per evitare ambiguita'
+                in caso di loop annidati (vedi tag 'data').
+  'startidx'    indice iniziale. L'indice e' restituito dal tag 'data' (vedi)
+                quando si specifica il campo '#'.
+  'extraloop'   puo' essere 'yes' o 'no' (default). Se 'yes' il loop, dopo
+                aver ciclato per tutta la collezione, esegue un ciclo in piu'
+                durante il quale il tag 'data' ritorna tutte stringhe vuote.
+  'storeAttr'   attributo dove depositare l'oggetto LoopTag.
+                Utile per accedere ai metodi dell'oggetto.
+  'storeScope'  scope per l'attributo dove depositare l'oggetto LoopTag.
+
+  -->
+
+  <tag>
+    <name>loop</name>
+    <tagclass>max.taglib.LoopTag</tagclass>
+	<attribute>
+		<name>attribute</name>
+		<required>true</required>
+		<rtexprvalue>true</rtexprvalue>
+	</attribute>
+	<attribute>
+		<name>id</name>
+	</attribute>
+	<attribute>
+		<name>scope</name>
+		<rtexprvalue>true</rtexprvalue>
+	</attribute>
+	<attribute>
+		<name>startidx</name>
+		<rtexprvalue>true</rtexprvalue>
+	</attribute>
+	<attribute>
+		<name>extraloop</name>
+	</attribute>
+	<attribute>
+		<name>storeAttr</name>
+	</attribute>
+	<attribute>
+		<name>storeScope</name>
+	</attribute>
+  </tag>
+
+  <!-- nocache  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <tag>
+    <name>nocache</name>
+    <tagclass>max.taglib.NoCacheTag</tagclass>
+  </tag>
+
+  <!-- popup  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Il contenuto del corpo e' visualizzato su un'altra finestra solo se
+  l'utente preme il pulsante di popup.
+
+  style    definisce lo stile del pulsante. E' una property nella forma
+           "sezione!property".
+           Definisce il codice HTML per definire il pulsante di popup.
+  target   definisce il nome della finestra da aprire (default = '__max_popup')
+
+  -->
+
+  <tag>
+    <name>popup</name>
+    <tagclass>max.taglib.PopupTag</tagclass>
+    <attribute>
+      <name>style</name>
+    </attribute>
+    <attribute>
+      <name>target</name>
+    </attribute>
+  </tag>
+
+  <!-- prop - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Questo tag estrae una property contenuta nei files di configurazione.
+  Non ha corpo.
+
+  'sect'  sezione contenente la property. Se assente si considera la
+          sezione di default.
+  'prop'  property da leggere.
+
+  -->
+
+  <tag>
+    <name>prop</name>
+    <tagclass>max.taglib.PropertyTag</tagclass>
+    <attribute>
+      <name>sect</name>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>prop</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+
+  <!-- repeatLoop - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Questo tag esegue il suo body solo se il loop che lo contiene non sta
+  eseguendo l'extra-loop (vedi tag 'loop') ed e' verificata la condizione
+  data.
+
+  'id'     identificativo del loop. E' usato per evitare ambiguita'
+           in caso di loop annidati (vedi tag 'loop').
+  'fld'    campo da testare.
+  'type'   puo' essere 'string' o 'number' (default).
+  'op'     puo' essere '<', '<=', '=' (default), '<>', '>', '>='.
+           se type e' 'number' allora puo' essere anche '%num'
+           (verificato se il campo specificato modulo num vale 'value')
+  'value'  e' un numero se 'type' e' 'number', una stringa qualsiasi
+           se 'type' e' 'string'.
+  'negate' puo' essere 'yes' oppure 'no' (default). Se 'yes' allora inverte
+           il significato dell'attributo 'op'.
+  -->
+
+  <tag>
+    <name>repeatLoop</name>
+    <tagclass>max.taglib.RepeatLoopTag</tagclass>
+	<attribute>
+		<name>id</name>
+	</attribute>
+    <attribute>
+      <name>fld</name>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>value</name>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>type</name>
+    </attribute>
+    <attribute>
+      <name>op</name>
+    </attribute>
+    <attribute>
+      <name>negate</name>
+    </attribute>
+  </tag>
+
+  <!-- selContent - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Questo tag seleziona un contenuto in funzione di una regola di selezione
+  ed isnerisce nella pagina, nella richiesta, nella sessione (default) o
+  nell'applicazione una collezione di attributi del contenuto.
+  Il contenuto e' visualizzabile tramite i tag 'loop' e 'content' (vedi).
+  Questo tag non ha corpo.
+
+  'group'     solo un tag 'selCount' dello stesso gruppo verra' eseguito.
+              Se 'group' non e' specificato allora il tag e' sempre eseguito.
+  'rule'      regola di selezione da eseguire. E' il nome di una sezione
+              della configurazione dove la regola e' definita.
+              Una regola e' realizzata da una classe Java che implementa
+              l'interfaccia max.core.ContentSelectionRule.
+  'param'     parametro opzionale passato alla regola di selezione.
+  'attribute' attributo che conterra' il risultato.
+  'scope'     punto di memorizzazione del risultato.
+              Puo' essere 'application', 'session' (default), 'request'
+              o 'page'.
+  'orderBy'   determina l'ordine di presentazione dei contenuti.
+              Deve essere nella forma 'CAMPO1 [MODE1], CAMPO2 [MODE2],...'
+              dove CAMPO1, CAMPO2 sono i nomi degli attributi, MODE1, MODE2
+              sono opzionali e possono essere 'ASC' (default) oppure 'DESC'.
+
+  -->
+
+  <tag>
+    <name>selContent</name>
+    <tagclass>max.taglib.SelContentTag</tagclass>
+	<attribute>
+		<name>group</name>
+	</attribute>
+    <attribute>
+      <name>rule</name>
+      <required>true</required>
+    </attribute>
+    <attribute>
+      <name>param</name>
+    </attribute>
+    <attribute>
+      <name>attribute</name>
+      <required>true</required>
+    </attribute>
+    <attribute>
+      <name>scope</name>
+    </attribute>
+    <attribute>
+      <name>orderBy</name>
+    </attribute>
+  </tag>
+
+
+</taglib>

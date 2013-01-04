@@ -1,0 +1,97 @@
+<%@ page import="java.net.URLEncoder"%>
+<%@ page import="java.util.Map"%>
+<%@ page import="it.greenvulcano.gvesb.gvconsole.workbench.plugin.TestGVBufferObject"%>
+
+<%
+	String countOk = (String) request.getParameter("countOk");
+	String countKo = (String) request.getParameter("countKo");
+	
+	Map mapTest = (Map) session.getAttribute("mapTestObject");
+%>
+<link rel="StyleSheet" type="text/css" href="../css/dmenu.css"/>
+<script>
+	dMenu.init();
+</script>
+<table>
+		<tr>
+	    	<td height='32'></td>
+	    </tr>
+		<tr>
+	    	<td class="border" colspan='4'>
+	    		<B><FONT class="titlesmall">&nbsp;&nbsp;RESULT&nbsp;</FONT></B>
+	    	</td>
+	    </tr>
+	    <tr>
+	        <td colspan="4"><HR></td>
+	    </tr>
+	    <tr>
+	    	<td align='left'>Success</td>
+	       	<td align="left" colspan="11"><%=countOk%></td>
+	    <tr>
+	    <tr>
+	    	<td align='left'>Failed</td>
+	       	<td align="left" colspan="11"><%=countKo%></td>
+	    <tr>		
+	    <tr>
+	        <td colspan="4">
+	            <hr></hr>
+	        </td>
+	    </tr>
+	<%
+	    if (mapTest != null) {
+			int len = mapTest.size();
+	%>
+			<tr>
+				<td align="left">ID</td>
+				<td align="left">GVBuffer</td>
+				<td align="left">Throwable</td>
+			</tr>
+	<%
+			for (int in = 0; in < len; in++) {
+				TestGVBufferObject testObject = (TestGVBufferObject) mapTest.get(in);
+				String id = testObject.getId();
+	%>
+	<script language="JavaScript1.2">
+	   	result<%= in %> = new dMenu();
+       	result<%= in %>.add("Show As Text", "showDataOutputMultiple.jsp?encoding=text&reference=<%= in %>&show=text", "#", "../images/select.png");
+       	result<%= in %>.add("Show Binary", "showDataOutputMultiple.jsp?encoding=binary&reference=<%= in %>&show=binary", "#", "../images/select.png");
+		result<%= in %>.add("US-ASCII", "showDataOutputMultiple.jsp?encoding=US-ASCII&reference=<%= in %>&show=text", "#", "../images/select.png");
+       	result<%= in %>.add("ISO-8859-1", "showDataOutputMultiple.jsp?encoding=ISO-8859-1&reference=<%= in %>&show=text", "#", "../images/select.png");
+       	result<%= in %>.add("UTF-8", "showDataOutputMultiple.jsp?encoding=UTF-8&reference=<%= in %>&show=text", "#", "../images/select.png");
+       	result<%= in %>.add("UTF-16BE", "showDataOutputMultiple.jsp?encoding=UTF-16BE&reference=<%= in %>&show=text", "#", "../images/select.png");
+       	result<%= in %>.add("UTF-16LE", "showDataOutputMultiple.jsp?encoding=UTF-16LE&reference=<%= in %>&show=text", "#", "../images/select.png");
+       	result<%= in %>.add("UTF-16", "showDataOutputMultiple.jsp?encoding=UTF-16&reference=<%= in %>&show=text", "#", "../images/select.png");
+	</script>
+	<%
+				if ((testObject.getThrowableMsg() != null) && (!testObject.getThrowableMsg().equals(""))) {
+	%>
+				
+					<tr class="borderlabel">
+						<td align="left"><%=id%></td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			    		<td align="left">
+			                <a href="exceptionMultiple.jsp?reference=<%=in%>">Throwable</a>
+			            </td>
+			        </tr>
+	<%
+				}
+				else {
+	%>
+					<tr class="borderlabelMultiple">
+						<td align="left"><%=id%></td>
+			    		<td align="left">
+	                    	<font onMouseover="result<%=in%>.show(event)" onMouseout="dMenu.delayHide()">Output</font>
+	                	</td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+	             	</tr>
+	<%
+				}
+			}
+		}
+	%>
+	    <tr>
+	        <td colspan="4">
+	            <hr></hr>
+	        </td>
+	    </tr>
+	</table>

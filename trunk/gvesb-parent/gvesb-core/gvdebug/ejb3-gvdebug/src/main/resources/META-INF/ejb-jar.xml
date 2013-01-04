@@ -1,0 +1,12 @@
+<ejb-jar version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_0.xsd">
+	<enterprise-beans>
+		<session>
+			<ejb-name>GVDebugger</ejb-name>
+			<business-remote>it.greenvulcano.gvesb.core.debug.ejb3.GVDebugger</business-remote>
+			<ejb-class>it.greenvulcano.gvesb.core.debug.ejb3.DebuggerBean</ejb-class>
+			<session-type>Stateful</session-type>
+		</session>
+	</enterprise-beans>
+</ejb-jar> 

@@ -1,0 +1,318 @@
+<!--============================================================================
+    L'elemento xml e' il root element per la configurazione delle funzionalita'
+    dell'XML editor engine.
+============================================================================-->
+<!ELEMENT xml (description?,context,stylesheet,details,entity-resolver,xpath)>
+
+<!ATTLIST xml copyright CDATA #FIXED "Maxime Informatica Intranet Framework">
+
+<!--
+    Specifica il content provider utilizzato dalle funzionalita' XML.
+
+    #Config: contents.xml : /contents/alias/@alias
+    #Config: contents.xml : /contents/provider/@name
+-->
+<!ATTLIST xml provider CDATA #REQUIRED>
+
+<!--============================================================================
+    L'elemento context contiene i parametri relativi al contesto
+    dell'applicazione web.
+============================================================================
+    #Template:
+
+    <xsl:template match="context">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Context</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@context"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Invoke</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@invoke"/></b></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT context (description?)>
+
+<!--
+    L'attributo context definisce il contesto della web application compreso
+    dello slash (/) iniziale.
+    Esempio: /maxime
+
+    #NotNull
+-->
+<!ATTLIST context context CDATA #REQUIRED>
+
+<!--
+    URI per l'invocazione del servlet dell'editor compreso del context.
+    Corrisponde ad un servlet-mapping contenuto in web.xml
+    Esempio: /maxime/MaxXMLServlet
+
+    #NotNull
+-->
+<!ATTLIST context invoke CDATA #REQUIRED>
+
+<!--============================================================================
+    L'elemento stylesheet contiene i parametri relativi alla visualizzazione
+    dell'interfaccia grafica dell'editor XML.
+============================================================================
+    #Template:
+
+    <xsl:template match="stylesheet">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Use pool</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@use-pool"/></b></td>
+            </tr>
+            <xsl:if test="@stylesheet">
+            <tr valign="top">
+                <td>Stylesheet</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@stylesheet"/></b></td>
+            </tr>
+            </xsl:if>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT stylesheet (description?)>
+
+<!--
+    L'attributo use-pool definisce se lo stylesheet XSLT per la produzione
+    dell'interfaccia HTML deve essere instanziato ogni volta, oppure deve
+    essere utilizzato in pool.
+    Alcune implementazioni XML non funzionano bene in pool, in tal caso questo
+    parametro va impostato a false.
+-->
+<!ATTLIST stylesheet use-pool (false|true) #REQUIRED>
+
+<!--
+    Questo attributo definisce il path per lo stylesheet XSLT da applicare
+    per produrre l'interfaccia HTML.
+    Lo stylesheet viene cercato prima nel classpath e poi nel file system.
+    Se non definito usa lo stylesheet built-in nel framework.
+
+    #NotNull
+-->
+<!ATTLIST stylesheet stylesheet CDATA #IMPLIED>
+
+<!--
+    Questo attributo definisce il path per lo stylesheet XSLT da applicare
+    per produrre l'interfaccia HTML per i warnings.
+    Lo stylesheet viene cercato prima nel classpath e poi nel file system.
+    Se non definito usa lo stylesheet built-in nel framework.
+
+    #NotNull
+-->
+<!ATTLIST stylesheet warnings-stylesheet CDATA #IMPLIED>
+
+
+<!--============================================================================
+    L'elemento details contiene i parametri relativi agli stylesheet di
+    dettaglio.
+    Gli stylesheet di dettaglio permettono di definire in dettaglio le
+    informazioni che compaiono sull'interfaccia grafica dell'editor.
+============================================================================
+    #Template:
+
+    <xsl:template match="details">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Category</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@category"/></b></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT details (description?)>
+
+<!--
+    Specifica la categoria all'interno del content provider.
+
+    #NotNull
+-->
+<!ATTLIST details category CDATA #REQUIRED>
+
+<!--============================================================================
+    L'elemento entity-resolver contiene i parametri relativi all'entity resolver.
+============================================================================
+    #Template:
+
+    <xsl:template match="entity-resolver">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Class</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="*[@type='entity-resolver']/@class"/></b></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT entity-resolver (description?,max-entity-resolver)>
+
+<!--============================================================================
+    L'elemento max-entity-resolver contiene i parametri relativi all'entity
+    resolver built-in.
+============================================================================
+    #Template:
+
+    <xsl:template match="max-entity-resolver">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Class</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@class"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Category</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@category"/></b></td>
+            </tr>
+            <xsl:if test="@prefix">
+            <tr valign="top">
+                <td>Prefix</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@prefix"/></b></td>
+            </tr>
+            </xsl:if>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT max-entity-resolver (description?)>
+
+<!ATTLIST max-entity-resolver type  CDATA #FIXED "entity-resolver">
+<!ATTLIST max-entity-resolver class CDATA #FIXED "max.xml.MaxEntityResolver">
+
+<!--
+    Specifica la categoria all'interno del content provider.
+
+    #NotNull
+-->
+<!ATTLIST max-entity-resolver category CDATA #REQUIRED>
+
+<!--
+    Specifica il prefisso da rimuovere al systemId per la ricerca dei DTD built-in.
+
+    #NotNull
+-->
+<!ATTLIST max-entity-resolver prefix CDATA #IMPLIED>
+
+
+<!--
+    Specifica i parametri relativi all'XPath.
+
+    #Table: | XPath Extensions | xpath-extension | Function | @function-name | Namespace | @namespace | Class | @class | Description | description
+    #Table: | Namespaces | xpath-namespace | Prefix | @prefix | Namespace | @namespace | Description | description
+
+    #Template:
+        <xsl:template match="xpath">
+            <xsl:value-of select="description"/>
+        </xsl:template>
+-->
+<!ELEMENT xpath  (description?,xpath-extension*,xpath-namespace*)>
+<!--
+    Specifica la libreria XPath da utilizzare.
+    Correntemente sono supportate due librerie:
+
+    - max.xpath.xalan.XalanXPathAPIFactoryImpl: libreria XPath basata sull'implementazione Xalan 2.4
+        di Jakarta. Alcune versioni della JVM includono nelle librerie di runtime versioni
+        precedenti della libreria Xalan, rendendo difficoloso l'utilizzo di Xalan 2.4.
+
+    - max.xpath.jaxen.JaxenXPathAPIFactoryImpl: libreria XPath basata sul Jaxen 1.0 di SourceForge.net.
+        Purtroppo questa libreria e' meno performante della libreria Xalan e presenta una serie di
+        problemi aperti. Utilizzare questa implementazione solo se Xalan non risulta essere
+        utilizzabile.
+        ATTENZIONE: per utilizzare la libreria Jaxen, includere nel classpath la versione modificata
+        di saxpath.jar che applica un workaround nella gestione dei namespaces.
+
+    #Choice: max.xpath.xalan.XalanXPathAPIFactoryImpl | max.xpath.jaxen.JaxenXPathAPIFactoryImpl
+-->
+<!ATTLIST xpath xpath-factory CDATA #REQUIRED>
+
+<!--
+    Specifica una funzione di estensione per l'XPath.
+    Le funzioni specificate sono accessibili con il prefisso 'max:'
+
+	#SelectOnInsert
+-->
+<!ELEMENT xpath-extension (description?)>
+<!--
+    Nome della funzione di estensione senza il prefisso max:
+
+    #NotNull
+    #Unique: ../xpath-extension/@function-name
+-->
+<!ATTLIST xpath-extension function-name CDATA #REQUIRED>
+<!--
+    Classe che implementa la funzione XPath.
+    La classe deve avere un costruttore di default senza parametri
+    e deve implementare l'interfaccia max.xpath.xalan.XPathFunction
+
+    #NotNull
+-->
+<!ATTLIST xpath-extension class CDATA #REQUIRED>
+<!--
+	Namespace per la funzione.
+	Se non specificato il namespace sara' "urn:maxime/functions"
+	installato automaticamente con il prefisso "max".
+	
+	#References: parent::xpath/xpath-namespace/@namespace
+-->
+<!ATTLIST xpath-extension namespace CDATA #IMPLIED>
+
+<!--
+	Specifica un namespace che puo' essere specificato negli XPath.
+	Il prefisso 'max' e' riservato.
+
+	#SelectOnInsert
+-->
+<!ELEMENT xpath-namespace (description?)>
+<!--
+	Prefisso del namespace.
+
+	#NotNull
+	#Warn: {{self::xpath-namespace[@prefix='max']}} Il prefisso 'max' e' riservato. Specificare un'altro prefisso.
+	#Unique: parent::xpath/xpath-namespace/@prefix
+-->
+<!ATTLIST xpath-namespace prefix CDATA #REQUIRED>
+<!--
+	Namespace.
+	Se non specificato, il prefisso e' associato al namespace di default.
+	
+	#NotNull
+-->
+<!ATTLIST xpath-namespace namespace CDATA #IMPLIED>
+
+<!--============================================================================
+    Free text for description.
+============================================================================-->
+<!ELEMENT description (#PCDATA)>

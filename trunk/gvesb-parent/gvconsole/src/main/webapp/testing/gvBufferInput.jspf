@@ -1,0 +1,126 @@
+<%@ page import="it.greenvulcano.gvesb.buffer.*"%>
+<%@ page import="java.util.Arrays"%>
+    <script>
+        function openUploadWindow()
+        {
+            var systemInserted = document.gvBufferInput.system.value;
+            var serviceInserted = document.gvBufferInput.service.value;
+            window.open("UploadWindow.jsp?system=" + systemInserted + "&service=" + serviceInserted, "uploadWindow", "left=50,top=50,width=340,height=260,resizable, scrollbars");
+        }
+
+        function openHexData()
+        {
+            window.open("showHexGVBuffer.jsp", "hexGVBufferInput", "left=50,top=50,width=540,height=460,resizable, scrollbars");
+        }
+    </script>
+    <tr>
+        <td align="left">Id</td>
+        <td align="left">
+            <input type="text" name ="id" class="input120" value="<%= testManager.get("inputId") %>"/>
+            <input type="submit" class="button buttonTesting" name="idButton" value="GetId" onclick="method.value='generateID'"/>
+        </td>
+        <td align="left">Character Encoding</td>
+        <%@ include file="comboEncodingInput.jspf" %>
+    </tr>
+    <tr id="serviceCombo">
+        <td align="left">Service</td>
+        <td align="left">
+        	<select name="service" class="input120" id="serviceSelect">
+				<option><%= testManager.get("inputService") == null ? "loading services..." : testManager.get("inputService") %></option>
+			</select>
+        </td>
+        <td align="left">Payload<br/><input type="button" class="button buttonTesting" name="uploadButton" value="Upload" onclick="openUploadWindow()"></td>
+        <% if (testManager.get("inputBinaryData").equals("true")) { %>
+		<td align="left" rowspan="4">
+        	<input type="button" class="button buttonTesting" name="showDataButton" value="Show data" onclick="openHexData()">
+            <input type="submit" class="button buttonTesting" name="reset" value="Reset data" onclick="method.value='resetData'">
+		</td>
+<% } else { %>
+        <td align="left" rowspan="5"><textarea name="byteData" class="input120" cols="30" rows="10"><%= testManager.get("inputData") %></textarea></td>
+<% } %>
+    </tr>
+    <tr id="systemCombo">
+        <td align="left">System</td>
+        <td align="left">
+        	<select name="system" class="input120" id="systemSelect">
+        		<option><%= testManager.get("inputSystem") == null ? "loading systems..." : testManager.get("inputSystem") %></option>
+			</select>
+		</td>
+		<td align="left"></td>
+        <td align="left"></td>
+    </tr>
+    <tr>
+        <td align="left">ReturnCode</td>
+        <td align="left"><input type="text" name="retCode" class="input120" value="<%= testManager.get("retCode") %>"/></td>
+		<td align="left"></td>
+        <td align="left"></td>
+    </tr>
+    <tr>
+        <td align="left">Properties</td>
+        <td align="left"><input type="button" class="button buttonTesting" value="Add" onclick="addProperties()"/></td>
+		<td align="left"></td>
+        <td align="left"></td>
+	</tr>
+    <tr>
+        <td colspan="4" align="center">
+            <script>
+    		    var counter = 0;
+
+    		    function addProperties()
+    		    {
+    		    	name = "property" + counter;
+    		    	counter++;
+
+    		    	$('#fields').append("<div id='" + name + "' style='margin: 4px'>"
+    		    	+ "<nobr>Name &nbsp;<input type=text class='input60' name='property' value=''/>"
+    		    	+ "&nbsp; Value &nbsp;<input type=text class='input60' name='propertyValue' value=''/>"
+    		    	+ "[<span valign=center onclick=\"remove('" + name + "')\" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>"
+    		    	+ "</div>");
+    		    }
+
+    		    function remove(id){$('#'+id).remove();}
+    	    </script>
+<%
+    GVBuffer gvBufferInput = (GVBuffer)testManager.get("inputGVBuffer", false);
+    String fieldNames[] = gvBufferInput.getPropertyNames();
+    Arrays.sort(fieldNames);
+    for(int i = 0; i < fieldNames.length; ++i) {
+        String field = fieldNames[i];
+        String value = gvBufferInput.getProperty(field);
+        String name = "property_" + field;
+%>
+                <div id="<%=name%>" style="margin: 4px">
+		    	    <nobr>
+		    	        Name &nbsp;<input type="text" class="input60" name="property" value="<%=field%>" />
+		    	        &nbsp; Value &nbsp;<input type="text" class="input60" name="propertyValue" value="<%=value%>" />
+		    	        [<span valign="center" onclick="remove('<%=name%>')" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>
+		    	    </nobr>
+    		   </div>
+<%
+            }
+%>
+		    <div id="fields">
+<!--
+		    	<div id='property300' style='margin-top:5px;'>
+    		    	<nobr>Name &nbsp;<input type=text name='property' value='ANNO_MESE'>
+    		    	&nbsp; Value &nbsp;<input type=text name='propertyValue' value='20100301'>
+    		    	&nbsp; [<span valign=center onclick=\"remove('property300')\" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>
+    		    </div>
+		    	<div id='property301' style='margin-top:5px;'>
+    		    	<nobr>Name &nbsp;<input type=text name='property' value='DH_SERVICE_NAME'>
+    		    	&nbsp; Value &nbsp;<input type=text name='propertyValue' value='EGL::CHECK_CONSUMI'>
+    		    	&nbsp; [<span valign=center onclick="remove('property301')" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>
+    		    </div>
+-->
+    		</div>
+		</td>
+    </tr>
+    <tr>
+        <td align="left">Transaction Mode</td>
+        <%@ include file="comboTransactionInput.jspf" %>
+    </tr>
+    <tr>
+        <td colspan="4">
+            <hr></hr>
+        </td>
+    </tr>
