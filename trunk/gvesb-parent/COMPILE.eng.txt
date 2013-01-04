@@ -5,7 +5,7 @@ Prerequisites:
     - m2eclipse plug-in   (Maven integration)
     - subversive plug-in  (Subversione client)
 
-Download from repository https://www.greenvulcano.com/svn/TEMP_GV_3.3.0/trunk the 'gvesb-parent' project.
+Download from repository https://svn.code.sf.net/p/greenvulcanoesb/source/trunk the 'gvesb-parent' project.
 Identify as GV_PROJECT_HOME the directory where you have downloaded the project.
 
 Common propaedeutic steps
