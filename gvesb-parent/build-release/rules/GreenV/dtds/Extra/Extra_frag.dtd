@@ -1,0 +1,23 @@
+<!ENTITY % gvcommons SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCommons.dtd">
+%gvcommons;
+
+<!ENTITY % gvhl7 SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd">
+%gvrules;
+
+<!ENTITY % extra-j2ee-calls "">
+<!ENTITY % extra-comm-calls "">
+<!ENTITY % extra-file-calls "">
+<!ENTITY % extra-db-calls   "">
+<!ENTITY % extra-util-calls "|rules-call">
+
+<!ENTITY % extra-enqueue "">
+<!ENTITY % extra-dequeue "">
+
+<!ENTITY % extra-dte-transformers "">
+
+<!ENTITY % extra-wf-operations "">
+<!ENTITY % extra-wf-extensions "">
+
+<!ENTITY % extra-core "">
+<!ENTITY % extra-adapters ",GVRulesConfigManager">
+<!ENTITY % extra-support "">

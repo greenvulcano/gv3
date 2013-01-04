@@ -1,0 +1,32 @@
+Definizioni:
+GV_HOME: percorso che indica la home in cui si trova GreenVulcano (esempio:/home/user/@base.dir@/GreenV)
+ADAPTER_HOME: Adapter_HL7/GreenV
+
+Istruzioni di installazione:
+- Copiare nella directory GV_HOME/application/deploy/gvesb-javaee5.ear/lib le librerie .jar presenti nella directory ADAPTER_HOME/application/deploy/gvesb-javaee5.ear/lib
+- Copiare in GV_HOME/gvdte/datasource/xsl l'intera directory ADAPTER_HOME/gvdte/datasource/xsl/HL7
+- Copiare in GV_HOME/ l'intera directory ADAPTER_HOME/TEST
+- Accedere alla directory GV_HOME/dtds/Extra
+    - Copiare nella directory corrente il file ADAPTER_HOME/dtds/Extra/GVHL7.dtd
+    - Modificare il file Extra.dtd inserendo il codice presente in ADAPTER_HOME/dtds/Extra/Extra_frag.dtd
+- Accedere alla directory GV_HOME/xmlconfig
+    - Modificare il file GVAdapters.xml            inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/GVAdapters_frag.xml
+    - Modificare il file GVCore.xml                inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/GVCore_frag.xml
+    - Modificare il file gvesb-catalog.xml         inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/gvesb-catalog_frag.xml
+    - Modificare il file gv-jmx.xml                inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/gv-jmx_frag.xml
+    - Modificare il file GVSupport.xml             inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/GVSupport_frag.xml
+    - Modificare il file XMLConfigSplit.properties inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/XMLConfigSplit_frag.properties
+
+Test:
+Sono stati improntati tre servizi GV per effettuare i test:
+- TestHL7:
+    richiede in ingresso la codifica hl7 contenuta nel file hl7_in.txt;
+    esegue la trasformazione di tale codifica in formato xml e la successiva ritrasformazione in codice hl7;
+    affinché si possa considerare il test riuscito, effettuando la RequestReply si dovrà ottenere un output identico a quello di input.
+- TestHL7_Listener:
+    è invocato dal listener.
+- TestHL7_Client:
+    richiede in ingresso la codifica hl7 contenuta nel file hl7_in.txt;
+    invoca l'HL7Listener tramite l'operazione hl7-call;
+    affinché si possa considerare il test riuscito, effettuando la RequestReply si dovrà ottenere un output in cui i valori nella seconda riga combacino con i valori della seconda riga del file hl7_out.txt; tale riga è la codifica per indicare che il messaggio è stato accettato seguita dall'id del messaggio.
+    Per una verifica più completa si può controllare che l'id del messaggio (1234561111) è presente anche nella prima riga del file di input (hl7_in.txt).

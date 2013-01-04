@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== -->
+<!--                                                                        -->
+<!--  GreenVulcano, the OpenSource ESB                                      -->
+<!--                                                                        -->
+<!--  Distributable under LGPL license.                                     -->
+<!--  See terms of license at http://www.gnu.org.                           -->
+<!--                                                                        -->
+<!-- ====================================================================== -->
+
+<project default="main" name="GVESB/Build">
+
+    <!-- ================================================================== -->
+    <!-- Setup                                                              -->
+    <!-- ================================================================== -->
+
+    <property environment="env"/>
+
+    <condition property="build.properties.file.exists">
+        <available file="build.properties" type="file"/>
+    </condition>
+
+    <fail unless="build.properties.file.exists">
+build.properties file not found.
+Please ensure that build.properties exists in the build dir of the checkout tree.
+    </fail>
+
+    <!-- Add the antcontrib tasks -->
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="${basedir}/../tools/lib/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
+  
+    <!-- Read in properties file for configuration -->
+    <property file="build.properties"/>
+
+    <!-- ================================================================== -->
+    <!-- Initialization                                                     -->
+    <!-- ================================================================== -->
+
+    <!--
+     | Initialize the build system.
+     | Other targets should depend on 'init'.
+    -->
+    <target name="init">
+    </target>
+
+
+    <!-- ================================================================== -->
+    <!-- Configuration                                                      -->
+    <!-- ================================================================== -->
+
+    <!--
+     | Configure the build system.
+     |
+    -->
+    <target name="configure" depends="init">
+        <!-- Module name(s) & version -->
+        <!--<property name="module.name" value="GvServer"/>
+        <property name="module.Name" value="GvServer Build"/>-->
+        <condition property="module.version" value="${version.major}.${version.minor}.${version.revision}">
+            <not>
+                <and>
+                    <length string="${version.tag}" trim="true" when="greater" length="0"/>
+                </and>
+            </not>
+        </condition>
+        <condition property="module.version" value="${version.major}.${version.minor}.${version.revision}.${version.tag}">
+            <and>
+                <length string="${version.tag}" trim="true" when="greater" length="0"/>
+            </and>
+        </condition>
+
+        <property name="module.output" value="${basedir}/target"/>
+        <property name="project.thirdparty" value="${basedir}/../thirdparty/libraries"/>
+
+        <!-- Release structure -->
+        <property name="release.id" value="${module.name}-${module.version}"/>
+
+        <property name="release.root" value="${module.output}/${release.id}"/>
+        <property name="release.gv" value="${release.root}/GreenV"/>
+        <property name="release.jboss" value="${release.root}/jboss-5.1.0.GA"/>
+
+        <property name="release.docs" value="${release.gv}/docs"/>
+        <property name="release.dtds" value="${release.gv}/dtds"/>
+        <property name="release.schema" value="${release.gv}/xmlconfig/xsds"/>
+
+        <property name="release.bin" value="${release.gv}/bin"/>
+        <property name="release.lib" value="${release.gv}/application/lib"/>
+        <property name="release.deploy" value="${release.gv}/application/deploy"/>
+        <property name="release.ear" value="${release.deploy}/gvesb-javaee5.ear"/>
+        <property name="release.ear.lib" value="${release.ear}/lib"/>
+
+        <property name="release.db" value="${release.gv}/hsqldb"/>
+        <property name="release.db.bin" value="${release.db}/bin"/>
+        <property name="release.db.lib" value="${release.db}/lib"/>
+        <property name="release.db.data" value="${release.db}/data"/>
+
+        <property name="release.rsh" value="${release.gv}/RSH"/>
+        <property name="release.rsh.bin" value="${release.rsh}/bin"/>
+        <property name="release.rsh.lib" value="${release.rsh}/lib"/>
+
+        <property name="release.jboss.bin" value="${release.jboss}/bin"/>
+        <property name="release.server" value="${release.jboss}/server/GreenV"/>
+        <property name="release.server.lib" value="${release.server}/lib"/>
+        <property name="release.server.deploy" value="${release.server}/deploy"/>
+        <property name="release.server.deployers" value="${release.server}/deployers"/>
+        <property name="release.server.conf" value="${release.server}/conf"/>
+    </target>
+
+
+    <!-- ================================================================== -->
+    <!-- Building                                                           -->
+    <!-- ================================================================== -->
+
+    <!-- Build ESB Base distribution -->
+    <target name="main" depends="maven-install, checkthirdparty"
+            description="Executes the ESB Base building">
+        <ant antfile="build-esb-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
+    <!-- Build HL7 Adapter distribution -->
+    <target name="hl7" depends="configure, checkthirdparty"
+            description="Executes the HL7 Adapter building">
+        <ant antfile="build-hl7-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
+    <!-- Build Rules Engine distribution -->
+    <target name="rules" depends="configure, checkthirdparty"
+            description="Executes the Rules Engine building">
+        <ant antfile="build-rules-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
+    <!-- Build OpenSpCoop Adapter distribution -->
+    <target name="openspc" depends="configure, checkthirdparty"
+            description="Executes the OpenSpCoop Adapter building">
+        <ant antfile="build-openspc-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
+
+    <!-- Build All ditribution packages -->
+    <target name="All" depends="maven-install, checkthirdparty"
+            description="Executes the Full building">
+        <ant antfile="build-esb-distr.xml" dir="${basedir}" target="release"/>
+        <ant antfile="build-hl7-distr.xml" dir="${basedir}" target="release"/>
+        <ant antfile="build-rules-distr.xml" dir="${basedir}" target="release"/>
+        <ant antfile="build-openspc-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
+    <!-- Define a macro for calling maven -->
+    <macrodef name="maven">
+        <attribute name="options" default="" />
+        <attribute name="goal" />
+        <attribute name="basedir" />
+        <attribute name="resultproperty" default="maven.result" />
+        <element name="args" implicit="true" optional="true" />
+        <sequential>
+            <java classname="org.codehaus.classworlds.Launcher" fork="true"
+                  dir="@{basedir}" resultproperty="@{resultproperty}">
+                <jvmarg value="-Xms512m"/>
+                <jvmarg value="-Xmx1024m"/>
+                <jvmarg value="-XX:MaxPermSize=256m"/>
+                <jvmarg value="-Dmaven.artifact.threads=4"/>
+                <classpath>
+                <fileset dir="${maven.home}/boot">
+                    <include name="*.jar" />
+                </fileset>
+                <fileset dir="${maven.home}/lib">
+                    <include name="*.jar" />
+                </fileset>
+                </classpath>
+                <sysproperty key="classworlds.conf" value="${maven.home}/bin/m2.conf" />
+                <sysproperty key="maven.home" value="${maven.home}" />
+                <arg line="--batch-mode -s ${env.GV_PROJECT_HOME}/tools/maven/conf/user-settings.xml @{options} @{goal}" />
+            </java>
+        </sequential>
+    </macrodef>
+
+    <target name="maven-init" depends="configure">
+        <property name="maven.home" location="${basedir}/../tools/maven"/>
+        <echo message="Maven Home set to ${maven.home}"/>
+    </target>
+
+    <target name="checkthirdparty" unless="skip.thirdparty">
+        <!--<if>
+            <not>
+                <available file="${basedir}/../thirdparty/libraries.ent"/>
+            </not>
+        <then>-->
+            <antcall target="createthirdparty"/>
+        <!--</then>
+        </if>-->
+    </target>
+
+    <!-- Call maven to create the thirdparty folder from artifacts in the maven repository -->
+    <target name="createthirdparty" depends="maven-init">
+        <property name="maven.opts" value=""/>
+        <property name="thirdparty.maven.opts" value="${maven.opts}"/>
+
+        <!--<maven basedir="${basedir}/../thirdparty"
+               options="${thirdparty.maven.opts}"
+               goal="dependency:tree"/>-->
+
+        <maven basedir="${basedir}/../thirdparty"
+               options="${thirdparty.maven.opts}"
+               goal="install"
+               resultproperty="maven.thirdparty.result"/>
+
+        <fail message="Unable to build thirdparty directory.  See maven output for details.">
+            <condition>
+                <not>
+                    <equals arg1="${maven.thirdparty.result}" arg2="0"/>
+                </not>
+            </condition>
+        </fail>
+    </target>
+
+    <!-- Call maven to build the mavenized modules -->
+    <target name="maven-install" unless="skip.build" description="Run the install goal against the maven build"
+            depends="maven-init">
+
+        <property name="maven.opts" value=""/>
+        <property name="maven.install.opts" value="-Dintegrated-build ${maven.opts}"/>
+
+        <!--<maven basedir="${basedir}/../thirdparty"
+               options="${thirdparty.maven.opts}"
+               goal="dependency:tree"/>-->
+
+        <maven basedir="${basedir}/.."
+               options="${maven.install.opts}"
+               goal="install"
+               resultproperty="maven.install.result"/>
+
+        <fail message="Unable to build maven modules.  See maven output for details.">
+            <condition>
+                <not>
+                    <equals arg1="${maven.install.result}" arg2="0"/>
+                </not>
+            </condition>
+        </fail>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Cleaning                                                           -->
+    <!-- ================================================================== -->
+
+    <!-- Clean up all build output -->
+    <target name="clean" depends="configure" description="Cleans up most generated files.">
+        <delete dir="${module.output}"/>
+    </target>
+
+    <!-- Call maven to clean the mavenized modules -->
+    <target name="maven-clean" description="Run the clean goal against the maven build."
+            depends="maven-init">
+
+        <property name="maven.clean.opts" value="-Dintegrated-build "/>
+
+        <maven basedir="${basedir}/.."
+               options="${maven.clean.opts}"
+               goal="clean"
+               resultproperty="maven.clean.result"/>
+
+        <fail message="Unable to clean maven modules.  See maven output for details.">
+            <condition>
+                <not>
+                    <equals arg1="${maven.clean.result}" arg2="0"/>
+                </not>
+            </condition>
+        </fail>
+    </target>
+
+    <!-- Clean up all generated files -->
+    <target name="purge" depends="clean, maven-clean"
+            description="Cleans up all generated files.">
+        <delete file="${module.root}/*_run.log"/>
+        <delete file="${basedir}/../thirdparty/libraries.ent"/>
+        <delete dir="${basedir}/../thirdparty/libraries"/>
+        <delete dir="${basedir}/../thirdparty/licenses"/>
+    </target>
+
+</project>

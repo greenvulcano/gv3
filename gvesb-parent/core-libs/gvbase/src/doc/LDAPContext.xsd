@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.greenvulcano.it/ldap" xmlns:ldapc="http://www.greenvulcano.it/ldap">
+  <xs:element name="LDAPContext">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ldapc:Entry" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Entry">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ldapc:AttributeList" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="ldapc:Entry" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="full-id" use="required"/>
+      <xs:attribute name="id" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="AttributeList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="ldapc:Attribute"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Attribute">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ldapc:Schema" minOccurs="0"/>
+        <xs:element maxOccurs="unbounded" ref="ldapc:Value"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" />
+      <xs:attribute name="encoding" type="ldapc:EncodingType"/>
+      <xs:attribute name="mode" type="ldapc:ModeType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Schema">
+    <xs:complexType>
+      <xs:attribute name="desc" use="required"/>
+      <xs:attribute name="equality"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="numericoid" use="required"/>
+      <xs:attribute name="substr"/>
+      <xs:attribute name="sup"/>
+      <xs:attribute name="syntax"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Value" type="xs:string"/>
+  
+  <xs:simpleType name="EncodingType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:enumeration value="string"/>
+      <xs:enumeration value="base64"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ModeType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:enumeration value="add"/>
+      <xs:enumeration value="replace"/>
+      <xs:enumeration value="delete"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
