@@ -1138,6 +1138,11 @@
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvrules</artifactId>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhl7</artifactId>
         </dependency>
         <dependency>

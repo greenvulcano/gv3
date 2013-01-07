@@ -3,7 +3,7 @@
    <!ENTITY libraries SYSTEM "../thirdparty/libraries.ent">
 ]>
 
-<project name="GVESB/Build Distribution">
+<project name="GVESB/Build Full Distribution">
 
     &libraries;
 
@@ -11,7 +11,7 @@
     <!-- Building                                                           -->
     <!-- ================================================================== -->
 
-    <target name="build-esb-dist" description="Builds the ESB distribution">
+    <target name="build-esb-full-dist" description="Builds the ESB full distribution">
         <antcall target="release"/>
     </target>
 
@@ -63,6 +63,25 @@
                 <include name="GVCore.dtd"/>
                 <include name="GVSupport.dtd"/>
                 <include name="GVVariables.dtd"/>
+
+                <include name="Extra/GVHL7.dtd"/>
+                <include name="Extra/GVOpenSpCoop.dtd"/>
+                <include name="Extra/GVRules.dtd"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy Full release files -->
+        <copy todir="${release.root}" filtering="true"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/full">
+                <include name="readme.*"/>
+            </fileset>
+        </copy>
+        <copy todir="${release.root}" filtering="no"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/full">
+                <include name="**"/>
+                <exclude name="readme.*"/>
             </fileset>
         </copy>
 
@@ -349,6 +368,63 @@
                 <include name="log4j.jar"/>
             </fileset>
         </copy>
+
+        <!-- Copy HL7 lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="no"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvhl7.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="no"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${hapi.hapi.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy OpenSpCoop lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="no"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvvcl-openspcoop.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="no"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${org.openspcoop.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy Rules lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="no"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvrules.jar"/>
+                <include name="gvrules-tests.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="no"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${drools.drools.lib}">
+                <include name="*.jar"/>
+                <exclude name="drools-api.jar"/>
+            </fileset>
+            <fileset dir="${antlr.antlr.lib}">
+                <include name="antlr.jar"/>
+                <include name="antlr-runtime.jar"/>
+            </fileset>
+            <fileset dir="${org.mvel.lib}">
+                <include name="mvel2.jar"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="bundle-docs" description="Include license, readme, etc">
@@ -366,7 +442,7 @@
     </target>
 
     <target name="bin-tgz" description="Build .tar.gz archive">
-        <tar destfile="${module.output}/${release.id}.tar.gz"
+        <tar destfile="${module.output}/${release.id}-Full.tar.gz"
              longfile="gnu" compression="gzip">
             <tarfileset dir="${release.root}" prefix="${release.id}">
                 <exclude name="**/bin/*.sh"/>
@@ -393,12 +469,12 @@
                 <include name="*.sh"/>
             </tarfileset>
         </tar>
-        <checksum file="${module.output}/${release.id}.tar.gz"/>
-        <checksum file="${module.output}/${release.id}.tar.gz" algorithm="SHA-256" />
+        <checksum file="${module.output}/${release.id}-Full.tar.gz"/>
+        <checksum file="${module.output}/${release.id}-Full.tar.gz" algorithm="SHA-256" />
     </target>
 
     <target name="bin-zip" description="Build zip archive">
-        <zip destfile="${module.output}/${release.id}.zip">
+        <zip destfile="${module.output}/${release.id}-Full.zip">
             <zipfileset dir="${release.root}" prefix="${release.id}">
                 <!--<exclude name="**/data/**"/>
                 <exclude name="**/log/**"/>
@@ -407,8 +483,8 @@
                 <exclude name="tmp/**"/>-->
             </zipfileset>
         </zip>
-        <checksum file="${module.output}/${release.id}.zip"/>
-        <checksum file="${module.output}/${release.id}.zip" algorithm="SHA-256" />
+        <checksum file="${module.output}/${release.id}-Full.zip"/>
+        <checksum file="${module.output}/${release.id}-Full.zip" algorithm="SHA-256" />
     </target>
 
 </project>
