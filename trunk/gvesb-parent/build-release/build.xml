@@ -120,6 +120,12 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         <ant antfile="build-esb-distr.xml" dir="${basedir}" target="release"/>
     </target>
 
+    <!-- Build ESB Full distribution -->
+    <target name="full" depends="maven-install, checkthirdparty"
+            description="Executes the ESB Full building">
+        <ant antfile="build-esb-full-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
     <!-- Build HL7 Adapter distribution -->
     <target name="hl7" depends="configure, checkthirdparty"
             description="Executes the HL7 Adapter building">
@@ -143,6 +149,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
     <target name="All" depends="maven-install, checkthirdparty"
             description="Executes the Full building">
         <ant antfile="build-esb-distr.xml" dir="${basedir}" target="release"/>
+        <ant antfile="build-esb-full-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-hl7-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-rules-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-openspc-distr.xml" dir="${basedir}" target="release"/>

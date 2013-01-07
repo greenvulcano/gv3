@@ -27,18 +27,21 @@
 
         <!-- Copy standard files -->
         <filter token="base.dir" value="${release.id}"/>
-        <copy todir="${release.root}" filtering="true">
+        <copy todir="${release.root}" filtering="true"
+              preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/rules">
                 <include name="readme.*"/>
             </fileset>
         </copy>
-        <copy todir="${release.root}" filtering="false">
+        <copy todir="${release.root}" filtering="false"
+              preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/rules">
                 <include name="**"/>
                 <exclude name="readme.*"/>
             </fileset>
         </copy>
-        <copy todir="${release.dtds}" filtering="no">
+        <copy todir="${release.dtds}" filtering="no"
+              preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/../gvesb/configuration/dtds">
                 <include name="Extra/GVRules.dtd"/>
             </fileset>
@@ -46,13 +49,16 @@
 
         <!-- Copy lib -->
         <!-- Copy EAR GVESB lib -->
-        <copy todir="${release.ear.lib}" filtering="no">
+        <copy todir="${release.ear.lib}" filtering="no"
+              preservelastmodified="true" overwrite="true">
             <fileset dir="${gvesb.gvesb.lib}">
                 <include name="gvrules.jar"/>
+                <include name="gvrules-tests.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
-        <copy todir="${release.ear.lib}" filtering="no">
+        <copy todir="${release.ear.lib}" filtering="no"
+              preservelastmodified="true" overwrite="true">
             <fileset dir="${drools.drools.lib}">
                 <include name="*.jar"/>
                 <exclude name="drools-api.jar"/>
@@ -61,12 +67,16 @@
                 <include name="antlr.jar"/>
                 <include name="antlr-runtime.jar"/>
             </fileset>
+            <fileset dir="${org.mvel.lib}">
+                <include name="mvel2.jar"/>
+            </fileset>
         </copy>
     </target>
 
     <target name="bundle-docs" description="Include license, readme, etc">
         <!-- Copy the thirdparty/licenses to docs/licenses -->
-        <!--<copy todir="${release.docs}/licenses">
+        <!--<copy todir="${release.docs}/licenses"
+              preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/../thirdparty/licenses">
                 <include name="**"/>
             </fileset>

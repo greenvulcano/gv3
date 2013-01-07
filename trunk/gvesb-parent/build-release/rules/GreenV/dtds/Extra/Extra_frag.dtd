@@ -1,7 +1,7 @@
 <!ENTITY % gvcommons SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCommons.dtd">
 %gvcommons;
 
-<!ENTITY % gvhl7 SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd">
+<!ENTITY % gvrules SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd">
 %gvrules;
 
 <!ENTITY % extra-j2ee-calls "">
