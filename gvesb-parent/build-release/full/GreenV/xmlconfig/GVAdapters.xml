@@ -691,4 +691,17 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                           url="file:${{gv.app.home}}/Rules/figure/figureFilter.drl"/>
         </GVKnowledgeBaseConfig>
     </GVRulesConfigManager>
+
+    <GVSocialAdapterManager name="GV_SOCIAL" type="module" version="1.0">
+        <SocialAdapters>
+            <TwitterSocialAdapter class="it.greenvulcano.gvesb.social.twitter.TwitterSocialAdapter"
+                                  social="twitter" type="social-adapter">
+                <Accounts>
+                    <Account name="[ACCOUNT_NAME]" consumer_key="[CONS_KEY-CONS_KEY-CONS_KEY-]" consumer_secret="[CONS_SECRET-CONS_SECRET-CONS_SECRET-CO]"
+                        oauth_access_token="[ACCESS_TOKEN-ACCESS_TOKEN-ACCESS_TOKEN-AC]" oauth_access_token_secret="[ACCESS_TOKEN_SECRET-ACCESS_TOKEN_SECRET]"
+                        twitteruserid="[USER_ID___]"/>
+                </Accounts>
+            </TwitterSocialAdapter>
+        </SocialAdapters>
+    </GVSocialAdapterManager>
 </GVAdapters>

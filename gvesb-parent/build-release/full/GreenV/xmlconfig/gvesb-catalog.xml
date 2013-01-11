@@ -18,4 +18,5 @@
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVHL7.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVHL7.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVOpenSpCoop.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVOpenSpCoop.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVRules.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVSocial.dtd" />
 </catalog>

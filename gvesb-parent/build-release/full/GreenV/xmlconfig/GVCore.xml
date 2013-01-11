@@ -1784,6 +1784,25 @@ data.setObject(fb);</Script>
                     </Flow>
                 </Operation>
             </Service>
+
+            <Service group-name="DEFAULT_GRP" id-service="TWEET"
+                    service-activation="on" statistics="off">
+                <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id"
+                        type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+                    <Participant id-channel="TEST_CHANNEL_TWEET" id-system="GVESB"/>
+                    <Flow first-node="update_status" point-x="20" point-y="150">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                        id="update_status" id-system="GVESB" input="input"
+                                        next-node-id="end" op-type="call"
+                                        operation-name="tweet" output="output"
+                                        point-x="186" point-y="152" type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                end-business-process="yes" id="end" op-type="end"
+                                output="output" point-x="386" point-y="150"
+                                type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
         </Services>
     </GVServices>
     <GVSystems name="SYSTEMS" type="module">
@@ -1940,21 +1959,21 @@ data.setObject(fb);</Script>
                     </dh-call>
                     <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation"
                                    name="ejbToupperGVBuffer" remote-or-local-interface="test.unit.ejb.J2EETest"
-                                   home-interface="test.unit.ejb.J2EETestHome" jndi-name="gvesb/test/Test"
+                                   version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="gvesb/test/Test"
                                    method="toupper" parameterTypes="it.greenvulcano.gvesb.buffer.GVBuffer" type="call"/>
                     <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation"
                                    name="ejbToupperStringArr" remote-or-local-interface="test.unit.ejb.J2EETest"
-                                   home-interface="test.unit.ejb.J2EETestHome" jndi-name="gvesb/test/Test"
+                                   version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="gvesb/test/Test"
                                    method="toupper" parameterTypes="java.lang.String[]" type="call"
                                    input-ref-dp="toupperInArrayDataProvider" output-ref-dp="toupperOutGVBChangeDataProvider"/>
                     <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation"
-                                   name="ejbSumInt" remote-or-local-interface="test.unit.ejb.J2EETest"
-                                   home-interface="test.unit.ejb.J2EETestHome" jndi-name="gvesb/test/Test"
+                                   name="ejbSumInt" remote-or-local-interface="test.unit.ejb3.J2EETest"
+                                   version="3" jndi-name="gvesb/test3/Test"
                                    method="sum" parameterTypes="int,int" type="call"
                                    input-ref-dp="sumInArrayDataProvider" output-ref-dp="sumOutGVBChangeDataProvider"/>
                     <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation"
-                                   name="ejbAddTime" remote-or-local-interface="test.unit.ejb.J2EETest"
-                                   home-interface="test.unit.ejb.J2EETestHome" jndi-name="gvesb/test/Test"
+                                   name="ejbAddTime" remote-or-local-interface="test.unit.ejb3.J2EETest"
+                                   version="3" jndi-name="gvesb/test3/Test"
                                    method="addTime" parameterTypes="java.util.Date,int,int" type="call"
                                    input-ref-dp="addTimeInArrayDataProvider" output-ref-dp="addTimeOutGVBChangeDataProvider"/>
                 </Channel>
@@ -2187,6 +2206,11 @@ data.setObject(fb);</Script>
                                 name="figureFilterOutColl"
                                 output-ref-dp="figFilterOutColl_OutGVBChangeDataProvider"
                                 ruleSet="figureFilterOutColl" type="call"/>
+                </Channel>
+
+                <Channel id-channel="TEST_CHANNEL_TWEET">
+                    <twitter-update-status type="call" class="it.greenvulcano.gvesb.virtual.social.twitter.TwitterUpdateStatusCallOperation"
+                                           name="tweet" account="[ACCOUNT_NAME]" statusText="ognl{{#object.object}}" />
                 </Channel>
             </System>
             <System id-system="CREDIT" system-activation="on">
