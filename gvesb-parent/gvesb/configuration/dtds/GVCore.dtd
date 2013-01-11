@@ -5242,13 +5242,22 @@
 -->
 <!ATTLIST j2ee-ejb-call output-ref-dp CDATA #IMPLIED>
 <!--
-    Java class that defines the EJB home interface.
+    Define the EJB specification version.
+    Default to 3.
+
+    #NotNull
+    #Warn: {{self::j2ee-ejb-call[not(@home-interface) and (@version='2')]}} home-interface must be used if version='2'
+-->
+<!ATTLIST j2ee-ejb-call  version (2|3) #IMPLIED>
+<!--
+    Java class that defines the EJB 2 home interface.
     Note that if the EJB is installed on the same application server of GreenVulcanoESB,
     then you can also specify the local home interface.
 
     #NotNull
+    #Warn: {{self::j2ee-ejb-call[@home-interface and (not(@version) or (@version='3'))]}} home-interface can be used only if version='2'
 -->
-<!ATTLIST j2ee-ejb-call  home-interface CDATA #REQUIRED>
+<!ATTLIST j2ee-ejb-call  home-interface CDATA #IMPLIED>
 <!--
     Java class that defines the EJB home remote.
     Note that if the EJB is installed on the same application server of GreenVulcanoESB,

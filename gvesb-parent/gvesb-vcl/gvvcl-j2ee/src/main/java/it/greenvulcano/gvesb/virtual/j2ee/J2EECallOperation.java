@@ -60,6 +60,9 @@ public class J2EECallOperation extends J2EEOperation implements CallOperation
 {
     private static final Logger logger                 = GVLogger.getLogger(J2EECallOperation.class);
 
+    private static final String EJB_2                  = "2";
+    private static final String EJB_3                  = "3";
+
     private String              jndiName               = null;
     private String              methodName             = null;
     private String              parameterTypes         = null;
@@ -67,6 +70,7 @@ public class J2EECallOperation extends J2EEOperation implements CallOperation
     private String              outputRefDP            = null;
     private String              homeInterfaceClassName = null;
     private String              interfaceClassName     = null;
+    private String              ejbVersion             = null;
 
     /**
      * Remote or local interface of the EJB to call.
@@ -107,8 +111,16 @@ public class J2EECallOperation extends J2EEOperation implements CallOperation
         logger.debug("input ref dp...........: " + inputRefDP);
         outputRefDP = XMLConfig.get(node, "@output-ref-dp", "");
         logger.debug("output ref dp..........: " + outputRefDP);
-        homeInterfaceClassName = XMLConfig.get(node, "@home-interface");
-        checkAttribute("home-interface", homeInterfaceClassName);
+        ejbVersion = XMLConfig.get(node, "@version", "3");
+        logger.debug("EJB version............: " + ejbVersion);
+        if (!(EJB_2.equals(ejbVersion) || EJB_3.equals(ejbVersion))) {
+            throw new InitializationException("GVVCL_PARAMETER_ERROR", new String[][]{{"param", "version"},
+                    {"value", ejbVersion}});
+        }
+        homeInterfaceClassName = XMLConfig.get(node, "@home-interface", "");
+        if (EJB_2.equals(ejbVersion)) {
+            checkAttribute("home-interface", homeInterfaceClassName);
+        }
         logger.debug("home interface.........: " + homeInterfaceClassName);
         interfaceClassName = XMLConfig.get(node, "@remote-or-local-interface");
         checkAttribute("remote-or-local-interface", interfaceClassName);
@@ -122,13 +134,20 @@ public class J2EECallOperation extends J2EEOperation implements CallOperation
     protected void j2eeConnectionEstablished(Context context) throws Exception
     {
         logger.debug("Lookup for " + jndiName);
-        Object home = context.lookup(jndiName);
-        Class<?> homeClass = Class.forName(homeInterfaceClassName);
-        Object ejbHome = PortableRemoteObject.narrow(home, homeClass);
-        Method createMethod = ejbHome.getClass().getMethod("create", (Class<?>[]) null);
-        Object ejbInterface = createMethod.invoke(ejbHome, (Object[]) null);
-        Class<?> interfaceClass = Class.forName(interfaceClassName);
-        ejbObject = PortableRemoteObject.narrow(ejbInterface, interfaceClass);
+        if (EJB_2.equals(ejbVersion)) {
+            Object home = context.lookup(jndiName);
+            Class<?> homeClass = Class.forName(homeInterfaceClassName);
+            Object ejbHome = PortableRemoteObject.narrow(home, homeClass);
+            Method createMethod = ejbHome.getClass().getMethod("create", (Class<?>[]) null);
+            Object ejbInterface = createMethod.invoke(ejbHome, (Object[]) null);
+            Class<?> interfaceClass = Class.forName(interfaceClassName);
+            ejbObject = PortableRemoteObject.narrow(ejbInterface, interfaceClass);
+        }
+        else if (EJB_3.equals(ejbVersion)) {
+            Object ejbInterface = context.lookup(jndiName);
+            Class<?> interfaceClass = Class.forName(interfaceClassName);
+            ejbObject = PortableRemoteObject.narrow(ejbInterface, interfaceClass);
+        }
     }
 
     /**

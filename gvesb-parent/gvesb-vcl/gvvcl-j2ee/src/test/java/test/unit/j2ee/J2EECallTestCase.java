@@ -71,11 +71,11 @@ public class J2EECallTestCase extends TestCase
      * @throws Exception
      * 
      */
-    public void testEJBtoupper() throws Exception
+    public void testEJB2toupper() throws Exception
     {
         Node node = XMLConfig.getNode(
                 "GVSystems.xml",
-                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejbToupperGVBuffer']");
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejb2ToupperGVBuffer']");
         J2EECallOperation j2ee = new J2EECallOperation();
         j2ee.init(node);
         GVBuffer gvBuffer = new GVBuffer("GVESB", "TOUPPER");
@@ -88,11 +88,11 @@ public class J2EECallTestCase extends TestCase
      * @throws Exception
      * 
      */
-    public void testEJBtoupper2() throws Exception
+    public void testEJB2toupper2() throws Exception
     {
         Node node = XMLConfig.getNode(
                 "GVSystems.xml",
-                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejbToupperStringArr']");
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejb2ToupperStringArr']");
         J2EECallOperation j2ee = new J2EECallOperation();
         j2ee.init(node);
         GVBuffer gvBuffer = new GVBuffer("GVESB", "TOUPPER");
@@ -105,10 +105,10 @@ public class J2EECallTestCase extends TestCase
      * @throws Exception
      * 
      */
-    public void testEJBsum() throws Exception
+    public void testEJB2sum() throws Exception
     {
         Node node = XMLConfig.getNode("GVSystems.xml",
-                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejbSumInt']");
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejb2SumInt']");
         J2EECallOperation j2ee = new J2EECallOperation();
         j2ee.init(node);
         GVBuffer gvBuffer = new GVBuffer("GVESB", "TOUPPER");
@@ -122,10 +122,10 @@ public class J2EECallTestCase extends TestCase
      * @throws Exception
      * 
      */
-    public void testEJBaddTime() throws Exception
+    public void testEJB2addTime() throws Exception
     {
         Node node = XMLConfig.getNode("GVSystems.xml",
-                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejbAddTime']");
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejb2AddTime']");
         J2EECallOperation j2ee = new J2EECallOperation();
         j2ee.init(node);
         GVBuffer gvBuffer = new GVBuffer("GVESB", "TOUPPER");
@@ -134,4 +134,73 @@ public class J2EECallTestCase extends TestCase
         GVBuffer result = j2ee.perform(gvBuffer);
         assertEquals(EXPECTED_RESULT_T, result.getProperty("DATE_OUT"));
     }
+
+    /**
+     * @throws Exception
+     * 
+     */
+    public void testEJB3toupper() throws Exception
+    {
+        Node node = XMLConfig.getNode(
+                "GVSystems.xml",
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejb3ToupperGVBuffer']");
+        J2EECallOperation j2ee = new J2EECallOperation();
+        j2ee.init(node);
+        GVBuffer gvBuffer = new GVBuffer("GVESB", "TOUPPER");
+        gvBuffer.setObject("hello world");
+        GVBuffer result = j2ee.perform(gvBuffer);
+        assertEquals(EXPECTED_RESULT, result.getObject());
+    }
+
+    /**
+     * @throws Exception
+     * 
+     */
+    public void testEJB3toupper2() throws Exception
+    {
+        Node node = XMLConfig.getNode(
+                "GVSystems.xml",
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejb3ToupperStringArr']");
+        J2EECallOperation j2ee = new J2EECallOperation();
+        j2ee.init(node);
+        GVBuffer gvBuffer = new GVBuffer("GVESB", "TOUPPER");
+        gvBuffer.setObject("hello world,have fun,we are the best");
+        GVBuffer result = j2ee.perform(gvBuffer);
+        assertEquals(EXPECTED_RESULT_A, result.getObject());
+    }
+
+    /**
+     * @throws Exception
+     * 
+     */
+    public void testEJB3sum() throws Exception
+    {
+        Node node = XMLConfig.getNode("GVSystems.xml",
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejb3SumInt']");
+        J2EECallOperation j2ee = new J2EECallOperation();
+        j2ee.init(node);
+        GVBuffer gvBuffer = new GVBuffer("GVESB", "TOUPPER");
+        gvBuffer.setProperty("I1", "4");
+        gvBuffer.setProperty("I2", "6");
+        GVBuffer result = j2ee.perform(gvBuffer);
+        assertEquals(EXPECTED_RESULT_I, Integer.parseInt(result.getProperty("SUM")));
+    }
+
+    /**
+     * @throws Exception
+     * 
+     */
+    public void testEJB3addTime() throws Exception
+    {
+        Node node = XMLConfig.getNode("GVSystems.xml",
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/j2ee-ejb-call[@name='ejb3AddTime']");
+        J2EECallOperation j2ee = new J2EECallOperation();
+        j2ee.init(node);
+        GVBuffer gvBuffer = new GVBuffer("GVESB", "TOUPPER");
+        gvBuffer.setProperty("DATE", "31/01/2012 12:15:00");
+        gvBuffer.setProperty("DELTA", "30");
+        GVBuffer result = j2ee.perform(gvBuffer);
+        assertEquals(EXPECTED_RESULT_T, result.getProperty("DATE_OUT"));
+    }
+
 }

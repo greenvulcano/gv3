@@ -8,28 +8,22 @@
     </parent>
 
     <groupId>it.greenvulcano.gvesb</groupId>
-    <artifactId>gvvcl-j2ee</artifactId>
-    <name>GreenVulcano VCL J2EE Plugin</name>
+    <artifactId>ejb3-test</artifactId>
+    <packaging>ejb</packaging>
+    <name>GreenVulcano VCL J2EE Test EJB3</name>
 
     <dependencies>
-        <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
-            <artifactId>gvvcl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
-            <artifactId>ejb-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
-            <artifactId>ejb3-test</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ejb-plugin</artifactId>
+                <configuration>
+                    <ejbVersion>3.0</ejbVersion>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.5</version>
