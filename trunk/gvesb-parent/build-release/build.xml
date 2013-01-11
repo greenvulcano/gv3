@@ -144,6 +144,12 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         <ant antfile="build-openspc-distr.xml" dir="${basedir}" target="release"/>
     </target>
 
+    <!-- Build Social Adapter distribution -->
+    <target name="social" depends="configure, checkthirdparty"
+            description="Executes the Social Adapter building">
+        <ant antfile="build-social-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
 
     <!-- Build All ditribution packages -->
     <target name="All" depends="maven-install, checkthirdparty"
@@ -153,6 +159,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         <ant antfile="build-hl7-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-rules-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-openspc-distr.xml" dir="${basedir}" target="release"/>
+        <ant antfile="build-social-distr.xml" dir="${basedir}" target="release"/>
     </target>
 
     <!-- Define a macro for calling maven -->

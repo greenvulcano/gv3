@@ -20,6 +20,9 @@
   <module>
     <ejb>ejb-test.jar</ejb>
   </module>
+  <module>
+    <ejb>ejb3-test.jar</ejb>
+  </module>
 
   <module>
     <ejb>ejb-gvstatistics.jar</ejb>

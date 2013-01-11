@@ -39,7 +39,7 @@
                 <include name="readme.*"/>
             </fileset>
         </copy>
-        <copy todir="${release.root}" filtering="no"
+        <copy todir="${release.root}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/base">
                 <include name="**"/>
@@ -50,7 +50,7 @@
         </copy>
         <unzip src="${basedir}/base/jboss-5.1.0.GA.zip"
                dest="${release.root}"/>
-        <copy todir="${release.dtds}" filtering="no"
+        <copy todir="${release.dtds}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/../gvesb/configuration/dtds">
                 <exclude name="Extra/Extra.dtd"/>
@@ -67,6 +67,7 @@
                 <include name="Extra/GVHL7.dtd"/>
                 <include name="Extra/GVOpenSpCoop.dtd"/>
                 <include name="Extra/GVRules.dtd"/>
+                <include name="Extra/GVSocial.dtd"/>
             </fileset>
         </copy>
 
@@ -77,7 +78,7 @@
                 <include name="readme.*"/>
             </fileset>
         </copy>
-        <copy todir="${release.root}" filtering="no"
+        <copy todir="${release.root}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/full">
                 <include name="**"/>
@@ -86,7 +87,7 @@
         </copy>
 
         <!-- Copy lib -->
-        <copy todir="${release.lib}" filtering="no"
+        <copy todir="${release.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${commons.dbcp.lib}">
                 <include name="*.jar"/>
@@ -106,7 +107,7 @@
         </copy>
 
         <!-- Copy EAR GVESB app -->
-        <copy todir="${release.ear}" filtering="no"
+        <copy todir="${release.ear}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${gvesb.gvesb.lib}">
                 <include name="gvboot.war"/>
@@ -118,10 +119,11 @@
                 <include name="ejb3-gvdebug.jar"/>
                 <include name="ejb-gvstatistics.jar"/>
                 <include name="ejb-test.jar"/>
+                <include name="ejb3-test.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR GVESB lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${gvesb.gvesb.lib}">
                 <exclude name="*.war"/>
@@ -129,6 +131,7 @@
                 <exclude name="ejb3-gvdebug.jar"/>
                 <exclude name="ejb-gvstatistics.jar"/>
                 <exclude name="ejb-test.jar"/>
+                <exclude name="ejb3-test.jar"/>
                 <exclude name="gvcore-ode.jar"/>
                 <exclude name="gvhl7.jar"/>
                 <exclude name="gvjbpm.jar"/>
@@ -140,7 +143,7 @@
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${avalon.framework.lib}">
                 <include name="*.jar"/>
@@ -345,7 +348,7 @@
 
 
         <!-- Copy RSH GVESB lib -->
-        <copy todir="${release.rsh.lib}" filtering="no"
+        <copy todir="${release.rsh.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${gvesb.gvesb.lib}">
                 <include name="gvbase.jar"/>
@@ -371,14 +374,14 @@
 
         <!-- Copy HL7 lib -->
         <!-- Copy EAR GVESB lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${gvesb.gvesb.lib}">
                 <include name="gvhl7.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${hapi.hapi.lib}">
                 <include name="*.jar"/>
@@ -387,14 +390,14 @@
 
         <!-- Copy OpenSpCoop lib -->
         <!-- Copy EAR GVESB lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${gvesb.gvesb.lib}">
                 <include name="gvvcl-openspcoop.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${org.openspcoop.lib}">
                 <include name="*.jar"/>
@@ -403,7 +406,7 @@
 
         <!-- Copy Rules lib -->
         <!-- Copy EAR GVESB lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${gvesb.gvesb.lib}">
                 <include name="gvrules.jar"/>
@@ -411,7 +414,7 @@
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${drools.drools.lib}">
                 <include name="*.jar"/>
@@ -425,18 +428,41 @@
                 <include name="mvel2.jar"/>
             </fileset>
         </copy>
+
+        <!-- Copy Social lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvsocial.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${org.twitter4j.lib}">
+                <include name="twitter4j-core.jar"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="bundle-docs" description="Include license, readme, etc">
         <!-- Copy the thirdparty/licenses to docs/licenses -->
-        <copy todir="${release.docs}/licenses"
+        <copy todir="${release.docs}/licenses" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/../thirdparty/licenses">
                 <include name="**"/>
             </fileset>
         </copy>
         <!-- Copy the build/docs to the dist root -->
-        <!--<copy todir="${release.gv}/docs/api">
+        <copy todir="${release.docs}/reference" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../core-libs/pdf_doc/target/pdf">
+                <include name="*.pdf"/>
+            </fileset>
+        </copy>
+        <!--<copy todir="${release.gv}/docs/api" filtering="false"
+              preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/javadocs"/>
         </copy>-->
     </target>

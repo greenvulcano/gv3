@@ -40,7 +40,7 @@
                 <exclude name="readme.*"/>
             </fileset>
         </copy>
-        <copy todir="${release.dtds}" filtering="no"
+        <copy todir="${release.dtds}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/../gvesb/configuration/dtds">
                 <include name="Extra/GVRules.dtd"/>
@@ -49,7 +49,7 @@
 
         <!-- Copy lib -->
         <!-- Copy EAR GVESB lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${gvesb.gvesb.lib}">
                 <include name="gvrules.jar"/>
@@ -57,7 +57,7 @@
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
-        <copy todir="${release.ear.lib}" filtering="no"
+        <copy todir="${release.ear.lib}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${drools.drools.lib}">
                 <include name="*.jar"/>
@@ -75,14 +75,15 @@
 
     <target name="bundle-docs" description="Include license, readme, etc">
         <!-- Copy the thirdparty/licenses to docs/licenses -->
-        <!--<copy todir="${release.docs}/licenses"
+        <!--<copy todir="${release.docs}/licenses" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/../thirdparty/licenses">
                 <include name="**"/>
             </fileset>
         </copy>-->
         <!-- Copy the build/docs to the dist root -->
-        <!--<copy todir="${release.gv}/docs/api">
+        <!--<copy todir="${release.gv}/docs/api" filtering="false"
+              preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/javadocs"/>
         </copy>-->
     </target>

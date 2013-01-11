@@ -16,8 +16,11 @@
 <!ENTITY % gvrules SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd">
 %gvrules;
 
+<!ENTITY % gvsocial SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd">
+%gvsocial;
+
 <!ENTITY % extra-j2ee-calls "">
-<!ENTITY % extra-comm-calls "|hl7-call|openspcoop-call">
+<!ENTITY % extra-comm-calls "|hl7-call|openspcoop-call|%social-calls;">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
 <!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call">
@@ -31,5 +34,5 @@
 <!ENTITY % extra-wf-extensions "">
 
 <!ENTITY % extra-core "">
-<!ENTITY % extra-adapters ",GVHL7ListenerManager,GVRulesConfigManager">
+<!ENTITY % extra-adapters ",GVHL7ListenerManager,GVRulesConfigManager,GVSocialAdapterManager">
 <!ENTITY % extra-support "">

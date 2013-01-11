@@ -18,7 +18,7 @@ Istruzioni di installazione:
     - Modificare il file XMLConfigSplit.properties inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/XMLConfigSplit_frag.properties
 
 Test:
-Sono stati improntati tre servizi GV per effettuare i test:
+Sono stati definiti tre servizi GV per effettuare i test:
 - TestHL7:
     richiede in ingresso la codifica hl7 contenuta nel file hl7_in.txt;
     esegue la trasformazione di tale codifica in formato xml e la successiva ritrasformazione in codice hl7;
