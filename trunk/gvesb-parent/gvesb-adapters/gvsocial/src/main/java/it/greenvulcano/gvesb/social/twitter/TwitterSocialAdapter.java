@@ -32,12 +32,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
-
-import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * 
@@ -46,8 +45,6 @@ import twitter4j.conf.ConfigurationBuilder;
  * 
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
- * 
- * 
  */
 public class TwitterSocialAdapter extends SocialAdapter{
     private static Logger logger = GVLogger.getLogger(SocialAdapter.class);
@@ -80,23 +77,22 @@ public class TwitterSocialAdapter extends SocialAdapter{
 	
 	public SocialAdapterAccount getAccount(String accountName) throws SocialAdapterException {
 		// ricerca nell'HashMap
-logger.info("getAccount - name: " + accountName);
+		logger.info("getAccount - name: " + accountName);
 		SocialAdapterAccount account = accounts.get(accountName);
 		try {
 			if (account == null){
 				// reading account configuration
 				Node accountConfig = XMLConfig.getNode(accountsConfig, "//TwitterSocialAdapter/*/Account[@name='" + accountName + "']");
-				if (accountConfig == null) throw new SocialAdapterException("Missing account: " + accountName +
-					" in SocialAdapter: " + socialName);
+				if (accountConfig == null) {
+					throw new SocialAdapterException("Missing account: " + accountName +" in SocialAdapter: " + socialName);
+				}
 				account = new TwitterSocialAdapterAccount(proxy);
 				account.init(accountConfig);
 				accounts.put(accountName, account);
 			}
 		} catch (XMLConfigException e) {
-			logger.error("Error initializing account: " + accountName +
-					" in SocialAdapter: " + socialName, e);
-			throw new SocialAdapterException("Error initializing account: " + accountName +
-					" in SocialAdapter: " + socialName, e);
+			logger.error("Error initializing account: " + accountName +	" in SocialAdapter: " + socialName, e);
+			throw new SocialAdapterException("Error initializing account: " + accountName + " in SocialAdapter: " + socialName, e);
 		}
 		return account;
 	}
@@ -111,10 +107,31 @@ logger.info("getAccount - name: " + accountName);
     	HashSet<String> names = new HashSet<String>();
     	for (Iterator<String> i = accounts.keySet().iterator(); i.hasNext();) {
 			SocialAdapterAccount account = accounts.get(i.next());
-			if (account.isAuthorized()){
+			if (account.isAuthorized()) {
 				names.add(i.toString());
 			}
 		}
     	return names;
     }
+	
+    public void destroy()
+    {
+        logger.debug("BEGIN - Destroying Twitter Accounts");
+        try {
+            for (Entry<String, SocialAdapterAccount> entry : accounts.entrySet()) {
+                try {
+                    entry.getValue().destroy();
+                }
+                catch (Exception exc) {
+                    logger.error("Error destroying account:[" + entry.getKey() + "]", exc);
+                }
+            }
+            accounts.clear();
+        }
+        catch (Exception exc) {
+            // TODO: handle exception
+        }
+        logger.debug("END - Destroying Twitter Accounts");
+    }
+	
 }

@@ -19,6 +19,8 @@
  */
 package it.greenvulcano.gvesb.social;
 
+import it.greenvulcano.configuration.ConfigurationEvent;
+import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.log.GVLogger;
@@ -26,6 +28,7 @@ import it.greenvulcano.log.GVLogger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -37,10 +40,8 @@ import org.w3c.dom.Node;
  * 
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
- * 
- * 
  */
-public class SocialAdapterManager {
+public class SocialAdapterManager implements ConfigurationListener {
 
     private static Logger logger = GVLogger.getLogger(SocialAdapterManager.class);
 	public static final String CFG_FILE="GVSocialAdapter-Configuration.xml";
@@ -54,6 +55,7 @@ public class SocialAdapterManager {
 	public static synchronized SocialAdapterManager getInstance() {
 		if (instance == null) {
 			instance = new SocialAdapterManager();
+	        XMLConfig.addConfigurationListener(instance, CFG_FILE);
 		}
 		return instance;
 	}
@@ -70,8 +72,7 @@ public class SocialAdapterManager {
 			if (adapter == null) {
 	    		// lettura configurazione adapter
 		    	Node adpNode = XMLConfig.getNode(CFG_FILE, "//*[@type='social-adapter' and @social='" + socialName + "']");
-				adapter = (SocialAdapter) Class.forName(XMLConfig.get(adpNode, "@class"))
-						.newInstance();
+				adapter = (SocialAdapter) Class.forName(XMLConfig.get(adpNode, "@class")).newInstance();
 				adapter.init(adpNode);
 				// registrazione in HashMap
 				adapters.put(socialName, adapter);
@@ -96,7 +97,7 @@ public class SocialAdapterManager {
 		adapter.execute(buffer);
 		return buffer;
 	}
-	
+
 	/**
 	 * Interface method towards the social platform. Unlike execute(), this method
 	 * is used to call directly one of the methods exposed by the platform, without
@@ -118,7 +119,7 @@ public class SocialAdapterManager {
 	public Set<String> getAccountsList(boolean authorized, String socialName){
 		return getAdapter(socialName).getAccountNames(authorized);
 	}
-	
+
 	public Tokens getConsumerTokens(String socialName, String accountName) throws SocialAdapterException{
 		SocialAdapterAccount account = getSocialAccount(socialName, accountName);
 		return account.getConsumerTokens();
@@ -141,19 +142,52 @@ public class SocialAdapterManager {
 		return account.getRequestTokenAndURL();
 	}
 
-	private SocialAdapterAccount getSocialAccount(String socialName,
-			String accountName) throws SocialAdapterException {
+	private SocialAdapterAccount getSocialAccount(String socialName, String accountName) throws SocialAdapterException {
 		SocialAdapter adapter = this.getAdapter(socialName);
 		SocialAdapterAccount account = null;
 		try {
 			account = adapter.getAccount(accountName);
 		} catch (SocialAdapterException e) {
-			logger.error(e);
-			throw new SocialAdapterException("Error retrieving Account name: " + 
-					accountName + ".", e);
+			logger.error("Error retrieving Account name: " + accountName + ".", e);
+			throw new SocialAdapterException("Error retrieving Account name: " + accountName + ".", e);
 		}
 		return account;
 	}
-	
-	
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * it.greenvulcano.configuration.ConfigurationListener#configurationChanged
+     * (it.greenvulcano.configuration.ConfigurationEvent)
+     */
+    @Override
+    public void configurationChanged(ConfigurationEvent evt)
+    {
+        logger.debug("BEGIN - Operation(reload Configuration)");
+        if ((evt.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && evt.getFile().equals(CFG_FILE)) {
+            destroy();
+        }
+        logger.debug("END - Operation(reload Configuration)");
+    }
+
+    public void destroy()
+    {
+        logger.debug("BEGIN - Destroying SocialAdapterManager");
+        try {
+            for (Entry<String, SocialAdapter> entry : adapters.entrySet()) {
+                try {
+                    entry.getValue().destroy();
+                }
+                catch (Exception exc) {
+                    logger.error("Error destroying SocialAdapter[" + entry.getKey() + "]", exc);
+                }
+            }
+            adapters.clear();
+        }
+        catch (Exception exc) {
+            // TODO: handle exception
+        }
+        logger.debug("END - Destroying SocialAdapterManager");
+    }
 }

@@ -20,13 +20,10 @@
 package it.greenvulcano.gvesb.social;
 
 /**
- * 
  * Bean class for OAuth tokens and fields.
  * 
  * @version 3.3.0 Sep, 2012
- * @author mb
- * 
- * 
+ * @author GreenVulcano Developer Team
  */
 public class Tokens {
 

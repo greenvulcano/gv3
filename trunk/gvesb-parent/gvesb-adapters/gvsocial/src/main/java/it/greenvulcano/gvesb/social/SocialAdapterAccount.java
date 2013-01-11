@@ -21,16 +21,12 @@ package it.greenvulcano.gvesb.social;
 
 import org.w3c.dom.Node;
 
-import twitter4j.Twitter;
-
 /**
  * 
  * Represents an Account in a social platform.
  * 
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
- * 
- * 
  */
 public interface SocialAdapterAccount {
 
@@ -67,7 +63,7 @@ public interface SocialAdapterAccount {
 	public abstract void setPINAndSave(String pIN) throws SocialAdapterException;
 	
 	/**
-	 * Returns a boolean meaning wether the account has been authorized or not.
+	 * Returns a boolean meaning whether the account has been authorized or not.
 	 */
 	public abstract boolean isAuthorized();
 	
@@ -75,4 +71,9 @@ public interface SocialAdapterAccount {
 	 * Returns the account name as configured.
 	 */
 	public abstract String getAccountName();
+	
+	/**
+	 * Deletes the account.
+	 */
+	public abstract void destroy();
 }

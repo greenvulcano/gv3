@@ -20,13 +20,10 @@
 package it.greenvulcano.gvesb.social;
 
 /**
- * 
  * Represents a bean containing Proxy settings.
  * 
  * @version 3.3.0 Sep, 2012
- * @author mb
- * 
- * 
+ * @author GreenVulcano Developer Team 
  */
 public class SocialAdapterProxy {
 	private String httpProxyHost;

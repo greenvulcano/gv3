@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project. All rights
+ * reserved.
+ * 
+ * This file is part of GreenVulcano ESB.
+ * 
+ * GreenVulcano ESB is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * 
+ * GreenVulcano ESB is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ * for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
+ */
 package it.greenvulcano.gvesb.social.twitter.directcall;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
@@ -12,11 +31,12 @@ import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
-/** Class managing data for the direct call of getFollowersIDs method
+/** 
+ * Class managing data for the direct call of getFollowersIDs method
  * on Twitter
  * 
- * @author mb
- *
+ * @version 3.3.0 Sep, 2012
+ * @author GreenVulcano Developer Team
  */
 public class TwitterOperationGetFollowersIDs extends TwitterOperationBase{
 
@@ -31,17 +51,16 @@ public class TwitterOperationGetFollowersIDs extends TwitterOperationBase{
 		this.cursor = cursor;
 	}
 
-
 	@Override
 	public void execute(SocialAdapterAccount account) throws SocialAdapterException {
 		try {
 			Twitter twitter = (Twitter) account.getProxyObject();
 			ids = twitter.getFollowersIDs(Long.parseLong(followingId), Long.parseLong(cursor));
 		} catch (NumberFormatException exc) {
-			logger.error(exc);
-			throw new SocialAdapterException("Call to TwitterOperationEnableNotification failed. Check followingId and cursor format.", exc);
+			logger.error("Call to TwitterOperationGetFollowersIDs failed. Check followingId and cursor format.", exc);
+			throw new SocialAdapterException("Call to TwitterOperationGetFollowersIDs failed. Check followingId and cursor format.", exc);
 		} catch (TwitterException exc) {
-			logger.error(exc);
+			logger.error("Call to TwitterOperationGetFollowersIDs failed.", exc);
 			throw new SocialAdapterException("Call to TwitterOperationGetFollowersIDs failed.", exc);
 		}
 	}
