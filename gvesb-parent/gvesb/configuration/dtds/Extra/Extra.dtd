@@ -22,8 +22,11 @@
 <!ENTITY % gvopenspcoop SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVOpenSpCoop.dtd">
 %gvopenspcoop;
 
+<!ENTITY % gvsocial SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd">
+%gvsocial;
+
 <!ENTITY % extra-j2ee-calls "">
-<!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call">
+<!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
 <!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call">
@@ -37,5 +40,5 @@
 <!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
 
 <!ENTITY % extra-core "">
-<!ENTITY % extra-adapters ",GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager"> 
+<!ENTITY % extra-adapters ",GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager"> 
 <!ENTITY % extra-support "">

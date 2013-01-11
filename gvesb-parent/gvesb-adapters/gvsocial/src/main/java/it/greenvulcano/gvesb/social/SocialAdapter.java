@@ -19,7 +19,6 @@
  */
 package it.greenvulcano.gvesb.social;
 
-
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.log.GVLogger;
@@ -44,9 +43,7 @@ import org.w3c.dom.NodeList;
  * the Account configured for that platform.
  * 
  * @version 3.3.0 Sep, 2012
- * @author mb
- * 
- * 
+ * @author GreenVulcano Developer Team
  */
 public abstract class SocialAdapter {
 	
@@ -213,5 +210,12 @@ public abstract class SocialAdapter {
      * @return
      */
 	public abstract Set<String> getAccountNames(boolean authorized);	
+	
+    /**
+     * Destroys the object.
+     * @param   
+     * @return
+     */
+	public abstract void destroy();	
 
 }

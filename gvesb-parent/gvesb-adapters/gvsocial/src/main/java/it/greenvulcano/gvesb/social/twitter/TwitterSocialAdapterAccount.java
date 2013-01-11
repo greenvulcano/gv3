@@ -44,7 +44,7 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 /** 
- * Rappresenta un account utente su Twitter.
+ * Represent Twitter user account.
  *
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
@@ -99,12 +99,14 @@ public class TwitterSocialAdapterAccount implements SocialAdapterAccount{
 	 * 
 	 * @return {@link Twitter}
 	 */
-    public Twitter getProxyObject(){
-    	if (twitter != null) return twitter;
+    public Twitter getProxyObject() {
+    	if (twitter != null) {
+    		return twitter;
+    	}
     	else {
     		// setting OAuth tokens
     		ConfigurationBuilder confBuilder = new ConfigurationBuilder();
-    		if (proxy != null){
+    		if (proxy != null) {
 	    		confBuilder.setHttpProxyHost(proxy.getHttpProxyHost());
 	    		confBuilder.setHttpProxyPort(proxy.getHttpProxyPort());
 	    		confBuilder.setHttpProxyUser(proxy.getHttpProxyUser());
@@ -136,12 +138,12 @@ public class TwitterSocialAdapterAccount implements SocialAdapterAccount{
      * @throws SocialAdapterException
      */
     private void saveAccessTokens() throws SocialAdapterException {
-    	String toWrite = this.accountName+".oauth_access_token="+this.accessToken;
-    	toWrite += "\n"+this.accountName+".oauth_access_token_secret="+this.accessTokenSecret;
+    	String toWrite = this.accountName + ".oauth_access_token=" + this.accessToken;
+    	toWrite += "\n" + this.accountName + ".oauth_access_token_secret=" + this.accessTokenSecret;
     	try {
 			TextUtils.writeFile(toWrite, ACCOUNTS, true);
 		} catch (IOException e) {
-			logger.error(e);
+			logger.error("Error saving tokens for Account: " + accountName +".", e);
 			throw new SocialAdapterException("Error saving tokens for Account: " + accountName +".", e);
 		}
     	this.isAuthorized = true;
@@ -159,7 +161,7 @@ public class TwitterSocialAdapterAccount implements SocialAdapterAccount{
 			requestToken = this.getProxyObject().getOAuthRequestToken();
 			this.requestToken = requestToken;
 		} catch (TwitterException e) {
-			logger.error(e);
+			logger.error("Call to Social Adapter Account: " + accountName +" failed.", e);
 			throw new SocialAdapterException("Call to Social Adapter Account: " + accountName +" failed.", e);
 		}
     	tokens.setRequestToken(requestToken.getToken());
@@ -178,15 +180,14 @@ public class TwitterSocialAdapterAccount implements SocialAdapterAccount{
 			this.accessToken = access.getToken();
 			this.accessTokenSecret = access.getTokenSecret();
 		} catch (TwitterException e) {
-			logger.error(e);
-			throw new SocialAdapterException("Call to Social Adapter Account: "
-					+ accountName + "] failed.", e);
+			logger.error("Call to Social Adapter Account: " + accountName + "] failed.", e);
+			throw new SocialAdapterException("Call to Social Adapter Account: " + accountName + "] failed.", e);
 		}
 		saveAccessTokens();
 	}
 	
 	/**
-	 * Returns a boolean meaning wether the account has been authorized or not.
+	 * Returns a boolean meaning whether the account has been authorized or not.
 	 */
 	@Override
 	public boolean isAuthorized() {
@@ -197,4 +198,8 @@ public class TwitterSocialAdapterAccount implements SocialAdapterAccount{
 	public String getAccountName() {
 		return this.accountName;
 	}
+	
+	public void destroy() {
+		// do nothing
+	};
 }
