@@ -28,28 +28,55 @@
       <System id-system="GVESB" system-activation="on">
         <Channel id-channel="TEST_CHANNEL">
           <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
-            name="ejbToupperGVBuffer" remote-or-local-interface="test.unit.ejb.J2EETest"
-            home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            name="ejb2ToupperGVBuffer" remote-or-local-interface="test.unit.ejb.J2EETest"
+            version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
             method="toupper" parameterTypes="it.greenvulcano.gvesb.buffer.GVBuffer" type="call">
             <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
           </j2ee-ejb-call>
           <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
-            name="ejbToupperStringArr" remote-or-local-interface="test.unit.ejb.J2EETest"
-            home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            name="ejb2ToupperStringArr" remote-or-local-interface="test.unit.ejb.J2EETest"
+            version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
             method="toupper" parameterTypes="java.lang.String[]" type="call"
             input-ref-dp="toupperInArrayDataProvider" output-ref-dp="toupperOutGVBChangeDataProvider">
             <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
           </j2ee-ejb-call>
           <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
-            name="ejbSumInt" remote-or-local-interface="test.unit.ejb.J2EETest"
-            home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            name="ejb2SumInt" remote-or-local-interface="test.unit.ejb.J2EETest"
+            version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
             method="sum" parameterTypes="int,int" type="call"
             input-ref-dp="sumInArrayDataProvider" output-ref-dp="sumOutGVBChangeDataProvider">
             <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
           </j2ee-ejb-call>
           <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
-            name="ejbAddTime" remote-or-local-interface="test.unit.ejb.J2EETest"
-            home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            name="ejb2AddTime" remote-or-local-interface="test.unit.ejb.J2EETest"
+            version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            method="addTime" parameterTypes="java.util.Date,int,int" type="call"
+            input-ref-dp="addTimeInArrayDataProvider" output-ref-dp="addTimeOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb3ToupperGVBuffer" remote-or-local-interface="test.unit.ejb3.J2EETest"
+            version="3" jndi-name="gvesb/test3/Test" 
+            method="toupper" parameterTypes="it.greenvulcano.gvesb.buffer.GVBuffer" type="call">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb3ToupperStringArr" remote-or-local-interface="test.unit.ejb3.J2EETest"
+            version="3" jndi-name="gvesb/test3/Test" 
+            method="toupper" parameterTypes="java.lang.String[]" type="call"
+            input-ref-dp="toupperInArrayDataProvider" output-ref-dp="toupperOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb3SumInt" remote-or-local-interface="test.unit.ejb3.J2EETest"
+            version="3" jndi-name="gvesb/test3/Test" 
+            method="sum" parameterTypes="int,int" type="call"
+            input-ref-dp="sumInArrayDataProvider" output-ref-dp="sumOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb3AddTime" remote-or-local-interface="test.unit.ejb3.J2EETest"
+            version="3" jndi-name="gvesb/test3/Test" 
             method="addTime" parameterTypes="java.util.Date,int,int" type="call"
             input-ref-dp="addTimeInArrayDataProvider" output-ref-dp="addTimeOutGVBChangeDataProvider">
             <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />

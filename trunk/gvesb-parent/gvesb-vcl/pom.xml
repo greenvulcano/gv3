@@ -22,6 +22,7 @@
     <modules>
         <module>gvvcl</module>
         <module>ejb-test</module>
+        <module>ejb3-test</module>
         <module>gvvcl-axis2</module>
         <module>gvvcl-db</module>
         <module>gvvcl-file</module>
