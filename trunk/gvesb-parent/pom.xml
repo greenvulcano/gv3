@@ -735,6 +735,17 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>org.eclipse.birt.runtime</id>
+            <name>Eclipse Birt Runtime Repo</name>
+            <url>http://mvnrepository.com/artifact/org.eclipse.birt.runtime/org.eclipse.birt.runtime</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <pluginRepositories>

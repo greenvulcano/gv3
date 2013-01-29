@@ -145,6 +145,11 @@
             </fileset>
             <fileset dir="${birt.birt.lib}">
                 <include name="*.jar"/>
+                <exclude name="com.ibm.icu.jar"/>
+                <exclude name="org.apache.batik.pdf.jar"/>
+                <exclude name="org.apache.commons.codec.jar"/>
+                <exclude name="org.apache.xml.resolver.jar"/>
+                <exclude name="org.mozilla.javascript.jar"/>
             </fileset>
             <fileset dir="${commons.beanutils.lib}">
                 <include name="*.jar"/>
@@ -256,9 +261,6 @@
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${opensaml.opensaml.lib}">
-                <include name="*.jar"/>
-            </fileset>
-            <fileset dir="${emf.emf.lib}">
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${springframework.springframework.lib}">

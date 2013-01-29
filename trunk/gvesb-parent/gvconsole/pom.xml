@@ -134,61 +134,13 @@
             <artifactId>formdef_1_0-validator</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.w3c</groupId>
-            <artifactId>flute</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.common</artifactId>
+            <groupId>org.eclipse.birt.runtime</groupId>
+            <artifactId>org.eclipse.birt.runtime</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.ecore</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>emitterconfig</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.birt</groupId>
             <artifactId>viewservlets</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>chartitemapi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>crosstabcoreapi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dataaggregationapi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dataextraction</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>modelodaapi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>odadesignapi</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>

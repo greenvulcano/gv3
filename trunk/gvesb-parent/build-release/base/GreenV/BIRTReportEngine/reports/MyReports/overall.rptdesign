@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.21" id="1">
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
     <property name="comments">Copyright (c) 2007 &lt;&lt;Your Company Name here>></property>
-    <property name="createdBy">Eclipse BIRT Designer Version 2.5.2.v20100208 Build &lt;2.5.2.v20100210-0630></property>
+    <property name="createdBy">Eclipse BIRT Designer Version 3.7.2.v20120213 Build &lt;3.7.2.v20120214-1408></property>
     <html-property name="description">Creates a blank report with no predefined content.</html-property>
     <simple-property-list name="includeResource">
         <value>messages</value>
@@ -183,9 +183,15 @@ group by CLASSICMODELS.PRODUCTS.PRODUCTNAME
                 <cell id="11">
                     <extended-item extensionName="Chart" name="NewChart" id="17">
                         <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
-  <Version>2.5.1</Version>
+  <Version>2.5.3</Version>
   <Type>Bar Chart</Type>
   <SubType>Side-by-side</SubType>
+  <Description>
+    <Value></Value>
+    <Font>
+      <Alignment/>
+    </Font>
+  </Description>
   <Block>
     <Children xsi:type="layout:TitleBlock">
       <Bounds>
@@ -452,7 +458,9 @@ group by CLASSICMODELS.PRODUCTS.PRODUCTNAME
       <SeriesDefinitionIndex>0</SeriesDefinitionIndex>
     </OrthogonalSampleData>
   </SampleData>
-  <Interactivity/>
+  <Interactivity>
+    <Enable>true</Enable>
+  </Interactivity>
   <EmptyMessage>
     <Caption>
       <Value></Value>
@@ -805,6 +813,10 @@ group by CLASSICMODELS.PRODUCTS.PRODUCTNAME
           </Label>
           <DataDefinition>
             <Definition>row[&quot;sales&quot;]</Definition>
+            <Grouping>
+              <GroupType>Text</GroupType>
+              <AggregateExpression>Sum</AggregateExpression>
+            </Grouping>
           </DataDefinition>
           <SeriesIdentifier></SeriesIdentifier>
           <DataPoint>
@@ -1381,19 +1393,23 @@ group by CLASSICMODELS.PRODUCTS.PRODUCTNAME
   <Rotation/>
 </model:ChartWithAxes>
 ]]></xml-property>
-                        <property name="outputFormat">SVG</property>
-                        <structure name="action">
-                            <property name="targetWindow">_self</property>
-                            <property name="linkType">drill-through</property>
-                            <property name="targetFileType">report-design</property>
-                            <property name="reportName">trend.rptdesign</property>
-                            <list-property name="paramBindings">
-                                <structure>
-                                    <property name="paramName">productname</property>
-                                    <expression name="expression">row["PRODUCTNAME"]</expression>
-                                </structure>
-                            </list-property>
-                        </structure>
+                        <property name="outputFormat">PNG</property>
+                        <list-property name="action">
+                            <structure>
+                                <property name="targetWindow">_self</property>
+                                <property name="linkType">drill-through</property>
+                                <property name="targetFileType">report-design</property>
+                                <property name="reportName">trend.rptdesign</property>
+                                <list-property name="paramBindings">
+                                    <structure>
+                                        <property name="paramName">productname</property>
+                                        <simple-property-list name="expression">
+                                            <value>row["PRODUCTNAME"]</value>
+                                        </simple-property-list>
+                                    </structure>
+                                </list-property>
+                            </structure>
+                        </list-property>
                         <property name="inheritColumns">true</property>
                         <property name="dataSet">OverallDataSet</property>
                         <property name="height">6.5520833333in</property>
