@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<datasources>
+    <local-tx-datasource>
+      <jndi-name>ds.ode</jndi-name>
+      <use-java-context>false</use-java-context>
+      <connection-url>jdbc:hsqldb:hsql://localhost:9001/ode</connection-url>
+      <driver-class>org.hsqldb.jdbc.JDBCDriver</driver-class>
+      <user-name>ode</user-name>
+      <password>ode</password>
+      <min-pool-size>5</min-pool-size>
+      <max-pool-size>20</max-pool-size>
+      <idle-timeout-minutes>0</idle-timeout-minutes>
+      <track-statements/>
+      <security-domain>OdeHsqlDbRealm</security-domain>
+      <prepared-statement-cache-size>32</prepared-statement-cache-size>
+      <metadata>
+         <type-mapping>Hypersonic SQL</type-mapping>
+      </metadata>
+    </local-tx-datasource>
+</datasources>

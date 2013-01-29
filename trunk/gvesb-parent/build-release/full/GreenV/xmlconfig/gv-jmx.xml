@@ -79,6 +79,8 @@
                                  target="${{jboss.server.name}}" type="initializer" />
             <generic-initializer class="it.greenvulcano.gvesb.core.savepoint.jmx.ResetGVCoreSavePoint"
                                  target="${{jboss.server.name}}" type="initializer"/>
+            <generic-initializer class="it.greenvulcano.gvesb.core.bpel.jmx.RegisterBpelManager"
+                                 target="${{jboss.server.name}}" type="initializer"/>
             <generic-initializer class="it.greenvulcano.gvesb.core.forward.jmx.RegisterJMSForwardManager"
                                  target="${{jboss.server.name}}" type="initializer" />
             <generic-initializer class="it.greenvulcano.gvesb.gvhl7.listener.jmx.RegisterHL7ListenerManager"

@@ -12,6 +12,7 @@ import it.greenvulcano.gvesb.core.bpel.scheduler.SchedulerWrapper;
 import it.greenvulcano.gvesb.j2ee.XAHelper;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -456,12 +457,12 @@ public class GVBpelEngineServer implements ConfigurationListener, ShutdownEventL
     }
 
 
-    public GVBuffer invokeASYNCRR(QName serviceName, String opName, Element body) throws Exception
+    public GVBuffer invokeASYNCRR(GVBuffer gvBuffer, QName serviceName, String opName, Element body) throws Exception
     {
         MyRoleMessageExchange mex;
         @SuppressWarnings("rawtypes")
         Future responseFuture;
-        GVBuffer gvBuffer = null;
+
         init();
         try {
             String messageId = new GUID().toString();
@@ -472,7 +473,7 @@ public class GVBpelEngineServer implements ConfigurationListener, ShutdownEventL
             if (mex.getOperation() == null) {
                 throw new Exception("Did not find operation " + opName + " on service " + serviceName);
             }
-            logger.error(mex.getMessageExchangePattern());
+            logger.debug(mex.getMessageExchangePattern());
             Message request = mex.createMessage(mex.getOperation().getInput().getMessage().getQName());
             Element wrapper = body.getOwnerDocument().createElementNS("", "payload");
             wrapper.appendChild(body);
@@ -498,14 +499,8 @@ public class GVBpelEngineServer implements ConfigurationListener, ShutdownEventL
                     case ASYNC :
                     case RESPONSE :
                         Message response = mex.getResponse();
-                        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                        Transformer transformer = transformerFactory.newTransformer();
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        transformer.transform(new DOMSource(response.getMessage()), new StreamResult(baos));
-                        baos.close();
-                        gvBuffer = new GVBuffer();
-                        gvBuffer.setObject(baos.toString());
-                        logger.info("Response message: " + baos.toString());
+                        gvBuffer.setObject(XMLUtils.serializeDOM_S(response.getMessage()));
+                        //logger.info("Response message: " + baos.toString());
                         break;
                     case FAILURE :
                         logger.error("Message exchange failure");
@@ -526,7 +521,7 @@ public class GVBpelEngineServer implements ConfigurationListener, ShutdownEventL
         return gvBuffer;
     }
 
-    public void invokeASYNCR(QName serviceName, String opName, Element body) throws Exception
+    public void invokeASYNCR(GVBuffer gvBuffer, QName serviceName, String opName, Element body) throws Exception
     {
         MyRoleMessageExchange mex;
         init();

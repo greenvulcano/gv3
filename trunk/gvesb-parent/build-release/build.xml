@@ -150,6 +150,12 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         <ant antfile="build-social-distr.xml" dir="${basedir}" target="release"/>
     </target>
 
+    <!-- Build ODE Adapter distribution -->
+    <target name="ode" depends="configure, checkthirdparty"
+            description="Executes the ODE Adapter building">
+        <ant antfile="build-ode-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
 
     <!-- Build All ditribution packages -->
     <target name="All" depends="maven-install, checkthirdparty"
@@ -160,6 +166,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         <ant antfile="build-rules-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-openspc-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-social-distr.xml" dir="${basedir}" target="release"/>
+        <ant antfile="build-ode-distr.xml" dir="${basedir}" target="release"/>
     </target>
 
     <!-- Define a macro for calling maven -->

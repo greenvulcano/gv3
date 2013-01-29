@@ -19,6 +19,9 @@
 <!ENTITY % gvsocial SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd">
 %gvsocial;
 
+<!ENTITY % gvbpel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVBpel.dtd">
+%gvbpel;
+
 <!ENTITY % extra-j2ee-calls "">
 <!ENTITY % extra-comm-calls "|hl7-call|openspcoop-call|%social-calls;">
 <!ENTITY % extra-file-calls "">
@@ -30,8 +33,8 @@
 
 <!ENTITY % extra-dte-transformers "|XML2HL7Transformation|HL72XMLTransformation">
 
-<!ENTITY % extra-wf-operations "">
-<!ENTITY % extra-wf-extensions "">
+<!ENTITY % extra-wf-operations ",BpelOperation*">
+<!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
 
 <!ENTITY % extra-core "">
 <!ENTITY % extra-adapters ",GVHL7ListenerManager,GVRulesConfigManager,GVSocialAdapterManager">

@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -1643,12 +1644,18 @@ public class GVCoreParser
         String xPathOdeProcess = "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
                 + "']/BpelOperation";
         NodeList odeProcess = parser.selectNodeList(newXml, xPathOdeProcess);
+        String xPathDirProcess = "/GVCore/GVServices/BpelEngineConfiguration/@deployMentUnitProcess";
         if (odeProcess.getLength() > 0) {
+            String dirProcPath = parser.get(serverXml, xPathDirProcess, "${{gv.app.home}}" + File.separator + "BpelProcess"); 
             for (int i = 0; i < odeProcess.getLength(); i++) {
-            	String opName = parser.get(odeProcess.item(i), "@name");
-            	String procName = parser.get(odeProcess.item(i), "BpelFlow/@processname"); 
+            	Node np = odeProcess.item(i);
+                String opName = parser.get(np, "@name");
+                if (opName.equals("Forward")) {
+                	opName = parser.get(np, "@forward-name");
+                }
+                String procName = parser.get(np, "BpelFlow/@processname"); 
                 String dirName = nomeServizio + "_" + opName + "_" + procName;
-                copiaFileProcess(dirName);
+                copiaFileProcess(dirProcPath,dirName);
             }
         }
     }
@@ -2176,6 +2183,27 @@ public class GVCoreParser
         }
     }
 
+    private void copiaFileProcess(String pathProcess, String dirName) throws Exception
+    {
+        logger.debug("pathProcess  = " + pathProcess);
+        logger.debug("dirName  = " + dirName);
+        String outputDir = PropertiesHandler.expand(pathProcess, null);
+        File nomeProcessDir = new File(outputDir, dirName);
+        nomeProcessDir.mkdirs();
+        String strPath = java.lang.System.getProperty("java.io.tmpdir");
+        String inputFile = strPath + File.separator + "conf" + File.separator + "BpelProcess" + File.separator
+                + dirName;
+        logger.debug("inputFile  = " + inputFile);
+        File pathBpel = new File(inputFile);
+        File[] files = pathBpel.listFiles();
+        logger.debug("files  = " + Arrays.toString(files));
+        logger.debug("num file  = " + files.length);
+        for (File file : files) {
+            copiaFile(file.getAbsolutePath(), outputDir + File.separator + dirName + File.separator + file.getName());
+        }
+    }
+
+    
     private void copiaFileWSDL(String nomeFile) throws Exception
     {
         logger.debug("inputFile  = " + nomeFile);
