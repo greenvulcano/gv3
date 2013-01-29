@@ -68,6 +68,7 @@
                 <include name="Extra/GVOpenSpCoop.dtd"/>
                 <include name="Extra/GVRules.dtd"/>
                 <include name="Extra/GVSocial.dtd"/>
+                <include name="Extra/GVBpel.dtd"/>
             </fileset>
         </copy>
 
@@ -165,6 +166,11 @@
             </fileset>
             <fileset dir="${birt.birt.lib}">
                 <include name="*.jar"/>
+                <exclude name="com.ibm.icu.jar"/>
+                <exclude name="org.apache.batik.pdf.jar"/>
+                <exclude name="org.apache.commons.codec.jar"/>
+                <exclude name="org.apache.xml.resolver.jar"/>
+                <exclude name="org.mozilla.javascript.jar"/>
             </fileset>
             <fileset dir="${commons.beanutils.lib}">
                 <include name="*.jar"/>
@@ -276,9 +282,6 @@
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${opensaml.opensaml.lib}">
-                <include name="*.jar"/>
-            </fileset>
-            <fileset dir="${emf.emf.lib}">
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${springframework.springframework.lib}">
@@ -442,6 +445,59 @@
               preservelastmodified="true" overwrite="true">
             <fileset dir="${org.twitter4j.lib}">
                 <include name="twitter4j-core.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy ODE files -->
+        <!-- Copy DB files -->
+        <copy todir="${release.db}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/GreenV/hsqldb">
+                <include name="**"/>
+            </fileset>
+        </copy>
+        <!-- Copy Proc files -->
+        <copy todir="${release.gv}/BpelProcess" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/GreenV/BpelProcess">
+                <include name="**"/>
+            </fileset>
+        </copy>
+        <!-- Copy WS files -->
+        <copy todir="${release.gv}/webservices" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/GreenV/webservices">
+                <include name="**"/>
+            </fileset>
+        </copy>
+        <!-- Copy JBoss files -->
+        <copy todir="${release.server.conf}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/jboss-5.1.0.GA/server/GreenV/conf">
+                <include name="*"/>
+            </fileset>
+        </copy>
+        <!-- Copy lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvcore-ode.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${ode.ode.lib}">
+                <include name="*.jar"/>
+                <exclude name="ode-dao-jpa.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy DS -->
+        <copy todir="${release.deploy}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/GreenV/application/deploy">
+                <include name="*.xml"/>
             </fileset>
         </copy>
     </target>

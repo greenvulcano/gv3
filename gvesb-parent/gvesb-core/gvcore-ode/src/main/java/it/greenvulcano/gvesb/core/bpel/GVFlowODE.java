@@ -178,7 +178,6 @@ public class GVFlowODE implements GVFlow
             }
         }
         catch (XMLConfigException exc) {
-        	exc.printStackTrace();
             throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
         }
     }
@@ -288,7 +287,7 @@ public class GVFlowODE implements GVFlow
 			if(flowName.equals("RequestReply")||
 					flowName.equals("GetReply")	||
 					flowName.equals("GetRequest")){
-				output = gvBpelManager.invokeASYNCRR(processQName, "process", doc.getDocumentElement());
+				output = gvBpelManager.invokeASYNCRR(gvBuffer, processQName, "process", doc.getDocumentElement());
 				if (output!=null && output.getObject() instanceof Throwable) {
 					if (output.getObject() instanceof GVCoreException) {
 						throw (GVCoreException) output.getObject();
@@ -297,15 +296,15 @@ public class GVFlowODE implements GVFlow
 							(Throwable) output.getObject());
 				}
 			}else{
-				gvBpelManager.invokeASYNCR(processQName, "process", doc.getDocumentElement());
+				gvBpelManager.invokeASYNCR(gvBuffer, processQName, "process", doc.getDocumentElement());
 			}
 		    if (logger.isDebugEnabled()) {
 				logger.debug(GVFormatLog.formatEND(flowName, (GVBuffer) output));
 			}
 			
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new GVCoreConfException("GVCORE_ERROR_INITBPEL_ERROR", new String[][]{{"name", flowName}});
+		} catch (Exception exc) {
+			logger.error("Error executing BPEL flow", exc);
+			throw new GVCoreException("GVCORE_EXECBPEL_ERROR", new String[][]{{"name", flowName}, {"message", "" + exc}});
 		}
 
     	return (GVBuffer) output;

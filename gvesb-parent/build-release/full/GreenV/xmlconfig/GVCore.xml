@@ -62,6 +62,19 @@
                           subsystem="GVHL7Listener"/>
     </GVPoolManager>
     <GVServices name="SERVICES" type="module">
+        <BpelEngineConfiguration deployMentUnitProcess="${{gv.app.home}}/BpelProcess"
+                                 startServer="true" transactionTimeout="30">
+            <EngineProperties name="gv-bpel.tx.factory.class"
+                              value="org.apache.ode.axis2.util.JBossFactory"/>
+            <EngineProperties name="gv-bpel.event.listeners"
+                              value="org.apache.ode.bpel.common.evt.DebugBpelEventListener"/>
+            <EngineProperties name="gv-bpel.db.ext.dataSource" value="ds.ode"/>
+            <EngineProperties name="gv-bpel.db.mode" value="EXTERNAL"/>
+            <EngineProperties name="gv-bpel.dao.factory"
+                              value="org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl"/>
+            <EngineProperties name="jta.UserTransaction" value="UserTransaction"/>
+            <EngineProperties name="hibernate.hbm2ddl.auto" value="update"/>
+        </BpelEngineConfiguration>
         <Management call-administration-on-init="no"/>
         <Persistence enabled="true" jdbc-connection-name="pool_persistence">
             <SequenceSQL>select recovery_seq.nextval from dual</SequenceSQL>
@@ -1802,6 +1815,14 @@ data.setObject(fb);</Script>
                                 type="flow-node"/>
                     </Flow>
                 </Operation>
+            </Service>
+
+            <Service group-name="DEFAULT_GRP" id-service="callOde"
+                     service-activation="on" statistics="off">
+                <BpelOperation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id"
+                               type="operation" class="it.greenvulcano.gvesb.core.bpel.GVFlowODE">
+                    <BpelFlow processname="HelloWorld" namespace="http://helloWorld"/>
+                </BpelOperation>
             </Service>
         </Services>
     </GVServices>
