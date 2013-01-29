@@ -91,7 +91,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
             }
 
             EngineConfig config = new EngineConfig();
-            config.setBIRTHome(reportEngineHome);
+            //config.setBIRTHome(reportEngineHome);
             config.setLogConfig(reportEngineHome + File.separator + "log", Level.parse(logLevel));
             Platform.startup(config);
             IReportEngineFactory factory = (IReportEngineFactory) Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);

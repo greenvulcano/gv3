@@ -133,17 +133,17 @@
                             </mapping>
                         </dependency>
                         <dependency>
-                            <groupId>org.eclipse.birt</groupId>
+                            <groupId>org.eclipse.birt.runtime</groupId>
                             <artifactId>*</artifactId>
                             <mapping>
                                 <componentId>birt</componentId>
                             </mapping>
                         </dependency>
                         <dependency>
-                            <groupId>org.eclipse.emf</groupId>
+                            <groupId>org.eclipse.birt.runtime.3_7_1</groupId>
                             <artifactId>*</artifactId>
                             <mapping>
-                                <componentId>emf</componentId>
+                                <componentId>birt</componentId>
                             </mapping>
                         </dependency>
                         <dependency>
@@ -749,72 +749,8 @@
             <artifactId>dom4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>coreapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>chartengineapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>chartitemapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>crosstabcoreapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dataadapterapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dataaggregationapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dataextraction</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dteapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>emitterconfig</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>engineapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>modelapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>modelodaapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>odadesignapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>scriptapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.ecore</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+            <groupId>org.eclipse.birt.runtime</groupId>
+            <artifactId>org.eclipse.birt.runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jbpm</groupId>
