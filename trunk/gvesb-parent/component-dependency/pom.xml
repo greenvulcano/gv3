@@ -26,7 +26,7 @@
     <version.axis>1.4</version.axis>
     <version.axis2>1.6.2</version.axis2>
     <version.axiom>1.2.13</version.axiom>
-    <version.birt>2.6.2</version.birt>
+    <version.birt>3.7.2.v20120214-1408</version.birt>
     <version.bouncycastle>1.45</version.bouncycastle>
     <version.commons-beanutils>1.8.0</version.commons-beanutils>
     <version.commons-cli>1.0</version.commons-cli>
@@ -1090,102 +1090,21 @@ zmq-2.1.0.jar -->
 
 
         <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>coreapi</artifactId>
+            <groupId>org.eclipse.birt.runtime</groupId>
+            <artifactId>org.eclipse.birt.runtime</artifactId>
             <version>${version.birt}</version>
             <type>jar</type>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>chartengineapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>chartitemapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>crosstabcoreapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dataadapterapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dataaggregationapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dataextraction</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>dteapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>emitterconfig</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>engineapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>modelapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>modelodaapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>odadesignapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt</groupId>
-            <artifactId>scriptapi</artifactId>
-            <version>${version.birt}</version>
-            <type>jar</type>
-            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.apache.xerces</artifactId>
+                    <groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.apache.xml.serializer</artifactId>
+                    <groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.eclipse.birt</groupId>
@@ -1194,28 +1113,6 @@ zmq-2.1.0.jar -->
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.common</artifactId>
-            <version>2.6.0.v20100614-1136</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.ecore</artifactId>
-            <version>2.6.1.v20100914-1218</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-            <version>2.5.0.v20100521-1846</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.w3c</groupId>
             <artifactId>flute</artifactId>
