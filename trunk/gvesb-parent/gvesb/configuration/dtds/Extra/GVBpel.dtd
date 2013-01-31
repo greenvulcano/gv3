@@ -74,6 +74,11 @@
 -->
 <!ATTLIST BpelOperation   type              CDATA #FIXED "operation">
 <!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST BpelOperation   class             CDATA #FIXED "it.greenvulcano.gvesb.core.bpel.GVFlowODE">
+<!--
     BpelOperation's name.
     Corresponds to a GreenVulcanoESB communication primitive or a forward.
 
