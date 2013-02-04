@@ -105,7 +105,7 @@ public class StrutsExportAction extends Action
             FileUtils.deleteDirectory(new File(appoDir));
             FileUtils.forceMkdir(new File(appoDir));
 
-            FileManager.cp(xmlDir, appoDir, "^((GVCore)|(GVSupport)|(GVAdapters)|(GVVariables))\\.xml$");
+            FileManager.cp(xmlDir, appoDir, "^((GVCore)|(GVSupport)|(GVAdapters)|(GVVariables)|(gvesb-catalog))\\.xml$");
             FileManager.cp(xmlDir, appoDir, "^GVEsb\\.jks$");
 
             FileManager.cp(dtdsDir, appoDir + File.separator + "dtds", ".*");
