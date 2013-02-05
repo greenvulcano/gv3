@@ -353,6 +353,14 @@
                 <include name="log4j.jar"/>
             </fileset>
         </copy>
+
+        <!-- Copy GreenVulcano Werbservices aar -->
+        <copy todir="${release.gv}/webservices/services" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../gvesb-adapters/gvaxis2/extra/services">
+                <include name="*.aar"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="bundle-docs" description="Include license, readme, etc">

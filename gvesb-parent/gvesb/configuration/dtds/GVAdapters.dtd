@@ -1109,7 +1109,6 @@
 <!--
     GreenVulcano Web Services definition
 
-    #Table: ! GreenVulcano Web Service ! GreenVulcanoWebServices ! key ! @id-key ! System ! @id-system ! Service ! @id-service ! Primitive ! @id-primitive ! ODP Input ! @id-odpInput ! ODP Output ! @id-odpOutput ! Description ! Description
     #SelectOnInsert
     #SortChild
     #Template:
@@ -1119,44 +1118,66 @@
 -->
 <!ELEMENT GreenVulcanoWebServices (Description?, GreenVulcanoWebService*)>
 <!--
-    The key that identifies the service is given either by the field id-key, or by the triple system / service / operation
-         - If this key is not satisfied - we will use the default inputObjectDataProviders and outputObjectDataProviders
-         - If the defaults are not defined exception is thrown.
-
-    #Warn: {{self::GreenVulcanoWebServices[not(@id-key or @id-service or @id-system)]}} Specificare id-key oppure id-service e id-system
+    #SelectOnInsert
+    #CompositeLabel: | | @gv-service | | @gv-operation
 -->
 <!ELEMENT GreenVulcanoWebService (Description?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
-<!ATTLIST GreenVulcanoWebService	type CDATA #FIXED "greenvulcanowebservice">
+<!ATTLIST GreenVulcanoWebService    type CDATA #FIXED "greenvulcanowebservice">
 <!--
-    #Warn: {{self::GreenVulcanoWebServices[@id-service or @id-system]}} L'attributo id-key non puo' essere specificato insieme a id-service e/o id-system
-    #NotNull
--->
-<!ATTLIST GreenVulcanoWebService	id-key CDATA #IMPLIED>
-<!--
-    Service
+    ID service with which to perform the invocation of GreenVulcano ESB.
 
-    #Warn: {{self::GreenVulcanoWebServices[@id-key]}} The id-service attribute cannot be specified together with id-key
-    #Warn: {{self::GreenVulcanoWebServices[not(@id-system)]}} The id-service attribute must be specified together with id-system
+    #References: gvesb:document('GVCore')/GVCore/GVServices/Services/Service/@id-service
+-->
+<!ATTLIST GreenVulcanoWebService    gv-service CDATA #REQUIRED>
+<!--
+     GreenVulcano ESB operation to invoke.
+
+    #References: gvesb:document('GVCore')/GVCore/GVServices/Services/Service[@id-service=current()/@gv-service]/*/@name
+    #References: gvesb:document('GVCore')/GVCore/GVServices/Services/Service[@id-service=current()/@gv-service]/*/@forward-name
+-->
+<!ATTLIST GreenVulcanoWebService    gv-operation CDATA #REQUIRED>
+<!--
+    Indicates whether the invocation to be performed in GreenVulcano is transactional or not.
+    Default: false
+
+    A transaction is rolled back if:
+    - the service ends with exception
+    - the output SOAP response is a Fault
+    - the output GVBuffer contains the property WS_FORCE_TX_ROLLBACK=Y
+-->
+<!ATTLIST GreenVulcanoWebService    transacted  (true|false) #IMPLIED>
+<!--
+    Transaction timeout in seconds.
+    Default: 30s
+
+    #Pattern: ! [1-9][0-9]* ! Enter the number of seconds
+    #Warn: {{self::GreenVulcanoWebService[not(@transacted) or (@transacted='false')]}} In non-transactional mode must NOT be specified the timeout
+-->
+<!ATTLIST GreenVulcanoWebService    tx-timeout  CDATA   #IMPLIED>
+<!--
+      Indicates whether the protocol must be https or not.
+      Default: false
+-->
+<!ATTLIST GreenVulcanoWebService    force-https  (true|false) #IMPLIED>
+<!--
+    DataProvider be used to send the reply to the caller.
 
     #NotNull
+    #References: /GVAdapters/GVDataProviderManager/DataProviders/*[@type='dataProvider']/@name
 -->
-<!ATTLIST GreenVulcanoWebService	id-service CDATA #IMPLIED>
+<!ATTLIST GreenVulcanoWebService    output-dp CDATA #IMPLIED>
 <!--
-    System
+    DataProvider be used to send the reply to the caller.
 
-    #Warn: {{self::GreenVulcanoWebServices[@id-key]}} The id-system attribute cannot be specified together with id-key
-    #Warn: {{self::GreenVulcanoWebServices[not(@id-service)]}} The id-system attribute must be specified together with id-service
     #NotNull
+    #References: /GVAdapters/GVDataProviderManager/DataProviders/*[@type='dataProvider']/@name
 -->
-<!ATTLIST GreenVulcanoWebService	id-system CDATA #IMPLIED>
-<!--
-    Primitive to invoke
--->
-<!ATTLIST GreenVulcanoWebService	id-primitive (%primitives;) #REQUIRED>
+<!ATTLIST GreenVulcanoWebService    input-dp CDATA #IMPLIED>
+
 <!--
     Business web services definition on Axis2.
 

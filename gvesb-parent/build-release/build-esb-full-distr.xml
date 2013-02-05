@@ -375,6 +375,14 @@
             </fileset>
         </copy>
 
+        <!-- Copy GreenVulcano Werbservices aar -->
+        <copy todir="${release.gv}/webservices/services" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../gvesb-adapters/gvaxis2/extra/services">
+                <include name="*.aar"/>
+            </fileset>
+        </copy>
+
         <!-- Copy HL7 lib -->
         <!-- Copy EAR GVESB lib -->
         <copy todir="${release.ear.lib}" filtering="false"

@@ -20,7 +20,14 @@
         </CustomMapping>
     </GVSQLErrorMapping>
     <GVWebServices name="WEB_SERVICES" type="module" version="1.0">
-        <GreenVulcanoWebServices/>
+        <GreenVulcanoWebServices>
+            <GreenVulcanoWebService gv-operation="RequestReply" gv-service="TOUPPER"
+                                    type="greenvulcanowebservice"/>
+            <GreenVulcanoWebService gv-operation="Request" gv-service="TOUPPER_A"
+                                    type="greenvulcanowebservice"/>
+            <GreenVulcanoWebService gv-operation="GetReply" gv-service="TOUPPER_A"
+                                    type="greenvulcanowebservice"/>
+        </GreenVulcanoWebServices>
         <BusinessWebServices authenticated-http-soap-address="http://localhost:8080/gvaxis2/services"
                              authenticated-https-soap-address="https://localhost:8080/gvaxis2/services"
                              http-soap-address="http://localhost:8080/gvaxis2/services"

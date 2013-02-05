@@ -1817,6 +1817,17 @@ public class XMLUtils
     }
 
     /**
+     * @param doc
+     * @param name
+     * @return the created element
+     * @see org.w3c.dom.Document#createElement(String)
+     */
+    public Element createElementNS(Document doc, String name, String namespace)
+    {
+        return doc.createElementNS(namespace, name);
+    }
+
+    /**
      * @param parent
      * @param name
      * @return the inserted element
