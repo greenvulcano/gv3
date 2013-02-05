@@ -29,7 +29,7 @@
                          the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
-    #Icon: TwitterTweet.png
+    #Icon: tweet.png
 -->
 <!ELEMENT twitter-update-status (Description?)>
 <!--
@@ -101,7 +101,7 @@
                          the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
-    #Icon: TwitterRetweet.png
+    #Icon: retweet.png
 -->
 <!ELEMENT twitter-retweet-status (Description?)>
 <!--
@@ -172,7 +172,7 @@
                          the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
-    #Icon: TwitterFollow.png
+    #Icon: follow.png
 -->
 <!ELEMENT twitter-enable-notification (Description?)>
 <!--
@@ -243,7 +243,7 @@
                          the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
-    #Icon: TwitterUnfollow.png
+    #Icon: unfollow.png
 -->
 <!ELEMENT twitter-disable-notification (Description?)>
 <!--
@@ -314,7 +314,7 @@
                          the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
-    #Icon: TwitterGetFollowers.png
+    #Icon: follower.png
 -->
 <!ELEMENT twitter-get-followers-ids (Description?)>
 <!--
@@ -392,7 +392,7 @@
                          the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
-    #Icon: TwitterGetFriends.png
+    #Icon: follower.png
 -->
 <!ELEMENT twitter-get-friends-ids (Description?)>
 <!--
@@ -463,7 +463,7 @@
                          the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
-    #Icon: TwitterDirectSend.png
+    #Icon: message.png
 -->
 <!ELEMENT twitter-send-direct-message (Description?)>
 <!--
