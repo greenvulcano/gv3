@@ -33,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 import max.xml.DOMWriter;
 
@@ -262,6 +263,28 @@ public class GVAdapterParser
     {
         return getEqualObject("/GVAdapters/GVWebServices/BusinessWebServices/WebService[@web-service='" + servizio
                 + "']");
+    }
+
+    /**
+     * @param nomeAdapter
+     * @return
+     * @throws XMLUtilsException 
+     */
+    public boolean getExistGVWebServices(String servizio,String operation) throws XMLUtilsException
+    {
+        return getExistObject("/GVAdapters/GVWebServices/GreenVulcanoWebServices/GreenVulcanoWebService[@gv-service='" + servizio
+                + "' and @gv-operation='"+operation+"']");
+    }
+
+    /**
+     * @param nomeAdapter
+     * @return
+     * @throws XMLUtilsException 
+     */
+    public boolean getEqualGVWebServices(String servizio,String operation) throws XMLUtilsException
+    {
+        return getEqualObject("/GVAdapters/GVWebServices/GreenVulcanoWebServices/GreenVulcanoWebService[@gv-service='" + servizio
+                + "' and @gv-operation='"+operation+"']");
     }
 
     /**
@@ -861,7 +884,7 @@ public class GVAdapterParser
     public void aggiornaWebServices(String nomeServizio) throws Exception
     {
         aggiornaBusinessWebServices(nomeServizio);
-        aggiornaGreenVulcanoWebServices(nomeServizio);
+        //aggiornaGreenVulcanoWebServices(nomeServizio);
         aggiornaAxisExtra(nomeServizio);
         String[] dataProvider = getWSDataProvider(nomeServizio);
         for (int i=0; i < dataProvider.length; i++) {
@@ -1094,36 +1117,34 @@ public class GVAdapterParser
 		}
     }
 
-    private void aggiornaGreenVulcanoWebServices(String id_key) throws Exception
+    public void aggiornaGreenVulcanoWebServices(String servizio,String[] operazioni) throws Exception
     {
         logger.debug("init aggiornaGreenVulcanoWebServices");
-        logger.debug("webServices=" + id_key);
-        XMLUtils parser = null;
+    	logger.debug("webServices = " + servizio + "/" + Arrays.toString(operazioni));
+    	XMLUtils parser = null;
     	try {
-    		parser = XMLUtils.getParserInstance();
+    	    parser = XMLUtils.getParserInstance();
 
-	        Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVWebServices/GreenVulcanoWebServices/GreenVulcanoWebService[@id-key='"
-	                + id_key + "']");
-	        Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVWebServices/GreenVulcanoWebServices/GreenVulcanoWebService[@id-key='"
-	                + id_key + "']");
-	        Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVWebServices/GreenVulcanoWebServices");
-	        if (resultsZip != null) {
-		        if (resultsServer == null) {
-	                Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
-	                parentServer.appendChild(importedNode);
-	                logger.debug("GreenVulcanoWebService[" + id_key + "] non esistente, inserimento");
-	            }
-		        else {
-		            Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
-		            parentServer.replaceChild(importedNode, resultsServer);
-		            logger.debug("GreenVulcanoWebService[" + id_key + "] esistente, aggiornamento");
-		        }
-	        }
-	        logger.debug("end aggiornaGreenVulcanoWebServices");
+    		Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVWebServices/GreenVulcanoWebServices");
+    		NodeList listService =  parser.selectNodeList(parentServer, "GreenVulcanoWebService[@gv-service='" + servizio+"']");
+    		for (int i = 0; i < listService.getLength(); i++){
+    		    logger.debug("Elimino " + servizio + "/" + parser.get(listService.item(i), "@gv-operation"));
+    		    parentServer.removeChild(listService.item(i));
+    		}
+    		for(String operazione: operazioni){
+    		    Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVWebServices/GreenVulcanoWebServices/GreenVulcanoWebService[@gv-service='" + servizio
+    			                    + "' and @gv-operation='" + operazione + "']");
+    			if (resultsZip != null) {
+    			    Node importedNode = serverXml.importNode(resultsZip, true);
+   					parentServer.appendChild(importedNode);
+   					logger.debug("GreenVulcanoWebService[" + servizio + "/" + operazione + "] non esistente, inserimento");
+    			}
+    		}
+    		logger.debug("end aggiornaGreenVulcanoWebServices");
     	}
-		finally {
-			XMLUtils.releaseParserInstance(parser);
-		}
+    	finally {
+    	    XMLUtils.releaseParserInstance(parser);
+    	}
     }
 
     private void aggiornaBusinessWebServices(String webServices) throws Exception
@@ -1291,11 +1312,6 @@ public class GVAdapterParser
     private String[] getListaKnowledgeBaseConfig(Document xml) throws Exception
     {
         return getListaObject(xml, "/GVAdapters/GVRulesConfigManager/*/@name");
-    }
-
-    private String[] getListaGreenVulcanoWebServices(Document xml) throws Exception
-    {
-        return getListaObject(xml, "/GVAdapters/GVWebServices/GreenVulcanoWebServices/GreenVulcanoWebService/@id-key");
     }
 
     private String[] getListaGVExcelWorkbook(Document xml) throws Exception
