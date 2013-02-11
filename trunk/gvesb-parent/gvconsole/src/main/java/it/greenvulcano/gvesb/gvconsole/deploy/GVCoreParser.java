@@ -1218,6 +1218,7 @@ public class GVCoreParser
 	            aggiornaService(nomeServizio, parser);
 	            aggiornaGroup(nomeServizio, parser);
 	            aggiornaSystem(nomeServizio, parser);
+	            aggiornaGVWebServices(nomeServizio, parser);
 	            aggiornaOdeProcess(nomeServizio, parser);
 	            aggiornaGVCryptoHelper(nomeServizio, parser);
 	            aggiornaGVForwards(nomeServizio, parser);
@@ -1626,6 +1627,27 @@ public class GVCoreParser
         }
     }
 
+    private void aggiornaGVWebServices(String nomeServizio,XMLUtils parser) throws Exception
+    {
+        String xPathOperation = "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
+                + "']/Operation";
+        NodeList listOperazioni = parser.selectNodeList(newXml, xPathOperation);
+
+        if (listOperazioni.getLength() > 0) {
+            String[] listOp = new String[listOperazioni.getLength()];
+            for (int i = 0; i < listOperazioni.getLength(); i++) {
+                Node operation = listOperazioni.item(i);
+                String operazione = parser.get(operation, "@name");
+                if ("Forward".equals(operazione)) {
+                    operazione = parser.get(operation, "@forward-name");
+                }
+                listOp[i] = operazione;
+            }
+            adapterParser.aggiornaGreenVulcanoWebServices(nomeServizio, listOp);
+            adapterParser.scriviFile();
+        }
+    }
+
     private void aggiornaListaGVKnowledgeBaseConfig(String[] listaKwB, String nomeServizio) throws Exception
     {
         if (listaKwB.length > 0) {
@@ -1739,7 +1761,7 @@ public class GVCoreParser
         Node gvDTZip = parser.selectSingleNode(gvDataTransformationZip, "Transformations/*[@type='transformation' and @name='" + name + "']");
         if (gvDTZip != null) {
         	Node gvDTServer = parser.selectSingleNode(baseDT, "*[@type='transformation' and @name='" + name + "']");
-            String dtType = parser.get(gvDTZip, "local-name()");
+            String dtType = gvDTZip.getLocalName();
         	if (gvDTServer == null) {
                 Node importedNode = baseDT.getOwnerDocument().importNode(gvDTZip, true);
                 baseDT.appendChild(importedNode);
