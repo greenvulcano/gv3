@@ -31,6 +31,9 @@
     <ejb>ejb-gvcore.jar</ejb>
   </module>
   <module>
+    <ejb>ejb3-gvcore.jar</ejb>
+  </module>
+  <module>
     <ejb>ejb3-gvdebug.jar</ejb>
   </module>
   <module>

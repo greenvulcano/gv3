@@ -27,6 +27,7 @@
     <modules>
         <module>gvcore</module>
         <module>ejb-gvcore</module>
+        <module>ejb3-gvcore</module>
         <module>gvdebug</module>
         <module>gvcore-forward</module>
         <module>task-gvcore</module>

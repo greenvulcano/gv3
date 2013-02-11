@@ -1035,6 +1035,11 @@
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>ejb3-gvcore</artifactId>
+            <type>ejb</type>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>ejb3-gvdebug</artifactId>
             <type>ejb</type>
         </dependency>
