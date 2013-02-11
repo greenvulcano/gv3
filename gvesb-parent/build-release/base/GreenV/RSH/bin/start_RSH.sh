@@ -1,7 +1,7 @@
 #!/bin/sh
 
 BASEDIR=$(dirname $0)
-. ${BASEDIR}/../bin/env_scripts.sh
+. ${BASEDIR}/../../bin/env_scripts.sh
 
 export RSH_HOME=$GV_HOME/RSH
 export CLASSPATH=$RSH_HOME/conf:$RSH_HOME/lib/gvbase.jar:$RSH_HOME/lib/gvrsh_commons.jar:$RSH_HOME/lib/gvrsh_server.jar:$RSH_HOME/lib/commons-logging.jar:$RSH_HOME/lib/commons-io.jar:$RSH_HOME/lib/jaxen.jar:$RSH_HOME/lib/log4j.jar:$RSH_HOME/lib/rmiio.jar
