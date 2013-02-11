@@ -117,6 +117,7 @@
                 <include name="gvhttp.war"/>
                 <include name="gvconsole.war"/>
                 <include name="ejb-gvcore.jar"/>
+                <include name="ejb3-gvcore.jar"/>
                 <include name="ejb3-gvdebug.jar"/>
                 <include name="ejb-gvstatistics.jar"/>
                 <include name="ejb-test.jar"/>
@@ -129,6 +130,7 @@
             <fileset dir="${gvesb.gvesb.lib}">
                 <exclude name="*.war"/>
                 <exclude name="ejb-gvcore.jar"/>
+                <exclude name="ejb3-gvcore.jar"/>
                 <exclude name="ejb3-gvdebug.jar"/>
                 <exclude name="ejb-gvstatistics.jar"/>
                 <exclude name="ejb-test.jar"/>

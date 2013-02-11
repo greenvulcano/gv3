@@ -471,6 +471,13 @@
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>ejb3-gvcore</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>ejb3-gvdebug</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
