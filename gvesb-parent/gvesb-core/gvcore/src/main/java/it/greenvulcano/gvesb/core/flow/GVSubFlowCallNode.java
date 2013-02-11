@@ -129,13 +129,14 @@ public class GVSubFlowCallNode extends GVFlowNode
         logger.info("Executing GVSubFlowCallNode '" + getId() + "'");
         dumpEnvironment(logger, true, environment);
 
-        GVBuffer data = (GVBuffer) environment.get(input);
-        if (Throwable.class.isInstance(data)) {
-            environment.put(output, data);
+        Object inData = environment.get(input);
+        if (Throwable.class.isInstance(inData)) {
+            environment.put(output, inData);
             logger.debug("END - Execute GVSubFlowCallNode '" + getId() + "' with Exception input -> " + onExceptionId);
             return onExceptionId;
         }
         try {
+            GVBuffer data = (GVBuffer) inData;
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatINPUT(data, false, false));
             }

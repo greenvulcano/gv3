@@ -127,16 +127,19 @@ public class ChangeGVBufferNode extends GVFlowNode
         String input = getInput();
         String output = getOutput();
 
+        Object obj = environment.get(input);
+        if (obj == null) {
+            environment.put(output, new GVCoreWrongInterfaceException("GVCORE_NULL_DATA_ERROR",
+                    new String[][]{{"id", getId()}}));
+            logger.debug("END - Execute ChangeGVBufferNode '" + getId() + "'");
+            return nextNodeId;
+        }
+        if (Throwable.class.isInstance(obj)) {
+            environment.put(output, obj);
+            logger.debug("END - Execute ChangeGVBufferNode '" + getId() + "'");
+            return nextNodeId;
+        }
         if ((cGVBuffer != null) || outputServices.isValid()) {
-            String destination = input;
-            if (!output.equals("")) {
-                destination = output;
-            }
-            Object obj = environment.get(input);
-            if (obj == null) {
-                environment.put(destination, new GVCoreWrongInterfaceException("GVCORE_INVALID_DATA_ERROR",
-                        new String[][]{{"id", getId()}}));
-            }
             if (obj instanceof GVBuffer) {
                 try {
                     GVBuffer data = (GVBuffer) obj;
@@ -152,25 +155,19 @@ public class ChangeGVBufferNode extends GVFlowNode
                     if (outputServices.isValid()) {
                         data = outputServices.perform(data);
                     }
-                    environment.put(destination, data);
+                    environment.put(output, data);
                     if (logger.isDebugEnabled() || isDumpInOut()) {
                         logger.info(GVFormatLog.formatOUTPUT(data, false, false));
                     }
                 }
                 catch (Throwable exc) {
                     logger.error("Error in ChangeGVBufferNode[" + getId() + "]", exc);
-                    environment.put(destination, exc);
+                    environment.put(output, exc);
                 }
-            }
-            else {
-                environment.put(destination, new GVCoreWrongInterfaceException("GVCORE_INVALID_DATA_ERROR",
-                        new String[][]{{"id", getId()}}));
             }
         }
         else {
-            if (!output.equals("")) {
-                environment.put(output, environment.get(input));
-            }
+            environment.put(output, environment.get(input));
         }
 
         dumpEnvironment(logger, false, environment);
