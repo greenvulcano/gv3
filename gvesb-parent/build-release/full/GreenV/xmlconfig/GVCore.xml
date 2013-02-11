@@ -2772,6 +2772,9 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
             <XSLTransformation DataSourceSet="Default" XSLMapName="identity.xsl"
                                class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
                                name="identityXML" type="transformation"/>
+            <XSLTransformation DataSourceSet="Default" XSLMapName="identityNoNamespace.xsl"
+                               class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
+                               name="identityXMLNoNamespace" type="transformation"/>
             <XSLTransformation DataSourceSet="Default" SchemaInput="DataHandler.xsd"
                                SchemaOutput="CreditPersons.xsd"
                                XSLMapName="DataHandler/CREDIT/SearchPerson.xsl"
