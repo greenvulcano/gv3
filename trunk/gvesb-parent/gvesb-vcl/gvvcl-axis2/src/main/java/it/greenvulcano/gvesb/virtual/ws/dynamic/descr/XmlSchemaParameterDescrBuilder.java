@@ -347,7 +347,7 @@ class XmlSchemaDescriptionBuilder
             ParamDescription tmp = description.getParent();
 
             while (tmp != null) {
-                if (name == tmp.getXmlName()) {
+                if (name.equals(tmp.getXmlName())) {
                     isCyclic = true;
                     description.cyclic_ = isCyclic;
 
