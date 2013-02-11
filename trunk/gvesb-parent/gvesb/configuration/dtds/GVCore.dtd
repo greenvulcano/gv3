@@ -16,7 +16,7 @@
 <!ENTITY % properties "Property|PropertyCompare">
 <!ENTITY % notification-nodes "Log4JNotification|JMXNotification">
 <!ENTITY % conditions "GVBufferCondition|ExceptionCondition|JavaScriptCondition|IdentityCondition">
-<!ENTITY % internal-services "gvdte-service|xml-validation-service|ognl-script-service">
+<!ENTITY % internal-services "gvdte-service|xml-validation-service|ognl-script-service|java-script-service">
 <!ENTITY % ShellCommands       "(cmd|cmd-array-elem+), env-property*">
 <!ENTITY % connections "DataSourceConnection|JdbcConnection">
 <!ENTITY % Resolver            "(XPathParamResolver|GVBufferParamResolver)">
@@ -4892,6 +4892,7 @@
     - Data Transformation
     - XML Validation
     - OGNL Scripting
+    - JavaScript Scripting
 
     #Icon: default.png
     #Template:
@@ -4913,6 +4914,7 @@
     - Data Transformation
     - XML Validation
     - OGNL Scripting
+    - JavaScript Scripting
 
     #Icon: default.png
     #Template:
@@ -7763,6 +7765,64 @@
     #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
 -->
 <!ATTLIST ognl-script-call  name CDATA #REQUIRED>
+
+<!--
+    Internal service useful to execute JavaScript scripts on GVBuffer instances.
+
+    #Template:
+
+        <xsl:template match="java-script-service">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT java-script-service (Description?, java-script-call)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST java-script-service type CDATA #FIXED "service">
+<!--
+    Unmodifiable.
+-->
+<!ATTLIST java-script-service   internal CDATA #FIXED "yes">
+<!--
+    Define if the service is critical.
+    A critical service failure mark the entire communication as failed.
+-->
+<!ATTLIST java-script-service critical (yes | no) "yes">
+
+<!--
+    VCL Operation useful to execute JavaScript scripts on GVBuffer instances.
+
+    #Label: @name
+    #Template:
+
+        <xsl:template match="java-script-call">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT java-script-call (Description?, OGNLScript)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST java-script-call type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST java-script-call  class CDATA #FIXED "it.greenvulcano.gvesb.virtual.internal.JSCallOperation">
+<!--
+    Operation identifier.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST java-script-call  name CDATA #REQUIRED>
 
 
 <!--
