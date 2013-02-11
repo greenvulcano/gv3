@@ -7805,7 +7805,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT java-script-call (Description?, OGNLScript)>
+<!ELEMENT java-script-call (Description?, Script)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
