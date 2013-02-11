@@ -91,6 +91,7 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
     public Object getValue(String expression, Object object) throws ExpressionEvaluatorException
     {
         try {
+        	initContext();
             scope = JSInit.setProperty(scope, "root", object);
             Object result = JavaScriptHelper.executeScript(expression, "JavaScriptExpressionEvaluator", scope, context);
             if (result instanceof NativeJavaObject) {
