@@ -223,6 +223,7 @@ public class IteratorController
      * 
      * @param gvBuffer
      *        input data for the operation.
+     * @param onDebug 
      * 
      * @return an <code>GVBuffer</code> containing the operation result.
      * 
@@ -233,7 +234,7 @@ public class IteratorController
      * @see it.greenvulcano.gvesb.virtual.Operation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
     @SuppressWarnings("unchecked")
-    public GVBuffer doPerform(GVBuffer gvBuffer) throws VCLException
+    public GVBuffer doPerform(GVBuffer gvBuffer, boolean onDebug) throws VCLException
     {
         logger.info("INIT doPerform");
         GVBuffer gvBufferOutput = new GVBuffer(gvBuffer);
@@ -277,10 +278,10 @@ public class IteratorController
                             logger.debug("currIterInput=" + currIterInput.toString());
                         }
                         if (operationType == ITERATOR_OPTYPE_CALLSERVICE) {
-                            currIterOutput = executeCoreCall(currIterInput);
+                            currIterOutput = executeCoreCall(currIterInput, onDebug);
                         }
                         else if (operationType == ITERATOR_OPTYPE_CALLSUBFLOW) {
-                            currIterOutput = executeSubFlow(currIterInput);
+                            currIterOutput = executeSubFlow(currIterInput, onDebug);
                         }
                         else {
                             currIterOutput = operation.perform(currIterInput);
@@ -374,7 +375,7 @@ public class IteratorController
         }
     }
 
-    private GVBuffer executeCoreCall(GVBuffer internalGVBuffer) throws Exception
+    private GVBuffer executeCoreCall(GVBuffer internalGVBuffer, boolean onDebug) throws Exception
     {
         GVBuffer result = null;
         Object inputCall = null;
@@ -401,7 +402,7 @@ public class IteratorController
 
             ServiceConfigManager svcMgr = gvContext.getGVServiceConfigManager();
             gvsConfig = svcMgr.getGVSConfig(internalGVBuffer);
-            GVFlow gvOp = gvsConfig.getGVOperation(internalGVBuffer, localFlowOp);
+            GVFlow flow = gvsConfig.getGVOperation(internalGVBuffer, localFlowOp);
             if ((call_dp != null) && (call_dp.length() > 0)) {
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
                 IDataProvider dataProvider = dataProviderManager.getDataProvider(call_dp);
@@ -422,7 +423,7 @@ public class IteratorController
                     NMDC.setOperation(localFlowOp);
                     GVBufferMDC.put(internalGVBuffer);
                 }
-                result = gvOp.perform(internalGVBuffer);
+                result = flow.perform(internalGVBuffer, onDebug);
             }
             finally {
                 NMDC.pop();
@@ -442,7 +443,7 @@ public class IteratorController
         return result;
     }
 
-    private GVBuffer executeSubFlow(GVBuffer internalGVBuffer) throws Exception
+    private GVBuffer executeSubFlow(GVBuffer internalGVBuffer, boolean onDebug) throws Exception
     {
         GVBuffer result = null;
         Object inputCall = null;
@@ -482,7 +483,7 @@ public class IteratorController
                     NMDC.setOperation(localSubFlow);
                     GVBufferMDC.put(internalGVBuffer);
                 }
-                result = subFlow.perform(internalGVBuffer);
+                result = subFlow.perform(internalGVBuffer, onDebug);
             }
             finally {
                 NMDC.pop();

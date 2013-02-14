@@ -227,7 +227,7 @@ public class GVDebugTestCase extends TestCase
             // step
             params.clear();
             params.put("threadName", threadName);
-            responseBody = sendRequest(httpClient, DebugCommand.STEP, params);
+            responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println(responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");

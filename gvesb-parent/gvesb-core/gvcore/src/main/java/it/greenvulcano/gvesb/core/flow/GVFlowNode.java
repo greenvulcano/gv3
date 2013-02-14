@@ -42,7 +42,7 @@ import org.w3c.dom.Node;
  *
  *
  */
-public abstract class GVFlowNode
+public abstract class GVFlowNode implements GVFlowNodeIF
 {
     /**
      * the flow node id
@@ -153,7 +153,20 @@ public abstract class GVFlowNode
      * @throws GVCoreException
      *         if errors occurs
      */
-    public abstract String execute(Map<String, Object> environment) throws GVCoreException;
+    public String execute(Map<String, Object> environment) throws GVCoreException {
+        return execute(environment, false);
+    }
+
+    /**
+     * Perform the flow node work
+     *
+     * @param environment
+     *        the flow execution environment
+     * @return the next flow node id
+     * @throws GVCoreException
+     *         if errors occurs
+     */
+    public abstract String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException;
 
     /**
      * @return if GVBuffer should be dumped for input and output logging

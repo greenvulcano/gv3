@@ -106,16 +106,11 @@ public class GVNodeCheck extends GVFlowNode
     }
 
     /**
-     * Perform the flow node work
-     *
-     * @param environment
-     *        the flow execution environment
-     * @return the next flow node id
-     * @throws GVCoreException
-     *         if errors occurs
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#execute(java.util.Map,
+     *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
     {
         logger.debug("BEGIN - Execute GVNodeCheck '" + getId() + "'");
         dumpEnvironment(logger, true, environment);

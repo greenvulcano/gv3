@@ -45,6 +45,7 @@ public class DebuggerObject implements Serializable
     }
 
     public static final String   NAME_ATTR            = "name";
+    public static final String   TYPE_ATTR            = "type";
     public static final String   VALUE_ATTR           = "value";
 
     public static DebuggerObject OK_DEBUGGER_OBJECT   = new DebuggerObject(Result.OK);

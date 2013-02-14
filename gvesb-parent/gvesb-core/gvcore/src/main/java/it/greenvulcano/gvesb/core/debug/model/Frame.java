@@ -19,8 +19,8 @@
  */
 package it.greenvulcano.gvesb.core.debug.model;
 
-import it.greenvulcano.gvesb.buffer.GVBuffer;
-import it.greenvulcano.gvesb.core.jmx.OperationInfo;
+import it.greenvulcano.gvesb.buffer.GVException;
+import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
@@ -38,35 +38,57 @@ import org.w3c.dom.Node;
  */
 public class Frame extends DebuggerObject
 {
-    private Map<String, Variable> vars = null;
+    /**
+     * 
+     */
+    private static final long     serialVersionUID = 1L;
+    private Map<String, Variable> vars             = null;
     private String                serviceName;
     private String                operationName;
     private String                flowNode;
     private String                frameName;
+    private String                subflow;
+    private ExecutionInfo         execInfo;
 
-    public Frame(String frameName, String serviceName, String operationName, String flowNode)
+    public Frame(ExecutionInfo execInfo)
     {
         super();
-        this.serviceName = serviceName;
-        this.operationName = operationName;
-        this.flowNode = flowNode;
-        this.frameName = frameName;
+        this.serviceName = execInfo.getService();
+        this.operationName = execInfo.getOperation();
+        this.flowNode = execInfo.getNodeId();
+        this.subflow = execInfo.getSubflow();
+        this.frameName = execInfo.getUniqueKey();
+        this.execInfo = execInfo;
         vars = new LinkedHashMap<String, Variable>();
+        loadInfo();
     }
 
-    public Variable getVar(String key)
+    public Variable getVar(String parent, String key)
     {
+        Variable varParent = null;
+        if (parent != null) {
+            varParent = vars.get(parent);
+        }
+        if (varParent != null) {
+            return varParent.getVar(key);
+        }
         return vars.get(key);
+    }
+
+    public void setVar(String parent, String varName, String varValue) throws GVException
+    {
+        Variable varParent = null;
+        if (parent != null) {
+            varParent = vars.get(parent);
+        }
+        if (varParent != null) {
+            varParent.setVar(varName, varValue);
+        }
     }
 
     public Map<String, Variable> getVars()
     {
         return vars;
-    }
-
-    public void setVars(Map<String, Variable> vars)
-    {
-        this.vars = vars;
     }
 
     public String getServiceName()
@@ -99,6 +121,11 @@ public class Frame extends DebuggerObject
         this.flowNode = flowNode;
     }
 
+    public String getFrameName()
+    {
+        return frameName;
+    }
+
     /**
      * @see it.greenvulcano.gvesb.core.debug.model.DebuggerObject#getXML(it.greenvulcano.util.xml.XMLUtils,
      *      org.w3c.dom.Document)
@@ -109,6 +136,7 @@ public class Frame extends DebuggerObject
         Element frame = xml.createElement(doc, "Frame");
         frame.setAttribute("service_name", serviceName);
         frame.setAttribute("operation_name", operationName);
+        frame.setAttribute("subflow", subflow);
         frame.setAttribute("flow_node", flowNode);
         frame.setAttribute("name", frameName);
         if (vars != null && vars.size() > 0) {
@@ -116,49 +144,25 @@ public class Frame extends DebuggerObject
             for (String e : vars.keySet()) {
                 Element var = xml.insertElement(varEl, Variable.ELEMENT_TAG);
                 xml.setAttribute(var, NAME_ATTR, e);
+                xml.setAttribute(var, TYPE_ATTR, vars.get(e).getTypeName());
             }
         }
         return frame;
     }
 
-    public void loadInfo(OperationInfo operationInfo, String threadName, String flowId)
+    private void loadInfo()
     {
-        Set<String> envEntryKeys = operationInfo.getEnvEntryKeys(threadName, flowId);
+        Map<String, Object> environment = execInfo.getEnvironment();
+        Set<String> envEntryKeys = environment.keySet();
         if (envEntryKeys != null) {
             for (String key : envEntryKeys) {
-                Object envEntry = operationInfo.getEnvEntry(threadName, flowId, key);
-                if (envEntry instanceof GVBuffer) {
-                    vars.putAll(fromGVBuffer(key, (GVBuffer) envEntry));
+                Object envEntry = environment.get(key);
+                if (envEntry != null) {
+                    Variable v = new Variable(key, envEntry.getClass(), envEntry);
+                    vars.put(key, v);
                 }
             }
         }
-    }
-
-    public Map<String, Variable> fromGVBuffer(String envKey, GVBuffer gvBuffer)
-    {
-        Map<String, Variable> vMap = new LinkedHashMap<String, Variable>();
-        String vName = envKey + "#$SYSTEM";
-        Variable v = new Variable(vName, gvBuffer.getSystem());
-        vMap.put(vName, v);
-        vName = envKey + "#$SERVICE";
-        v = new Variable(vName, gvBuffer.getService());
-        vMap.put(vName, v);
-        vName = envKey + "#$ID";
-        v = new Variable(vName, gvBuffer.getId().toString());
-        vMap.put(vName, v);
-        vName = envKey + "#$RETCODE";
-        v = new Variable(vName, Integer.toString(gvBuffer.getRetCode()));
-        vMap.put(vName, v);
-        vName = envKey + "#$OBJECT";
-        v = new Variable(vName, gvBuffer.getObject());
-        vMap.put(vName, v);
-        Set<String> namesSet = gvBuffer.getPropertyNamesSet();
-        for (String name : namesSet) {
-            vName = envKey + "#" + name;
-            v = new Variable(vName, gvBuffer.getProperty(name));
-            vMap.put(vName, v);
-        }
-        return vMap;
     }
 
 }

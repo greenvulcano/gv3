@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2009-2011 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- *
+ * 
  * This file is part of GreenVulcano ESB.
- *
+ * 
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- *
+ * 
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -40,10 +40,10 @@ import org.w3c.dom.NodeList;
 
 /**
  * ServiceOperationInfo class.
- *
+ * 
  * @version 3.2.0 Set 10, 2011
  * @author GreenVulcano Developer Team
- *
+ * 
  */
 public class ServiceOperationInfo
 {
@@ -56,7 +56,7 @@ public class ServiceOperationInfo
     /**
      * the associated opInfo map
      */
-    private Map<String, OperationInfo> opMap            = new HashMap<String, OperationInfo>();
+    private Map<String, OperationInfo> opMap                   = new HashMap<String, OperationInfo>();
     /**
      * the service name
      */
@@ -68,13 +68,13 @@ public class ServiceOperationInfo
     /**
      * the service jmx key
      */
-    private String                     jmxSrvcKey           = "";
+    private String                     jmxSrvcKey              = "";
     /**
      * the jmx filter for inter-instances communication
      */
     private String                     jmxFilter               = "";
     /**
-     * if tru the instance runs on administration/support server
+     * if true the instance runs on administration/support server
      */
     private boolean                    isAdministrator         = false;
     /**
@@ -113,7 +113,7 @@ public class ServiceOperationInfo
 
     /**
      * Constructor
-     *
+     * 
      * @param srv
      *        the service name
      * @param grp
@@ -131,7 +131,7 @@ public class ServiceOperationInfo
 
     /**
      * Initialize the instance
-     *
+     * 
      * @param initData
      *        initialization data
      */
@@ -147,7 +147,7 @@ public class ServiceOperationInfo
 
     /**
      * Register the instance on JMX server
-     *
+     * 
      * @param register
      *        the registration flag
      * @throws Exception
@@ -169,7 +169,7 @@ public class ServiceOperationInfo
 
     /**
      * Deregister the instance from JMX server
-     *
+     * 
      * @param clearOps
      *        if true cancel the child op
      * @throws Exception
@@ -207,7 +207,7 @@ public class ServiceOperationInfo
 
     /**
      * Return the instance properties
-     *
+     * 
      * @param properties
      *        properties list to enrich
      * @param full
@@ -311,7 +311,7 @@ public class ServiceOperationInfo
     /**
      * Return a sting representing a matrix of Id/Thread/GVFlowNode id for the
      * associated flow status
-     *
+     * 
      * @return the current associated flow status
      */
     public String getFlowsStatus()
@@ -328,14 +328,14 @@ public class ServiceOperationInfo
             try {
                 OperationInfo opInfo = getOperationInfo(operation, true);
                 flowsStatus += operation + ": (Success = " + opInfo.getTotalSuccess() + "; Failure = "
-                + opInfo.getTotalFailure() + ")\n";
+                        + opInfo.getTotalFailure() + ")\n";
                 Map<String, Map<String, String>> opFlow = opInfo.getFlowsStatus();
                 for (String id : opFlow.keySet()) {
-                	Map<String, String> thStatus = opFlow.get(id);
-                	for (String th : thStatus.keySet()) {
-                    	String status = thStatus.get(th);
-                    	flowsStatus += id + " = [Th:" + th + "]:" + status +"\n";
-                	}
+                    Map<String, String> thStatus = opFlow.get(id);
+                    for (String th : thStatus.keySet()) {
+                        String status = thStatus.get(th);
+                        flowsStatus += id + " = [Th:" + th + "]:" + status + "\n";
+                    }
                 }
             }
             catch (Exception exc) {
@@ -346,28 +346,8 @@ public class ServiceOperationInfo
     }
 
     /**
-     * Set the status of an associated flow
-     *
-     * @param operation
-     *        the operation name
-     * @param flowId
-     *        the flow id
-     * @param id
-     *        the flow node id
-     */
-    public void setFlowStatus(String operation, String flowId, String id)
-    {
-        try {
-            getOperationInfo(operation, true).setFlowStatus(flowId, id);
-        }
-        catch (Exception exc) {
-            // do nothing
-        }
-    }
-
-    /**
      * Mark an associated flow as terminated
-     *
+     * 
      * @param operation
      *        the operation name
      * @param flowId
@@ -389,7 +369,7 @@ public class ServiceOperationInfo
 
     /**
      * Return the required OperationInfo instance
-     *
+     * 
      * @param operation
      *        the operation name
      * @param register
@@ -415,7 +395,7 @@ public class ServiceOperationInfo
             else {
                 Map<String, Object> objectData = null;
                 String jmxFilterLocal = "GreenVulcano:*,Group=management,Internal=Yes,Component="
-                    + JMXServiceManager.getDescriptorName();
+                        + JMXServiceManager.getDescriptorName();
                 try {
                     objectData = getRemoteObjectData(properties, jmxFilterLocal);
                     if (objectData == null) {
@@ -439,7 +419,7 @@ public class ServiceOperationInfo
 
     /**
      * Read configuration data from a remote object
-     *
+     * 
      * @param properties
      *        the object name / configuration data
      * @param jmxFilterLocal
@@ -450,7 +430,7 @@ public class ServiceOperationInfo
      */
     @SuppressWarnings("unchecked")
     private Map<String, Object> getRemoteObjectData(Map<String, Object> properties, String jmxFilterLocal)
-    throws Exception
+            throws Exception
     {
         Map<String, Object> objectData = new HashMap<String, Object>(properties);
         Object[] params = new Object[]{objectData};
@@ -464,7 +444,7 @@ public class ServiceOperationInfo
 
     /**
      * Read configuration data from a local configuration file
-     *
+     * 
      * @param operation
      *        the operation name
      * @return the required data
@@ -544,7 +524,7 @@ public class ServiceOperationInfo
         Map<String, Object> properties = new HashMap<String, Object>(initData);
 
         String jmxFilterLocal = "GreenVulcano:*,Group=management,Internal=Yes,Component="
-            + JMXServiceManager.getDescriptorName();
+                + JMXServiceManager.getDescriptorName();
 
         for (OperationInfo operationInfo : opMap.values()) {
             String operation = operationInfo.getOperation();
@@ -581,7 +561,7 @@ public class ServiceOperationInfo
     /**
      * Get the status of the group activation. <br/>
      * <br/>
-     *
+     * 
      * @return The Group activation flag
      */
     public boolean getGroupActivation()
@@ -591,7 +571,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the history average througput for services.
-     *
+     * 
      * @return the history throughput
      */
     public static float getHistoryThroughputSvc()
@@ -601,7 +581,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the maximum througput for services.
-     *
+     * 
      * @return the maximum througput
      */
     public static float getMaxThroughputSvc()
@@ -611,7 +591,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the minimum througput for services.
-     *
+     * 
      * @return the minimum throughtput
      */
     public static float getMinThroughputSvc()
@@ -621,7 +601,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the througput for services.
-     *
+     * 
      * @return the throughput
      */
     public static float getThroughputSvc()
@@ -631,7 +611,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the total hint for services.
-     *
+     * 
      * @return the total hints
      */
     public static long getTotalHintsSvc()
@@ -641,7 +621,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the history average througput for one service.
-     *
+     * 
      * @return the history throughput
      */
     public float getHistoryThroughput()
@@ -651,7 +631,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the maximum througput for one service.
-     *
+     * 
      * @return the max throughput
      */
     public float getMaxThroughput()
@@ -661,7 +641,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the minimum througput for one service.
-     *
+     * 
      * @return the minimum throughput
      */
     public float getMinThroughput()
@@ -671,7 +651,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the throughput for one service.
-     *
+     * 
      * @return the throughput
      */
     public float getThroughput()
@@ -681,7 +661,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the total hint for one service.
-     *
+     * 
      * @return the total hints
      */
     public long getTotalHints()
@@ -691,7 +671,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the status of the service activation.
-     *
+     * 
      * @return The Service activation flag
      */
     public boolean getServiceActivation()
@@ -784,7 +764,7 @@ public class ServiceOperationInfo
 
     /**
      * Set the activation status at true for the given service on every server
-     *
+     * 
      * @throws Exception
      *         if errors occurs
      */
@@ -795,7 +775,7 @@ public class ServiceOperationInfo
 
     /**
      * Set the activation status at false for the given service on every server
-     *
+     * 
      * @throws Exception
      *         if errors occurs
      */
@@ -807,7 +787,7 @@ public class ServiceOperationInfo
     /**
      * Set the statistics activation status at true for the given
      * system::service on every server
-     *
+     * 
      * @throws Exception
      *         if errors occurs
      */
@@ -819,7 +799,7 @@ public class ServiceOperationInfo
     /**
      * Set the statistics activation status at false for the given
      * system::service on every server
-     *
+     * 
      * @throws Exception
      *         if errors occurs
      */

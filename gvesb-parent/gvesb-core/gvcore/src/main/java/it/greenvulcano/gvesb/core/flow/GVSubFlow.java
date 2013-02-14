@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- *
+ * 
  * This file is part of GreenVulcano ESB.
- *
+ * 
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- *
+ * 
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,9 +23,13 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
+import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
+import it.greenvulcano.gvesb.core.debug.DebuggingInvocationHandler;
+import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.core.jmx.OperationInfo;
+import it.greenvulcano.gvesb.core.jmx.ServiceOperationInfoManager;
 import it.greenvulcano.gvesb.gvdte.controller.DTEController;
 import it.greenvulcano.gvesb.internal.GVInternalException;
 import it.greenvulcano.gvesb.log.GVFormatLog;
@@ -41,12 +45,13 @@ import org.w3c.dom.NodeList;
 
 /**
  * GVSubFlow.
- *
+ * 
  * @version 3.2.0 Mar 01, 2011
  * @author GreenVulcano Developer Team
- *
+ * 
  */
-public class GVSubFlow {
+public class GVSubFlow
+{
     private static Logger           logger         = GVLogger.getLogger(GVSubFlow.class);
 
     /**
@@ -78,20 +83,33 @@ public class GVSubFlow {
     private boolean                 isSingleThread = false;
 
     /**
+     * the service name
+     */
+    private String                  serviceName;
+
+    private String                  operationName;
+
+    /**
      * Initialize the instance
-     *
+     * 
      * @param gvsfNode
      *        the node from which read configuration data
      * @throws GVCoreConfException
      *         if errors occurs
      */
-    public void init(Node gvsfNode, boolean isSingleThread) throws GVCoreConfException {
+    public void init(Node gvsfNode, boolean isSingleThread) throws GVCoreConfException
+    {
         logger.debug("BEGIN - GVSubFlow init");
 
+        serviceName = XMLConfig.get(gvsfNode, "../../@id-service", "");
+        operationName = XMLConfig.get(gvsfNode, "../@name", "");
+        if ("Forward".equals(operationName)) {
+            operationName = XMLConfig.get(gvsfNode, "../@forward-name", "");
+        }
         flowName = XMLConfig.get(gvsfNode, "@name", "");
         if (flowName.equals("")) {
-            throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][] { { "name", "'name'" },
-                    { "node", XPathFinder.buildXPath(gvsfNode) } });
+            throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'name'"},
+                    {"node", XPathFinder.buildXPath(gvsfNode)}});
         }
 
         this.isSingleThread = isSingleThread;
@@ -119,15 +137,15 @@ public class GVSubFlow {
      * @throws GVCoreConfException
      *         if errors occurs
      */
-    private void initFlowNodes(Node instNode) throws GVCoreConfException {
+    private void initFlowNodes(Node instNode) throws GVCoreConfException
+    {
         try {
             firstNode = XMLConfig.get(instNode, "@first-node");
 
             NodeList nl = null;
             nl = XMLConfig.getNodeList(instNode, "*[@type='flow-node']");
             if ((nl == null) || (nl.getLength() == 0)) {
-                throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR",
-                        new String[][] { { "name", flowName } });
+                throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
             }
 
             Node defNode = null;
@@ -147,28 +165,30 @@ public class GVSubFlow {
             }
             catch (Exception exc) {
                 logger.error("Error initiliazing FlowNode " + flowName, exc);
-                throw new GVCoreConfException("GVCORE_INIT_FLOW_NODE_ERROR", new String[][] { { "name", flowName },
-                        { "node", XPathFinder.buildXPath(defNode) } }, exc);
+                throw new GVCoreConfException("GVCORE_INIT_FLOW_NODE_ERROR", new String[][]{{"name", flowName},
+                        {"node", XPathFinder.buildXPath(defNode)}}, exc);
             }
         }
         catch (XMLConfigException exc) {
-            throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][] { { "name", flowName } });
+            throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
         }
     }
 
     /**
      * Execute the flow
-     *
+     * 
      * @param gvBuffer
      *        the input data
      * @return the output data
      * @throws GVCoreException
      *         if errors occurs
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws GVCoreException {
-        boolean onDebug = "true".equalsIgnoreCase(gvBuffer.getProperty("GV_FLOW_DEBUG"));
-        if (!onDebug && (operationInfo != null)) {
-            onDebug = operationInfo.isMarkForDebug();
+    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException
+    {
+        onDebug = onDebug || "true".equalsIgnoreCase(gvBuffer.getProperty("GV_FLOW_DEBUG"));
+        if (!onDebug) {
+            ExecutionInfo execInfo = new ExecutionInfo(serviceName, flowName, null, null, null);
+            onDebug = DebugSynchObject.checkWaitingDebug(execInfo);
         }
 
         try {
@@ -177,12 +197,13 @@ public class GVSubFlow {
                 gvContext.setContext(flowName, gvBuffer);
                 gvContext.setGVServiceConfigManager(mainCtx.getGVServiceConfigManager());
                 gvContext.setStatisticsDataManager(mainCtx.getStatisticsDataManager());
-                //gvContext.setExtraField("DTE_CONTROLLER", mainCtx.getExtraField("DTE_CONTROLLER"));
+                // gvContext.setExtraField("DTE_CONTROLLER",
+                // mainCtx.getExtraField("DTE_CONTROLLER"));
                 gvContext.setExtraField("DTE_CONTROLLER", dteController);
             }
         }
         catch (GVInternalException exc) {
-            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][] { { "operation", flowName } }, exc);
+            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}}, exc);
         }
 
         try {
@@ -202,14 +223,15 @@ public class GVSubFlow {
 
     /**
      * Execute the flow
-     *
+     * 
      * @param gvBuffer
      *        the input data
      * @return the output data
      * @throws GVCoreException
      *         if errors occurs
      */
-    public GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException {
+    public GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException
+    {
         if (logger.isDebugEnabled()) {
             logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
         }
@@ -218,61 +240,56 @@ public class GVSubFlow {
         GVFlowNode flowNode = flowNodes.get(firstNode);
         if (flowNode == null) {
             logger.error("FlowNode " + firstNode + " not configured. Check configuration.");
-            throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][] { { "operation", flowName },
-                    { "flownode", firstNode } });
+            throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                    {"flownode", firstNode}});
         }
 
         Map<String, Object> environment = new HashMap<String, Object>();
         environment.put(flowNode.getInput(), gvBuffer);
         String nextNode = firstNode;
 
-        /*if (onDebug) {
-            operationInfo.startDebug(inID);
-            operationInfo.setFlowEnvironment(inID, environment);
-
+        if (onDebug) {
+            String inID = gvBuffer.getId().toString();
+            DebugSynchObject synchObj = DebugSynchObject.getSynchObject(inID, null);
+            ExecutionInfo parent = synchObj.getExecutionInfo();
+            ExecutionInfo info = new ExecutionInfo(parent);
+            info.setSubflow(flowName);
+            synchObj.setExecutionInfo(info);
             while (!nextNode.equals("")) {
+                operationInfo.setFlowStatus(inID, flowName, nextNode);
                 flowNode = flowNodes.get(nextNode);
                 if (flowNode == null) {
                     logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
-                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][] {
-                            { "operation", flowName }, { "flownode", nextNode } });
+                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                            {"flownode", nextNode}});
                 }
-                if (operationInfo.mustStop(inID, nextNode)) {
-                    synchronized (environment) {
-                        try {
-                            environment.wait();
-                        }
-                        catch (Exception exc) {
-                            throw new GVCoreException("GVCORE_DEBUG_FLOW_ERROR", new String[][] {
-                                    { "operation", flowName }, { "flownode", nextNode } }, exc);
-                        }
-                    }
+                GVFlowNodeIF proxy = DebuggingInvocationHandler.getProxy(GVFlowNodeIF.class, flowNode, synchObj);
+                nextNode = proxy.execute(environment, onDebug);
+            }
+            synchObj.terminated();
+        }
+        else {
+            while (!nextNode.equals("")) {
+                /*
+                 * if (operationInfo != null) {
+                 * operationInfo.setFlowStatus(inID, nextNode); }
+                 */
+                flowNode = flowNodes.get(nextNode);
+                if (flowNode == null) {
+                    logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
+                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                            {"flownode", nextNode}});
                 }
-                operationInfo.setFlowStatus(inID, nextNode);
                 nextNode = flowNode.execute(environment);
             }
         }
-        else {*/
-        while (!nextNode.equals("")) {
-            /*if (operationInfo != null) {
-                operationInfo.setFlowStatus(inID, nextNode);
-            }*/
-            flowNode = flowNodes.get(nextNode);
-            if (flowNode == null) {
-                logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
-                throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][] { { "operation", flowName },
-                        { "flownode", nextNode } });
-            }
-            nextNode = flowNode.execute(environment);
-        }
-        //}
 
         Object output = environment.get(flowNode.getOutput());
         if (output instanceof Throwable) {
             if (output instanceof GVCoreException) {
                 throw (GVCoreException) output;
             }
-            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][] { { "operation", flowName } },
+            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}},
                     (Throwable) output);
         }
 
@@ -286,23 +303,25 @@ public class GVSubFlow {
     /**
      * Initialize the associated OperationInfo instance
      */
-    private void getGVOperationInfo() {
-        /*if (operationInfo == null) {
+    private void getGVOperationInfo()
+    {
+        if (operationInfo == null) {
             try {
-                operationInfo = ServiceOperationInfoManager.instance().getOperationInfo(systemName, serviceName, flowName,
+                operationInfo = ServiceOperationInfoManager.instance().getOperationInfo(serviceName, operationName,
                         true);
             }
             catch (Exception exc) {
                 logger.warn("Error on MBean registration: " + exc);
                 operationInfo = null;
             }
-        }*/
+        }
     }
 
     /**
      * Execute cleanup operations
      */
-    private void cleanUp() {
+    private void cleanUp()
+    {
         for (GVFlowNode node : flowNodes.values()) {
             try {
                 node.cleanUp();
@@ -325,7 +344,8 @@ public class GVSubFlow {
     /**
      * Execute destroy operations
      */
-    public void destroy() {
+    public void destroy()
+    {
         for (GVFlowNode node : flowNodes.values()) {
             try {
                 node.destroy();

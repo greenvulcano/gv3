@@ -19,9 +19,15 @@
  */
 package it.greenvulcano.gvesb.core.debug.model;
 
-import it.greenvulcano.gvesb.core.jmx.OperationInfo;
+import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
+import it.greenvulcano.gvesb.core.debug.DebuggerException;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,19 +37,38 @@ import org.w3c.dom.Node;
  * @version 3.3.0 Dic 14, 2012
  * @author GreenVulcano Developer Team
  */
-public class ThreadInfo extends DebuggerObject
+public class ThreadList extends DebuggerObject
 {
+    /**
+     * 
+     */
+    private static final long       serialVersionUID = 1L;
+    private Map<String, ThreadInfo> threads;
+    private String                  serviceName;
 
-    private String     tName;
-    private FrameStack frameStack;
-    private String     serviceName;
-
-    public ThreadInfo(String tName, String serviceName)
+    public ThreadList(String serviceName)
     {
-        this.tName = tName;
+        threads = new HashMap<String, ThreadInfo>();
         this.serviceName = serviceName;
-        frameStack = new FrameStack();
     }
+
+    public void loadInfo(String id) throws DebuggerException
+    {
+        try {
+            DebugSynchObject synchObject = DebugSynchObject.getSynchObject(id, null);
+            
+            Set<String> threadSet = synchObject.getOnDebugThreads();
+            if (threadSet != null) {
+                for (String tName : threadSet) {
+                    threads.put(tName, new ThreadInfo(tName, serviceName));
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new DebuggerException(e);
+        }
+    }
+
 
     /**
      * @see it.greenvulcano.gvesb.core.debug.model.DebuggerObject#getXML(it.greenvulcano.util.xml.XMLUtils,
@@ -52,28 +77,16 @@ public class ThreadInfo extends DebuggerObject
     @Override
     protected Node getXML(XMLUtils xml, Document doc) throws XMLUtilsException
     {
-        Element thread = xml.createElement(doc, "Thread");
-        thread.setAttribute(NAME_ATTR, tName);
-        thread.appendChild(frameStack.getXML(xml, doc));
-        return thread;
-    }
-
-    public void loadInfo(OperationInfo operationInfo, String flowId)
-    {
-        String flowNode = operationInfo.getFlowStatus(tName, flowId);
-
-        if (flowNode != null) {
-            String opName = operationInfo.getOperation();
-            String frameName = serviceName + "/" + opName;
-            Frame f = new Frame(frameName, serviceName, opName, flowNode);
-            frameStack.add(f);
-            frameStack.loadInfo(operationInfo, tName, flowId);
+        Element thds = xml.createElement(doc, "Threads");
+        for (Entry<String, ThreadInfo> stack : threads.entrySet()) {
+            thds.appendChild(stack.getValue().getXML(xml, doc));
         }
+        return thds;
     }
 
-    public FrameStack getStackFrame()
+    public ThreadInfo getThread(String threadName)
     {
-        return frameStack;
+        return threads.get(threadName);
     }
 
 }

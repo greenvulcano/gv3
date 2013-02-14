@@ -20,7 +20,6 @@
 package it.greenvulcano.gvesb.core.debug.model;
 
 import it.greenvulcano.gvesb.core.debug.DebuggerException;
-import it.greenvulcano.gvesb.core.jmx.OperationInfo;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
@@ -35,6 +34,10 @@ import org.w3c.dom.Node;
 public class Service extends DebuggerObject
 {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private String     serviceName;
     private String     operationName;
     private String     id;
@@ -88,11 +91,11 @@ public class Service extends DebuggerObject
         this.id = id;
     }
 
-    public void loadInfo(OperationInfo operationInfo) throws DebuggerException
+    public void loadInfo() throws DebuggerException
     {
         try {
             threads = new ThreadList(serviceName);
-            threads.loadInfo(operationInfo, getId());
+            threads.loadInfo(getId());
         }
         catch (Exception e) {
             throw new DebuggerException(e);

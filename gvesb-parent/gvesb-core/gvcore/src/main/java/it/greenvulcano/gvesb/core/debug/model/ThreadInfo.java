@@ -19,15 +19,9 @@
  */
 package it.greenvulcano.gvesb.core.debug.model;
 
-import it.greenvulcano.gvesb.core.debug.DebuggerException;
-import it.greenvulcano.gvesb.core.jmx.OperationInfo;
+import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,32 +31,21 @@ import org.w3c.dom.Node;
  * @version 3.3.0 Dic 14, 2012
  * @author GreenVulcano Developer Team
  */
-public class ThreadList extends DebuggerObject
+public class ThreadInfo extends DebuggerObject
 {
-    private Map<String, ThreadInfo> threads;
-    private String                  serviceName;
 
-    public ThreadList(String serviceName)
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private String            tName;
+    private FrameStack        frameStack;
+
+    public ThreadInfo(String tName, String serviceName)
     {
-        threads = new HashMap<String, ThreadInfo>();
-        this.serviceName = serviceName;
+        this.tName = tName;
+        frameStack = new FrameStack();
     }
-
-    public void loadInfo(OperationInfo operationInfo, String id) throws DebuggerException
-    {
-        try {
-            Set<String> threadSet = operationInfo.getOnDebugIDs().get(id);
-            if (threadSet != null) {
-                for (String tName : threadSet) {
-                    threads.put(tName, new ThreadInfo(tName, serviceName));
-                }
-            }
-        }
-        catch (Exception e) {
-            throw new DebuggerException(e);
-        }
-    }
-
 
     /**
      * @see it.greenvulcano.gvesb.core.debug.model.DebuggerObject#getXML(it.greenvulcano.util.xml.XMLUtils,
@@ -71,16 +54,20 @@ public class ThreadList extends DebuggerObject
     @Override
     protected Node getXML(XMLUtils xml, Document doc) throws XMLUtilsException
     {
-        Element thds = xml.createElement(doc, "Threads");
-        for (Entry<String, ThreadInfo> stack : threads.entrySet()) {
-            thds.appendChild(stack.getValue().getXML(xml, doc));
-        }
-        return thds;
+        Element thread = xml.createElement(doc, "Thread");
+        thread.setAttribute(NAME_ATTR, tName);
+        thread.appendChild(frameStack.getXML(xml, doc));
+        return thread;
     }
 
-    public ThreadInfo getThread(String threadName)
+    public void loadInfo(DebugSynchObject synchObject)
     {
-        return threads.get(threadName);
+        frameStack.loadInfo(synchObject);
+    }
+
+    public FrameStack getStackFrame()
+    {
+        return frameStack;
     }
 
 }

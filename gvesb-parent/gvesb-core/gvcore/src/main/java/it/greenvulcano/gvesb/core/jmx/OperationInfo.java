@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -28,11 +28,7 @@ import it.greenvulcano.util.Stats;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
@@ -106,38 +102,6 @@ public class OperationInfo
     private DomainAction                     failureAction           = null;
     private DomainAction                     enableAction            = null;
     private DomainAction                     disableAction           = null;
-
-    /*
-     * DEBUG FIELDS
-     */
-
-    private enum BreakpointType {
-        PERSISTENT, TEMPORARY, REMOVED
-    }
-
-    /**
-     * If true, the next flow is executed in debug mode.
-     */
-    private boolean                                               markForDebug             = false;
-    private String                                                lastIDOnDebug            = null;
-    /**
-     * The list of ID/Thread in debug mode.
-     */
-    private Map<String, Set<String>>                              onDebugIDs               = new HashMap<String, Set<String>>();
-    /**
-     * The flow's nodes history of the currently debugging associated flows.
-     */
-    private Map<String, Map<String, List<String>>>                debugFlowsHistoryMap     = new ConcurrentHashMap<String, Map<String, List<String>>>();
-    /**
-     * The execution environments of the currently debugging associated flows.
-     */
-    private Map<String, Map<String, Map<String, Object>>>         debugFlowsEnvironmentMap = new ConcurrentHashMap<String, Map<String, Map<String, Object>>>();
-    /**
-     * The next flow node before which suspend execution of the currently
-     * debugging associated flows.
-     */
-    private Map<String, Map<String, Map<String, BreakpointType>>> debugFlowsStopNodeMap    = new ConcurrentHashMap<String, Map<String, Map<String, BreakpointType>>>();
-
 
     /**
      * Static initializer
@@ -348,10 +312,12 @@ public class OperationInfo
      * 
      * @param flowId
      *        the flow id
+     * @param subflow
+     *        the subflow name or null if main flow
      * @param id
      *        the flow node id
      */
-    public void setFlowStatus(String flowId, String id)
+    public void setFlowStatus(String flowId, String subflow, String id)
     {
         statNodes.hint();
         synchronized (flowsStatusMap) {
@@ -362,7 +328,6 @@ public class OperationInfo
             }
             String threadName = Thread.currentThread().getName();
             thFlows.put(threadName, id);
-            getFlowHistory(threadName, flowId).add(id);
         }
     }
 
@@ -381,7 +346,8 @@ public class OperationInfo
                 thFlows = new ConcurrentHashMap<String, String>();
                 flowsStatusMap.put(flowId, thFlows);
             }
-            return thFlows.get(threadName);
+            String flowStatus = thFlows.get(threadName);
+            return flowStatus;
         }
     }
 
@@ -410,45 +376,6 @@ public class OperationInfo
                 thFlows.remove(threadName);
                 if (thFlows.isEmpty()) {
                     flowsStatusMap.remove(flowId);
-                }
-            }
-        }
-
-        // DEBUG
-        synchronized (debugFlowsHistoryMap) {
-            Map<String, List<String>> thFlows = debugFlowsHistoryMap.get(flowId);
-            if (thFlows != null) {
-                thFlows.remove(threadName);
-                if (thFlows.isEmpty()) {
-                    debugFlowsHistoryMap.remove(flowId);
-                }
-            }
-        }
-        synchronized (debugFlowsEnvironmentMap) {
-            Map<String, Map<String, Object>> thFlows = debugFlowsEnvironmentMap.get(flowId);
-            if (thFlows != null) {
-                thFlows.remove(threadName);
-                if (thFlows.isEmpty()) {
-                    debugFlowsEnvironmentMap.remove(flowId);
-                }
-            }
-        }
-        synchronized (debugFlowsStopNodeMap) {
-            Map<String, Map<String, BreakpointType>> thFlows = debugFlowsStopNodeMap.get(flowId);
-            if (thFlows != null) {
-                thFlows.remove(threadName);
-                if (thFlows.isEmpty()) {
-                    debugFlowsStopNodeMap.remove(flowId);
-                }
-            }
-        }
-        synchronized (onDebugIDs) {
-            onDebugIDs.remove(flowId);
-            Set<String> thFlows = onDebugIDs.get(flowId);
-            if (thFlows != null) {
-                thFlows.remove(threadName);
-                if (thFlows.isEmpty()) {
-                    onDebugIDs.remove(flowId);
                 }
             }
         }
@@ -654,325 +581,5 @@ public class OperationInfo
         return statNodes.getTotalHints();
     }
 
-
-    /*
-     * DEBUG FUNCTIONS
-     */
-
-    /**
-     * Mark the new flow ID as on debug. Wait till the next flow start in debug
-     * mode.
-     * 
-     * @param flowId
-     * @return the new flow ID
-     */
-    public String markForDebug()
-    {
-        lastIDOnDebug = null;
-        markForDebug = true;
-        synchronized (this) {
-            try {
-                this.wait(60000);
-            }
-            catch (Exception exc) {
-                // do nothing
-            }
-        }
-        markForDebug = false;
-        return lastIDOnDebug;
-    }
-
-    /**
-     * @return the markForDebug
-     */
-    public boolean isMarkForDebug()
-    {
-        return markForDebug;
-    }
-
-    /**
-     * Mark a flowId as on debug.
-     * 
-     * @param flowId
-     */
-    public void startDebug(String threadName, String flowId)
-    {
-        markForDebug = false;
-        synchronized (onDebugIDs) {
-            Set<String> thFlows = onDebugIDs.get(flowId);
-            if (thFlows == null) {
-                thFlows = new HashSet<String>();
-                onDebugIDs.put(flowId, thFlows);
-            }
-            thFlows.add(threadName);
-        }
-        lastIDOnDebug = flowId;
-        synchronized (this) {
-            this.notifyAll();
-        }
-    }
-
-    /**
-     * Get the list of on debug flow's ID and threads.
-     */
-    public Map<String, Set<String>> getOnDebugIDs()
-    {
-        return Collections.unmodifiableMap(onDebugIDs);
-    }
-
-    /**
-     * Return a navigable list of flowId's flow nodes, from the given Thread,
-     * ordered by execution sequence.
-     * 
-     * @param flowId
-     * @return a navigable list of flowId's flow nodes
-     */
-    public List<String> getFlowHistory(String threadName, String flowId)
-    {
-        synchronized (debugFlowsHistoryMap) {
-            Map<String, List<String>> thFlows = debugFlowsHistoryMap.get(flowId);
-            if (thFlows == null) {
-                thFlows = new HashMap<String, List<String>>();
-                debugFlowsHistoryMap.put(flowId, thFlows);
-            }
-            List<String> fh = thFlows.get(threadName);
-            if (fh == null) {
-                fh = new LinkedList<String>();
-                thFlows.put(threadName, fh);
-            }
-            return fh;
-        }
-    }
-
-    /**
-     * @param flowId
-     * @param environment
-     */
-    public void setFlowEnvironment(String threadName, String flowId, Map<String, Object> environment)
-    {
-        synchronized (debugFlowsEnvironmentMap) {
-            Map<String, Map<String, Object>> thFlows = debugFlowsEnvironmentMap.get(flowId);
-            if (thFlows == null) {
-                thFlows = new HashMap<String, Map<String, Object>>();
-                debugFlowsEnvironmentMap.put(flowId, thFlows);
-            }
-            thFlows.put(threadName, environment);
-        }
-    }
-
-    /**
-     * @param flowId
-     * @param environment
-     */
-    private Map<String, Object> getFlowEnvironment(String threadName, String flowId)
-    {
-        synchronized (debugFlowsEnvironmentMap) {
-            Map<String, Map<String, Object>> thFlows = debugFlowsEnvironmentMap.get(flowId);
-            if (thFlows != null) {
-                return thFlows.get(threadName);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Return the keys list of flowId's flow execution environment.
-     * 
-     * @param flowId
-     * @return
-     */
-    public Set<String> getEnvEntryKeys(String threadName, String flowId)
-    {
-        Map<String, Object> fe = getFlowEnvironment(threadName, flowId);
-        if (fe != null) {
-            return Collections.unmodifiableSet(fe.keySet());
-        }
-        return Collections.unmodifiableSet(new HashSet<String>());
-    }
-
-    /**
-     * Return the flowId's flow execution environment key's associated value.
-     * 
-     * @param flowId
-     * @param key
-     * @return
-     */
-    public Object getEnvEntry(String threadName, String flowId, String key)
-    {
-        Map<String, Object> fe = getFlowEnvironment(threadName, flowId);
-        if (fe != null) {
-            return fe.get(key);
-        }
-        return null;
-    }
-
-    /**
-     * Set in the id's flow execution environment the key's associated value.
-     * 
-     * @param flowId
-     * @param key
-     * @param value
-     */
-    public void setEnvEntry(String threadName, String flowId, String key, Object value)
-    {
-        Map<String, Object> fe = getFlowEnvironment(threadName, flowId);
-        if (fe != null) {
-            fe.put(key, value);
-        }
-    }
-
-    /**
-     * Return true if the flow flowId must suspend execution on node nodeId.
-     * 
-     * @param flowId
-     * @param nodeId
-     * @return
-     */
-    public boolean mustStop(String threadName, String flowId, String nodeId)
-    {
-        boolean res = true;
-        Map<String, Map<String, BreakpointType>> thFlows = debugFlowsStopNodeMap.get(flowId);
-        if (thFlows != null) {
-            Map<String, BreakpointType> sn = thFlows.get(threadName);
-            if (sn != null) {
-                BreakpointType bt = sn.get(nodeId);
-                if (bt != null) {
-                    switch (bt) {
-                        case PERSISTENT :
-                            res = true;
-                            break;
-                        case TEMPORARY :
-                            sn.put(nodeId, BreakpointType.REMOVED);
-                            res = true;
-                            break;
-                        default :
-                            res = false;
-                    }
-                }
-                else {
-                    res = false;
-                }
-            }
-        }
-        return res;
-    }
-
-    /**
-     * Execute the flowId's flow next node.
-     * 
-     * @param flowId
-     */
-    public void step(String threadName, String flowId)
-    {
-        synchronized (debugFlowsStopNodeMap) {
-            Map<String, Map<String, BreakpointType>> thFlows = debugFlowsStopNodeMap.get(flowId);
-            if (thFlows != null) {
-                thFlows.remove(threadName);
-            }
-            Map<String, Object> fe = getFlowEnvironment(threadName, flowId);
-            if (fe != null) {
-                synchronized (fe) {
-                    fe.notifyAll();
-                }
-            }
-        }
-    }
-
-    /**
-     * Resume normal execution of the flowId's flow.
-     * 
-     * @param flowId
-     */
-    public void resume(String threadName, String flowId)
-    {
-        Map<String, Map<String, BreakpointType>> thFlows = debugFlowsStopNodeMap.get(flowId);
-        if (thFlows == null) {
-            thFlows = new HashMap<String, Map<String, BreakpointType>>();
-            debugFlowsStopNodeMap.put(flowId, thFlows);
-            thFlows.put(threadName, new HashMap<String, BreakpointType>());
-        }
-        Map<String, Object> fe = getFlowEnvironment(threadName, flowId);
-        if (fe != null) {
-            synchronized (fe) {
-                fe.notifyAll();
-            }
-        }
-    }
-
-    /**
-     * Sets a breakpoint on node nodeId.
-     * 
-     * @param threadName
-     * @param flowId
-     * @param nodeId
-     */
-    public void setBreakpoint(String threadName, String flowId, String nodeId)
-    {
-        Map<String, Map<String, BreakpointType>> thFlows = debugFlowsStopNodeMap.get(flowId);
-        if (thFlows == null) {
-            thFlows = new HashMap<String, Map<String, BreakpointType>>();
-            debugFlowsStopNodeMap.put(flowId, thFlows);
-        }
-        Map<String, BreakpointType> nodeMap = thFlows.get(threadName);
-        if (nodeMap == null) {
-            nodeMap = new HashMap<String, BreakpointType>();
-            thFlows.put(threadName, nodeMap);
-        }
-        nodeMap.put(nodeId, BreakpointType.PERSISTENT);
-        System.out.println("set breakpoint: " + nodeId);
-    }
-
-    /**
-     * Clears a breakpoint on node nodeId.
-     * 
-     * @param threadName
-     * @param flowId
-     * @param nodeId
-     */
-    public void clearBreakpoint(String threadName, String flowId, String nodeId)
-    {
-        Map<String, Map<String, BreakpointType>> thFlows = debugFlowsStopNodeMap.get(flowId);
-        if (thFlows == null) {
-            thFlows = new HashMap<String, Map<String, BreakpointType>>();
-            debugFlowsStopNodeMap.put(flowId, thFlows);
-        }
-        Map<String, BreakpointType> nodeMap = thFlows.get(threadName);
-        if (nodeMap == null) {
-            nodeMap = new HashMap<String, BreakpointType>();
-            thFlows.put(threadName, nodeMap);
-        }
-        nodeMap.put(nodeId, BreakpointType.REMOVED);
-    }
-
-    /**
-     * Resume normal execution of the flowId's flow, till node nodeId, then
-     * suspend execution.
-     * 
-     * @param flowId
-     * @param nodeId
-     */
-    public void resumeTo(String threadName, String flowId, String nodeId)
-    {
-        Map<String, Map<String, BreakpointType>> thFlows = debugFlowsStopNodeMap.get(flowId);
-        if (thFlows == null) {
-            thFlows = new HashMap<String, Map<String, BreakpointType>>();
-            debugFlowsStopNodeMap.put(flowId, thFlows);
-        }
-        Map<String, BreakpointType> nodeMap = thFlows.get(threadName);
-        if (nodeMap == null) {
-            nodeMap = new HashMap<String, BreakpointType>();
-            thFlows.put(threadName, nodeMap);
-        }
-        BreakpointType breakpointType = nodeMap.get(nodeId);
-        if (breakpointType != BreakpointType.PERSISTENT) {
-            nodeMap.put(nodeId, BreakpointType.TEMPORARY);
-        }
-        Map<String, Object> fe = getFlowEnvironment(threadName, flowId);
-        if (fe != null) {
-            synchronized (fe) {
-                fe.notifyAll();
-            }
-        }
-    }
 
 }
