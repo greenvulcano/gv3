@@ -19,10 +19,14 @@
  */
 package it.greenvulcano.gvesb.core.debug.model;
 
-import it.greenvulcano.gvesb.core.jmx.OperationInfo;
+import it.greenvulcano.gvesb.buffer.GVException;
+import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
+import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
+import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -37,6 +41,10 @@ import org.w3c.dom.Node;
 public class FrameStack extends DebuggerObject
 {
 
+    /**
+     * 
+     */
+    private static final long  serialVersionUID = 1L;
     private Map<String, Frame> frames;
     private Frame              currentFrame;
 
@@ -59,35 +67,37 @@ public class FrameStack extends DebuggerObject
                 frameStack.appendChild(f.getXML(xml, doc));
             }
         }
-        if (currentFrame != null) {
-            frameStack.appendChild(currentFrame.getXML(xml, doc));
-        }
         return frameStack;
     }
 
-    public DebuggerObject getVar(String stackFrame, String varName)
+    public Variable getVar(String stackFrame, String parent, String varName)
     {
         Frame f = frames.get(stackFrame);
         if (f == null) {
-            return currentFrame.getVar(varName);
+            return currentFrame.getVar(parent, varName);
         }
-        return f.getVar(varName);
+        return f.getVar(parent, varName);
     }
 
-    public void add(Frame f)
+    public void setVar(String stackFrame, String parent, String varName, String varValue) throws GVException
     {
-//        if (currentFrame != null && f != null && !f.getName().equals(currentFrame.getName())
-//                && !frames.containsKey(currentFrame.getName())) {
-//            frames.put(currentFrame.getName(), currentFrame);
-//        }
-        currentFrame = f;
+        Frame f = frames.get(stackFrame);
+        if (f == null) {
+            currentFrame.setVar(parent, varName, varValue);
+        }
+        f.setVar(parent, varName, varValue);
     }
 
-    public void loadInfo(OperationInfo operationInfo, String threadName, String flowId)
+    public void loadInfo(DebugSynchObject synchObject)
     {
-        for (Frame f : frames.values()) {
-            f.loadInfo(operationInfo, threadName, flowId);
+        frames.clear();
+        Deque<ExecutionInfo> executionInfoStack = synchObject.getExecutionInfoStack();
+        if (executionInfoStack != null && executionInfoStack.size() > 0) {
+            Iterator<ExecutionInfo> iterator = executionInfoStack.descendingIterator();
+            while (iterator.hasNext()) {
+                currentFrame = new Frame(iterator.next());
+                frames.put(currentFrame.getFrameName(), currentFrame);
+            }
         }
-        currentFrame.loadInfo(operationInfo, threadName, flowId);
     }
 }

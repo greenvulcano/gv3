@@ -71,6 +71,18 @@ public interface GVFlow
      */
     public GVBuffer perform(GVBuffer gvBuffer) throws GVCoreException;
 
+    /**
+     * Execute the flow
+     *
+     * @param gvBuffer
+     *        the input data
+     * @param onDebug 
+     * @return the output data
+     * @throws GVCoreException
+     *         if errors occurs
+     */
+    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException;
+
 
     /**
      * Execute the flow

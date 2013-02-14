@@ -99,10 +99,11 @@ public class GVWaitNode extends GVFlowNode
     }
 
     /**
-     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#execute(java.util.Map)
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#execute(java.util.Map,
+     *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
     {
         Object data = null;
         long locTimeout = timeout;

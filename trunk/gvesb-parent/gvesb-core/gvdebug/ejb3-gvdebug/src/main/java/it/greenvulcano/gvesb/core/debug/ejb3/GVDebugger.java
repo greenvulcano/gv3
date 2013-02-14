@@ -33,15 +33,22 @@ public interface GVDebugger
 {
     public DebuggerObject stack(String threadName);
 
-    public DebuggerObject var(String threadName, String stackFrame, String varName);
+    public DebuggerObject var(String threadName, String stackFrame, String parent, String varName);
 
-    public DebuggerObject set(String threadName, String sBreakpoint);
+    public DebuggerObject set_var(String threadName, String stackFrame, String parent, String varName, String varValue)
+            throws DebuggerException;
+
+    public DebuggerObject set(String threadName, String subflow, String sBreakpoint) throws DebuggerException;
 
     public DebuggerObject data();
 
-    public DebuggerObject clear(String threadName, String cBreakpoint);
+    public DebuggerObject clear(String threadName, String subflow, String cBreakpoint) throws DebuggerException;
 
-    public DebuggerObject step(String threadName);
+    public DebuggerObject stepOver(String threadName) throws DebuggerException;
+
+    public DebuggerObject stepInto(String threadName) throws DebuggerException;
+
+    public DebuggerObject stepReturn(String threadName) throws DebuggerException;
 
     public DebuggerObject resume(String threadName) throws DebuggerException;
 

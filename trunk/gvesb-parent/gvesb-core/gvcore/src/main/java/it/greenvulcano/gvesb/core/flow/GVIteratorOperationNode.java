@@ -112,11 +112,11 @@ public class GVIteratorOperationNode extends GVFlowNode
     }
 
     /**
-     * Call <code>operation</code> and return the returned data.
-     *
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#execute(java.util.Map,
+     *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
     {
         Object data = null;
         String input = getInput();
@@ -141,7 +141,7 @@ public class GVIteratorOperationNode extends GVFlowNode
             }
 
             internalData = inputServices.perform(internalData);
-            internalData = performVCLOpCall(internalData);
+            internalData = performVCLOpCall(internalData, onDebug);
             internalData = outputServices.perform(internalData);
             environment.put(output, internalData);
         }
@@ -196,12 +196,13 @@ public class GVIteratorOperationNode extends GVFlowNode
      * @param data
      *        The GreenVulcano GVBuffer coming from the client (the request
      *        buffer)
+     * @param onDebug 
      * @return The GreenVulcano GVBuffer elaborated by the service called (it
      *         may be a server, a PlugIn, ...)
      * @throws GVCoreException
      *         if an error occurs at connection layer or core level
      */
-    protected GVBuffer performVCLOpCall(GVBuffer data) throws GVCoreException
+    protected GVBuffer performVCLOpCall(GVBuffer data, boolean onDebug) throws GVCoreException
     {
         GVBuffer outputGVBuffer = null;
 
@@ -215,7 +216,7 @@ public class GVIteratorOperationNode extends GVFlowNode
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatINPUT(data, false, false));
             }
-            outputGVBuffer = gvController.doPerform(data);
+            outputGVBuffer = gvController.doPerform(data, onDebug);
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatOUTPUT(outputGVBuffer, false, false));
             }

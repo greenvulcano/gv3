@@ -43,7 +43,7 @@ public class DebuggerServlet extends HttpServlet
     private static final String STATEFUL_BEAN_KEY = "STATEFUL_BEAN_KEY";
 
     public enum DebugCommand {
-        CONNECT, START, STACK, VAR, DATA, SET, CLEAR, STEP, RESUME, EXIT, EVENT
+        CONNECT, START, STACK, VAR, SET_VAR, DATA, SET, CLEAR, STEP_OVER, STEP_INTO, STEP_RETURN, RESUME, EXIT, EVENT
     }
 
     /**
@@ -85,9 +85,19 @@ public class DebuggerServlet extends HttpServlet
                         break;
                     case VAR : {
                         String stackFrame = request.getParameter("stackFrame");
+                        String varParent = request.getParameter("varParent");
                         String varName = request.getParameter("varName");
                         String threadName = request.getParameter("threadName");
-                        dObj = debuggerBean.var(threadName, stackFrame, varName);
+                        dObj = debuggerBean.var(threadName, stackFrame, varParent, varName);
+                    }
+                        break;
+                    case SET_VAR : {
+                        String stackFrame = request.getParameter("stackFrame");
+                        String varParent = request.getParameter("varParent");
+                        String varName = request.getParameter("varName");
+                        String varValue = request.getParameter("varValue");
+                        String threadName = request.getParameter("threadName");
+                        dObj = debuggerBean.set_var(threadName, stackFrame, varParent, varName, varValue);
                     }
                         break;
                     case DATA :
@@ -96,18 +106,30 @@ public class DebuggerServlet extends HttpServlet
                     case SET : {
                         String threadName = request.getParameter("threadName");
                         String sBreakpoint = request.getParameter("breakpoint");
-                        dObj = debuggerBean.set(threadName, sBreakpoint);
+                        String subflow = request.getParameter("subflow");
+                        dObj = debuggerBean.set(threadName, subflow, sBreakpoint);
                     }
                         break;
                     case CLEAR : {
                         String threadName = request.getParameter("threadName");
                         String cBreakpoint = request.getParameter("breakpoint");
-                        dObj = debuggerBean.clear(threadName, cBreakpoint);
+                        String subflow = request.getParameter("subflow");
+                        dObj = debuggerBean.clear(threadName, subflow, cBreakpoint);
                     }
                         break;
-                    case STEP : {
+                    case STEP_OVER : {
                         String threadName = request.getParameter("threadName");
-                        dObj = debuggerBean.step(threadName);
+                        dObj = debuggerBean.stepOver(threadName);
+                    }
+                        break;
+                    case STEP_INTO : {
+                        String threadName = request.getParameter("threadName");
+                        dObj = debuggerBean.stepInto(threadName);
+                    }
+                        break;
+                    case STEP_RETURN : {
+                        String threadName = request.getParameter("threadName");
+                        dObj = debuggerBean.stepReturn(threadName);
                     }
                         break;
                     case RESUME : {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project.
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project.
  * All rights reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -30,35 +30,37 @@ import org.w3c.dom.Node;
  * @version 3.3.0 Dic 14, 2012
  * @author GreenVulcano Developer Team
  */
-public class Variable extends DebuggerObject
+public class DebuggerEventObject extends DebuggerObject
 {
-    public static final String ELEMENT_TAG = "Variable";
-    private String             name        = null;
-    private String             value       = null;
-
-    public Variable(String name, String value)
-    {
-        this.name = name;
-        this.value = value;
-    }
-
-    public Variable(String name, Object object)
-    {
-        this.name = name;
-        this.value = object != null ? object.toString() : "";
-    }
-
     /**
-     * @see it.greenvulcano.gvesb.core.debug.model.DebuggerObject#getXML(it.greenvulcano.util.xml.XMLUtils,
-     *      org.w3c.dom.Document)
+     * 
      */
-    @Override
+    private static final long serialVersionUID = 1L;
+
+    public enum Event {
+        STARTED, SUSPENDED, RESUMED, TERMINATED, NONE
+    }
+
+    public static final DebuggerEventObject NO_EVENT = new DebuggerEventObject(Event.NONE);
+
+    private Event                     event;
+    private String[]                  props;
+
+    public DebuggerEventObject(Event event, String... props)
+    {
+        this.event = event;
+        this.props = props;
+    }
+
     protected Node getXML(XMLUtils xml, Document doc) throws XMLUtilsException
     {
-        Element var = xml.createElement(doc, ELEMENT_TAG);
-        xml.setAttribute(var, NAME_ATTR, name);
-        var.setTextContent(value);
-        return var;
+        Element eventEl = doc.createElement("Event");
+        eventEl.setAttribute(NAME_ATTR, event.toString());
+        if (props != null) {
+            for (String prop : props) {
+                xml.insertElement(eventEl, "Property").setTextContent(prop);
+            }
+        }
+        return eventEl;
     }
-
 }

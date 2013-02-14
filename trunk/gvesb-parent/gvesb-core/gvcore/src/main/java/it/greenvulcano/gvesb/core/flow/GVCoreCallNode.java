@@ -126,10 +126,11 @@ public class GVCoreCallNode extends GVFlowNode
     }
 
     /**
-     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#execute(java.util.Map)
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#execute(java.util.Map,
+     *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
     {
         GVBuffer internalData = null;
         String input = getInput();
@@ -202,7 +203,7 @@ public class GVCoreCallNode extends GVFlowNode
                         dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
                     }
                 }
-                data = gvOp.perform(internalData);
+                data = gvOp.perform(internalData, onDebug);
                 if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
                     try {

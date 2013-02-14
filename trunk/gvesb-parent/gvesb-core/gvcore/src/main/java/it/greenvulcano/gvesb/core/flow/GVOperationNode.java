@@ -177,11 +177,11 @@ public class GVOperationNode extends GVFlowNode
     }
 
     /**
-     * Call <code>operation</code> and return the returned data.
-     * 
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#execute(java.util.Map,
+     *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
     {
         Object data = null;
         String input = getInput();

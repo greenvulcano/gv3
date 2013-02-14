@@ -79,15 +79,19 @@ public class DebuggerBean implements GVDebugger
         return debugger.stack(threadName);
     }
 
-    public DebuggerObject var(String threadName, String stackFrame, String varName)
+    public DebuggerObject var(String threadName, String stackFrame, String parent, String varName)
     {
-
-        return debugger.var(threadName, stackFrame, varName);
+        return debugger.var(threadName, stackFrame, parent, varName);
     }
 
-    public DebuggerObject set(String threadName, String sBreakpoint)
+    public DebuggerObject set_var(String threadName, String stackFrame, String parent, String varName, String varValue) throws DebuggerException
     {
-        return debugger.set(threadName, sBreakpoint);
+        return debugger.set_var(threadName, stackFrame, parent, varName, varValue);
+    }
+
+    public DebuggerObject set(String threadName, String subflow, String sBreakpoint) throws DebuggerException
+    {
+        return debugger.set(threadName, subflow, sBreakpoint);
     }
 
     public DebuggerObject data()
@@ -95,14 +99,25 @@ public class DebuggerBean implements GVDebugger
         return debugger.data();
     }
 
-    public DebuggerObject clear(String threadName, String cBreakpoint)
+    public DebuggerObject clear(String threadName, String subflow, String cBreakpoint) throws DebuggerException
     {
-        return debugger.clear(threadName, cBreakpoint);
+        return debugger.clear(threadName, subflow, cBreakpoint);
     }
 
-    public DebuggerObject step(String threadName)
+    public DebuggerObject stepOver(String threadName) throws DebuggerException
     {
-        return debugger.step(threadName);
+        return debugger.stepOver(threadName);
+    }
+
+    public DebuggerObject stepInto(String threadName) throws DebuggerException
+    {
+        return debugger.stepInto(threadName);
+    }
+
+    @Override
+    public DebuggerObject stepReturn(String threadName) throws DebuggerException
+    {
+        return debugger.stepReturn(threadName);
     }
 
     public DebuggerObject resume(String threadName) throws DebuggerException

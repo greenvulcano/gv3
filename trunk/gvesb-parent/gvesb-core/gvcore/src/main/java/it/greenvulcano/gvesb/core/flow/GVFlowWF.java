@@ -23,6 +23,9 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
+import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
+import it.greenvulcano.gvesb.core.debug.DebuggingInvocationHandler;
+import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.core.exc.GVCoreWrongInterfaceException;
@@ -205,9 +208,27 @@ public class GVFlowWF implements GVFlow
      */
     public GVBuffer perform(GVBuffer gvBuffer) throws GVCoreException
     {
-        boolean onDebug = "true".equalsIgnoreCase(gvBuffer.getProperty("GV_FLOW_DEBUG"));
-        if (!onDebug && (operationInfo != null)) {
-            onDebug = operationInfo.isMarkForDebug();
+        return perform(gvBuffer, false);
+    }
+
+    /**
+     * Execute the flow
+     * 
+     * @param gvBuffer
+     *        the input data
+     * @param onDebug
+     * @return the output data
+     * @throws GVCoreException
+     *         if errors occurs
+     */
+    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException
+    {
+        if (!onDebug) {
+            onDebug = "true".equalsIgnoreCase(gvBuffer.getProperty("GV_FLOW_DEBUG"));
+            if (!onDebug) {
+                ExecutionInfo execInfo = new ExecutionInfo(serviceName, flowName, null, null, null);
+                onDebug = DebugSynchObject.checkWaitingDebug(execInfo);
+            }
         }
         boolean useStatistics = statisticsEnabled && (statisticsDataManager != null) && !onDebug;
         StatisticsData sd = null;
@@ -349,36 +370,28 @@ public class GVFlowWF implements GVFlow
         String nextNode = firstNode;
 
         if (onDebug) {
-            String threadName = Thread.currentThread().getName();
-            operationInfo.startDebug(threadName, inID);
-            operationInfo.setFlowEnvironment(threadName, inID, environment);
-
+            ExecutionInfo info = new ExecutionInfo(inService, flowName, nextNode, null, environment);
+            DebugSynchObject synchObj = DebugSynchObject.getSynchObject(inID, info);
+            if (synchObj == null) {
+                synchObj = DebugSynchObject.createNew(Thread.currentThread().getName(), inID, info);
+            }
             while (!nextNode.equals("")) {
-                operationInfo.setFlowStatus(inID, nextNode);
+                operationInfo.setFlowStatus(inID, null, nextNode);
                 flowNode = flowNodes.get(nextNode);
                 if (flowNode == null) {
                     logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
                     throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
                             {"flownode", nextNode}});
                 }
-                if (operationInfo.mustStop(threadName, inID, nextNode)) {
-                    synchronized (environment) {
-                        try {
-                            environment.wait();
-                        }
-                        catch (Exception exc) {
-                            throw new GVCoreException("GVCORE_DEBUG_FLOW_ERROR", new String[][]{
-                                    {"operation", flowName}, {"flownode", nextNode}}, exc);
-                        }
-                    }
-                }
-                nextNode = flowNode.execute(environment);
+                GVFlowNodeIF proxy = DebuggingInvocationHandler.getProxy(GVFlowNodeIF.class, flowNode, synchObj);
+                nextNode = proxy.execute(environment, onDebug);
             }
+            synchObj.terminated();
         }
         else {
             while (!nextNode.equals("")) {
                 if (operationInfo != null) {
-                    operationInfo.setFlowStatus(inID, nextNode);
+                    operationInfo.setFlowStatus(inID, null, nextNode);
                 }
                 flowNode = flowNodes.get(nextNode);
                 if (flowNode == null) {
@@ -444,7 +457,7 @@ public class GVFlowWF implements GVFlow
 
         while (!nextNode.equals("")) {
             if (operationInfo != null) {
-                operationInfo.setFlowStatus(inID, nextNode);
+                operationInfo.setFlowStatus(inID, null, nextNode);
             }
             flowNode = flowNodes.get(nextNode);
             if (flowNode == null) {
