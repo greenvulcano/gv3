@@ -21,9 +21,9 @@ package it.greenvulcano.gvesb.internal.data;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @version 3.2.0 23/nov/2011
@@ -38,7 +38,7 @@ public class GVBufferPropertiesHelper
 
     public static Map<String, Object> getPropertiesMapSO(GVBuffer gvBuffer, boolean nullOrEmptyAsNULL)
     {
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new TreeMap<String, Object>();
         addProperties(props, gvBuffer, nullOrEmptyAsNULL);
 
         return props;
@@ -46,7 +46,7 @@ public class GVBufferPropertiesHelper
 
     public static Map<String, String> getPropertiesMapSS(GVBuffer gvBuffer, boolean nullOrEmptyAsNULL)
     {
-        Map<String, String> props = new HashMap<String, String>();
+        Map<String, String> props = new TreeMap<String, String>();
         addProperties(props, gvBuffer, nullOrEmptyAsNULL);
 
         return props;
