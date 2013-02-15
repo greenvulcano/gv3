@@ -187,6 +187,24 @@ public class GVFlowODE implements GVFlow
      *
      * @param gvBuffer
      *        the input data
+     * @param onDebug
+     *        unused
+     * @return the output data
+     * @throws GVCoreException
+     *         if errors occurs
+     */
+    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException
+    {
+        logger.error("Debug no enabled for " + flowName + "/"+bpelProcessName );
+        throw new GVCoreException("GVCORE_INVOCATION_ERROR", new String[][]{{"operation", flowName},
+                    {"bpelProcessName", bpelProcessName}, {"message", "Debug mode non enabled"}});
+    }
+
+    /**
+     * Execute the flow
+     *
+     * @param gvBuffer
+     *        the input data
      * @return the output data
      * @throws GVCoreException
      *         if errors occurs
