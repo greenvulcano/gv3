@@ -521,6 +521,13 @@ zmq-2.1.0.jar -->
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-dom</artifactId>
+            <version>${version.axiom}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.sun.xml.stream</groupId>
             <artifactId>sjsxp</artifactId>
             <version>1.0.2</version>
@@ -789,6 +796,12 @@ zmq-2.1.0.jar -->
             <version>1.0.0</version>
             <type>jar</type>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>axiom-dom</artifactId>
+                    <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -803,6 +816,12 @@ zmq-2.1.0.jar -->
             <version>${version.axis2}</version>
             <type>jar</type>
             <scope>provided</scope>
+	        <exclusions>
+	            <exclusion>
+	                <artifactId>axiom-dom</artifactId>
+	                <groupId>org.apache.ws.commons.axiom</groupId>
+	            </exclusion>
+	        </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -830,6 +849,12 @@ zmq-2.1.0.jar -->
             <artifactId>sandesha2-core</artifactId>
             <version>${version.sandesha2}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>axiom-dom</artifactId>
+                    <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.security</groupId>
@@ -865,6 +890,12 @@ zmq-2.1.0.jar -->
             <version>${version.axis2}</version>
             <type>jar</type>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>axiom-dom</artifactId>
+                    <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart</groupId>
@@ -872,6 +903,12 @@ zmq-2.1.0.jar -->
             <version>${version.axis2}</version>
             <type>jar</type>
             <scope>provided</scope>
+	        <exclusions>
+	            <exclusion>
+	                <artifactId>axiom-dom</artifactId>
+	                <groupId>org.apache.ws.commons.axiom</groupId>
+	            </exclusion>
+	        </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart</groupId>
@@ -879,6 +916,12 @@ zmq-2.1.0.jar -->
             <version>${version.axis2}</version>
             <type>jar</type>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>axiom-dom</artifactId>
+                    <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
@@ -941,6 +984,10 @@ zmq-2.1.0.jar -->
                     <artifactId>org.apache.xalan</artifactId>
                     <groupId>xalan</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>axiom-dom</artifactId>
+                    <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -987,6 +1034,10 @@ zmq-2.1.0.jar -->
                     <artifactId>org.apache.xalan</artifactId>
                     <groupId>xalan</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>axiom-dom</artifactId>
+                    <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -1002,6 +1053,12 @@ zmq-2.1.0.jar -->
             <version>${version.ode}</version>
             <type>jar</type>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>axiom-dom</artifactId>
+                    <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
