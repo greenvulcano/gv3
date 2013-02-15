@@ -153,7 +153,7 @@ public class GVInternalServiceHandler
                                 + serviceParam.isCritical() + ")");
                     }
                     localData = handleServices(localData, serviceParam);
-                    if (logger.isDebugEnabled()) {
+                    if (logger.isDebugEnabled() && fnode.isDumpInOut()) {
                         logger.debug(GVFormatLog.formatOUTPUT(localData, false, false));
                         logger.debug("END - Internal Service (" + serviceParam.getName() + "), RetCode ("
                                 + localData.getRetCode() + ")");
@@ -268,11 +268,11 @@ public class GVInternalServiceHandler
         logger.debug("BEGIN - Perform Internal Call");
 
         try {
-            if (logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled() && fnode.isDumpInOut()) {
                 logger.debug(GVFormatLog.formatINPUT(gvBuffer, false, false));
             }
             gvBuffer = operation.perform(gvBuffer);
-            if (logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled() && fnode.isDumpInOut()) {
                 logger.debug(GVFormatLog.formatOUTPUT(gvBuffer, false, false));
             }
         }
