@@ -20,11 +20,11 @@
 package it.greenvulcano.gvesb.buffer;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * <code>GVBuffer</code> is used in order to transport data in GreenVulcano.
@@ -329,7 +329,7 @@ public class GVBuffer implements Serializable, Cloneable
     private Map<String, String> getProperties()
     {
         if (properties == null) {
-            properties = new HashMap<String, String>();
+            properties = new TreeMap<String, String>();
         }
         return properties;
     }
