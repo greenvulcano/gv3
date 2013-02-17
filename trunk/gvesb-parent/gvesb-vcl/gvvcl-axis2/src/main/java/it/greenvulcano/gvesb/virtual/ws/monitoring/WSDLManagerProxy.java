@@ -56,7 +56,7 @@ public class WSDLManagerProxy
     /**
      *
      */
-    public static final String JMX_FILTER    = "GVEsb:*," + JMX_KEY;
+    public static final String JMX_FILTER    = "GreenVulcano:*," + JMX_KEY;
 
     /**
      * @return the loaded WSDLs

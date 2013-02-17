@@ -24,6 +24,7 @@ import it.greenvulcano.gvesb.virtual.ws.dynamic.descr.OperationDescription;
 import it.greenvulcano.gvesb.virtual.ws.dynamic.descr.ServiceDescrBuilder;
 import it.greenvulcano.gvesb.virtual.ws.dynamic.descr.ServiceDescription;
 import it.greenvulcano.gvesb.virtual.ws.module.ModuleHandler;
+import it.greenvulcano.gvesb.ws.axis2.context.Axis2ConfigurationContextHelper;
 import it.greenvulcano.util.metadata.PropertiesHandlerException;
 
 import java.io.ByteArrayOutputStream;
@@ -310,8 +311,8 @@ public class DynamicInvoker
         ServiceDescription svcDesc = getServiceDescription();
         OperationDescription opDesc = getOperationDescription();
 
-        //client = new ServiceClient(Axis2ConfigurationContextHelper.getConfigurationContext(), null);
-        client = new ServiceClient();
+        client = new ServiceClient(Axis2ConfigurationContextHelper.getConfigurationContext(), null);
+        //client = new ServiceClient();
         OperationClient operationClient = client.createClient(ServiceClient.ANON_OUT_IN_OP);
         Options options = operationClient.getOptions();
 

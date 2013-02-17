@@ -23,6 +23,7 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.virtual.ws.WSCallOperation;
 
+import java.io.File;
 import java.util.Iterator;
 
 import javax.naming.Context;
@@ -42,6 +43,7 @@ import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -64,6 +66,21 @@ public class Axis2PluginTestCase extends TestCase
     @Override
     protected void setUp() throws Exception
     {
+        File repoSrc = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + 
+                           File.separator + "resources" + File.separator + "webservices");
+        File repoDest = new File(System.getProperty("user.dir") + File.separator + "target" + File.separator + "webservices");
+
+        File xmlSrc = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + 
+                           File.separator + "resources" + File.separator + "axis2.xml");
+        File xmlDest = new File(System.getProperty("user.dir") + File.separator + "target" + 
+                           File.separator + "xmlconfig" + File.separator + "axis2.xml");
+
+        FileUtils.deleteQuietly(repoDest);
+        FileUtils.deleteQuietly(xmlDest);
+        FileUtils.forceMkdir(new File(System.getProperty("user.dir") + File.separator + "target/webservices"));
+        FileUtils.forceMkdir(new File(System.getProperty("user.dir") + File.separator + "target/xmlconfig"));
+        FileUtils.copyDirectory(repoSrc, repoDest);
+        FileUtils.copyFile(xmlSrc, xmlDest);
         initialContext = new InitialContext();
     }
 
