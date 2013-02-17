@@ -410,22 +410,34 @@ public final class CryptoHelper implements ConfigurationListener
                     NodeList nodeList = XMLConfig.getNodeList(CRYPTO_HELPER_FILE, "/GVCryptoHelper/KeyStoreID");
                     if ((nodeList != null) && (nodeList.getLength() > 0)) {
                         for (int i = 0; i < nodeList.getLength(); i++) {
-                            Node node = nodeList.item(i);
-                            KeyStoreID keySid = new KeyStoreID(node);
-                            KeyStoreUtils.getKeyStore(keySid);
-                            System.out.println("CryptoHelper - Adding keyStoreID '" + keySid.getKeyStoreID()
+                            try {
+                                Node node = nodeList.item(i);
+                                KeyStoreID keySid = new KeyStoreID(node);
+                                KeyStoreUtils.getKeyStore(keySid);
+                                System.out.println("CryptoHelper - Adding keyStoreID '" + keySid.getKeyStoreID()
                                     + "' to cache.");
-                            keyStoreIDMap.put(keySid.getKeyStoreID(), keySid);
+                                keyStoreIDMap.put(keySid.getKeyStoreID(), keySid);
+                            }
+                            catch (Exception exc) {
+                                System.out.println("CryptoHelper - Error reading keyStore.\n" + exc.getMessage());
+                                exc.printStackTrace();
+                            }
                         }
                     }
                     nodeList = XMLConfig.getNodeList(CRYPTO_HELPER_FILE, "/GVCryptoHelper/KeyID");
                     if ((nodeList != null) && (nodeList.getLength() > 0)) {
                         for (int i = 0; i < nodeList.getLength(); i++) {
-                            Node node = nodeList.item(i);
-                            KeyID keyid = new KeyID(node);
-                            KeyStoreUtils.readKey(keyid);
-                            System.out.println("CryptoHelper - Adding keyID '" + keyid.getKeyID() + "' to cache.");
-                            keyIDMap.put(keyid.getKeyID(), keyid);
+                            try {
+                                Node node = nodeList.item(i);
+                                KeyID keyid = new KeyID(node);
+                                KeyStoreUtils.readKey(keyid);
+                                System.out.println("CryptoHelper - Adding keyID '" + keyid.getKeyID() + "' to cache.");
+                                keyIDMap.put(keyid.getKeyID(), keyid);
+                            }
+                            catch (Exception exc) {
+                                System.out.println("CryptoHelper - Error reading key.\n" + exc.getMessage());
+                                exc.printStackTrace();
+                            }
                         }
                     }
                 }
@@ -433,18 +445,12 @@ public final class CryptoHelper implements ConfigurationListener
                     System.out.println("CryptoHelper - Error reading file '" + CRYPTO_HELPER_FILE
                             + "' - using only default keyID.\n" + exc.getMessage());
                     exc.printStackTrace();
-                    keyIDMap.clear();
-                    keyStoreIDMap.clear();
                 }
-                // if keyIDMap has been emptied reinsert the default keyID
-                setDefaultKeyID();
             }
             catch (KeyStoreUtilsException exc) {
-                System.out.println("CryptoHelper Error - CryptoHelper disabled.\n" + exc.getMessage());
+                System.out.println("CryptoHelper Error.\n" + exc.getMessage());
                 exc.printStackTrace();
-                keyIDMap.clear();
-                keyStoreIDMap.clear();
-            }
+           }
         }
     }
 
