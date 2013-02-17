@@ -24,6 +24,10 @@
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp_commons</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvws_commons</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.axis2</groupId>

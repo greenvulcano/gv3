@@ -60,15 +60,18 @@ public class CryptoAdapter extends Merlin
      */
     public CryptoAdapter(Properties properties) throws CredentialException, IOException
     {
-        this(properties, CryptoAdapter.class.getClassLoader());
+        this(properties, Loader.getClassLoader(Merlin.class));
     }
 
     public CryptoAdapter(Properties properties, ClassLoader loader) throws CredentialException, IOException
     {
+        logger.debug("Initializing Rampart CryptoAdapter: " + properties);
+
         this.keyStoreID = properties.getProperty(KEYSTORE_ID);
         this.defaultAlias = properties.getProperty(KEYSTORE_ALIAS);
         this.trustStoreID = properties.getProperty(TRUSTSTORE_ID);
         try {
+            logger.debug("Retrieving keystore: " + this.keyStoreID);
             this.keystore = CryptoHelper.getKeyStore(this.keyStoreID);
         }
         catch (Exception exc) {
@@ -78,6 +81,7 @@ public class CryptoAdapter extends Merlin
         }
         if (this.trustStoreID != null) {
             try {
+                logger.debug("Retrieving truststore: " + this.trustStoreID);
                 this.truststore = CryptoHelper.getKeyStore(this.trustStoreID);
             }
             catch (Exception exc) {
@@ -86,7 +90,7 @@ public class CryptoAdapter extends Merlin
                         new Object[]{this.trustStoreID}, exc);
             }
         }
-        super.loadProperties(properties, Loader.getClassLoader(Merlin.class));
+        super.loadProperties(properties, loader);
     }
 
 }

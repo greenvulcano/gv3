@@ -20,10 +20,12 @@
  */
 package it.greenvulcano.gvesb.virtual.ws.module.rampart;
 
+import it.greenvulcano.gvesb.virtual.ws.module.ModuleHandler;
+import it.greenvulcano.log.GVLogger;
+
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
-
-import it.greenvulcano.gvesb.virtual.ws.module.ModuleHandler;
+import org.apache.log4j.Logger;
 /*
  *
  * RampartModuleHandler class
@@ -33,8 +35,11 @@ import it.greenvulcano.gvesb.virtual.ws.module.ModuleHandler;
 */
 public class RampartModuleHandler extends ModuleHandler
 {
+    private static Logger logger = GVLogger.getLogger(RampartModuleHandler.class);
+    
     public boolean preSendOperationSpecific(ServiceClient serviceClient, Options options)
     {
+        logger.debug("Setting module data [" + getPolicyKey() + "]: " + getPolicy());
         options.setProperty(getPolicyKey(), getPolicy());
         return true;
     }

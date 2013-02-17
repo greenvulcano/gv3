@@ -31,6 +31,7 @@ import it.greenvulcano.gvesb.virtual.ws.module.ModuleHandler;
 import it.greenvulcano.gvesb.virtual.ws.module.ModuleHandlerFactory;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.txt.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -113,6 +114,9 @@ public class GVWebServiceInvoker
             // WSDLInfo
             Node wsdlConfiguration = XMLConfig.getNode(configNode, "*[@type='wsdlinfo']");
             wsdlURL = PropertiesHandler.expand(XMLConfig.get(wsdlConfiguration, "@wsdl"), null);
+            if (wsdlURL != null) {
+                wsdlURL= TextUtils.replaceSubstring(wsdlURL, "\\", "/");
+            }
             if (logger.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("The GVWebServiceInvoker initialization parameters value:\n'");
