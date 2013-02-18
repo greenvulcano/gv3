@@ -79,14 +79,15 @@ public class DebuggerBean implements GVDebugger
         return debugger.stack(threadName);
     }
 
-    public DebuggerObject var(String threadName, String stackFrame, String parent, String varName)
+    public DebuggerObject var(String threadName, String stackFrame, String varEnv, String varID)
     {
-        return debugger.var(threadName, stackFrame, parent, varName);
+        return debugger.var(threadName, stackFrame, varEnv, varID);
     }
 
-    public DebuggerObject set_var(String threadName, String stackFrame, String parent, String varName, String varValue) throws DebuggerException
+    public DebuggerObject set_var(String threadName, String stackFrame, String varEnv, String varID, String varValue)
+            throws DebuggerException
     {
-        return debugger.set_var(threadName, stackFrame, parent, varName, varValue);
+        return debugger.set_var(threadName, stackFrame, varEnv, varID, varValue);
     }
 
     public DebuggerObject set(String threadName, String subflow, String sBreakpoint) throws DebuggerException

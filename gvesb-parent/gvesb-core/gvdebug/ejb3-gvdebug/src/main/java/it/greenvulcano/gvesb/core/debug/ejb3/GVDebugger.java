@@ -33,9 +33,9 @@ public interface GVDebugger
 {
     public DebuggerObject stack(String threadName);
 
-    public DebuggerObject var(String threadName, String stackFrame, String parent, String varName);
+    public DebuggerObject var(String threadName, String stackFrame, String varEnv, String varID);
 
-    public DebuggerObject set_var(String threadName, String stackFrame, String parent, String varName, String varValue)
+    public DebuggerObject set_var(String threadName, String stackFrame, String varEnv, String varID, String varValue)
             throws DebuggerException;
 
     public DebuggerObject set(String threadName, String subflow, String sBreakpoint) throws DebuggerException;

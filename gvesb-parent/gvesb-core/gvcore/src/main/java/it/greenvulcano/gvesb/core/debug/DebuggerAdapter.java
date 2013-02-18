@@ -20,6 +20,7 @@
 package it.greenvulcano.gvesb.core.debug;
 
 import it.greenvulcano.gvesb.buffer.GVException;
+import it.greenvulcano.gvesb.core.debug.model.DebuggerEventObject;
 import it.greenvulcano.gvesb.core.debug.model.DebuggerObject;
 import it.greenvulcano.gvesb.core.debug.model.Service;
 import it.greenvulcano.gvesb.core.debug.model.ThreadInfo;
@@ -88,20 +89,20 @@ public class DebuggerAdapter
         return thread.getStackFrame();
     }
 
-    public DebuggerObject var(String threadName, String stackFrame, String parent, String varName)
+    public DebuggerObject var(String threadName, String stackFrame, String varEnv, String varID)
     {
         ThreadInfo thread = debugService.getThread(threadName);
         thread.loadInfo(synchObject);
-        return thread.getStackFrame().getVar(stackFrame, parent, varName);
+        return thread.getStackFrame().getVar(stackFrame, varEnv, varID);
     }
 
-    public DebuggerObject set_var(String threadName, String stackFrame, String parent, String varName, String varValue)
+    public DebuggerObject set_var(String threadName, String stackFrame, String varEnv, String varID, String varValue)
             throws DebuggerException
     {
         ThreadInfo thread = debugService.getThread(threadName);
         thread.loadInfo(synchObject);
         try {
-            thread.getStackFrame().setVar(stackFrame, parent, varName, varValue);
+            thread.getStackFrame().setVar(stackFrame, varEnv, varID, varValue);
         }
         catch (GVException e) {
             throw new DebuggerException(e);
@@ -165,7 +166,9 @@ public class DebuggerAdapter
     public DebuggerObject exit()
     {
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
-        synchObject.stop();
+        if (synchObject != null) {
+            synchObject.stop();
+        }
         return DebuggerObject.OK_DEBUGGER_OBJECT;
     }
 
@@ -178,7 +181,9 @@ public class DebuggerAdapter
     public DebuggerObject event()
     {
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
-        return synchObject != null ? synchObject.event() : null;
+        return ((DebuggerObject) (synchObject == null
+                ? new DebuggerEventObject(DebuggerEventObject.Event.TERMINATED)
+                : synchObject.event()));
     }
 
 }
