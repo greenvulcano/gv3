@@ -41,15 +41,17 @@ public class DebuggerObject implements Serializable
     private static final long serialVersionUID = 1L;
 
     public enum Result {
-        OK, FAIL
+        OK, FAIL, TERM
     }
 
+    public static final String   ID_ATTR              = "id";
     public static final String   NAME_ATTR            = "name";
     public static final String   TYPE_ATTR            = "type";
     public static final String   VALUE_ATTR           = "value";
 
     public static DebuggerObject OK_DEBUGGER_OBJECT   = new DebuggerObject(Result.OK);
     public static DebuggerObject FAIL_DEBUGGER_OBJECT = new DebuggerObject(Result.FAIL);
+    public static DebuggerObject TERM_DEBUGGER_OBJECT = new DebuggerObject(Result.TERM);
 
     private Result               result;
 

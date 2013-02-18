@@ -22,13 +22,13 @@ package it.greenvulcano.gvesb.core.debug.model;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.buffer.GVBuffer.Field;
 import it.greenvulcano.gvesb.buffer.GVException;
-import it.greenvulcano.gvesb.buffer.Id;
+import it.greenvulcano.gvesb.core.debug.utils.ExceptionConverter;
+import it.greenvulcano.gvesb.core.debug.utils.GVBufferConverter;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -40,21 +40,24 @@ import org.w3c.dom.Node;
  */
 public class Variable extends DebuggerObject
 {
-    /**
-     * 
-     */
-    private static final long     serialVersionUID = 1L;
+    private static final long     serialVersionUID = 4734478388039002009L;
     public static final String    ELEMENT_TAG      = "Variable";
+    private String                id               = null;
     private String                name             = null;
     private Object                value            = null;
-    private Map<String, Variable> values           = null;
+    private Map<String, Variable> values           = new LinkedHashMap<String, Variable>();
     private boolean               isGVBuffer       = false;
+    private boolean               isException      = false;
     private GVBuffer              origGVBuffer     = null;
     private Class<?>              type;
     private Field                 gvField;
 
+    public static final String    GVFIELD_PFX      = "F$";
+    public static final String    PROPERTY_PFX     = "P$";
+
     public Variable(String name, Class<?> type)
     {
+        this.id = name;
         this.name = name;
         this.type = type;
     }
@@ -63,25 +66,13 @@ public class Variable extends DebuggerObject
     {
         this(name, type);
         isGVBuffer = object instanceof GVBuffer;
+        isException = object instanceof Throwable;
         if (isGVBuffer) {
-            values = new HashMap<String, Variable>();
             origGVBuffer = (GVBuffer) object;
-
-            Variable v = new Variable(Field.SYSTEM, String.class, origGVBuffer.getSystem());
-            values.put(v.name, v);
-            v = new Variable(Field.SERVICE, String.class, origGVBuffer.getService());
-            values.put(v.name, v);
-            v = new Variable(Field.ID, Id.class, origGVBuffer.getId());
-            values.put(v.name, v);
-            v = new Variable(Field.RETCODE, Integer.class, origGVBuffer.getRetCode());
-            values.put(v.name, v);
-            v = new Variable(Field.OBJECT, origGVBuffer.getObject().getClass(), origGVBuffer.getObject());
-            values.put(v.name, v);
-            Set<String> namesSet = origGVBuffer.getPropertyNamesSet();
-            for (String pname : namesSet) {
-                v = new Variable(Field.PROPERTY, pname, String.class, origGVBuffer.getProperty(pname));
-                values.put(pname, v);
-            }
+            GVBufferConverter.toDebugger(this, origGVBuffer);
+        }
+        else if (isException) {
+            ExceptionConverter.toDebugger(this, (Throwable) object);
         }
         else {
             this.value = object;
@@ -90,14 +81,21 @@ public class Variable extends DebuggerObject
 
     public Variable(Field field, Class<?> type, Object object)
     {
-        this("$" + field, type, object);
+        this(field.name(), type, object);
         this.gvField = field;
+        this.id = GVFIELD_PFX + field.name();
     }
 
     public Variable(Field field, String name, Class<?> type, Object object)
     {
         this(name, type, object);
         this.gvField = field;
+        if (field == Field.PROPERTY) {
+            this.id = PROPERTY_PFX + name;
+        }
+        else {
+            this.id = GVFIELD_PFX + name;
+        }
     }
 
     /**
@@ -108,9 +106,10 @@ public class Variable extends DebuggerObject
     protected Node getXML(XMLUtils xml, Document doc) throws XMLUtilsException
     {
         Element var = xml.createElement(doc, ELEMENT_TAG);
+        xml.setAttribute(var, ID_ATTR, id);
         xml.setAttribute(var, NAME_ATTR, name);
         xml.setAttribute(var, TYPE_ATTR, getTypeName());
-        if (isGVBuffer) {
+        if (!values.isEmpty()) {
             for (Variable v : values.values()) {
                 var.appendChild(v.getXML(xml, doc));
             }
@@ -125,36 +124,59 @@ public class Variable extends DebuggerObject
 
     public String getTypeName()
     {
+        if (type == null) {
+            return "";
+        }
         return type.getName();
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public GVBuffer getGVBuffer()
+    {
+        return origGVBuffer;
+    }
+
+    public Field getGVBufferField()
+    {
+        return gvField;
+    }
+
+    public void addVar(Variable var)
+    {
+        values.put(var.id, var);
     }
 
     public Variable getVar(String key)
     {
-        return isGVBuffer ? values.get(key) : null;
+        Variable v = values.get(key);
+        if (id.toString().equals(key)) {
+            v = this;
+        }
+        else if (isGVBuffer) {
+            if (key.startsWith(PROPERTY_PFX)) {
+                Variable props = values.get(GVFIELD_PFX + Field.PROPERTY);
+                v = props.getVar(key);
+            }
+        }
+        return v;
     }
 
-    public void setVar(String varName, String varValue) throws GVException
+    public void setVar(String varID, String varValue) throws GVException
     {
         if (isGVBuffer) {
-            Variable variable = values.get(varName);
-            switch (variable.gvField) {
-                case SYSTEM :
-                    origGVBuffer.setSystem(varValue);
-                    break;
-                case SERVICE :
-                    origGVBuffer.setService(varValue);
-                    break;
-                case OBJECT :
-                    origGVBuffer.setObject(varValue);
-                    break;
-                case PROPERTY :
-                    origGVBuffer.setProperty(varName, varValue);
-                    break;
-            }
-            variable.setVar(varName, varValue);
+            GVBufferConverter.toESB(this, varID, varValue);
         }
         else {
             value = varValue;
         }
+    }
+
+    public String getID()
+    {
+        return id.toString();
     }
 }

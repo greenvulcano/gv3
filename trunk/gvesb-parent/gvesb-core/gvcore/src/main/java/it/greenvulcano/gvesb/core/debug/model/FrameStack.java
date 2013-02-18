@@ -70,22 +70,22 @@ public class FrameStack extends DebuggerObject
         return frameStack;
     }
 
-    public Variable getVar(String stackFrame, String parent, String varName)
+    public Variable getVar(String stackFrame, String varEnv, String varID)
     {
         Frame f = frames.get(stackFrame);
         if (f == null) {
-            return currentFrame.getVar(parent, varName);
+            return currentFrame.getVar(varEnv, varID);
         }
-        return f.getVar(parent, varName);
+        return f.getVar(varEnv, varID);
     }
 
-    public void setVar(String stackFrame, String parent, String varName, String varValue) throws GVException
+    public void setVar(String stackFrame, String varEnv, String varID, String varValue) throws GVException
     {
         Frame f = frames.get(stackFrame);
         if (f == null) {
-            currentFrame.setVar(parent, varName, varValue);
+            currentFrame.setVar(varEnv, varID, varValue);
         }
-        f.setVar(parent, varName, varValue);
+        f.setVar(varEnv, varID, varValue);
     }
 
     public void loadInfo(DebugSynchObject synchObject)

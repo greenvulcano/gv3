@@ -85,19 +85,19 @@ public class DebuggerServlet extends HttpServlet
                         break;
                     case VAR : {
                         String stackFrame = request.getParameter("stackFrame");
-                        String varParent = request.getParameter("varParent");
-                        String varName = request.getParameter("varName");
+                        String varEnv = request.getParameter("varEnv");
+                        String varID = request.getParameter("varID");
                         String threadName = request.getParameter("threadName");
-                        dObj = debuggerBean.var(threadName, stackFrame, varParent, varName);
+                        dObj = debuggerBean.var(threadName, stackFrame, varEnv, varID);
                     }
                         break;
                     case SET_VAR : {
                         String stackFrame = request.getParameter("stackFrame");
-                        String varParent = request.getParameter("varParent");
-                        String varName = request.getParameter("varName");
+                        String varEnv = request.getParameter("varEnv");
+                        String varID = request.getParameter("varID");
                         String varValue = request.getParameter("varValue");
                         String threadName = request.getParameter("threadName");
-                        dObj = debuggerBean.set_var(threadName, stackFrame, varParent, varName, varValue);
+                        dObj = debuggerBean.set_var(threadName, stackFrame, varEnv, varID, varValue);
                     }
                         break;
                     case DATA :

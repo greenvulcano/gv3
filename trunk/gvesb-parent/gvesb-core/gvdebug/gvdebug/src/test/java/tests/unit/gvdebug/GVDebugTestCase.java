@@ -39,6 +39,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import tests.unit.gvdebug.server.EmbeddedServer;
@@ -158,6 +159,7 @@ public class GVDebugTestCase extends TestCase
      */
     public final void testDebugger() throws Exception
     {
+        System.out.println("-------------------- BEGIN TOUPPER");
         String serviceName = "TOUPPER";
         String opName = "RequestReply";
         /*
@@ -175,7 +177,7 @@ public class GVDebugTestCase extends TestCase
         params.put("service", serviceName);
         params.put("operation", opName);
         String responseBody = sendRequest(httpClient, DebugCommand.CONNECT, params);
-        System.out.println(responseBody);
+        System.out.println("CONNECT response: " + responseBody);
 
         final PostMethod method2 = new PostMethod(CONNECT_URL);
         Thread t = new Thread() {
@@ -211,8 +213,9 @@ public class GVDebugTestCase extends TestCase
 
         responseBody = new String(method2.getResponseBody());
         method2.releaseConnection();
-        System.out.println(responseBody);
-        new Thread(new EventPoller(httpClient)).start();
+        System.out.println("START response: " + responseBody);
+        EventPoller poller = new EventPoller(httpClient);
+        new Thread(poller).start();
 
         XMLUtils xmlUtils = XMLUtils.getParserInstance();
         try {
@@ -224,29 +227,528 @@ public class GVDebugTestCase extends TestCase
 
             String threadName = threads.item(0).getAttributes().getNamedItem("name").getNodeValue();
 
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "request");
+
+            Node env = xmlUtils.selectSingleNode(document,
+                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='input_test']");
+            assertNotNull(env);
+            // variable
+            params.clear();
+            params.put("threadName", threadName);
+            params.put("varEnv", xmlUtils.get(env, "@name"));
+            params.put("varID", xmlUtils.get(env, "@id"));
+            responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
+            System.out.println("VAR(input_test) response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+
             // step
             params.clear();
             params.put("threadName", threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
-            System.out.println(responseBody);
+            System.out.println("STEP_OVER response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "check_status");
+
+            env = xmlUtils.selectSingleNode(document,
+                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='output_test']");
+            assertNotNull(env);
+            // variable
+            params.clear();
+            params.put("threadName", threadName);
+            params.put("varEnv", xmlUtils.get(env, "@name"));
+            params.put("varID", xmlUtils.get(env, "@id"));
+            responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
+            System.out.println("VAR(output_test) response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+
+            // step
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
+            System.out.println("STEP_OVER response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "return_status");
+
+            // step
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
+            System.out.println("STEP_OVER response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
         }
         finally {
+            if (poller != null) {
+                poller.terminate();
+            }
             XMLUtils.releaseParserInstance(xmlUtils);
         }
+        System.out.println("-------------------- END TOUPPER");
     }
 
-    private GVBuffer startService(String serviceName, String opName) throws Exception
+
+    /**
+     * @throws Exception
+     */
+    public final void testDebuggerExc() throws Exception
+    {
+        System.out.println("\n\n-------------------- BEGIN TOUPPER_EXC");
+        String serviceName = "TOUPPER_EXC";
+        String opName = "RequestReply";
+        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+
+        final HttpClient httpClient = new HttpClient(connectionManager);
+
+        // Connect debugger
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("service", serviceName);
+        params.put("operation", opName);
+        String responseBody = sendRequest(httpClient, DebugCommand.CONNECT, params);
+        System.out.println("CONNECT response: " + responseBody);
+
+        final PostMethod method2 = new PostMethod(CONNECT_URL);
+        Thread t = new Thread() {
+            public void run()
+            {
+                method2.setParameter("debugOperation", "start");
+                // method.setParameter("id", input.getId().toString());
+
+                int statusCode = -1;
+                try {
+                    statusCode = httpClient.executeMethod(method2);
+                }
+                catch (HttpException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                assertEquals(HttpStatus.SC_OK, statusCode);
+            };
+        };
+        t.start();
+        System.out.println("SLEEP 2");
+        Thread.sleep(2000);
+
+        System.out.println("START SERVICE");
+        GVBuffer input = startService(serviceName, opName);
+
+        System.out.println("JOIN");
+        t.join();
+
+        responseBody = new String(method2.getResponseBody());
+        method2.releaseConnection();
+        System.out.println("START response: " + responseBody);
+        EventPoller poller = new EventPoller(httpClient);
+        new Thread(poller).start();
+
+        XMLUtils xmlUtils = XMLUtils.getParserInstance();
+        try {
+            Document document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            NodeList threads = xmlUtils.selectNodeList(document, "/GVDebugger/Service/Threads/Thread");
+            assertNotNull(threads);
+            assertFalse(threads.getLength() == 0);
+
+            String threadName = threads.item(0).getAttributes().getNamedItem("name").getNodeValue();
+
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "request");
+
+            Node env = xmlUtils.selectSingleNode(document,
+                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='input_test']");
+            assertNotNull(env);
+            // variable
+            params.clear();
+            params.put("threadName", threadName);
+            params.put("varEnv", xmlUtils.get(env, "@name"));
+            params.put("varID", xmlUtils.get(env, "@id"));
+            responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
+            System.out.println("VAR(input_test) response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+
+            // step
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
+            System.out.println("STEP_OVER response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "check_status");
+
+            env = xmlUtils.selectSingleNode(document,
+                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='output_test']");
+            assertNotNull(env);
+            // variable
+            params.clear();
+            params.put("threadName", threadName);
+            params.put("varEnv", xmlUtils.get(env, "@name"));
+            params.put("varID", xmlUtils.get(env, "@id"));
+            responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
+            System.out.println("VAR(output_test) response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+
+            // step
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
+            System.out.println("STEP_OVER response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "return_error");
+
+            // step
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
+            System.out.println("STEP_OVER response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+        }
+        catch (Exception exc) {
+            exc.printStackTrace();
+        }
+        finally {
+            if (poller != null) {
+                poller.terminate();
+            }
+            XMLUtils.releaseParserInstance(xmlUtils);
+        }
+        System.out.println("-------------------- END TOUPPER_EXC");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public final void testDebuggerDom() throws Exception
+    {
+        System.out.println("\n\n-------------------- BEGIN TEST_DOM");
+        String serviceName = "TEST_DATA";
+        String opName = "RequestReply";
+        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+
+        final HttpClient httpClient = new HttpClient(connectionManager);
+
+        // Connect debugger
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("service", serviceName);
+        params.put("operation", opName);
+        String responseBody = sendRequest(httpClient, DebugCommand.CONNECT, params);
+        System.out.println("CONNECT response: " + responseBody);
+
+        final PostMethod method2 = new PostMethod(CONNECT_URL);
+        Thread t = new Thread() {
+            public void run()
+            {
+                method2.setParameter("debugOperation", "start");
+                // method.setParameter("id", input.getId().toString());
+
+                int statusCode = -1;
+                try {
+                    statusCode = httpClient.executeMethod(method2);
+                }
+                catch (HttpException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                assertEquals(HttpStatus.SC_OK, statusCode);
+            };
+        };
+        t.start();
+        System.out.println("SLEEP 2");
+        Thread.sleep(2000);
+
+        System.out.println("START SERVICE");
+        GVBuffer input = startDomService(serviceName, opName);
+
+        System.out.println("JOIN");
+        t.join();
+
+        responseBody = new String(method2.getResponseBody());
+        method2.releaseConnection();
+        System.out.println("START response: " + responseBody);
+        EventPoller poller = new EventPoller(httpClient);
+        new Thread(poller).start();
+
+        XMLUtils xmlUtils = XMLUtils.getParserInstance();
+        try {
+            Document document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            NodeList threads = xmlUtils.selectNodeList(document, "/GVDebugger/Service/Threads/Thread");
+            assertNotNull(threads);
+            assertFalse(threads.getLength() == 0);
+
+            String threadName = threads.item(0).getAttributes().getNamedItem("name").getNodeValue();
+
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "check");
+
+            Node env = xmlUtils.selectSingleNode(document,
+                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='input_test']");
+            assertNotNull(env);
+            // variable
+            params.clear();
+            params.put("threadName", threadName);
+            params.put("varEnv", xmlUtils.get(env, "@name"));
+            params.put("varID", xmlUtils.get(env, "@id"));
+            responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
+            System.out.println("VAR(input_test) response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+
+            // step
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
+            System.out.println("STEP_OVER response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+        }
+        finally {
+            if (poller != null) {
+                poller.terminate();
+            }
+            XMLUtils.releaseParserInstance(xmlUtils);
+        }
+        System.out.println("-------------------- END TEST_DOM");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public final void testDebuggerByteArray() throws Exception
+    {
+        System.out.println("\n\n-------------------- BEGIN TEST_B[]");
+        String serviceName = "TEST_DATA";
+        String opName = "RequestReply";
+        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+
+        final HttpClient httpClient = new HttpClient(connectionManager);
+
+        // Connect debugger
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("service", serviceName);
+        params.put("operation", opName);
+        String responseBody = sendRequest(httpClient, DebugCommand.CONNECT, params);
+        System.out.println("CONNECT response: " + responseBody);
+
+        final PostMethod method2 = new PostMethod(CONNECT_URL);
+        Thread t = new Thread() {
+            public void run()
+            {
+                method2.setParameter("debugOperation", "start");
+                // method.setParameter("id", input.getId().toString());
+
+                int statusCode = -1;
+                try {
+                    statusCode = httpClient.executeMethod(method2);
+                }
+                catch (HttpException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                assertEquals(HttpStatus.SC_OK, statusCode);
+            };
+        };
+        t.start();
+        System.out.println("SLEEP 2");
+        Thread.sleep(2000);
+
+        System.out.println("START SERVICE");
+        GVBuffer input = startBArrService(serviceName, opName);
+
+        System.out.println("JOIN");
+        t.join();
+
+        responseBody = new String(method2.getResponseBody());
+        method2.releaseConnection();
+        System.out.println("START response: " + responseBody);
+        EventPoller poller = new EventPoller(httpClient);
+        new Thread(poller).start();
+
+        XMLUtils xmlUtils = XMLUtils.getParserInstance();
+        try {
+            Document document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            NodeList threads = xmlUtils.selectNodeList(document, "/GVDebugger/Service/Threads/Thread");
+            assertNotNull(threads);
+            assertFalse(threads.getLength() == 0);
+
+            String threadName = threads.item(0).getAttributes().getNamedItem("name").getNodeValue();
+
+            // data
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
+            System.out.println("STACK response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+            assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "check");
+
+            Node env = xmlUtils.selectSingleNode(document,
+                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='input_test']");
+            assertNotNull(env);
+            // variable
+            params.clear();
+            params.put("threadName", threadName);
+            params.put("varEnv", xmlUtils.get(env, "@name"));
+            params.put("varID", xmlUtils.get(env, "@id"));
+            responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
+            System.out.println("VAR(input_test) response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+
+            // step
+            params.clear();
+            params.put("threadName", threadName);
+            responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
+            System.out.println("STEP_OVER response: " + responseBody);
+            document = xmlUtils.parseDOM(responseBody);
+            assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
+        }
+        finally {
+            if (poller != null) {
+                poller.terminate();
+            }
+            XMLUtils.releaseParserInstance(xmlUtils);
+        }
+        System.out.println("-------------------- END TEST_B[]");
+    }
+
+    private GVBuffer startService(final String serviceName, final String opName) throws Exception
     {
         final GVBuffer gvBuffer = new GVBuffer("GVESB", serviceName);
         gvBuffer.setObject("test debugger");
+        gvBuffer.setProperty("PROP_A", "VALUE_A");
+        gvBuffer.setProperty("PROP_B", "VALUE_B");
         new Thread() {
             public void run()
             {
                 try {
                     GreenVulcano greenVulcano = new GreenVulcano();
-                    greenVulcano.requestReply(gvBuffer);
+                    greenVulcano.forward(gvBuffer, opName);
+                }
+                catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            };
+        }.start();
+        return gvBuffer;
+    }
+
+    private GVBuffer startDomService(final String serviceName, final String opName) throws Exception
+    {
+        final GVBuffer gvBuffer = new GVBuffer("GVESB", serviceName);
+        gvBuffer.setObject(XMLUtils.parseObject_S(
+                "<doc>\n\t<element>pippo</element>\n\t<element>pippo</element>\n</doc>", false, true));
+        gvBuffer.setProperty("PROP_A", "VALUE_A");
+        gvBuffer.setProperty("PROP_B", "VALUE_B");
+        new Thread() {
+            public void run()
+            {
+                try {
+                    GreenVulcano greenVulcano = new GreenVulcano();
+                    greenVulcano.forward(gvBuffer, opName);
+                }
+                catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            };
+        }.start();
+        return gvBuffer;
+    }
+
+    private GVBuffer startBArrService(final String serviceName, final String opName) throws Exception
+    {
+        final GVBuffer gvBuffer = new GVBuffer("GVESB", serviceName);
+        gvBuffer.setObject("<doc>\n\t<element>pippo</element>\n\t<element>pippo</element>\n</doc>".getBytes());
+        gvBuffer.setProperty("PROP_A", "VALUE_A");
+        gvBuffer.setProperty("PROP_B", "VALUE_B");
+        new Thread() {
+            public void run()
+            {
+                try {
+                    GreenVulcano greenVulcano = new GreenVulcano();
+                    greenVulcano.forward(gvBuffer, opName);
                 }
                 catch (Exception e) {
                     // TODO Auto-generated catch block

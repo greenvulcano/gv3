@@ -63,26 +63,20 @@ public class Frame extends DebuggerObject
         loadInfo();
     }
 
-    public Variable getVar(String parent, String key)
+    public Variable getVar(String env, String key)
     {
-        Variable varParent = null;
-        if (parent != null) {
-            varParent = vars.get(parent);
-        }
-        if (varParent != null) {
-            return varParent.getVar(key);
-        }
-        return vars.get(key);
+        Variable varEnv = vars.get(env);
+        return varEnv.getVar(key);
     }
 
-    public void setVar(String parent, String varName, String varValue) throws GVException
+    public void setVar(String env, String varID, String varValue) throws GVException
     {
-        Variable varParent = null;
-        if (parent != null) {
-            varParent = vars.get(parent);
+        Variable varEnv = null;
+        if (env != null) {
+            varEnv = vars.get(env);
         }
-        if (varParent != null) {
-            varParent.setVar(varName, varValue);
+        if (varEnv != null) {
+            varEnv.setVar(varID, varValue);
         }
     }
 
@@ -144,6 +138,7 @@ public class Frame extends DebuggerObject
             for (String e : vars.keySet()) {
                 Element var = xml.insertElement(varEl, Variable.ELEMENT_TAG);
                 xml.setAttribute(var, NAME_ATTR, e);
+                xml.setAttribute(var, ID_ATTR, vars.get(e).getID());
                 xml.setAttribute(var, TYPE_ATTR, vars.get(e).getTypeName());
             }
         }
