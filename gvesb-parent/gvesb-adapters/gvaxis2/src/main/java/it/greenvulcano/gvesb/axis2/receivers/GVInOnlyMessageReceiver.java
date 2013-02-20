@@ -70,9 +70,15 @@ public class GVInOnlyMessageReceiver extends AbstractInMessageReceiver
         XAHelper xaHelper = null;
         boolean inError = true;
         boolean forceTxRollBack = false;
+        String serviceName = null;
+        String operationName = null;
         try {
-            String serviceName = input.getAxisService().getName();
-            String operationName = getLocalName(input.getAxisOperation().getName().toString());
+            serviceName = input.getAxisService().getName();
+            operationName = getLocalName(input.getAxisOperation().getName().toString());
+            logger.info("GVInOnlyMessageReceiver - BEGIN service [" + serviceName + "/" + operationName + "]");
+            if (logger.isDebugEnabled()) {
+            	logger.debug("INPUT Envelope:\n" + input.getEnvelope().toString());
+            }
             try {
                 mrConfigurator.checkConfig();
             }
@@ -223,6 +229,7 @@ public class GVInOnlyMessageReceiver extends AbstractInMessageReceiver
                     throw new AxisFault("Error handling tansaction", exc);
                 }
             }
+            logger.info("GVInOnlyMessageReceiver - END service [" + serviceName + "/" + operationName + "]");
         }
     }
 

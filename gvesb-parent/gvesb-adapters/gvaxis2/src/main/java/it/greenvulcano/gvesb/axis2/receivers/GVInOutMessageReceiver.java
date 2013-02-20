@@ -75,9 +75,16 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
         boolean inError = true;
         boolean forceTxRollBack = false;
         boolean outputIsFault = false;
+        String serviceName = null;
+        String operationName = null;
         try {
-            String serviceName = input.getAxisService().getName();
-            String operationName = getLocalName(input.getAxisOperation().getName().toString());
+            serviceName = input.getAxisService().getName();
+            operationName = getLocalName(input.getAxisOperation().getName().toString());
+            logger.info("GVInOutMessageReceiver - BEGIN service [" + serviceName + "/" + operationName + "]");
+            if (logger.isDebugEnabled()) {
+            	logger.debug("INPUT Envelope:\n" + input.getEnvelope().toString());
+            }
+            input.getEnvelope().toString();
             try {
                 mrConfigurator.checkConfig();
             }
@@ -213,6 +220,10 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
                         logger.warn("Output is Fault : prepare to roll back transaction");
                         outputIsFault = true;
                     }
+                    
+                    if (logger.isDebugEnabled()) {
+                    	logger.debug("OUTPUT Envelope:\n" + output.getEnvelope().toString());
+                    }
                     inError = false;
                 }
                 catch (GVException exc) {
@@ -256,6 +267,7 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
                     throw new AxisFault("Error handling tansaction", exc);
                 }
             }
+            logger.info("GVInOutMessageReceiver - END service [" + serviceName + "/" + operationName + "]");
         }
     }
 
