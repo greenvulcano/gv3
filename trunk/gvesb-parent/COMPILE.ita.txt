@@ -6,7 +6,7 @@ Prerequisiti:
     - plug-in subversive  (Subversione client)
 
 Scaricare dal repository https://svn.code.sf.net/p/greenvulcanoesb/source/trunk il progetto 'gvesb-parent'.
-Identifichiamo come GV_PROJECT_HOME la directory dove è stato scaricato il progetto.
+Identifichiamo come GV_PROJECT_HOME il path del progetto.
 
 Operazioni propedeutiche comuni
 - modificare opportunamente il contenuto del file (GV_PROJECT_HOME)/tools/maven/conf/user-settings.xml :
