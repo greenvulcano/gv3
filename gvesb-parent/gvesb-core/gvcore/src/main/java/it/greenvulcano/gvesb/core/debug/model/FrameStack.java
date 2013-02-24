@@ -21,6 +21,7 @@ package it.greenvulcano.gvesb.core.debug.model;
 
 import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
+import it.greenvulcano.gvesb.core.debug.DebuggerException;
 import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
@@ -70,7 +71,7 @@ public class FrameStack extends DebuggerObject
         return frameStack;
     }
 
-    public Variable getVar(String stackFrame, String varEnv, String varID)
+    public Variable getVar(String stackFrame, String varEnv, String varID) throws DebuggerException
     {
         Frame f = frames.get(stackFrame);
         if (f == null) {

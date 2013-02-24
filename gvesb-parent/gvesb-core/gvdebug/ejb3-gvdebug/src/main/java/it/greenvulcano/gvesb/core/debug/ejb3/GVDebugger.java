@@ -31,9 +31,10 @@ import it.greenvulcano.gvesb.core.debug.model.DebuggerObject;
  */
 public interface GVDebugger
 {
-    public DebuggerObject stack(String threadName);
+    public DebuggerObject stack(String threadName) throws DebuggerException;
 
-    public DebuggerObject var(String threadName, String stackFrame, String varEnv, String varID);
+    public DebuggerObject var(String threadName, String stackFrame, String varEnv, String varID)
+            throws DebuggerException;
 
     public DebuggerObject set_var(String threadName, String stackFrame, String varEnv, String varID, String varValue)
             throws DebuggerException;
@@ -54,7 +55,7 @@ public interface GVDebugger
 
     public DebuggerObject exit();
 
-    public DebuggerObject connect(String service, String operation) throws DebuggerException;
+    public DebuggerObject connect(String version, String service, String operation) throws DebuggerException;
 
     public DebuggerObject start() throws DebuggerException;
 

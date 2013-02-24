@@ -33,29 +33,11 @@ import java.util.Set;
  */
 public class DebuggerAdapter
 {
+    private Service             debugService;
+    private DebugSynchObject    synchObject;
 
-    /**
-     * <p>
-     * The stack of stack frames (the control stack)
-     * </p>
-     * <p>
-     * Each stack frame is a mapping of variable names to values.
-     * </p>
-     * <p>
-     * There are a number of special variable names:
-     * </p>
-     * <p>
-     * _pc_ is the current program counter in the frame
-     * </p>
-     * <p>
-     * the pc points to the next instruction to be executed
-     * </p>
-     * <p>
-     * _func_ is the name of the function in this frame
-     * </p>
-     */
-    private Service          debugService;
-    private DebugSynchObject synchObject;
+    // TODO: make configurable
+    public static final Version DEBUGGER_VERSION = new Version("3.3.0");
 
     public DebuggerAdapter() throws DebuggerException
     {
@@ -82,15 +64,18 @@ public class DebuggerAdapter
         return null;
     }
 
-    public DebuggerObject stack(String threadName)
+    public DebuggerObject stack(String threadName) throws DebuggerException
     {
+        checkNotEmpty(threadName);
         ThreadInfo thread = debugService.getThread(threadName);
         thread.loadInfo(synchObject);
         return thread.getStackFrame();
     }
 
     public DebuggerObject var(String threadName, String stackFrame, String varEnv, String varID)
+            throws DebuggerException
     {
+        checkNotEmpty(threadName, stackFrame, varEnv, varID);
         ThreadInfo thread = debugService.getThread(threadName);
         thread.loadInfo(synchObject);
         return thread.getStackFrame().getVar(stackFrame, varEnv, varID);
@@ -99,6 +84,7 @@ public class DebuggerAdapter
     public DebuggerObject set_var(String threadName, String stackFrame, String varEnv, String varID, String varValue)
             throws DebuggerException
     {
+        checkNotEmpty(threadName, stackFrame, varEnv, varID);
         ThreadInfo thread = debugService.getThread(threadName);
         thread.loadInfo(synchObject);
         try {
@@ -112,6 +98,7 @@ public class DebuggerAdapter
 
     public DebuggerObject set(String threadName, String subflow, String nodeId) throws DebuggerException
     {
+        checkNotEmpty(threadName, nodeId);
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
         ExecutionInfo bp = new ExecutionInfo(synchObject.getExecutionInfo());
         bp.setNodeId(nodeId);
@@ -127,6 +114,7 @@ public class DebuggerAdapter
 
     public DebuggerObject clear(String threadName, String subflow, String nodeId) throws DebuggerException
     {
+        checkNotEmpty(threadName, nodeId);
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
         ExecutionInfo bp = new ExecutionInfo(synchObject.getExecutionInfo());
         bp.setNodeId(nodeId);
@@ -137,6 +125,7 @@ public class DebuggerAdapter
 
     public DebuggerObject stepOver(String threadName) throws DebuggerException
     {
+        checkNotEmpty(threadName);
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
         synchObject.stepOver();
         return DebuggerObject.OK_DEBUGGER_OBJECT;
@@ -144,6 +133,7 @@ public class DebuggerAdapter
 
     public DebuggerObject stepInto(String threadName) throws DebuggerException
     {
+        checkNotEmpty(threadName);
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
         synchObject.stepInto();
         return DebuggerObject.OK_DEBUGGER_OBJECT;
@@ -151,6 +141,7 @@ public class DebuggerAdapter
 
     public DebuggerObject stepReturn(String threadName) throws DebuggerException
     {
+        checkNotEmpty(threadName);
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
         synchObject.stepReturn();
         return DebuggerObject.OK_DEBUGGER_OBJECT;
@@ -158,6 +149,7 @@ public class DebuggerAdapter
 
     public DebuggerObject resume(String threadName) throws DebuggerException
     {
+        checkNotEmpty(threadName);
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
         synchObject.resume();
         return DebuggerObject.OK_DEBUGGER_OBJECT;
@@ -172,8 +164,10 @@ public class DebuggerAdapter
         return DebuggerObject.OK_DEBUGGER_OBJECT;
     }
 
-    public DebuggerObject connect(String service, String operation)
+    public DebuggerObject connect(String version, String service, String operation) throws DebuggerException
     {
+        checkNotEmpty(version, service, operation);
+        checkVersion(version);
         debugService = new Service(service, operation);
         return debugService;
     }
@@ -186,4 +180,21 @@ public class DebuggerAdapter
                 : synchObject.event()));
     }
 
+    private void checkNotEmpty(String... args) throws DebuggerException
+    {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] == null || args[i].length() == 0) {
+                throw new DebuggerException("Input parameter at position " + (i + 1) + " is empty");
+            }
+        }
+    }
+
+    private void checkVersion(String version) throws DebuggerException
+    {
+        Version v = new Version(version);
+        if (DEBUGGER_VERSION.compareTo(v) < 0) {
+            throw new DebuggerException("GreenVulcano ESB debugger version is less than client debugger version. GV: "
+                    + DEBUGGER_VERSION + " CLIENT: " + version);
+        }
+    }
 }

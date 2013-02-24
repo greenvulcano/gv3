@@ -20,6 +20,7 @@
 package it.greenvulcano.gvesb.core.debug.model;
 
 import it.greenvulcano.gvesb.buffer.GVException;
+import it.greenvulcano.gvesb.core.debug.DebuggerException;
 import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
@@ -63,9 +64,12 @@ public class Frame extends DebuggerObject
         loadInfo();
     }
 
-    public Variable getVar(String env, String key)
+    public Variable getVar(String env, String key) throws DebuggerException
     {
         Variable varEnv = vars.get(env);
+        if (varEnv == null) {
+            throw new DebuggerException("Environment '" + env + "' not found");
+        }
         return varEnv.getVar(key);
     }
 

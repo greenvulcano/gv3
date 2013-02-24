@@ -20,8 +20,10 @@
 package tests.unit.gvdebug;
 
 import it.greenvulcano.core.debug.servlet.DebuggerServlet.DebugCommand;
+import it.greenvulcano.core.debug.servlet.DebuggerServlet.DebugKey;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.GreenVulcano;
+import it.greenvulcano.gvesb.core.debug.DebuggerAdapter;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.util.xml.XMLUtils;
 
@@ -125,7 +127,10 @@ public class GVDebugTestCase extends TestCase
     {
         PostMethod method = new PostMethod(CONNECT_URL);
         try {
-            method.setParameter("debugOperation", command.toString());
+            method.setParameter(DebugKey.debugOperation.name(), command.toString());
+            if (command == DebugCommand.CONNECT) {
+                params.put(DebugKey.debuggerVersion.name(), DebuggerAdapter.DEBUGGER_VERSION.toString());
+            }
             if (params != null && params.size() > 0) {
                 for (Entry<String, String> e : params.entrySet()) {
                     method.setParameter(e.getKey(), e.getValue());
@@ -174,8 +179,8 @@ public class GVDebugTestCase extends TestCase
 
         // Connect debugger
         Map<String, String> params = new HashMap<String, String>();
-        params.put("service", serviceName);
-        params.put("operation", opName);
+        params.put(DebugKey.service.name(), serviceName);
+        params.put(DebugKey.operation.name(), opName);
         String responseBody = sendRequest(httpClient, DebugCommand.CONNECT, params);
         System.out.println("CONNECT response: " + responseBody);
 
@@ -229,21 +234,22 @@ public class GVDebugTestCase extends TestCase
 
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "request");
 
-            Node env = xmlUtils.selectSingleNode(document,
-                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='input_test']");
+            Node frame = xmlUtils.selectSingleNode(document, "/GVDebugger/FrameStack/Frame");
+            Node env = xmlUtils.selectSingleNode(frame, "Variables/Variable[@name='input_test']");
             assertNotNull(env);
             // variable
             params.clear();
-            params.put("threadName", threadName);
-            params.put("varEnv", xmlUtils.get(env, "@name"));
-            params.put("varID", xmlUtils.get(env, "@id"));
+            params.put(DebugKey.threadName.name(), threadName);
+            params.put(DebugKey.varEnv.name(), xmlUtils.get(env, "@name"));
+            params.put(DebugKey.varID.name(), xmlUtils.get(env, "@id"));
+            params.put(DebugKey.stackFrame.name(), xmlUtils.get(frame, "@name"));
             responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
             System.out.println("VAR(input_test) response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -251,28 +257,29 @@ public class GVDebugTestCase extends TestCase
 
             // step
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println("STEP_OVER response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "check_status");
 
-            env = xmlUtils.selectSingleNode(document,
-                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='output_test']");
+            frame = xmlUtils.selectSingleNode(document, "/GVDebugger/FrameStack/Frame");
+            env = xmlUtils.selectSingleNode(frame, "Variables/Variable[@name='output_test']");
             assertNotNull(env);
             // variable
             params.clear();
-            params.put("threadName", threadName);
-            params.put("varEnv", xmlUtils.get(env, "@name"));
-            params.put("varID", xmlUtils.get(env, "@id"));
+            params.put(DebugKey.threadName.name(), threadName);
+            params.put(DebugKey.varEnv.name(), xmlUtils.get(env, "@name"));
+            params.put(DebugKey.varID.name(), xmlUtils.get(env, "@id"));
+            params.put(DebugKey.stackFrame.name(), xmlUtils.get(frame, "@name"));
             responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
             System.out.println("VAR(output_test) response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -280,14 +287,14 @@ public class GVDebugTestCase extends TestCase
 
             // step
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println("STEP_OVER response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -296,14 +303,14 @@ public class GVDebugTestCase extends TestCase
 
             // step
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println("STEP_OVER response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -333,8 +340,8 @@ public class GVDebugTestCase extends TestCase
 
         // Connect debugger
         Map<String, String> params = new HashMap<String, String>();
-        params.put("service", serviceName);
-        params.put("operation", opName);
+        params.put(DebugKey.service.name(), serviceName);
+        params.put(DebugKey.operation.name(), opName);
         String responseBody = sendRequest(httpClient, DebugCommand.CONNECT, params);
         System.out.println("CONNECT response: " + responseBody);
 
@@ -388,21 +395,22 @@ public class GVDebugTestCase extends TestCase
 
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "request");
 
-            Node env = xmlUtils.selectSingleNode(document,
-                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='input_test']");
+            Node frame = xmlUtils.selectSingleNode(document, "/GVDebugger/FrameStack/Frame");
+            Node env = xmlUtils.selectSingleNode(frame, "Variables/Variable[@name='input_test']");
             assertNotNull(env);
             // variable
             params.clear();
-            params.put("threadName", threadName);
-            params.put("varEnv", xmlUtils.get(env, "@name"));
-            params.put("varID", xmlUtils.get(env, "@id"));
+            params.put(DebugKey.threadName.name(), threadName);
+            params.put(DebugKey.varEnv.name(), xmlUtils.get(env, "@name"));
+            params.put(DebugKey.varID.name(), xmlUtils.get(env, "@id"));
+            params.put(DebugKey.stackFrame.name(), xmlUtils.get(frame, "@name"));
             responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
             System.out.println("VAR(input_test) response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -410,28 +418,29 @@ public class GVDebugTestCase extends TestCase
 
             // step
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println("STEP_OVER response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "check_status");
 
-            env = xmlUtils.selectSingleNode(document,
-                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='output_test']");
+            frame = xmlUtils.selectSingleNode(document, "/GVDebugger/FrameStack/Frame");
+            env = xmlUtils.selectSingleNode(frame, "Variables/Variable[@name='output_test']");
             assertNotNull(env);
             // variable
             params.clear();
-            params.put("threadName", threadName);
-            params.put("varEnv", xmlUtils.get(env, "@name"));
-            params.put("varID", xmlUtils.get(env, "@id"));
+            params.put(DebugKey.threadName.name(), threadName);
+            params.put(DebugKey.varEnv.name(), xmlUtils.get(env, "@name"));
+            params.put(DebugKey.varID.name(), xmlUtils.get(env, "@id"));
+            params.put(DebugKey.stackFrame.name(), xmlUtils.get(frame, "@name"));
             responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
             System.out.println("VAR(output_test) response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -439,14 +448,14 @@ public class GVDebugTestCase extends TestCase
 
             // step
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println("STEP_OVER response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -455,14 +464,14 @@ public class GVDebugTestCase extends TestCase
 
             // step
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println("STEP_OVER response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -494,8 +503,8 @@ public class GVDebugTestCase extends TestCase
 
         // Connect debugger
         Map<String, String> params = new HashMap<String, String>();
-        params.put("service", serviceName);
-        params.put("operation", opName);
+        params.put(DebugKey.service.name(), serviceName);
+        params.put(DebugKey.operation.name(), opName);
         String responseBody = sendRequest(httpClient, DebugCommand.CONNECT, params);
         System.out.println("CONNECT response: " + responseBody);
 
@@ -549,21 +558,22 @@ public class GVDebugTestCase extends TestCase
 
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "check");
 
-            Node env = xmlUtils.selectSingleNode(document,
-                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='input_test']");
+            Node frame = xmlUtils.selectSingleNode(document, "/GVDebugger/FrameStack/Frame");
+            Node env = xmlUtils.selectSingleNode(frame, "Variables/Variable[@name='input_test']");
             assertNotNull(env);
             // variable
             params.clear();
-            params.put("threadName", threadName);
-            params.put("varEnv", xmlUtils.get(env, "@name"));
-            params.put("varID", xmlUtils.get(env, "@id"));
+            params.put(DebugKey.threadName.name(), threadName);
+            params.put(DebugKey.varEnv.name(), xmlUtils.get(env, "@name"));
+            params.put(DebugKey.varID.name(), xmlUtils.get(env, "@id"));
+            params.put(DebugKey.stackFrame.name(), xmlUtils.get(frame, "@name"));
             responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
             System.out.println("VAR(input_test) response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -571,7 +581,7 @@ public class GVDebugTestCase extends TestCase
 
             // step
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println("STEP_OVER response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -600,8 +610,8 @@ public class GVDebugTestCase extends TestCase
 
         // Connect debugger
         Map<String, String> params = new HashMap<String, String>();
-        params.put("service", serviceName);
-        params.put("operation", opName);
+        params.put(DebugKey.service.name(), serviceName);
+        params.put(DebugKey.operation.name(), opName);
         String responseBody = sendRequest(httpClient, DebugCommand.CONNECT, params);
         System.out.println("CONNECT response: " + responseBody);
 
@@ -655,21 +665,22 @@ public class GVDebugTestCase extends TestCase
 
             // data
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STACK, params);
             System.out.println("STACK response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
             assertEquals(xmlUtils.get(document, "/GVDebugger/@result"), "OK");
             assertEquals(xmlUtils.get(document, "/GVDebugger/FrameStack/Frame/@flow_node"), "check");
 
-            Node env = xmlUtils.selectSingleNode(document,
-                    "/GVDebugger/FrameStack/Frame/Variables/Variable[@name='input_test']");
+            Node frame = xmlUtils.selectSingleNode(document, "/GVDebugger/FrameStack/Frame");
+            Node env = xmlUtils.selectSingleNode(frame, "Variables/Variable[@name='input_test']");
             assertNotNull(env);
             // variable
             params.clear();
-            params.put("threadName", threadName);
-            params.put("varEnv", xmlUtils.get(env, "@name"));
-            params.put("varID", xmlUtils.get(env, "@id"));
+            params.put(DebugKey.threadName.name(), threadName);
+            params.put(DebugKey.varEnv.name(), xmlUtils.get(env, "@name"));
+            params.put(DebugKey.varID.name(), xmlUtils.get(env, "@id"));
+            params.put(DebugKey.stackFrame.name(), xmlUtils.get(frame, "@name"));
             responseBody = sendRequest(httpClient, DebugCommand.VAR, params);
             System.out.println("VAR(input_test) response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
@@ -677,7 +688,7 @@ public class GVDebugTestCase extends TestCase
 
             // step
             params.clear();
-            params.put("threadName", threadName);
+            params.put(DebugKey.threadName.name(), threadName);
             responseBody = sendRequest(httpClient, DebugCommand.STEP_OVER, params);
             System.out.println("STEP_OVER response: " + responseBody);
             document = xmlUtils.parseDOM(responseBody);
