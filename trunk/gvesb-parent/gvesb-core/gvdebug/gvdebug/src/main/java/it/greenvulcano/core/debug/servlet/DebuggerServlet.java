@@ -46,6 +46,10 @@ public class DebuggerServlet extends HttpServlet
         CONNECT, START, STACK, VAR, SET_VAR, DATA, SET, CLEAR, STEP_OVER, STEP_INTO, STEP_RETURN, RESUME, EXIT, EVENT
     }
 
+    public enum DebugKey {
+        debugOperation, service, operation, debuggerVersion, threadName, stackFrame, varEnv, varID, varValue, breakpoint, subflow
+    }
+
     /**
      * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse)
@@ -55,7 +59,7 @@ public class DebuggerServlet extends HttpServlet
             IOException
     {
         try {
-            String dOp = request.getParameter("debugOperation");
+            String dOp = request.getParameter(DebugKey.debugOperation.name());
             DebugCommand debugOperation = DebugCommand.valueOf(dOp.toUpperCase());
             PrintWriter writer = response.getWriter();
             DebuggerObject dObj = null;
@@ -69,9 +73,10 @@ public class DebuggerServlet extends HttpServlet
             synchronized (debuggerBean) {
                 switch (debugOperation) {
                     case CONNECT : {
-                        String service = request.getParameter("service");
-                        String operation = request.getParameter("operation");
-                        dObj = debuggerBean.connect(service, operation);
+                        String service = request.getParameter(DebugKey.service.name());
+                        String operation = request.getParameter(DebugKey.operation.name());
+                        String version = request.getParameter(DebugKey.debuggerVersion.name());
+                        dObj = debuggerBean.connect(version, service, operation);
                     }
                         break;
                     case START : {
@@ -79,24 +84,24 @@ public class DebuggerServlet extends HttpServlet
                     }
                         break;
                     case STACK : {
-                        String threadName = request.getParameter("threadName");
+                        String threadName = request.getParameter(DebugKey.threadName.name());
                         dObj = debuggerBean.stack(threadName);
                     }
                         break;
                     case VAR : {
-                        String stackFrame = request.getParameter("stackFrame");
-                        String varEnv = request.getParameter("varEnv");
-                        String varID = request.getParameter("varID");
-                        String threadName = request.getParameter("threadName");
+                        String stackFrame = request.getParameter(DebugKey.stackFrame.name());
+                        String varEnv = request.getParameter(DebugKey.varEnv.name());
+                        String varID = request.getParameter(DebugKey.varID.name());
+                        String threadName = request.getParameter(DebugKey.threadName.name());
                         dObj = debuggerBean.var(threadName, stackFrame, varEnv, varID);
                     }
                         break;
                     case SET_VAR : {
-                        String stackFrame = request.getParameter("stackFrame");
-                        String varEnv = request.getParameter("varEnv");
-                        String varID = request.getParameter("varID");
-                        String varValue = request.getParameter("varValue");
-                        String threadName = request.getParameter("threadName");
+                        String stackFrame = request.getParameter(DebugKey.stackFrame.name());
+                        String varEnv = request.getParameter(DebugKey.varEnv.name());
+                        String varID = request.getParameter(DebugKey.varID.name());
+                        String varValue = request.getParameter(DebugKey.varValue.name());
+                        String threadName = request.getParameter(DebugKey.threadName.name());
                         dObj = debuggerBean.set_var(threadName, stackFrame, varEnv, varID, varValue);
                     }
                         break;
@@ -104,36 +109,36 @@ public class DebuggerServlet extends HttpServlet
                         dObj = debuggerBean.data();
                         break;
                     case SET : {
-                        String threadName = request.getParameter("threadName");
-                        String sBreakpoint = request.getParameter("breakpoint");
-                        String subflow = request.getParameter("subflow");
+                        String threadName = request.getParameter(DebugKey.threadName.name());
+                        String sBreakpoint = request.getParameter(DebugKey.breakpoint.name());
+                        String subflow = request.getParameter(DebugKey.subflow.name());
                         dObj = debuggerBean.set(threadName, subflow, sBreakpoint);
                     }
                         break;
                     case CLEAR : {
-                        String threadName = request.getParameter("threadName");
-                        String cBreakpoint = request.getParameter("breakpoint");
-                        String subflow = request.getParameter("subflow");
+                        String threadName = request.getParameter(DebugKey.threadName.name());
+                        String cBreakpoint = request.getParameter(DebugKey.breakpoint.name());
+                        String subflow = request.getParameter(DebugKey.subflow.name());
                         dObj = debuggerBean.clear(threadName, subflow, cBreakpoint);
                     }
                         break;
                     case STEP_OVER : {
-                        String threadName = request.getParameter("threadName");
+                        String threadName = request.getParameter(DebugKey.threadName.name());
                         dObj = debuggerBean.stepOver(threadName);
                     }
                         break;
                     case STEP_INTO : {
-                        String threadName = request.getParameter("threadName");
+                        String threadName = request.getParameter(DebugKey.threadName.name());
                         dObj = debuggerBean.stepInto(threadName);
                     }
                         break;
                     case STEP_RETURN : {
-                        String threadName = request.getParameter("threadName");
+                        String threadName = request.getParameter(DebugKey.threadName.name());
                         dObj = debuggerBean.stepReturn(threadName);
                     }
                         break;
                     case RESUME : {
-                        String threadName = request.getParameter("threadName");
+                        String threadName = request.getParameter(DebugKey.threadName.name());
                         dObj = debuggerBean.resume(threadName);
                     }
                         break;

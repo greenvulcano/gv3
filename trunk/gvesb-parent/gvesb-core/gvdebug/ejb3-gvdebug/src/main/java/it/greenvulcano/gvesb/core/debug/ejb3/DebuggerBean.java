@@ -74,12 +74,13 @@ public class DebuggerBean implements GVDebugger
         this.clientInfo = clientInfo;
     }
 
-    public DebuggerObject stack(String threadName)
+    public DebuggerObject stack(String threadName) throws DebuggerException
     {
         return debugger.stack(threadName);
     }
 
     public DebuggerObject var(String threadName, String stackFrame, String varEnv, String varID)
+            throws DebuggerException
     {
         return debugger.var(threadName, stackFrame, varEnv, varID);
     }
@@ -137,10 +138,10 @@ public class DebuggerBean implements GVDebugger
         return object;
     }
 
-    public DebuggerObject connect(String service, String operation) throws DebuggerException
+    public DebuggerObject connect(String version, String service, String operation) throws DebuggerException
     {
         debugger = new DebuggerAdapter();
-        return debugger.connect(service, operation);
+        return debugger.connect(version, service, operation);
     }
 
     public DebuggerObject start() throws DebuggerException
@@ -152,4 +153,5 @@ public class DebuggerBean implements GVDebugger
     {
         return debugger.event();
     }
+
 }
