@@ -128,7 +128,7 @@ public class DebuggerBean implements GVDebugger
     }
 
     @Remove
-    public DebuggerObject exit()
+    public DebuggerObject exit() throws DebuggerException
     {
         DebuggerObject object = null;
         if (debugger != null) {

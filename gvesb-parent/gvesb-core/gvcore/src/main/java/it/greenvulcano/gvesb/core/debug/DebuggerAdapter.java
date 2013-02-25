@@ -155,7 +155,7 @@ public class DebuggerAdapter
         return DebuggerObject.OK_DEBUGGER_OBJECT;
     }
 
-    public DebuggerObject exit()
+    public DebuggerObject exit() throws DebuggerException
     {
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
         if (synchObject != null) {

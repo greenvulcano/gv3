@@ -53,7 +53,7 @@ public interface GVDebugger
 
     public DebuggerObject resume(String threadName) throws DebuggerException;
 
-    public DebuggerObject exit();
+    public DebuggerObject exit() throws DebuggerException;
 
     public DebuggerObject connect(String version, String service, String operation) throws DebuggerException;
 
