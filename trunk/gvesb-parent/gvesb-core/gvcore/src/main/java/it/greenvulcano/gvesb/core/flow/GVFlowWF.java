@@ -370,7 +370,7 @@ public class GVFlowWF implements GVFlow
         String nextNode = firstNode;
 
         if (onDebug) {
-            ExecutionInfo info = new ExecutionInfo(inService, flowName, nextNode, null, environment);
+            ExecutionInfo info = new ExecutionInfo(serviceName, flowName, nextNode, null, environment);
             DebugSynchObject synchObj = DebugSynchObject.getSynchObject(inID, info);
             if (synchObj == null) {
                 synchObj = DebugSynchObject.createNew(Thread.currentThread().getName(), inID, info);
