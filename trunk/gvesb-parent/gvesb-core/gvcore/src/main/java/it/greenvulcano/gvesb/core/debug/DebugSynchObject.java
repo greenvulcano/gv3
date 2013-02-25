@@ -189,7 +189,7 @@ public class DebugSynchObject
     {
         ExecutionInfo execInfo = execInfoStack.peek();
         boolean res = mustStop;
-        if (!res) {
+        if (!res && execInfo != null) {
             synchronized (debugFlowsBreakpoints) {
                 BreakpointType bt = debugFlowsBreakpoints.get(execInfo.toString());
                 if (bt != null) {
@@ -355,7 +355,9 @@ public class DebugSynchObject
     {
         BreakpointType breakpointType = debugFlowsBreakpoints.get(execInfo.toString());
         if (breakpointType != BreakpointType.PERSISTENT) {
-            debugFlowsBreakpoints.put(execInfo.toString(), BreakpointType.TEMPORARY);
+            synchronized (debugFlowsBreakpoints) {
+                debugFlowsBreakpoints.put(execInfo.toString(), BreakpointType.TEMPORARY);
+            }
         }
         synchronized (this) {
             this.notifyAll();
@@ -390,7 +392,9 @@ public class DebugSynchObject
 
     public void terminated()
     {
-        execInfoStack.pop();
+        if (!execInfoStack.isEmpty()) {
+            execInfoStack.pop();
+        }
         if (stepReturn) {
             mustStop = true;
         }
@@ -411,8 +415,12 @@ public class DebugSynchObject
         events.add(dObj);
     }
 
-    public void stop()
+    public void stop() throws DebuggerException
     {
+        synchronized (debugFlowsBreakpoints) {
+            debugFlowsBreakpoints.clear();
+        }
+        resume();
         execInfoStack.clear();
     }
 
