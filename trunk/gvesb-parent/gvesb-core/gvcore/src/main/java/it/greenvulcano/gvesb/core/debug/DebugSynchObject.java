@@ -148,12 +148,14 @@ public class DebugSynchObject
     private boolean                     stepReturn;
 
     private Deque<DebuggerObject>       events;
+    private boolean                     skipAllBreakpoints;
 
     private DebugSynchObject()
     {
         this.mustStop = true;
         execInfoStack = new ArrayDeque<ExecutionInfo>();
         events = new LinkedList<DebuggerObject>();
+        skipAllBreakpoints = false;
     }
 
     private DebugSynchObject(String threadName, String flowId)
@@ -195,8 +197,10 @@ public class DebugSynchObject
                 if (bt != null) {
                     switch (bt) {
                         case PERSISTENT :
-                            res = true;
-                            sendDebugEvent(Event.SUSPENDED, "breakpoint", execInfo.getNodeId());
+                            if (!skipAllBreakpoints) {
+                                res = true;
+                                sendDebugEvent(Event.SUSPENDED, "breakpoint", execInfo.getNodeId());
+                            }
                             break;
                         case TEMPORARY :
                             debugFlowsBreakpoints.put(execInfo.toString(), BreakpointType.REMOVED);
@@ -432,5 +436,10 @@ public class DebugSynchObject
     public String getFlowId()
     {
         return flowId;
+    }
+
+    public void skipAllBreakpoints(boolean enabled)
+    {
+        skipAllBreakpoints = enabled;
     }
 }

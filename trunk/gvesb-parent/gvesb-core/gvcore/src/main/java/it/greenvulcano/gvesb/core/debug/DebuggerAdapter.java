@@ -155,6 +155,13 @@ public class DebuggerAdapter
         return DebuggerObject.OK_DEBUGGER_OBJECT;
     }
 
+    public DebuggerObject skipAllBreakpoints(boolean enabled)
+    {
+        DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);
+        synchObject.skipAllBreakpoints(enabled);
+        return DebuggerObject.OK_DEBUGGER_OBJECT;
+    }
+
     public DebuggerObject exit() throws DebuggerException
     {
         DebugSynchObject synchObject = DebugSynchObject.getSynchObject(debugService.getId(), null);

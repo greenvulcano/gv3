@@ -127,6 +127,11 @@ public class DebuggerBean implements GVDebugger
         return debugger.resume(threadName);
     }
 
+    public DebuggerObject skipAllBreakpoints(boolean enabled) throws DebuggerException
+    {
+        return debugger.skipAllBreakpoints(enabled);
+    }
+
     @Remove
     public DebuggerObject exit() throws DebuggerException
     {
