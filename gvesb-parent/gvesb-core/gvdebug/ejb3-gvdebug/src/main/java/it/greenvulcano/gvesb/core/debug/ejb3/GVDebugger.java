@@ -60,4 +60,6 @@ public interface GVDebugger
     public DebuggerObject start() throws DebuggerException;
 
     public DebuggerObject event();
+
+    public DebuggerObject skipAllBreakpoints(boolean enabled) throws DebuggerException;
 }

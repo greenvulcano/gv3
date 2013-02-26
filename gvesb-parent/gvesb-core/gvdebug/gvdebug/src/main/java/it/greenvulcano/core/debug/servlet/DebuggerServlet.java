@@ -43,11 +43,11 @@ public class DebuggerServlet extends HttpServlet
     private static final String STATEFUL_BEAN_KEY = "STATEFUL_BEAN_KEY";
 
     public enum DebugCommand {
-        CONNECT, START, STACK, VAR, SET_VAR, DATA, SET, CLEAR, STEP_OVER, STEP_INTO, STEP_RETURN, RESUME, EXIT, EVENT
+        CONNECT, START, STACK, VAR, SET_VAR, DATA, SET, CLEAR, STEP_OVER, STEP_INTO, STEP_RETURN, RESUME, EXIT, EVENT, SKIP_ALL_BP
     }
 
     public enum DebugKey {
-        debugOperation, service, operation, debuggerVersion, threadName, stackFrame, varEnv, varID, varValue, breakpoint, subflow
+        debugOperation, service, operation, debuggerVersion, threadName, stackFrame, varEnv, varID, varValue, breakpoint, subflow, enabled
     }
 
     /**
@@ -120,6 +120,11 @@ public class DebuggerServlet extends HttpServlet
                         String cBreakpoint = request.getParameter(DebugKey.breakpoint.name());
                         String subflow = request.getParameter(DebugKey.subflow.name());
                         dObj = debuggerBean.clear(threadName, subflow, cBreakpoint);
+                    }
+                        break;
+                    case SKIP_ALL_BP : {
+                        boolean enabled = Boolean.parseBoolean(request.getParameter(DebugKey.enabled.name()));
+                        dObj = debuggerBean.skipAllBreakpoints(enabled);
                     }
                         break;
                     case STEP_OVER : {
