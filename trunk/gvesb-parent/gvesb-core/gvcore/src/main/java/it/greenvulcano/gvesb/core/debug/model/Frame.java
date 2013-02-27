@@ -42,14 +42,14 @@ public class Frame extends DebuggerObject
     /**
      * 
      */
-    private static final long     serialVersionUID = 1L;
-    private Map<String, Variable> vars             = null;
-    private String                serviceName;
-    private String                operationName;
-    private String                flowNode;
-    private String                frameName;
-    private String                subflow;
-    private ExecutionInfo         execInfo;
+    private static final long       serialVersionUID = 1L;
+    private Map<String, Variable>   vars             = null;
+    private String                  serviceName;
+    private String                  operationName;
+    private String                  flowNode;
+    private String                  frameName;
+    private String                  subflow;
+    private transient ExecutionInfo execInfo;
 
     public Frame(ExecutionInfo execInfo)
     {

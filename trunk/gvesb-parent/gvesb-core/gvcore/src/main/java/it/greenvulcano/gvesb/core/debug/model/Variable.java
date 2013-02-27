@@ -44,11 +44,11 @@ public class Variable extends DebuggerObject
     public static final String    ELEMENT_TAG      = "Variable";
     private String                id               = null;
     private String                name             = null;
-    private Object                value            = null;
+    private String                value            = null;
     private Map<String, Variable> values           = new LinkedHashMap<String, Variable>();
     private boolean               isGVBuffer       = false;
     private boolean               isException      = false;
-    private GVBuffer              origGVBuffer     = null;
+    private transient GVBuffer    origGVBuffer     = null;
     private Class<?>              type;
     private Field                 gvField;
 
@@ -74,8 +74,8 @@ public class Variable extends DebuggerObject
         else if (isException) {
             ExceptionConverter.toDebugger(this, (Throwable) object);
         }
-        else {
-            this.value = object;
+        else if (object != null) {
+            this.value = object.toString();
         }
     }
 
@@ -116,7 +116,7 @@ public class Variable extends DebuggerObject
         }
         else {
             if (value != null) {
-                var.setTextContent(value.toString());
+                var.setTextContent(value);
             }
         }
         return var;
