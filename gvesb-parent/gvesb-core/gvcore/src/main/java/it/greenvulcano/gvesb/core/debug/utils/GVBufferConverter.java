@@ -105,6 +105,9 @@ public class GVBufferConverter
             case SERVICE :
                 origGVBuffer.setService(varValue);
                 break;
+            case RETCODE :
+                origGVBuffer.setRetCode(Integer.parseInt(varValue));
+                break;
             case OBJECT :
                 origGVBuffer.setObject(varValue);
                 break;
