@@ -1,0 +1,34 @@
+<%@ taglib uri="/WEB-INF/maxime.tld" prefix="max" %>
+<%
+    String command = request.getParameter("command");
+    if(command != null) {
+%>
+        <hr>
+<%
+        // server and objectName come from the page which include this page
+        
+        if(command.equals("Reload")) {
+            String selectedFiles[] = request.getParameterValues("file");
+            if(selectedFiles != null) {
+                Object params[] = new Object[1];
+                String signature[] = new String[] {"java.lang.String"};
+                for(int i = 0; i < selectedFiles.length; ++i) {
+                    params[0] = selectedFiles[i];
+                    server.invoke(objectName, "reload", params, signature);
+%>
+                    <li>Reload <b><%= selectedFiles[i] %></b><br>
+<%
+                }
+%>
+                <br>
+<%
+            }
+        }
+        else if(command.equals("Reload all")) {
+            server.invoke(objectName, "reloadAll", null, null);
+        }
+%>
+        <b><%= command %></b> successfully executed.
+<%
+    }
+%>

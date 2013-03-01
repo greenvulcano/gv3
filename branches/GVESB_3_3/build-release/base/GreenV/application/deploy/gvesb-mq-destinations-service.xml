@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<server>
+    <mbean code="org.jboss.jms.server.destination.QueueService"
+           name="jboss.messaging.destination:service=Queue,name=TOUPPER_A_Request_Queue"
+           xmbean-dd="xmdesc/Queue-xmbean.xml">
+       <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+       <depends>jboss.messaging:service=PostOffice</depends>
+       <attribute name="JNDIName">gvesb/jms/queue/TOUPPER_A_Request_Queue</attribute>
+       <attribute name="RedeliveryDelay">60000</attribute>
+       <attribute name="MaxDeliveryAttempts">100</attribute>
+    </mbean>
+    <mbean code="org.jboss.jms.server.destination.QueueService"
+           name="jboss.messaging.destination:service=Queue,name=TOUPPER_A_Response_Queue"
+           xmbean-dd="xmdesc/Queue-xmbean.xml">
+       <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+       <depends>jboss.messaging:service=PostOffice</depends>
+       <attribute name="JNDIName">gvesb/jms/queue/TOUPPER_A_Response_Queue</attribute>
+       <attribute name="RedeliveryDelay">60000</attribute>
+       <attribute name="MaxDeliveryAttempts">100</attribute>
+    </mbean>
+    <mbean code="org.jboss.jms.server.destination.QueueService"
+           name="jboss.messaging.destination:service=Queue,name=Statistics_Queue"
+           xmbean-dd="xmdesc/Queue-xmbean.xml">
+       <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+       <depends>jboss.messaging:service=PostOffice</depends>
+       <attribute name="JNDIName">gvesb/jms/queue/Statistics_Queue</attribute>
+       <attribute name="RedeliveryDelay">60000</attribute>
+       <attribute name="MaxDeliveryAttempts">100</attribute>
+    </mbean>
+</server>

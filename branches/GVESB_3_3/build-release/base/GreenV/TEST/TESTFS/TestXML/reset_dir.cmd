@@ -1,0 +1,1 @@
+move discarded\*.xml inputmove validated\*.xml inputdel discarded\*.result

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE jmx SYSTEM "http://www.greenvulcano.com/gvesb/dtds/gv-jmx.dtd">
+
+<jmx version="R1">
+    <entry-point>
+        ....
+        <Initializers>
+            ....
+            <generic-initializer class="it.greenvulcano.gvesb.gvhl7.listener.jmx.RegisterHL7ListenerManager"
+                                 target="${{jboss.server.name}}" type="initializer"/>
+            <TimerTask-initializer class="it.greenvulcano.scheduler.util.RegisterTaskManagerFactory"
+                                 target="${{jboss.server.name}}" type="initializer"/>
+        </Initializers>
+    </entry-point>
+    ....
+</jmx>

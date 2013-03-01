@@ -1,0 +1,11 @@
+<div id="buttonsSingleTest">
+<%
+    String buttons[] = testManager.getPlugin().getAvailableCommands();
+    for(int i = 0; i < buttons.length; ++i) {
+        String button = buttons[i];
+%>
+        <input type="submit" class="button" value="<%= button %>" onclick="method.value='<%= button %>';submitForm();"/>
+<%}%>
+        <input type="submit" class="button" value="clear" onclick="method.value='clear'"/>
+        <input type="submit" class="button" value="reset" onclick="method.value='reset'"/>
+</div>

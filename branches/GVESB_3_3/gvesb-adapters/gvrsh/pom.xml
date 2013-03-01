@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>it.greenvulcano.gvesb</groupId>
+        <artifactId>gvesb.adapters</artifactId>
+        <version>3.3.0-Trunk</version>
+    </parent>
+
+    <groupId>it.greenvulcano.gvesb</groupId>
+    <artifactId>gvesb.adapters.rsh</artifactId>
+    <packaging>pom</packaging>
+    <name>GreenVulcano RSH Parent Project</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.healthmarketscience.rmiio</groupId>
+            <artifactId>rmiio</artifactId>
+            <version>2.0.2</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    
+    <modules>
+        <module>gvrsh_commons</module>
+        <module>gvrsh_server</module>
+        <module>gvrsh_client</module>
+    </modules>
+</project>
+
