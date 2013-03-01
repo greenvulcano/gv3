@@ -16,13 +16,14 @@
   <name>GreenVulcano ESB Parent Project</name>
 
   <issueManagement>
-    <system>jira</system>
-    <url>http://jira.greenvulcano.com/</url>
+    <system>tickets</system>
+    <url>http://sourceforge.net/p/greenvulcanoesb/tickets/</url>
   </issueManagement>
 
   <scm>
-    <connection>....</connection>
-    <developerConnection>....</developerConnection>
+    <url>http://svn.code.sf.net/p/greenvulcanoesb/source/trunk/gvesb-parent</url>
+    <connection>http://svn.code.sf.net/p/greenvulcanoesb/source/trunk/gvesb-parent</connection>
+    <developerConnection>https://svn.code.sf.net/p/greenvulcanoesb/source/trunk/gvesb-parent</developerConnection>
   </scm>
 
   <!--<licenses>
@@ -37,14 +38,12 @@
     <url>http://www.greenvulcano.com</url>
   </organization>
 
-    <properties>
-        <!--greenv.project.home>${env.GV_PROJECT_HOME}</greenv.project.home-->
-        <greenv.project.name>GreenVulcano ESB</greenv.project.name>
-        <greenv.project.version>3.3.0-Trunk</greenv.project.version>
-        <greenv.project.url>http://www.greenvulcano.com</greenv.project.url>
-        <!--jboss.home>${env.JBOSS_HOME}</jboss.home-->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+  <properties>
+      <greenv.project.name>GreenVulcano ESB</greenv.project.name>
+      <greenv.project.version>3.3.0-Trunk</greenv.project.version>
+      <greenv.project.url>http://www.greenvulcano.com</greenv.project.url>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
   <build>
     <defaultGoal>install</defaultGoal>
@@ -257,11 +256,16 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.0-beta-8</version>
+          <version>2.0</version>
           <configuration>
             <useReleaseProfile>false</useReleaseProfile>
             <arguments>-Prelease</arguments>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -709,17 +713,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <!--<repository>
-            <id>public-jboss</id>
-            <name>jboss Mirror</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>-->
         <repository>
             <id>jboss.com</id>
             <name>jboss Mirror</name>
@@ -769,7 +762,7 @@
         </pluginRepository>
     </pluginRepositories>
 
-  <profiles>
+    <profiles>
         <!-- By default build all modules -->
         <profile>
         <id>default-build</id>

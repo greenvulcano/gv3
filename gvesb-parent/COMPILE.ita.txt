@@ -3,7 +3,7 @@ Prerequisiti:
 - JDK 1.6.x
 - Eclipse 3.7.x
     - plug-in m2eclipse   (Maven integration)
-    - plug-in subversive  (Subversione client)
+    - plug-in subversive  (Subversion client)
 
 Scaricare dal repository https://svn.code.sf.net/p/greenvulcanoesb/source/trunk il progetto 'gvesb-parent'.
 Identifichiamo come GV_PROJECT_HOME il path del progetto.
