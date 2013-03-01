@@ -104,8 +104,8 @@
                                                      type="service">
                                     <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
                                                       name="serializeDOM" type="call">
-                                        <OGNLScript>#document=@it.greenvulcano.util.xml.XMLUtils@parseDOM_S(new java.lang.String(object),false,true),
-                      setObject(@it.greenvulcano.configuration.XMLConfig@get(#document,&apos;//gvesbws:resultUp&apos;))</OGNLScript>
+                                        <OGNLScript>#document=@it.greenvulcano.util.xml.XMLUtils@parseObject_S(object,false,true),
+                      setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,&apos;//gvesbws:resultUp&apos;))</OGNLScript>
                                     </ognl-script-call>
                                 </ognl-script-service>
                             </OutputServices>
@@ -131,8 +131,8 @@
                                                      type="service">
                                     <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
                                                       name="serializeDOM" type="call">
-                                        <OGNLScript>#document=@it.greenvulcano.util.xml.XMLUtils@parseDOM_S(new java.lang.String(object),false,true),
-                      setObject(@it.greenvulcano.configuration.XMLConfig@get(#document,&apos;//gvesbws:str&apos;))</OGNLScript>
+                                        <OGNLScript>#document=@it.greenvulcano.util.xml.XMLUtils@parseObject_S(object,false,true),
+                      setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,&apos;//gvesbws:str&apos;))</OGNLScript>
                                     </ognl-script-call>
                                 </ognl-script-service>
                             </InputServices>
@@ -313,7 +313,7 @@
                                             op-type="change GVBuffer" output="input"
                                             point-x="-25" point-y="163" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript>property[&apos;FILE_NAME&apos;]=@it.greenvulcano.configuration.XMLConfig@get(object,&apos;@name&apos;)</OGNLScript>
+                                <OGNLScript>property[&apos;FILE_NAME&apos;]=@it.greenvulcano.util.xml.XMLUtils@get_S(object,&apos;@name&apos;)</OGNLScript>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -433,7 +433,7 @@
                                             op-type="change GVBuffer" output="input"
                                             point-x="-15" point-y="160" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript>property[&apos;FILE_NAME&apos;]=@it.greenvulcano.configuration.XMLConfig@get(object,&apos;@name&apos;)</OGNLScript>
+                                <OGNLScript>property[&apos;FILE_NAME&apos;]=@it.greenvulcano.util.xml.XMLUtils@get_S(object,&apos;@name&apos;)</OGNLScript>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -610,12 +610,12 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             op-type="change GVBuffer" output="prepared"
                                             point-x="87" point-y="139" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script>var doc=XMLUtils.parseDOM_S(new java.lang.String(data.getObject()),false,true);
-                var subject = XMLConfig.get(doc,&apos;/Message/Subject&apos;, &apos;NULL&apos;);
+                                <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                var subject = XMLUtils.get_S(doc,&apos;/Message/Subject&apos;, &apos;NULL&apos;);
                 data.setProperty(&quot;SUBJECT&quot;,subject);
-                var to = XMLConfig.get(doc,&apos;/Message/ReplyTo&apos;, &apos;NULL&apos;);
+                var to = XMLUtils.get_S(doc,&apos;/Message/ReplyTo&apos;, &apos;NULL&apos;);
                 data.setProperty(&quot;GV_SMTP_TO&quot;,to);
-                var cc = XMLConfig.get(doc,&apos;/Message/Cc&apos;, &apos;NULL&apos;);
+                var cc = XMLUtils.get_S(doc,&apos;/Message/Cc&apos;, &apos;NULL&apos;);
                 if (cc != &apos;NULL&apos;) {
                   data.setProperty(&quot;GV_SMTP_CC&quot;,cc);
                 };
@@ -876,7 +876,7 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             point-x="121" point-y="149" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
                                 <PropertyDef name="CNUMBER"
-                                             value="js{{gvesb::var doc=XMLUtils.parseDOM_S(new java.lang.String(object.getObject()),false,true); XMLConfig.get(doc,&apos;//cred:cnumber&apos;)}}"/>
+                                             value="js{{gvesb::var doc=XMLUtils.parseObject_S(object.getObject(),false,true); XMLUtils.get_S(doc,&apos;//cred:cnumber&apos;)}}"/>
                                 <PropertyDef name="IS_INTERNAL"
                                              value="sql{{ds.gv_test::select decode(count(*), 1, &apos;true&apos;, &apos;false&apos;) from credit_card where cnumber=ognl{{#object.getProperty(&apos;CNUMBER&apos;)}}}}"/>
                             </ChangeGVBuffer>
@@ -952,7 +952,7 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             point-x="136" point-y="154" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
                                 <PropertyDef name="CNUMBER"
-                                             value="js{{gvesb::var doc=XMLUtils.parseDOM_S(new java.lang.String(object.getObject()),false,true); XMLConfig.get(doc,&apos;//cred:cnumber&apos;)}}"/>
+                                             value="js{{gvesb::var doc=XMLUtils.parseObject_S(object.getObject(),false,true); XMLUtils.get_S(doc,&apos;//cred:cnumber&apos;)}}"/>
                                 <PropertyDef name="IS_INTERNAL"
                                              value="sql{{ds.gv_test::select decode(count(*), 1, &apos;true&apos;, &apos;false&apos;) from credit_card where cnumber=ognl{{#object.getProperty(&apos;CNUMBER&apos;)}}}}"/>
                             </ChangeGVBuffer>
@@ -1082,13 +1082,13 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             op-type="change GVBuffer" output="prepared"
                                             point-x="7" point-y="166" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script>var doc=XMLUtils.parseDOM_S(new java.lang.String(data.getObject()),false,true);
-                                    data.setProperty(&apos;PERSON_NAME&apos;, XMLConfig.get(doc,&apos;/PersonData/Name&apos;));
-                                    data.setProperty(&apos;CITY_NAME&apos;, XMLConfig.get(doc,&apos;/PersonData/City&apos;));
-                                    data.setProperty(&apos;BIRTHDATE&apos;, XMLConfig.get(doc,&apos;/PersonData/BirthDate&apos;));
-                                    data.setProperty(&apos;CNUMBER&apos;, XMLConfig.get(doc,&apos;/PersonData/CardsData/CardData/Number&apos;));
-                                    data.setProperty(&apos;CREDIT&apos;, XMLConfig.get(doc,&apos;/PersonData/CardsData/CardData/Credit&apos;));
-                                    data.setProperty(&apos;ACTIVE&apos;, XMLConfig.get(doc,&apos;/PersonData/CardsData/CardData/Active&apos;));</Script>
+                                <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                                    data.setProperty(&apos;PERSON_NAME&apos;, XMLUtils.get_S(doc,&apos;/PersonData/Name&apos;));
+                                    data.setProperty(&apos;CITY_NAME&apos;, XMLUtils.get_S(doc,&apos;/PersonData/City&apos;));
+                                    data.setProperty(&apos;BIRTHDATE&apos;, XMLUtils.get_S(doc,&apos;/PersonData/BirthDate&apos;));
+                                    data.setProperty(&apos;CNUMBER&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Number&apos;));
+                                    data.setProperty(&apos;CREDIT&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Credit&apos;));
+                                    data.setProperty(&apos;ACTIVE&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Active&apos;));</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -1104,8 +1104,8 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             op-type="change GVBuffer" output="output"
                                             point-x="300" point-y="31" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script>var doc=XMLUtils.parseDOM_S(new java.lang.String(data.getObject()),false,true);
-                                    data.setProperty(&apos;ID_PERSON&apos;, XMLConfig.get(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
+                                <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                                    data.setProperty(&apos;ID_PERSON&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
@@ -1135,8 +1135,8 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             op-type="change GVBuffer" output="output"
                                             point-x="220" point-y="445" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script>var doc=XMLUtils.parseDOM_S(new java.lang.String(data.getObject()),false,true);
-                                    data.setProperty(&apos;ID_CARD&apos;, XMLConfig.get(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
+                                <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                                    data.setProperty(&apos;ID_CARD&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
@@ -1165,8 +1165,8 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             op-type="change GVBuffer" output="output"
                                             point-x="849" point-y="111" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script>var doc=XMLUtils.parseDOM_S(new java.lang.String(data.getObject()),false,true);
-                                    data.setProperty(&apos;ID_PERSON&apos;, XMLConfig.get(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
+                                <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                                    data.setProperty(&apos;ID_PERSON&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
