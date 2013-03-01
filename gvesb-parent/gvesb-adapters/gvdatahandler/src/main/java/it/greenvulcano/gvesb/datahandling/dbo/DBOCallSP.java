@@ -703,94 +703,99 @@ public class DBOCallSP extends AbstractDBO
                         row.appendChild(col);
                     }
                     if (resultSet != null) {
-                        ResultSetMetaData metadata = resultSet.getMetaData();
-                        boolean firstItr = true;
-                        Set<Integer> keyField = keysMap.get(statementId);
-                        boolean noKey = ((keyField == null) || keyField.isEmpty());
-                        Map<String, String> keyAttr = new HashMap<String, String>();
-                        String colKey = null;
-                        String precKey = null;
-                        while (resultSet.next()) {
-                            if (!firstItr) {
-                                row = xml.createElement(xmlOut, ROW_NAME);
-                                xml.setAttribute(row, ID_NAME, SP_RESULT);
-                            }
-                            for (int j = 1; j <= metadata.getColumnCount(); j++) {
-                                Element col = xml.createElement(xmlOut, "col");
-                                xml.setAttribute(col, ID_NAME, propName + "[" + j + "]");
-                                switch (metadata.getColumnType(j)) {
-                                    case Types.CLOB : {
-                                        Clob clob = resultSet.getClob(j);
-                                        if (clob != null) {
-                                            InputStream is = clob.getAsciiStream();
-                                            byte[] buffer = new byte[2048];
-                                            ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-                                            int size;
-                                            while ((size = is.read(buffer)) != -1) {
-                                                baos.write(buffer, 0, size);
-                                            }
-                                            is.close();
-                                            value = baos.toString();
-                                        }
-                                    }
-                                        break;
-                                    case Types.BLOB : {
-                                        Blob blob = resultSet.getBlob(j);
-                                        if (blob != null) {
-                                            InputStream is = blob.getBinaryStream();
-                                            byte[] buffer = new byte[2048];
-                                            ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-                                            int size;
-                                            while ((size = is.read(buffer)) != -1) {
-                                                baos.write(buffer, 0, size);
-                                            }
-                                            is.close();
-                                            value = new String(Base64.encodeBase64(baos.toByteArray()));
-                                        }
-                                    }
-                                        break;
-                                    default : {
-                                        value = resultSet.getString(j);
-                                        if (value == null) {
-                                            value = "";
-                                        }
-                                    }
-                                }
-                                if (value != null) {
-                                    col.appendChild(xmlOut.createTextNode(value));
-                                }
-                                if (!noKey && keyField.contains(new Integer(j))) {
-                                    if (value != null) {
-                                        if (colKey == null) {
-                                            colKey = value;
-                                        }
-                                        else {
-                                            colKey += "##" + value;
-                                        }
-                                        keyAttr.put("key_" + j, value);
-                                    }
-                                }
-                                else {
-                                    row.appendChild(col);
-                                }
-                            }
-                            if (!noKey && (colKey != null) && !colKey.equals(precKey)) {
+                        try {
+                            ResultSetMetaData metadata = resultSet.getMetaData();
+                            boolean firstItr = true;
+                            Set<Integer> keyField = keysMap.get(statementId);
+                            boolean noKey = ((keyField == null) || keyField.isEmpty());
+                            Map<String, String> keyAttr = new HashMap<String, String>();
+                            String colKey = null;
+                            String precKey = null;
+                            while (resultSet.next()) {
                                 if (!firstItr) {
-                                    data = xml.createElement(xmlOut, DATA_NAME);
-                                    xml.setAttribute(data, ID_NAME, statementId);
-                                    docRoot.appendChild(data);
+                                    row = xml.createElement(xmlOut, ROW_NAME);
+                                    xml.setAttribute(row, ID_NAME, SP_RESULT);
                                 }
-                                for (Entry<String, String> keyAttrEntry : keyAttr.entrySet()) {
-                                    xml.setAttribute(data, keyAttrEntry.getKey(), keyAttrEntry.getValue());
+                                for (int j = 1; j <= metadata.getColumnCount(); j++) {
+                                    Element col = xml.createElement(xmlOut, "col");
+                                    xml.setAttribute(col, ID_NAME, propName + "[" + j + "]");
+                                    switch (metadata.getColumnType(j)) {
+                                        case Types.CLOB : {
+                                            Clob clob = resultSet.getClob(j);
+                                            if (clob != null) {
+                                                InputStream is = clob.getAsciiStream();
+                                                byte[] buffer = new byte[2048];
+                                                ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
+                                                int size;
+                                                while ((size = is.read(buffer)) != -1) {
+                                                    baos.write(buffer, 0, size);
+                                                }
+                                                is.close();
+                                                value = baos.toString();
+                                            }
+                                        }
+                                            break;
+                                        case Types.BLOB : {
+                                            Blob blob = resultSet.getBlob(j);
+                                            if (blob != null) {
+                                                InputStream is = blob.getBinaryStream();
+                                                byte[] buffer = new byte[2048];
+                                                ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
+                                                int size;
+                                                while ((size = is.read(buffer)) != -1) {
+                                                    baos.write(buffer, 0, size);
+                                                }
+                                                is.close();
+                                                value = new String(Base64.encodeBase64(baos.toByteArray()));
+                                            }
+                                        }
+                                            break;
+                                        default : {
+                                            value = resultSet.getString(j);
+                                            if (value == null) {
+                                                value = "";
+                                            }
+                                        }
+                                    }
+                                    if (value != null) {
+                                        col.appendChild(xmlOut.createTextNode(value));
+                                    }
+                                    if (!noKey && keyField.contains(new Integer(j))) {
+                                        if (value != null) {
+                                            if (colKey == null) {
+                                                colKey = value;
+                                            }
+                                            else {
+                                                colKey += "##" + value;
+                                            }
+                                            keyAttr.put("key_" + j, value);
+                                        }
+                                    }
+                                    else {
+                                        row.appendChild(col);
+                                    }
                                 }
-                                keyAttr.clear();
-                                precKey = colKey;
+                                if (!noKey && (colKey != null) && !colKey.equals(precKey)) {
+                                    if (!firstItr) {
+                                        data = xml.createElement(xmlOut, DATA_NAME);
+                                        xml.setAttribute(data, ID_NAME, statementId);
+                                        docRoot.appendChild(data);
+                                    }
+                                    for (Entry<String, String> keyAttrEntry : keyAttr.entrySet()) {
+                                        xml.setAttribute(data, keyAttrEntry.getKey(), keyAttrEntry.getValue());
+                                    }
+                                    keyAttr.clear();
+                                    precKey = colKey;
+                                }
+                                if (firstItr) {
+                                    firstItr = false;
+                                }
+                                colKey = null;
+                                data.appendChild(row);
                             }
-                            if (firstItr) {
-                                firstItr = false;
-                            }
-                            colKey = null;
-                            data.appendChild(row);
+                        }
+                        finally {
+                            resultSet.close();
                         }
                     }
                 }
