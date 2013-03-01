@@ -11,7 +11,7 @@ Follow the propaedeutic common steps as described in COMPILE.eng.txt, then run:
 
 At the end of the process the target directory will contain the .tar.gz and. zip packages used for installation.
 
-build command options for ESB base package compilation:
+Build command options for ESB base package compilation:
 - build.sh
     - executes 'mvn install' instruction in project root
     - populates thirdparty/libraries and thirdparty/licenses
@@ -26,15 +26,24 @@ build command options for ESB base package compilation:
 - build.sh -Dskip.build=true -Dskip.thirdparty=true
     - generates .tar.gz and .zip packages
 
-build command options for extra packages compilation:
-- build.sh [-Dskip.thirdparty=true] hl7
+Build command options for extra packages compilation:
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] hl7
     - generates Adapter HL7 (.tar.gz and .zip) packages
-- build.sh [-Dskip.thirdparty=true] rules
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] rules
     - generates Rules Engine (.tar.gz and .zip) packages
-- build.sh [-Dskip.thirdparty=true] openspc
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] openspc
     - generates Adapter OpenSpCoop (.tar.gz and .zip) packages
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] social
+    - generates Adapter Social (.tar.gz and .zip) packages
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] ode
+    - generates BPEL Engine ODE (.tar.gz and .zip) packages
 
-build command options for ESB base and extra packages compilation:
+Build command options for ESB full package compilation:
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] full
+    - generates a complete base + all extra (.tar.gz and .zip) package
+
+
+Build command options for ESB base, extra and full packages compilation:
 - build.sh All
     - executes 'mvn install' instruction in project root
     - populates thirdparty/libraries and thirdparty/licenses
