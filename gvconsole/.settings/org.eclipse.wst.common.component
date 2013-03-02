@@ -5,25 +5,25 @@
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <dependent-module archiveName="gvstatistics-3.3.0-Trunk.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvstatistics/gvstatistics">
+        <dependent-module archiveName="gvstatistics-3.3.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvstatistics/gvstatistics">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gvvcl-3.3.0-Trunk.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvvcl/gvvcl">
+        <dependent-module archiveName="gvvcl-3.3.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvvcl/gvvcl">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gvthroughput-3.3.0-Trunk.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvthroughput/gvthroughput">
+        <dependent-module archiveName="gvthroughput-3.3.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvthroughput/gvthroughput">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gvdte-3.3.0-Trunk.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdte/gvdte">
+        <dependent-module archiveName="gvdte-3.3.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdte/gvdte">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gvdp-axis2-3.3.0-Trunk.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdp-axis2/gvdp-axis2">
+        <dependent-module archiveName="gvdp-axis2-3.3.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdp-axis2/gvdp-axis2">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gvhttp_commons-3.3.0-Trunk.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvhttp_commons/gvhttp_commons">
+        <dependent-module archiveName="gvhttp_commons-3.3.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvhttp_commons/gvhttp_commons">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gvdatahandler-3.3.0-Trunk.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdatahandler/gvdatahandler">
+        <dependent-module archiveName="gvdatahandler-3.3.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdatahandler/gvdatahandler">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="context-root" value="gvconsole"/>

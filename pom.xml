@@ -21,9 +21,9 @@
   </issueManagement>
 
   <scm>
-    <url>http://svn.code.sf.net/p/greenvulcanoesb/source/trunk/gvesb-parent</url>
-    <connection>http://svn.code.sf.net/p/greenvulcanoesb/source/trunk/gvesb-parent</connection>
-    <developerConnection>https://svn.code.sf.net/p/greenvulcanoesb/source/trunk/gvesb-parent</developerConnection>
+    <url>http://svn.code.sf.net/p/greenvulcanoesb/source/branches/GVESB_3_3</url>
+    <connection>http://svn.code.sf.net/p/greenvulcanoesb/source/branches/GVESB_3_3</connection>
+    <developerConnection>https://svn.code.sf.net/p/greenvulcanoesb/source/branches/GVESB_3_3</developerConnection>
   </scm>
 
   <!--<licenses>
