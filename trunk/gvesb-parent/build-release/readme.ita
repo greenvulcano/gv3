@@ -1,7 +1,7 @@
 Prerequisiti:
 - JDK 1.6.x
 
-Scaricare dal repository https://svn.code.sf.net/p/greenvulcanoesb/source/trunk il progetto 'gvesb-parent'.
+Scaricare dal repository http://svn.code.sf.net/p/greenvulcanoesb/source/trunk il progetto 'gvesb-parent'.
 Identifichiamo come GV_PROJECT_HOME il path del progetto.
 
 Eseguidre le operazioni propedeutiche comuni come descritto in COMPILE.ita.txt, poi eseguire:
