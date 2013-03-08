@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project [
+   <!ENTITY libraries SYSTEM "../thirdparty/libraries.ent">
+]>
+
+<project name="GVESB/Build Full Distribution">
+
+    &libraries;
+
+    <patternset id="source.filter">
+      <exclude name="**/.svn/**"/>
+      <exclude name="**/target/**"/>
+      <exclude name="**/maven-repository/**"/>
+      <exclude name="**/libraries/**"/>
+      <exclude name="**/licenses/**"/>
+      <exclude name="**/libraries.ent"/>
+      <exclude name="**/id_file"/>
+   </patternset>
+
+    <!-- ================================================================== -->
+    <!-- Building                                                           -->
+    <!-- ================================================================== -->
+
+    <target name="build-esb-full-dist" description="Builds the ESB full distribution">
+        <antcall target="release"/>
+    </target>
+
+    <target name="release"
+            depends="prepare, bundle-docs, bin-tgz, bin-zip, source-tgz"
+            description="Creates the release binary and source from the distribution">
+    </target>
+
+    <target name="prepare">
+        <delete dir="${release.root}"/>
+
+        <mkdir dir="${release.root}"/>
+
+        <!-- Copy standard files -->
+        <filter token="base.dir" value="${release.id}"/>
+        <copy todir="${release.root}" filtering="true"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/base">
+                <include name="**/bin/env_scripts*"/>
+            </fileset>
+        </copy>
+        <copy todir="${release.root}" filtering="true"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/base">
+                <include name="readme.*"/>
+            </fileset>
+        </copy>
+        <copy todir="${release.root}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/base">
+                <include name="**"/>
+                <exclude name="readme.*"/>
+                <exclude name="**/bin/env_scripts*"/>
+                <exclude name="jboss-5.1.0.GA.zip"/>
+            </fileset>
+        </copy>
+        <unzip src="${basedir}/base/jboss-5.1.0.GA.zip"
+               dest="${release.root}"/>
+        <copy todir="${release.dtds}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../gvesb/configuration/dtds">
+                <exclude name="Extra/Extra.dtd"/>
+                <include name="Extra/GVDataHandler.dtd"/>
+                <include name="Extra/GVExcel.dtd"/>
+                <include name="gv-jmx.dtd"/>
+                <include name="gv-log4j.dtd"/>
+                <include name="GVAdapters.dtd"/>
+                <include name="GVCommons.dtd"/>
+                <include name="GVCore.dtd"/>
+                <include name="GVSupport.dtd"/>
+                <include name="GVVariables.dtd"/>
+
+                <include name="Extra/GVHL7.dtd"/>
+                <include name="Extra/GVOpenSpCoop.dtd"/>
+                <include name="Extra/GVRules.dtd"/>
+                <include name="Extra/GVSocial.dtd"/>
+                <include name="Extra/GVBpel.dtd"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy Full release files -->
+        <copy todir="${release.root}" filtering="true"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/full">
+                <include name="readme.*"/>
+            </fileset>
+        </copy>
+        <copy todir="${release.root}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/full">
+                <include name="**"/>
+                <exclude name="readme.*"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy lib -->
+        <copy todir="${release.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${commons.dbcp.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.pool.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${quartz.scheduler.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${wss4j.wss4j.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${xmlsec.xmlsec.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy EAR GVESB app -->
+        <copy todir="${release.ear}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvboot.war"/>
+                <include name="gvdebug.war"/>
+                <include name="gvaxis2.war"/>
+                <include name="gvhttp.war"/>
+                <include name="gvconsole.war"/>
+                <include name="ejb-gvcore.jar"/>
+                <include name="ejb3-gvcore.jar"/>
+                <include name="ejb3-gvdebug.jar"/>
+                <include name="ejb-gvstatistics.jar"/>
+                <include name="ejb-test.jar"/>
+                <include name="ejb3-test.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <exclude name="*.war"/>
+                <exclude name="ejb-gvcore.jar"/>
+                <exclude name="ejb3-gvcore.jar"/>
+                <exclude name="ejb3-gvdebug.jar"/>
+                <exclude name="ejb-gvstatistics.jar"/>
+                <exclude name="ejb-test.jar"/>
+                <exclude name="ejb3-test.jar"/>
+                <exclude name="gvcore-ode.jar"/>
+                <exclude name="gvhl7.jar"/>
+                <exclude name="gvjbpm.jar"/>
+                <exclude name="gvrules.jar"/>
+                <exclude name="gvrules-tests.jar"/>
+                <exclude name="gvsocial.jar"/>
+                <exclude name="gvzmq.jar"/>
+                <exclude name="gvvcl-openspcoop.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${avalon.framework.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${axiom.axiom.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${axis.axis.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${axis2.axis2.lib}">
+                <include name="*.jar"/>
+                <exclude name="axis2-adb-codegen.jar"/>
+                <exclude name="axis2-codegen.jar"/>
+                <exclude name="axis2-java2wsdl.jar"/>
+            </fileset>
+            <fileset dir="${bouncycastle.bouncycastle.lib}">
+                <include name="*-jdk16.jar"/>
+            </fileset>
+            <fileset dir="${birt.birt.lib}">
+                <include name="*.jar"/>
+                <exclude name="com.ibm.icu.jar"/>
+                <exclude name="org.apache.batik.pdf.jar"/>
+                <exclude name="org.apache.commons.codec.jar"/>
+                <exclude name="org.apache.xml.resolver.jar"/>
+                <exclude name="org.mozilla.javascript.jar"/>
+            </fileset>
+            <fileset dir="${commons.beanutils.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.cli.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.configuration.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.codec.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.collections.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.dbcp.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.digester.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.discovery.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.fileupload.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.httpclient.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.io.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.lang.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.logging.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.modeler.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.net.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${commons.pool.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${dom4j.dom4j.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${fop.fop.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.apache.httpcomponents.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${icu4j.icu4j.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${javassist.javassist.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${javax.xml.bind.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${com.sun.xml.bind.lib}">
+                <include name="jaxb-impl.jar"/>
+            </fileset>
+            <fileset dir="${jaxen.jaxen.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${javax.xml.ws.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${com.sun.xml.ws.lib}">
+                <include name="jaxws-rt.jar"/>
+            </fileset>
+            <fileset dir="${jdom.jdom.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${joda.time.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${rhino.rhino.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${com.jcraft.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <!--jsr181-api-1.0-MR1.jar
+            jsr250-api-1.0.jar-->
+            <fileset dir="${juddi.juddi.lib}">
+                <include name="juddi.jar"/>
+                <include name="uddi-ws.jar"/>
+            </fileset>
+            <fileset dir="${jxl.jxl.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <!--logkit-1.0.1.jar-->
+            <fileset dir="${org.jvnet.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.apache.neethi.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${ognl.ognl.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${opensaml.opensaml.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${rmiio.rmiio.lib}">
+                <include name="rmiio.jar"/>
+            </fileset>
+            <fileset dir="${springframework.springframework.lib}">
+                <exclude name="spring.jar"/>
+            </fileset>
+            <fileset dir="${rampart.rampart.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${com.sun.xml.messaging.saaj.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${javax.xml.soap.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${saxon.saxon.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${scout.scout.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.jvnet.staxex.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${stax.stax.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${com.sun.xml.stream.buffer.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${velocity.velocity.lib}">
+                <include name="velocity.jar"/>
+            </fileset>
+            <fileset dir="${woden.woden.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${wsdl4j.wsdl4j.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.codehaus.woodstox.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${xml.apis.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${xml.resolver.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${xmlbeans.xmlbeans.lib}">
+                <include name="xmlbeans.jar"/>
+            </fileset>
+            <fileset dir="${xmlgraphics.commons.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${xerces.xerces.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${xalan.xalan.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.apache.ws.commons.schema.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${xom.xom.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+
+        <!-- Copy RSH GVESB lib -->
+        <copy todir="${release.rsh.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvbase.jar"/>
+                <include name="gvrsh_commons.jar"/>
+                <include name="gvrsh_server.jar"/>
+            </fileset>
+            <fileset dir="${rmiio.rmiio.lib}">
+                <include name="rmiio.jar"/>
+            </fileset>
+            <fileset dir="${jaxen.jaxen.lib}">
+                <include name="jaxen.jar"/>
+            </fileset>
+            <fileset dir="${commons.io.lib}">
+                <include name="commons-io.jar"/>
+            </fileset>
+            <fileset dir="${commons.logging.lib}">
+                <include name="commons-logging.jar"/>
+            </fileset>
+            <fileset dir="${log4j.log4j.lib}">
+                <include name="log4j.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy GreenVulcano Werbservices aar -->
+        <copy todir="${release.gv}/webservices/services" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../gvesb-adapters/gvaxis2/extra/services">
+                <include name="*.aar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy HL7 lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvhl7.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${hapi.hapi.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy OpenSpCoop lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvvcl-openspcoop.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${org.openspcoop.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy Rules lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvrules.jar"/>
+                <include name="gvrules-tests.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${drools.drools.lib}">
+                <include name="*.jar"/>
+                <exclude name="drools-api.jar"/>
+            </fileset>
+            <fileset dir="${antlr.antlr.lib}">
+                <include name="antlr.jar"/>
+                <include name="antlr-runtime.jar"/>
+            </fileset>
+            <fileset dir="${org.mvel.lib}">
+                <include name="mvel2.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy Social lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvsocial.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${org.twitter4j.lib}">
+                <include name="twitter4j-core.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy ODE files -->
+        <!-- Copy DB files -->
+        <copy todir="${release.db}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/GreenV/hsqldb">
+                <include name="**"/>
+            </fileset>
+        </copy>
+        <!-- Copy Proc files -->
+        <copy todir="${release.gv}/BpelProcess" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/GreenV/BpelProcess">
+                <include name="**"/>
+            </fileset>
+        </copy>
+        <!-- Copy WS files -->
+        <copy todir="${release.gv}/webservices" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/GreenV/webservices">
+                <include name="**"/>
+            </fileset>
+        </copy>
+        <!-- Copy JBoss files -->
+        <copy todir="${release.server.conf}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/jboss-5.1.0.GA/server/GreenV/conf">
+                <include name="*"/>
+            </fileset>
+        </copy>
+        <!-- Copy lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvcore-ode.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${ode.ode.lib}">
+                <include name="*.jar"/>
+                <exclude name="ode-dao-jpa.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy DS -->
+        <copy todir="${release.deploy}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode/GreenV/application/deploy">
+                <include name="*.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="bundle-docs" description="Include license, readme, etc">
+        <!-- Copy the thirdparty/licenses to docs/licenses -->
+        <copy todir="${release.docs}/licenses" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../thirdparty/licenses">
+                <include name="**"/>
+            </fileset>
+        </copy>
+        <!-- Copy the build/docs to the dist root -->
+        <copy todir="${release.docs}/reference" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../core-libs/pdf_doc/target/pdf">
+                <include name="*.pdf"/>
+            </fileset>
+        </copy>
+        <!--<copy todir="${release.gv}/docs/api" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/javadocs"/>
+        </copy>-->
+    </target>
+
+    <target name="bin-tgz" description="Build .tar.gz archive">
+        <tar destfile="${module.output}/${release.id}-Full.tar.gz"
+             longfile="gnu" compression="gzip">
+            <tarfileset dir="${release.root}" prefix="${release.id}">
+                <exclude name="**/bin/*.sh"/>
+                <!--<exclude name="**/data/**"/>
+                <exclude name="**/log/**"/>
+                <exclude name="**/tmp/**"/>
+                <exclude name="**/work/**"/>
+                <exclude name="bin/*"/>-->
+            </tarfileset>
+            <tarfileset dir="${release.bin}"
+                        prefix="${release.id}/GreenV/bin" mode="755">
+                <include name="*.sh"/>
+            </tarfileset>
+            <tarfileset dir="${release.db.bin}"
+                        prefix="${release.id}/GreenV/hsqldb/bin" mode="755">
+                <include name="*.sh"/>
+            </tarfileset>
+            <tarfileset dir="${release.rsh.bin}"
+                        prefix="${release.id}/GreenV/RSH/bin" mode="755">
+                <include name="*.sh"/>
+            </tarfileset>
+            <tarfileset dir="${release.jboss.bin}"
+                        prefix="${release.id}/jboss-5.1.0.GA/bin" mode="755">
+                <include name="*.sh"/>
+            </tarfileset>
+        </tar>
+        <checksum file="${module.output}/${release.id}-Full.tar.gz"/>
+        <checksum file="${module.output}/${release.id}-Full.tar.gz" algorithm="SHA-256" />
+    </target>
+
+    <target name="bin-zip" description="Build zip archive">
+        <zip destfile="${module.output}/${release.id}-Full.zip">
+            <zipfileset dir="${release.root}" prefix="${release.id}">
+                <!--<exclude name="**/data/**"/>
+                <exclude name="**/log/**"/>
+                <exclude name="**/tmp/**"/>
+                <exclude name="**/work/**"/>
+                <exclude name="tmp/**"/>-->
+            </zipfileset>
+        </zip>
+        <checksum file="${module.output}/${release.id}-Full.zip"/>
+        <checksum file="${module.output}/${release.id}-Full.zip" algorithm="SHA-256" />
+    </target>
+
+    <target name="source-tgz" description="Build source .tar.gz archive">
+        <tar destfile="${module.output}/${release.id}-Full-src.tar.gz"
+             longfile="gnu" compression="gzip">
+            <tarfileset dir="${basedir}/../" prefix="${release.id}-src">
+                <patternset refid="source.filter"/>
+                <exclude name="tools/bin/*"/>
+                <exclude name="tools/maven/bin/*"/>
+            </tarfileset>
+            <tarfileset dir="${basedir}/../" prefix="${release.id}-src" mode="755">
+                <patternset refid="source.filter"/>
+                <include name="tools/bin/*"/>
+                <exclude name="tools/maven/bin/*"/>
+            </tarfileset>
+        </tar>
+        <checksum file="${module.output}/${release.id}-Full-src.tar.gz"/>
+        <checksum file="${module.output}/${release.id}-Full-src.tar.gz" algorithm="SHA-256" />
+   </target>
+
+</project>
