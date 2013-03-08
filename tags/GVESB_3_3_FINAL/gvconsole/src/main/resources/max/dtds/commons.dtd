@@ -1,0 +1,430 @@
+<!ENTITY % proxy-plug-in  "FileSystemProxy|ZipProxy|MasterDerivedProxy|ContentProviderProxy">
+<!ENTITY % proxy-plug-in-ro  "ClasspathProxy|RegistryProxy|%proxy-plug-in;">
+<!ENTITY % stylesheet-src "URL-StylesheetSource|Classpath-StylesheetSource|Zip-StylesheetSource|ContentProvider-StylesheetSource">
+
+<!--
+    Preleva uno stylesheet XSLT tramite un URL.
+    Sono validi tutti gli URL supportati dalla JVM.
+    In particolare e' possibile utilizzare "file://" e "http://".
+
+    #Label: @url
+    #Template:
+
+        <xsl:template match="URL-StylesheetSource">
+        	<table>
+        		<tr valign="top">
+        			<td><b>Description:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="description"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Class:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@class"/><xsl:text> </xsl:text></td>
+        		</tr>
+        	</table>	
+        </xsl:template>
+-->
+<!ELEMENT URL-StylesheetSource (description?, XSLParameter*)>
+
+<!ATTLIST URL-StylesheetSource
+    class CDATA #FIXED "max.documents.URLStylesheetSource"
+    type  CDATA #FIXED "stylesheet-src"
+>
+<!--
+    #NotNull
+-->
+<!ATTLIST URL-StylesheetSource url CDATA #REQUIRED>
+
+<!--
+    Preleva uno stylesheet da un content provider.
+
+    #Template:
+
+        <xsl:template match="ContentProvider-StylesheetSource">
+        	<table>
+        		<tr valign="top">
+        			<td><b>Description:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="description"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Class:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@class"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>ContentProviderName:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@ContentProviderName"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Category:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@Category"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>ContentName:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@ContentName"/><xsl:text> </xsl:text></td>
+        		</tr>
+        	</table>	
+        </xsl:template>
+-->
+<!ELEMENT ContentProvider-StylesheetSource (description?, XSLParameter*)>
+<!ATTLIST ContentProvider-StylesheetSource
+    class CDATA #FIXED "max.documents.ContentProviderStylesheetSource"
+    type  CDATA #FIXED "stylesheet-src"
+>
+<!--
+    #Config: contents.xml : /contents/provider/@name
+    #Config: contents.xml : /contents/alias/@provider
+-->
+<!ATTLIST ContentProvider-StylesheetSource ContentProviderName CDATA #REQUIRED>
+<!--
+    #NotNull
+-->
+<!ATTLIST ContentProvider-StylesheetSource Category            CDATA #REQUIRED>
+<!--
+    #NotNull
+-->
+<!ATTLIST ContentProvider-StylesheetSource ContentName         CDATA #REQUIRED>
+
+<!--
+    Preleva uno stylesheet contenuto nel classpath.
+
+    #Template:
+
+        <xsl:template match="Classpath-StylesheetSource">
+            <table>
+        		<tr valign="top">
+        			<td><b>Description:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="description"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Class:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@class"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Resource:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@resource"/><xsl:text> </xsl:text></td>
+        		</tr>
+        	</table>	
+        </xsl:template>
+-->
+<!ELEMENT Classpath-StylesheetSource (description?, XSLParameter*)>
+<!ATTLIST Classpath-StylesheetSource
+    class CDATA #FIXED "max.documents.ClasspathStylesheetSource"
+    type  CDATA #FIXED "stylesheet-src"
+>
+<!--
+    #NotNull
+-->
+<!ATTLIST Classpath-StylesheetSource resource CDATA #REQUIRED>
+
+
+<!--
+    Preleva uno stylesheet contenuto dentro un file zip o jar.
+
+    #Template:
+
+        <xsl:template match="Zip-StylesheetSource">
+			<table>
+        		<tr valign="top">
+        			<td><b>Description:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="description"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Class:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@class"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Path:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@path"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Entry:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@entry"/><xsl:text> </xsl:text></td>
+        		</tr>
+        	</table>	
+        </xsl:template>
+-->
+<!ELEMENT Zip-StylesheetSource (description?, XSLParameter*)>
+<!ATTLIST Zip-StylesheetSource
+    class CDATA #FIXED "max.documents.ZipStylesheetSource"
+    type  CDATA #FIXED "stylesheet-src"
+>
+<!--
+    #NotNull
+-->
+<!ATTLIST Zip-StylesheetSource path  CDATA #REQUIRED>
+<!--
+    #NotNull
+-->
+<!ATTLIST Zip-StylesheetSource entry  CDATA #REQUIRED>
+
+
+
+
+<!--
+    A paremeter for the StylesheetSource classes.
+
+    #Label: @name
+    #Template:
+
+        <xsl:template match="XSLParameter">
+        	<table>
+        		<tr valign="top">
+        			<td><b>Description:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="description"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Name:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@name"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Value:</b></td>
+        			<td width="20"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@value"/><xsl:text> </xsl:text></td>
+        		</tr>
+        	</table>
+        </xsl:template>
+-->
+<!ELEMENT XSLParameter (description?)>
+
+<!--
+	Unique name of the parameter.
+
+    #NotNull
+    #Unique: ../XSLParameters/@name
+-->
+<!ATTLIST XSLParameter
+    name CDATA #REQUIRED
+>
+
+<!--
+	Value for the parameter.
+
+    #NotNull
+-->
+<!ATTLIST XSLParameter
+    value CDATA #REQUIRED
+>
+
+<!--
+	This element specifies a document proxy that is capable to read and write a
+	XML document from/to the file system.
+
+    #Label: @path
+    #Template:
+
+        <xsl:template match="FileSystemProxy">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><b>Path:</b></td>
+                    <td width="20"></td>
+                    <td><xsl:value-of select="@path"/><xsl:text> </xsl:text></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT FileSystemProxy (description?)>
+<!ATTLIST FileSystemProxy
+    class CDATA #FIXED "max.documents.FileSystemDocProxy"
+    type  CDATA #FIXED "proxy"
+>
+
+<!--
+	Path of the XML document.
+
+    #NotNull
+-->
+<!ATTLIST FileSystemProxy path  CDATA #REQUIRED>
+
+
+
+
+<!--
+    This element specifies a document proxy that is capable to read and write
+    a XML document from/to a content provider.
+
+    #Label: @ContentProviderName
+    #Template:
+
+        <xsl:template match="ContentProviderProxy">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><b>ContentProviderName:</b></td>
+                    <td width="20"></td>
+                    <td><xsl:value-of select="@ContentProviderName"/><xsl:text> </xsl:text></td>
+                </tr>
+                <tr>
+                    <td><b>Category:</b></td>
+                    <td width="20"></td>
+                    <td><xsl:value-of select="@Category"/><xsl:text> </xsl:text></td>
+                </tr>
+                <tr>
+                    <td><b>ContentName:</b></td>
+                    <td width="20"></td>
+                    <td><xsl:value-of select="@ContentName"/><xsl:text> </xsl:text></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT ContentProviderProxy (description?)>
+<!ATTLIST ContentProviderProxy
+    class CDATA #FIXED "max.documents.ContentProviderDocProxy"
+    type  CDATA #FIXED "proxy"
+>
+
+<!--
+	Content provider name.
+	Must be a content provider or an alias for it, configured in the
+	contents.xml configuration file.
+
+    #Config: contents.xml : /contents/provider/@name
+    #Config: contents.xml : /contents/alias/@provider
+-->
+<!ATTLIST ContentProviderProxy ContentProviderName CDATA #REQUIRED>
+
+<!--
+	Category into the content provider.
+
+    #NotNull
+-->
+<!ATTLIST ContentProviderProxy Category            CDATA #REQUIRED>
+
+<!--
+	Content name.
+
+    #NotNull
+-->
+<!ATTLIST ContentProviderProxy ContentName         CDATA #REQUIRED>
+
+
+
+
+<!--
+	This element specifies a document provider that is capable to read and write
+	a document from/to a zip or jar file.
+
+    #Label: @path
+    #Template:
+
+        <xsl:template match="ZipProxy">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><b>Path:</b></td>
+                    <td width="20"></td>
+                    <td><xsl:value-of select="@path"/><xsl:text> </xsl:text></td>
+                </tr>
+                <tr>
+                    <td><b>Entry:</b></td>
+                    <td width="20"></td>
+                    <td><xsl:value-of select="@entry"/><xsl:text> </xsl:text></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT ZipProxy (description?)>
+<!ATTLIST ZipProxy
+    class CDATA #FIXED "max.documents.ZipDocProxy"
+    type  CDATA #FIXED "proxy"
+>
+
+<!--
+	Path for the zip or jar file.
+
+    #NotNull
+-->
+<!ATTLIST ZipProxy path  CDATA #REQUIRED>
+
+<!--
+	Entry to read/write into the zip or jar file.
+
+    #NotNull
+-->
+<!ATTLIST ZipProxy entry  CDATA #REQUIRED>
+
+
+<!--
+	This element specifies a document provider that is capable only to read  
+	a document from the classpath
+
+    #Label: @resource
+    #Template:
+
+        <xsl:template match="ClasspathProxy">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><b>Resource:</b></td>
+                    <td width="20"></td>
+                    <td><xsl:value-of select="@resource"/><xsl:text> </xsl:text></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT ClasspathProxy (description?)>
+<!ATTLIST ClasspathProxy
+    class CDATA #FIXED "max.documents.ClasspathDocProxy"
+    type  CDATA #FIXED "proxy"
+>
+<!ATTLIST ClasspathProxy resource CDATA #REQUIRED >
+
+<!--
+	This element specifies a document provider that is capable only to read  
+	a document fromt he ICon registry
+
+    #Label: @resource
+    #Template:
+
+        <xsl:template match="RegistryProxy">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><b>Resource:</b></td>
+                    <td width="20"></td>
+                    <td><xsl:value-of select="@resource"/><xsl:text> </xsl:text></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT RegistryProxy (description?)>
+<!ATTLIST RegistryProxy
+    class CDATA #FIXED "max.documents.RegistryDocProxy"
+    type  CDATA #FIXED "proxy"
+>
+
+<!--
+	#References: max:document('documents')/documents/document/@name
+	#References: max:document('documents')/documents/group/document/@name
+-->
+<!ATTLIST RegistryProxy resource CDATA #REQUIRED >

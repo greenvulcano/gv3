@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE documents SYSTEM "file://max/dtds/documentRepository.dtd">
+
+<documents filter-provider="MAX_XML_PROVIDER">
+  <group label="GreenVulcanoESB - Core" name="gvesb_core">
+    <document label="GreenVulcanoESB - Configurazione del Core" name="GVCore">
+      <FileSystemProxy class="max.documents.FileSystemDocProxy" path="sp{{gv.app.home}}/xmlconfig/GVCore.xml"
+        type="proxy" />
+      <description>Configurazione dei servizi di GreenVulcanoESB.</description>
+      <role access="rw" name="consoleAdministrator" />
+      <role access="ro" name="supervisor" />
+    </document>
+    <document label="GreenVulcanoESB - Configurazione degli Adapters" name="GVAdapters">
+      <FileSystemProxy class="max.documents.FileSystemDocProxy" path="sp{{gv.app.home}}/xmlconfig/GVAdapters.xml"
+        type="proxy" />
+      <description>Configurazione degli adapters di GreenVulcanoESB.</description>
+      <role access="rw" name="consoleAdministrator" />
+      <role access="ro" name="supervisor" />
+    </document>
+    <document label="GreenVulcanoESB - Configurazione dei file di supporto" name="GVSupport">
+      <FileSystemProxy class="max.documents.FileSystemDocProxy" path="sp{{gv.app.home}}/xmlconfig/GVSupport.xml"
+        type="proxy" />
+      <description>Configurazione dei file di supporto di GreenVulcanoESB.</description>
+      <role access="rw" name="consoleAdministrator" />
+      <role access="ro" name="supervisor" />
+    </document>
+    <document label="GreenVulcanoESB - Configurazione Variabili Globali" name="GVVariables">
+      <FileSystemProxy class="max.documents.FileSystemDocProxy" path="sp{{gv.app.home}}/xmlconfig/GVVariables.xml"
+        type="proxy" />
+      <description>Configurazione Variabili Globali GreenVulcanoESB.</description>
+      <role access="rw" name="consoleAdministrator" />
+      <role access="ro" name="supervisor" />
+    </document>
+  </group>
+</documents>

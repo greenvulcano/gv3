@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<!DOCTYPE catalog
+  PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN"
+         "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd" uri="file://${{gv.app.home}}/dtds/GVCore.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd" uri="file://${{gv.app.home}}/dtds/GVAdapters.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVSupport.dtd" uri="file://${{gv.app.home}}/dtds/GVSupport.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVVariables.dtd" uri="file://${{gv.app.home}}/dtds/GVVariables.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/gv-jmx.dtd" uri="file://${{gv.app.home}}/dtds/gv-jmx.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/gv-log4j.dtd" uri="file://${{gv.app.home}}/dtds/gv-log4j.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVCommons.dtd" uri="file://${{gv.app.home}}/dtds/GVCommons.dtd" />
+
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/Extra.dtd" uri="file://${{gv.app.home}}/dtds/Extra/Extra.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVDataHandler.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVDataHandler.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVExcel.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVExcel.dtd" />
+
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVHL7.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVHL7.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVOpenSpCoop.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVOpenSpCoop.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVRules.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVSocial.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVBpel.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVBpel.dtd" />
+</catalog>

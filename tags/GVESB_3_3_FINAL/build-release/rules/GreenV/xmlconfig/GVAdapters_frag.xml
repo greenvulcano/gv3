@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+
+    ....
+    <GVDataProviderManager name="GVDP" type="module">
+        <DataProviders>
+            ....
+
+            <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
+                             name="figFilter_InMapDataProvider" type="dataProvider">
+                <Field direction="INOUT" key="figset" type="field">
+                    <Expression type="ognl">object</Expression>
+                </Field>
+            </MapDataProvider>
+            <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
+                             name="figFilter_GlobMapDataProvider" type="dataProvider">
+                <Field direction="INOUT" key="filterColor" type="field">
+                    <Expression type="ognl">property[&apos;COLOR&apos;]</Expression>
+                </Field>
+            </MapDataProvider>
+            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider"
+                                        name="figFilter_OutGVBChangeDataProvider"
+                                        type="dataProvider">
+                <Field direction="OUT" key="buffer" type="field">
+                    <Expression type="ognl">#output.setObject(#input.getValue(&quot;figset&quot;))</Expression>
+                </Field>
+            </GVBufferChangeDataProvider>
+
+            <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
+                             name="figFilterOut_InMapDataProvider" type="dataProvider">
+                <Field direction="INOUT" key="figset" type="field">
+                    <Expression type="ognl">object</Expression>
+                </Field>
+            </MapDataProvider>
+            <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
+                             name="figFilterOut_GlobMapDataProvider" type="dataProvider">
+                <Field direction="INOUT" key="filterColor" type="field">
+                    <Expression type="ognl">property[&apos;COLOR&apos;]</Expression>
+                </Field>
+                <Field direction="INOUT" key="[[OUT]]figsetOut" type="field">
+                    <Expression type="ognl">new tests.unit.gvrules.bean.figure.FigureBag()</Expression>
+                </Field>
+            </MapDataProvider>
+            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider"
+                                        name="figFilterOut_OutGVBChangeDataProvider"
+                                        type="dataProvider">
+                <Field direction="OUT" key="buffer" type="field">
+                    <Expression type="ognl">#output.setObject(#input)</Expression>
+                </Field>
+            </GVBufferChangeDataProvider>
+
+            <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
+                             name="figFilterOutColl_InMapDataProvider" type="dataProvider">
+                <Field direction="INOUT" key="figset" type="field">
+                    <Expression type="ognl">object.getFigures()</Expression>
+                </Field>
+            </MapDataProvider>
+            <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
+                             name="figFilterOutColl_GlobMapDataProvider"
+                             type="dataProvider">
+                <Field direction="INOUT" key="filterColor" type="field">
+                    <Expression type="ognl">property[&apos;COLOR&apos;]</Expression>
+                </Field>
+                <Field direction="INOUT" key="[[OUT]]figsetOut" type="field">
+                    <Expression type="ognl">new tests.unit.gvrules.bean.figure.FigureBag()</Expression>
+                </Field>
+            </MapDataProvider>
+            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider"
+                                        name="figFilterOutColl_OutGVBChangeDataProvider"
+                                        type="dataProvider">
+                <Field direction="OUT" key="buffer" type="field">
+                    <Expression type="ognl">#output.setObject(#input)</Expression>
+                </Field>
+            </GVBufferChangeDataProvider>
+        </DataProviders>
+    </GVDataProviderManager>
+
+    ....
+    </RSHServiceClientConfiguration>
+
+    <GVRulesConfigManager name="RULES_CFG" type="module" version="1.0">
+        <GVKnowledgeBaseConfig class="it.greenvulcano.gvesb.gvrules.drools.config.impl.GVKnowledgeBaseConfig"
+                               name="figureFilterOutColl" type="knwl-config">
+            <RuleResource resourceType="DRL" type="knwl-resource"
+                          url="file:${{gv.app.home}}/Rules/figure/figureFilterOutColl.drl"/>
+        </GVKnowledgeBaseConfig>
+        <GVKnowledgeBaseConfig class="it.greenvulcano.gvesb.gvrules.drools.config.impl.GVKnowledgeBaseConfig"
+                               name="figureFilterOut" type="knwl-config">
+            <RuleResource resourceType="DRL" type="knwl-resource"
+                          url="file:${{gv.app.home}}/Rules/figure/figureFilterOut.drl"/>
+        </GVKnowledgeBaseConfig>
+        <GVKnowledgeBaseConfig class="it.greenvulcano.gvesb.gvrules.drools.config.impl.GVKnowledgeBaseConfig"
+                               name="figureFilter" type="knwl-config">
+            <RuleResource resourceType="DRL" type="knwl-resource"
+                          url="file:${{gv.app.home}}/Rules/figure/figureFilter.drl"/>
+        </GVKnowledgeBaseConfig>
+    </GVRulesConfigManager>
+</GVAdapters>

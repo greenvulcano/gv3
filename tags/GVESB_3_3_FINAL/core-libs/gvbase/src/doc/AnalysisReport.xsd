@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="AnalysisReport">
+    <xs:complexType>
+      <xs:sequence>  
+        <xs:element name="AnalysisDirectory">
+          <xs:complexType>
+            <xs:attribute name="path"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="AnalysisFilter">
+          <xs:complexType>
+            <xs:attribute name="filter"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element ref="FileList" minOccurs="0" maxOccurs="4"/>
+      </xs:sequence>
+      <xs:attribute name="created" type="xs:dateTime"/>
+    </xs:complexType>
+    <xs:unique name="singleFileListType">
+      <xs:selector xpath="FileList"/>
+      <xs:field xpath="@type"/>
+    </xs:unique>
+  </xs:element>
+  
+  <xs:element name="File">
+    <xs:complexType>
+      <xs:attribute name="name"/>
+      <xs:attribute name="size" type="xs:long"/>
+      <xs:attribute name="modified" type="xs:dateTime"/>
+      <xs:attribute name="isDirectory" type="xs:boolean"/>
+      <xs:attribute name="canRead" type="xs:boolean"/>
+      <xs:attribute name="canWrite" type="xs:boolean"/>
+      <xs:attribute name="canExecute" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="FileList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="File" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="type" type="ListType"/>
+    </xs:complexType>
+    <xs:unique name="singleFileInFileList">
+      <xs:selector xpath="File"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+  </xs:element>
+  
+  <xs:simpleType name="ListType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:enumeration value="existing"/>
+      <xs:enumeration value="modified"/>
+      <xs:enumeration value="created"/>
+      <xs:enumeration value="deleted"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

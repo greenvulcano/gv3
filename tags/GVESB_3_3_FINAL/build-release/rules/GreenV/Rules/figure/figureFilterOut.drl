@@ -1,0 +1,22 @@
+#created on: 10-feb-2012
+package tests.unit.gvrules.bean.figure
+
+#list any import classes here.
+import tests.unit.gvrules.bean.figure.Figure;
+import tests.unit.gvrules.bean.figure.FigureBag;
+import tests.unit.gvrules.bean.figure.Circle;
+import tests.unit.gvrules.bean.figure.Square;
+import tests.unit.gvrules.bean.figure.Triangle;
+
+#declare any global variables here
+global String filterColor;
+global FigureBag figsetOut;
+
+rule "Filter by color"
+when
+    $bag : FigureBag()
+    $fig : Figure(filterColor == color) from $bag.getFigures()
+then
+    figsetOut.add($fig);
+end
+

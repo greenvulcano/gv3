@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE weblogic-ejb-jar PUBLIC "-//BEA Systems, Inc.//DTD WebLogic 8.1.0 EJB//EN" "http://www.bea.com/servers/wls810/dtd/weblogic-ejb-jar.dtd">
+
+<!-- Sample MessageDriven bean Weblogic deployment descriptor -->
+
+<weblogic-ejb-jar>
+    <weblogic-enterprise-bean>
+        <ejb-name>MDBStatisticsReader</ejb-name>
+        <message-driven-descriptor>
+            <pool>
+                <max-beans-in-free-pool>20</max-beans-in-free-pool>
+                <initial-beans-in-free-pool>0</initial-beans-in-free-pool>
+            </pool>
+            <destination-jndi-name>gvesb/jms/queue/Statistics_Queue</destination-jndi-name>
+            <connection-factory-jndi-name>gvesb/jms/connFactory/QueueConnectionFactory</connection-factory-jndi-name>
+        </message-driven-descriptor>
+        <jndi-name>gvesb/statistics/MDBStatisticsReader</jndi-name>
+    </weblogic-enterprise-bean>
+</weblogic-ejb-jar>
+
