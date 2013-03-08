@@ -7,6 +7,16 @@
 
     &libraries;
 
+    <patternset id="source.filter">
+      <exclude name="**/.svn/**"/>
+      <exclude name="**/target/**"/>
+      <exclude name="**/maven-repository/**"/>
+      <exclude name="**/libraries/**"/>
+      <exclude name="**/licenses/**"/>
+      <exclude name="**/libraries.ent"/>
+      <exclude name="**/id_file"/>
+   </patternset>
+
     <!-- ================================================================== -->
     <!-- Building                                                           -->
     <!-- ================================================================== -->
@@ -16,8 +26,8 @@
     </target>
 
     <target name="release"
-            depends="prepare, bundle-docs, bin-tgz, bin-zip"
-            description="Creates the release binary from the distribution">
+            depends="prepare, bundle-docs, bin-tgz, bin-zip, source-tgz"
+            description="Creates the release binary and source from the distribution">
     </target>
 
     <target name="prepare">
@@ -581,5 +591,23 @@
         <checksum file="${module.output}/${release.id}-Full.zip"/>
         <checksum file="${module.output}/${release.id}-Full.zip" algorithm="SHA-256" />
     </target>
+
+    <target name="source-tgz" description="Build source .tar.gz archive">
+        <tar destfile="${module.output}/${release.id}-Full-src.tar.gz"
+             longfile="gnu" compression="gzip">
+            <tarfileset dir="${basedir}/../" prefix="${release.id}-src">
+                <patternset refid="source.filter"/>
+                <exclude name="tools/bin/*"/>
+                <exclude name="tools/maven/bin/*"/>
+            </tarfileset>
+            <tarfileset dir="${basedir}/../" prefix="${release.id}-src" mode="755">
+                <patternset refid="source.filter"/>
+                <include name="tools/bin/*"/>
+                <exclude name="tools/maven/bin/*"/>
+            </tarfileset>
+        </tar>
+        <checksum file="${module.output}/${release.id}-Full-src.tar.gz"/>
+        <checksum file="${module.output}/${release.id}-Full-src.tar.gz" algorithm="SHA-256" />
+   </target>
 
 </project>
