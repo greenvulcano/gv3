@@ -177,6 +177,7 @@ public class DBOFlatSelect extends AbstractDBO
                                     }
                                     switch (metadata.getColumnType(j)) {
                                         case Types.DATE :
+                                        case Types.TIME : 
                                         case Types.TIMESTAMP :{
                                             Timestamp dateVal = rs.getTimestamp(j);
                                             if (dateVal == null) {
@@ -188,13 +189,17 @@ public class DBOFlatSelect extends AbstractDBO
                                         }
                                             break;
                                         case Types.DOUBLE :
-                                        case Types.FLOAT :{
+                                        case Types.FLOAT :
+                                        case Types.REAL : {
                                             float numVal = rs.getFloat(j);
                                             textVal = fF.formatNumber(numVal);
                                         }
                                             break;
+                                        case Types.BIGINT :
+                                        case Types.INTEGER :
                                         case Types.NUMERIC :
-                                        case Types.INTEGER :{
+                                        case Types.SMALLINT : 
+                                        case Types.TINYINT : {
                                             BigDecimal bigdecimal = rs.getBigDecimal(j);
                                             if (bigdecimal == null) {
                                                 textVal = fF.formatField("");
