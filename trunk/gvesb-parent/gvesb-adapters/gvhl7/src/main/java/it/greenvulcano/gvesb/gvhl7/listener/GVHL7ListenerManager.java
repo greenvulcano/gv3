@@ -28,15 +28,20 @@ import it.greenvulcano.event.util.shutdown.ShutdownEventLauncher;
 import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
 import it.greenvulcano.gvesb.core.pool.GreenVulcanoPool;
 import it.greenvulcano.gvesb.core.pool.GreenVulcanoPoolManager;
+import it.greenvulcano.gvesb.gvhl7.listener.jmx.HL7ListenerInfo;
+import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import ca.uhn.hl7v2.app.ThreadUtils;
 
 /**
  *
@@ -81,6 +86,8 @@ public class GVHL7ListenerManager implements ConfigurationListener, ShutdownEven
     private void init() throws HL7AdapterException
     {
         try {
+        	ThreadUtils.setCtxClassLoader(this.getClass().getClassLoader());
+
             Document globalConfig = null;
             try {
                 globalConfig = XMLConfig.getDocument(DEFAULT_CONF_FILE_NAME);
@@ -105,9 +112,12 @@ public class GVHL7ListenerManager implements ConfigurationListener, ShutdownEven
                 String clazz = XMLConfig.get(n, "@class");
                 HL7Listener list = (HL7Listener) Class.forName(clazz).newInstance();
                 list.init(n);
+                register(list);
                 listeners.put(list.getName(), list);
                 logger.debug("Configured HL7Listener[" + list.getName() + "]");
-                list.start();
+                if (list.isAutoStart()) {
+                	list.start();
+                }
             }
         }
         catch (HL7AdapterException exc) {
@@ -134,6 +144,7 @@ public class GVHL7ListenerManager implements ConfigurationListener, ShutdownEven
         try {
             for (Entry<String, HL7Listener> entry : listeners.entrySet()) {
                 try {
+                	deregister(entry.getValue(), true);
                     entry.getValue().destroy();
                 }
                 catch (Exception exc) {
@@ -185,4 +196,52 @@ public class GVHL7ListenerManager implements ConfigurationListener, ShutdownEven
         destroy();
     }
 
+    
+    /**
+     * Register the listener as MBean.
+     * 
+     * @param listener
+     *        the instance to register.
+     */
+    private void register(HL7Listener listener)
+    {
+        logger.debug("Registering MBean for HL7Listener(" + listener.getName() + ")");
+        Hashtable<String, String> properties = getMBeanProperties(listener);
+        try {
+            deregister(listener, false);
+            JMXEntryPoint jmx = JMXEntryPoint.instance();
+            jmx.registerObject(new HL7ListenerInfo(listener), HL7ListenerInfo.DESCRIPTOR_NAME, properties);
+        }
+        catch (Exception exc) {
+            logger.warn("Error registering MBean for HL7Listener(" + listener.getName() + ")", exc);
+        }
+    }
+
+    /**
+     * Deregister the listener as MBean.
+     * 
+     * @param listener
+     *        the instance to deregister.
+     */
+    private void deregister(HL7Listener listener, boolean showError)
+    {
+        logger.debug("Deregistering MBean for HL7Listener(" + listener.getName() + ")");
+        Hashtable<String, String> properties = getMBeanProperties(listener);
+        try {
+            JMXEntryPoint jmx = JMXEntryPoint.instance();
+            jmx.unregisterObject(new HL7ListenerInfo(listener), HL7ListenerInfo.DESCRIPTOR_NAME, properties);
+        }
+        catch (Exception exc) {
+            if (showError) {
+                logger.warn("Cannot de-register HL7Listener(" + listener.getName() + ")", exc);
+            }
+        }
+    }
+
+    private Hashtable<String, String> getMBeanProperties(HL7Listener listener)
+    {
+        Hashtable<String, String> properties = new Hashtable<String, String>();
+        properties.put("Name", listener.getName());
+        return properties;
+    }
 }

@@ -21,7 +21,10 @@ package it.greenvulcano.gvesb.gvhl7.listener;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.gvhl7.listener.handler.GVCoreApplication;
+import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.ThreadMap;
 
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
@@ -36,6 +39,7 @@ import org.w3c.dom.NodeList;
 
 import ca.uhn.hl7v2.app.Connection;
 import ca.uhn.hl7v2.app.HL7Service;
+import ca.uhn.hl7v2.app.ThreadUtils;
 import ca.uhn.hl7v2.llp.LowerLayerProtocol;
 import ca.uhn.hl7v2.parser.PipeParser;
 
@@ -56,6 +60,8 @@ public class HL7Listener extends HL7Service
     private String                         name;
     private ServerSocket                   ss           = null;
     private Map<String, GVCoreApplication> applications = new HashMap<String, GVCoreApplication>();
+    private boolean                        autoStart    = false;
+    private String                         serverName;
 
 
     public HL7Listener()
@@ -66,8 +72,10 @@ public class HL7Listener extends HL7Service
     public void init(Node node) throws HL7AdapterException
     {
         try {
+        	serverName = JMXEntryPoint.getServerName();
             name = XMLConfig.get(node, "@name");
             port = XMLConfig.getInteger(node, "@port");
+            autoStart = XMLConfig.getBoolean(node, "@autoStart", true);
 
             NodeList nl = XMLConfig.getNodeList(node, "HL7Applications/*[@type='hl7application']");
             for (int i = 0; i < nl.getLength(); i++) {
@@ -98,10 +106,17 @@ public class HL7Listener extends HL7Service
     @Override
     public void run()
     {
+    	NMDC.push();
+        NMDC.clear();
+        NMDC.setServer(serverName);
+        NMDC.setSubSystem(GVHL7ListenerManager.SUBSYSTEM);
+        NMDC.put("LISTENER", name);
+         
         try {
+        	ThreadUtils.setListenerName(name);
             ss = new ServerSocket(port);
             ss.setSoTimeout(SO_TIMEOUT);
-            logger.debug("HL7Listener[" + name + "] running on port " + ss.getLocalPort());
+            logger.info("HL7Listener[" + name + "] running on port " + ss.getLocalPort());
             while (isRunning()) {
                 try {
                     Socket newSocket = ss.accept();
@@ -117,7 +132,7 @@ public class HL7Listener extends HL7Service
                     logger.error("HL7Listener[" + name + "] error while accepting connections: ", exc);
                 }
             }
-            logger.debug("HL7Listener[" + name + "] stop listening");
+            logger.info("HL7Listener[" + name + "] stop listening");
         }
         catch (Exception exc) {
             logger.error("HL7Listener[" + name + "] listening error", exc);
@@ -132,6 +147,9 @@ public class HL7Listener extends HL7Service
                     //exc.printStackTrace();
                 }
             }
+            NMDC.pop();
+            ThreadMap.clean();
+            ThreadUtils.removeListenerName();
         }
     }
 
@@ -143,9 +161,25 @@ public class HL7Listener extends HL7Service
         return this.name;
     }
 
+    /**
+     * @return
+     */
+    public boolean isAutoStart() {
+		return autoStart;
+	}
+    
+    /**
+     * 
+     * @return
+     */
+    public int getPort() {
+		return port;
+	}
+    
     public void destroy()
     {
         logger.debug("BEGIN - Destroing HL7Listener[" + name + "]");
+        
         try {
             this.stop();
         }
