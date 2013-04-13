@@ -929,9 +929,10 @@
 <!--
     Definition of business web service.
     The ESB's service input GVBuffer contains the following properties:
-    - WS_SERVICE     : name of the invoked webservice
-    - WS_OPERATION   : name of the invoked webservice's operation
-    - WS_REMOTE_ADDR : remote address of the invoking client
+    - WS_SERVICE      : name of the invoked webservice
+    - WS_OPERATION    : name of the invoked webservice's operation
+    - WS_REMOTE_ADDR  : remote address of the invoking client
+    - WS_CONTENT_TYPE : request content type
 
     #Table: ! Operations ! Operation ! Operation ! @operation ! SOAP Action ! @soap-action ! Description ! Description
     #SelectOnInsert
