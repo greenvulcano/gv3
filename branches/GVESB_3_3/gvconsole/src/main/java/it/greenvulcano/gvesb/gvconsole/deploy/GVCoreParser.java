@@ -1906,7 +1906,7 @@ public class GVCoreParser
             	Node importedNode = base.getOwnerDocument().importNode(resultsSysZip, true);
             	base.appendChild(importedNode);
                 logger.debug("Nodo System[" + sistema + "] non esistente, inserimento");
-                handleVCLOperationDetails(resultsSysZip, parser);
+                handleVCLOperationDetails(importedNode, parser);
             }
             else {
                 logger.debug("Nodo System[" + sistema + "] esistente, aggiornamento");
@@ -1920,6 +1920,7 @@ public class GVCoreParser
                     	Node importedNode = resultsSysServer.getOwnerDocument().importNode(resChZip, true);
                     	resultsSysServer.appendChild(importedNode);
                         logger.debug("Nodo Channel[" + channelName + "] non esistente, inserimento");
+                        handleVCLOperationDetails(importedNode, parser);
                     }
                 	else {
                 		logger.debug("Nodo Channel[" + channelName + "] esistente, aggiornamento");
@@ -1940,9 +1941,9 @@ public class GVCoreParser
                                 logger.debug("Nodo VCLOperation[" + nameOperZip + "] non esistente, inserimento");
                             }
                         }
+                        handleVCLOperationDetails(resChServer, parser);
                     }
                 }
-                handleVCLOperationDetails(resultsSysServer, parser);
             }
         }
     }
