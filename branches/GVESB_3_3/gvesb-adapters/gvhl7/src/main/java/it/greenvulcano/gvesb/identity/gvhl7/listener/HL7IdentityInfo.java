@@ -26,6 +26,7 @@ import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.apache.log4j.Logger;
 
 import ca.uhn.hl7v2.app.Receiver;
+import ca.uhn.hl7v2.app.ThreadUtils;
 
 /**
  * @version 3.2.0 25/giu/2012
@@ -41,7 +42,7 @@ public class HL7IdentityInfo extends BaseIdentityInfo
     public HL7IdentityInfo(String name)
     {
         this.name = name;
-        address = Receiver.getClientIP();
+        address = ThreadUtils.getIPRef();
     }
 
     @Override
