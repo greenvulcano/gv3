@@ -171,7 +171,7 @@ public class TextUtils
                 startNextToken = endNextToken + toBeReplaced.length();
             }
             else {
-                if (startNextToken != (maxPosition - 1)) {
+                if (startNextToken <= (maxPosition - 1)) {
                     String currToken = input.substring(startNextToken);
                     buf.append(currToken);
                     startNextToken = maxPosition;
