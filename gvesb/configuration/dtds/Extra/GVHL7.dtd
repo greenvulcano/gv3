@@ -40,6 +40,11 @@
     #NotNull
 -->
 <!ATTLIST HL7Listener port CDATA #REQUIRED>
+<!--
+    Automatically starts listening for connection.
+    Default to true.
+-->
+<!ATTLIST HL7Listener autoStart (true|false) #IMPLIED>
 
 <!--
     #SortChild

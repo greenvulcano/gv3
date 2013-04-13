@@ -26,7 +26,10 @@ import it.greenvulcano.gvesb.gvhl7.listener.GVHL7ListenerManager;
 import it.greenvulcano.gvesb.gvhl7.listener.HL7AdapterException;
 import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.identity.gvhl7.listener.HL7IdentityInfo;
+import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.ThreadMap;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.util.ArrayList;
@@ -40,7 +43,7 @@ import org.w3c.dom.NodeList;
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.app.Application;
 import ca.uhn.hl7v2.app.ApplicationException;
-import ca.uhn.hl7v2.app.Receiver;
+import ca.uhn.hl7v2.app.ThreadUtils;
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.parser.DefaultXMLParser;
 import ca.uhn.hl7v2.parser.GenericParser;
@@ -59,6 +62,7 @@ public class GVCoreApplication implements Application
     private String         service;
     private String         operation;
     private List<String[]> activations = new ArrayList<String[]>();
+    private String         serverName;
 
     /**
      *
@@ -66,6 +70,7 @@ public class GVCoreApplication implements Application
     public void init(Node node) throws HL7AdapterException
     {
         try {
+        	serverName = JMXEntryPoint.getServerName();
             name = XMLConfig.get(node, "@name");
             system = XMLConfig.get(node, "@gv-system", GVBuffer.DEFAULT_SYS);
             service = XMLConfig.get(node, "@gv-service");
@@ -125,6 +130,11 @@ public class GVCoreApplication implements Application
         GenericParser hl7StringParser = new GenericParser();
         Message msgOut = null;
 
+        NMDC.push();
+        NMDC.clear();
+        NMDC.setServer(serverName);
+        NMDC.setSubSystem(GVHL7ListenerManager.SUBSYSTEM);
+        
         GVIdentityHelper.push(new HL7IdentityInfo(this.name));
         try {
             logger.debug("BEGIN Operation");
@@ -134,7 +144,7 @@ public class GVCoreApplication implements Application
 
             GVBuffer in = new GVBuffer(system, service);
             in.setObject(hl7MsgXmlIn);
-            in.setProperty("HL7_REMOTE_ADDR", Receiver.getClientIP());
+            in.setProperty("HL7_REMOTE_ADDR", ThreadUtils.getIPRef());
 
             GVBuffer out = getGreenVulcanoPool().forward(in, operation);
 
@@ -160,6 +170,8 @@ public class GVCoreApplication implements Application
         }
         finally {
             GVIdentityHelper.pop();
+            NMDC.pop();
+            ThreadMap.clean();
         }
         return msgOut;
     }
