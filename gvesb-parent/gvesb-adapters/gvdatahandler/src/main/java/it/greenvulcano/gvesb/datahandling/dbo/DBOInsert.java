@@ -228,7 +228,7 @@ public class DBOInsert extends AbstractDBO
                         currentRowFields.add(Integer.valueOf(text));
                     }
                 }
-                else if (FLOAT_TYPE.equals(currType)) {
+                else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
                     if (text.equals("")) {
                         ps.setNull(colIdx, Types.NUMERIC);
                         currentRowFields.add(null);
