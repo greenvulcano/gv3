@@ -373,6 +373,11 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     protected static final String FLOAT_TYPE              = "float";
 
     /**
+    *
+    */
+    protected static final String DECIMAL_TYPE            = "decimal";
+   
+    /**
      *
      */
     protected static final String FORMAT_NAME             = "format";

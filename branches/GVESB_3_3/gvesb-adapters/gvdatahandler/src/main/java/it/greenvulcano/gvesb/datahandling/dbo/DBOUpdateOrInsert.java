@@ -251,7 +251,7 @@ public class DBOUpdateOrInsert extends AbstractDBO
                     currDateFormat = DEFAULT_DATE_FORMAT;
                 }
             }
-            else if (FLOAT_TYPE.equals(currType)) {
+            else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
                 currNumberFormat = attributes.getValue(uri, FORMAT_NAME);
                 if (currNumberFormat == null) {
                     currNumberFormat = call_DEFAULT_NUMBER_FORMAT;
@@ -442,7 +442,7 @@ public class DBOUpdateOrInsert extends AbstractDBO
                         localCurrentRowFields.add(Integer.valueOf(text));
                     }
                 }
-                else if (FLOAT_TYPE.equals(currType)) {
+                else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.NUMERIC);
                         localCurrentRowFields.add(null);
