@@ -20,8 +20,10 @@
 package it.greenvulcano.gvesb.virtual.excel.reader;
 
 import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.excel.reader.ToXMLReader;
+import it.greenvulcano.excel.exception.ExcelException;
+import it.greenvulcano.excel.reader.BaseReader;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.ConnectionException;
@@ -29,8 +31,13 @@ import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -48,15 +55,25 @@ public class GVExcelReaderCallOperation implements CallOperation
 
     protected OperationKey      key         = null;
 
-    private ToXMLReader         excelReader = null;
-    private boolean             onlyData    = true;
+    private   BaseReader        excelReader = null;
+    
+    /**
+     * Source file name. Can contain placeholders that will be expanded at call
+     * time.
+     */
+    private String              filename = null;
 
     @Override
     public void init(Node node) throws InitializationException
     {
         try {
-            excelReader = new ToXMLReader();
-            onlyData = XMLConfig.getBoolean(node, "@onlyData", true);
+            filename = XMLConfig.get(node, "@fileName", "");
+            Node rNode = XMLConfig.getNode(node, "*[@type='excel-reader']");
+            if (rNode == null) {
+                throw new ExcelException("Missing ExcelReader node");
+            }
+            excelReader = (BaseReader) Class.forName(XMLConfig.get(rNode, "@class")).newInstance();
+            excelReader.init(rNode);
         }
         catch (Exception exc) {
             throw new InitializationException("GV_INIT_SERVICE_ERROR", new String[][]{{"message", exc.getMessage()}},
@@ -67,12 +84,21 @@ public class GVExcelReaderCallOperation implements CallOperation
     @Override
     public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
     {
+        InputStream in = null;
         try {
-            ByteArrayInputStream in = new ByteArrayInputStream((byte[]) gvBuffer.getObject());
-            excelReader.processWorkBook(in, onlyData);
+            PropertiesHandler.enableExceptionOnErrors();
+            if ("".equals(filename)) {
+                in = new ByteArrayInputStream((byte[]) gvBuffer.getObject());                
+            }
+            else {
+                Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
+                String xlsFile = PropertiesHandler.expand(filename, params, gvBuffer);
+                logger.debug("Reading Excel file: " + xlsFile);
+                in = new BufferedInputStream(new FileInputStream(xlsFile));
+            }
+            excelReader.processExcel(in);
 
-            //byte[] data = excelReader.getXMLAsBytes();
-            String data = excelReader.getXMLAsString();
+            Object data = excelReader.getAsObject();
             gvBuffer.setObject(data);
         }
         catch (Exception exc) {
@@ -80,6 +106,17 @@ public class GVExcelReaderCallOperation implements CallOperation
                     {"system", gvBuffer.getSystem()}, {"tid", gvBuffer.getId().toString()},
                     {"message", exc.getMessage()}}, exc);
 
+        }
+        finally {
+            PropertiesHandler.disableExceptionOnErrors();
+            if (in != null) {
+                try {
+                    in.close();
+                }
+                catch (Exception exc) {
+                    // do nothing
+                }
+            }
         }
         return gvBuffer;
     }
