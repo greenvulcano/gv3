@@ -274,6 +274,13 @@
                             </mapping>
                         </dependency>
                         <dependency>
+                            <groupId>org.apache.poi</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>poi</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
                             <groupId>org.zeromq</groupId>
                             <artifactId>zeromq</artifactId>
                             <mapping>
@@ -747,6 +754,18 @@
         <dependency>
             <groupId>net.sourceforge.jexcelapi</groupId>
             <artifactId>jxl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml-schemas</artifactId>
         </dependency>
         <dependency>
             <groupId>dom4j</groupId>

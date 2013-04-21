@@ -274,8 +274,6 @@
             <fileset dir="${com.jcraft.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <!--jsr181-api-1.0-MR1.jar
-            jsr250-api-1.0.jar-->
             <fileset dir="${juddi.juddi.lib}">
                 <include name="juddi.jar"/>
                 <include name="uddi-ws.jar"/>
@@ -283,7 +281,9 @@
             <fileset dir="${jxl.jxl.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <!--logkit-1.0.1.jar-->
+            <fileset dir="${poi.poi.lib}">
+                <include name="*.jar"/>
+            </fileset>
             <fileset dir="${org.jvnet.lib}">
                 <include name="*.jar"/>
             </fileset>

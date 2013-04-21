@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  *
  * This file is part of GreenVulcano ESB.
@@ -19,26 +19,14 @@
  */
 package it.greenvulcano.excel.reader;
 
+import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.excel.exception.ExcelException;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
-import java.io.File;
-import java.io.InputStream;
-
-import jxl.Cell;
-import jxl.CellType;
-import jxl.Range;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.biff.SheetRangeImpl;
-import jxl.format.Border;
-import jxl.format.BorderLineStyle;
-import jxl.format.CellFormat;
-import jxl.format.Colour;
-import jxl.format.Font;
-import jxl.format.Pattern;
-
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -48,57 +36,107 @@ import org.w3c.dom.Node;
  * @version 3.0.0 14/ott/2010
  * @author GreenVulcano Developer Team
  *
+ * @version 3.4.0 20/apr/2013
+ * Converted to POI API
  */
-public class ToXMLReader
+public class ToXMLReader extends BaseReader
 {
-    /**
-     *
-     */
-    private static final String NUMBER_ATTR = "number";
+    
     private Document            doc         = null;
+    private Element             root        = null;
+    private Element             shE         = null;
+            
+    private boolean             onlyData    = true;
+    private XMLUtils            parser      = null;
 
-    public void processWorkBook(String filePath, boolean onlyData) throws ExcelException
-    {
-        doc = null;
+    @Override
+    public void init(Node node) throws ExcelException {
+        super.init(node);
         try {
-            processWorkBook(new File(filePath), onlyData);
-        }
-        catch (ExcelException exc) {
-            throw exc;
+            setOnlyData(XMLConfig.getBoolean(node, "@onlyData", true));
         }
         catch (Exception exc) {
-            throw new ExcelException("Error parsing WorkBook", exc);
+            throw new ExcelException("Error initializing ExcelReader", exc);
+        }
+    }
+    
+    public boolean isOnlyData() {
+        return this.onlyData;
+    }
+    
+    public void setOnlyData(boolean onlyData) {
+        this.onlyData = onlyData;
+    }
+    
+    @Override
+    protected void startProcess() throws ExcelException {
+        try {
+            parser = XMLUtils.getParserInstance();
+            doc = parser.newDocument("workbook");
+            root = doc.getDocumentElement();
+        }
+        catch (Exception exc) {
+            throw new ExcelException("Error parsing Excel", exc);
         }
     }
 
-    public void processWorkBook(File file, boolean onlyData) throws ExcelException
-    {
-        doc = null;
-        try {
-            processWorkBook(Workbook.getWorkbook(file), onlyData);
+    @Override
+    protected boolean processSheet(Sheet sheet, int sNum) throws ExcelException {
+        if (sheet.getPhysicalNumberOfRows() > 0) {
+            shE = parser.createElement(doc, "sheet");
+            root.appendChild(shE);
+            parser.setAttribute(shE, "n", String.valueOf(sNum));
+            Node name = shE.appendChild(parser.createElement(doc, "name"));
+            name.appendChild(doc.createTextNode(sheet.getSheetName()));
+            
+            return true;
         }
-        catch (ExcelException exc) {
-            throw exc;
+        return false;
+    }
+    
+    @Override
+    protected void processRow(Row row, int sNum, int rNum) throws ExcelException {
+        try {
+            if (row != null) {
+                Element rE = parser.createElement(doc, "r");
+                parser.setAttribute(rE, "n", String.valueOf(rNum));
+                shE.appendChild(rE);
+
+                int lastCellNum = row.getLastCellNum();
+                for (int i = 0; i <= lastCellNum; i++) {
+                    if (colSkipper.skip(sNum, i)) {
+                        continue;
+                    }
+                    Cell cell = row.getCell(i);
+                    String value = "";
+                    if (cell != null) {
+                        if (cell.getCellType() != Cell.CELL_TYPE_FORMULA) {
+                            value = formatter.formatCellValue(cell);
+                        }
+                        else {
+                            value = formatter.formatCellValue(cell, evaluator);
+                        }
+                    }
+                    Element cE = parser.createElement(doc, "c");
+                    parser.setAttribute(cE, "n", String.valueOf(i));
+                    rE.appendChild(cE);
+                    Node data = cE.appendChild(parser.createElement(doc, "v"));
+                    data.appendChild(doc.createTextNode(value));
+                }
+            }
         }
         catch (Exception exc) {
-            throw new ExcelException("Error parsing WorkBook", exc);
+            throw new ExcelException("Error parsing Excel", exc);
         }
     }
-
-    public void processWorkBook(InputStream in, boolean onlyData) throws ExcelException
-    {
-        doc = null;
-        try {
-            processWorkBook(Workbook.getWorkbook(in), onlyData);
-        }
-        catch (ExcelException exc) {
-            throw exc;
-        }
-        catch (Exception exc) {
-            throw new ExcelException("Error parsing WorkBook", exc);
-        }
+    
+    @Override
+    protected void endProcess() throws ExcelException {
+        XMLUtils.releaseParserInstance(parser);
+        parser = null;
     }
-
+    
+/*
     public void processWorkBook(Workbook wb, boolean onlyData) throws ExcelException
     {
         doc = null;
@@ -238,8 +276,9 @@ public class ToXMLReader
             XMLUtils.releaseParserInstance(parser);
         }
     }
-
-    public Document getXML() throws ExcelException
+*/
+    @Override
+    public Object getAsObject() throws ExcelException
     {
         if (doc == null) {
             throw new ExcelException("No WorkBook parsed");
@@ -247,33 +286,42 @@ public class ToXMLReader
         return doc;
     }
 
-    public byte[] getXMLAsBytes() throws ExcelException
+    @Override
+    public byte[] getAsBytes() throws ExcelException
     {
         try {
-            return XMLUtils.serializeDOMToByteArray_S(getXML());
+            return XMLUtils.serializeDOMToByteArray_S((Document) getAsObject());
         }
         catch (XMLUtilsException exc) {
             throw new ExcelException("Error serializing Document", exc);
         }
     }
 
-    public String getXMLAsString() throws ExcelException
+    @Override
+    public String getAsString() throws ExcelException
     {
         try {
-            return XMLUtils.serializeDOM_S(getXML());
+            return XMLUtils.serializeDOM_S((Document) getAsObject());
         }
         catch (XMLUtilsException exc) {
             throw new ExcelException("Error serializing Document", exc);
         }
     }
 
+    @Override
     public void cleanUp()
     {
         doc = null;
+        root = null;
+        shE = null;
+        XMLUtils.releaseParserInstance(parser);
+        parser = null;
     }
 
+    @Override
     public void destroy()
     {
         cleanUp();
     }
+
 }

@@ -155,7 +155,7 @@
     #NotNull
     #Unique: ../*[@type='call' or @type='enqueue' or @type='dequeue']/@name
 -->
-<!ATTLIST excel-call name CDATA #IMPLIED>
+<!ATTLIST excel-call name CDATA #REQUIRED>
 <!--
     Reports group name.
 
@@ -170,7 +170,8 @@
 <!ATTLIST excel-call report CDATA #IMPLIED>
 
 <!--
-    Defines the information needed to convert a Excel file, in GVBuffer.object field, in a XML document.
+    Defines the information needed to convert a Excel file, read from file system 
+    or in GVBuffer.object field, in a XML document or CSV string.
 
     #Label: @name
     #Icon: GVExcelReaderCall.png
@@ -182,7 +183,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT excelreader-call (Description?)>
+<!ELEMENT excelreader-call (Description?, (ToXMLReader | ToCSVReader)?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -200,14 +201,92 @@
     #NotNull
     #Unique: ../*[@type='call' or @type='enqueue' or @type='dequeue']/@name
 -->
-<!ATTLIST excelreader-call name CDATA #IMPLIED>
+<!ATTLIST excelreader-call name CDATA #REQUIRED>
+<!--
+    Excel file name. Can contains placeholder to be decoded at runtime.
+    If not defined the Excel file content must be into GVBuffer.object field.
+
+    #NotNull
+-->
+<!ATTLIST excelreader-call fileName CDATA #IMPLIED>
+
+
+<!--
+    Defines the information needed to convert a Excel file into an XML document.
+-->
+<!ELEMENT ToXMLReader (Description?, ColumnSkipper?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST ToXMLReader type CDATA #FIXED "excel-reader">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST ToXMLReader class CDATA #FIXED "it.greenvulcano.excel.reader.ToXMLReader">
 <!--
     If true, insert in the XML document also the cell formatting informations.
     Default to true.
 -->
-<!ATTLIST excelreader-call onlyData (false|true) #IMPLIED>
+<!ATTLIST ToXMLReader onlyData (false|true) #IMPLIED>
 
 
+<!--
+    Defines the information needed to convert a Excel file into an CSV string.
+-->
+<!ELEMENT ToCSVReader (Description?, ColumnSkipper?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST ToCSVReader type CDATA #FIXED "excel-reader">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST ToCSVReader class CDATA #FIXED "it.greenvulcano.excel.reader.ToCSVReader">
+<!--
+    CSV field's separator. Can handle also '\t' (TAB) character.
+    Default to ','.
+
+    #NotNull
+-->
+<!ATTLIST ToCSVReader separator CDATA #IMPLIED>
+<!--
+    Defines the EOL chars to append at the end of every CSV line.
+    Default to LN.
+
+    native : OS native EOL
+    LF     : line feed
+    CR-LF  : carriage return and line feed
+    CR     : carriage return
+-->
+<!ATTLIST ToCSVReader end-line (native|LF|CR-LF|CR) #IMPLIED>
+<!--
+    Defines the CSV escape formatting style..
+    Default to excel.
+-->
+<!ATTLIST ToCSVReader formatting-style (excel|unix) #IMPLIED>
+
+<!--
+    Defines the information needed to skip column processing on some Excel sheet.
+-->
+<!ELEMENT ColumnSkipper (Description?, sheet+)>
+
+<!ELEMENT sheet (Description?)>
+<!--
+    Sheet number, 0 based.
+
+    #NotNull
+-->
+<!ATTLIST sheet id CDATA #REQUIRED>
+<!--
+    Comma separated columns number to skip, 0 based.
+
+    #NotNull
+-->
+<!ATTLIST sheet col CDATA #REQUIRED>
 
 <!--
     It is on this GreenVulcano  ESB element where Report Excel formats will be configured.
