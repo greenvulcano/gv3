@@ -1150,7 +1150,6 @@ public class DBOCallSP extends AbstractDBO
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
-        CallableStatement cs = (CallableStatement) sqlStatementInfo.getStatement();
         if (ROW_NAME.equals(localName)) {
             if (!currCriticalError) {
                 executeStatement();
@@ -1169,6 +1168,7 @@ public class DBOCallSP extends AbstractDBO
             }
         }
         else if (COL_NAME.equals(localName)) {
+            CallableStatement cs = (CallableStatement) sqlStatementInfo.getStatement();
             try {
                 if (!outOnly) {
                     colDataExpecting = false;
