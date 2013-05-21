@@ -37,7 +37,7 @@ public class DebuggerAdapter
     private DebugSynchObject    synchObject;
 
     // TODO: make configurable
-    public static final Version DEBUGGER_VERSION = new Version("3.3.0");
+    public static final Version DEBUGGER_VERSION = new Version("3.3.1");
 
     public DebuggerAdapter() throws DebuggerException
     {
