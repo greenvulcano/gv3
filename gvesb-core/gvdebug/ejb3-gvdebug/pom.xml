@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>it.greenvulcano.gvesb</groupId>
 		<artifactId>gvesb.core.gvcore.gvdebug</artifactId>
-		<version>3.3.0-Final</version>
+		<version>3.3.1-Final</version>
 	</parent>
 
 	<artifactId>ejb3-gvdebug</artifactId>
