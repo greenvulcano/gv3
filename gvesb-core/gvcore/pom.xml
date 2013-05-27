@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>it.greenvulcano.gvesb</groupId>
+        <artifactId>gvesb.core.gvcore</artifactId>
+        <version>3.3.1-Final</version>
+    </parent>
+
+    <groupId>it.greenvulcano.gvesb</groupId>
+    <artifactId>gvcore</artifactId>
+    <name>GreenVulcano ESB Core</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvstatistics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvthroughput</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvpolicy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvdte</artifactId>
+        </dependency>
+    </dependencies>
+</project>

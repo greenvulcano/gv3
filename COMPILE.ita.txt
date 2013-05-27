@@ -1,0 +1,39 @@
+
+Prerequisiti:
+- JDK 1.6.x
+- Eclipse 3.7.x
+    - plug-in m2eclipse   (Maven integration)
+    - plug-in subversive  (Subversion client)
+
+Scaricare dal repository http://svn.code.sf.net/p/greenvulcanoesb/source/branches il progetto 'GVESB_3_3'.
+Identifichiamo come GV_PROJECT_HOME il path del progetto.
+
+Operazioni propedeutiche comuni
+- modificare opportunamente il contenuto del file (GV_PROJECT_HOME)/tools/maven/conf/user-settings.xml :
+    - l'elemento 'localRepository' deve essere popolato col path di (GV_PROJECT_HOME)/maven-repository
+    - l'elemento 'greenv.project.home' nel profilo 'base-cfg' deve essere popolato col path di (GV_PROJECT_HOME)
+  tale file deve essere utilizzato per configurazioni specifiche dell'utente e NON deve essere caricato 
+  sul repository SVN
+
+Compilazione a riga di comando
+- aprire una shell
+- modificare la variabile PATH inserendo all'inizio (GV_PROJECT_HOME)/tools/bin (Ant) e (GV_PROJECT_HOME)/tools/maven/bin (Maven2)
+  oppure
+  - modificare il file setenv.sh o setenv.bat settando la variabile GV_PROJECT_HOME (i file modificati NON devono essere caricati sul repository SVN)
+  - lanciare il file appropriato al proprio OS:
+    - Unix: . setenv.sh
+    - Windows: setenv.bat
+- utilizzare il comando mvn per avviare la compilazione
+
+Compilazione da Eclipse
+- avviare Eclipse in un nuovo workspace e installare i plug-in indicati
+- configurare il plug-in Maven:
+    - nel tab Installations aggiungere una installazione esterna di Maven2: (GV_PROJECT_HOME)/tools/maven
+    - nel tab User Settings selezionare il file (GV_PROJECT_HOME)/tools/maven/conf/user-settings.xml
+- importare il progetto radice:
+    - Import -> Maven -> Existing Maven Projects -> root directory=(GV_PROJECT_HOME)
+    - importare tutti i progetti trovati
+- se si installano nuovi plug-in su Eclipse è possibile che vengano modificati i file .project o la directory .settings: tali modifiche
+  NON devono essere caricate sul repository SVN
+
+Per generare i vari pacchetti di installazione fare riferimento a (GV_PROJECT_HOME)/build-release/readme.ita
