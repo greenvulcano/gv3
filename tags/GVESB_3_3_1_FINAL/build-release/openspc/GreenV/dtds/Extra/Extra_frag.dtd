@@ -1,0 +1,20 @@
+<!ENTITY % gvcommons SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCommons.dtd">
+%gvcommons;
+
+<!ENTITY % gvopenspcoop SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVOpenSpCoop.dtd">
+%gvopenspcoop;
+
+<!ENTITY % extra-j2ee-calls "">
+<!ENTITY % extra-comm-calls "|openspcoop-call">
+<!ENTITY % extra-file-calls "">
+<!ENTITY % extra-db-calls   "">
+<!ENTITY % extra-util-calls "">
+
+<!ENTITY % extra-enqueue "">
+<!ENTITY % extra-dequeue "">
+<!ENTITY % extra-dte-transformers "">
+<!ENTITY % extra-wf-operations "">
+<!ENTITY % extra-wf-extensions "">
+<!ENTITY % extra-core "">
+<!ENTITY % extra-adapters "">
+<!ENTITY % extra-support "">

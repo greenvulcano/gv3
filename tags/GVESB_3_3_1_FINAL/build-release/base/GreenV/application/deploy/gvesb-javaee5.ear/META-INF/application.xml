@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE application PUBLIC
+	"-//Sun Microsystems, Inc.//DTD J2EE Application 1.3//EN"
+	"http://java.sun.com/dtd/application_1_3.dtd">
+<application>
+  <display-name>gvesb-javaee5</display-name>
+  <module>
+    <web>
+      <web-uri>gvboot.war</web-uri>
+      <context-root>/gvboot</context-root>
+    </web>
+  </module>
+  <module>
+    <web>
+      <web-uri>gvdebug.war</web-uri>
+      <context-root>/gvdebug</context-root>
+    </web>
+  </module>
+
+  <module>
+    <ejb>ejb-test.jar</ejb>
+  </module>
+  <module>
+    <ejb>ejb3-test.jar</ejb>
+  </module>
+
+  <module>
+    <ejb>ejb-gvstatistics.jar</ejb>
+  </module>
+  <module>
+    <ejb>ejb-gvcore.jar</ejb>
+  </module>
+  <module>
+    <ejb>ejb3-gvcore.jar</ejb>
+  </module>
+  <module>
+    <ejb>ejb3-gvdebug.jar</ejb>
+  </module>
+  <module>
+    <web>
+      <web-uri>gvaxis2.war</web-uri>
+      <context-root>/gvaxis2</context-root>
+    </web>
+  </module>
+  <module>
+    <web>
+      <web-uri>gvconsole.war</web-uri>
+      <context-root>/gvconsole</context-root>
+    </web>
+  </module>
+</application>

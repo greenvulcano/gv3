@@ -1,0 +1,8 @@
+<jboss>
+    <enterprise-beans>
+        <message-driven>
+            <ejb-name>MDBStatisticsReader</ejb-name>
+            <destination-jndi-name>gvesb/jms/queue/Statistics_Queue</destination-jndi-name>
+        </message-driven>
+    </enterprise-beans>
+</jboss>

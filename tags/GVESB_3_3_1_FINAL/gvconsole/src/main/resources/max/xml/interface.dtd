@@ -1,0 +1,196 @@
+<!--    XMLBuilder fornisce l'interfaccia per l'editor XML
+    in formato XML.
+
+    Questo DTD ne definisce il formato.
+-->
+
+<!ELEMENT interface        (action*,undo?,redo?,ancestors?,element,external-data?,attributes?,operations?,tree?)>
+<!ATTLIST interface
+    invoke       CDATA      #REQUIRED
+    context      CDATA      #REQUIRED
+    warnings     (yes|no)   "no"
+    anchor       (yes|no)   #IMPLIED
+    autocheck    (yes|no)   "yes"
+    graphic-mode (yes|no)   #IMPLIED
+>
+
+<!ELEMENT action           (#PCDATA)>
+<!ATTLIST action
+    label       CDATA      #REQUIRED
+    text        CDATA      #REQUIRED
+    key         CDATA      #REQUIRED
+    target      CDATA      #IMPLIED
+>
+
+<!ELEMENT undo             (#PCDATA)>
+<!ATTLIST undo
+    text        CDATA                       #REQUIRED
+    operation   (delete|edit|change|insert) #REQUIRED
+>
+
+<!ELEMENT redo             (#PCDATA)>
+<!ATTLIST redo
+    text        CDATA                       #REQUIRED
+    operation   (delete|edit|change|insert) #REQUIRED
+>
+
+
+<!ELEMENT ancestors        (ancestor+)>
+
+<!ELEMENT ancestor         EMPTY>
+<!ATTLIST ancestor
+    element-name   NMTOKEN  #REQUIRED
+    key            CDATA    #REQUIRED
+    label          CDATA    #IMPLIED
+>
+
+<!ELEMENT element          (description,warning*)>
+<!ATTLIST element
+    element-name   NMTOKEN  #REQUIRED
+    content-model  CDATA    #REQUIRED
+>
+
+<!ELEMENT attributes       (attribute+)>
+<!ATTLIST attributes
+	readOnly	   CDATA 	#IMPLIED
+>
+<!ELEMENT operations       (row*,table*)>
+<!ELEMENT details          (#PCDATA)>
+
+<!ELEMENT description      (#PCDATA)>
+<!ATTLIST description  popup-style CDATA #IMPLIED
+>
+
+<!ELEMENT warning   EMPTY>
+<!ATTLIST warning
+    key     CDATA   #REQUIRED
+    warn    CDATA   #REQUIRED
+>
+
+<!ELEMENT attribute        (description?,(remove-attribute|choice-attribute|edit-attribute|view-attribute|add-attribute)+)>
+<!ATTLIST attribute
+    attribute-name   CDATA    #REQUIRED
+    attribute-value  CDATA    #REQUIRED
+    attribute-model  CDATA    #REQUIRED
+>
+
+<!ELEMENT remove-attribute EMPTY>
+<!ATTLIST remove-attribute
+    key            CDATA    #REQUIRED
+>
+
+<!ELEMENT choice-attribute (choice*)>
+<!ATTLIST choice-attribute
+    key            CDATA    #REQUIRED
+>
+
+<!-- used in choice-attribute and choice-element -->
+<!ELEMENT choice            EMPTY>
+<!ATTLIST choice
+    value          CDATA    #REQUIRED
+>
+
+<!ELEMENT edit-attribute   EMPTY>
+<!ATTLIST edit-attribute
+    key            CDATA    #REQUIRED
+>
+
+<!ELEMENT view-attribute   EMPTY>
+<!ATTLIST view-attribute
+    key            CDATA    #REQUIRED
+>
+
+<!ELEMENT add-attribute    EMPTY>
+<!ATTLIST add-attribute
+    key            CDATA    #REQUIRED
+>
+
+<!ELEMENT row              ((select|edit),menu?)>
+<!ATTLIST row
+    anchor      (yes|no)   #IMPLIED
+>
+
+<!ELEMENT menu  (menu-item*)>
+<!ATTLIST menu
+    name            CDATA   #REQUIRED
+>
+
+<!ELEMENT menu-item EMPTY>
+<!ATTLIST menu-item
+    label           CDATA   #REQUIRED
+    key             CDATA   #REQUIRED
+    type            (insert|change|delete|copy)   #REQUIRED
+    description     CDATA   #IMPLIED
+>
+
+
+<!ELEMENT select           (details?,external-data?,warning*)>
+<!ATTLIST select
+    element-name   NMTOKEN  #REQUIRED
+    key            CDATA    #REQUIRED
+    new-element    (yes|no) "no"
+    label          CDATA    #IMPLIED
+>
+
+
+<!ELEMENT edit              (free-text|choice-element)>
+<!ATTLIST edit
+    key            CDATA    #REQUIRED
+    readOnly	   CDATA 	#IMPLIED
+    isXML		   CDATA    #IMPLIED
+>
+
+<!ELEMENT free-text         (#PCDATA)>
+<!ELEMENT choice-element    (choice*)>
+
+<!ELEMENT external-data     ANY>
+
+<!ELEMENT table             (theader,trow*)>
+<!ATTLIST table
+    description     CDATA   #REQUIRED
+>
+<!ELEMENT theader           (hcell*)>
+<!ELEMENT hcell             EMPTY>
+<!ATTLIST hcell
+    lable           CDATA   #REQUIRED
+>
+<!ELEMENT trow              (select?,tcell*,menu?)>
+<!ATTLIST trow
+    anchor      (yes|no)   #IMPLIED
+>
+<!ELEMENT tcell             (value*)>
+<!ATTLIST tcell
+    colspan         CDATA  #IMPLIED
+>
+<!ELEMENT value             EMPTY>
+<!ATTLIST value
+    value           CDATA   #REQUIRED
+>
+
+<!--
+    Usato per fornire dati a dtree.js
+-->
+<!ELEMENT tree (tree-node*)>
+<!ATTLIST tree active           (yes|no)    #REQUIRED>
+<!ATTLIST tree openTo           CDATA       #IMPLIED>
+<!ATTLIST tree name             CDATA       #IMPLIED>
+<!ATTLIST tree target           CDATA       #IMPLIED>
+<!ATTLIST tree folderLinks      CDATA       #IMPLIED>
+<!ATTLIST tree useSelection     CDATA       #IMPLIED>
+<!ATTLIST tree useCookies       CDATA       #IMPLIED>
+<!ATTLIST tree useLines         CDATA       #IMPLIED>
+<!ATTLIST tree useIcons         CDATA       #IMPLIED>
+<!ATTLIST tree useStatusText    CDATA       #IMPLIED>
+<!ATTLIST tree closeSameLevel   CDATA       #IMPLIED>
+<!ATTLIST tree inOrder          CDATA       #IMPLIED>
+
+<!ELEMENT tree-node (tree-node*)>
+<!ATTLIST tree-node id          CDATA #REQUIRED>
+<!ATTLIST tree-node pid         CDATA #REQUIRED>
+<!ATTLIST tree-node name        CDATA #REQUIRED>
+<!ATTLIST tree-node url         CDATA #IMPLIED>
+<!ATTLIST tree-node title       CDATA #IMPLIED>
+<!ATTLIST tree-node target      CDATA #IMPLIED>
+<!ATTLIST tree-node icon        CDATA #IMPLIED>
+<!ATTLIST tree-node iconOpen    CDATA #IMPLIED>
+<!ATTLIST tree-node open        CDATA #IMPLIED>

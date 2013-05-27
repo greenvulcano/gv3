@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.3//EN"
+          "http://struts.apache.org/dtds/struts-config_1_3.dtd">
+
+<struts-config>
+  <form-beans>
+    <form-bean name="fileUpload" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsUploadForm" />
+    <form-bean name="deployCore" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
+    <form-bean name="deployAdapter" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
+    <form-bean name="deploySupport" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
+    <form-bean name="fileExport" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
+    <form-bean name="deploy" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsDeployForm" />
+    <form-bean name="save" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsDeployForm" />
+    <form-bean name="GVWebServiceForm" type="it.greenvulcano.gvesb.gvconsole.webservice.forms.GVWebServiceForm" />
+    <form-bean name="BlankForm" type="it.greenvulcano.gvesb.gvconsole.util.BlankForm"/>
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+
+  <action-mappings>
+    <action path="/GVWebServiceAction" type="it.greenvulcano.gvesb.gvconsole.webservice.action.GVWebServiceAction" name="GVWebServiceForm"
+      validate="false" input="/general.jsp" scope="session">
+      <forward name="success" path="/webservice/managementwsdl.jsp" />
+      <forward name="successUDDI" path="/webservice/managementuddi.jsp" />
+      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
+    </action>
+    <action path="/fileExport" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsExportAction" name="fileExport"
+      scope="request" validate="true" input="/index.jsp">
+      <forward name="success" path="/deploy/listaServiziExport.jsp" />
+      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
+    </action>
+    <action path="/fileUpload" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsUploadAction" name="fileUpload"
+      scope="request" validate="true" input="/fileUpload.jsp">
+      <forward name="success" path="/deploy/listaServiziCore.jsp" />
+      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
+    </action>
+    <action path="/deployCore" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsGestCoreAction" name="deployCore"
+      scope="session" validate="true" input="/deployFile.jsp">
+      <forward name="success" path="/deploy/deployFile.jsp" />
+      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
+    </action>
+    <action path="/deployAdapter" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsGestAdapterAction" name="deployAdapter"
+      scope="session" validate="true" input="/deployFile.jsp">
+      <forward name="success" path="/deploy/deployFile.jsp" />
+      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
+    </action>
+    <action path="/deploySupport" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsGestSupportAction" name="deploySupport"
+      scope="session" validate="true" input="/deployFile.jsp">
+      <forward name="success" path="/deploy/deployFile.jsp" />
+      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
+    </action>
+    <action path="/deploy" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsDeployAction" name="deploy" scope="request"
+      validate="true" input="/deploy/save.jsp">
+      <forward name="success" path="/deploy/save.jsp" />
+      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
+    </action>
+    <action path="/save" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsSaveAction" name="save" scope="request"
+      validate="true" input="/deployFile.jsp">
+      <forward name="success" path="/deploy/deployFile.jsp" />
+      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
+    </action>
+    <action path="/testing/loadServices" type="it.greenvulcano.gvesb.gvconsole.workbench.action.TestingAction" name="loadServices" scope="session"
+      validate="true" input="/testing/index.jsp"/>
+    <action path="/testing/loadSystems" type="it.greenvulcano.gvesb.gvconsole.workbench.action.TestingAction" name="loadSystems" scope="session"
+      validate="true" input="/testing/index.jsp"/>
+    <action path="/monitoring/loadTabs" type="it.greenvulcano.gvesb.gvconsole.monitoring.action.ProcessAction" name="loadTabs" scope="session"
+      validate="true" input="/monitoring/index.jsp"/>
+    <action path="/monitoring/memory" type="it.greenvulcano.gvesb.gvconsole.monitoring.action.MemoryAction" name="memory" scope="session"
+      validate="true" input="/monitoring/index.jsp"/>
+    <action path="/monitoring/thread" type="it.greenvulcano.gvesb.gvconsole.monitoring.action.ThreadAction" name="thread" scope="session"
+      validate="true" input="/monitoring/index.jsp"/>
+    <action path="/monitoring/class" type="it.greenvulcano.gvesb.gvconsole.monitoring.action.ClassAction" name="class" scope="session"
+      validate="true" input="/monitoring/index.jsp"/>
+    <action path="/monitoring/cpu" type="it.greenvulcano.gvesb.gvconsole.monitoring.action.CpuAction" name="cpu" scope="session"
+      validate="true" input="/monitoring/index.jsp"/>
+
+    <action name="BlankForm" path="/reportMain" scope="session" type="it.greenvulcano.gvesb.gvconsole.report.InitAction">
+        <forward name="home" path="/report/index.jsp"/>
+    </action>
+    <action input="/report/index.jsp" name="BirtReportForm" parameter="methodToCall" path="/report/HandleReportAction" scope="session"
+            type="it.greenvulcano.gvesb.gvconsole.report.ReportAction" validate="true">
+        <forward name="home" path="/report/index.jsp"/>
+        <forward name="chggroup" path="/report/index.jsp"/>
+        <forward name="chgreport" path="/report/index.jsp"/>
+    </action>
+
+    <action name="BlankForm" path="/savepointMain" scope="session" type="it.greenvulcano.gvesb.gvconsole.savepoint.InitAction">
+        <forward name="home" path="/savepoint/index.jsp"/>
+    </action>
+    <action input="/savepoint/index.jsp" name="SavePointForm" parameter="methodToCall" path="/savepoint/HandleSavePointAction" scope="session"
+            type="it.greenvulcano.gvesb.gvconsole.savepoint.SavePointAction" validate="true">
+        <forward name="home" path="/savepoint/index.jsp"/>
+    </action>
+    
+    <action name="BlankForm" path="/logMain" scope="session" type="it.greenvulcano.gvesb.gvconsole.log.InitAction">
+        <forward name="home" path="/log/main.jsp"/>
+    </action>
+    <action input="/forms/log/main.jsp" name="LogViewerForm" parameter="methodToCall" path="/log/HandleLogAction" scope="session"
+            type="it.greenvulcano.gvesb.gvconsole.log.LogAction" validate="true">
+        <forward name="home" path="/log/main.jsp"/>
+    </action>
+  </action-mappings>
+
+  <controller/>
+    <message-resources parameter="Messages"/>
+    <plug-in className="formdef.plugin.validator.CombinedValidatorPlugIn">
+        <set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/form-defs.xml"/>
+    </plug-in>
+    <plug-in className="formdef.plugin.validator.CombinedFormDefPlugIn">
+        <set-property property="defnames" value="/WEB-INF/form-defs.xml"/>
+    </plug-in>
+</struts-config>
+

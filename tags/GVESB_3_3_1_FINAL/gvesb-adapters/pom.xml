@@ -1,0 +1,46 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>it.greenvulcano.gvesb</groupId>
+        <artifactId>gvesb-parent</artifactId>
+        <version>3.3.1-Final</version>
+    </parent>
+
+    <groupId>it.greenvulcano.gvesb</groupId>
+    <artifactId>gvesb.adapters</artifactId>
+    <packaging>pom</packaging>
+    <name>GreenVulcano Adapters Parent Project</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvbase</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvcore</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvpolicy</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <modules>
+        <module>gvdatahandler</module>
+        <module>gvhttp</module>
+        <module>gvaxis2</module>
+        <module>gvbirt</module>
+        <module>gvexcel</module>
+        <module>gvrsh</module>
+        <module>gvhl7</module>
+        <module>gvrules</module>
+        <module>gvjbpm</module>
+        <module>gvsocial</module>
+        <module>gvzmq</module>
+    </modules>
+</project>
