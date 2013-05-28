@@ -183,7 +183,6 @@ public class DBOInsert extends AbstractDBO
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
-        PreparedStatement ps = (PreparedStatement) sqlStatementInfo.getStatement();
         if (ROW_NAME.equals(localName)) {
             if (!currCriticalError) {
                 executeStatement();
@@ -202,6 +201,7 @@ public class DBOInsert extends AbstractDBO
             }
         }
         else if (COL_NAME.equals(localName)) {
+            PreparedStatement ps = (PreparedStatement) sqlStatementInfo.getStatement();
             try {
                 colDataExpecting = false;
                 String text = textBuffer.toString();
