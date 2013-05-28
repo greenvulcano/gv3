@@ -25,10 +25,13 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.event.util.shutdown.ShutdownEvent;
 import it.greenvulcano.event.util.shutdown.ShutdownEventLauncher;
 import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
+import it.greenvulcano.gvesb.core.forward.jms.JMSForwardData;
 import it.greenvulcano.gvesb.core.forward.jms.JMSForwardListenerPool;
 import it.greenvulcano.gvesb.core.forward.jmx.JMSForwardListenerPoolInfo;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.ThreadMap;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -52,6 +55,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     private static JMSForwardManager                instance              = null;
 
     private HashMap<String, JMSForwardListenerPool> jmsListeners          = new HashMap<String, JMSForwardListenerPool>();
+    private String 									serverName;
 
     private JMSForwardManager()
     {
@@ -77,7 +81,13 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     */
     private void init() throws JMSForwardException
     {
+    	serverName = JMXEntryPoint.getServerName();
+    	
         logger.debug("Initializing JMSForwardManager");
+        NMDC.push();
+        NMDC.clear();
+        NMDC.setServer(serverName);
+        NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
         try {
             NodeList nl = XMLConfig.getNodeList(JMS_FORWARD_FILE_NAME,
                     "/GVForwards/ForwardConfiguration[@enabled='true']");
@@ -98,23 +108,35 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
             logger.error("Error initializing JMSForwardManager", exc);
             throw new JMSForwardException("GVJMS_APPLICATION_INIT_ERROR", exc);
         }
+        finally {
+            NMDC.pop();
+        }
     }
 
     public void destroy()
     {
-        logger.debug("BEGIN - Destroing JMSForwardManager");
-        for (Entry<String, JMSForwardListenerPool> entry : jmsListeners.entrySet()) {
-            try {
-                JMSForwardListenerPool pool = entry.getValue();
-                deregister(pool, true);
-                pool.destroy();
+        NMDC.push();
+        NMDC.clear();
+        NMDC.setServer(serverName);
+        NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
+        try {
+            logger.debug("BEGIN - Destroing JMSForwardManager");
+            for (Entry<String, JMSForwardListenerPool> entry : jmsListeners.entrySet()) {
+                try {
+                    JMSForwardListenerPool pool = entry.getValue();
+                    deregister(pool, true);
+                    pool.destroy();
+                }
+                catch (Exception exc) {
+                    logger.error("Error destroing JMSForwardListenerPool[" + entry.getKey() + "]", exc);
+                }
             }
-            catch (Exception exc) {
-                logger.error("Error destroing JMSForwardListenerPool[" + entry.getKey() + "]", exc);
-            }
+            jmsListeners.clear();
+            logger.debug("END - Destroing JMSForwardManager");
+    	}
+        finally {
+            NMDC.pop();
         }
-        jmsListeners.clear();
-        logger.debug("END - Destroing JMSForwardManager");
     }
 
     @Override
