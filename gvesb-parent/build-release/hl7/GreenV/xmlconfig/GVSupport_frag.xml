@@ -57,12 +57,12 @@
                 <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
             </logger>
             <logger additivity="false" name="ca.uhn.hl7v2.app">
-                <level value="DEBUG"/>
+                <level value="WARN"/>
                 <appender-ref ref="LOGGER_FOR_GVHL7"/>
                 <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
             </logger>
             <logger additivity="false" name="ca.uhn.hl7v2.llp">
-                <level value="DEBUG"/>
+                <level value="WARN"/>
                 <appender-ref ref="LOGGER_FOR_GVHL7"/>
                 <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
             </logger>
