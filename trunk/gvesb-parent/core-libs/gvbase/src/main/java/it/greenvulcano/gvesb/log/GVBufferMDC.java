@@ -44,6 +44,9 @@ public class GVBufferMDC
     {
         NMDC.put(GVBuffer.Field.ID.toString(), gvBuffer.getId().toString());
         NMDC.put(GVBuffer.Field.SERVICE.toString(), gvBuffer.getService());
+        if (NMDC.get("MASTER_SERVICE") == null) {
+            NMDC.put("MASTER_SERVICE", gvBuffer.getService());
+        }
         NMDC.put(GVBuffer.Field.SYSTEM.toString(), gvBuffer.getSystem());
         NMDC.put(GVBuffer.Field.RETCODE.toString(), "" + gvBuffer.getRetCode());
     }
