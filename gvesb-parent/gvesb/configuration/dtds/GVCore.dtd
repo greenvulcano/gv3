@@ -1982,6 +1982,11 @@
         </xsl:template>
 -->
 <!ELEMENT Services (Description?, Service*)>
+<!--
+    Defines the default master logger Level for all services.
+    Default to ALL.
+-->
+<!ATTLIST Services loggerLevel (ALL|DEBUG|INFO|WARN|ERROR) #IMPLIED>
 
 <!--
     GreenVulcanoESB service's alias.
@@ -2089,6 +2094,11 @@
     of reports on configuration.
 -->
 <!ATTLIST Service brief-description CDATA #IMPLIED>
+<!--
+    Defines the default master logger Level for all service operations.
+    Default to ALL.
+-->
+<!ATTLIST Service loggerLevel (ALL|DEBUG|INFO|WARN|ERROR) #IMPLIED>
 
 <!--
     Defines an operational workflow of GreenVulcanoESB.
@@ -2189,6 +2199,12 @@
     - off: the operation is not active.
 -->
 <!ATTLIST Operation operation-activation (on|off) "on">
+<!--
+    Defines the master logger Level for the Operation and all SubFlows.
+    Default to ALL.
+-->
+<!ATTLIST Operation loggerLevel (ALL|DEBUG|INFO|WARN|ERROR) #IMPLIED>
+
 <!--
     Defines a 'Flow' to implement a GreenVulcanoESB communication
     primitive with a workflow actually executable.
@@ -2292,6 +2308,11 @@
     #Freezed
 -->
 <!ATTLIST SubFlow  point-y CDATA #IMPLIED>
+<!--
+    Defines the master logger Level for the SubFlow.
+    Default to ALL.
+-->
+<!ATTLIST SubFlow  loggerLevel (ALL|DEBUG|INFO|WARN|ERROR) #IMPLIED>
 
 <!--
     Is a operative node indicating that GreenVulcanoESB must

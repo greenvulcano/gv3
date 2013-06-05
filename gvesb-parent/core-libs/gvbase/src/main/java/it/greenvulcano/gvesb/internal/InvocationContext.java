@@ -98,7 +98,7 @@ public class InvocationContext
     {
         LinkedList<InvocationContext> icStack = getInvocationContextStack();
         icStack.addFirst(this);
-        System.out.println("InvocationContext TH[" + Thread.currentThread().getId() + "] push() size: " + icStack.size());
+        //System.out.println("InvocationContext TH[" + Thread.currentThread().getId() + "] push() size: " + icStack.size());
     }
 
     /**
@@ -115,7 +115,7 @@ public class InvocationContext
              * exc.printStackTrace(); }
              */
         }
-        System.out.println("InvocationContext TH[" + Thread.currentThread().getId() + "] pop() size: " + icStack.size());
+        //System.out.println("InvocationContext TH[" + Thread.currentThread().getId() + "] pop() size: " + icStack.size());
         if (icStack.isEmpty()) {
             ThreadMap.remove(THREAD_CTX_MAP_KEY);
         }

@@ -39,6 +39,7 @@ import it.greenvulcano.util.xpath.XPathFinder;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -90,6 +91,11 @@ public class GVSubFlow
     private String                  operationName;
 
     /**
+     * The default logger level.
+     */
+    private Level                   loggerLevel           = Level.ALL;
+
+    /**
      * Initialize the instance
      * 
      * @param gvsfNode
@@ -111,6 +117,9 @@ public class GVSubFlow
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'name'"},
                     {"node", XPathFinder.buildXPath(gvsfNode)}});
         }
+        
+        Level opLoggerLevel = GVLogger.getThreadMasterLevel();
+        loggerLevel = Level.toLevel(XMLConfig.get(gvsfNode, "@loggerLevel", (opLoggerLevel == null) ? "ALL" : opLoggerLevel.toString()));
 
         this.isSingleThread = isSingleThread;
 
@@ -139,38 +148,46 @@ public class GVSubFlow
      */
     private void initFlowNodes(Node instNode) throws GVCoreConfException
     {
+        Level level = null;
         try {
-            firstNode = XMLConfig.get(instNode, "@first-node");
+            level = GVLogger.setThreadMasterLevel(loggerLevel);
 
-            NodeList nl = null;
-            nl = XMLConfig.getNodeList(instNode, "*[@type='flow-node']");
-            if ((nl == null) || (nl.getLength() == 0)) {
-                throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
-            }
-
-            Node defNode = null;
             try {
-                for (int i = 0; i < nl.getLength(); i++) {
-                    GVFlowNode flowNode = null;
-                    defNode = nl.item(i);
-                    String nodeClass = XMLConfig.get(defNode, "@class");
-                    logger.debug("creating GVFlowNode(" + i + ") of class " + nodeClass);
-                    flowNode = (GVFlowNode) Class.forName(nodeClass).newInstance();
-                    flowNode.init(defNode);
-                    flowNodes.put(flowNode.getId(), flowNode);
+                firstNode = XMLConfig.get(instNode, "@first-node");
+    
+                NodeList nl = null;
+                nl = XMLConfig.getNodeList(instNode, "*[@type='flow-node']");
+                if ((nl == null) || (nl.getLength() == 0)) {
+                    throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
+                }
+    
+                Node defNode = null;
+                try {
+                    for (int i = 0; i < nl.getLength(); i++) {
+                        GVFlowNode flowNode = null;
+                        defNode = nl.item(i);
+                        String nodeClass = XMLConfig.get(defNode, "@class");
+                        logger.debug("creating GVFlowNode(" + i + ") of class " + nodeClass);
+                        flowNode = (GVFlowNode) Class.forName(nodeClass).newInstance();
+                        flowNode.init(defNode);
+                        flowNodes.put(flowNode.getId(), flowNode);
+                    }
+                }
+                catch (GVCoreConfException exc) {
+                    throw exc;
+                }
+                catch (Exception exc) {
+                    logger.error("Error initiliazing FlowNode " + flowName, exc);
+                    throw new GVCoreConfException("GVCORE_INIT_FLOW_NODE_ERROR", new String[][]{{"name", flowName},
+                            {"node", XPathFinder.buildXPath(defNode)}}, exc);
                 }
             }
-            catch (GVCoreConfException exc) {
-                throw exc;
-            }
-            catch (Exception exc) {
-                logger.error("Error initiliazing FlowNode " + flowName, exc);
-                throw new GVCoreConfException("GVCORE_INIT_FLOW_NODE_ERROR", new String[][]{{"name", flowName},
-                        {"node", XPathFinder.buildXPath(defNode)}}, exc);
+            catch (XMLConfigException exc) {
+                throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
             }
         }
-        catch (XMLConfigException exc) {
-            throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
+        finally {
+            GVLogger.removeThreadMasterLevel(level);
         }
     }
 
@@ -232,72 +249,80 @@ public class GVSubFlow
      */
     public GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException
     {
-        if (logger.isDebugEnabled()) {
-            logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
-        }
-        getGVOperationInfo();
+        Level level = null;
+        try {
+            level = GVLogger.setThreadMasterLevel(loggerLevel);
 
-        GVFlowNode flowNode = flowNodes.get(firstNode);
-        if (flowNode == null) {
-            logger.error("FlowNode " + firstNode + " not configured. Check configuration.");
-            throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
-                    {"flownode", firstNode}});
-        }
-
-        Map<String, Object> environment = new HashMap<String, Object>();
-        environment.put(flowNode.getInput(), gvBuffer);
-        String nextNode = firstNode;
-
-        if (onDebug) {
-            String inID = gvBuffer.getId().toString();
-            DebugSynchObject synchObj = DebugSynchObject.getSynchObject(inID, null);
-            ExecutionInfo parent = synchObj.getExecutionInfo();
-            ExecutionInfo info = new ExecutionInfo(parent);
-            info.setSubflow(flowName);
-            synchObj.setExecutionInfo(info);
-            while (!nextNode.equals("")) {
-                operationInfo.setFlowStatus(inID, flowName, nextNode);
-                flowNode = flowNodes.get(nextNode);
-                if (flowNode == null) {
-                    logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
-                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
-                            {"flownode", nextNode}});
+            if (logger.isDebugEnabled()) {
+                logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
+            }
+            getGVOperationInfo();
+    
+            GVFlowNode flowNode = flowNodes.get(firstNode);
+            if (flowNode == null) {
+                logger.error("FlowNode " + firstNode + " not configured. Check configuration.");
+                throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                        {"flownode", firstNode}});
+            }
+    
+            Map<String, Object> environment = new HashMap<String, Object>();
+            environment.put(flowNode.getInput(), gvBuffer);
+            String nextNode = firstNode;
+    
+            if (onDebug) {
+                String inID = gvBuffer.getId().toString();
+                DebugSynchObject synchObj = DebugSynchObject.getSynchObject(inID, null);
+                ExecutionInfo parent = synchObj.getExecutionInfo();
+                ExecutionInfo info = new ExecutionInfo(parent);
+                info.setSubflow(flowName);
+                synchObj.setExecutionInfo(info);
+                while (!nextNode.equals("")) {
+                    operationInfo.setFlowStatus(inID, flowName, nextNode);
+                    flowNode = flowNodes.get(nextNode);
+                    if (flowNode == null) {
+                        logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
+                        throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                                {"flownode", nextNode}});
+                    }
+                    GVFlowNodeIF proxy = DebuggingInvocationHandler.getProxy(GVFlowNodeIF.class, flowNode, synchObj);
+                    nextNode = proxy.execute(environment, onDebug);
                 }
-                GVFlowNodeIF proxy = DebuggingInvocationHandler.getProxy(GVFlowNodeIF.class, flowNode, synchObj);
-                nextNode = proxy.execute(environment, onDebug);
+                synchObj.terminated();
             }
-            synchObj.terminated();
-        }
-        else {
-            while (!nextNode.equals("")) {
-                /*
-                 * if (operationInfo != null) {
-                 * operationInfo.setFlowStatus(inID, nextNode); }
-                 */
-                flowNode = flowNodes.get(nextNode);
-                if (flowNode == null) {
-                    logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
-                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
-                            {"flownode", nextNode}});
+            else {
+                while (!nextNode.equals("")) {
+                    /*
+                     * if (operationInfo != null) {
+                     * operationInfo.setFlowStatus(inID, nextNode); }
+                     */
+                    flowNode = flowNodes.get(nextNode);
+                    if (flowNode == null) {
+                        logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
+                        throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                                {"flownode", nextNode}});
+                    }
+                    nextNode = flowNode.execute(environment);
                 }
-                nextNode = flowNode.execute(environment);
             }
-        }
-
-        Object output = environment.get(flowNode.getOutput());
-        if (output instanceof Throwable) {
-            if (output instanceof GVCoreException) {
-                throw (GVCoreException) output;
+    
+            Object output = environment.get(flowNode.getOutput());
+            if (output instanceof Throwable) {
+                if (output instanceof GVCoreException) {
+                    throw (GVCoreException) output;
+                }
+                throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}},
+                        (Throwable) output);
             }
-            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}},
-                    (Throwable) output);
+    
+            if (logger.isDebugEnabled()) {
+                logger.debug(GVFormatLog.formatEND(flowName, (GVBuffer) output));
+            }
+    
+            return (GVBuffer) output;
         }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug(GVFormatLog.formatEND(flowName, (GVBuffer) output));
+        finally {
+            GVLogger.removeThreadMasterLevel(level);
         }
-
-        return (GVBuffer) output;
     }
 
     /**
@@ -318,26 +343,53 @@ public class GVSubFlow
     }
 
     /**
+     * @return the actual logger level
+     */
+    public Level getLoggerLevel() {
+        return this.loggerLevel;
+    }
+
+    /**
+     * 
+     * @param loggerLevel
+     *        the logger level to set
+     */
+    public void setLoggerLevel(Level loggerLevel) {
+        if (Level.ALL.equals(this.loggerLevel)) {
+            this.loggerLevel = loggerLevel;
+        }
+    }
+
+    /**
      * Execute cleanup operations
      */
     private void cleanUp()
     {
-        for (GVFlowNode node : flowNodes.values()) {
-            try {
-                node.cleanUp();
+        Level level = null;
+        try {
+            level = GVLogger.setThreadMasterLevel(loggerLevel);
+
+            for (GVFlowNode node : flowNodes.values()) {
+                try {
+                    node.cleanUp();
+                }
+                catch (Exception exc) {
+                    logger.warn("Failed cleanUp() operation on GVFlowNode " + node.getId(), exc);
+                }
             }
-            catch (Exception exc) {
-                logger.warn("Failed cleanUp() operation on GVFlowNode " + node.getId(), exc);
+            if (!isSingleThread) {
+                try {
+                    gvContext.pop();
+                    gvContext.cleanup();
+                }
+                catch (Exception exc) {
+                    logger.warn("Failed cleanUp() of InvocationContext on GVSubFlow " + this.flowName, exc);
+                }
             }
+    
         }
-        if (!isSingleThread) {
-            try {
-                gvContext.pop();
-                gvContext.cleanup();
-            }
-            catch (Exception exc) {
-                logger.warn("Failed cleanUp() of InvocationContext on GVSubFlow " + this.flowName, exc);
-            }
+        finally {
+            GVLogger.removeThreadMasterLevel(level);
         }
     }
 

@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -116,6 +117,10 @@ public class GVServiceConf
      * The status of the statistics activation.
      */
     private boolean               statisticsEnabled      = false;
+    /**
+     * The default logger level.
+     */
+    private Level                 loggerLevel            = Level.ALL;
 
     public GVServiceConf()
     {
@@ -151,6 +156,8 @@ public class GVServiceConf
         groupActivation = XMLConfig.getBoolean(groupNode, "@group-activation", true);
         serviceActivation = XMLConfig.getBoolean(serviceNode, "@service-activation", true);
         statisticsEnabled = XMLConfig.getBoolean(serviceNode, "@statistics", false);
+        String masterLevel = XMLConfig.get(serviceNode, "../@loggerLevel", "ALL");
+        loggerLevel = Level.toLevel(XMLConfig.get(serviceNode, "@loggerLevel", masterLevel));
 
         checkGVOperations();
 
@@ -457,42 +464,50 @@ public class GVServiceConf
      */
     private GVFlow initGVOperation(String name) throws GVCoreConfException, GVCoreWrongOpException
     {
-        logger.debug("BEGIN - Init GVOperation - " + serviceName + ":" + name);
-        GVFlow gvOp = null;
-        Node opNode = null;
+        Level level = null;
         try {
-            opNode = XMLConfig.getNode(serviceNode, "*[@type='operation' and (@name='" + name + "' or @forward-name='"
-                    + name + "')]");
+            level = GVLogger.setThreadMasterLevel(loggerLevel);
+
+            logger.debug("BEGIN - Init GVOperation - " + serviceName + ":" + name);
+            GVFlow gvOp = null;
+            Node opNode = null;
+            try {
+                opNode = XMLConfig.getNode(serviceNode, "*[@type='operation' and (@name='" + name + "' or @forward-name='"
+                        + name + "')]");
+            }
+            catch (XMLConfigException exc) {
+                throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
+                        {"service", serviceName}, {"operation", name}}, exc);
+            }
+            if (opNode == null) {
+                throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
+                        {"service", serviceName}, {"operation", name}});
+            }
+            String clazz = null;
+            try{
+            	clazz = XMLConfig.get(opNode, "@class");
+    	        gvOp = (GVFlow) Class.forName(clazz).newInstance();
+    	        gvOp.init(opNode);
+    	        gvOp.setStatisticsEnabled(statisticsEnabled);
+    	        gvOp.setStatisticsDataManager(statisticsDataManager);
+    	        gvOperationMap.put(name, gvOp);
+    	        logger.debug("Set GreenVulcano Operation : " + name + " (" + gvOp.toString() + ")");
+    	
+    	        logger.debug("END - Init GVOperation");
+            }
+            catch(GVCoreConfException exc){
+            	throw exc;
+            }
+            catch(Exception exc){
+            	 throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
+                         {"service", serviceName}, {"operation", name}, {"class", clazz}});
+            }
+            
+            return gvOp;
         }
-        catch (XMLConfigException exc) {
-            throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
-                    {"service", serviceName}, {"operation", name}}, exc);
+        finally {
+            GVLogger.removeThreadMasterLevel(level);
         }
-        if (opNode == null) {
-            throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
-                    {"service", serviceName}, {"operation", name}});
-        }
-        String clazz = null;
-        try{
-        	clazz = XMLConfig.get(opNode, "@class");
-	        gvOp = (GVFlow) Class.forName(clazz).newInstance();
-	        gvOp.init(opNode);
-	        gvOp.setStatisticsEnabled(statisticsEnabled);
-	        gvOp.setStatisticsDataManager(statisticsDataManager);
-	        gvOperationMap.put(name, gvOp);
-	        logger.debug("Set GreenVulcano Operation : " + name + " (" + gvOp.toString() + ")");
-	
-	        logger.debug("END - Init GVOperation");
-        }
-        catch(GVCoreConfException exc){
-        	throw exc;
-        }
-        catch(Exception exc){
-        	 throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
-                     {"service", serviceName}, {"operation", name}, {"class", clazz}});
-        }
-        
-        return gvOp;
     }
 
     /**
@@ -532,6 +547,22 @@ public class GVServiceConf
                 gvOp.setStatisticsEnabled(statisticsEnabled);
             }
         }
+    }
+    
+    /**
+     * @return the actual logger level
+     */
+    public Level getLoggerLevel() {
+        return this.loggerLevel;
+    }
+    
+    /**
+     * 
+     * @param loggerLevel
+     *        the logger level to set
+     */
+    public void setLoggerLevel(Level loggerLevel) {
+        this.loggerLevel = loggerLevel;
     }
 
     /**
