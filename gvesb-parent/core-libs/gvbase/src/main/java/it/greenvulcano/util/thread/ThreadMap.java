@@ -54,7 +54,7 @@ public final class ThreadMap
      *        the key to search for
      * @return the found object, or null
      */
-    public static synchronized Object get(Object key)
+    public static Object get(Object key)
     {
         return get(Thread.currentThread(), key);
     }
@@ -66,7 +66,7 @@ public final class ThreadMap
      *        the key to search for
      * @return the found objects, or an empty array
      */
-    public static synchronized Object[] allThreadGet(Object key)
+    public static Object[] allThreadGet(Object key)
     {
         ArrayList<Object> list = new ArrayList<Object>();
         Set<Thread> threads = threadsMap.keySet();
@@ -88,7 +88,7 @@ public final class ThreadMap
      * @param value
      *        the value to insert
      */
-    public static synchronized void put(Object key, Object value)
+    public static void put(Object key, Object value)
     {
         put(Thread.currentThread(), key, value);
     }
@@ -101,7 +101,7 @@ public final class ThreadMap
      * @param value
      *        the value to insert
      */
-    public static synchronized void allThreadPut(Object key, Object value)
+    public static void allThreadPut(Object key, Object value)
     {
         Set<Thread> threads = threadsMap.keySet();
         for (Thread thread : threads) {
@@ -116,7 +116,7 @@ public final class ThreadMap
      *        the key to search for
      * @return the found object, or null
      */
-    public static synchronized Object remove(Object key)
+    public static Object remove(Object key)
     {
         return remove(Thread.currentThread(), key);
     }
@@ -127,7 +127,7 @@ public final class ThreadMap
      * @param key
      *        the key to search for
      */
-    public static synchronized void allThreadRemove(Object key)
+    public static void allThreadRemove(Object key)
     {
         Set<Thread> threads = threadsMap.keySet();
         for (Thread thread : threads) {
@@ -140,20 +140,22 @@ public final class ThreadMap
      *
      * @return the found object, or null
      */
-    public static synchronized void clean()
+    public static void clean()
     {
         Thread thread = Thread.currentThread();
-        HashMap<Object, Object> currThreadMap = threadsMap.get(thread);
-        if (currThreadMap != null) {
-            currThreadMap.clear();
-            threadsMap.remove(thread);
+        synchronized (thread) {
+            HashMap<Object, Object> currThreadMap = threadsMap.get(thread);
+            if (currThreadMap != null) {
+                currThreadMap.clear();
+                threadsMap.remove(thread);
+            }
         }
     }
 
     /**
      * Clean all Thread maps
      */
-    public static synchronized void cleanAll()
+    public static void cleanAll()
     {
         threadsMap.clear();
     }
@@ -190,12 +192,14 @@ public final class ThreadMap
      */
     private static void put(Thread thread, Object key, Object value)
     {
-        HashMap<Object, Object> currThreadMap = threadsMap.get(thread);
-        if (currThreadMap == null) {
-            currThreadMap = new HashMap<Object, Object>();
-            threadsMap.put(thread, currThreadMap);
+        synchronized (thread) {
+            HashMap<Object, Object> currThreadMap = threadsMap.get(thread);
+            if (currThreadMap == null) {
+                currThreadMap = new HashMap<Object, Object>();
+                threadsMap.put(thread, currThreadMap);
+            }
+            currThreadMap.put(key, value);
         }
-        currThreadMap.put(key, value);
     }
 
     /**
@@ -211,12 +215,14 @@ public final class ThreadMap
     {
         Object result = null;
 
-        HashMap<Object, Object> currThreadMap = threadsMap.get(thread);
-        if (currThreadMap != null) {
-            result = currThreadMap.remove(key);
-
-            if (currThreadMap.isEmpty()) {
-                threadsMap.remove(thread);
+        synchronized (thread) {
+            HashMap<Object, Object> currThreadMap = threadsMap.get(thread);
+            if (currThreadMap != null) {
+                result = currThreadMap.remove(key);
+    
+                if (currThreadMap.isEmpty()) {
+                    threadsMap.remove(thread);
+                }
             }
         }
         return result;
