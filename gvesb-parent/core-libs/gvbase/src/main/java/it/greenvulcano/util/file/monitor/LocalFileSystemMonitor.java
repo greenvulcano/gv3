@@ -198,10 +198,10 @@ public class LocalFileSystemMonitor implements FileSystemMonitor
             checkAnalysisDir(currAnalysisDir);
             initMonitorStatus(currAnalysisDir, optProperties);
 
-            fileFilter.setCheckLastModified(false, -1);
+            fileFilter.setCheckLastModified(false, -1, true);
             currentAnalysisFileSet = buildFileSet(currAnalysisDir, fileFilter);
 
-            fileFilter.setCheckLastModified(true, lastAnalysisTimestamp);
+            fileFilter.setCheckLastModified(true, lastAnalysisTimestamp, true);
             modifiedFileSet = buildFileSet(currAnalysisDir, fileFilter);
 
             AnalysisReport result = generateReport(currAnalysisDir, fileFilter.toString());
@@ -312,7 +312,7 @@ public class LocalFileSystemMonitor implements FileSystemMonitor
         }
         else {
             lastAnalysisTimestamp = new Date().getTime();
-            fileFilter.setCheckLastModified(false, 0);
+            fileFilter.setCheckLastModified(false, 0, true);
             lastAnalysisFileSet = buildFileSet(currAnalysisDir, fileFilter);
         }
     }
