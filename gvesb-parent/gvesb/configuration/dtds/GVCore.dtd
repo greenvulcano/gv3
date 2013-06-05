@@ -12322,7 +12322,7 @@
     #SelectOnInsert
     #SortChild
 -->
-<!ELEMENT TaskGroup (Description?, (ServiceCallerTask|RSHTask|ShellTask|TestTask)*)>
+<!ELEMENT TaskGroup (Description?, (ServiceCallerTask|RSHTask|ShellTask|LogCleanerTask|TestTask)*)>
 <!--
     Task name.
 
@@ -12709,6 +12709,83 @@
 -->
 <!ATTLIST RSHTask directory CDATA #IMPLIED>
 
+<!--
+    Log cleaner task.
+
+    #Label: @name
+    #SelectOnInsert
+    #Icon: GVtest.png
+-->
+<!ELEMENT LogCleanerTask (Description?, Triggers, JbProperties?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST LogCleanerTask type         CDATA #FIXED "task">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST LogCleanerTask class        CDATA #FIXED "it.greenvulcano.scheduler.util.log.LogCleanerTask">
+<!--
+    Task name.
+
+    #NotNull
+    #Unique: ../*[@type='task']/@name
+-->
+<!ATTLIST LogCleanerTask name         CDATA #REQUIRED>
+<!--
+    If 'true' Task is automatically registered on the timer.
+-->
+<!ATTLIST LogCleanerTask auto-start   (true|false) #IMPLIED>
+<!--
+    Task activation status.
+-->
+<!ATTLIST LogCleanerTask enabled      (true|false) #IMPLIED>
+<!--
+    The log directory to be searched for files.
+    Can contains metadata resolved at runtime and can reference Task and Trigger properties.
+    Default to sp{{gv.app.home}}/log.
+
+    #NotNull
+-->
+<!ATTLIST LogCleanerTask log-directory      CDATA #IMPLIED>
+<!--
+    If greater than 0 indicates the number of days for the oldest log file to compress.
+    Default to 7.
+
+    #NotNull
+-->
+<!ATTLIST LogCleanerTask zip-older-than     CDATA #IMPLIED>
+<!--
+    Search pattern for log file to compress.
+    Default to: (.*\.log$)|(.*\.log\.\d*$)|(.*\.log\.\d{4}-\d{2}-\d{2}$)
+
+    #NotNull
+-->
+<!ATTLIST LogCleanerTask zip-filter         CDATA #IMPLIED>
+<!--
+    Compression mode:
+    - zip     (default)
+    - gz(ip)
+-->
+<!ATTLIST LogCleanerTask zip-mode           (gz|zip) #IMPLIED>
+<!--
+    If greater than 0 indicates the number of days for the oldest log file to delete.
+    Default to 14.
+
+    #NotNull
+-->
+<!ATTLIST LogCleanerTask delete-older-than  CDATA #IMPLIED>
+<!--
+    Search pattern for log file to delete.
+    Default to: (.*\.log$)|(.*\.log\.\d*$)|(.*\.log\..*\.zip$)|(.*\.log\..*\.gz$)
+
+    #NotNull
+-->
+<!ATTLIST LogCleanerTask delete-filter         CDATA #IMPLIED>
+
+        
 <!--
     Defines an group of Timer Tasks.
 
