@@ -460,6 +460,7 @@ public class ServiceOperationInfo
                 + "')]");
         boolean activation = XMLConfig.getBoolean(opNode, "@operation-activation", true);
         objectData.put("operationActivation", new Boolean(activation));
+        objectData.put("loggerLevel", XMLConfig.get(opNode, "@loggerLevel", XMLConfig.get(svcNode, "@loggerLevel", XMLConfig.get(svcNode, "../@loggerLevel", "ALL"))));
         if (XMLConfig.exists(opNode, "OperationManagement/FailureAction")) {
             String component = XMLConfig.get(opNode, "OperationManagement/FailureAction/@component", "");
             int failureRateo = XMLConfig.getInteger(opNode, "OperationManagement/FailureAction/@max-failure-rate",
