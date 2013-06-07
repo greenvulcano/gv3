@@ -24,6 +24,7 @@ import it.greenvulcano.expression.ExpressionEvaluatorHelper;
 import it.greenvulcano.gvesb.gvdp.AbstractDataProvider;
 import it.greenvulcano.gvesb.gvdp.DataProviderException;
 import it.greenvulcano.gvesb.gvdp.FieldExpressionKey;
+import it.greenvulcano.log.GVLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +49,7 @@ import org.apache.log4j.Logger;
  */
 public class XMLEventCollectionDataProvider extends AbstractDataProvider
 {
-    private static final Logger   logger             = Logger.getLogger(XMLEventCollectionDataProvider.class);
+    private static final Logger   logger             = GVLogger.getLogger(XMLEventCollectionDataProvider.class);
     /**
      *
      */

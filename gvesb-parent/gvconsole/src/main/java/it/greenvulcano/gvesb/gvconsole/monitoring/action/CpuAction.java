@@ -28,6 +28,7 @@ import it.greenvulcano.gvesb.gvconsole.monitoring.service.RuntimeService;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.RuntimeServiceImpl;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.SunOperatingSystemService;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.SunOperatingSystemServiceImpl;
+import it.greenvulcano.log.GVLogger;
 
 import javax.management.MBeanServerConnection;
 
@@ -44,7 +45,7 @@ public class CpuAction extends GeneralAction
 {
 
     private static final long         serialVersionUID = 300L;
-    private static final Logger       logger           = Logger.getLogger(CpuAction.class);
+    private static final Logger       logger           = GVLogger.getLogger(CpuAction.class);
 
     private MBeanServerConnection     mBeanServerConnection;
 

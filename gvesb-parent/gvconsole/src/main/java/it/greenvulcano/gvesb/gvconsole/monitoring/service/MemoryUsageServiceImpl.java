@@ -25,6 +25,7 @@ import static java.lang.management.ManagementFactory.newPlatformMXBeanProxy;
 import it.greenvulcano.gvesb.gvconsole.monitoring.domain.HeapMemory;
 import it.greenvulcano.gvesb.gvconsole.monitoring.domain.NotHeapMemory;
 import it.greenvulcano.gvesb.gvconsole.monitoring.domain.ObjectPendingFinalizationCount;
+import it.greenvulcano.log.GVLogger;
 
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -40,7 +41,7 @@ import org.apache.log4j.Logger;
  */
 public class MemoryUsageServiceImpl implements MemoryUsageService
 {
-    private static final Logger logger = Logger.getLogger(MemoryUsageServiceImpl.class);
+    private static final Logger logger = GVLogger.getLogger(MemoryUsageServiceImpl.class);
     private MemoryMXBean        mbean  = null;
 
     /**

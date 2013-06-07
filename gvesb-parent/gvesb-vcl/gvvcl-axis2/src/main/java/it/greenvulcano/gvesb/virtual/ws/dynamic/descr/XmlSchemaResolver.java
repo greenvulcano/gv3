@@ -19,6 +19,9 @@
  */
 package it.greenvulcano.gvesb.virtual.ws.dynamic.descr;
 
+import it.greenvulcano.gvesb.virtual.ws.utils.NormalizeUtil;
+import it.greenvulcano.log.GVLogger;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,8 +41,6 @@ import org.apache.ws.commons.schema.XmlSchemaInclude;
 import org.apache.ws.commons.schema.XmlSchemaObjectCollection;
 import org.w3c.dom.Element;
 
-import it.greenvulcano.gvesb.virtual.ws.utils.NormalizeUtil;
-
 import com.ibm.wsdl.extensions.schema.SchemaImpl;
 
 
@@ -51,7 +52,7 @@ import com.ibm.wsdl.extensions.schema.SchemaImpl;
  */
 public class XmlSchemaResolver
 {
-    private static final Logger logger = Logger.getLogger(XmlSchemaResolver.class);
+    private static final Logger logger = GVLogger.getLogger(XmlSchemaResolver.class);
 
     /**
      * Populate a List with all the top level SchemaType objects (complexTypes,

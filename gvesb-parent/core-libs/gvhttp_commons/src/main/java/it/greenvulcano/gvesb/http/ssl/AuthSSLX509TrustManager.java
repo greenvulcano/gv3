@@ -49,6 +49,8 @@
  */
 package it.greenvulcano.gvesb.http.ssl;
 
+import it.greenvulcano.log.GVLogger;
+
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -81,7 +83,7 @@ public class AuthSSLX509TrustManager implements X509TrustManager
     private X509TrustManager    defaultTrustManager = null;
 
     /** Log object for this class. */
-    private static final Logger logger              = Logger.getLogger(AuthSSLX509TrustManager.class);
+    private static final Logger logger              = GVLogger.getLogger(AuthSSLX509TrustManager.class);
 
     /**
      * Constructor for AuthSSLX509TrustManager.
