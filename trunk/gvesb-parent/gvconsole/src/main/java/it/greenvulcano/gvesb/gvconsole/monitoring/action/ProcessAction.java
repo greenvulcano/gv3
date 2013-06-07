@@ -21,6 +21,7 @@ package it.greenvulcano.gvesb.gvconsole.monitoring.action;
 
 import it.greenvulcano.gvesb.gvconsole.monitoring.domain.MonitoredProcess;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.MonitoredProcessServiceImpl;
+import it.greenvulcano.log.GVLogger;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class ProcessAction extends GeneralAction
 {
 
     private static final long           serialVersionUID = 300L;
-    private static final Logger         logger           = Logger.getLogger(ProcessAction.class);
+    private static final Logger         logger           = GVLogger.getLogger(ProcessAction.class);
 
     private MonitoredProcessServiceImpl monitoredProcessServiceImpl;
     private List<MonitoredProcess>      monitoredProcesses;

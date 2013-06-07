@@ -22,6 +22,7 @@ package it.greenvulcano.gvesb.gvconsole.monitoring.action;
 import it.greenvulcano.gvesb.gvconsole.monitoring.domain.ThreadInfo;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.ThreadUsageService;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.ThreadsUsageServiceImpl;
+import it.greenvulcano.log.GVLogger;
 
 import javax.management.MBeanServerConnection;
 
@@ -38,7 +39,7 @@ public class ThreadAction extends GeneralAction
 {
 
     private static final long     serialVersionUID = 300L;
-    private static final Logger   logger           = Logger.getLogger(ThreadAction.class);
+    private static final Logger   logger           = GVLogger.getLogger(ThreadAction.class);
 
     private MBeanServerConnection mBeanServerConnection;
 
