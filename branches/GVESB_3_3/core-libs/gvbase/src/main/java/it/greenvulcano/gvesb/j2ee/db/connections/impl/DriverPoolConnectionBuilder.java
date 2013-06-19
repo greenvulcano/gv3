@@ -69,21 +69,21 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
             }
             Class.forName(className);
 
+            Node poolNode = XMLConfig.getNode(node, "PoolParameters");
             connectionPool = new GenericObjectPool(null);
             connectionPool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK);
-            connectionPool.setMaxWait(XMLConfig.getLong(node, "PoolParamters/@maxWait", 30) * 1000);
+            connectionPool.setMaxWait(XMLConfig.getLong(poolNode, "@maxWait", 30) * 1000);
 
-            connectionPool.setMinIdle(XMLConfig.getInteger(node, "PoolParamters/@minIdle", 5));
-            connectionPool.setMaxIdle(XMLConfig.getInteger(node, "PoolParamters/@maxIdle", 10));
-            connectionPool.setMaxActive(XMLConfig.getInteger(node, "PoolParamters/@maxActive", 15));
-            connectionPool.setTimeBetweenEvictionRunsMillis(XMLConfig.getLong(node,
-                    "PoolParamters/@timeBetweenEvictionRuns", 300) * 1000);
-            connectionPool.setMinEvictableIdleTimeMillis(XMLConfig.getLong(node, "PoolParamters/@minEvictableIdleTime",
+            connectionPool.setMinIdle(XMLConfig.getInteger(poolNode, "@minIdle", 5));
+            connectionPool.setMaxIdle(XMLConfig.getInteger(poolNode, "@maxIdle", 10));
+            connectionPool.setMaxActive(XMLConfig.getInteger(poolNode, "@maxActive", 15));
+            connectionPool.setTimeBetweenEvictionRunsMillis(XMLConfig.getLong(poolNode,
+                    "@timeBetweenEvictionRuns", 300) * 1000);
+            connectionPool.setMinEvictableIdleTimeMillis(XMLConfig.getLong(poolNode, "@minEvictableIdleTime",
                     300) * 1000);
-            connectionPool.setNumTestsPerEvictionRun(XMLConfig.getInteger(node,
-                    "PoolParamters/@numTestsPerEvictionRun", 3));
-            if (XMLConfig.exists(node, "PoolParamters/validationQuery")) {
-                validationQuery = XMLConfig.get(node, "PoolParamters/validationQuery");
+            connectionPool.setNumTestsPerEvictionRun(XMLConfig.getInteger(poolNode, "@numTestsPerEvictionRun", 3));
+            if (XMLConfig.exists(poolNode, "validationQuery")) {
+                validationQuery = XMLConfig.get(poolNode, "validationQuery");
             }
         }
         catch (Exception exc) {
