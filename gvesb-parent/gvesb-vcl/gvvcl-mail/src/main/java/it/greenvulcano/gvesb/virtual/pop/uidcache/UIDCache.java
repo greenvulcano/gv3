@@ -31,4 +31,6 @@ public interface UIDCache
     public boolean contains(String uid);
 
     public void add(String uid);
+    
+    public boolean remove(String uid);
 }

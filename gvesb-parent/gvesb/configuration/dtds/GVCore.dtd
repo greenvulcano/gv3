@@ -4,7 +4,7 @@
 <!ENTITY % flow-nodes "GVOperationNode|GVNodeCheck|ChangeGVBufferNode|GVWaitNode|GVNotificationNode|GVIteratorOperationNode|GVCoreCallNode|GVSubFlowCallNode|GVEndNode|GVSavePointNode">
 <!ENTITY % filters    "IDFilter|RetCodeFilter|SystemFilter|ServiceFilter|PropertyFilter">
 <!ENTITY % j2ee-calls "j2ee-ejb-call|j2ee-jca-call|jmx-call %extra-j2ee-calls;">
-<!ENTITY % comm-calls "smtp-call|pop-call|ws-call|http-call %extra-comm-calls;">
+<!ENTITY % comm-calls "smtp-call|pop-call|pop-uid-remove-call|ws-call|http-call %extra-comm-calls;">
 <!ENTITY % file-calls "filereader-call|filewriter-call|filemanager-call|fsmonitor-call|remotemanager-call|rsh-call|rsh-filereader-call|rsh-filewriter-call %extra-file-calls;">
 <!ENTITY % db-calls   "db-call|ldap-search-call|ldap-update-call %extra-db-calls;">
 <!ENTITY % util-calls "extract-data-call|routed-call|birt-report-call|test-service-call|generic-call %extra-util-calls;">
@@ -9027,6 +9027,51 @@
     #NotNull
 -->
 <!ATTLIST pop-call email-rx-cleaner CDATA #IMPLIED>
+
+<!--
+    Plugin for removing emails UID from UID cache, useful for email reprocess.
+    The emails UID to remove must be provided as a comma separated list in MESSAGE_ID
+    GVBuffer property.
+
+    #Label: @name
+    #Icon: GVPopCall.png
+    #Category: Web/Mail
+    #SelectOnInsert
+    #Table: | JNDI Context | JNDIHelper | Factory initial | @initial-context-factory | Provider URL | @provider-url | Security Principal | @security-principal | Security Credentials | @security-credentials | Description | Description
+    #Template:
+
+        <xsl:template match="pop-uid-remove-call">
+                <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT pop-uid-remove-call (Description?, JNDIHelper?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST pop-uid-remove-call type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+
+-->
+<!ATTLIST pop-uid-remove-call class CDATA #FIXED "it.greenvulcano.gvesb.virtual.pop.uidcache.UIDCacheRemoveOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST pop-uid-remove-call name CDATA #REQUIRED>
+<!--
+    JNDI name of the mail Session configured in the application server.
+
+    #NotNull
+-->
+<!ATTLIST pop-uid-remove-call jndi-name CDATA #REQUIRED>
 
 <!--
     Plugin for running a R(emote)SH(ell) command.
