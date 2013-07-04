@@ -303,4 +303,23 @@ public class PropertiesHandlerTestCase extends TestCase
         assertEquals("aaaC_C 'C_C'..C_C", dest);
     }
 
+    /**
+    *
+    */
+   @Test
+   public void testExpand16() throws Exception
+   {
+       String match = System.getenv("PATH");
+       System.out.println("----- PATH env: " + match);
+       String src = "env{{PATH}}";
+       String dest = PropertiesHandler.expand(src, null);
+       assertEquals(match, dest);
+
+       match = System.getenv("HOME");
+       System.out.println("----- HOME env: " + match);
+       src = "env{{HOME}}";
+       dest = PropertiesHandler.expand(src, null);
+       assertEquals(match, dest);
+   }
+
 }
