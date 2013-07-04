@@ -47,13 +47,13 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
-import javax.mail.Message.RecipientType;
 import javax.naming.NamingException;
 
 import org.apache.commons.codec.binary.Base64OutputStream;
@@ -134,6 +134,9 @@ public class POPCallOperation implements CallOperation
             if (protocolUser != null) {
                 logger.debug("Override protocol user: " + protocolUser);
             }
+
+            mbox = XMLConfig.get(node, "@folder", "INBOX");
+            logger.debug("Messages folder: " + mbox);
 
             delete_messages = XMLConfig.getBoolean(node, "@delete-messages", false);
             expunge = XMLConfig.getBoolean(node, "@expunge", false);
@@ -272,8 +275,7 @@ public class POPCallOperation implements CallOperation
 
                     if (!delete_messages) {
                         if (folder instanceof POP3Folder) {
-                            POP3Folder pf = (POP3Folder) folder;
-                            String uid = pf.getUID(msgs[i]);
+                            String uid = msgs[i].getHeader("Message-ID")[0];
                             if (uid != null) {
                                 if (uidCache.contains(uid)) {
                                     skipMessage = true;
@@ -367,12 +369,13 @@ public class POPCallOperation implements CallOperation
         }
 
         Element content = null;
-        if (p.isMimeType("text/plain")) {
+        String filename = p.getFileName();
+        if (p.isMimeType("text/plain") && (filename == null)) {
             content = doc.createElement("PlainMessage");
             Text body = doc.createTextNode((String) p.getContent());
             content.appendChild(body);
         }
-        else if (p.isMimeType("text/html")) {
+        else if (p.isMimeType("text/html") && (filename == null)) {
             content = doc.createElement("HTMLMessage");
             CDATASection body = doc.createCDATASection((String) p.getContent());
             content.appendChild(body);
@@ -400,7 +403,6 @@ public class POPCallOperation implements CallOperation
             content.appendChild(doc.createTextNode(os.toString()));
         }
         msg.appendChild(content);
-        String filename = p.getFileName();
         if (filename != null) {
             content.setAttribute("file-name", filename);
         }
