@@ -55,6 +55,7 @@ public class BasicPropertyHandler implements PropertyHandler
         PropertiesHandler.registerHandler("%", handler);
         PropertiesHandler.registerHandler("$", handler);
         PropertiesHandler.registerHandler("sp", handler);
+        PropertiesHandler.registerHandler("env", handler);
         PropertiesHandler.registerHandler("@", handler);
         PropertiesHandler.registerHandler("xpath", handler);
         PropertiesHandler.registerHandler("timestamp", handler);
@@ -81,6 +82,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * - %{{package}}       : the obj package name;
      * - ${{propname}}      : a System property value;
      * - sp{{propname}}     : a System property value;
+     * - env{{varname}}     : an Environment variable value;
      * - @{{propname}}      : a inProperties property value;
      * - xmlp{{propname}}   : a inProperties property value, only used by
      *                        XMLConfig on xml files reading;
@@ -139,6 +141,9 @@ public class BasicPropertyHandler implements PropertyHandler
         else if (type.startsWith("@")) {
             return expandInProperties(str, inProperties, object, scope, extra);
         }
+        else if (type.startsWith("env")) {
+            return expandEnvVariable(str, inProperties, object, scope, extra);
+        }
         else if (type.startsWith("xpath")) {
             return expandXPathProperties(str, inProperties, object, scope, extra);
         }
@@ -192,6 +197,29 @@ public class BasicPropertyHandler implements PropertyHandler
             propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
         }
         String paramValue = System.getProperty(propName, "");
+        if (!PropertiesHandler.isExpanded(paramValue)) {
+            paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
+        }
+        str = paramValue;
+        return str;
+    }
+
+    /**
+     * @param str
+     *        the string to valorize
+     * @return the expanded string
+     */
+    private static String expandEnvVariable(String str, Map<String, Object> inProperties, Object object,
+            Scriptable scope, Object extra) throws PropertiesHandlerException
+    {
+        String propName = str;
+        if (!PropertiesHandler.isExpanded(propName)) {
+            propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
+        }
+        String paramValue = System.getenv(propName);
+        if (paramValue == null) {
+            paramValue = "";
+        }
         if (!PropertiesHandler.isExpanded(paramValue)) {
             paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
         }
