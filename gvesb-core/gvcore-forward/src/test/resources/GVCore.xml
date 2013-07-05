@@ -23,7 +23,7 @@
     </XPath>
   </GVXPath>
   <GVForwards name="JMS_FORWARD" type="module">
-        <ForwardConfiguration dump-message="true" forwardName="FWD_TOUPPER_A"
+        <ForwardConfiguration dump-message="true" name="ToupperA" forwardName="FWD_TOUPPER_A"
                               ref-dp="toupperTestJMSBytesMessageToStringDataProvider"
                               enabled="true" full-debug="true">
             <ForwardDeployment reconnect-interval-sec="10"
@@ -39,7 +39,7 @@
                 <XAHelper auto-enlist="false" transaction-status="TMSUCCESS" />
             </ForwardDeployment>
         </ForwardConfiguration>
-        <ForwardConfiguration dump-message="true" forwardName="FWD_TOUPPER_A_PROP"
+        <ForwardConfiguration dump-message="true" name="ToupperA_Prop" forwardName="FWD_TOUPPER_A_PROP"
                               ref-dp="toupperTestJMSBytesMessageToStringDataProvider"
                               enabled="true" full-debug="true">
             <ForwardDeployment reconnect-interval-sec="10"
