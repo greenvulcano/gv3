@@ -35,7 +35,7 @@
     </GVXPath>
     <GVForwards name="JMS_FORWARD" type="module">
         <ForwardConfiguration dump-message="true" enabled="true"
-                              forwardName="FWD_TOUPPER_A"
+                              name="ToupperA" forwardName="FWD_TOUPPER_A"
                               ref-dp="ReadString_JMSBytesMessageDataProvider">
             <ForwardDeployment connection-factory="java:/XAConnectionFactory"
                                destination="gvesb/jms/queue/TOUPPER_A_Request_Queue"
