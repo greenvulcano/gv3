@@ -245,14 +245,21 @@
 -->
 <!ATTLIST GVForwards name    CDATA   #FIXED  "JMS_FORWARD">
 <!--
-    #Label: @forwardName
+    #CompositeLabel: || @name | - | @forwardName
 -->
 <!ELEMENT ForwardConfiguration (Description?, ForwardDeployment, ErrorHandler*)>
 
 <!--
+    Forward configuration name.
+
+    #Unique: /GVCore/GVForwards/ForwardConfiguration/@name
+    #NotNull
+-->
+<!ATTLIST ForwardConfiguration name CDATA #REQUIRED>
+
+<!--
     Forward name. References the Core workflow of type "Forward".
 
-    #Unique: /GVCore/GVForwards/ForwardConfiguration/@forwardName
     #References: /GVCore/GVServices/Services/Service/Operation/@forward-name
     #NotNull
 -->

@@ -63,6 +63,10 @@ public class JMSForwardData
     private int                    maximumSize          = DEFAULT_MAXIMUM_SIZE;
 
     /**
+     * Forward configuration name.
+     */
+    private String                 name;
+    /**
      * Forward name.
      */
     private String                 forwardName;
@@ -138,6 +142,7 @@ public class JMSForwardData
             cfgNode = node;
             this.pool = pool;
             this.logger = logger;
+            name = XMLConfig.get(node, "@name", XMLConfig.get(node, "concat(@forwardName, '_', position())"));
             forwardName = XMLConfig.get(node, "@forwardName", "UNDEFINED");
             serverName = JMXEntryPoint.getServerName();
 
@@ -281,6 +286,14 @@ public class JMSForwardData
         return pool.getPooledCount();
     }
 
+
+    /**
+     * @return the name
+     */
+    public String getName()
+    {
+        return this.name;
+    }
 
     /**
      * @return the forwardName

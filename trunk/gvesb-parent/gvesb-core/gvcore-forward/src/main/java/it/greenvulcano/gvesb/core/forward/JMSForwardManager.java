@@ -31,10 +31,10 @@ import it.greenvulcano.gvesb.core.forward.jmx.JMSForwardListenerPoolInfo;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
-import it.greenvulcano.util.thread.ThreadMap;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
@@ -54,7 +54,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     private static String                           JMS_FORWARD_FILE_NAME = "GVJMSForward.xml";
     private static JMSForwardManager                instance              = null;
 
-    private HashMap<String, JMSForwardListenerPool> jmsListeners          = new HashMap<String, JMSForwardListenerPool>();
+    private List<JMSForwardListenerPool> jmsListeners          = new ArrayList<JMSForwardListenerPool>();
     private String 									serverName;
 
     private JMSForwardManager()
@@ -95,8 +95,8 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
                 Node n = nl.item(i);
                 JMSForwardListenerPool jmsLP = new JMSForwardListenerPool();
                 jmsLP.init(n);
-                jmsListeners.put(jmsLP.getForwardName(), jmsLP);
-                logger.debug("Configured JMSForwardListenerPool[" + jmsLP.getForwardName() + "]");
+                jmsListeners.add(jmsLP);
+                logger.debug("Configured JMSForwardListenerPool[" + jmsLP.getName() + "/" + jmsLP.getForwardName() + "]");
                 register(jmsLP);
             }
         }
@@ -121,14 +121,14 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
         NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
         try {
             logger.debug("BEGIN - Destroing JMSForwardManager");
-            for (Entry<String, JMSForwardListenerPool> entry : jmsListeners.entrySet()) {
+            for (JMSForwardListenerPool pool : jmsListeners) {
+                String forwardName = pool.getName() + "/" + pool.getForwardName();
                 try {
-                    JMSForwardListenerPool pool = entry.getValue();
                     deregister(pool, true);
                     pool.destroy();
                 }
                 catch (Exception exc) {
-                    logger.error("Error destroing JMSForwardListenerPool[" + entry.getKey() + "]", exc);
+                    logger.error("Error destroing JMSForwardListenerPool[" + forwardName + "]", exc);
                 }
             }
             jmsListeners.clear();
@@ -169,7 +169,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
      */
     private void register(JMSForwardListenerPool pool)
     {
-        logger.debug("Registering MBean for JMSForwardListenerPool(" + pool.getForwardName() + ")");
+        logger.debug("Registering MBean for JMSForwardListenerPool(" + pool.getName() + "/" + pool.getForwardName() + ")");
         Hashtable<String, String> properties = getMBeanProperties(pool);
         try {
             deregister(pool, false);
@@ -178,7 +178,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
                     JMSForwardListenerPoolInfo.DESCRIPTOR_NAME, properties);
         }
         catch (Exception exc) {
-            logger.warn("Error registering MBean for JMSForwardListenerPool(" + pool.getForwardName() + ")", exc);
+            logger.warn("Error registering MBean for JMSForwardListenerPool(" + pool.getName() + "/" + pool.getForwardName() + ")", exc);
         }
     }
 
@@ -191,7 +191,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     private void deregister(JMSForwardListenerPool pool, boolean showError)
     {
         if (showError) {
-            logger.debug("Deregistering MBean for JMSForwardListenerPool(" + pool.getForwardName() + ")");
+            logger.debug("Deregistering MBean for JMSForwardListenerPool(" + pool.getName() + "/" + pool.getForwardName() + ")");
         }
         Hashtable<String, String> properties = getMBeanProperties(pool);
         try {
@@ -209,7 +209,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     private Hashtable<String, String> getMBeanProperties(JMSForwardListenerPool pool)
     {
         Hashtable<String, String> properties = new Hashtable<String, String>();
-        properties.put("Forward", pool.getForwardName());
+        properties.put("Forward", pool.getName());
         return properties;
     }
 }
