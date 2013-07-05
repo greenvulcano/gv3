@@ -55,6 +55,10 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
     private ThreadPoolExecutor  executor    = null;
 
     /**
+     * Forward configuration name.
+     */
+    private String              name        = "";
+    /**
      * Forward name invoked in GreenVulcano.
      */
     private String              forwardName = "";
@@ -73,6 +77,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
     {
         try {
             data = new JMSForwardData(node, this, logger);
+            name = data.getName();
             forwardName = data.getForwardName();
             serverName = data.getServerName();
 
@@ -121,13 +126,20 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
     }
 
     /**
+     * @return Returns the name.
+     */
+    public String getName()
+    {
+        return name;
+    }
+
+    /**
      * @return Returns the forwardName.
      */
     public String getForwardName()
     {
         return forwardName;
     }
-
 
     /**
      * @return Returns the maxCreated.

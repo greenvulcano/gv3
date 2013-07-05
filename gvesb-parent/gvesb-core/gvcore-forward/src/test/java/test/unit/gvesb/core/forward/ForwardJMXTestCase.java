@@ -79,10 +79,10 @@ public class ForwardJMXTestCase extends TestCase
         MBeanServer server = JMXEntryPoint.instance().getServer();
         Set<ObjectName> set = server.queryNames(
                 new ObjectName(
-                        "GreenVulcano:Type=JMSForwardListenerPoolInfo,Component=JMSForwardListenerPoolInfo,Forward=FWD_TOUPPER_A,*"),
+                        "GreenVulcano:Type=JMSForwardListenerPoolInfo,Component=JMSForwardListenerPoolInfo,Forward=FWD_TOUPPER_A_0,*"),
                 null);
         assertTrue(
-                "No JMSForwardListenerPool info available in JMX object returned from GreenVulcano domain for Forward=FWD_TOUPPER_A",
+                "No JMSForwardListenerPool info available in JMX object returned from GreenVulcano domain for Forward=FWD_TOUPPER_A_0",
                 (set != null) && !set.isEmpty());
         ObjectName poolInfo = set.iterator().next();
 
@@ -107,10 +107,10 @@ public class ForwardJMXTestCase extends TestCase
 
         set = server.queryNames(
                 new ObjectName(
-                        "GreenVulcano:Type=JMSForwardListenerPoolInfo,Component=JMSForwardListenerPoolInfo,Forward=FWD_TOUPPER_A_PROP,*"),
+                        "GreenVulcano:Type=JMSForwardListenerPoolInfo,Component=JMSForwardListenerPoolInfo,Forward=FWD_TOUPPER_A_PROP_0,*"),
                 null);
         assertTrue(
-                "No JMSForwardListenerPool info available in JMX object returned from GreenVulcano domain for Forward=FWD_TOUPPER_A_PROP",
+                "No JMSForwardListenerPool info available in JMX object returned from GreenVulcano domain for Forward=FWD_TOUPPER_A_PROP_0",
                 (set != null) && !set.isEmpty());
         poolInfo = set.iterator().next();
 
@@ -142,10 +142,10 @@ public class ForwardJMXTestCase extends TestCase
         MBeanServer server = JMXEntryPoint.instance().getServer();
         Set<ObjectName> set = server.queryNames(
                 new ObjectName(
-                        "GreenVulcano:Type=JMSForwardListenerPoolInfo,Component=JMSForwardListenerPoolInfo,Forward=FWD_TOUPPER_A,*"),
+                        "GreenVulcano:Type=JMSForwardListenerPoolInfo,Component=JMSForwardListenerPoolInfo,Forward=FWD_TOUPPER_A_0,*"),
                 null);
         assertTrue(
-                "No JMSForwardListenerPool info available in JMX object returned from GreenVulcano domain for Forward=FWD_TOUPPER_A",
+                "No JMSForwardListenerPool info available in JMX object returned from GreenVulcano domain for Forward=FWD_TOUPPER_A_0",
                 (set != null) && !set.isEmpty());
         ObjectName poolInfo = set.iterator().next();
 
