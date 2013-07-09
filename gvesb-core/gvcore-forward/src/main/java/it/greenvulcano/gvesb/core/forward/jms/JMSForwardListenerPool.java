@@ -81,7 +81,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
             forwardName = data.getForwardName();
             serverName = data.getServerName();
 
-            logger.debug("BEGIN - Initializing JMSForwardListenerPool[" + forwardName + "]");
+            logger.debug("BEGIN - Initializing JMSForwardListenerPool[" + name + "/" + forwardName + "]");
 
             NMDC.push();
             NMDC.setServer(serverName);
@@ -89,7 +89,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
             try {
                 BlockingQueue<Runnable> queue = new SynchronousQueue<Runnable>();
                 executor = new ThreadPoolExecutor(data.getInitialSize(), data.getMaximumSize(), 10L, TimeUnit.MINUTES,
-                        queue, new BaseThreadFactory("JMSForward#" + forwardName, true), this);
+                        queue, new BaseThreadFactory("JMSForward#" + name + "#" + forwardName, true), this);
 
                 // single initial listener
                 executor.execute(createJMSForwardListener());
@@ -112,11 +112,11 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
             throw exc;
         }
         catch (Exception exc) {
-            throw new JMSForwardException("GVJMSPOOL_APPLICATION_INIT_ERROR", new String[][]{{"forward", forwardName}},
+            throw new JMSForwardException("GVJMSPOOL_APPLICATION_INIT_ERROR", new String[][]{{"forward", name + "/" + forwardName}},
                     exc);
         }
         finally {
-            logger.debug("END - Initialized JMSForwardListenerPool[" + forwardName + "]");
+            logger.debug("END - Initialized JMSForwardListenerPool[" + name + "/" + forwardName + "]");
         }
     }
 
@@ -175,12 +175,12 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
                         JMSForwardListener jmsFwd = createJMSForwardListener();
                         executor.execute(jmsFwd);
                         if (data.isDebug()) {
-                            logger.debug("Forward [" + forwardName + "] - creating new instance ("
+                            logger.debug("Forward [" + name + "/" + forwardName + "] - creating new instance ("
                                     + executor.getActiveCount() + "/" + data.getMaximumSize() + ")");
                         }
                     }
                     catch (Exception exc) {
-                        logger.error("Forward [" + forwardName + "] - error creating new instance", exc);
+                        logger.error("Forward [" + name + "/" + forwardName + "] - error creating new instance", exc);
                     }
                 }
             }
@@ -206,17 +206,17 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
                                 JMSForwardListener jmsFwd = createJMSForwardListener();
                                 executor.execute(jmsFwd);
                                 if (data.isDebug()) {
-                                    logger.debug("Forward [" + forwardName + "] - rescheduling new instance ("
+                                    logger.debug("Forward [" + name + "/" + forwardName + "] - rescheduling new instance ("
                                             + executor.getActiveCount() + "/" + data.getMaximumSize() + ")");
                                 }
                             }
                             catch (Exception exc) {
-                                logger.error("Forward [" + forwardName + "] - error rescheduling new instance", exc);
+                                logger.error("Forward [" + name + "/" + forwardName + "] - error rescheduling new instance", exc);
                             }
                         }
                     };
 
-                    BaseThread bt = new BaseThread(rr, "Forward [" + forwardName + "] - rescheduler");
+                    BaseThread bt = new BaseThread(rr, "Forward [" + name + "/" + forwardName + "] - rescheduler");
                     bt.setDaemon(true);
                     bt.start();
                 }
@@ -229,14 +229,14 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
      */
     public void destroy()
     {
-        logger.debug("Forward [" + forwardName + "] - Begin destroying instances");
+        logger.debug("Forward [" + name + "/" + forwardName + "] - Begin destroying instances");
         if (data != null) {
             data.destroy();
         }
         data = null;
         executor.shutdown();
         executor = null;
-        logger.debug("Forward [" + forwardName + "] - End destroying instances");
+        logger.debug("Forward [" + name + "/" + forwardName + "] - End destroying instances");
     }
 
     /**
@@ -260,7 +260,8 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor)
     {
-        logger.warn("Forward [" + ((JMSForwardListener) r).getForwardName() + "] has been rejected from execution");
+        JMSForwardListener jmsFwd = (JMSForwardListener) r;
+        logger.warn("Forward [" + jmsFwd.getName() + "/" + jmsFwd.getForwardName() + "] has been rejected from execution");
     }
 
 }
