@@ -77,6 +77,10 @@ public class JMSForwardListener implements Runnable
     private JMSForwardData      data            = null;
 
     /**
+     * Forward configuration name.
+     */
+    private String              name        = "";
+    /**
      * Forward name invoked in GreenVulcano.
      */
     private String              forwardName     = "";
@@ -117,6 +121,7 @@ public class JMSForwardListener implements Runnable
 
         try {
             this.data = data;
+            name = data.getName();
             forwardName = data.getForwardName();
             serverName = data.getServerName();
 
@@ -174,6 +179,11 @@ public class JMSForwardListener implements Runnable
         disconnect();
     }
 
+    public String getName()
+    {
+        return this.name;
+    }
+
     public String getForwardName()
     {
         return this.forwardName;
@@ -193,7 +203,7 @@ public class JMSForwardListener implements Runnable
         NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
 
         if (data.isDebug()) {
-            logger.debug("Started Forward [" + forwardName + "] instance");
+            logger.debug("Started Forward [" + name + "/" + forwardName + "] instance");
         }
         try {
             while (isActive() && ((data.getReadBlockCount() < 0) || (readCount < data.getReadBlockCount()))) {
@@ -204,7 +214,7 @@ public class JMSForwardListener implements Runnable
                         }
                         catch (Exception exc) {
                             logger.error(
-                                    "Connection error on Forward [" + forwardName + "]. Retry after "
+                                    "Connection error on Forward [" + name + "/" + forwardName + "]. Retry after "
                                             + data.getReconnectInterval() + " ms.", exc);
                             try {
                                 Thread.sleep(data.getReconnectInterval());
@@ -224,17 +234,17 @@ public class JMSForwardListener implements Runnable
                                     }
                                 }
                                 catch (Exception exc) {
-                                    logger.error("Error enlisting XA Resource for Forward[" + forwardName + "]", exc);
+                                    logger.error("Error enlisting XA Resource for Forward[" + name + "/" + forwardName + "]", exc);
                                     if (exc instanceof JMSException) {
                                         disconnect();
                                         sleep();
                                         continue;
                                     }
                                     throw new JMSForwardException("Error enlisting XA Resource for Forward["
-                                            + forwardName + "]", exc);
+                                            + name + "/" + forwardName + "]", exc);
                                 }
                                 if (data.isDebug()) {
-                                    logger.debug("Forward [" + forwardName + "] listening...");
+                                    logger.debug("Forward [" + name + "/" + forwardName + "] listening...");
                                 }
 
                                 try {
@@ -261,7 +271,7 @@ public class JMSForwardListener implements Runnable
                                         }
                                     }
                                     catch (Exception exc) {
-                                        logger.error("Error delisting XA Resource for Forward[" + forwardName + "]",
+                                        logger.error("Error delisting XA Resource for Forward[" + name + "/" + forwardName + "]",
                                                 exc);
                                         rollbackTX();
                                         if (exc instanceof JMSException) {
@@ -272,7 +282,7 @@ public class JMSForwardListener implements Runnable
                                 }
                             }
                             catch (Throwable exc) {
-                                logger.error("Error processing Forward [" + forwardName + "]... rolling back", exc);
+                                logger.error("Error processing Forward [" + name + "/" + forwardName + "]... rolling back", exc);
                                 if (!data.isShutdown()) {
                                     rollbackTX();
                                     if (exc instanceof JMSException) {
@@ -296,21 +306,21 @@ public class JMSForwardListener implements Runnable
                                     }
                                     catch (Throwable exc) {
                                         logger.error(
-                                                "Error rolling back transaction for Forward [" + forwardName + "]", exc);
+                                                "Error rolling back transaction for Forward [" + name + "/" + forwardName + "]", exc);
                                     }
                                 }
                             }
                         }
                     }
                     catch (Throwable exc) {
-                        logger.error("Error processing Forward [" + forwardName + "]", exc);
+                        logger.error("Error processing Forward [" + name + "/" + forwardName + "]", exc);
                         if (!data.isShutdown()) {
                             sleep();
                         }
                     }
                 }
                 catch (Throwable exc) {
-                    logger.error("Error processing Forward [" + forwardName + "]", exc);
+                    logger.error("Error processing Forward [" + name + "/" + forwardName + "]", exc);
                     /*if (!data.isShutdown()) {
                         sleep();
                         rollbackTX();
@@ -365,7 +375,7 @@ public class JMSForwardListener implements Runnable
 
             connected = true;
             if (data.isDebug()) {
-                logger.debug("Connected Forward [" + forwardName + "] instance");
+                logger.debug("Connected Forward [" + name + "/" + forwardName + "] instance");
             }
         }
         finally {
@@ -373,7 +383,7 @@ public class JMSForwardListener implements Runnable
                 initialContext.close();
             }
             catch (Exception exc) {
-                logger.warn("Exception closing the context for Forward [" + forwardName + "] instance", exc);
+                logger.warn("Exception closing the context for Forward [" + name + "/" + forwardName + "] instance", exc);
             }
         }
     }
@@ -410,7 +420,7 @@ public class JMSForwardListener implements Runnable
                 xaHelper.begin();
             }
             catch (Exception exc) {
-                logger.error("Error beginning transaction on Forward [" + forwardName + "]", exc);
+                logger.error("Error beginning transaction on Forward [" + name + "/" + forwardName + "]", exc);
                 throw exc;
             }
         }
@@ -431,7 +441,7 @@ public class JMSForwardListener implements Runnable
             }
         }
         catch (Exception exc) {
-            logger.error("Error committing transaction on Forward [" + forwardName + "]"
+            logger.error("Error committing transaction on Forward [" + name + "/" + forwardName + "]"
                     + ((tx != null) ? ": " + tx : ""), exc);
             throw exc;
         }
@@ -452,7 +462,7 @@ public class JMSForwardListener implements Runnable
             }
         }
         catch (Exception exc) {
-            logger.error("Error rolling-back transaction on Forward [" + forwardName + "]"
+            logger.error("Error rolling-back transaction on Forward [" + name + "/" + forwardName + "]"
                     + ((tx != null) ? ": " + tx : ""), exc);
         }
     }
@@ -474,10 +484,10 @@ public class JMSForwardListener implements Runnable
     private void processMessage(Message msg) throws Exception
     {
         if (!initialized) {
-            throw new JMSForwardException("Forward [" + forwardName + "] NOT initialized");
+            throw new JMSForwardException("Forward [" + name + "/" + forwardName + "] NOT initialized");
         }
         if (data.isDebug()) {
-            logger.debug("Forward [" + forwardName + "]: Processing incoming message");
+            logger.debug("Forward [" + name + "/" + forwardName + "]: Processing incoming message");
         }
         GVBuffer gvBuffer = null;
         long startTime = System.currentTimeMillis();
@@ -488,7 +498,7 @@ public class JMSForwardListener implements Runnable
         try {
             try {
                 if (data.isDumpMessage() && logger.isDebugEnabled()) {
-                    logger.debug("Forward [" + forwardName + "] Received message :\n" + new JMSMessageDump(msg, null));
+                    logger.debug("Forward [" + name + "/" + forwardName + "] Received message :\n" + new JMSMessageDump(msg, null));
                 }
                 gvBuffer = new GVBuffer(flowSystem, flowService);
 
@@ -515,7 +525,7 @@ public class JMSForwardListener implements Runnable
                 }
             }
             catch (Exception exc) {
-                throw new JMSForwardException("The forward [" + forwardName + "] received a unmanageable message", exc);
+                throw new JMSForwardException("The forward [" + name + "/" + forwardName + "] received a unmanageable message", exc);
             }
             GVBufferMDC.put(gvBuffer);
             execute(gvBuffer, flowSystem, flowService);
@@ -523,7 +533,7 @@ public class JMSForwardListener implements Runnable
         finally {
             long endTime = System.currentTimeMillis();
             if (data.isDebug()) {
-                logger.debug("Forward [" + forwardName + "]: Processed message - ExecutionTime ("
+                logger.debug("Forward [" + name + "/" + forwardName + "]: Processed message - ExecutionTime ("
                         + (endTime - startTime) + ")");
             }
         }
@@ -544,7 +554,7 @@ public class JMSForwardListener implements Runnable
         try {
             greenVulcano.forward(gvBuffer, forwardName, flowSystem, flowService);
             if (getRollbackOnly()) {
-                logger.warn("The transaction started by the Forward [" + forwardName
+                logger.warn("The transaction started by the Forward [" + name + "/" + forwardName
                         + "] was rolled back by an external system");
             }
         }
@@ -552,7 +562,7 @@ public class JMSForwardListener implements Runnable
             if ((errorHandlerMgr == null) || !errorHandlerMgr.mustHandleError(exc)) {
                 throw exc;
             }
-            logger.warn("Forward [" + forwardName + "] - Calling error handler (" + errorHandlerMgr.getName()
+            logger.warn("Forward [" + name + "/" + forwardName + "] - Calling error handler (" + errorHandlerMgr.getName()
                     + ") on exception", exc);
             gvBuffer = errorHandlerMgr.prepareBuffer(gvBuffer);
             GVBufferMDC.put(gvBuffer);
@@ -588,7 +598,7 @@ public class JMSForwardListener implements Runnable
         int status = tx.getStatus();
         if ((status == Status.STATUS_MARKED_ROLLBACK) || (status == Status.STATUS_ROLLEDBACK)
                 || (status == Status.STATUS_UNKNOWN) || (status == Status.STATUS_ROLLING_BACK)) {
-            logger.warn("Forward [" + forwardName + "] transaction rolled back: " + tx);
+            logger.warn("Forward [" + name + "/" + forwardName + "] transaction rolled back: " + tx);
             return true;
         }
         return false;
@@ -606,14 +616,14 @@ public class JMSForwardListener implements Runnable
             node = XMLConfig.getNode(node, "ErrorHandler");
         }
         catch (Exception exc) {
-            logger.error("Forward [" + forwardName + "]: Error reading ErrorHandlerManager data ", exc);
+            logger.error("Forward [" + name + "/" + forwardName + "]: Error reading ErrorHandlerManager data ", exc);
             node = null;
         }
         if (node != null) {
             try {
                 errorHandlerMgr = new ErrorHandlerManager();
                 errorHandlerMgr.init(node.getParentNode());
-                logger.info("Forward [" + forwardName + "]: Using ErrorHandlerManager");
+                logger.info("Forward [" + name + "/" + forwardName + "]: Using ErrorHandlerManager");
             }
             catch (Exception exc) {
                 logger.error("Error initializing ErrorHandlerManager ", exc);

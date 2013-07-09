@@ -833,9 +833,11 @@ public class GVCoreParser
         	
 	        for (int i = 0; i < listaForward.length; i++) {
 	        	String strXpath = "/GVCore/GVForwards/ForwardConfiguration[@forwardName='" + listaForward[i] + "']";
-	            Node nodo = parser.selectSingleNode(xml, strXpath);
-	            if (nodo != null) {
-	                gvForwards.add(nodo);
+	            NodeList nodeList = parser.selectNodeList(xml, strXpath);
+	            if (nodeList != null) {
+	                for (int n = 0; n < nodeList.getLength(); n++) {
+	                    gvForwards.add(nodeList.item(n));
+	                }
 	            }
 	        }
 	        return gvForwards;
@@ -934,12 +936,20 @@ public class GVCoreParser
 		}
     }
 
-    private String getListDataProviderForward(Document xml, String forwardName) throws XMLUtilsException
+    private String[] getListDataProviderForward(Document xml, String forwardName) throws XMLUtilsException
     {
-        String dp = XMLUtils.get_S(xml, "/GVCore/GVForwards/ForwardConfiguration[@forwardName='"
-                + forwardName + "']/@ref-dp");
-        logger.debug("getListDataProviderForward - LISTA DP=" + dp);
-        return dp;
+        NodeList nl = XMLUtils.selectNodeList_S(xml, "/GVCore/GVForwards/ForwardConfiguration[@forwardName='"
+                + forwardName + "']");
+        String[] dps = null; 
+        if (nl != null) {
+            dps = new String[nl.getLength()];
+            for (int i = 0; i < nl.getLength(); i++) {
+                dps[i] = XMLUtils.get_S(nl.item(i), "@ref-dp");
+                logger.debug("getListDataProviderForward - [" + forwardName + "] DP=" + dps[i]);
+            }
+        }
+        
+        return dps;
     }
 
     private void getListDataProviderSystem(Document xml, String nomeServizio, Map<String, String> vlistaDp, XMLUtils parser) throws XMLUtilsException
@@ -1449,22 +1459,27 @@ public class GVCoreParser
         List<Node> forwardConfigurations = getGVForwards(newXml, nomeServizio);
         Map<String, String> hlistaDp = new Hashtable<String, String>();
         for (Node forwardConfiguration : forwardConfigurations) {
+            String name = parser.get(forwardConfiguration, "@name");
             String forward = parser.get(forwardConfiguration, "@forwardName");
-            Node resultsFwdServer = parser.selectSingleNode(serverXml, "/GVCore/GVForwards/ForwardConfiguration[@forwardName='"
-                    + forward + "']");
+            Node resultsFwdServer = parser.selectSingleNode(serverXml, "/GVCore/GVForwards/ForwardConfiguration[@name='"
+                    + name + "']");
             if (resultsFwdServer == null) {
                 Node importedNode = base.getOwnerDocument().importNode(forwardConfiguration, true);
                 base.appendChild(importedNode);
-                logger.debug("Nodo ForwardConfiguration[" + forward + "] non esistente inserimento");
+                logger.debug("Nodo ForwardConfiguration[" + name + "/" + forward + "] non esistente inserimento");
             }
             else {
                 Node importedNode = base.getOwnerDocument().importNode(forwardConfiguration, true);
                 base.replaceChild(importedNode, resultsFwdServer);
-                logger.debug("Nodo ForwardConfiguration[" + forward + "] gia esistente aggiornamento");
+                logger.debug("Nodo ForwardConfiguration[" + name + "/" + forward + "] gia esistente aggiornamento");
             }
-            String dp = getListDataProviderForward(newXml, forward);
-            if (dp != null) {
-                hlistaDp.put(dp, dp);
+            String[] dps = getListDataProviderForward(newXml, forward);
+            if (dps != null) {
+                for (int i = 0; i < dps.length; i++) {
+                    if (dps[i] != null) {
+                        hlistaDp.put(dps[i], dps[i]);
+                    }
+                }
             }
         }
         Set<String> set = hlistaDp.keySet(); // get set-view of keys
