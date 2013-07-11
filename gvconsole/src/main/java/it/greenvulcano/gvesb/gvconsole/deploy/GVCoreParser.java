@@ -1524,12 +1524,12 @@ public class GVCoreParser
 	                        String system = parser.get(concurrentServices.item(j), "@system");
 	                        Node resultsCSServer = null;
 	                        if (system == null) {
-	                        	resultsCSServer = parser.selectSingleNode(gvConcurrencyManagerServer, "SubSystems/SubSystem[@name="
-	                                  + subsystem + "]/ConcurrentService[@service='" + service + "']");
+	                        	resultsCSServer = parser.selectSingleNode(gvConcurrencyManagerServer, "SubSystems/SubSystem[@name='"
+	                                  + subsystem + "']/ConcurrentService[@service='" + service + "']");
 	                        }
 	                        else {
-	                        	resultsCSServer = parser.selectSingleNode(gvConcurrencyManagerServer, "SubSystems/SubSystem[@name="
-		                                  + subsystem + "]/ConcurrentService[@system='" + system + "' and @service='" + service + "']");
+	                        	resultsCSServer = parser.selectSingleNode(gvConcurrencyManagerServer, "SubSystems/SubSystem[@name='"
+		                                  + subsystem + "']/ConcurrentService[@system='" + system + "' and @service='" + service + "']");
 	                        }
 	                        if (resultsCSServer == null) {
 	                            Node importedNode = resultsSubSysServer.getOwnerDocument().importNode(concurrentServices.item(j), true);
