@@ -2070,7 +2070,8 @@ data.setObject(fb);</Script>
                                 </to>
                             </destinations>
                             <message-body gvBuffer-dump="false">
-                                <message-text>${&apos;Attachment file list:\n&apos;+property[&apos;GV_SMTP_ATTACHMENTS&apos;]}</message-text>
+                                <message-text>Attachment file list:
+@{{GV_SMTP_ATTACHMENTS}}</message-text>
                             </message-body>
                         </mail-message>
                     </smtp-call>
@@ -2245,12 +2246,12 @@ data.setObject(fb);</Script>
                                type="call">
                         <mail-message content-type="text-plain" high-priority="false"
                                       sender-display-name="GV ESB"
-                                      subject="RE: ${property[&quot;SUBJECT&quot;]}">
+                                      subject="RE: @{{SUBJECT}}">
                             <message-body gvBuffer-dump="false">
                                 <message-text>Persons data</message-text>
                             </message-body>
                             <attachments>
-                                <gvBuffer name="PersonsData_${@it.greenvulcano.util.txt.DateUtils@nowToString(&apos;yyyyMMddHHmmss&apos;)}.${property[&apos;FILE_EXT&apos;]}"/>
+                                <gvBuffer name="PersonsData_timestamp{{yyyyMMddHHmmss}}.@{{FILE_EXT}}"/>
                             </attachments>
                         </mail-message>
                     </smtp-call>
@@ -2259,7 +2260,7 @@ data.setObject(fb);</Script>
                                type="call">
                         <mail-message content-type="text-plain" high-priority="true"
                                       sender-display-name="GV ESB"
-                                      subject="RE: ${property[&quot;SUBJECT&quot;]}">
+                                      subject="RE: @{{SUBJECT}}">
                             <message-body gvBuffer-dump="false">
                                 <message-text>Invalid service request.
 Available Services:
