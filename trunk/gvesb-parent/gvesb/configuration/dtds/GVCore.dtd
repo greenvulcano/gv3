@@ -1808,12 +1808,14 @@
 <!--
     Subsystem name.
 
+    #Unique: /GVCore/GVConcurrencyHandler/SubSystems/SubSystem/@name
+    #Choice: GVCore
     #NotNull
 -->
 <!ATTLIST SubSystem name CDATA #REQUIRED>
 
 <!--
-    #CompositeLabel: || @system | :: | @service
+    #CompositeLabel: || @service | :: | @system
     #SelectOnInsert
 -->
 <!ELEMENT ConcurrentService (Description?)>

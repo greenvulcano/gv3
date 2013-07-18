@@ -1523,23 +1523,27 @@ public class GVCoreParser
 	                        String service = parser.get(concurrentServices.item(j), "@service");
 	                        String system = parser.get(concurrentServices.item(j), "@system");
 	                        Node resultsCSServer = null;
-	                        if (system == null) {
+	                        if ((system == null) || "".equals(system)) {
 	                        	resultsCSServer = parser.selectSingleNode(gvConcurrencyManagerServer, "SubSystems/SubSystem[@name='"
-	                                  + subsystem + "']/ConcurrentService[@service='" + service + "']");
+	                                  + subsystem + "']/ConcurrentService[@service='" + service + "' and not(@system)]");
+	                        	logger.debug("Searching SubSystems/SubSystem[@name='"
+                                      + subsystem + "']/ConcurrentService[@service='" + service + "' and not(@system)]: " + (resultsCSServer != null));
 	                        }
 	                        else {
 	                        	resultsCSServer = parser.selectSingleNode(gvConcurrencyManagerServer, "SubSystems/SubSystem[@name='"
-		                                  + subsystem + "']/ConcurrentService[@system='" + system + "' and @service='" + service + "']");
+		                                  + subsystem + "']/ConcurrentService[@service='" + service + "' and @system='" + system + "']");
+	                        	logger.debug("Searching SubSystems/SubSystem[@name='"
+                                          + subsystem + "']/ConcurrentService[@service='" + service + "' and @system='" + system + "']: " + (resultsCSServer != null));
 	                        }
 	                        if (resultsCSServer == null) {
 	                            Node importedNode = resultsSubSysServer.getOwnerDocument().importNode(concurrentServices.item(j), true);
 	                            resultsSubSysServer.appendChild(importedNode);
-	                            logger.debug("Nodo ConcurrentService[" + system + "/" + service + "] non esistente inserimento");
+	                            logger.debug("Nodo ConcurrentService[" + service + "/" + system + "] non esistente inserimento");
 	                        }
 	                        else {
 	                            Node importedNode = resultsSubSysServer.getOwnerDocument().importNode(concurrentServices.item(j), true);
 	                            resultsSubSysServer.replaceChild(importedNode, resultsCSServer);
-	                            logger.debug("Nodo ConcurrentService[" +  system + "/" + service + "] gia esistente aggiornamento");
+	                            logger.debug("Nodo ConcurrentService[" +  service + "/" + system + "] gia esistente aggiornamento");
 	                        }
 	
 	                    }
