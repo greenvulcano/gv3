@@ -225,8 +225,8 @@ public class JMSForwardListener implements Runnable
                             continue;
                         }
                         if (!data.isShutdown()) {
-                            beginTX();
                             try {
+                                beginTX();
                                 try {
                                     if (data.isTransacted() && !xaHelper.isAutoEnlist()
                                             && xaHelper.isTransactionActive()) {
