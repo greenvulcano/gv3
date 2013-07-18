@@ -37,7 +37,7 @@
 <!ENTITY % jmx-op "(invoke-method|set-attribute|get-attribute)">
 
 <!--
-	Configuration file for GreenVulcanoESB core modules.
+    Configuration file for GreenVulcanoESB core modules.
 -->
 <!ELEMENT GVCore (GVCryptoHelper?,GVXPath?,GVForwards?,GVPoolManager?,GVServices?,GVSystems?,GVPolicy?,GVConcurrencyHandler?,GVBufferDump?,GVDataTransformation?,GVTaskManagerConfiguration?)>
 <!--
@@ -442,7 +442,7 @@
     Can match an Exception versus more definitions.
 
     #Label: @condition
-	#SortChild
+    #SortChild
 -->
 <!ELEMENT ExceptionCondition (Description?, ExceptionDef+)>
 <!--
@@ -2977,15 +2977,13 @@
     with fields of any GVBuffer in the execution environment.
     The parameters are always written in ${param} format.
     The possible parameters for a GVBuffer object are:
-    - for standard fields, the field name
-      - ${GVBuffer.system}
-      - ${GVBuffer.service}
-      - ${GVBuffer.id}
-      - ${GVBuffer.retCode}
-    - for properties:
-      - ${GVBuffer.property:}
-      - ${GVBuffer.properties} (return all the properties, in the form
-                  name: 'filedName' value: 'fieldValue')
+        - for standard fields, the field name
+            - ${system}
+            - ${service}
+            - ${id}
+            - ${retCode}
+        - for properties:
+            - ${property['PROP_NAME']}
 
     All metadata are written in accordance with the above format.
     If an error occurs the metadata will not be replaced.
@@ -4392,12 +4390,12 @@
     Ogni elemento di Notifica ha dei sub-elementi che ne definiscono il messaggio :
 
     - StaticMessage
-    	A static message that does not provide dynamic parameters and can be
-    	associated to any notification
+        A static message that does not provide dynamic parameters and can be
+        associated to any notification
     - JMXGVBufferNotification
-    	Defines a notification relating to a GVBuffer found in the execution environment.
+        Defines a notification relating to a GVBuffer found in the execution environment.
     - JMXExcNotification
-    	Defines a notification relating to an Exception found in the execution environment.
+        Defines a notification relating to an Exception found in the execution environment.
 
     #Label: @id
     #Warn: {{../JMXNotification[@input and not(JMXExcNotification/ExceptionMessage or JMXGVBufferNotification/GVBufferMessage)]}} The input contains the run-time data objects. Therefore, if you specify it, you must also define a message that reads its fields (GVBufferMessage and/or ExceptionMessage).
@@ -4515,8 +4513,8 @@
 -->
 <!ATTLIST JMXGVBufferNotification	dataValue (yes | no) #REQUIRED>
 <!--
-	This element defines a notification object that extends the
-	standard JMX Notification including the Throwable object.
+    This element defines a notification object that extends the
+    standard JMX Notification including the Throwable object.
 -->
 <!ELEMENT JMXExcNotification (Description?, ExceptionMessage?)>
 
@@ -4571,8 +4569,6 @@
             - ${retCode}
         - for properties:
             - ${property['PROP_NAME']}
-            - ${properties} (return all the properties, in the form
-                  name: 'fieldName' value: 'fieldValue')
 
     All metadata are written in accordance with the above format.
     If an error occurs the metadata will not be replaced.
@@ -4607,6 +4603,7 @@
           - ${retCode}
       - for properties:
           - ${property['PROP_NAME']}
+
     The possible parameters for an Exception object are:
       - ${message}
       - ${cause}
@@ -6330,7 +6327,7 @@
     - body            : the body as XML serialized as string
     - body-element    : the first child of body as XML serialized as string
     - header          : the header as XML serialized as string
-	- envelope-om     : the envelope as OMMessage
+    - envelope-om     : the envelope as OMMessage
     - body-om         : the body as OMMessage
     - body-element-om : the first child of body as OMMessage
     - header-om       : the header as OMMessage
@@ -8552,7 +8549,7 @@
 
     #NotNull
 -->
-<!ATTLIST smtp-call  jndi-name CDATA #REQUIRED>
+<!ATTLIST smtp-call  jndi-name CDATA #IMPLIED>
 <!--
     Corresponds to the property mail.protocol.host
     and overwrites the value of property mail.host
@@ -8576,60 +8573,103 @@
 -->
 <!ATTLIST smtp-call	message-id-property CDATA #IMPLIED>
 <!--
-	The SMTP protocol provider supports the following properties, which may
-	be set in the JavaMail Session object.
-	The properties are always set as strings; the Type column describes
-	how the string is interpreted.
-	For example, use
+    The SMTP protocol provider supports the following properties, which may
+    be set in the JavaMail Session object.
+    The properties are always set as strings; the Type column describes
+    how the string is interpreted.
+    For example, use
 
         props.put("mail.smtp.port", "888");
 
-	to set the mail.smtp.port property, which is of type int.
+    to set the mail.smtp.port property, which is of type int.
 
-	Note that if you're using the "smtps" protocol to access SMTP over SSL,
-	all the properties would be named "mail.smtps.*".
+    Note that if you're using the "smtps" protocol to access SMTP over SSL,
+    all the properties would be named "mail.smtps.*".
 
-	Name 							Type 		Description
-	**********************************************************************************************************************************
-	mail.smtp.user 					String 		Default user name for SMTP.
-	mail.smtp.host 					String 		The SMTP server to connect to.
-	mail.smtp.port 					int 		The SMTP server port to connect to, if the connect() method doesn't explicitly specify one. Defaults to 25.
-	mail.smtp.connectiontimeout 	int 		Socket connection timeout value in milliseconds. Default is infinite timeout.
-	mail.smtp.timeout 				int 		Socket I/O timeout value in milliseconds. Default is infinite timeout.
-	mail.smtp.from 					String 		Email address to use for SMTP MAIL command. This sets the envelope return address. Defaults to msg.getFrom() or InternetAddress.getLocalAddress(). NOTE: mail.smtp.user was previously used for this.
-	mail.smtp.localhost 			String 		Local host name used in the SMTP HELO or EHLO command. Defaults to InetAddress.getLocalHost().getHostName(). Should not normally need to be set if your JDK and your name service are configured properly.
-	mail.smtp.localaddress 			String 		Local address (host name) to bind to when creating the SMTP socket. Defaults to the address picked by the Socket class. Should not normally need to be set, but useful with multi-homed hosts where it's important to pick a particular local address to bind to.
-	mail.smtp.localport 			int 		Local port number to bind to when creating the SMTP socket. Defaults to the port number picked by the Socket class.
-	mail.smtp.ehlo 					boolean 	If false, do not attempt to sign on with the EHLO command. Defaults to true. Normally failure of the EHLO command will fallback to the HELO command; this property exists only for servers that don't fail EHLO properly or don't implement EHLO properly.
-	mail.smtp.auth 					boolean 	If true, attempt to authenticate the user using the AUTH command. Defaults to false.
-	mail.smtp.auth.mechanisms 		String 		If set, lists the authentication mechanisms to consider, and the order in which to consider them. Only mechanisms supported by the server and supported by the current implementation will be used. The default is "LOGIN PLAIN DIGEST-MD5 NTLM", which includes all the authentication mechanisms supported by the current implementation.
-	mail.smtp.auth.ntlm.domain 		String 		The NTLM authentication domain.
-	mail.smtp.auth.ntlm.flags 		int 		NTLM protocol-specific flags. See http://curl.haxx.se/rfc/ntlm.html#theNtlmFlags for details.
-	mail.smtp.submitter 			String 		The submitter to use in the AUTH tag in the MAIL FROM command. Typically used by a mail relay to pass along information about the original submitter of the message. See also the setSubmitter method of SMTPMessage. Mail clients typically do not use this.
-	mail.smtp.dsn.notify 			String 		The NOTIFY option to the RCPT command. Either NEVER, or some combination of SUCCESS, FAILURE, and DELAY (separated by commas).
-	mail.smtp.dsn.ret 				String 		The RET option to the MAIL command. Either FULL or HDRS.
-	mail.smtp.allow8bitmime 		boolean 	If set to true, and the server supports the 8BITMIME extension, text parts of messages that use the "quoted-printable" or "base64" encodings are converted to use "8bit" encoding if they follow the RFC2045 rules for 8bit text.
-	mail.smtp.sendpartial 			boolean 	If set to true, and a message has some valid and some invalid addresses, send the message anyway, reporting the partial failure with a SendFailedException. If set to false (the default), the message is not sent to any of the recipients if there is an invalid recipient address.
-	mail.smtp.sasl.realm 			String 		The realm to use with DIGEST-MD5 authentication.
-	mail.smtp.quitwait 				boolean 	If set to false, the QUIT command is sent and the connection is immediately closed. If set to true (the default), causes the transport to wait for the response to the QUIT command.
-	mail.smtp.reportsuccess 		boolean 	If set to true, causes the transport to include an SMTPAddressSucceededException for each address that is successful. Note also that this will cause a SendFailedException to be thrown from the sendMessage method of SMTPTransport even if all addresses were correct and the message was sent successfully.
-	mail.smtp.socketFactory 		SocketFactory 	If set to a class that implements the javax.net.SocketFactory interface, this class will be used to create SMTP sockets. Note that this is an instance of a class, not a name, and must be set using the put method, not the setProperty method.
-	mail.smtp.socketFactory.class 	String 		If set, specifies the name of a class that implements the javax.net.SocketFactory interface. This class will be used to create SMTP sockets.
-	mail.smtp.socketFactory.fallback 	boolean 	If set to true, failure to create a socket using the specified socket factory class will cause the socket to be created using the java.net.Socket class. Defaults to true.
-	mail.smtp.socketFactory.port 	int 		Specifies the port to connect to when using the specified socket factory. If not set, the default port will be used.
-	mail.smtp.ssl.enable 			boolean 	If set to true, use SSL to connect and use the SSL port by default. Defaults to false for the "smtp" protocol and true for the "smtps" protocol.
-	mail.smtp.ssl.checkserveridentity 	boolean If set to true, check the server identity as specified by RFC 2595. These additional checks based on the content of the server's certificate are intended to prevent man-in-the-middle attacks. Defaults to false.
-	mail.smtp.ssl.trust 			String 		If set, and a socket factory hasn't been specified, enables use of a MailSSLSocketFactory. If set to "*", all hosts are trusted. If set to a whitespace separated list of hosts, those hosts are trusted. Otherwise, trust depends on the certificate the server presents.
-	mail.smtp.ssl.socketFactory 	SSLSocketFactory 	If set to a class that extends the javax.net.ssl.SSLSocketFactory class, this class will be used to create SMTP SSL sockets. Note that this is an instance of a class, not a name, and must be set using the put method, not the setProperty method.
-	mail.smtp.ssl.socketFactory.class 	String 	If set, specifies the name of a class that extends the javax.net.ssl.SSLSocketFactory class. This class will be used to create SMTP SSL sockets.
-	mail.smtp.ssl.socketFactory.port 	int 	Specifies the port to connect to when using the specified socket factory. If not set, the default port will be used.
-	mail.smtp.ssl.protocols 		string 		Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens acceptable to the javax.net.ssl.SSLSocket.setEnabledProtocols method.
-	mail.smtp.ssl.ciphersuites 		string 		Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens acceptable to the javax.net.ssl.SSLSocket.setEnabledCipherSuites method.
-	mail.smtp.mailextension 		String 		Extension string to append to the MAIL command. The extension string can be used to specify standard SMTP service extensions as well as vendor-specific extensions. Typically the application should use the SMTPTransport method supportsExtension to verify that the server supports the desired service extension. See RFC 1869 and other RFCs that define specific extensions.
-	mail.smtp.starttls.enable 		boolean 	If true, enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection before issuing any login commands. Note that an appropriate trust store must configured so that the client will trust the server's certificate. Defaults to false.
-	mail.smtp.starttls.required 	boolean 	If true, requires the use of the STARTTLS command. If the server doesn't support the STARTTLS command, or the command fails, the connect method will fail. Defaults to false.
-	mail.smtp.userset 				boolean 	If set to true, use the RSET command instead of the NOOP command in the isConnected method. In some cases sendmail will respond slowly after many NOOP commands; use of RSET avoids this sendmail issue. Defaults to false.
-	mail.smtp.noop.strict 			boolean 	If set to true (the default), insist on a 250 response code from the NOOP command to indicate success. The NOOP command is used by the isConnected method to determine if the connection is still alive. Some older servers return the wrong response code on success, some servers don't implement the NOOP command at all and so always return a failure code. Set this property to false to handle servers that are broken in this way. Normally, when a server times out a connection, it will send a 421 response code, which the client will see as the response to the next command it issues. Some servers send the wrong failure response code when timing out a connection. Do not set this property to false when dealing with servers that are broken in this way.
+    Name                                Type        Description
+    **********************************************************************************************************************************
+    mail.smtp.user                      String      Default user name for SMTP.
+    mail.smtp.password                  String      GreenVulcano user password for SMTP.
+    mail.smtp.host                      String      The SMTP server to connect to.
+    mail.smtp.port                      int         The SMTP server port to connect to, if the connect() method doesn't explicitly specify one. Defaults to 25.
+    mail.smtp.connectiontimeout         int         Socket connection timeout value in milliseconds. Default is infinite timeout.
+    mail.smtp.timeout                   int         Socket I/O timeout value in milliseconds. Default is infinite timeout.
+    mail.smtp.from                      String      Email address to use for SMTP MAIL command. This sets the envelope return address. Defaults to msg.getFrom() or InternetAddress.getLocalAddress(). NOTE: mail.smtp.user was previously used for this.
+    mail.smtp.localhost                 String      Local host name used in the SMTP HELO or EHLO command. Defaults to InetAddress.getLocalHost().getHostName(). Should not normally need to be set if your JDK and your name service are configured properly.
+    mail.smtp.localaddress              String      Local address (host name) to bind to when creating the SMTP socket. Defaults to the address picked by the Socket class. Should not normally need to be set, but useful with multi-homed hosts where it's important to pick a particular local address to bind to.
+    mail.smtp.localport                 int         Local port number to bind to when creating the SMTP socket. Defaults to the port number picked by the Socket class.
+    mail.smtp.ehlo                      boolean     If false, do not attempt to sign on with the EHLO command. Defaults to true. Normally failure of the EHLO command will fallback to the HELO command; this property exists only for servers that don't fail EHLO properly or don't implement EHLO properly.
+    mail.smtp.auth                      boolean     If true, attempt to authenticate the user using the AUTH command. Defaults to false.
+    mail.smtp.auth.mechanisms           String      If set, lists the authentication mechanisms to consider, and the order in which to consider them. Only mechanisms supported by the server and supported by the current implementation will be used. The default is "LOGIN PLAIN DIGEST-MD5 NTLM", which includes all the authentication mechanisms supported by the current implementation.
+    mail.smtp.auth.ntlm.domain          String      The NTLM authentication domain.
+    mail.smtp.auth.ntlm.flags           int         NTLM protocol-specific flags. See http://curl.haxx.se/rfc/ntlm.html#theNtlmFlags for details.
+    mail.smtp.submitter                 String      The submitter to use in the AUTH tag in the MAIL FROM command. Typically used by a mail relay to pass along information about the original submitter of the message. See also the setSubmitter method of SMTPMessage. Mail clients typically do not use this.
+    mail.smtp.dsn.notify                String      The NOTIFY option to the RCPT command. Either NEVER, or some combination of SUCCESS, FAILURE, and DELAY (separated by commas).
+    mail.smtp.dsn.ret                   String      The RET option to the MAIL command. Either FULL or HDRS.
+    mail.smtp.allow8bitmime             boolean     If set to true, and the server supports the 8BITMIME extension, text parts of messages that use the "quoted-printable" or "base64" encodings are converted to use "8bit" encoding if they follow the RFC2045 rules for 8bit text.
+    mail.smtp.sendpartial               boolean     If set to true, and a message has some valid and some invalid addresses, send the message anyway, reporting the partial failure with a SendFailedException. If set to false (the default), the message is not sent to any of the recipients if there is an invalid recipient address.
+    mail.smtp.sasl.realm                String      The realm to use with DIGEST-MD5 authentication.
+    mail.smtp.quitwait                  boolean     If set to false, the QUIT command is sent and the connection is immediately closed. If set to true (the default), causes the transport to wait for the response to the QUIT command.
+    mail.smtp.reportsuccess             boolean     If set to true, causes the transport to include an SMTPAddressSucceededException for each address that is successful. Note also that this will cause a SendFailedException to be thrown from the sendMessage method of SMTPTransport even if all addresses were correct and the message was sent successfully.
+    mail.smtp.socketFactory             SocketFactory  If set to a class that implements the javax.net.SocketFactory interface, this class will be used to create SMTP sockets. Note that this is an instance of a class, not a name, and must be set using the put method, not the setProperty method.
+    mail.smtp.socketFactory.class       String      If set, specifies the name of a class that implements the javax.net.SocketFactory interface. This class will be used to create SMTP sockets.
+    mail.smtp.socketFactory.fallback    boolean     If set to true, failure to create a socket using the specified socket factory class will cause the socket to be created using the java.net.Socket class. Defaults to true.
+    mail.smtp.socketFactory.port        int         Specifies the port to connect to when using the specified socket factory. If not set, the default port will be used.
+    mail.smtp.ssl.enable                boolean     If set to true, use SSL to connect and use the SSL port by default. Defaults to false for the "smtp" protocol and true for the "smtps" protocol.
+    mail.smtp.ssl.checkserveridentity   boolean     If set to true, check the server identity as specified by RFC 2595. These additional checks based on the content of the server's certificate are intended to prevent man-in-the-middle attacks. Defaults to false.
+    mail.smtp.ssl.trust                 String      If set, and a socket factory hasn't been specified, enables use of a MailSSLSocketFactory. If set to "*", all hosts are trusted. If set to a whitespace separated list of hosts, those hosts are trusted. Otherwise, trust depends on the certificate the server presents.
+    mail.smtp.ssl.socketFactory         SSLSocketFactory If set to a class that extends the javax.net.ssl.SSLSocketFactory class, this class will be used to create SMTP SSL sockets. Note that this is an instance of a class, not a name, and must be set using the put method, not the setProperty method.
+    mail.smtp.ssl.socketFactory.class   String      If set, specifies the name of a class that extends the javax.net.ssl.SSLSocketFactory class. This class will be used to create SMTP SSL sockets.
+    mail.smtp.ssl.socketFactory.port    int         Specifies the port to connect to when using the specified socket factory. If not set, the default port will be used.
+    mail.smtp.ssl.protocols             String      Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens acceptable to the javax.net.ssl.SSLSocket.setEnabledProtocols method.
+    mail.smtp.ssl.ciphersuites          String      Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens acceptable to the javax.net.ssl.SSLSocket.setEnabledCipherSuites method.
+    mail.smtp.mailextension             String      Extension string to append to the MAIL command. The extension string can be used to specify standard SMTP service extensions as well as vendor-specific extensions. Typically the application should use the SMTPTransport method supportsExtension to verify that the server supports the desired service extension. See RFC 1869 and other RFCs that define specific extensions.
+    mail.smtp.starttls.enable           boolean     If true, enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection before issuing any login commands. Note that an appropriate trust store must configured so that the client will trust the server's certificate. Defaults to false.
+    mail.smtp.starttls.required         boolean     If true, requires the use of the STARTTLS command. If the server doesn't support the STARTTLS command, or the command fails, the connect method will fail. Defaults to false.
+    mail.smtp.userset                   boolean     If set to true, use the RSET command instead of the NOOP command in the isConnected method. In some cases sendmail will respond slowly after many NOOP commands; use of RSET avoids this sendmail issue. Defaults to false.
+    mail.smtp.noop.strict               boolean     If set to true (the default), insist on a 250 response code from the NOOP command to indicate success. The NOOP command is used by the isConnected method to determine if the connection is still alive. Some older servers return the wrong response code on success, some servers don't implement the NOOP command at all and so always return a failure code. Set this property to false to handle servers that are broken in this way. Normally, when a server times out a connection, it will send a 421 response code, which the client will see as the response to the next command it issues. Some servers send the wrong failure response code when timing out a connection. Do not set this property to false when dealing with servers that are broken in this way.
+
+
+    The SMTP protocol provider supports the following properties.
+    Note that if you're using the "pop3s" protocol to access POP3 over SSL, 
+    all the properties would be named "mail.pop3s.*". 
+
+    Name                                Type        Description
+    **********************************************************************************************************************************
+    mail.pop3.user                      String      Default user name for POP3.
+    mail.pop3.password                  String      GreenVulcano user password for POP3.
+    mail.pop3.host                      String      The POP3 server to connect to.
+    mail.pop3.port                      int         The POP3 server port to connect to, if the connect() method doesn't explicitly specify one. Defaults to 110.
+    mail.pop3.connectiontimeout         int         Socket connection timeout value in milliseconds. Default is infinite timeout.
+    mail.pop3.timeout                   int         Socket I/O timeout value in milliseconds. Default is infinite timeout.
+    mail.pop3.rsetbeforequit            boolean     Send a POP3 RSET command when closing the folder, before sending the QUIT command. Useful with POP3 servers that implicitly mark all messages that are read as "deleted"; this will prevent such messages from being deleted and expunged unless the client requests so. Default is false.
+    mail.pop3.message.class             String      Class name of a subclass of com.sun.mail.pop3.POP3Message. The subclass can be used to handle (for example) non-standard Content-Type headers. The subclass must have a public constructor of the form MyPOP3Message(Folder f, int msgno) throws MessagingException.
+    mail.pop3.localaddress              String      Local address (host name) to bind to when creating the POP3 socket. Defaults to the address picked by the Socket class. Should not normally need to be set, but useful with multi-homed hosts where it's important to pick a particular local address to bind to.
+    mail.pop3.localport                 int         Local port number to bind to when creating the POP3 socket. Defaults to the port number picked by the Socket class.
+    mail.pop3.apop.enable               boolean     If set to true, use APOP instead of USER/PASS to login to the POP3 server, if the POP3 server supports APOP. APOP sends a digest of the password rather than the clear text password. Defaults to false.
+    mail.pop3.socketFactory             SocketFactory   If set to a class that implements the javax.net.SocketFactory interface, this class will be used to create POP3 sockets. Note that this is an instance of a class, not a name, and must be set using the put method, not the setProperty method.
+    mail.pop3.socketFactory.class       String      If set, specifies the name of a class that implements the javax.net.SocketFactory interface. This class will be used to create POP3 sockets.
+    mail.pop3.socketFactory.fallback    boolean     If set to true, failure to create a socket using the specified socket factory class will cause the socket to be created using the java.net.Socket class. Defaults to true.
+    mail.pop3.socketFactory.port        int         Specifies the port to connect to when using the specified socket factory. If not set, the default port will be used.
+    mail.pop3.ssl.enable                boolean     If set to true, use SSL to connect and use the SSL port by default. Defaults to false for the "pop3" protocol and true for the "pop3s" protocol.
+    mail.pop3.ssl.checkserveridentity   boolean     If set to true, check the server identity as specified by RFC 2595. These additional checks based on the content of the server's certificate are intended to prevent man-in-the-middle attacks. Defaults to false.
+    mail.pop3.ssl.trust                 String      If set, and a socket factory hasn't been specified, enables use of a MailSSLSocketFactory. If set to "*", all hosts are trusted. If set to a whitespace separated list of hosts, those hosts are trusted. Otherwise, trust depends on the certificate the server presents.
+    mail.pop3.ssl.socketFactory         SSLSocketFactory    If set to a class that extends the javax.net.ssl.SSLSocketFactory class, this class will be used to create POP3 SSL sockets. Note that this is an instance of a class, not a name, and must be set using the put method, not the setProperty method.
+    mail.pop3.ssl.socketFactory.class   String      If set, specifies the name of a class that extends the javax.net.ssl.SSLSocketFactory class. This class will be used to create POP3 SSL sockets.
+    mail.pop3.ssl.socketFactory.port    int         Specifies the port to connect to when using the specified socket factory. If not set, the default port will be used.
+    mail.pop3.ssl.protocols             String      Specifies the SSL protocols that will be enabled for SSL connections. The property value is a whitespace separated list of tokens acceptable to the javax.net.ssl.SSLSocket.setEnabledProtocols method.
+    mail.pop3.ssl.ciphersuites          String      Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens acceptable to the javax.net.ssl.SSLSocket.setEnabledCipherSuites method.
+    mail.pop3.starttls.enable           boolean     If true, enables the use of the STLS command (if supported by the server) to switch the connection to a TLS-protected connection before issuing any login commands. Note that an appropriate trust store must configured so that the client will trust the server's certificate. Defaults to false.
+    mail.pop3.starttls.required         boolean     If true, requires the use of the STLS command. If the server doesn't support the STLS command, or the command fails, the connect method will fail. Defaults to false.
+    mail.pop3.socks.host                String      Specifies the host name of a SOCKS5 proxy server that will be used for connections to the mail server. (Note that this only works on JDK 1.5 or newer.)
+    mail.pop3.socks.port                String      Specifies the port number for the SOCKS5 proxy server. This should only need to be used if the proxy server is not using the standard port number of 1080.
+    mail.pop3.disabletop                boolean     If set to true, the POP3 TOP command will not be used to fetch message headers. This is useful for POP3 servers that don't properly implement the TOP command, or that provide incorrect information in the TOP command results. Defaults to false.
+    mail.pop3.disablecapa               boolean     If set to true, the POP3 CAPA command will not be used to fetch server capabilities. This is useful for POP3 servers that don't properly implement the CAPA command, or that provide incorrect information in the CAPA command results. Defaults to false.
+    mail.pop3.forgettopheaders          boolean     If set to true, the headers that might have been retrieved using the POP3 TOP command will be forgotten and replaced by headers retrieved as part of the POP3 RETR command. Some servers, such as some versions of Microsft Exchange and IBM Lotus Notes, will return slightly different headers each time the TOP or RETR command is used. To allow the POP3 provider to properly parse the message content returned from the RETR command, the headers also returned by the RETR command must be used. Setting this property to true will cause these headers to be used, even if they differ from the headers returned previously as a result of using the TOP command. Defaults to false.
+    mail.pop3.filecache.enable          boolean     If set to true, the POP3 provider will cache message data in a temporary file rather than in memory. Messages are only added to the cache when accessing the message content. Message headers are always cached in memory (on demand). The file cache is removed when the folder is closed or the JVM terminates. Defaults to false.
+    mail.pop3.filecache.dir             String      If the file cache is enabled, this property can be used to override the default directory used by the JDK for temporary files.
+    mail.pop3.cachewriteto              boolean     Controls the behavior of the writeTo method on a POP3 message object. If set to true, and the message content hasn't yet been cached, and ignoreList is null, the message is cached before being written. Otherwise, the message is streamed directly to the output stream without being cached. Defaults to false.
+    mail.pop3.keepmessagecontent        boolean     The content of a message is cached when it is first fetched. Normally this cache uses a SoftReference to refer to the cached content. This allows the cached content to be purged if memory is low, in which case the content will be fetched again if it's needed. If this property is set to true, a hard reference to the cached content will be kept, preventing the memory from being reused until the folder is closed or the cached content is explicitly invalidated (using the invalidate method). (This was the behavior in previous versions of JavaMail.) Defaults to false. 
 -->
 <!ELEMENT mail-properties (mail-property+)>
 <!--
@@ -8645,6 +8685,7 @@
 <!ATTLIST mail-property   name CDATA #REQUIRED>
 <!--
     Property value.
+    Can contains placeholder to be resolved at runtime.
 
     #NotNull
 -->
@@ -8688,17 +8729,19 @@
 <!ATTLIST mail-message sender-display-name CDATA #REQUIRED>
 <!--
     The subject of the email.
+    Can contains placeholder to be resolved at runtime.
+
+    DEPRECATED!!! [
     You can enter gvBuffer values using the following syntax:
-
-      - for standard fields
-        - ${system}
-        - ${service}
-        - ${id}
-        - ${object}
-        - ${retCode}
-
-      - for properties
-        - ${property['nome']}
+        - for standard fields, the field name
+            - ${system}
+            - ${service}
+            - ${id}
+            - ${retCode}
+        - for properties:
+            - ${property['PROP_NAME']}
+    ]
+    
 
     #NotNull
 -->
@@ -8882,6 +8925,7 @@
 <!ELEMENT file-attachment (Description?)>
 <!--
     Defines the path of the file to attach.
+    Can contains placeholder to be resolved at runtime.
 
     #NotNull
 -->
@@ -8901,6 +8945,7 @@
 <!ELEMENT gvBuffer (Description?)>
 <!--
     Defines a name of the attachment containing the GVBuffer contents.
+    Can contains placeholder to be resolved at runtime.
 
     #NotNull
 -->
@@ -8920,17 +8965,18 @@
 <!ELEMENT message-body (message-text?, Description?)>
 <!--
     The message of the email.
+    Can contains placeholder to be resolved at runtime.
+
+    DEPRECATED!! [
     You can enter gvBuffer values using the following syntax:
-
-      - for standard fields
-        - ${system}
-        - ${service}
-        - ${id}
-        - ${object}
-        - ${retCode}
-
-      - for properties
-        - ${property['nome']}
+        - for standard fields, the field name
+            - ${system}
+            - ${service}
+            - ${id}
+            - ${retCode}
+        - for properties:
+            - ${property['PROP_NAME']}
+    ]
 
      The attribute 'escape-HTML-in-gvBuffer-fields' allows you to specify whether,
      when replacing the placeholders for the fields of GVBuffer, any invalid
@@ -9862,12 +9908,12 @@
 <!ATTLIST ResultSet rsHoldability CDATA #IMPLIED>
 
 <!--
-	#Warn: {{../Statement[(@statementType='PreparedStatement') and (../CallSPFormatter)]}} PreparedStatement cannot be associated to CallSPFormatter.
-	#Warn: {{../Statement[(@statementType='PreparedStatement') and (../CallSPSimpleBaseFormatter)]}} PreparedStatement cannot be associated to CallSPSimpleBaseFormatter.
+    #Warn: {{../Statement[(@statementType='PreparedStatement') and (../CallSPFormatter)]}} PreparedStatement cannot be associated to CallSPFormatter.
+    #Warn: {{../Statement[(@statementType='PreparedStatement') and (../CallSPSimpleBaseFormatter)]}} PreparedStatement cannot be associated to CallSPSimpleBaseFormatter.
 
-	#Icon: default.png
+    #Icon: default.png
 
-	#Template:
+    #Template:
         <xsl:template match="Statement">
             <xsl:if test="Description">
                 <small><xsl:value-of select="Description"/></small><p/>
@@ -10120,7 +10166,7 @@
 <!--
     This attribute defines the name of the property if the method is getProperty().
 
-	#NotNull
+    #NotNull
     #Warn: {{../GVBufferParam[@propertyName and not(@GVBufferMethod='getProperty')]}} If the attribute propertyName is set the method should be 'getProperty'
 -->
 <!ATTLIST GVBufferParam propertyName CDATA         #IMPLIED >
@@ -10188,7 +10234,7 @@
     This element represents the Formatter to use if statements required
     is an update, an insert or delete.
 
-	#Template:
+    #Template:
         <xsl:template match="DMLWriteFormatter">
             <xsl:if test="Description">
                 <small><xsl:value-of select="Description"/></small><p/>
@@ -10838,26 +10884,26 @@
                 <tr valign="top">
                     <td width="200">Connect timeout:</td>
                     <td width="20"></td>
-			        <xsl:choose>
-				        <xsl:when test="@connectTimeout">
-		                    <td><b><xsl:value-of select="@connectTimeout"/></b></td>
-				        </xsl:when>
-				        <xsl:otherwise>
-		                    <td><b>infinite</b></td>
-				        </xsl:otherwise>
-			        </xsl:choose>
+                    <xsl:choose>
+                        <xsl:when test="@connectTimeout">
+                            <td><b><xsl:value-of select="@connectTimeout"/></b></td>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <td><b>infinite</b></td>
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </tr>
                 <tr valign="top">
                     <td width="200">Data transfer timeout:</td>
                     <td width="20"></td>
-			        <xsl:choose>
-				        <xsl:when test="@dataTimeout">
-                    		<td><b><xsl:value-of select="@dataTimeout"/></b></td>
-				        </xsl:when>
-				        <xsl:otherwise>
-		                    <td><b>infinite</b></td>
-				        </xsl:otherwise>
-			        </xsl:choose>
+                    <xsl:choose>
+                        <xsl:when test="@dataTimeout">
+                            <td><b><xsl:value-of select="@dataTimeout"/></b></td>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <td><b>infinite</b></td>
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </tr>
             </table>
             <xsl:if test="Description">
@@ -10997,26 +11043,26 @@
                 <tr valign="top">
                     <td width="200">Connect timeout:</td>
                     <td width="20"></td>
-			        <xsl:choose>
-				        <xsl:when test="@connectTimeout">
-		                    <td><b><xsl:value-of select="@connectTimeout"/></b></td>
-				        </xsl:when>
-				        <xsl:otherwise>
-		                    <td><b>infinite</b></td>
-				        </xsl:otherwise>
-			        </xsl:choose>
+                    <xsl:choose>
+                        <xsl:when test="@connectTimeout">
+                            <td><b><xsl:value-of select="@connectTimeout"/></b></td>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <td><b>infinite</b></td>
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </tr>
                 <tr valign="top">
                     <td width="200">Data transfer timeout:</td>
                     <td width="20"></td>
-			        <xsl:choose>
-				        <xsl:when test="@dataTimeout">
-                    		<td><b><xsl:value-of select="@dataTimeout"/></b></td>
-				        </xsl:when>
-				        <xsl:otherwise>
-		                    <td><b>infinite</b></td>
-				        </xsl:otherwise>
-			        </xsl:choose>
+                    <xsl:choose>
+                        <xsl:when test="@dataTimeout">
+                            <td><b><xsl:value-of select="@dataTimeout"/></b></td>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <td><b>infinite</b></td>
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </tr>
             </table>
             <xsl:if test="Description">
@@ -11101,29 +11147,29 @@
 <!ATTLIST SFTPManager autoConnect (true|false) #IMPLIED>
 
 <!--
-	Retrieve information for public and private keys to connect with SSH,
-	with authentication method 'publicKey'.
+    Retrieve information for public and private keys to connect with SSH,
+    with authentication method 'publicKey'.
 
-	#SelectOnInsert
+    #SelectOnInsert
 -->
 <!ELEMENT IdentityInfo EMPTY>
 <!--
-	Path of file containing the private key.
+    Path of file containing the private key.
 
-	#NotNull
+    #NotNull
 -->
 <!ATTLIST IdentityInfo privateKey CDATA #REQUIRED>
 <!--
-	Passphrase to access the private key.
+    Passphrase to access the private key.
 
-	#NotNull
-	#Encrypted
+    #NotNull
+    #Encrypted
 -->
 <!ATTLIST IdentityInfo passphrase CDATA #REQUIRED>
 <!--
-	Path of file containing the public key.
+    Path of file containing the public key.
 
-	#NotNull
+    #NotNull
 -->
 <!ATTLIST IdentityInfo publicKey CDATA #REQUIRED>
 
@@ -11301,15 +11347,15 @@
     #SelectOnInsert
     #Template:
         <xsl:template match="ResultFilter">
-			<table cellpadding="0" cellspacing="0">
-				<tr valign="top">
-					<td width="100">Existing</td>
-					<td width="100">Created</td>
-					<td width="100">Modified</td>
-					<td width="100">Deleted</td>
-					<td width="100">Sort</td>
-					<td width="100">Ascending</td>
-				</tr>
+            <table cellpadding="0" cellspacing="0">
+                <tr valign="top">
+                    <td width="100">Existing</td>
+                    <td width="100">Created</td>
+                    <td width="100">Modified</td>
+                    <td width="100">Deleted</td>
+                    <td width="100">Sort</td>
+                    <td width="100">Ascending</td>
+                </tr>
                 <tr valign="top">
                     <td><b><xsl:value-of select="@existing"/></b></td>
                     <td><b><xsl:value-of select="@created"/></b></td>
@@ -11318,8 +11364,8 @@
                     <td><b><xsl:value-of select="@sort-mode"/></b></td>
                     <td><b><xsl:value-of select="@sort-ascending"/></b></td>
                 </tr>
-			</table>
-		</xsl:template>
+            </table>
+        </xsl:template>
 -->
 <!ELEMENT ResultFilter EMPTY>
 <!--
@@ -11539,7 +11585,7 @@
 -->
 <!ATTLIST GreenVulcanoPool initial-size  CDATA   #REQUIRED>
 <!--
-	Maximum pool size.
+    Maximum pool size.
     The default is 10 items.
     A value of -1 equals not limited pool.
 
@@ -11548,7 +11594,7 @@
 -->
 <!ATTLIST GreenVulcanoPool maximum-size  CDATA   #REQUIRED>
 <!--
-	Maximum number of instances to create.
+    Maximum number of instances to create.
     The default is 50 instances.
     A value of -1 is equivalent to unlimited number of creations.
 
@@ -11742,7 +11788,7 @@
 -->
 <!ATTLIST jmx-call  object-name CDATA #REQUIRED>
 <!--
-	Invokes a method to the MBean.
+    Invokes a method to the MBean.
 -->
 <!ELEMENT invoke-method (invoke-parameter*)>
 <!--
