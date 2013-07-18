@@ -79,6 +79,7 @@
                 <include name="Extra/GVRules.dtd"/>
                 <include name="Extra/GVSocial.dtd"/>
                 <include name="Extra/GVBpel.dtd"/>
+                <include name="Extra/GVSAP.dtd"/>
             </fileset>
         </copy>
 
