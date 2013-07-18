@@ -59,6 +59,7 @@ public class GreenVulcanoPoolElement extends GreenVulcano implements Configurati
     @Override
     public void destroy()
     {
+        XMLConfig.removeConfigurationListener(this);
         super.destroy();
         execServices.clear();
     }
