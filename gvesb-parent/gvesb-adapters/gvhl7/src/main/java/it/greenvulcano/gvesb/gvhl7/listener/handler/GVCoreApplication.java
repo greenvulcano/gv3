@@ -26,6 +26,8 @@ import it.greenvulcano.gvesb.gvhl7.listener.GVHL7ListenerManager;
 import it.greenvulcano.gvesb.gvhl7.listener.HL7AdapterException;
 import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.identity.gvhl7.listener.HL7IdentityInfo;
+import it.greenvulcano.gvesb.j2ee.XAHelper;
+import it.greenvulcano.gvesb.j2ee.XAHelperException;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
@@ -63,6 +65,9 @@ public class GVCoreApplication implements Application
     private String         operation;
     private List<String[]> activations = new ArrayList<String[]>();
     private String         serverName;
+    private boolean        transacted  = false;
+    private int	           txTimeout   = 30; 
+    private XAHelper       xaHelper    = null;
 
     /**
      *
@@ -75,6 +80,12 @@ public class GVCoreApplication implements Application
             system = XMLConfig.get(node, "@gv-system", GVBuffer.DEFAULT_SYS);
             service = XMLConfig.get(node, "@gv-service");
             operation = XMLConfig.get(node, "@gv-operation");
+            transacted = XMLConfig.getBoolean(node, "@transacted", false);
+            txTimeout = XMLConfig.getInteger(node, "@tx-timeout", 30);
+            
+            if (transacted) {
+            	xaHelper = new XAHelper();
+            }
 
             NodeList nl = XMLConfig.getNodeList(node, "HL7Activations/HL7Activation");
             for (int i = 0; i < nl.getLength(); i++) {
@@ -129,6 +140,8 @@ public class GVCoreApplication implements Application
         DefaultXMLParser hl7XmlParser = new DefaultXMLParser();
         GenericParser hl7StringParser = new GenericParser();
         Message msgOut = null;
+        boolean forceTxRollBack = false;
+        boolean inError = true;
 
         NMDC.push();
         NMDC.clear();
@@ -145,6 +158,14 @@ public class GVCoreApplication implements Application
             GVBuffer in = new GVBuffer(system, service);
             in.setObject(hl7MsgXmlIn);
             in.setProperty("HL7_REMOTE_ADDR", ThreadUtils.getIPRef());
+            
+            if (transacted) {
+                xaHelper.begin();
+                if (txTimeout > 0) {
+                    xaHelper.setTransactionTimeout(txTimeout);
+                }
+                logger.debug("Begin transaction: " + xaHelper.getTransaction());
+            }
 
             GVBuffer out = getGreenVulcanoPool().forward(in, operation);
 
@@ -163,12 +184,34 @@ public class GVCoreApplication implements Application
             msgOut = hl7XmlParser.parse(hl7MsgXmlOut);
             msgOut.setParser(hl7StringParser);
             logger.debug("Output StringMessage:\n" + msgOut.encode());
-            logger.debug("END Operation");
+            
+            if ("Y".equalsIgnoreCase(out.getProperty("HL7_FORCE_TX_ROLLBACK"))) {
+                logger.warn("Output contains HL7_FORCE_TX_ROLLBACK=Y : prepare to roll back transaction");
+                forceTxRollBack = true;
+            }
+            inError = false;
         }
         catch (Exception exc) {
             logger.error("Error processing HL7 message", exc);
         }
         finally {
+            if (transacted) {
+                try {
+                    if (inError || forceTxRollBack) {
+                        logger.warn("Rolling back transaction: " + xaHelper.getTransaction());
+                        xaHelper.rollback();
+                    }
+                    else {
+                        logger.debug("Commiting transaction: " + xaHelper.getTransaction());
+                        xaHelper.commit();
+                    }
+                }
+                catch (Exception exc) {
+                    logger.error("Error handling tansaction", exc);
+                }
+            }
+            logger.debug("END Operation");
+
             GVIdentityHelper.pop();
             NMDC.pop();
             ThreadMap.clean();
