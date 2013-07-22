@@ -107,6 +107,16 @@
         </tr>
         <%numRighe++;%>
      </c:forEach>
+    <tr>
+    <td><font color="red" size="4">HTTP INBOUND:</font></td>
+   </tr>
+   <%numRighe=0;%>
+   <c:forEach items="${listaGVHTTP}" var="listaGVHTTP">
+    <tr>         
+         <td><a href="javascript:invocaDeploy('<c:out value='${listaGVHTTP}'/>','HTTP_ADAPTER');"><c:out value='${listaGVHTTP}'/></a></td>
+        </tr>
+        <%numRighe++;%>
+     </c:forEach>
    <tr>	
    	<td><font color="red" size="4">ADAPTER:</font></td>
    </tr>

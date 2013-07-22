@@ -57,6 +57,9 @@
         <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
                           maximum-size="5" shrink-timeout="120000"
                           subsystem="GreenVulcano-WebServices"/>
+        <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
+                          maximum-size="5" shrink-timeout="120000"
+                          subsystem="HttpInboundGateway"/>
     </GVPoolManager>
     <GVServices name="SERVICES" type="module">
         <Management call-administration-on-init="no"/>

@@ -14,6 +14,7 @@
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/Extra.dtd" uri="file://${{gv.app.home}}/dtds/Extra/Extra.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVDataHandler.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVDataHandler.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVExcel.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVExcel.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVHTTPInbound.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVHTTPInbound.dtd" />
 
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVHL7.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVHL7.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVOpenSpCoop.dtd" uri="file://${{gv.app.home}}/dtds/Extra/GVOpenSpCoop.dtd" />

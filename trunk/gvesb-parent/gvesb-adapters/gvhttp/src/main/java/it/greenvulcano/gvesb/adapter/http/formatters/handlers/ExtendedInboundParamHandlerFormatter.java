@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -83,8 +83,8 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
     private List<String>                                  respParamList                   = null;
 
     private Map<String, List<InterfaceParametersHandler>> respParamHandlers               = null;
-
-    private Map<String, List<InterfaceParametersHandler>> respParamACKHandlers            = null;
+    
+    private Set<String>                                   reqParamRequired                = null;
 
     private Map<String, List<InterfaceParametersHandler>> respParamErrorHandlers          = null;
 
@@ -102,6 +102,8 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
 
     private String                                        respCharacterEncoding           = null;
 
+    private String                                        respContentType                 = null;
+
     private String                                        formatterId                     = null;
 
     private boolean                                       handlePostBodyAsParams          = false;
@@ -117,8 +119,10 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
     {
         try {
             logger.debug("ExtendedInboundParamHandlerFormatter - Formatter init start");
-            reqCharacterEncoding = XMLConfig.get(configurationNode, "@ReqCharacterEncoding", "ISO-8859-1");
-            respCharacterEncoding = XMLConfig.get(configurationNode, "@RespCharacterEncoding", "ISO-8859-1");
+            reqCharacterEncoding = XMLConfig.get(configurationNode, "@ReqCharacterEncoding", "UTF-8");
+            respCharacterEncoding = XMLConfig.get(configurationNode, "@RespCharacterEncoding", "UTF-8");
+            respContentType = XMLConfig.get(configurationNode, "@RespContentType",
+                    AdapterHttpConstants.TEXTHTML_MIMETYPE_NAME);
             handlePostBodyAsParams = XMLConfig.getBoolean(configurationNode, "@HandlePostBodyAsParams", false);
             respErrorCode = XMLConfig.getInteger(configurationNode, "@ResponseOnError-HTTPCode", -1);
             formatterId = XMLConfig.get(configurationNode, "@ID");
@@ -220,17 +224,21 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
                                 operationType = (String) currHandler.build(reqParamValue, null);
                                 logger.debug("manageRequest - current handler is an OpType handler"
                                         + "- operationType = " + operationType);
+                                operationType = (String) currHandler.build(reqParamValue, null);
                             }
                             else if (currHandler.getHandlerType() == InterfaceParametersHandler.GVBUFFER_HANDLER) {
-                                inputGVBuffer = (GVBuffer) currHandler.build(reqParamValue, inputGVBuffer);
                                 logger.debug("manageRequest - current handler is an GVBuffer handler");
+                                inputGVBuffer = (GVBuffer) currHandler.build(reqParamValue, inputGVBuffer);
                             }
                         }
                     }
-                    else {
-                        logger.error("manageRequest - mandatory request parameter missing: " + currParamName);
+                    else if (reqParamRequired.contains(currParamName)) {
+                        logger.error("manageRequest - Required request parameter missing: " + currParamName);
                         throw new FormatterExecutionException("GVHTTP_MISSING_HTTP_REQUEST_PARAMETER_ERROR",
                                 new String[][]{{"paramName", currParamName}});
+                    }
+                    else {
+                        logger.debug("manageRequest - not required request parameter missing: " + currParamName);
                     }
                 }
             }
@@ -242,12 +250,12 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
                         currHandler.setCharEncoding(reqCharacterEncoding);
 
                         if (currHandler.getHandlerType() == InterfaceParametersHandler.OPTYPE_HANDLER) {
-                            operationType = (String) currHandler.build(reqParamValue, null);
                             logger.debug("manageRequest - operationType = " + operationType);
+                            operationType = (String) currHandler.build(reqParamValue, null);
                         }
                         else if (currHandler.getHandlerType() == InterfaceParametersHandler.GVBUFFER_HANDLER) {
-                            inputGVBuffer = (GVBuffer) currHandler.build(reqParamValue, inputGVBuffer);
                             logger.debug("manageRequest - current handler is an GVBuffer handler");
+                            inputGVBuffer = (GVBuffer) currHandler.build(reqParamValue, inputGVBuffer);
                         }
                     }
                 }
@@ -348,51 +356,10 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
 
         try {
             environment.put(AdapterHttpConstants.ENV_KEY_UNMARSHALL_ENCODING, respCharacterEncoding);
+            environment.put(AdapterHttpConstants.ENV_KEY_RESPONSE_CONTENT_TYPE, respContentType);
+
             String responseString = null;
-            if (obj == null) {
-                paramEntries = new HashMap<String, String>();
-
-                GVTransactionInfo transInfo = (GVTransactionInfo) environment.get(AdapterHttpConstants.ENV_KEY_TRANS_INFO);
-                if (transInfo == null) {
-                    logger.error("ExtendedInboundParamHandlerFormatter - Error: GVTransactionInfo object received is null");
-                    throw new FormatterExecutionException("GVHTTP_HTTP_TRANSACTION_INFO_MISSING");
-                }
-
-                for (String currRespParamName : respParamList) {
-                    String currRespParamValue = null;
-                    List<InterfaceParametersHandler> currParamACKHandlerList = respParamACKHandlers.get(currRespParamName);
-                    if (currParamACKHandlerList != null) {
-                        for (InterfaceParametersHandler currHandler : currParamACKHandlerList) {
-                            currHandler.setCharEncoding(respCharacterEncoding);
-                            logger.debug("manageAckResponse - response parameter '" + currRespParamName
-                                    + "' ACK handler is a " + currHandler.getClass().getName());
-                            currRespParamValue = (String) currHandler.build(transInfo, currRespParamValue);
-                            logger.debug("manageAckResponse - response parameter '" + currRespParamName
-                                    + "' value set to: " + currRespParamValue + " by ACK handler");
-                        }
-
-                        if (respURLEncoding) {
-                            currRespParamValue = URLEncoder.encode(currRespParamValue, respCharacterEncoding);
-                            logger.debug("manageAckResponse - response parameter '" + currRespParamName
-                                    + "' value URLEncoded to: " + currRespParamValue);
-                        }
-                    }
-
-                    boolean toBody = true;
-                    if (respParamNamesWithinQueryString.contains(currRespParamName)) {
-                        paramEntries.put(currRespParamName, currRespParamValue);
-                        toBody = false;
-                    }
-                    if (headerParameters.contains(currRespParamName)) {
-                        headerMap.put(currRespParamName, currRespParamValue);
-                        toBody = false;
-                    }
-                    if (toBody) {
-                        bodyEntry = currRespParamValue;
-                    }
-                }
-            }
-            else if (obj instanceof GVBuffer) {
+            if (obj instanceof GVBuffer) {
                 GVBuffer outputGVBuffer = (GVBuffer) obj;
                 paramEntries = new HashMap<String, String>();
 
@@ -526,24 +493,6 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
         return formatterId;
     }
 
-    /**
-     * @see it.greenvulcano.gvesb.adapter.http.formatters.Formatter#haveACKMessage
-     */
-    @Override
-    public boolean haveACKMessage()
-    {
-        return (respParamACKHandlers != null) && !respParamACKHandlers.isEmpty();
-    }
-
-    /**
-     * @see it.greenvulcano.gvesb.adapter.http.formatters.Formatter#reloadConfiguration
-     *      (org.w3c.dom.Node)
-     */
-    @Override
-    public void reloadConfiguration(Node configurationNode)
-    {
-        // do nothing
-    }
 
     /**
      * @param configurationNode
@@ -556,18 +505,20 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
         logger.debug("init - BEGIN Request configuration");
 
         reqParamHandlers = new HashMap<String, List<InterfaceParametersHandler>>();
+        reqParamRequired = new HashSet<String>();
         reqContentHandlers = new ArrayList<InterfaceParametersHandler>();
         reqGVBufferDefaults = new HashMap<String, String>();
-        reqParamEntrySeparator = XMLConfig.get(configurationNode, "InboundRequestParams/@ParamEntrySeparator", "&");
-        reqParamNameValueSeparator = XMLConfig.get(configurationNode, "InboundRequestParams/@ParamNameValueSeparator",
+        reqParamEntrySeparator = XMLConfig.get(configurationNode, "RequestParams/@ParamEntrySeparator", "&");
+        reqParamNameValueSeparator = XMLConfig.get(configurationNode, "RequestParams/@ParamNameValueSeparator",
                 "=");
 
-        NodeList paramNodes = XMLConfig.getNodeList(configurationNode, "InboundRequestParams/InboundRequestParam");
+        NodeList paramNodes = XMLConfig.getNodeList(configurationNode, "RequestParams/RequestParam");
         if ((paramNodes != null) && (paramNodes.getLength() > 0)) {
             for (int i = 0; i < paramNodes.getLength(); i++) {
                 Node currParam = paramNodes.item(i);
                 String paramName = XMLConfig.get(currParam, "@Name");
-                logger.debug("init - paramName = " + paramName);
+                boolean paramRequired = XMLConfig.getBoolean(currParam, "@Required", true);
+                logger.debug("init - paramName = " + paramName + " - required = " + paramRequired);
                 NodeList currParamHandlerNodes = XMLConfig.getNodeList(currParam, "*[@ItemType='Handler']");
                 List<InterfaceParametersHandler> handlerList = new ArrayList<InterfaceParametersHandler>(
                         currParamHandlerNodes.getLength());
@@ -579,10 +530,13 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
                     handlerList.add(handler);
                 }
                 reqParamHandlers.put(paramName, handlerList);
+                if (paramRequired) {
+                    reqParamRequired.add(paramName);
+                }
             }
             logger.debug("init - current handler cache content is: " + dumpHandlersCache(reqParamHandlers, ""));
         }
-        Node contentNode = XMLConfig.getNode(configurationNode, "InboundRequestContent");
+        Node contentNode = XMLConfig.getNode(configurationNode, "RequestContent");
         if (contentNode != null) {
             NodeList handlerNodes = XMLConfig.getNodeList(contentNode, "*[@ItemType='Handler']");
             int handlerNumber = 0;
@@ -597,7 +551,7 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
         }
 
         NodeList gvFieldDefaultNodes = XMLConfig.getNodeList(configurationNode,
-                "InputGVBufferDefaultValues/GVBufferFieldDefaultValue");
+                "GVBufferDefaultValues/GVBufferFieldDefaultValue");
         if ((gvFieldDefaultNodes != null) && (gvFieldDefaultNodes.getLength() > 0)) {
             for (int i = 0; i < gvFieldDefaultNodes.getLength(); i++) {
                 Node currDefault = gvFieldDefaultNodes.item(i);
@@ -608,7 +562,7 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
         }
 
         NodeList gvPropertyDefaultNodes = XMLConfig.getNodeList(configurationNode,
-                "InputGVBufferDefaultValues/GVBufferExtFieldDefaultValue");
+                "GVBufferDefaultValues/GVBufferPropertyDefaultValue");
         if ((gvPropertyDefaultNodes != null) && (gvPropertyDefaultNodes.getLength() > 0)) {
             for (int i = 0; i < gvPropertyDefaultNodes.getLength(); i++) {
                 Node currDefault = gvPropertyDefaultNodes.item(i);
@@ -639,19 +593,17 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
         logger.debug("init - BEGIN Response configuration");
         respParamList = new ArrayList<String>();
         respParamHandlers = new HashMap<String, List<InterfaceParametersHandler>>();
-        respParamACKHandlers = new HashMap<String, List<InterfaceParametersHandler>>();
         respParamErrorHandlers = new HashMap<String, List<InterfaceParametersHandler>>();
         respParamNamesWithinQueryString = new HashSet<String>();
         headerParameters = new HashSet<String>();
-        respURLEncoding = XMLConfig.getBoolean(configurationNode, "InboundResponseParams/@URLEncoding", false);
+        respURLEncoding = XMLConfig.getBoolean(configurationNode, "ResponseParams/@URLEncoding", false);
         logger.debug("init - encode response parameters = " + respURLEncoding);
-        respParamEntrySeparator = XMLConfig.get(configurationNode, "InboundResponseParams/@ParamEntrySeparator", "&");
-        respParamNameValueSeparator = XMLConfig.get(configurationNode,
-                "InboundResponseParams/@ParamNameValueSeparator", "=");
+        respParamEntrySeparator = XMLConfig.get(configurationNode, "ResponseParams/@ParamEntrySeparator", "&");
+        respParamNameValueSeparator = XMLConfig.get(configurationNode, "ResponseParams/@ParamNameValueSeparator", "=");
         logger.debug("init - paramNameValueSeparator = '" + respParamNameValueSeparator + "'"
                 + " - paramEntrySeparator = '" + respParamEntrySeparator + "'");
 
-        NodeList paramNodes = XMLConfig.getNodeList(configurationNode, "InboundResponseParams/InboundResponseParam");
+        NodeList paramNodes = XMLConfig.getNodeList(configurationNode, "ResponseParams/ResponseParam");
         for (int i = 0; i < paramNodes.getLength(); i++) {
             Node currParam = paramNodes.item(i);
             String paramName = XMLConfig.get(currParam, "@Name");
@@ -667,6 +619,7 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
             if (putInHeader) {
                 headerParameters.add(paramName);
             }
+
             NodeList currParamHandlerNodes = XMLConfig.getNodeList(currParam, "*[@ItemType='Handler']");
             List<InterfaceParametersHandler> handlerList = new ArrayList<InterfaceParametersHandler>(
                     currParamHandlerNodes.getLength());
@@ -679,19 +632,6 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
                 handlerList.add(handler);
             }
             respParamHandlers.put(paramName, handlerList);
-            NodeList currParamAckHandlerNodes = XMLConfig.getNodeList(currParam, "*[@ItemType='ACKHandler']");
-            List<InterfaceParametersHandler> ackHandlerList = new ArrayList<InterfaceParametersHandler>(
-                    currParamAckHandlerNodes.getLength());
-            handlerNumber = 0;
-            for (int j = 0; j < currParamAckHandlerNodes.getLength(); j++) {
-                Node currAckHandler = currParamAckHandlerNodes.item(j);
-                handlerNumber++;
-                logger.debug("init - instantiating ACK handler n." + handlerNumber + " for response parameter "
-                        + paramName);
-                InterfaceParametersHandler ackHandler = InterfaceParametersHandlerFactory.getHandler(currAckHandler);
-                ackHandlerList.add(ackHandler);
-            }
-            respParamACKHandlers.put(paramName, ackHandlerList);
 
             NodeList currParamErrorHandlerNodes = XMLConfig.getNodeList(currParam, "*[@ItemType='ErrorHandler']");
             List<InterfaceParametersHandler> errorHandlerList = new ArrayList<InterfaceParametersHandler>(
@@ -710,7 +650,6 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
         }
         logger.debug("init - handler cache content is: " + dumpHandlersCache(respParamHandlers, ""));
         logger.debug("init - error handler cache content is: " + dumpHandlersCache(respParamErrorHandlers, "Error"));
-        logger.debug("init - ACK handler cache content is: " + dumpHandlersCache(respParamACKHandlers, "ACK"));
         logger.debug("init - END Request configuration");
     }
 

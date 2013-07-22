@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  *
  * This file is part of GreenVulcano ESB.
@@ -37,8 +37,8 @@ public class HttpServletTransaction
     private String  system           = "";
     private String  service          = "";
     private String  operation        = "";
-    private boolean transacted       = true;
-    private int     timeout          = 0;
+    private boolean transacted       = false;
+    private int     timeout          = 30;
     private boolean closeBeforeReply = true;
 
     /**
@@ -46,11 +46,11 @@ public class HttpServletTransaction
      */
     public void init(Node node)
     {
-        system = XMLConfig.get(node, "@system", "");
         service = XMLConfig.get(node, "@service", "");
+        system = XMLConfig.get(node, "@system", "ALL");
         operation = XMLConfig.get(node, "@operation", "");
-        transacted = XMLConfig.getBoolean(node, "@transacted", true);
-        timeout = XMLConfig.getInteger(node, "@timeout", 0);
+        transacted = XMLConfig.getBoolean(node, "@transacted", false);
+        timeout = XMLConfig.getInteger(node, "@timeout", 30);
         closeBeforeReply = XMLConfig.get(node, "@close-on-response", "before").equals("before");
     }
 
@@ -83,6 +83,15 @@ public class HttpServletTransaction
      */
     public String getKey()
     {
-        return (system + "::" + service + "::" + operation);
+        if ("".equals(system) && "".equals(operation)) {
+            return service;
+        }
+        else if ("".equals(operation)) {
+            return (service + "::" + system);
+        }
+        else if ("".equals(system)) {
+            return (service + "::" + operation);
+        }
+        return (service + "::" + system + "::" + operation);
     }
 }

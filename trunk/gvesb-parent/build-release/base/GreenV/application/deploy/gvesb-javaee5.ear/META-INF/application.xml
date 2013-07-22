@@ -44,6 +44,12 @@
   </module>
   <module>
     <web>
+      <web-uri>gvhttp.war</web-uri>
+      <context-root>/gvhttp</context-root>
+    </web>
+  </module>
+  <module>
+    <web>
       <web-uri>gvconsole.war</web-uri>
       <context-root>/gvconsole</context-root>
     </web>

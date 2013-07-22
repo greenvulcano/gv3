@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -69,6 +69,7 @@ public class HttpServletMappingManager implements ConfigurationListener
     {
         try {
             formatterMgr = new FormatterManager();
+            transactionManager = new HttpServletTransactionManager();
             initMappings();
             configurationChanged = false;
             XMLConfig.addConfigurationListener(this, AdapterHttpConstants.CFG_FILE);
@@ -80,20 +81,19 @@ public class HttpServletMappingManager implements ConfigurationListener
     }
 
     /**
-     * @param mapping
+     * @param action
      * @return the HTTP servlet mapping
      * @throws AdapterHttpConfigurationException
      */
-    public HttpServletMapping getMapping(String mapping) throws AdapterHttpConfigurationException
+    public HttpServletMapping getMapping(String action) throws AdapterHttpConfigurationException
     {
         if (configurationChanged) {
-            destroy();
             init();
         }
-        HttpServletMapping smapping = mappings.get(mapping);
+        HttpServletMapping smapping = mappings.get(action);
 
         if (smapping == null) {
-            throw new AdapterHttpConfigurationException("HttpServletMappingManager - Mapping '" + mapping
+            throw new AdapterHttpConfigurationException("HttpServletMappingManager - Mapping '" + action
                     + "' not found");
         }
 
@@ -129,6 +129,7 @@ public class HttpServletMappingManager implements ConfigurationListener
         if ((evt.getCode() == ConfigurationEvent.EVT_FILE_REMOVED)
                 && evt.getFile().equals(AdapterHttpConstants.CFG_FILE)) {
             configurationChanged = true;
+            destroy();
             logger.info("HttpServletMappingManager: Configuration Event received for file: "
                     + AdapterHttpConstants.CFG_FILE);
         }
@@ -138,19 +139,17 @@ public class HttpServletMappingManager implements ConfigurationListener
     {
         try {
             NodeList mappingNodes = XMLConfig.getNodeList(AdapterHttpConstants.CFG_FILE,
-                    "/GVAdapterHttpConfiguration/InboundConfiguration/ServletMappings/ServletMapping");
+                    "/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@enabled='true']");
 
-            if ((mappingNodes == null) || (mappingNodes.getLength() == 0)) {
-                throw new AdapterHttpConfigurationException(
-                        "HttpServletMappingManager - No ServletMapping found on file " + AdapterHttpConstants.CFG_FILE);
-            }
-            for (int i = 0; i < mappingNodes.getLength(); i++) {
-                Node confNode = mappingNodes.item(i);
-                HttpServletMapping smapping = new HttpServletMapping();
-                smapping.init(transactionManager, formatterMgr, confNode);
-                mappings.put(smapping.getMapping(), smapping);
-                if (!smapping.getMapping().startsWith("/")) {
-                    mappings.put("/" + smapping.getMapping(), smapping);
+            if (mappingNodes != null) {
+                for (int i = 0; i < mappingNodes.getLength(); i++) {
+                    Node confNode = mappingNodes.item(i);
+                    HttpServletMapping smapping = new HttpServletMapping();
+                    smapping.init(transactionManager, formatterMgr, confNode);
+                    mappings.put(smapping.getAction(), smapping);
+                    if (!smapping.getAction().startsWith("/")) {
+                        mappings.put("/" + smapping.getAction(), smapping);
+                    }
                 }
             }
         }

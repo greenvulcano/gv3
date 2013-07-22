@@ -665,6 +665,147 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                              name="RSHRemote" regURL="rmi://localhost:3099" type="rshClient"/>
     </RSHServiceClientConfiguration>
 
+    <GVAdapterHttpConfiguration name="HTTP_ADAPTER" type="module">
+        <InboundConfiguration>
+            <ActionMappings>
+                <ActionMapping Action="HTTP_TEST" FormatterID="MessageInboundFormatter" enabled="true"/>
+            </ActionMappings>
+            <InboundTransactions>
+                <Transaction service="TOUPPER" transacted="false"/>
+                <Transaction service="TOUPPER_A" transacted="true"/>
+            </InboundTransactions>
+        </InboundConfiguration>
+        <Formatters>
+            <ExtendedInboundParamHandlerFormatter Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.ExtendedInboundParamHandlerFormatter"
+                                                  RespContentType="text/html"
+                                                  HandlePostBodyAsParams="true"
+                                                  ID="MessageInboundFormatter"
+                                                  Type="FormatterPlugin">
+                <RequestParams>
+                    <RequestParam Name="service">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                                   ItemType="Handler"
+                                                   OutputType="GVBuffer">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <GVBufferField FieldName="GVBuffer.service"/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                    <RequestParam Name="system" Required="false">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                            ItemType="Handler"
+                                            OutputType="GVBuffer">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <GVBufferField FieldName="GVBuffer.system"/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                    <RequestParam Name="id" Required="false">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                                   ItemType="Handler"
+                                                   OutputType="GVBuffer">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <GVBufferField FieldName="GVBuffer.id"/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                    <RequestParam Name="data" Required="false">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                            ItemType="Handler"
+                                            OutputType="GVBuffer">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <GVBufferField FieldName="GVBuffer.object"/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                    <RequestParam Name="operation">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                            ItemType="Handler"
+                                            OutputType="OpType">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <OpType/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                </RequestParams>
+
+                <GVBufferDefaultValues>
+                    <GVBufferFieldDefaultValue FieldName="GVBuffer.system" FieldValue="GVESB"/>
+                </GVBufferDefaultValues>
+
+                <ResponseParams URLEncoding="False">
+                    <ResponseParam Name="Data" SendParameterName="False">
+                        <ResponseStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                            ItemType="Handler"
+                                            OutputType="HttpParam">
+                            <ResponseStringParamMapping ItemType="Mapping">
+                                <DefaultValue>&lt;html&gt;
+&lt;body&gt;
+    &lt;table border=&quot;1&quot;&gt;
+        &lt;tr&gt;&lt;td&gt;Service&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;System&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Data&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</DefaultValue>
+                            </ResponseStringParamMapping>
+                        </ResponseStringParamHandler>
+                        <ResponseXMLParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.XMLParameterHandler"
+                                         ItemType="Handler"
+                                         OutputType="HttpParam">
+                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[1]/td[2]">
+                                <GVBufferField FieldName="GVBuffer.service"/>
+                            </ResponseXMLParamMapping>
+                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[2]/td[2]">
+                                <GVBufferField FieldName="GVBuffer.system"/>
+                            </ResponseXMLParamMapping>
+                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[3]/td[2]">
+                                <GVBufferField FieldName="GVBuffer.id"/>
+                            </ResponseXMLParamMapping>
+                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[4]/td[2]">
+                                <GVBufferField FieldName="GVBuffer.object"/>
+                            </ResponseXMLParamMapping>
+                        </ResponseXMLParamHandler>
+
+                        <StringParamErrorHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                                                ItemType="ErrorHandler"
+                                                                OutputType="HttpParam">
+                            <StringParamErrorMapping ItemType="Mapping">
+                                <DefaultErrorMessage>&lt;html&gt;
+&lt;body&gt;
+    &lt;table border=&quot;1&quot;&gt;
+        &lt;tr&gt;&lt;td&gt;Service&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;System&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Error&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</DefaultErrorMessage>
+                            </StringParamErrorMapping>
+                        </StringParamErrorHandler>
+                        <XMLParamErrorHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.XMLParameterHandler"
+                                              ItemType="ErrorHandler"
+                                              OutputType="HttpParam">
+                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[1]/td[2]">
+                                <GVTransactionErrorInfo Value="GVTransInfo.service"/>
+                            </XMLParamErrorMapping>
+                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[2]/td[2]">
+                                <GVTransactionErrorInfo Value="GVTransInfo.system"/>
+                            </XMLParamErrorMapping>
+                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[3]/td[2]">
+                                <GVTransactionErrorInfo Value="GVTransInfo.id"/>
+                            </XMLParamErrorMapping>
+                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[4]/td[2]">
+                                <GVTransactionErrorInfo Value="GVTransInfo.errorMessage"/>
+                            </XMLParamErrorMapping>
+                        </XMLParamErrorHandler>
+                    </ResponseParam>
+                </ResponseParams>
+            </ExtendedInboundParamHandlerFormatter>
+        </Formatters>
+    </GVAdapterHttpConfiguration>
+
     <GVHL7ListenerManager name="HL7_LISTENERS" type="module" version="1.0">
         <HL7Listeners>
             <HL7Listener class="it.greenvulcano.gvesb.gvhl7.listener.HL7Listener" name="TestListener" port="8181" type="hl7listener">
