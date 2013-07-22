@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -63,9 +63,10 @@ public class HttpServletTransactionManager
      */
     public void begin(GVBuffer data) throws HttpServletTransactionException
     {
-        String key = data.getSystem() + "::" + data.getService();
+        String key = getKey(data);
         begin(key);
     }
+
 
     /**
      * @param data
@@ -74,7 +75,7 @@ public class HttpServletTransactionManager
      */
     public void commit(GVBuffer data, boolean beforeResponse) throws HttpServletTransactionException
     {
-        String key = data.getSystem() + "::" + data.getService();
+        String key = getKey(data);
         commit(key, beforeResponse);
     }
 
@@ -85,7 +86,7 @@ public class HttpServletTransactionManager
      */
     public void rollback(GVBuffer data, boolean beforeResponse) throws HttpServletTransactionException
     {
-        String key = data.getSystem() + "::" + data.getService();
+        String key = getKey(data);
         rollback(key, beforeResponse);
     }
 
@@ -95,7 +96,7 @@ public class HttpServletTransactionManager
      */
     public void begin(GVTransactionInfo transInfo) throws HttpServletTransactionException
     {
-        String key = transInfo.getSystem() + "::" + transInfo.getService();
+        String key = getKey(transInfo);
         begin(key);
     }
 
@@ -106,7 +107,7 @@ public class HttpServletTransactionManager
      */
     public void commit(GVTransactionInfo transInfo, boolean beforeResponse) throws HttpServletTransactionException
     {
-        String key = transInfo.getSystem() + "::" + transInfo.getService();
+        String key = getKey(transInfo);
         commit(key, beforeResponse);
     }
 
@@ -117,9 +118,10 @@ public class HttpServletTransactionManager
      */
     public void rollback(GVTransactionInfo transInfo, boolean beforeResponse) throws HttpServletTransactionException
     {
-        String key = transInfo.getSystem() + "::" + transInfo.getService();
+        String key = getKey(transInfo);
         rollback(key, beforeResponse);
     }
+
 
     /**
      * @param key
@@ -132,10 +134,13 @@ public class HttpServletTransactionManager
             return;
         }
         try {
-            servletTransaction = transactions.get(key);
+            servletTransaction = getServletTransaction(key);
+            if ((servletTransaction == null) && (key.indexOf("::") != -1)) {
+                servletTransaction = transactions.get(key.substring(0, key.indexOf("::")));                
+            }
             if (servletTransaction == null) {
-                throw new HttpServletTransactionException("GVHTTP_TRANSACTION_MISSING_ERROR", new String[][]{{"key",
-                        key}});
+                return;
+                //throw new HttpServletTransactionException("GVHTTP_TRANSACTION_MISSING_ERROR", new String[][]{{"key", key}});
             }
             if (servletTransaction.isTransacted()) {
                 logger.debug("begin - Executing Transaction begin for key '" + key + "'");
@@ -143,9 +148,9 @@ public class HttpServletTransactionManager
                 xaHelper.setTransactionTimeout(servletTransaction.getTimeout());
             }
         }
-        catch (HttpServletTransactionException exc) {
+        /*catch (HttpServletTransactionException exc) {
             throw exc;
-        }
+        }*/
         catch (Exception exc) {
             throw new HttpServletTransactionException("GVHTTP_TRANSACTION_BEGIN_ERROR", new String[][]{{"key", key},
                     {"msg", "" + exc}}, exc);
@@ -164,19 +169,19 @@ public class HttpServletTransactionManager
             return;
         }
         try {
-            servletTransaction = transactions.get(key);
+            servletTransaction = getServletTransaction(key);
             if (servletTransaction == null) {
-                throw new HttpServletTransactionException("GVHTTP_TRANSACTION_MISSING_ERROR", new String[][]{{"key",
-                        key}});
+                return;
+                //throw new HttpServletTransactionException("GVHTTP_TRANSACTION_MISSING_ERROR", new String[][]{{"key", key}});
             }
             if (servletTransaction.isTransacted() && (servletTransaction.isCloseBeforeReply() == beforeReply)) {
                 logger.debug("commit - Executing Transaction commit for key '" + key + "'");
                 xaHelper.commit();
             }
         }
-        catch (HttpServletTransactionException exc) {
+        /*catch (HttpServletTransactionException exc) {
             throw exc;
-        }
+        }*/
         catch (Exception exc) {
             throw new HttpServletTransactionException("GVHTTP_TRANSACTION_COMMIT_ERROR", new String[][]{{"key", key},
                     {"msg", "" + exc}}, exc);
@@ -195,23 +200,36 @@ public class HttpServletTransactionManager
             return;
         }
         try {
-            servletTransaction = transactions.get(key);
+            servletTransaction = getServletTransaction(key);
             if (servletTransaction == null) {
-                throw new HttpServletTransactionException("GVHTTP_TRANSACTION_MISSING_ERROR", new String[][]{{"key",
-                        key}});
+                return;
+                //throw new HttpServletTransactionException("GVHTTP_TRANSACTION_MISSING_ERROR", new String[][]{{"key", key}});
             }
             if (servletTransaction.isTransacted()) {
                 logger.debug("rollback - Executing Transaction rollback for key '" + key + "'");
                 xaHelper.rollback();
             }
         }
-        catch (HttpServletTransactionException exc) {
+        /*catch (HttpServletTransactionException exc) {
             throw exc;
-        }
+        }*/
         catch (Exception exc) {
             throw new HttpServletTransactionException("GVHTTP_TRANSACTION_ROLLBACK_ERROR", new String[][]{{"key", key},
                     {"msg", "" + exc}}, exc);
         }
+    }
+
+    /**
+     * @param key
+     * @return
+     */
+    private HttpServletTransaction getServletTransaction(String key) {
+        HttpServletTransaction servletTransaction = transactions.get(key);
+        if (servletTransaction == null) {
+            key = key.substring(0, key.indexOf("::")) + "::ALL";
+            servletTransaction = transactions.get(key);
+        }
+        return servletTransaction;
     }
 
     /**
@@ -259,4 +277,21 @@ public class HttpServletTransactionManager
     {
         transactions.clear();
     }
+    
+    /**
+     * @param data
+     * @return
+     */
+    private String getKey(GVBuffer data) {
+        return data.getService() + "::" + data.getSystem();
+    }
+
+    /**
+     * @param transInfo
+     * @return
+     */
+    private String getKey(GVTransactionInfo transInfo) {
+        return transInfo.getService() + "::" + transInfo.getSystem();
+    }
+
 }

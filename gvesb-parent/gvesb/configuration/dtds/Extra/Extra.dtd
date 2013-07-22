@@ -1,29 +1,32 @@
 <!ENTITY % gvcommons SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCommons.dtd">
 %gvcommons;
 
-<!ENTITY % gvhl7 SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHL7.dtd">
-%gvhl7;
-
 <!ENTITY % gvdh SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVDataHandler.dtd">
 %gvdh;
 
 <!ENTITY % gvexcel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVExcel.dtd">
 %gvexcel;
 
-<!ENTITY % gvzmq SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVZMQ.dtd">
-%gvzmq;
+<!ENTITY % gvhttp SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHTTPInbound.dtd">
+%gvhttp;
 
-<!ENTITY % gvbpel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVBpel.dtd">
-%gvbpel;
-
-<!ENTITY % gvrules SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd">
-%gvrules;
+<!ENTITY % gvhl7 SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHL7.dtd">
+%gvhl7;
 
 <!ENTITY % gvopenspcoop SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVOpenSpCoop.dtd">
 %gvopenspcoop;
 
+<!ENTITY % gvrules SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd">
+%gvrules;
+
 <!ENTITY % gvsocial SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd">
 %gvsocial;
+
+<!ENTITY % gvbpel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVBpel.dtd">
+%gvbpel;
+
+<!ENTITY % gvzmq SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVZMQ.dtd">
+%gvzmq;
 
 <!ENTITY % gvsap SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSAP.dtd">
 %gvsap;
@@ -43,5 +46,5 @@
 <!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
 
 <!ENTITY % extra-core "">
-<!ENTITY % extra-adapters ",GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager"> 
+<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager"> 
 <!ENTITY % extra-support "">

@@ -235,7 +235,9 @@ public class GVBufferAccess
             // ID
             //
             else if (fieldName.equals("GVBuffer.id")) {
-                gvBuffer.setId(new Id((value.toString()).trim()));
+                if (value != null && !"".equals(value)) {
+                    gvBuffer.setId(new Id((value.toString()).trim()));
+                }
             }
             // OBJECT
             //

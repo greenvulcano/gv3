@@ -61,24 +61,6 @@ public interface Formatter
     public void unMarshall(Map<String, Object> environment) throws FormatterExecutionException;
 
     /**
-     * This method is to inform the class that the configuration has changed.
-     * This information should be propagated to any dependent object. When the
-     * configuration changes, any configurable object must check if it has to
-     * repeat its initialization
-     * 
-     * @param configurationNode
-     */
-    public void reloadConfiguration(Node configurationNode);
-
-    /**
-     * This method returns true if the formatter is configured to handle default
-     * response messages.
-     * 
-     * @return
-     */
-    public boolean haveACKMessage();
-
-    /**
      * This method returns the ID of the formatter.
      * 
      * Classes implementing this interface should have a "ID" String field, to

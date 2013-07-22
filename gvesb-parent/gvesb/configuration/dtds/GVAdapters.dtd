@@ -7,7 +7,7 @@
 <!--
     GreenVulcanoESB adapters configuration file.
 -->
-<!ELEMENT GVAdapters (GVSQLErrorMapping?,GVWebServices?,GVHTTPAdapter?,GVJdbc?,GVJDBCConnectionBuilder?,GVDataProviderManager?,GVDataHandlerConfiguration,GVExcelWorkbookConfiguration,GVExcelCreatorConfiguration,GVBIRTReportConfiguration,RSHServiceClientConfiguration %extra-adapters;)>
+<!ELEMENT GVAdapters (GVSQLErrorMapping?,GVWebServices?,GVJdbc?,GVJDBCConnectionBuilder?,GVDataProviderManager?,GVDataHandlerConfiguration,GVExcelWorkbookConfiguration,GVExcelCreatorConfiguration,GVBIRTReportConfiguration,RSHServiceClientConfiguration %extra-adapters;)>
 <!--
     Current GreenVulcano ESB version.
 -->
@@ -511,108 +511,6 @@
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST HttpMethodDataProvider class CDATA #FIXED "it.greenvulcano.gvesb.gvhttp.impl.HttpMethodDataProvider">
-
-<!ELEMENT GVHTTPAdapter (Configuration)>
-<!--
-    Element type 'module'.
--->
-<!ATTLIST GVHTTPAdapter type    CDATA   #FIXED  "module">
-<!--
-    Module Id always set to 'HTTP_INBOUND'.
--->
-<!ATTLIST GVHTTPAdapter name    CDATA   #FIXED  "HTTP_ADAPTER">
-
-<!ELEMENT Configuration (ServletMappings, GVConnection, HTTPTransactions)>
-
-<!ELEMENT ServletMappings (ServletMapping*)>
-
-<!ELEMENT RetCodeConversionIn EMPTY>
-<!--
-    #NotNull
--->
-<!ATTLIST RetCodeConversionIn	RetCodeConversion           (ignore | 0to1 | 1to0) #IMPLIED>
-
-<!ELEMENT RetCodeConversionOut EMPTY>
-<!--
-    #NotNull
--->
-<!ATTLIST RetCodeConversionOut	RetCodeConversion           (ignore | 0to1 | 1to0) #IMPLIED>
-
-<!--
-    #SelectOnInsert
-    #Label: @Mapping
--->
-<!ELEMENT ServletMapping (Description?, RetCodeConversionIn?, RetCodeConversionOut?)>
-<!--
-    #NotNull
-    #Unique: ../ServletMapping/@Mapping
--->
-<!ATTLIST ServletMapping Mapping	        CDATA #REQUIRED>
-
-<!--
-    This element contains the transaction definitions for the managed services.
-
--->
-<!ELEMENT HTTPTransactions (Transaction*)>
-<!--
-    This element contains the transaction definitions for a given service.
-    All service managed by the HTTPAdapter must have a Transaction element that defines
-    is transaction requirements.
-
-    #Label: @service
-    #SelectOnInsert
--->
-<!ELEMENT Transaction (Description?)>
-<!--
-    #NotNull
--->
-<!ATTLIST Transaction system CDATA #REQUIRED>
-<!--
-    #NotNull
--->
-<!ATTLIST Transaction service CDATA #REQUIRED>
-<!--
-    This parameter defines if a service must be executed in transaction.
-
-    #NotNull
--->
-<!ATTLIST Transaction transacted (yes | no) #REQUIRED>
-<!--
-    This parameter defines the transaction timeout in seconds.
-
-    #NotNull
--->
-<!ATTLIST Transaction timeout CDATA #IMPLIED>
-<!--
-    This parameter defines when transaction must be committed:
-    before or after sending the response to the client.
-    The default is before.
-
-    #NotNull
--->
-<!ATTLIST Transaction close-on-response (after | before) #IMPLIED>
-
-<!--
-    This element contains configuration informations related to connection to GreenVulcano ESB via GVConnector client class.
-
-    #Template:
-        <xsl:template match="GVConnection">
-            <table cellpadding="0" cellspacing="0">
-                <tr>
-                    <td>GVC configuration filename:</td>
-                    <td width="20"></td>
-                    <td><b><xsl:value-of select="@ConfigFilename"/></b></td>
-                </tr>
-            </table>
-        </xsl:template>
--->
-<!ELEMENT GVConnection EMPTY>
-<!--
-    GVC configuration filename.
-    #NotNull
--->
-<!ATTLIST GVConnection ConfigFilename CDATA #REQUIRED>
-
 
 <!--
     This element defines the parameters necessary to build a JDBC connection.

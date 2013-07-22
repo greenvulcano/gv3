@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -22,6 +22,7 @@ package it.greenvulcano.gvesb.adapter.http.formatters.handlers;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.utils.GVBufferAccess;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xml.XMLUtils;
 
@@ -214,24 +215,11 @@ public abstract class InterfaceParametersHandler
         try {
             switch (handlerType) {
                 case GVBUFFER_HANDLER :
-                    if (byte[].class.isInstance(input)) {
-                        output = buildGVBuffer((byte[]) input, (GVBuffer) previous);
-                    }
-                    else {
-                        output = buildGVBuffer((String) input, (GVBuffer) previous);
-                    }
+                    output = buildGVBuffer(input, (GVBuffer) previous);
                     break;
-
                 case OPTYPE_HANDLER :
-                    if (byte[].class.isInstance(input)) {
-                        output = buildOpTypeString((byte[]) input);
-
-                    }
-                    else {
-                        output = buildOpTypeString((String) input);
-                    }
+                    output = buildOpTypeString(input);
                     break;
-
                 default :
                     if (input instanceof GVBuffer) {
                         output = buildHttpParam((GVBuffer) input, (String) previous);
@@ -297,23 +285,8 @@ public abstract class InterfaceParametersHandler
      * @throws DataHandlerException
      *         if any error occurs.
      */
-    protected abstract GVBuffer buildGVBuffer(String input, GVBuffer previous) throws DataHandlerException;
+    protected abstract GVBuffer buildGVBuffer(Object input, GVBuffer previous) throws DataHandlerException;
 
-    /**
-     * Parameter handler method which takes an HTTP param as input and generates
-     * an <tt>GVBuffer</tt> object as output. This method has to be implemented
-     * by subclasses of this class.
-     * 
-     * @param input
-     *        the input HTTP parameter (as a <tt>byte</tt> array) to be used to
-     *        populate an GVBuffer object.
-     * @param previous
-     *        the output GVBuffer object from a previous handler.
-     * @return the resulting output GVBuffer object.
-     * @throws DataHandlerException
-     *         if any error occurs.
-     */
-    protected abstract GVBuffer buildGVBuffer(byte[] input, GVBuffer previous) throws DataHandlerException;
 
     /**
      * Parameter handler method which takes an HTTP param as input and generates
@@ -328,22 +301,8 @@ public abstract class InterfaceParametersHandler
      * @throws OpTypeHandlerException
      *         if any error occurs.
      */
-    protected abstract String buildOpTypeString(String input) throws OpTypeHandlerException;
+    protected abstract String buildOpTypeString(Object input) throws OpTypeHandlerException;
 
-    /**
-     * Parameter handler method which takes an HTTP param as input and generates
-     * a string (<tt>OpType</tt>) indicating a valid GreenVulcano ESB
-     * communication paradigm as output. This method has to be implemented by
-     * subclasses of this class.
-     * 
-     * @param input
-     *        the input HTTP parameter (as a <tt>byte</tt> array) from which the
-     *        OpType parameter has to be parsed.
-     * @return the resulting OpType parameter value (as a String).
-     * @throws OpTypeHandlerException
-     *         if any error occurs.
-     */
-    protected abstract String buildOpTypeString(byte[] input) throws OpTypeHandlerException;
 
     /**
      * Parameter handler method which takes an <tt>GVBuffer</tt> object as input
@@ -408,7 +367,7 @@ public abstract class InterfaceParametersHandler
      */
     protected boolean isGVBufferField(String variable)
     {
-        return false;
+        return GVBufferAccess.isGVBufferField(variable);
     }
 
     /**
@@ -422,7 +381,7 @@ public abstract class InterfaceParametersHandler
      */
     protected boolean isGVBufferProperty(String variable)
     {
-        return false;
+        return GVBufferAccess.isGVBufferProperty(variable);
     }
 
     /**
@@ -545,37 +504,45 @@ public abstract class InterfaceParametersHandler
 
     }
 
-    protected String getStringValue(byte[] input, MappingData mappingData) throws Exception
+    protected String getStringValue(Object input, MappingData mappingData) throws Exception
     {
-        String charEnc = getCharEncoding();
         String inputString = null;
-        String outputString = null;
-        if (charEnc != null) {
-            inputString = new String(input, charEnc);
-            logger.debug("getStringValue - converting bytes to characters using " + getCharEncoding());
-
+        String output = null;
+        String charEnc = getCharEncoding();
+        
+        if (input instanceof byte[]) {
+            if (charEnc != null) {
+                logger.debug("getStringValue - converting bytes to string using " + charEnc + " encoding");
+                inputString = new String((byte[]) input, charEnc);
+            }
+            else {
+                logger.debug("getStringValue - converting bytes to string using Java default encoding");
+                inputString = new String((byte[]) input);
+            }
         }
-        else {
-            inputString = new String(input);
-            logger.debug("getStringValue - converting bytes to characters using Java default encoding");
+        else if (input instanceof Node) {
+            if (charEnc != null) {
+                logger.debug("getStringValue - serializing DOM to string using " + charEnc + " encoding");
+                inputString = XMLUtils.serializeDOM_S((Node) input, charEnc);
+            }
+            else {
+                logger.debug("getStringValue - converting bytes to string using UTF-8 encoding");
+                inputString = XMLUtils.serializeDOM_S((Node) input);
+            }
+        }
+        else if (input instanceof String) {
+            inputString = (String) input;
         }
 
         int endIdx = (mappingData.length < Integer.MAX_VALUE)
                 ? mappingData.offset + mappingData.length
                 : inputString.length();
-        outputString = inputString.substring(mappingData.offset, endIdx);
-        outputString = trim(outputString, mappingData.trim);
-        return outputString;
-    }
-
-    protected String getStringValue(String input, MappingData mappingData) throws Exception
-    {
-        String output = null;
-
-        int endIdx = (mappingData.length < Integer.MAX_VALUE)
-                ? mappingData.offset + mappingData.length
-                : input.length();
-        output = input.substring(mappingData.offset, endIdx);
+        if ((mappingData.offset > 0) || (endIdx != inputString.length())) {
+            output = inputString.substring(mappingData.offset, endIdx);
+        }
+        else {
+            output = inputString;
+        }
         output = trim(output, mappingData.trim);
         return output;
     }

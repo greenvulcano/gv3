@@ -66,6 +66,7 @@
                 <exclude name="Extra/Extra.dtd"/>
                 <include name="Extra/GVDataHandler.dtd"/>
                 <include name="Extra/GVExcel.dtd"/>
+                <include name="Extra/GVHTTPInbound.dtd"/>
                 <include name="gv-jmx.dtd"/>
                 <include name="gv-log4j.dtd"/>
                 <include name="GVAdapters.dtd"/>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -77,7 +77,7 @@ public class InboundParamHandlerFormatter implements Formatter
 
     private Map<String, List<InterfaceParametersHandler>> reqParamHandlers                = null;
 
-    private List                                          reqContentHandlers              = null;
+    private List<InterfaceParametersHandler>              reqContentHandlers              = null;
 
     private Map<String, String>                           reqGVBufferDefaults             = null;
 
@@ -92,8 +92,6 @@ public class InboundParamHandlerFormatter implements Formatter
     private List<String>                                  respParamList                   = null;
 
     private Map<String, List<InterfaceParametersHandler>> respParamHandlers               = null;
-
-    private Map<String, List<InterfaceParametersHandler>> respParamACKHandlers            = null;
 
     private Map<String, List<InterfaceParametersHandler>> respParamErrorHandlers          = null;
 
@@ -120,8 +118,8 @@ public class InboundParamHandlerFormatter implements Formatter
     {
         try {
             logger.debug("InboundParamHandlerFormatter - Formatter init start");
-            reqCharacterEncoding = XMLConfig.get(configurationNode, "@ReqCharacterEncoding", "ISO-8859-1");
-            respCharacterEncoding = XMLConfig.get(configurationNode, "@RespCharacterEncoding", "ISO-8859-1");
+            reqCharacterEncoding = XMLConfig.get(configurationNode, "@ReqCharacterEncoding", "UTF-8");
+            respCharacterEncoding = XMLConfig.get(configurationNode, "@RespCharacterEncoding", "UTF-8");
             respContentType = XMLConfig.get(configurationNode, "@RespContentType",
                     AdapterHttpConstants.TEXTHTML_MIMETYPE_NAME);
             formatterId = XMLConfig.get(configurationNode, "@ID");
@@ -181,7 +179,7 @@ public class InboundParamHandlerFormatter implements Formatter
 
             if (reqParamHandlers.size() > 0) {
                 Properties propParam = new Properties();
-                List entriesList = TextUtils.splitByStringSeparator(requestContent, reqParamEntrySeparator);
+                List<String> entriesList = TextUtils.splitByStringSeparator(requestContent, reqParamEntrySeparator);
                 for (int i = 0; i < entriesList.size(); i++) {
                     String element = (String) entriesList.get(i);
                     logger.debug("manageRequest - Token estratto dalla risposta : " + element);
@@ -192,10 +190,10 @@ public class InboundParamHandlerFormatter implements Formatter
                     propParam.put(paramName, paramValue);
                 }
 
-                Iterator paramNames = reqParamHandlers.keySet().iterator();
+                Iterator<String> paramNames = reqParamHandlers.keySet().iterator();
                 while (paramNames.hasNext()) {
                     String currParamName = (String) paramNames.next();
-                    List currParamHandlerList = reqParamHandlers.get(currParamName);
+                    List<InterfaceParametersHandler> currParamHandlerList = reqParamHandlers.get(currParamName);
                     String reqParamValue = propParam.getProperty(currParamName);
                     logger.debug("manageRequest - request parameter " + currParamName + " = [" + reqParamValue + "]");
                     if ((reqParamValue != null) && !reqParamValue.equals("")) {
@@ -322,7 +320,7 @@ public class InboundParamHandlerFormatter implements Formatter
     public void unMarshall(Map<String, Object> environment) throws FormatterExecutionException
     {
         logger.debug("InboundParamHandlerFormatter: BEGIN unmarshall");
-        ArrayList paramEntries = null;
+        List<String> paramEntries = new ArrayList<String>();
 
         Object obj = environment.get(AdapterHttpConstants.ENV_KEY_GVBUFFER_OUTPUT);
 
@@ -331,55 +329,15 @@ public class InboundParamHandlerFormatter implements Formatter
             environment.put(AdapterHttpConstants.ENV_KEY_RESPONSE_CONTENT_TYPE, respContentType);
 
             String responseString = null;
-            if (obj == null) {
-                paramEntries = new ArrayList();
-                GVTransactionInfo transInfo = (GVTransactionInfo) environment.get(AdapterHttpConstants.ENV_KEY_TRANS_INFO);
-                if (transInfo == null) {
-                    logger.error("InboundParamHandlerFormatter - Error: GVTransactionInfo object received is null");
-                    throw new FormatterExecutionException("GVHTTP_HTTP_TRANSACTION_INFO_MISSING");
-                }
-
-                Iterator paramNames = respParamList.iterator();
-                while (paramNames.hasNext()) {
-                    String currParamEntry = null;
-                    String currRespParamName = (String) paramNames.next();
-                    String currRespParamValue = null;
-
-                    List currParamACKHandlerList = respParamACKHandlers.get(currRespParamName);
-                    if (currParamACKHandlerList != null) {
-                        for (int i = 0; i < currParamACKHandlerList.size(); i++) {
-                            InterfaceParametersHandler currHandler = (InterfaceParametersHandler) currParamACKHandlerList.get(i);
-                            currHandler.setCharEncoding(respCharacterEncoding);
-                            logger.debug("manageAckResponse - response parameter '" + currRespParamName
-                                    + "' ACK handler n. " + (i + 1) + " is a " + currHandler.getClass().getName());
-                            currRespParamValue = (String) currHandler.build(transInfo, currRespParamValue);
-                            logger.debug("manageAckResponse - response parameter '" + currRespParamName
-                                    + "' value set to: " + currRespParamValue + " by ACK handler n. " + (i + 1));
-                        }
-
-                        if (respURLEncoding) {
-                            currRespParamValue = URLEncoder.encode(currRespParamValue, respCharacterEncoding);
-                            logger.debug("manageAckResponse - response parameter '" + currRespParamName
-                                    + "' value URLEncoded to: " + currRespParamValue);
-                        }
-
-                        currParamEntry = respParamNamesWithinQueryString.get(currRespParamName) + currRespParamValue;
-                    }
-                    paramEntries.add(currParamEntry);
-
-                }
-                responseString = buildResponseString(paramEntries);
-            }
-            else if (obj instanceof GVBuffer) {
+            if (obj instanceof GVBuffer) {
                 GVBuffer outputGVBuffer = (GVBuffer) obj;
-                paramEntries = new ArrayList();
-                Iterator paramNames = respParamList.iterator();
+                Iterator<String> paramNames = respParamList.iterator();
                 while (paramNames.hasNext()) {
                     String currParamEntry = null;
-                    String currRespParamName = (String) paramNames.next();
+                    String currRespParamName = paramNames.next();
                     String currRespParamValue = null;
 
-                    List currParamHandlerList = respParamHandlers.get(currRespParamName);
+                    List<InterfaceParametersHandler> currParamHandlerList = respParamHandlers.get(currRespParamName);
                     if (currParamHandlerList != null) {
                         for (int i = 0; i < currParamHandlerList.size(); i++) {
                             InterfaceParametersHandler currHandler = (InterfaceParametersHandler) currParamHandlerList.get(i);
@@ -404,19 +362,18 @@ public class InboundParamHandlerFormatter implements Formatter
                 responseString = buildResponseString(paramEntries);
             }
             else if (obj instanceof Throwable) {
-                paramEntries = new ArrayList();
                 GVTransactionInfo transInfo = (GVTransactionInfo) environment.get(AdapterHttpConstants.ENV_KEY_TRANS_INFO);
                 if (transInfo == null) {
                     logger.error("InboundParamHandlerFormatter - Error: GVTransactionInfo object received is null");
                     throw new FormatterExecutionException("GVHTTP_HTTP_TRANSACTION_INFO_MISSING");
                 }
 
-                Iterator paramNames = respParamList.iterator();
+                Iterator<String> paramNames = respParamList.iterator();
                 while (paramNames.hasNext()) {
                     String currParamEntry = null;
                     String currParamName = (String) paramNames.next();
                     String errorValue = null;
-                    List currParamErrorHandlerList = respParamErrorHandlers.get(currParamName);
+                    List<InterfaceParametersHandler> currParamErrorHandlerList = respParamErrorHandlers.get(currParamName);
                     if (currParamErrorHandlerList != null) {
                         for (int i = 0; i < currParamErrorHandlerList.size(); i++) {
                             InterfaceParametersHandler currErrorHandler = (InterfaceParametersHandler) currParamErrorHandlerList.get(i);
@@ -477,24 +434,6 @@ public class InboundParamHandlerFormatter implements Formatter
         return formatterId;
     }
 
-    /**
-     * @see it.greenvulcano.gvesb.adapter.http.formatters.Formatter#haveACKMessage
-     */
-    @Override
-    public boolean haveACKMessage()
-    {
-        return (respParamACKHandlers != null) && !respParamACKHandlers.isEmpty();
-    }
-
-    /**
-     * @see it.greenvulcano.gvesb.adapter.http.formatters.Formatter#reloadConfiguration
-     *      (org.w3c.dom.Node)
-     */
-    @Override
-    public void reloadConfiguration(Node configurationNode)
-    {
-        // do nothing
-    }
 
     /**
      * @param configurationNode
@@ -505,22 +444,22 @@ public class InboundParamHandlerFormatter implements Formatter
             ParameterHandlerFactoryException
     {
         logger.debug("init - BEGIN Request configuration");
-        reqParamHandlers = new HashMap();
-        reqContentHandlers = new ArrayList();
-        reqGVBufferDefaults = new HashMap();
+        reqParamHandlers = new HashMap<String, List<InterfaceParametersHandler>>();
+        reqContentHandlers = new ArrayList<InterfaceParametersHandler>();
+        reqGVBufferDefaults = new HashMap<String, String>();
 
-        reqParamEntrySeparator = XMLConfig.get(configurationNode, "InboundRequestParams/@ParamEntrySeparator", "&");
-        reqParamNameValueSeparator = XMLConfig.get(configurationNode, "InboundRequestParams/@ParamNameValueSeparator",
+        reqParamEntrySeparator = XMLConfig.get(configurationNode, "RequestParams/@ParamEntrySeparator", "&");
+        reqParamNameValueSeparator = XMLConfig.get(configurationNode, "RequestParams/@ParamNameValueSeparator",
                 "=");
 
-        NodeList paramNodes = XMLConfig.getNodeList(configurationNode, "InboundRequestParams/InboundRequestParam");
+        NodeList paramNodes = XMLConfig.getNodeList(configurationNode, "RequestParams/RequestParam");
         if ((paramNodes != null) && (paramNodes.getLength() > 0)) {
             for (int i = 0; i < paramNodes.getLength(); i++) {
                 Node currParam = paramNodes.item(i);
                 String paramName = XMLConfig.get(currParam, "@Name");
                 logger.debug("init - paramName = " + paramName);
                 NodeList currParamHandlerNodes = XMLConfig.getNodeList(currParam, "*[@ItemType='Handler']");
-                List handlerList = new ArrayList(currParamHandlerNodes.getLength());
+                List<InterfaceParametersHandler> handlerList = new ArrayList<InterfaceParametersHandler>(currParamHandlerNodes.getLength());
                 int handlerNumber = 0;
                 for (int j = 0; j < currParamHandlerNodes.getLength(); j++) {
                     Node currHandler = currParamHandlerNodes.item(j);
@@ -536,7 +475,7 @@ public class InboundParamHandlerFormatter implements Formatter
             logger.debug("init - current handler cache content is: " + dumpHandlersCache(reqParamHandlers, ""));
         }
         else {
-            Node contentNode = XMLConfig.getNode(configurationNode, "InboundRequestContent");
+            Node contentNode = XMLConfig.getNode(configurationNode, "RequestContent");
             if (contentNode != null) {
                 NodeList handlerNodes = XMLConfig.getNodeList(contentNode, "*[@ItemType='Handler']");
                 int handlerNumber = 0;
@@ -552,7 +491,7 @@ public class InboundParamHandlerFormatter implements Formatter
         }
 
         NodeList gvFieldDefaultNodes = XMLConfig.getNodeList(configurationNode,
-                "InputGVBufferDefaultValues/GVBufferFieldDefaultValue");
+                "GVBufferDefaultValues/GVBufferFieldDefaultValue");
         if ((gvFieldDefaultNodes != null) && (gvFieldDefaultNodes.getLength() > 0)) {
             for (int i = 0; i < gvFieldDefaultNodes.getLength(); i++) {
                 Node currDefault = gvFieldDefaultNodes.item(i);
@@ -563,7 +502,7 @@ public class InboundParamHandlerFormatter implements Formatter
         }
 
         NodeList gvPropertyDefaultNodes = XMLConfig.getNodeList(configurationNode,
-                "InputGVBufferDefaultValues/GVBufferPropertyDefaultValue");
+                "GVBufferDefaultValues/GVBufferPropertyDefaultValue");
         if ((gvPropertyDefaultNodes != null) && (gvPropertyDefaultNodes.getLength() > 0)) {
             for (int i = 0; i < gvPropertyDefaultNodes.getLength(); i++) {
                 Node currDefault = gvPropertyDefaultNodes.item(i);
@@ -592,22 +531,20 @@ public class InboundParamHandlerFormatter implements Formatter
             ParameterHandlerFactoryException
     {
         logger.debug("init - BEGIN Response configuration");
-        respParamList = new ArrayList();
-        respParamHandlers = new HashMap();
-        respParamACKHandlers = new HashMap();
-        respParamErrorHandlers = new HashMap();
-        respParamNamesWithinQueryString = new HashMap();
+        respParamList = new ArrayList<String>();
+        respParamHandlers = new HashMap<String, List<InterfaceParametersHandler>>();
+        respParamErrorHandlers = new HashMap<String, List<InterfaceParametersHandler>>();
+        respParamNamesWithinQueryString = new HashMap<String, String>();
 
-        respURLEncoding = XMLConfig.getBoolean(configurationNode, "InboundResponseParams/@URLEncoding", false);
+        respURLEncoding = XMLConfig.getBoolean(configurationNode, "ResponseParams/@URLEncoding", false);
         logger.debug("init - encode response parameters = " + respURLEncoding);
 
-        respParamEntrySeparator = XMLConfig.get(configurationNode, "InboundResponseParams/@ParamEntrySeparator", "&");
-        respParamNameValueSeparator = XMLConfig.get(configurationNode,
-                "InboundResponseParams/@ParamNameValueSeparator", "=");
+        respParamEntrySeparator = XMLConfig.get(configurationNode, "ResponseParams/@ParamEntrySeparator", "&");
+        respParamNameValueSeparator = XMLConfig.get(configurationNode, "ResponseParams/@ParamNameValueSeparator", "=");
         logger.debug("init - paramNameValueSeparator = '" + respParamNameValueSeparator + "'"
                 + " - paramEntrySeparator = '" + respParamEntrySeparator + "'");
 
-        NodeList paramNodes = XMLConfig.getNodeList(configurationNode, "InboundResponseParams/InboundResponseParam");
+        NodeList paramNodes = XMLConfig.getNodeList(configurationNode, "ResponseParams/ResponseParam");
         for (int i = 0; i < paramNodes.getLength(); i++) {
             Node currParam = paramNodes.item(i);
             String paramName = XMLConfig.get(currParam, "@Name");
@@ -624,7 +561,7 @@ public class InboundParamHandlerFormatter implements Formatter
             }
 
             NodeList currParamHandlerNodes = XMLConfig.getNodeList(currParam, "*[@ItemType='Handler']");
-            List handlerList = new ArrayList(currParamHandlerNodes.getLength());
+            List<InterfaceParametersHandler> handlerList = new ArrayList<InterfaceParametersHandler>(currParamHandlerNodes.getLength());
             int handlerNumber = 0;
             for (int j = 0; j < currParamHandlerNodes.getLength(); j++) {
                 Node currHandler = currParamHandlerNodes.item(j);
@@ -635,21 +572,8 @@ public class InboundParamHandlerFormatter implements Formatter
             }
             respParamHandlers.put(paramName, handlerList);
 
-            NodeList currParamAckHandlerNodes = XMLConfig.getNodeList(currParam, "*[@ItemType='ACKHandler']");
-            List ackHandlerList = new ArrayList(currParamAckHandlerNodes.getLength());
-            handlerNumber = 0;
-            for (int j = 0; j < currParamAckHandlerNodes.getLength(); j++) {
-                Node currAckHandler = currParamAckHandlerNodes.item(j);
-                handlerNumber++;
-                logger.debug("init - instantiating ACK handler n." + handlerNumber + " for response parameter "
-                        + paramName);
-                InterfaceParametersHandler ackHandler = InterfaceParametersHandlerFactory.getHandler(currAckHandler);
-                ackHandlerList.add(ackHandler);
-            }
-            respParamACKHandlers.put(paramName, ackHandlerList);
-
             NodeList currParamErrorHandlerNodes = XMLConfig.getNodeList(currParam, "*[@ItemType='ErrorHandler']");
-            List errorHandlerList = new ArrayList(currParamErrorHandlerNodes.getLength());
+            List<InterfaceParametersHandler> errorHandlerList = new ArrayList<InterfaceParametersHandler>(currParamErrorHandlerNodes.getLength());
             handlerNumber = 0;
             for (int j = 0; j < currParamErrorHandlerNodes.getLength(); j++) {
                 Node currErrorHandler = currParamErrorHandlerNodes.item(j);
@@ -664,7 +588,6 @@ public class InboundParamHandlerFormatter implements Formatter
         }
         logger.debug("init - handler cache content is: " + dumpHandlersCache(respParamHandlers, ""));
         logger.debug("init - error handler cache content is: " + dumpHandlersCache(respParamErrorHandlers, "Error"));
-        logger.debug("init - ACK handler cache content is: " + dumpHandlersCache(respParamACKHandlers, "ACK"));
         logger.debug("init - END Request configuration");
     }
 
@@ -676,11 +599,11 @@ public class InboundParamHandlerFormatter implements Formatter
      *        a <code>List</code> of strings in the format name=value.
      * @return the resulting response query string.
      */
-    private String buildResponseString(List params)
+    private String buildResponseString(List<String> params)
     {
         StringBuffer buf = new StringBuffer("");
         for (int i = 0; i < params.size(); i++) {
-            String currEntry = (String) params.get(i);
+            String currEntry = params.get(i);
             buf.append(currEntry);
             if (i < (params.size() - 1)) {
                 buf.append(respParamEntrySeparator);
@@ -717,7 +640,7 @@ public class InboundParamHandlerFormatter implements Formatter
      * Sets configured default values (if any) for input GVBuffer object fields.
      * 
      * @param inputgvBuffer
-     *        the inbound request <tt>GVBuffer</tt> object.
+     *        the inbounds request <tt>GVBuffer</tt> object.
      * @return an <tt>GVBuffer</tt> object with some fields set to default
      *         values, or null if no default values were configured.
      * @throws IBException
@@ -730,9 +653,9 @@ public class InboundParamHandlerFormatter implements Formatter
                 inputgvBuffer = new GVBuffer();
             }
 
-            Iterator iter = reqGVBufferDefaults.keySet().iterator();
+            Iterator<String> iter = reqGVBufferDefaults.keySet().iterator();
             while (iter.hasNext()) {
-                String currFieldName = (String) iter.next();
+                String currFieldName = iter.next();
                 String currFieldValue = reqGVBufferDefaults.get(currFieldName);
 
                 if (currFieldName.equals(AdapterHttpConfig.MAPPING_VARIABLE_VALUE_SYSTEM)) {
