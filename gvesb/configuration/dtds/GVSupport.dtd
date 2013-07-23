@@ -208,7 +208,7 @@
 -->
 <!ATTLIST JDBCStatisticsWriter id CDATA #REQUIRED>
 <!--
-    JDBC DataSorce JNDI name.
+    JDBC Connection name.
 
     #NotNull
 -->
