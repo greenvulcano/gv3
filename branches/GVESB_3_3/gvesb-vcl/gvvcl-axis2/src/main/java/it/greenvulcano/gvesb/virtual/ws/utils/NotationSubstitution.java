@@ -30,6 +30,7 @@ import it.greenvulcano.gvesb.virtual.ws.dynamic.io.parameter.OMParameter;
 import it.greenvulcano.gvesb.virtual.ws.dynamic.io.parameter.OMParameterHolder;
 import it.greenvulcano.gvesb.virtual.ws.dynamic.io.parameter.SimpleParameter;
 import it.greenvulcano.gvesb.virtual.ws.dynamic.io.writer.IOMParameterWriter;
+import it.greenvulcano.log.GVLogger;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -77,7 +78,7 @@ import org.xml.sax.SAXException;
  */
 public class NotationSubstitution
 {
-    private static final Logger logger = Logger.getLogger(NotationSubstitution.class);
+    private static final Logger logger = GVLogger.getLogger(NotationSubstitution.class);
 
     /**
      * Creates a <code>ParameterHolder</code> for a given

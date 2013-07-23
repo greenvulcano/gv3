@@ -39,6 +39,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -98,6 +99,11 @@ public class GVFlowODE implements GVFlow
      */
     private boolean                 businessFlowTerminated;
     /**
+     * The default logger level.
+     */
+    private Level                   loggerLevel           = Level.ALL;
+
+    /**
      *  type flow: VL or BPEL
      */
     private String typeFlow = "VL";
@@ -141,6 +147,9 @@ public class GVFlowODE implements GVFlow
             outCheckType = XMLConfig.get(gvopNode, "@out-check-type", OUT_CHECK_NONE);
             operationActivation = XMLConfig.getBoolean(gvopNode, "@operation-activation", true);
 
+            Level opLoggerLevel = GVLogger.getThreadMasterLevel();
+            loggerLevel = Level.toLevel(XMLConfig.get(gvopNode, "@loggerLevel", (opLoggerLevel == null) ? "ALL" : opLoggerLevel.toString()));
+
             Node instNode = XMLConfig.getNode(gvopNode, "BpelFlow");
           	if (instNode == null) {
           		throw new GVCoreConfException("GVCORE_MISSED_FLOW_INSTANCE_ERROR", new String[][]{{"node", XPathFinder.buildXPath(gvopNode)}});
@@ -154,6 +163,7 @@ public class GVFlowODE implements GVFlow
 
         logger.debug("END - GVFlow init");
     }
+
     /**
     * @param instNode
     *        the flow instantiation node
@@ -285,7 +295,6 @@ public class GVFlowODE implements GVFlow
     private GVBuffer internalBpelPerform(GVBuffer gvBuffer) throws GVCoreException
     {
     	GVBuffer output = gvBuffer;
-
     	if (logger.isDebugEnabled()) {
     		logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
     	}
@@ -376,6 +385,28 @@ public class GVFlowODE implements GVFlow
     public void setStatisticsEnabled(boolean b)
     {
         statisticsEnabled = b;
+    }
+    
+    /**
+     * @return the actual logger level
+     */
+    public Level getLoggerLevel() {
+        getGVOperationInfo();
+        if (operationInfo != null) {
+            return operationInfo.getLoggerLevelj();
+        }
+        return this.loggerLevel;
+    }
+
+    /**
+     * 
+     * @param loggerLevel
+     *        the logger level to set
+     */
+    public void setLoggerLevel(Level loggerLevel) {
+        //if (Level.ALL.equals(this.loggerLevel)) {
+        this.loggerLevel = loggerLevel;
+        //}
     }
 
     /**

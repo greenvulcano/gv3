@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -36,7 +36,7 @@ public final class AdapterHttpConstants
     /**
      * Http MIME-Type value "text/html".
      */
-    public final static String TEXTHTML_MIMETYPE_NAME            = "text/xml";
+    public final static String TEXTHTML_MIMETYPE_NAME            = "text/html";
 
     /**
      * Http MIME-Type value "text/xml".

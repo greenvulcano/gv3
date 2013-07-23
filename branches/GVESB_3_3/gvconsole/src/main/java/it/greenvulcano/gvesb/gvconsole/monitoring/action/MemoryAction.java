@@ -23,6 +23,7 @@ import it.greenvulcano.gvesb.gvconsole.monitoring.domain.HeapMemory;
 import it.greenvulcano.gvesb.gvconsole.monitoring.domain.NotHeapMemory;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.MemoryUsageService;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.MemoryUsageServiceImpl;
+import it.greenvulcano.log.GVLogger;
 
 import javax.management.MBeanServerConnection;
 
@@ -39,7 +40,7 @@ public class MemoryAction extends GeneralAction
 {
 
     private static final long     serialVersionUID = 300L;
-    private static final Logger   logger           = Logger.getLogger(MemoryAction.class);
+    private static final Logger   logger           = GVLogger.getLogger(MemoryAction.class);
 
     private MBeanServerConnection mBeanServerConnection;
 

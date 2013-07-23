@@ -57,6 +57,9 @@
         <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
                           maximum-size="5" shrink-timeout="120000"
                           subsystem="GreenVulcano-WebServices"/>
+        <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
+                          maximum-size="5" shrink-timeout="120000"
+                          subsystem="HttpInboundGateway"/>
     </GVPoolManager>
     <GVServices name="SERVICES" type="module">
         <Management call-administration-on-init="no"/>
@@ -1794,7 +1797,8 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                 </to>
                             </destinations>
                             <message-body gvBuffer-dump="false">
-                                <message-text>${&apos;Attachment file list:\n&apos;+property[&apos;GV_SMTP_ATTACHMENTS&apos;]}</message-text>
+                                <message-text>Attachment file list:
+@{{GV_SMTP_ATTACHMENTS}}</message-text>
                             </message-body>
                         </mail-message>
                     </smtp-call>
@@ -1935,12 +1939,12 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                type="call">
                         <mail-message content-type="text-plain" high-priority="false"
                                       sender-display-name="GV ESB"
-                                      subject="RE: ${property[&quot;SUBJECT&quot;]}">
+                                      subject="RE: @{{SUBJECT}}">
                             <message-body gvBuffer-dump="false">
                                 <message-text>Persons data</message-text>
                             </message-body>
                             <attachments>
-                                <gvBuffer name="PersonsData_${@it.greenvulcano.util.txt.DateUtils@nowToString(&apos;yyyyMMddHHmmss&apos;)}.${property[&apos;FILE_EXT&apos;]}"/>
+                                <gvBuffer name="PersonsData_timestamp{{yyyyMMddHHmmss}}.@{{FILE_EXT}}"/>
                             </attachments>
                         </mail-message>
                     </smtp-call>
@@ -1949,7 +1953,7 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                type="call">
                         <mail-message content-type="text-plain" high-priority="true"
                                       sender-display-name="GV ESB"
-                                      subject="RE: ${property[&quot;SUBJECT&quot;]}">
+                                      subject="RE: @{{SUBJECT}}">
                             <message-body gvBuffer-dump="false">
                                 <message-text>Invalid service request.
 Available Services:
@@ -2546,6 +2550,29 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
             </Calendars>
         </GVSchedulerBuilder>
         <TaskGroups>
+            <TaskGroup name="SystemGroup">
+                <LogCleanerTask auto-start="true" class="it.greenvulcano.scheduler.util.log.LogCleanerTask"
+                          enabled="false" zip-older-than="7" delete-older-than="14"
+                          log-directory="@{{LOG_DIR}}" zip-mode="zip"
+                          name="LogCleaner" type="task">
+                    <Triggers>
+                        <CronTriggerBuilder class="it.greenvulcano.scheduler.util.quartz.impl.trigger.CronTriggerBuilder"
+                                            cronExpression="0 0 0/2 * * ?"
+                                            name="Trg_2h_gv" type="cron-trigger">
+                            <TgProperties>
+                                <PropertyDef name="LOG_DIR" value="sp{{gv.app.home}}/log"/>
+                            </TgProperties>
+                        </CronTriggerBuilder>
+                        <CronTriggerBuilder class="it.greenvulcano.scheduler.util.quartz.impl.trigger.CronTriggerBuilder"
+                                            cronExpression="0 0 0/2 * * ?"
+                                            name="Trg_2h_jboss" type="cron-trigger">
+                            <TgProperties>
+                                <PropertyDef name="LOG_DIR" value="sp{{jboss.server.log.dir}}"/>
+                            </TgProperties>
+                        </CronTriggerBuilder>
+                    </Triggers>
+                </LogCleanerTask>
+            </TaskGroup>
             <TaskGroup name="BaseGroup">
                 <TestTask auto-start="true"
                           class="it.greenvulcano.scheduler.util.test.TestTask"

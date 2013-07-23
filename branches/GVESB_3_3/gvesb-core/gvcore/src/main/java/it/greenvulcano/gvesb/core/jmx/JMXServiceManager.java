@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -607,7 +608,8 @@ public final class JMXServiceManager implements ConfigurationListener
             for (int i = 0; i < num; i++) {
                 String name = XMLConfig.get(services.item(i), "@id-service");
                 boolean activation = XMLConfig.getBoolean(services.item(i), "@service-activation", true);
-                mapSvc.put(name, new ServiceInfo(name, activation));
+                String loggerLevel = XMLConfig.get(services.item(i), "@loggerLevel", XMLConfig.get(services.item(i), "../@loggerLevel", "ALL"));
+                mapSvc.put(name, new ServiceInfo(name, activation, loggerLevel));
             }
         }
         catch (XMLConfigException exc) {

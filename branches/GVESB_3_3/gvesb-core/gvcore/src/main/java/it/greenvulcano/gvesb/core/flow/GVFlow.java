@@ -26,6 +26,7 @@ import it.greenvulcano.gvesb.statistics.StatisticsDataManager;
 
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.w3c.dom.Node;
 
 /**
@@ -120,6 +121,17 @@ public interface GVFlow
      */
     public void setStatisticsEnabled(boolean b);
 
+    /**
+     * @return the actual logger level
+     */
+    public Level getLoggerLevel();
+
+    /**
+     * 
+     * @param loggerLevel
+     *        the logger level to set
+     */
+    public void setLoggerLevel(Level loggerLevel);
 
     /**
      * @return the flow activation flag value

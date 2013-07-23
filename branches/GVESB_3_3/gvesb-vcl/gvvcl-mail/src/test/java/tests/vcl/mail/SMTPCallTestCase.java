@@ -60,7 +60,6 @@ public class SMTPCallTestCase extends TestCase
     @Override
     protected void setUp() throws Exception
     {
-        // server = SimpleSmtpServer.start(10025);
         context = new InitialContext();
     }
 
@@ -80,8 +79,6 @@ public class SMTPCallTestCase extends TestCase
         gvBuffer.setObject(TEST_MESSAGE);
 
         op.perform(gvBuffer);
-
-        // server.stop();
 
         assertTrue(server.getReceivedEmailSize() == 1);
         Iterator<?> emailIter = server.getReceivedEmail();
@@ -120,8 +117,6 @@ public class SMTPCallTestCase extends TestCase
 
         op.perform(gvBuffer);
 
-        // server.stop();
-
         assertTrue(server.getReceivedEmailSize() == 1);
         Iterator<?> emailIter = server.getReceivedEmail();
         SmtpMessage email = (SmtpMessage) emailIter.next();
@@ -156,8 +151,6 @@ public class SMTPCallTestCase extends TestCase
 
         op.perform(gvBuffer);
 
-        // server.stop();
-
         assertTrue(server.getReceivedEmailSize() == 1);
         Iterator<?> emailIter = server.getReceivedEmail();
         SmtpMessage email = (SmtpMessage) emailIter.next();
@@ -188,11 +181,5 @@ public class SMTPCallTestCase extends TestCase
                 exc.printStackTrace();
             }
         }
-
-        /*
-         * if (server != null) { try { if (!server.isStopped()) {
-         * //server.stop(); } } catch (Exception exc) { exc.printStackTrace(); }
-         * server = null; }
-         */
     }
 }

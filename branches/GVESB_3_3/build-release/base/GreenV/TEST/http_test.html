@@ -1,0 +1,17 @@
+<html>
+    <body>
+        <form name="input" action="http://localhost:8080/gvhttp/inbound" method="post">
+            <input type="hidden" name="GV_ACTION" value="HTTP_TEST"/>
+            Service: <input type="text" name="service"/><br/>
+            System (optional): <input type="text" name="system"/><br/>
+            ID (optional): <input type="text" name="id"/><br/>
+            Data (optional): <textarea rows="10" cols="30" name="data"></textarea><br/>
+            Operation: <select name="operation">
+                           <option value="RequestReply" selected>RequestReply</option>
+                           <option value="Request">Request</option>
+                           <option value="GetReply">GetReply</option>
+                       </select><br/>
+            <input type="submit" value="Invoke"/>
+        </form>
+    </body>
+</html>

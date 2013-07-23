@@ -52,26 +52,26 @@ public class RegExFileFilter implements FileFilter
     /**
      * Search for <code>files-only</code>
      */
-    public static final int FILES_ONLY        = 0;
+    public static final int FILES_ONLY          = 0;
 
     /**
      * Search for <code>directories-only</code>
      */
-    public static final int DIRECTORIES_ONLY  = 1;
+    public static final int DIRECTORIES_ONLY    = 1;
 
     /**
      * Search for <code>all</code>
      */
-    public static final int ALL               = 2;
+    public static final int ALL                 = 2;
 
-    private String          namePattern       = "";
-    private Pattern         pattern           = null;
-    private boolean         checkLastModified = false;
-    private long            lastTimestamp     = -1;
+    private String          namePattern         = "";
+    private Pattern         pattern             = null;
+    private boolean         checkLastModified   = false;
+    private boolean         selectModifiedSince = true;
+    private long            lastTimestamp       = -1;
     private int             fileType;
 
-    public static RegExFileFilter buildFileFilter(Node node) throws Exception
-    {
+    public static RegExFileFilter buildFileFilter(Node node) throws Exception {
         String fileType = XMLConfig.get(node, "@file-type", "files-only");
         String namePattern = XMLConfig.get(node, "@file-mask", "");
         int type = -1;
@@ -87,8 +87,7 @@ public class RegExFileFilter implements FileFilter
         return new RegExFileFilter(namePattern, type);
     }
 
-    public static RegExFileFilter buildFileFilter(Node node, Map<String, String> properties) throws Exception
-    {
+    public static RegExFileFilter buildFileFilter(Node node, Map<String, String> properties) throws Exception {
         try {
             PropertiesHandler.enableExceptionOnErrors();
             String fileType = XMLConfig.get(node, "@file-type", "files-only");
@@ -111,8 +110,7 @@ public class RegExFileFilter implements FileFilter
         }
     }
 
-    public static RegExFileFilter buildFileFilter(Node node, Object propsObj) throws Exception
-    {
+    public static RegExFileFilter buildFileFilter(Node node, Object propsObj) throws Exception {
         try {
             PropertiesHandler.enableExceptionOnErrors();
             String fileType = XMLConfig.get(node, "@file-type", "files-only");
@@ -134,8 +132,7 @@ public class RegExFileFilter implements FileFilter
         }
     }
 
-    public RegExFileFilter(String namePattern, int fileType)
-    {
+    public RegExFileFilter(String namePattern, int fileType) {
         this.namePattern = namePattern;
         if ((namePattern != null) && (namePattern.length() > 0)) {
             if (PropertiesHandler.isExpanded(namePattern)) {
@@ -149,8 +146,7 @@ public class RegExFileFilter implements FileFilter
         this.fileType = fileType;
     }
 
-    public RegExFileFilter(String namePattern, int fileType, long lastTimestamp)
-    {
+    public RegExFileFilter(String namePattern, int fileType, long lastTimestamp) {
         this.namePattern = namePattern;
         if ((namePattern != null) && (namePattern.length() > 0)) {
             if (PropertiesHandler.isExpanded(namePattern)) {
@@ -168,16 +164,35 @@ public class RegExFileFilter implements FileFilter
         }
     }
 
+    public RegExFileFilter(String namePattern, int fileType, long timestamp, boolean selectModifiedSince) {
+        this.namePattern = namePattern;
+        if ((namePattern != null) && (namePattern.length() > 0)) {
+            if (PropertiesHandler.isExpanded(namePattern)) {
+                this.pattern = Pattern.compile(namePattern);
+            }
+        }
+        else {
+            this.pattern = null;
+        }
+
+        this.fileType = fileType;
+        if (timestamp > 0) {
+            this.checkLastModified = true;
+            this.lastTimestamp = timestamp;
+            this.selectModifiedSince = selectModifiedSince;
+        }
+    }
+
     /**
      * Defines if the file search must use file timestamp.
      * 
      * @param value
      * @param lastTimestamp
      */
-    public void setCheckLastModified(boolean value, long lastTimestamp)
-    {
+    public void setCheckLastModified(boolean value, long timestamp, boolean selectModifiedSince) {
         checkLastModified = value;
-        this.lastTimestamp = lastTimestamp;
+        this.lastTimestamp = timestamp;
+        this.selectModifiedSince = selectModifiedSince;
     }
 
     /**
@@ -186,8 +201,7 @@ public class RegExFileFilter implements FileFilter
      * @param properties
      * @throws Exception
      */
-    public void compileNamePattern(Map<String, String> properties) throws Exception
-    {
+    public void compileNamePattern(Map<String, String> properties) throws Exception {
         String locNamePattern = PropertiesHandler.expand(this.namePattern, MapUtils.convertToHMStringObject(properties));
         this.pattern = Pattern.compile(locNamePattern);
     }
@@ -198,18 +212,18 @@ public class RegExFileFilter implements FileFilter
      * @param properties
      * @throws Exception
      */
-    public void compileNamePattern(Object propsObj) throws Exception
-    {
+    public void compileNamePattern(Object propsObj) throws Exception {
         String locNamePattern = PropertiesHandler.expand(this.namePattern, null, propsObj);
         this.pattern = Pattern.compile(locNamePattern);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.io.FileFilter#accept(java.io.File)
      */
     @Override
-    public boolean accept(File file)
-    {
+    public boolean accept(File file) {
         boolean fileTypeMatches = false;
         boolean nameMatches = false;
         boolean isModified = false;
@@ -228,7 +242,7 @@ public class RegExFileFilter implements FileFilter
 
             if (nameMatches) {
                 if (checkLastModified) {
-                    isModified = file.lastModified() > lastTimestamp;
+                    isModified = selectModifiedSince ? (file.lastModified() > lastTimestamp) : (file.lastModified() <= lastTimestamp);
                 }
                 else {
                     isModified = true;
@@ -239,8 +253,7 @@ public class RegExFileFilter implements FileFilter
         return fileTypeMatches && nameMatches && isModified;
     }
 
-    public boolean accept(FTPFile file)
-    {
+    public boolean accept(FTPFile file) {
         boolean fileTypeMatches = false;
         boolean nameMatches = false;
         boolean isModified = false;
@@ -259,7 +272,7 @@ public class RegExFileFilter implements FileFilter
 
             if (nameMatches) {
                 if (checkLastModified) {
-                    isModified = file.getTimestamp().getTimeInMillis() > lastTimestamp;
+                    isModified = selectModifiedSince ? (file.getTimestamp().getTimeInMillis() > lastTimestamp) : (file.getTimestamp().getTimeInMillis() <= lastTimestamp);
                 }
                 else {
                     isModified = true;
@@ -270,8 +283,7 @@ public class RegExFileFilter implements FileFilter
         return fileTypeMatches && nameMatches && isModified;
     }
 
-    public boolean accept(LsEntry file)
-    {
+    public boolean accept(LsEntry file) {
         boolean fileTypeMatches = false;
         boolean nameMatches = false;
         boolean isModified = false;
@@ -290,7 +302,7 @@ public class RegExFileFilter implements FileFilter
 
             if (nameMatches) {
                 if (checkLastModified) {
-                    isModified = file.getAttrs().getMTime() > lastTimestamp;
+                    isModified = selectModifiedSince ? (file.getAttrs().getMTime() > lastTimestamp) : (file.getAttrs().getMTime() <= lastTimestamp);
                 }
                 else {
                     isModified = true;
@@ -301,8 +313,7 @@ public class RegExFileFilter implements FileFilter
         return fileTypeMatches && nameMatches && isModified;
     }
 
-    public static int getFileType(String fileType)
-    {
+    public static int getFileType(String fileType) {
         if (fileType.equals("all")) {
             return ALL;
         }
@@ -314,12 +325,13 @@ public class RegExFileFilter implements FileFilter
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         String regExp = (pattern != null) ? pattern.pattern() : namePattern;
         if (fileType == ALL) {
             return regExp + "||all";

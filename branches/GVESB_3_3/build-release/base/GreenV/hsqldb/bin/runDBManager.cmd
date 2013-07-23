@@ -9,6 +9,6 @@ call ..\..\bin\env_scripts.cmd
 set HSQLDB_HOME=%GV_HOME%\hsqldb
 set CLASSPATH=%HSQLDB_HOME%\lib\hsqldb.jar
 
-%JAVA_HOME%\bin\java -cp %CLASSPATH% org.hsqldb.util.DatabaseManagerSwing %1 %2 %3 %4 %5 %6 %7 %8 %9
+"%JAVA_HOME%\bin\java" -cp %CLASSPATH% org.hsqldb.util.DatabaseManagerSwing %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 cd "%SOURCEDIR%"

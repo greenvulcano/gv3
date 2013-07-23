@@ -11,6 +11,6 @@ set CLASSPATH=%HSQLDB_HOME%\lib\hsqldb.jar
 
 set JAVA_OPTS=-Xms256M -Xmx512M -XX:MaxPermSize=64m -XX:+UseConcMarkSweepGC
 
-%JAVA_HOME%\bin\java %JAVA_OPTS% -cp %CLASSPATH% -DHSQLDB_HOME=%HSQLDB_HOME% org.hsqldb.server.Server
+"%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp %CLASSPATH% -DHSQLDB_HOME=%HSQLDB_HOME% org.hsqldb.server.Server
 
 cd "%SOURCEDIR%"

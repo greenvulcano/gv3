@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -59,7 +59,7 @@ public class FlatParameterHandler extends InterfaceParametersHandler
     {
         try {
             paramMappings = new HashMap<String, MappingData>();
-            NodeList mappingNodes = XMLConfig.getNodeList(specificParamHandlerSection, "./*[@ItemType='Mapping']");
+            NodeList mappingNodes = XMLConfig.getNodeList(specificParamHandlerSection, "*[@ItemType='Mapping']");
             for (int i = 0; i < mappingNodes.getLength(); i++) {
                 Node currMapping = mappingNodes.item(i);
                 String mappingVariable = null;
@@ -71,26 +71,26 @@ public class FlatParameterHandler extends InterfaceParametersHandler
                 mappingData.trim = XMLConfig.get(currMapping, "@Trim", "");
                 mappingData.xpath = XMLConfig.get(currMapping, "@XPath", "");
 
-                if ((variable = XMLConfig.getNode(currMapping, "./GVBufferField")) != null) {
+                if ((variable = XMLConfig.getNode(currMapping, "GVBufferField")) != null) {
                     mappingVariable = XMLConfig.get(variable, "@FieldName");
                 }
-                else if ((variable = XMLConfig.getNode(currMapping, "./GVBufferExtendedField")) != null) {
+                else if ((variable = XMLConfig.getNode(currMapping, "GVBufferProperty")) != null) {
                     mappingVariable = AdapterHttpConfig.MAPPING_VARIABLE_VALUE_PROPERTY
                             + AdapterHttpConfig.TOKEN_SEPARATOR + XMLConfig.get(variable, "@FieldName");
                 }
-                else if ((variable = XMLConfig.getNode(currMapping, "./OpType")) != null) {
+                else if ((variable = XMLConfig.getNode(currMapping, "OpType")) != null) {
                     mappingVariable = AdapterHttpConfig.MAPPING_VARIABLE_VALUE_OPTYPE;
                 }
-                else if ((variable = XMLConfig.getNode(currMapping, "./GVTransactionInfo")) != null) {
+                else if ((variable = XMLConfig.getNode(currMapping, "GVTransactionInfo")) != null) {
                     mappingVariable = XMLConfig.get(variable, "@Value");
                 }
-                else if ((variable = XMLConfig.getNode(currMapping, "./GVTransactionErrorInfo")) != null) {
+                else if ((variable = XMLConfig.getNode(currMapping, "GVTransactionErrorInfo")) != null) {
                     mappingVariable = XMLConfig.get(variable, "@Value");
                 }
-                else if ((variable = XMLConfig.getNode(currMapping, "./DefaultErrorMessage")) != null) {
+                else if ((variable = XMLConfig.getNode(currMapping, "DefaultErrorMessage")) != null) {
                     mappingVariable = XMLConfig.getNodeValue(variable);
                 }
-                else if ((variable = XMLConfig.getNode(currMapping, "./DefaultValue")) != null) {
+                else if ((variable = XMLConfig.getNode(currMapping, "DefaultValue")) != null) {
                     mappingVariable = XMLConfig.getNodeValue(variable);
                 }
 
@@ -113,8 +113,7 @@ public class FlatParameterHandler extends InterfaceParametersHandler
      * Parameter handler method.
      * 
      * @param input
-     *        the input HTTP parameter (as a <tt>String</tt>) to be used to
-     *        populate an GVBuffer object.
+     *        the input HTTP parameter to be used to populate an GVBuffer object.
      * @param previous
      *        the output GVBuffer object from a previous handler.
      * @return the resulting output GVBuffer object.
@@ -122,7 +121,7 @@ public class FlatParameterHandler extends InterfaceParametersHandler
      *         if any error occurs.
      */
     @Override
-    protected GVBuffer buildGVBuffer(String input, GVBuffer previous) throws DataHandlerException
+    protected GVBuffer buildGVBuffer(Object input, GVBuffer previous) throws DataHandlerException
     {
         String currDestVar = null;
         String currGVBufferFieldValue = null;
@@ -158,29 +157,9 @@ public class FlatParameterHandler extends InterfaceParametersHandler
                         currGVBufferFieldValue = getStringValue(xmlValue, mappingData);
                     }
 
-                    if (currDestVar.equals(AdapterHttpConfig.MAPPING_VARIABLE_VALUE_GVBUFFER)) {
-                        String charEnc = getCharEncoding();
-                        if (charEnc != null) {
-                            //gvBufferAccess.setField(currDestVar, currGVBufferFieldValue.getBytes(charEnc));
-                            gvBufferAccess.setField(currDestVar, currGVBufferFieldValue);
-                            logger.debug("buildGVBuffer - GVBuffer field '" + currDestVar
-                                    + "' populated with bytes from the string : " + currGVBufferFieldValue
-                                    + " (decoded using " + charEnc + ")");
-
-                        }
-                        else {
-                            //gvBufferAccess.setField(currDestVar, currGVBufferFieldValue.getBytes());
-                            gvBufferAccess.setField(currDestVar, currGVBufferFieldValue);
-                            logger.debug("buildGVBuffer - GVBuffer field '" + currDestVar
-                                    + "' populated with bytes from the string : " + currGVBufferFieldValue
-                                    + " (decoded using default Java encoding)");
-                        }
-                    }
-                    else {
-                        gvBufferAccess.setField(currDestVar, currGVBufferFieldValue);
-                        logger.debug("buildGVBuffer - GVBuffer field '" + currDestVar + "' populated with value: "
-                                + currGVBufferFieldValue);
-                    }
+                    gvBufferAccess.setField(currDestVar, currGVBufferFieldValue);
+                    logger.debug("buildGVBuffer - GVBuffer field '" + currDestVar + "' populated with value: "
+                            + currGVBufferFieldValue);
                 }
             }
 
@@ -206,103 +185,6 @@ public class FlatParameterHandler extends InterfaceParametersHandler
         }
     }
 
-    /**
-     * Parameter handler method.
-     * 
-     * @param input
-     *        the input HTTP parameter (as a <tt>byte</tt> array) to be used to
-     *        populate an GVBuffer object.
-     * @param previous
-     *        the output GVBuffer object from a previous handler.
-     * @return the resulting output GVBuffer object.
-     * @throws DataHandlerException
-     *         if any error occurs.
-     */
-    @Override
-    protected GVBuffer buildGVBuffer(byte[] input, GVBuffer previous) throws DataHandlerException
-    {
-        String currDestVar = null;
-        String currGVBufferFieldValue = null;
-        GVBufferAccess gvBufferAccess = null;
-        Document doc = null;
-        try {
-            Iterator iter = paramMappings.keySet().iterator();
-            while (iter.hasNext()) {
-                currDestVar = (String) iter.next();
-                MappingData mappingData = paramMappings.get(currDestVar);
-
-                logger.debug("buildGVBuffer - target variable: " + currDestVar);
-
-                if ((currDestVar != null) && isGVBufferField(currDestVar)) {
-                    if (previous == null) {
-                        // No handlers before this one:
-                        // the GVBuffer object has to be created
-                        // from scratch
-                        previous = new GVBuffer();
-                    }
-                    if (gvBufferAccess == null) {
-                        gvBufferAccess = new GVBufferAccess(previous);
-                    }
-                    if (mappingData.xpath.equals("")) {
-                        if (currDestVar.equals(AdapterHttpConfig.MAPPING_VARIABLE_VALUE_GVBUFFER)) {
-                            currGVBufferFieldValue = "Binary value";
-                            gvBufferAccess.setField(currDestVar, getByteArrValue(input, mappingData));
-                            logger.debug("buildGVBuffer - GVBuffer field '" + currDestVar + "' populated with value: "
-                                    + currGVBufferFieldValue);
-                        }
-                        else {
-                            currGVBufferFieldValue = getStringValue(input, mappingData);
-                            gvBufferAccess.setField(currDestVar, currGVBufferFieldValue);
-                            logger.debug("buildGVBuffer - GVBuffer field '" + currDestVar + "' populated with value: "
-                                    + currGVBufferFieldValue);
-                        }
-                    }
-                    else {
-                        if (doc == null) {
-                            // parse XML parameter into a DOM
-                            doc = parseDOM(input, "Input");
-                        }
-                        String xmlValue = getNodeContent(doc, mappingData.xpath);
-                        currGVBufferFieldValue = getStringValue(xmlValue, mappingData);
-                        String charEnc = getCharEncoding();
-                        if (charEnc != null) {
-                            //gvBufferAccess.setField(currDestVar, currGVBufferFieldValue.getBytes(charEnc));
-                            gvBufferAccess.setField(currDestVar, currGVBufferFieldValue);
-                            logger.debug("buildGVBuffer - GVBuffer field '" + currDestVar
-                                    + "' populated with bytes from the string : " + currGVBufferFieldValue
-                                    + " (decoded using " + charEnc + ")");
-                        }
-                        else {
-                            //gvBufferAccess.setField(currDestVar, currGVBufferFieldValue.getBytes());
-                            gvBufferAccess.setField(currDestVar, currGVBufferFieldValue);
-                            logger.debug("buildGVBuffer - GVBuffer field '" + currDestVar
-                                    + "' populated with bytes from the string : " + currGVBufferFieldValue
-                                    + " (decoded using default Java encoding)");
-                        }
-                    }
-                }
-            }
-            return previous;
-        }
-        catch (GVException exc) {
-            logger.error("buildGVBuffer - Error while setting GVBuffer object field " + currDestVar + ": " + exc);
-            throw new DataHandlerException("GVHTTP_GVDATA_FIELD_SETTING_ERROR", new String[][]{
-                    {"fieldName", currDestVar}, {"fieldValue", currGVBufferFieldValue}, {"errorName", "" + exc}}, exc);
-
-        }
-        catch (UnsupportedEncodingException exc) {
-            logger.error("buildGVBuffer - Encoding error while setting GVBuffer object field " + currDestVar + ": "
-                    + exc);
-            throw new DataHandlerException("GVHTTP_CHARACTER_ENCODING_ERROR", new String[][]{
-                    {"encName", getCharEncoding()}, {"errorName", "" + exc}}, exc);
-
-        }
-        catch (Throwable exc) {
-            logger.error("buildGVBuffer - Runtime error while populating GVBuffer object: " + exc);
-            throw new DataHandlerException("GVHTTP_RUNTIME_ERROR", new String[][]{
-                    {"phase", "GVBuffer object population"}, {"errorName", "" + exc}}, exc);
-        }
-    }
 
     /**
      * Parameter handler method.
@@ -315,7 +197,7 @@ public class FlatParameterHandler extends InterfaceParametersHandler
      *         if any error occurs.
      */
     @Override
-    protected String buildOpTypeString(String input) throws OpTypeHandlerException
+    protected String buildOpTypeString(Object input) throws OpTypeHandlerException
     {
         String result = null;
         try {
@@ -343,50 +225,6 @@ public class FlatParameterHandler extends InterfaceParametersHandler
         }
     }
 
-    /**
-     * Parameter handler method.
-     * 
-     * @param input
-     *        the input HTTP parameter (as a <tt>byte</tt> array) from which the
-     *        OpType parameter has to be parsed.
-     * @return the resulting OpType parameter value (as a String).
-     * @throws OpTypeHandlerException
-     *         if any error occurs.
-     */
-    @Override
-    protected String buildOpTypeString(byte[] input) throws OpTypeHandlerException
-    {
-        String result = null;
-        try {
-            Iterator iter = paramMappings.keySet().iterator();
-            while (iter.hasNext()) {
-                String currDestVar = (String) iter.next();
-                MappingData mappingData = paramMappings.get(currDestVar);
-
-                logger.debug("buildOpTypeString - target variable: " + currDestVar);
-
-                if (isOpType(currDestVar)) {
-                    logger.debug("buildOpTypeString - Found mapping for OpType value");
-                    result = getStringValue(input, mappingData);
-                    logger.debug("buildOpTypeString - OpType value is: " + result);
-                    break;
-                }
-            }
-
-            return result;
-        }
-        catch (UnsupportedEncodingException exc) {
-            logger.error("buildOpTypeString - Encoding error while setting OpType variable value: " + exc);
-            throw new OpTypeHandlerException("GVHTTP_CHARACTER_ENCODING_ERROR", new String[][]{
-                    {"encName", getCharEncoding()}, {"errorName", "" + exc}}, exc);
-
-        }
-        catch (Throwable exc) {
-            logger.error("buildOpTypeString - Runtime error while setting OpType variable value: " + exc);
-            throw new OpTypeHandlerException("GVHTTP_RUNTIME_ERROR", new String[][]{
-                    {"phase", "OpType variable value setting"}, {"errorName", "" + exc}}, exc);
-        }
-    }
 
     /**
      * Parameter handler method.
@@ -423,7 +261,7 @@ public class FlatParameterHandler extends InterfaceParametersHandler
                 if (currSourceVar != null) {
                     if (currSourceVar.equals(AdapterHttpConfig.MAPPING_VARIABLE_VALUE_GVBUFFER)) {
                         if (mappingData.xpath.equals("")) {
-                            outputHttpParam = getStringValue((byte[]) gvBufferAccess.getFieldAsObject(currSourceVar),
+                            outputHttpParam = getStringValue(gvBufferAccess.getFieldAsObject(currSourceVar),
                                     mappingData);
                         }
                         else {

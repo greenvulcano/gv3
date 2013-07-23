@@ -436,6 +436,9 @@
             <attribute description="The operation activation status"
                        displayName="Activation" name="operationActivation" readable="true"
                        type="boolean" writeable="false"/>
+            <attribute description="The operation logger level"
+                       displayName="Logger Level" name="loggerLevel" readable="true"
+                       type="java.lang.String" writeable="true"/>
             <attribute description="Reads the history Throughput for Nodes."
                        displayName="historyThroughputNod" name="historyThroughputNod"
                        readable="true" type="float" writeable="false"/>
@@ -463,6 +466,9 @@
             <attribute description="The operation activation status"
                        displayName="Activation" name="operationActivation" readable="true"
                        type="boolean" writeable="true"/>
+            <attribute description="The operation logger level"
+                       displayName="Logger Level" name="loggerLevelj" readable="true"
+                       type="org.apache.log4j.Level" writeable="true"/>
             <operation description="Set the Activation flag to &apos;on&apos;." name="on"/>
             <operation description="Set the Activation flag to &apos;off&apos;."
                        name="off"/>

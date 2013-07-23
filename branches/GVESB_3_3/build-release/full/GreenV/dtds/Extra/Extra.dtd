@@ -7,6 +7,9 @@
 <!ENTITY % gvexcel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVExcel.dtd">
 %gvexcel;
 
+<!ENTITY % gvhttp SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHTTPInbound.dtd">
+%gvhttp;
+
 <!ENTITY % gvhl7 SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHL7.dtd">
 %gvhl7;
 
@@ -37,5 +40,5 @@
 <!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
 
 <!ENTITY % extra-core "">
-<!ENTITY % extra-adapters ",GVHL7ListenerManager,GVRulesConfigManager,GVSocialAdapterManager">
+<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVRulesConfigManager,GVSocialAdapterManager">
 <!ENTITY % extra-support "">

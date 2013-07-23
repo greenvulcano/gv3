@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -107,6 +108,11 @@ public class GVFlowWF implements GVFlow
      * if true the flow terminate a business flow
      */
     private boolean                 businessFlowTerminated;
+    /**
+     * The default logger level.
+     */
+    private Level                   loggerLevel           = Level.ALL;
+
 
     /**
      * Initialize the instance
@@ -138,6 +144,9 @@ public class GVFlowWF implements GVFlow
 
             outCheckType = XMLConfig.get(gvopNode, "@out-check-type", OUT_CHECK_NONE);
             operationActivation = XMLConfig.getBoolean(gvopNode, "@operation-activation", true);
+            
+            Level opLoggerLevel = GVLogger.getThreadMasterLevel();
+            loggerLevel = Level.toLevel(XMLConfig.get(gvopNode, "@loggerLevel", (opLoggerLevel == null) ? "ALL" : opLoggerLevel.toString()));
 
             Node instNode = XMLConfig.getNode(gvopNode, "Flow");
             if (instNode == null) {
@@ -162,38 +171,46 @@ public class GVFlowWF implements GVFlow
      */
     private void initFlowNodes(Node instNode) throws GVCoreConfException
     {
+        Level level = null;
         try {
-            firstNode = XMLConfig.get(instNode, "@first-node");
+            level = GVLogger.setThreadMasterLevel(getLoggerLevel());
 
-            NodeList nl = null;
-            nl = XMLConfig.getNodeList(instNode, "*[@type='flow-node']");
-            if ((nl == null) || (nl.getLength() == 0)) {
-                throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
-            }
-
-            Node defNode = null;
             try {
-                for (int i = 0; i < nl.getLength(); i++) {
-                    GVFlowNode flowNode = null;
-                    defNode = nl.item(i);
-                    String nodeClass = XMLConfig.get(defNode, "@class");
-                    logger.debug("creating GVFlowNode(" + i + ") of class " + nodeClass);
-                    flowNode = (GVFlowNode) Class.forName(nodeClass).newInstance();
-                    flowNode.init(defNode);
-                    flowNodes.put(flowNode.getId(), flowNode);
+                firstNode = XMLConfig.get(instNode, "@first-node");
+    
+                NodeList nl = null;
+                nl = XMLConfig.getNodeList(instNode, "*[@type='flow-node']");
+                if ((nl == null) || (nl.getLength() == 0)) {
+                    throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
+                }
+    
+                Node defNode = null;
+                try {
+                    for (int i = 0; i < nl.getLength(); i++) {
+                        GVFlowNode flowNode = null;
+                        defNode = nl.item(i);
+                        String nodeClass = XMLConfig.get(defNode, "@class");
+                        logger.debug("creating GVFlowNode(" + i + ") of class " + nodeClass);
+                        flowNode = (GVFlowNode) Class.forName(nodeClass).newInstance();
+                        flowNode.init(defNode);
+                        flowNodes.put(flowNode.getId(), flowNode);
+                    }
+                }
+                catch (GVCoreConfException exc) {
+                    throw exc;
+                }
+                catch (Exception exc) {
+                    logger.error("Error initiliazing FlowNode " + flowName, exc);
+                    throw new GVCoreConfException("GVCORE_INIT_FLOW_NODE_ERROR", new String[][]{{"name", flowName},
+                            {"node", XPathFinder.buildXPath(defNode)}}, exc);
                 }
             }
-            catch (GVCoreConfException exc) {
-                throw exc;
-            }
-            catch (Exception exc) {
-                logger.error("Error initiliazing FlowNode " + flowName, exc);
-                throw new GVCoreConfException("GVCORE_INIT_FLOW_NODE_ERROR", new String[][]{{"name", flowName},
-                        {"node", XPathFinder.buildXPath(defNode)}}, exc);
+            catch (XMLConfigException exc) {
+                throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
             }
         }
-        catch (XMLConfigException exc) {
-            throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
+        finally {
+            GVLogger.removeThreadMasterLevel(level);
         }
     }
 
@@ -562,6 +579,26 @@ public class GVFlowWF implements GVFlow
     public void setStatisticsEnabled(boolean b)
     {
         statisticsEnabled = b;
+    }
+
+    /**
+     * @return the actual logger level
+     */
+    public Level getLoggerLevel() {
+        getGVOperationInfo();
+        if (operationInfo != null) {
+            return operationInfo.getLoggerLevelj();
+        }
+        return this.loggerLevel;
+    }
+
+    /**
+     * 
+     * @param loggerLevel
+     *        the logger level to set
+     */
+    public void setLoggerLevel(Level loggerLevel) {
+        this.loggerLevel = loggerLevel;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -23,7 +23,6 @@ import it.greenvulcano.gvesb.adapter.http.exc.InboundHttpResponseException;
 import it.greenvulcano.gvesb.adapter.http.formatters.handlers.AdapterHttpConfigurationException;
 import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpConstants;
 import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpException;
-import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.identity.impl.HTTPIdentityInfo;
 import it.greenvulcano.gvesb.log.GVFormatLog;
@@ -159,34 +158,37 @@ public class HttpInboundGateway extends HttpServlet
         NMDC.clear();
         NMDC.setServer(JMXEntryPoint.getServerName());
         NMDC.setSubSystem(AdapterHttpConstants.SUBSYSTEM);
-        String mapping = req.getServletPath();
+        String mapping = req.getServletPath().substring(1);
+        String gvAction = req.getParameter("GV_ACTION");
+        gvAction = (gvAction != null) ? gvAction : "NULL";
         Level level = Level.INFO;
         AdapterHttpException exception = null;
         HttpServletMapping smapping = null;
 
-        startTime = System.currentTimeMillis();
-        logWriter.info(method + " - BEGIN " + mapping.substring(1));
-
         try {
+            startTime = System.currentTimeMillis();
+            NMDC.put("HTTP_ACTION", gvAction);
+            logWriter.info(method + " - BEGIN " + mapping + "/" + gvAction);
+
             // Create and insert the caller in the security context
             GVIdentityHelper.push(new HTTPIdentityInfo(req));
 
-            smapping = mappingManager.getMapping(mapping);
+            smapping = mappingManager.getMapping(gvAction);
             if (!smapping.handleRequest(req, resp)) {
                 level = Level.ERROR;
             }
         }
         catch (AdapterHttpConfigurationException exc) {
             level = Level.ERROR;
-            logWriter.error(method + " " + mapping.substring(1) + " - Can't handle request from client system: ", exc);
+            logWriter.error(method + " " + mapping + "/" + gvAction + " - Can't handle request from client system", exc);
             exception = exc;
-            throw new ServletException("Can't handle request from  client system - " + mapping.substring(1), exc);
+            throw new ServletException("Can't handle request from client system - " + mapping + "/" + gvAction, exc);
         }
         catch (InboundHttpResponseException exc) {
             level = Level.ERROR;
-            logWriter.error(method + " " + mapping.substring(1) + " - Can't send response to client system: " + exc);
+            logWriter.error(method + " " + mapping + "/" + gvAction + " - Can't send response to client system: " + exc);
             exception = exc;
-            throw new ServletException("Can't send response to client system - " + mapping.substring(1), exc);
+            throw new ServletException("Can't send response to client system - " + mapping + "/" + gvAction, exc);
         }
         finally {
         	try {
@@ -196,10 +198,10 @@ public class HttpInboundGateway extends HttpServlet
 	            	GVFormatLog gvFormatLog = GVFormatLog.formatENDOperation(exception, totalTime);
 	                logWriter.log(level, gvFormatLog);
 	            }
-	            logWriter.log(level, method + " - END " + mapping.substring(1) + " - ExecutionTime (" + totalTime + ")");
+	            logWriter.log(level, method + " - END " + mapping + "/" + gvAction + " - ExecutionTime (" + totalTime + ")");
         	}
         	finally {
-        		// Remove the caller in the security context
+        		// Remove the caller from the security context
         		GVIdentityHelper.pop();
 
         		NMDC.pop();

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -77,6 +78,11 @@ public class OperationInfo
      * the previous activation flag
      */
     private boolean                          oldActivation           = true;
+    /**
+     * the master logger level
+     */
+    private String                           loggerLevel             = "ALL";
+    private Level                            loggerLevelj            = Level.ALL;
     /**
      * the jmx filter for inter-instances communication
      */
@@ -148,6 +154,8 @@ public class OperationInfo
             maxFailuresRateo = Integer.MAX_VALUE;
         }
         setOperationActivation(((Boolean) initData.get("operationActivation")).booleanValue());
+        loggerLevel = (String) initData.get("loggerLevel");
+        loggerLevelj = Level.toLevel(loggerLevel);
     }
 
     /**
@@ -250,6 +258,8 @@ public class OperationInfo
     public void synchronizeStatus(Node node) throws Exception
     {
         setOperationActivation(XMLConfig.getBoolean(node, "@operationActivation", true));
+        loggerLevel = XMLConfig.get(node, "@loggerLevel", "ALL");
+        loggerLevelj = Level.toLevel(loggerLevel);
     }
 
     /**
@@ -470,6 +480,36 @@ public class OperationInfo
         else {
             execDisableAction();
         }
+    }
+    
+    /**
+     * @param loggerLevel
+     *        the master logger level value
+     */
+    public void setLoggerLevel(String loggerLevel) throws Exception
+    {
+        this.loggerLevel = loggerLevel;
+        this.loggerLevelj = Level.toLevel(loggerLevel);
+        JMXUtils.set(jmxFilter, "loggerLevelj", loggerLevelj, false, logger);
+    }
+
+    /**
+     * @return the master logger level value
+     */
+    public String getLoggerLevel()
+    {
+        return loggerLevel;
+    }
+    
+    public void setLoggerLevelj(Level loggerLevelj) throws Exception
+    {
+        this.loggerLevelj = loggerLevelj;
+        this.loggerLevel = loggerLevelj.toString();
+    }
+
+    public Level getLoggerLevelj()
+    {
+        return loggerLevelj;
     }
 
     /**

@@ -19,6 +19,8 @@
  */
 package it.greenvulcano.gvesb.virtual.ws.dynamic.descr;
 
+import it.greenvulcano.log.GVLogger;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,7 +61,7 @@ import org.apache.ws.commons.schema.XmlSchemaType;
  */
 public class XmlSchemaParameterDescrBuilder extends ParamDescBuilder
 {
-    private static final Logger logger = Logger.getLogger(XmlSchemaParameterDescrBuilder.class);
+    private static final Logger logger = GVLogger.getLogger(XmlSchemaParameterDescrBuilder.class);
 
     XmlSchemaDescriptionBuilder builder_;
 

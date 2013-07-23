@@ -130,6 +130,12 @@
 -->
 <!ATTLIST BpelOperation operation-activation (on|off) "on">
 <!--
+    Defines the master logger Level for the BpelOperation.
+    Default to ALL.
+-->
+<!ATTLIST BpelOperation loggerLevel (ALL|DEBUG|INFO|WARN|ERROR) #IMPLIED>
+
+<!--
     Defines a GreenVulcanoESB Bpel workflow.
 -->
 <!ELEMENT BpelFlow   (Description?)>

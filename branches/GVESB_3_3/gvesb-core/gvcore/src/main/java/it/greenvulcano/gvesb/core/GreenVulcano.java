@@ -58,6 +58,7 @@ import it.greenvulcano.log.NMDC;
 
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -267,17 +268,32 @@ public class GreenVulcano
             startTime = System.currentTimeMillis();
 
             serviceConcInfo = ConcurrencyHandler.instance().add(GVC_SUBSYSTEM, gvBuffer);
-
-            gvsConfig = preHandleFlow(gvBuffer, flowSystem, flowService, startTime);
-
+            
+            gvsConfig = createGVSConfig(gvBuffer, flowSystem, flowService);
+            
             GVFlow gvOp = gvsConfig.getGVOperation(gvBuffer, gvsOperation);
-            returnData = gvOp.recover(recoveryNode, environment);
-            gvsConfig.manageAliasOutput(returnData);
 
-            if (logger.isInfoEnabled()) {
-                GVBufferDump dump = new GVBufferDump(returnData, false);
-                logger.info("OUTPUT GVBuffer: ");
-                logger.info(dump);
+            Level level = null;
+            try {
+                level = GVLogger.setThreadMasterLevel(gvsConfig.getLoggerLevel());
+                
+                if (logger.isInfoEnabled()) {
+                    GVBufferDump dump = new GVBufferDump(gvBuffer, false);
+                    logger.info("INPUT GVBuffer: ");
+                    logger.info(dump);
+                }
+                
+                returnData = gvOp.recover(recoveryNode, environment);
+                gvsConfig.manageAliasOutput(returnData);
+    
+                if (logger.isInfoEnabled()) {
+                    GVBufferDump dump = new GVBufferDump(returnData, false);
+                    logger.info("OUTPUT GVBuffer: ");
+                    logger.info(dump);
+                }
+            }
+            finally {
+                GVLogger.removeThreadMasterLevel(level);
             }
 
             long endTime = System.currentTimeMillis();
@@ -427,7 +443,13 @@ public class GreenVulcano
 
             serviceConcInfo = ConcurrencyHandler.instance().add(GVC_SUBSYSTEM, gvBuffer);
 
-            gvsConfig = preHandleFlow(gvBuffer, flowSystem, flowService, startTime);
+            if (logger.isInfoEnabled()) {
+                logger.info(GVFormatLog.formatBEGINOperation(gvBuffer));
+            }
+
+            gvsConfig = createGVSConfig(gvBuffer, flowSystem, flowService);
+            
+            gvsConfig.manageAliasInput(gvBuffer);
 
             if (!ACLManager.canAccess(new GVCoreServiceKey(gvsConfig.getGroupName(), gvsConfig.getServiceName(),
                     gvsOperation))) {
@@ -436,7 +458,36 @@ public class GreenVulcano
                         {"id", gvBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
             }
 
-            returnData = execHandleFlow(gvsOperation, gvBuffer, gvsConfig, startTime);
+            GVFlow gvOp = gvsConfig.getGVOperation(gvBuffer, gvsOperation);
+
+            Level level = null;
+            try {
+                level = GVLogger.setThreadMasterLevel(gvOp.getLoggerLevel());
+
+                if (logger.isInfoEnabled()) {
+                    GVBufferDump dump = new GVBufferDump(gvBuffer, false);
+                    logger.info("INPUT GVBuffer: ");
+                    logger.info(dump);
+                }
+
+                returnData = gvOp.perform(gvBuffer);
+                gvsConfig.manageAliasOutput(returnData);
+    
+                if (logger.isInfoEnabled()) {
+                    GVBufferDump dump = new GVBufferDump(returnData, false);
+                    logger.info("OUTPUT GVBuffer: ");
+                    logger.info(dump);
+                }
+            }
+            finally {
+                GVLogger.removeThreadMasterLevel(level);
+            }
+
+            long endTime = System.currentTimeMillis();
+
+            if (logger.isInfoEnabled()) {
+                logger.info(GVFormatLog.formatENDOperation(returnData, endTime - startTime));
+            }
 
             success = true;
         }
@@ -508,71 +559,6 @@ public class GreenVulcano
         return returnData;
     }
 
-    /**
-     * Execute the requested Operation.
-     * 
-     * @param gvBuffer
-     *        The GreenVulcano data coming from the client
-     * @param flowSystem
-     *        If not null, overwrite the gvBuffer system
-     * @param flowService
-     *        If not null, overwrite the gvBuffer service
-     * @return
-     * @throws GVPublicException
-     */
-    private GVServiceConf preHandleFlow(GVBuffer gvBuffer, String flowSystem, String flowService, long startTime)
-            throws Exception
-    {
-        GVServiceConf gvsConfig = null;
-
-        if (logger.isInfoEnabled()) {
-            logger.info(GVFormatLog.formatBEGINOperation(gvBuffer));
-        }
-        if (logger.isInfoEnabled()) {
-            GVBufferDump dump = new GVBufferDump(gvBuffer, false);
-            logger.info("INPUT GVBuffer: ");
-            logger.info(dump);
-        }
-
-        gvsConfig = createGVSConfig(gvBuffer, flowSystem, flowService);
-        gvsConfig.manageAliasInput(gvBuffer);
-
-        return gvsConfig;
-    }
-
-    /**
-     * Execute the requested Operation.
-     * 
-     * @param gvsOperation
-     *        The name of the Operation to invoke
-     * @param gvBuffer
-     *        The GreenVulcano data coming from the client
-     * @return
-     * @throws GVPublicException
-     */
-    private GVBuffer execHandleFlow(String gvsOperation, GVBuffer gvBuffer, GVServiceConf gvsConfig, long startTime)
-            throws Exception
-    {
-        GVBuffer returnData = null;
-
-        GVFlow gvOp = gvsConfig.getGVOperation(gvBuffer, gvsOperation);
-        returnData = gvOp.perform(gvBuffer);
-        gvsConfig.manageAliasOutput(returnData);
-
-        if (logger.isInfoEnabled()) {
-            GVBufferDump dump = new GVBufferDump(returnData, false);
-            logger.info("OUTPUT GVBuffer: ");
-            logger.info(dump);
-        }
-
-        long endTime = System.currentTimeMillis();
-
-        if (logger.isInfoEnabled()) {
-            logger.info(GVFormatLog.formatENDOperation(returnData, endTime - startTime));
-        }
-
-        return returnData;
-    }
 
     /**
      * @param excID

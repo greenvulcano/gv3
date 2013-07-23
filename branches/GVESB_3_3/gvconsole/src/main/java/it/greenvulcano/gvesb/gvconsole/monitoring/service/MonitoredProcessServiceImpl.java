@@ -21,6 +21,7 @@ package it.greenvulcano.gvesb.gvconsole.monitoring.service;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.gvconsole.monitoring.domain.MonitoredProcess;
+import it.greenvulcano.log.GVLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ import org.w3c.dom.NodeList;
 public class MonitoredProcessServiceImpl implements MonitoredProcessService
 {
 
-    private static final Logger logger = Logger.getLogger(MonitoredProcessServiceImpl.class);
+    private static final Logger logger = GVLogger.getLogger(MonitoredProcessServiceImpl.class);
 
     /**
      * @see it.greenvulcano.gvesb.gvconsole.monitoring.service.MonitoredProcessService#getMonitoredProcesses()

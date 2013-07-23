@@ -111,6 +111,9 @@ public class GVAdapterParser
         else if (nomeAdapter.equals("HL7_LISTENERS")) {
             ret = getExistGVHL7(nomeServizio);
         }
+        else if (nomeAdapter.equals("HTTP_ADAPTER")) {
+            ret = getExistGVHTTP(nomeServizio);
+        }
         else {
             ret = getExistObject("/GVAdapters/*[@name='" + nomeAdapter + "']");
         }
@@ -148,6 +151,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("HL7_LISTENERS")) {
             ret = getEqualGVHL7(nomeServizio);
+        }
+        else if (nomeAdapter.equals("HTTP_ADAPTER")) {
+            ret = getEqualGVHTTP(nomeServizio);
         }
         else {
             ret = getEqualObject("/GVAdapters/*[@name='" + nomeAdapter + "']");
@@ -194,6 +200,12 @@ public class GVAdapterParser
                 + listener + "']");
     }
 
+    private boolean getExistGVHTTP(String action) throws XMLUtilsException
+    {
+        return getExistObject("/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
+                + action + "']");
+    }
+
     private boolean getEqualGVExcelWorkbook(String excelWorkbook) throws XMLUtilsException
     {
         return getEqualObject("/GVAdapters/GVExcelWorkbookConfiguration/GVExcelWorkbook[@configName='" + excelWorkbook
@@ -221,6 +233,12 @@ public class GVAdapterParser
     {
         return getEqualObject("/GVAdapters/GVHL7ListenerManager/HL7Listeners/*[@type='hl7listener' and @name='"
                 + listener + "']");
+    }
+
+    private boolean getEqualGVHTTP(String action) throws XMLUtilsException
+    {
+        return getEqualObject("/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
+                + action + "']");
     }
 
     /**
@@ -433,6 +451,11 @@ public class GVAdapterParser
         return getListaGVHL7(newXml);
     }
 
+    public String[] getListaGVHTTPZip() throws Exception
+    {
+        return getListaGVHTTP(newXml);
+    }
+
     public String[] getListaGVBirtRepoZip() throws Exception
     {
         return getListaGVBirtRepo(newXml);
@@ -467,6 +490,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("HL7_LISTENERS")) {
             ret = getGVHL7Zip(nomeServizio);
+        }
+        else if (nomeAdapter.equals("HTTP_ADAPTER")) {
+            ret = getGVHTTPZip(nomeServizio);
         }
         else if (nomeAdapter.equals("RULES_CFG")) {
             ret = getGvKnowledgeBaseConfigZip(nomeServizio);
@@ -505,6 +531,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("HL7_LISTENERS")) {
             ret = getGVHL7Server(nomeServizio);
+        }
+        else if (nomeAdapter.equals("HTTP_ADAPTER")) {
+            ret = getGVHTTPServer(nomeServizio);
         }
         else if (nomeAdapter.equals("RULES_CFG")) {
             ret = getGvKnowledgeBaseConfigServer(nomeServizio);
@@ -803,6 +832,52 @@ public class GVAdapterParser
 		}
     }
 
+    private String getGVHTTPZip(String servizio) throws XMLUtilsException
+    {
+        return getGVHTTP(newXml, servizio);
+    }
+
+    private String getGVHTTPServer(String servizio) throws XMLUtilsException
+    {
+        return getGVHTTP(serverXml, servizio);
+    }
+
+    private String getGVHTTP(Document xml, String servizio) throws XMLUtilsException
+    {
+        logger.debug("getGVHTTP servizio =" + servizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            Node localXml = parser.selectSingleNode(xml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
+                    + servizio + "']");
+            Document localXmlGVAdapters = parser.newDocument("GVAdapters");
+            if (localXml != null) {
+                Node base = localXmlGVAdapters.getDocumentElement().appendChild(parser.createElement(localXmlGVAdapters, "GVAdapterHttpConfiguration"));
+                Node mappings = base.appendChild(parser.createElement(localXmlGVAdapters, "InboundConfiguration"));
+                mappings = mappings.appendChild(parser.createElement(localXmlGVAdapters, "ActionMappings"));
+                parser.setAttribute((Element) base, "version", "1.0");
+                parser.setAttribute((Element) base, "type", "module");
+                parser.setAttribute((Element) base, "name", "HTTP_ADAPTER");
+
+                Node importedNode = localXmlGVAdapters.importNode(localXml, true);
+                mappings.appendChild(importedNode);
+                
+                localXml = parser.selectSingleNode(xml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters/*[@Type='FormatterPlugin' and @ID='"
+                        + parser.get(localXml, "@FormatterID") + "']");
+            
+                if (localXml != null) {
+                    Node formatters = base.appendChild(parser.createElement(localXmlGVAdapters, "Formatters"));
+                    importedNode = localXmlGVAdapters.importNode(localXml, true);
+                    formatters.appendChild(importedNode);
+                }
+            }
+            return parser.serializeDOM(localXmlGVAdapters, false, true);
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+
     private String getGvAdapter(Document xml, String nomeAdapter) throws XMLUtilsException
     {
     	logger.debug("Adapter =" + nomeAdapter);
@@ -851,6 +926,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("HL7_LISTENERS")) {
             aggiornaGVHL7(nomeServizio);
+        }
+        else if (nomeAdapter.equals("HTTP_ADAPTER")) {
+            aggiornaGVHTTP(nomeServizio);
         }
         else {
             XMLUtils parser = null;
@@ -1117,6 +1195,92 @@ public class GVAdapterParser
 		}
     }
 
+    
+    public void aggiornaGVHTTP(String nomeServizio) throws Exception
+    {
+        logger.debug("init aggiornaGVHTTP");
+        logger.debug("action=" + nomeServizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            
+            // handle ActionMapping deployment
+            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
+                    + nomeServizio + "']");
+            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
+                    + nomeServizio + "']");
+            Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings");
+            if (resultsZip != null) {
+                if (resultsServer == null) {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.appendChild(importedNode);
+                    logger.debug("ActionMapping[" + nomeServizio + "] non esistente, inserimento");
+                }
+                else {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.replaceChild(importedNode, resultsServer);
+                    logger.debug("ActionMapping[" + nomeServizio + "] esistente, aggiornamento");
+                }
+
+                // handle Formatter deployment
+                String formatter = parser.get(resultsZip, "@FormatterID");
+                resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters/*[@Type='FormatterPlugin' and @ID='"
+                        + formatter + "']");
+                resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters/*[@Type='FormatterPlugin' and @ID='"
+                        + formatter + "']");
+                parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters");
+                if (resultsZip != null) {
+                    if (resultsServer == null) {
+                        Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                        parentServer.appendChild(importedNode);
+                        logger.debug("Formatter[" + formatter + "] non esistente, inserimento");
+                    }
+                    else {
+                        Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                        parentServer.replaceChild(importedNode, resultsServer);
+                        logger.debug("Formatter[" + formatter + "] esistente, aggiornamento");
+                    }
+                }
+                
+                // handle Transaction deployment
+                NodeList txNewList = parser.selectNodeList(newXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/InboundTransactions/Transaction");
+                
+                if (txNewList != null) {
+                    parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/InboundTransactions");
+                    
+                    for (int i = 0; i < txNewList.getLength(); i++) {
+                        resultsZip = txNewList.item(i);
+                        String service = parser.get(resultsZip, "@service");
+                        String system = parser.get(resultsZip, "@system");
+                        if ((system != null) && !"".equals(system)) {
+                            resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/InboundTransactions/Transaction[@service='" + service + "' and @system='"
+                                + system + "']");
+                        }
+                        else {
+                            resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/InboundTransactions/Transaction[@service='" + service + "' and not(@system)]");
+                        }
+
+                        if (resultsServer == null) {
+                            Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                            parentServer.appendChild(importedNode);
+                            logger.debug("Transaction[" + service + "::" + (system != null ? system : "ALL") + "] non esistente, inserimento");
+                        }
+                        else {
+                            Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                            parentServer.replaceChild(importedNode, resultsServer);
+                            logger.debug("Transaction[" + service + "::" + (system != null ? system : "ALL") + "] esistente, aggiornamento");
+                        }
+                    }
+                }
+            }
+            
+            logger.debug("end aggiornaGVHTTP");
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+    
     public void aggiornaGreenVulcanoWebServices(String servizio,String[] operazioni) throws Exception
     {
         logger.debug("init aggiornaGreenVulcanoWebServices");
@@ -1332,6 +1496,11 @@ public class GVAdapterParser
     private String[] getListaGVHL7(Document xml) throws Exception
     {
         return getListaObject(xml, "/GVAdapters/GVHL7ListenerManager/HL7Listeners/*[@type='hl7listener']/@name");
+    }
+
+    private String[] getListaGVHTTP(Document xml) throws Exception
+    {
+        return getListaObject(xml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping/@Action");
     }
 
     private String[] getListaGVBirtRepo(Document xml) throws Exception

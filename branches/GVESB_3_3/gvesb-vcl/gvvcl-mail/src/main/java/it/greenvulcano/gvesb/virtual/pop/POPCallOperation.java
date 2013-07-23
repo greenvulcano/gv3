@@ -21,6 +21,7 @@ package it.greenvulcano.gvesb.virtual.pop;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.j2ee.JNDIHelper;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.CallOperation;
@@ -31,11 +32,14 @@ import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.gvesb.virtual.pop.uidcache.UIDCache;
 import it.greenvulcano.gvesb.virtual.pop.uidcache.UIDCacheManagerFactory;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,13 +51,13 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
-import javax.mail.Message.RecipientType;
 import javax.naming.NamingException;
 
 import org.apache.commons.codec.binary.Base64OutputStream;
@@ -104,13 +108,21 @@ public class POPCallOperation implements CallOperation
     private String              protocolUser    = null;
 
     private String              protocol        = "pop3";
+    
+    private boolean             dynamicServer   = false;
+    private Properties          serverProps     = null;
+    private boolean             performLogin    = false;
+    private String              loginUser       = null;
+    private String              loginPassword   = null;
+    private String              serverHost      = null;
+    private String              cacheKey        = null;
 
     // POP3 supports only a single folder named "INBOX".
     private String              mbox            = "INBOX";
     private boolean             delete_messages = false;
     private boolean             expunge         = false;
     private Store               store           = null;
-    private Pattern             emailRxPattern     = null;
+    private Pattern             emailRxPattern  = null;
 
     /**
      * Invoked from <code>OperationFactory</code> when an <code>Operation</code>
@@ -123,7 +135,9 @@ public class POPCallOperation implements CallOperation
         JNDIHelper initialContext = null;
         try {
             jndiName = XMLConfig.get(node, "@jndi-name");
-            logger.debug("JNDI name: " + jndiName);
+            if (jndiName != null) {
+                logger.debug("JNDI name: " + jndiName);
+            }
 
             protocolHost = XMLConfig.get(node, "@override-protocol-host");
             if (protocolHost != null) {
@@ -135,50 +149,61 @@ public class POPCallOperation implements CallOperation
                 logger.debug("Override protocol user: " + protocolUser);
             }
 
+            mbox = XMLConfig.get(node, "@folder", "INBOX");
+            logger.debug("Messages folder: " + mbox);
+
             delete_messages = XMLConfig.getBoolean(node, "@delete-messages", false);
             expunge = XMLConfig.getBoolean(node, "@expunge", false);
 
-            initialContext = new JNDIHelper(XMLConfig.getNode(node, "JNDIHelper"));
-            logger.debug("Initial Context properties: " + initialContext);
+            Session session = null;
+            if (jndiName != null) {
+                initialContext = new JNDIHelper(XMLConfig.getNode(node, "JNDIHelper"));
+                session = (Session) initialContext.lookup(jndiName);
+            }
 
-            Session session = (Session) initialContext.lookup(jndiName);
-
-            Properties props = null;
             NodeList nodeList = XMLConfig.getNodeList(node, "mail-properties/mail-property");
             if (nodeList != null && nodeList.getLength() > 0) {
-                props = session.getProperties();
+                serverProps = new Properties();
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     Node property = nodeList.item(i);
                     String name = XMLConfig.get(property, "@name");
                     String value = XMLConfig.get(property, "@value");
-                    props.setProperty(name, value);
+                    if (name.contains(".password")) {
+                        performLogin = true;
+                    }
+                    if (!PropertiesHandler.isExpanded(value)) {
+                        dynamicServer = true;
+                    }
+                    serverProps.setProperty(name, value);
                 }
             }
 
             if ((protocolHost != null) || (protocolUser != null)) {
-                if (props == null) {
-                    props = session.getProperties();
+                if (serverProps == null) {
+                    serverProps = session.getProperties();
                 }
                 if (protocolHost != null) {
-                    props.setProperty("mail.protocol.host", protocolHost);
+                    serverProps.setProperty("mail.protocol.host", protocolHost);
                 }
                 if (protocolUser != null) {
-                    props.setProperty("mail.protocol.user", protocolUser);
+                    serverProps.setProperty("mail.protocol.user", protocolUser);
                 }
             }
 
-            if (props != null) {
-                session = Session.getDefaultInstance(props, null);
-            }
+            if (!dynamicServer) {
+                if (serverProps != null) {
+                    session = Session.getDefaultInstance(serverProps, null);
+                }
 
-            if (session == null) {
-                throw new InitializationException("GVVCL_POP_NO_SESSION", new String[][]{{"node", node.getLocalName()}});
+                if (session == null) {
+                    throw new InitializationException("GVVCL_POP_NO_SESSION", new String[][]{{"node", node.getLocalName()}});
+                }
+
+                store = session.getStore(protocol);
             }
 
             String regex = XMLConfig.get(node, "@email-rx-cleaner", "[A-z][A-z0-9_]*([.][A-z0-9_]+)*[@][A-z0-9_]+([.][A-z0-9_]+)*[.][A-z]{2,4}");
             emailRxPattern = Pattern.compile(regex);
-
-            store = session.getStore(protocol);
         }
         catch (Exception exc) {
             logger.error("Error initializing POP call operation", exc);
@@ -202,17 +227,13 @@ public class POPCallOperation implements CallOperation
      */
     public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
     {
-
-        if (gvBuffer == null) {
-            return null;
-        }
         try {
             return receiveMails(gvBuffer);
         }
-        catch (Exception e) {
+        catch (Exception exc) {
             throw new CallException("GV_CALL_SERVICE_ERROR",
                     new String[][]{{"service", gvBuffer.getService()}, {"system", gvBuffer.getSystem()},
-                            {"id", gvBuffer.getId().toString()}, {"message", e.getMessage()}}, e);
+                            {"id", gvBuffer.getId().toString()}, {"message", exc.getMessage()}}, exc);
         }
     }
 
@@ -227,11 +248,17 @@ public class POPCallOperation implements CallOperation
      */
     private GVBuffer receiveMails(GVBuffer data) throws Exception
     {
-        store.connect();
+        Store localStore = getStore(data);
+        if (performLogin) {
+            localStore.connect(serverHost, loginUser, loginPassword);
+        }
+        else {
+            localStore.connect();
+        }
 
         XMLUtils xml = null;
         try {
-            Folder folder = store.getDefaultFolder();
+            Folder folder = localStore.getDefaultFolder();
             if (folder == null) {
                 logger.error("No default folder");
                 throw new Exception("No default folder");
@@ -262,8 +289,8 @@ public class POPCallOperation implements CallOperation
                 fp.add(UIDFolder.FetchProfileItem.UID);
                 fp.add("X-Mailer");
                 folder.fetch(msgs, fp);
-
-                UIDCache uidCache = UIDCacheManagerFactory.getInstance().getUIDCache(jndiName);
+                
+                UIDCache uidCache = UIDCacheManagerFactory.getInstance().getUIDCache(cacheKey);
 
                 xml = XMLUtils.getParserInstance();
                 Document doc = xml.newDocument("MailMessages");
@@ -272,8 +299,7 @@ public class POPCallOperation implements CallOperation
 
                     if (!delete_messages) {
                         if (folder instanceof POP3Folder) {
-                            POP3Folder pf = (POP3Folder) folder;
-                            String uid = pf.getUID(msgs[i]);
+                            String uid = msgs[i].getHeader("Message-ID")[0];
                             if (uid != null) {
                                 if (uidCache.contains(uid)) {
                                     skipMessage = true;
@@ -309,7 +335,9 @@ public class POPCallOperation implements CallOperation
         }
         finally {
             XMLUtils.releaseParserInstance(xml);
-            store.close();
+            if (localStore != null) {
+                localStore.close();
+            }
         }
 
         return data;
@@ -360,6 +388,62 @@ public class POPCallOperation implements CallOperation
         return gvBuffer.getService();
     }
 
+    private Store getStore(GVBuffer data) throws Exception {
+        loginUser     = null;
+        loginPassword = null;
+        serverHost    = null;
+        cacheKey      = null;
+
+        if (!dynamicServer) {
+            cacheKey = jndiName;
+            return store;
+        }
+        
+        try {
+            PropertiesHandler.enableExceptionOnErrors();
+            Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(data, true);
+     
+            Properties localProps = new Properties();
+            for (Iterator iterator = serverProps.keySet().iterator(); iterator.hasNext();) {
+                String name = (String) iterator.next();
+                String value = PropertiesHandler.expand(serverProps.getProperty(name), params, data);
+                if (name.contains(".host")) {
+                    logger.debug("Logging-in to host: " + value);
+                    serverHost = value;
+                }
+                else if (name.contains(".user")) {
+                    logger.debug("Logging-in as user: " + value);
+                    loginUser = value;
+                }
+                else if (name.contains(".password")) {
+                    value = XMLConfig.getDecrypted(value);
+                    //logger.debug("Logging-in with password: " + value);
+                    loginPassword = value;
+                }
+                localProps.setProperty(name, value);
+            }
+            
+            cacheKey = serverHost + "_" + loginUser;
+
+            Session session = Session.getInstance(localProps, null);
+
+            if (session == null) {
+                throw new CallException("GVVCL_POP_NO_SESSION", new String[][]{{"properties", "" + localProps}});
+            }
+            
+            return session.getStore(protocol);
+        }
+        catch (CallException exc) {
+            throw exc;
+        }
+        catch (Exception exc) {
+            throw new CallException("GVVCL_POP_SESSION_ERROR", new String[][]{{"message", exc.getMessage()}}, exc);
+        }
+        finally {
+            PropertiesHandler.disableExceptionOnErrors();
+        }
+    }
+
     private void dumpPart(Part p, Element msg, Document doc) throws Exception
     {
         if (p instanceof Message) {
@@ -367,12 +451,13 @@ public class POPCallOperation implements CallOperation
         }
 
         Element content = null;
-        if (p.isMimeType("text/plain")) {
+        String filename = p.getFileName();
+        if (p.isMimeType("text/plain") && (filename == null)) {
             content = doc.createElement("PlainMessage");
             Text body = doc.createTextNode((String) p.getContent());
             content.appendChild(body);
         }
-        else if (p.isMimeType("text/html")) {
+        else if (p.isMimeType("text/html") && (filename == null)) {
             content = doc.createElement("HTMLMessage");
             CDATASection body = doc.createCDATASection((String) p.getContent());
             content.appendChild(body);
@@ -400,7 +485,6 @@ public class POPCallOperation implements CallOperation
             content.appendChild(doc.createTextNode(os.toString()));
         }
         msg.appendChild(content);
-        String filename = p.getFileName();
         if (filename != null) {
             content.setAttribute("file-name", filename);
         }

@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- *
+ * 
  * This file is part of GreenVulcano ESB.
- *
+ * 
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- *
+ * 
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,8 +23,11 @@ import it.greenvulcano.configuration.ConfigurationEvent;
 import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.util.thread.ThreadMap;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggerFactory;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.w3c.dom.Document;
 
@@ -38,21 +41,23 @@ import org.w3c.dom.Document;
  * This class is a <code>ConfigurationListener</code> that reconfigures log4j if
  * the configuration file is reloaded.<br>
  * The <code>reload()</code> mehod can be used in order to reconfigure log4j.<br>
- * <code>getConfigurationFile()</code> return the configuration file name used by
- * <code>GVLogger</code>.
+ * <code>getConfigurationFile()</code> return the configuration file name used
+ * by <code>GVLogger</code>.
  * <p>
- *
+ * 
  * Note that the reloading mechanism is a little bit complicated, but this
  * uniforms the configuration reloading mechanism for all GreenVulcano classes.
- *
- *
+ * 
+ * 
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- *
- *
+ * 
+ * 
  **/
 public final class GVLogger
 {
+    private static final String          MASTER_LEVEL          = "GVLOGGER_MASTER_LEVEL";
+
     /**
      * Flag for initialization status.
      */
@@ -66,19 +71,19 @@ public final class GVLogger
      */
     private static ConfigurationListener configurationListener = null;
 
+    private static LoggerFactory         defaultFactory        = new GVLoggerFactory();
+
     /**
      * Constructor.
      */
-    private GVLogger()
-    {
+    private GVLogger() {
         // do nothing
     }
 
     /**
      * Initialize log4j.
      */
-    private static synchronized void init()
-    {
+    private static synchronized void init() {
         if (initialized) {
             return;
         }
@@ -87,8 +92,7 @@ public final class GVLogger
 
         if (configurationListener == null) {
             configurationListener = new ConfigurationListener() {
-                public void configurationChanged(ConfigurationEvent event)
-                {
+                public void configurationChanged(ConfigurationEvent event) {
                     GVLogger.configurationChanged(event);
                 }
             };
@@ -107,23 +111,21 @@ public final class GVLogger
     /**
      * @return the configuration file name.
      */
-    public static String getConfigurationFile()
-    {
+    public static String getConfigurationFile() {
         return configurationFile;
     }
 
     /**
      * Set the configuration file name. This method must be called before use
      * getLogger() method.
-     *
+     * 
      * @param _configurationFile
      *        the configuration file name
      * @exception IllegalStateException
      *            if the GVLogger is alredy initialized (getLogger() was already
      *            called).
      */
-    public static void setConfigurationFile(String _configurationFile) throws IllegalStateException
-    {
+    public static void setConfigurationFile(String _configurationFile) throws IllegalStateException {
         if (initialized) {
             throw new IllegalStateException("Cannot set the configuration file: Log4J already initialized.");
         }
@@ -132,39 +134,66 @@ public final class GVLogger
 
     /**
      * Return the Logger for the given class.
-     *
+     * 
      * @param cls
      *        the logger class
      * @return the requested logger
      */
-    public static Logger getLogger(Class<?> cls)
-    {
+    public static Logger getLogger(Class<?> cls) {
         if (!initialized) {
             init();
         }
-        return Logger.getLogger(cls);
+        return Logger.getLogger(cls.getName(), defaultFactory);
     }
 
     /**
      * Return the Logger for the given logger name.
-     *
+     * 
      * @param logger
      *        the logger name
      * @return the requested logger
      */
-    public static Logger getLogger(String logger)
-    {
+    public static Logger getLogger(String logger) {
         if (!initialized) {
             init();
         }
-        return Logger.getLogger(logger);
+        return Logger.getLogger(logger, defaultFactory);
     }
 
     /**
+     * Set a per-Thread master Level. Return the previous Level, if set.
+     */
+    public static Level setThreadMasterLevel(Level level) {
+        Level oldLevel = (Level) ThreadMap.get(GVLogger.MASTER_LEVEL);
+        ThreadMap.put(GVLogger.MASTER_LEVEL, level);
+        return oldLevel;
+    }
+
+    /**
+     * Remove the current per-Thread master level.
+     * 
+     * @param oldLevel
+     *        if not null, is set as new master level
+     */
+    public static void removeThreadMasterLevel(Level oldLevel) {
+        ThreadMap.remove(GVLogger.MASTER_LEVEL);
+        if (oldLevel != null) {
+            ThreadMap.put(GVLogger.MASTER_LEVEL, oldLevel);
+        }
+    }
+
+    public static Level getThreadMasterLevel() {
+        Object obj = ThreadMap.get(GVLogger.MASTER_LEVEL);
+        if (obj == null) {
+            obj = Level.ALL;
+        }
+        return (Level) obj;
+    }
+    
+    /**
      * Reload the log4j configuration.
      */
-    public static void reload()
-    {
+    public static void reload() {
         try {
             XMLConfig.reload(configurationFile);
         }
@@ -176,12 +205,11 @@ public final class GVLogger
     /**
      * XMLConfig changed. Reconfigure Log4J if the configurationFile is
      * reloaded.
-     *
+     * 
      * @param event
      *        the configuration event
      */
-    private static void configurationChanged(ConfigurationEvent event)
-    {
+    private static void configurationChanged(ConfigurationEvent event) {
         if ((event.getCode() == ConfigurationEvent.EVT_FILE_LOADED) && (event.getFile().equals(configurationFile))) {
             System.out.println("Initializing Log4J with URL: " + event.getURL());
             Document document;
@@ -194,4 +222,5 @@ public final class GVLogger
             }
         }
     }
+
 }

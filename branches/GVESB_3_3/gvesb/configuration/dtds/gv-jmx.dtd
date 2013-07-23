@@ -376,38 +376,37 @@
 <!ATTLIST ObjectNameProperty name  CDATA #REQUIRED>
 <!--
     The property value can be a combination of:
-     1 - fixed : a text string;
-     2 - %{{class}}         : the obj class name;
-     3 - %{{fqclass}}       : the obj fully qualified class name;
-     4 - %{{package}}       : the obj package name;
-     5 - ${{propname}}      : a System property name;
-     6 - sp{{propname}}     : a System property name;
-     7 - @{{propname}}      : a inProperties property name;
-     8 - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
-     9 - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
-    10 - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - fixed : a text string;
+     - %{{class}}         : the obj class name;
+     - %{{fqclass}}       : the obj fully qualified class name;
+     - %{{package}}       : the obj package name;
+     - ${{propname}}      : a System property name;
+     - sp{{propname}}     : a System property name;
+     - env{{varname}}     : an Environment variable value;
+     - @{{propname}}      : a inProperties property name;
+     - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                evaluate as if-then-else; if 'field' is equal to cond1...n,
                                return the value of val1...n, otherwise 'default'
-    11 - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-    12 - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                               the inProperties map is added to the scope as 'inProperties',
-                               the object is added to the scope as 'object'
-    13 - sql{{conn::statement}}  : executes a select sql statement and returns the value of
+     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
+                             the inProperties map is added to the scope as 'inProperties',
+                             the object is added to the scope as 'object'
+     - sql{{conn::statement}}      : executes a select sql statement and returns the value of
                                      the first field of the first selected record.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    14 - sqllist{{conn::statement}}
-                                   : executes a select sql statement and returns the value of
+     - sqllist{{conn::statement}}  : executes a select sql statement and returns the value of
                                      the first field of all selected records as a comma separated list.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    15 - sqltable{{conn::statement}}
-                                   : executes a select sql statement and returns all values of
+     - sqltable{{conn::statement}} : executes a select sql statement and returns all values of
                                      returned cursor as an XML.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    16 - ognl{{script}} : evaluate a OGNL script,
-                         the inProperties map is added to the context as 'inProperties',
-                         the object is added to the context as 'object' (and is also the object on which execute the script)
+     - ognl{{script}} : evaluate a OGNL script,
+                        the inProperties map is added to the context as 'inProperties',
+                        the object is added to the context as 'object' (and is also the object on which execute the script)
 
     #NotNull
 -->
@@ -450,30 +449,29 @@
     If not defined then the target check isn't executed.
 
     This value can be a static value or contain placeholders that at runtime can be replaced in the following manner:
-     1 - fixed : a text string;
-     2 - ${{propname}}           :  a System property name;
-     3 - sp{{propname}}          :  a System property name;
-     4 - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
-     5 - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
-     6 - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - fixed : a text string;
+     - ${{propname}}           :  a System property name;
+     - sp{{propname}}          :  a System property name;
+     - env{{varname}}          :  an Environment variable value;
+     - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                 evaluate as if-then-else; if 'field' is equal to cond1...n,
                                 return the value of val1...n, otherwise 'default'
-     7 - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                 is equivalent to 'decode', with the difference that 'condX'
                                 can be a list of values separated by 'sep'
-     8 - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
-     9 - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
-                                 the first field of the first selected record.
-                                 The 'conn' parameter is the JNDI name of a DataSource
-    10  - sqllist{{conn::statement}}
-                                   : execute a select sql statement sql and return the value of
+     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - sql{{conn::statement}}     : execute a select sql statement sql and return the value of
+                                    the first field of the first selected record.
+                                    The 'conn' parameter is the JNDI name of a DataSource
+     - sqllist{{conn::statement}}  : execute a select sql statement sql and return the value of
                                      the first field of all selected records as a comma separated list.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    11 - sqltable{{conn::statement}}
-                                   : executes a select sql statement and returns all values of
+     - sqltable{{conn::statement}} : executes a select sql statement and returns all values of
                                      returned cursor as an XML.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    12 - ognl{{script}} : evaluate a OGNL script
+     - ognl{{script}} : evaluate a OGNL script
 
     #NotNull
 -->
@@ -518,30 +516,29 @@
     If not defined then the target check isn't executed.
 
     This value can be a static value or contain placeholders that at runtime can be replaced in the following manner:
-     1 - fixed : a text string;
-     2 - ${{propname}}           :  a System property name;
-     3 - sp{{propname}}          :  a System property name;
-     4 - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
-     5 - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
-     6 - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - fixed : a text string;
+     - ${{propname}}           :  a System property name;
+     - sp{{propname}}          :  a System property name;
+     - env{{varname}}          :  an Environment variable value;
+     - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                 evaluate as if-then-else; if 'field' is equal to cond1...n,
                                 return the value of val1...n, otherwise 'default'
-     7 - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                 is equivalent to 'decode', with the difference that 'condX'
                                 can be a list of values separated by 'sep'
-     8 - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
-     9 - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
-                                 the first field of the first selected record.
-                                 The 'conn' parameter is the JNDI name of a DataSource
-    10  - sqllist{{conn::statement}}
-                                   : execute a select sql statement sql and return the value of
+     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - sql{{conn::statement}}      : execute a select sql statement sql and return the value of
+                                     the first field of the first selected record.
+                                     The 'conn' parameter is the JNDI name of a DataSource
+     - sqllist{{conn::statement}}  : execute a select sql statement sql and return the value of
                                      the first field of all selected records as a comma separated list.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    11 - sqltable{{conn::statement}}
-                                   : executes a select sql statement and returns all values of
+     - sqltable{{conn::statement}} : executes a select sql statement and returns all values of
                                      returned cursor as an XML.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    12 - ognl{{script}} : evaluate a OGNL script
+     - ognl{{script}} : evaluate a OGNL script
 
     #NotNull
 -->
@@ -564,30 +561,29 @@
     The value of the Java property to set.
 
     This value can be a static value or contain placeholders that at runtime can be replaced in the following manner:
-     1 - fixed : a text string;
-     2 - ${{propname}}           :  a System property name;
-     3 - sp{{propname}}          :  a System property name;
-     4 - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
-     5 - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
-     6 - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - fixed : a text string;
+     - ${{propname}}           :  a System property name;
+     - sp{{propname}}          :  a System property name;
+     - env{{varname}}          :  an Environment variable value;
+     - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                 evaluate as if-then-else; if 'field' is equal to cond1...n,
                                 return the value of val1...n, otherwise 'default'
-     7 - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                 is equivalent to 'decode', with the difference that 'condX'
                                 can be a list of values separated by 'sep'
-     8 - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
-     9 - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
-                                 the first field of the first selected record.
-                                 The 'conn' parameter is the JNDI name of a DataSource
-    10  - sqllist{{conn::statement}}
-                                   : execute a select sql statement sql and return the value of
+     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - sql{{conn::statement}}      : execute a select sql statement sql and return the value of
+                                     the first field of the first selected record.
+                                     The 'conn' parameter is the JNDI name of a DataSource
+     - sqllist{{conn::statement}}  : execute a select sql statement sql and return the value of
                                      the first field of all selected records as a comma separated list.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    11 - sqltable{{conn::statement}}
-                                   : executes a select sql statement and returns all values of
+     - sqltable{{conn::statement}} : executes a select sql statement and returns all values of
                                      returned cursor as an XML.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    12 - ognl{{script}} : evaluate a OGNL script
+     - ognl{{script}} : evaluate a OGNL script
 
 
     #NotNull
@@ -628,30 +624,29 @@
     If not defined then the target check isn't executed.
 
     This value can be a static value or contain placeholders that at runtime can be replaced in the following manner:
-     1 - fixed : a text string;
-     2 - ${{propname}}           :  a System property name;
-     3 - sp{{propname}}          :  a System property name;
-     4 - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
-     5 - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
-     6 - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - fixed : a text string;
+     - ${{propname}}           :  a System property name;
+     - sp{{propname}}          :  a System property name;
+     - env{{varname}}          :  an Environment variable value;
+     - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                 evaluate as if-then-else; if 'field' is equal to cond1...n,
                                 return the value of val1...n, otherwise 'default'
-     7 - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                 is equivalent to 'decode', with the difference that 'condX'
                                 can be a list of values separated by 'sep'
-     8 - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
-     9 - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
-                                 the first field of the first selected record.
-                                 The 'conn' parameter is the JNDI name of a DataSource
-    10  - sqllist{{conn::statement}}
-                                   : execute a select sql statement sql and return the value of
+     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - sql{{conn::statement}}      : execute a select sql statement sql and return the value of
+                                     the first field of the first selected record.
+                                     The 'conn' parameter is the JNDI name of a DataSource
+     - sqllist{{conn::statement}}  : execute a select sql statement sql and return the value of
                                      the first field of all selected records as a comma separated list.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    11 - sqltable{{conn::statement}}
-                                   : executes a select sql statement and returns all values of
+     - sqltable{{conn::statement}} : executes a select sql statement and returns all values of
                                      returned cursor as an XML.
                                      The 'conn' parameter is the JNDI name of a DataSource
-    12 - ognl{{script}} : evaluate a OGNL script
+     - ognl{{script}} : evaluate a OGNL script
 
     #NotNull
 -->

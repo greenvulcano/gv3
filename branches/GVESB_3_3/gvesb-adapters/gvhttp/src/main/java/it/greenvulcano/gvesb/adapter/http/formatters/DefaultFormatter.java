@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -78,8 +78,8 @@ public class DefaultFormatter implements Formatter
         paramNamesWithinQueryString = new HashMap<String, String>();
         paramList = new ArrayList<String>();
         try {
-            characterEncoding = XMLConfig.get(configurationNode, "./@CharacterEncoding");
-            urlEncoding = XMLConfig.getBoolean(configurationNode, "./@URLEncoding", false);
+            characterEncoding = XMLConfig.get(configurationNode, "@CharacterEncoding");
+            urlEncoding = XMLConfig.getBoolean(configurationNode, "@URLEncoding", false);
             Id = XMLConfig.get(configurationNode, "@ID");
         }
         catch (XMLConfigException exc) {
@@ -162,21 +162,6 @@ public class DefaultFormatter implements Formatter
     public void unMarshall(Map<String, Object> environment) throws FormatterExecutionException
     {
         // do nothing
-    }
-
-    /**
-     * @see it.greenvulcano.gvesb.adapter.http.formatters.Formatter#reloadConfiguration(org.w3c.dom.Node)
-     */
-    @Override
-    public void reloadConfiguration(Node configurationNode)
-    {
-        // do nothing
-    }
-
-    @Override
-    public boolean haveACKMessage()
-    {
-        return false;
     }
 
     /**

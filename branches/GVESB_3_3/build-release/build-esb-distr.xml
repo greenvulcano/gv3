@@ -56,6 +56,7 @@
                 <exclude name="Extra/Extra.dtd"/>
                 <include name="Extra/GVDataHandler.dtd"/>
                 <include name="Extra/GVExcel.dtd"/>
+                <include name="Extra/GVHTTPInbound.dtd"/>
                 <include name="gv-jmx.dtd"/>
                 <include name="gv-log4j.dtd"/>
                 <include name="GVAdapters.dtd"/>
@@ -243,8 +244,6 @@
             <fileset dir="${com.jcraft.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <!--jsr181-api-1.0-MR1.jar
-            jsr250-api-1.0.jar-->
             <fileset dir="${juddi.juddi.lib}">
                 <include name="juddi.jar"/>
                 <include name="uddi-ws.jar"/>

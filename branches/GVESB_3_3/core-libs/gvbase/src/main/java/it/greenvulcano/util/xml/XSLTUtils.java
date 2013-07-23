@@ -161,16 +161,16 @@ public class XSLTUtils
     /**
      * @see it.greenvulcano.util.txt.DateUtils#nowToString(String, String)
      */
-    public static String nowToString(String tZoneOut, String formatOut)
+    public static String nowToString(String formatOut, String tZoneOut)
     {
-        return DateUtils.nowToString(tZoneOut, formatOut);
+        return DateUtils.nowToString(formatOut, tZoneOut);
     }
 
     /**
      * @see it.greenvulcano.util.txt.DateUtils#nowToString(String, String,
      *      String)
      */
-    public static String nowToString(String tZoneOut, String formatOut, String langOut)
+    public static String nowToString(String formatOut, String tZoneOut, String langOut)
     {
         return DateUtils.nowToString(formatOut, tZoneOut, langOut);
     }
