@@ -12,6 +12,7 @@
 <!ENTITY % Formatter      "(ExtendedInboundParamHandlerFormatter)">
 
 <!ELEMENT GVAdapterHttpConfiguration (InboundConfiguration, Formatters)>
+<!ATTLIST GVAdapterHttpConfiguration version CDATA #FIXED "1.0">
 <!--
     Element type 'module'.
 -->

@@ -609,7 +609,7 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                              name="RSHRemote" regURL="rmi://localhost:3099" type="rshClient"/>
     </RSHServiceClientConfiguration>
 
-    <GVAdapterHttpConfiguration name="HTTP_ADAPTER" type="module">
+    <GVAdapterHttpConfiguration name="HTTP_ADAPTER" type="module" version="1.0">
         <InboundConfiguration>
             <ActionMappings>
                 <ActionMapping Action="HTTP_TEST" FormatterID="MessageInboundFormatter" enabled="true"/>
