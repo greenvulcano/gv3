@@ -45,6 +45,7 @@
  */
 package it.greenvulcano.gvesb.http.ssl;
 
+import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.crypto.CryptoHelper;
 import it.greenvulcano.util.crypto.CryptoHelperException;
 import it.greenvulcano.util.crypto.KeyStoreUtilsException;
@@ -225,7 +226,7 @@ public class AuthSSLProtocolSocketFactory implements ProtocolSocketFactory
 {
 
     /** Log object for this class. */
-    private static final Logger logger       = Logger.getLogger(AuthSSLProtocolSocketFactory.class);
+    private static final Logger logger       = GVLogger.getLogger(AuthSSLProtocolSocketFactory.class);
 
     private String              keystoreID   = null;
     private String              keyPassword  = null;

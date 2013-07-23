@@ -20,6 +20,7 @@
 package it.greenvulcano.gvesb.virtual.ws.transport.https;
 
 import it.greenvulcano.gvesb.http.ssl.AuthSSLProtocolSocketFactory;
+import it.greenvulcano.log.GVLogger;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -41,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class GVHTTPSTransportSender extends CommonsHTTPTransportSender
 {
-    private static final Logger logger            = Logger.getLogger(GVHTTPSTransportSender.class);
+    private static final Logger logger            = GVLogger.getLogger(GVHTTPSTransportSender.class);
 
     private static final String TWOWAY_AUTH       = "2WAY_AUTH";
     private static final String KEYSTORE_ID       = "KeystoreID";

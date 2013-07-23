@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  *
  * This file is part of GreenVulcano ESB.
@@ -265,7 +265,7 @@ public class GVTransactionInfo
             else if (fieldName.equals("GVTransInfo.service")) {
                 retValue = service;
             }
-            else if (fieldName.equals("GVTransInfo.tid")) {
+            else if (fieldName.equals("GVTransInfo.id")) {
                 retValue = (id != null) ? id.toString() : "";
             }
             else if (fieldName.equals("GVTransInfo.operation")) {

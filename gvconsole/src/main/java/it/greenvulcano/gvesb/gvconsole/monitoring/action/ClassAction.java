@@ -22,6 +22,7 @@ package it.greenvulcano.gvesb.gvconsole.monitoring.action;
 import it.greenvulcano.gvesb.gvconsole.monitoring.domain.ClassInfo;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.ClassLoadingService;
 import it.greenvulcano.gvesb.gvconsole.monitoring.service.ClassLoadingServiceImpl;
+import it.greenvulcano.log.GVLogger;
 
 import javax.management.MBeanServerConnection;
 
@@ -38,7 +39,7 @@ public class ClassAction extends GeneralAction
 {
 
     private static final long     serialVersionUID = 1738011103001826026L;
-    private static final Logger   logger           = Logger.getLogger(ClassAction.class);
+    private static final Logger   logger           = GVLogger.getLogger(ClassAction.class);
 
     private MBeanServerConnection mBeanServerConnection;
 

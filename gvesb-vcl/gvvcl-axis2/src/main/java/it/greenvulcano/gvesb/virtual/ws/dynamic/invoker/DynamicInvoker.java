@@ -25,6 +25,7 @@ import it.greenvulcano.gvesb.virtual.ws.dynamic.descr.ServiceDescrBuilder;
 import it.greenvulcano.gvesb.virtual.ws.dynamic.descr.ServiceDescription;
 import it.greenvulcano.gvesb.virtual.ws.module.ModuleHandler;
 import it.greenvulcano.gvesb.ws.axis2.context.Axis2ConfigurationContextHelper;
+import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandlerException;
 
 import java.io.ByteArrayOutputStream;
@@ -67,7 +68,7 @@ import org.apache.log4j.Logger;
  */
 public class DynamicInvoker
 {
-    private final static Logger                        logger              = Logger.getLogger(DynamicInvoker.class);
+    private final static Logger                        logger              = GVLogger.getLogger(DynamicInvoker.class);
 
     private static Map<String, Stack<DynamicInvoker>>  invokersCache       = new LinkedHashMap<String, Stack<DynamicInvoker>>();
     private static Map<String, Vector<DynamicInvoker>> inUseInvokers       = new LinkedHashMap<String, Vector<DynamicInvoker>>();

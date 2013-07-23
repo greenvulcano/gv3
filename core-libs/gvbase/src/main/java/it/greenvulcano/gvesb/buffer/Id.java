@@ -183,7 +183,7 @@ public class Id implements Serializable
      *
      * @see it.greenvulcano.gvesb.buffer.Id
      */
-    private String getId()
+    private static synchronized String getId()
     {
         int rand = random.nextInt(0xFFFF) + 1; // excludes 0
 

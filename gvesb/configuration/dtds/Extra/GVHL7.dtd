@@ -90,7 +90,23 @@
     #References: gvesb:document('GVCore')/GVCore/GVServices/Services/Service[@id-service=current()/@gv-service]/*/@forward-name
 -->
 <!ATTLIST GVCoreApplication gv-operation CDATA #REQUIRED>
+<!--
+    Indicates whether the invocation to be performed in GreenVulcano is transactional or not.
+    Default: false
 
+    A transaction is rolled back if:
+      - the service ends with exception
+      - the output GVBuffer contains the property HL7_FORCE_TX_ROLLBACK=Y
+-->
+<!ATTLIST GVCoreApplication transacted  (true|false) #IMPLIED>
+<!--
+    Transaction timeout in seconds.
+    Default: 30s
+
+    #Pattern: ! [1-9][0-9]* ! Enter the number of seconds
+    #Warn: {{self::GVCoreApplication[not(@transacted) or (@transacted='false')]}} In non-transactional mode must NOT be specified the timeout
+-->
+<!ATTLIST GVCoreApplication tx-timeout  CDATA   #IMPLIED>
 
 <!ELEMENT HL7Activations (HL7Activation+)>
 

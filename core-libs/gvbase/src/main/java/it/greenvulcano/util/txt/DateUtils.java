@@ -1172,6 +1172,7 @@ public final class DateUtils
         if (onlyDate) {
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.HOUR, 0);
+            cal.set(Calendar.AM_PM, Calendar.AM);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);

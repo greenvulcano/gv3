@@ -23,6 +23,7 @@ package it.greenvulcano.gvesb.core.jmx;
 import it.greenvulcano.jmx.JMXUtils;
 import it.greenvulcano.log.GVLogger;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -50,6 +51,12 @@ public class ServiceInfo {
      * The status of the service activation.
      */
     private boolean            activation      = true;
+    /**
+     * the master logger level
+     */
+    private String             loggerLevel     = "ALL";
+    private Level              loggerLevelj    = Level.ALL;
+
 
     /**
      * Constructor
@@ -59,9 +66,11 @@ public class ServiceInfo {
      * @param act
      *            the activation flag
      */
-    public ServiceInfo(String sName, boolean act) {
-        name = sName;
-        activation = act;
+    public ServiceInfo(String sName, boolean act, String loggerLevel) {
+        this.name = sName;
+        this.activation = act;
+        this.loggerLevel = loggerLevel;
+        this.loggerLevelj = Level.toLevel(loggerLevel);
         jmxFilter = "GreenVulcano:*,Component=" + ServiceOperationInfo.DESCRIPTOR_NAME
         + ",Group=management,Internal=Yes,IDService=" + name;
     }
@@ -84,6 +93,36 @@ public class ServiceInfo {
     public void setActivation(boolean act) throws Exception {
         activation = act;
         JMXUtils.set(jmxFilter, "serviceActivation", new Boolean(activation), false, logger);
+    }
+    
+    /**
+     * @param loggerLevel
+     *        the master logger level value
+     */
+    public void setLoggerLevel(String loggerLevel) throws Exception
+    {
+        this.loggerLevel = loggerLevel;
+        this.loggerLevelj = Level.toLevel(loggerLevel);
+        JMXUtils.set(jmxFilter, "loggerLevelj", loggerLevelj, false, logger);
+    }
+
+    /**
+     * @return the master logger level value
+     */
+    public String getLoggerLevel()
+    {
+        return loggerLevel;
+    }
+    
+    public void setLoggerLevelj(Level loggerLevelj) throws Exception
+    {
+        this.loggerLevelj = loggerLevelj;
+        this.loggerLevel = loggerLevelj.toString();
+    }
+
+    public Level getLoggerLevelj()
+    {
+        return loggerLevelj;
     }
 
     /**

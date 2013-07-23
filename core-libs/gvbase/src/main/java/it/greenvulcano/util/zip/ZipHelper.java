@@ -382,15 +382,19 @@ public class ZipHelper
             ZipEntry currEntry = entries.nextElement();
             if (currEntry.isDirectory()) {
                 String targetSubdirPathname = currEntry.getName();
-                FileUtils.forceMkdir(new File(targetDirectory, targetSubdirPathname));
+                File dir = new File(targetDirectory, targetSubdirPathname);
+                FileUtils.forceMkdir(dir);
+                dir.setLastModified(currEntry.getTime());
             }
             else {
                 InputStream is = null;
                 OutputStream os = null;
+                File file = null;
                 try {
                     is = zipFile.getInputStream(currEntry);
                     FileUtils.forceMkdir(new File(targetDirectory, currEntry.getName()).getParentFile());
-                    os = new FileOutputStream(new File(targetDirectory, currEntry.getName()));
+                    file = new File(targetDirectory, currEntry.getName());
+                    os = new FileOutputStream(file);
                     IOUtils.copy(is, os);
                 }
                 finally {
@@ -406,6 +410,10 @@ public class ZipHelper
                     catch (IOException exc) {
                         // Do nothing
                     }
+                    
+                    if (file != null) {
+                        file.setLastModified(currEntry.getTime());
+                    }
                 }
             }
         }
@@ -416,6 +424,7 @@ public class ZipHelper
         if (srcFile.isDirectory()) {
             zipEntryName = zipEntryName.endsWith("/") ? zipEntryName : zipEntryName + "/";
             ZipEntry anEntry = new ZipEntry(zipEntryName);
+            anEntry.setTime(srcFile.lastModified());
             zos.putNextEntry(anEntry);
 
             File[] dirList = srcFile.listFiles();
@@ -425,6 +434,7 @@ public class ZipHelper
         }
         else {
             ZipEntry anEntry = new ZipEntry(zipEntryName);
+            anEntry.setTime(srcFile.lastModified());
             zos.putNextEntry(anEntry);
 
             FileInputStream fis = null;

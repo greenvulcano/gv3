@@ -58,4 +58,11 @@ public class MemoryUIDCache implements UIDCache
         logger.debug("Writing UID [" + uid + "] in Cache [" + key + "]");
         cache.add(uid);
     }
+    
+    public boolean remove(String uid)
+    {
+        logger.debug("Deleting UID [" + uid + "] in Cache [" + key + "]");
+        return cache.remove(uid);
+    }
+    
 }

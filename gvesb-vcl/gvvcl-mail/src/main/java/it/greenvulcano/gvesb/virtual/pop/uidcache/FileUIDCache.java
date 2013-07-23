@@ -72,4 +72,20 @@ public class FileUIDCache implements UIDCache
             }
         }
     }
+    
+    public boolean remove(String uid)
+    {
+        synchronized (cache) {
+            logger.debug("Deleting UID [" + uid + "] in Cache [" + key + "]");
+            boolean res = cache.remove(uid);
+            try {
+                manager.updateUIDCacheInt(key);
+            }
+            catch (Exception exc) {
+                // TODO: handle exception
+                logger.error("Error saving Cache [" + key + "] data.", exc);
+            }
+            return res;
+        }
+    }
 }

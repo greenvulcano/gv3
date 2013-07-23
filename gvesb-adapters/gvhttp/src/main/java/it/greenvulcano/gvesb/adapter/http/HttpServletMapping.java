@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  * 
  * This file is part of GreenVulcano ESB.
@@ -68,11 +68,10 @@ public class HttpServletMapping
 
     private Formatter                     formatter           = null;
     private HttpServletTransactionManager transactionManager  = null;
-    private String                        mapping             = null;
+    private String                        action              = null;
     private RetCodeHandler                retCodeHandlerIn    = null;
     private RetCodeHandler                retCodeHandlerOut   = null;
     private String                        responseContentType = null;
-    public static final String            SUBSYSTEM           = "HTTPAdapter";
 
     /**
      * @param transactionManager
@@ -87,22 +86,22 @@ public class HttpServletMapping
         this.transactionManager = transactionManager;
 
         try {
-            mapping = XMLConfig.get(configurationNode, "@Mapping");
+            action = XMLConfig.get(configurationNode, "@Action");
             String formatterID = XMLConfig.get(configurationNode, "@FormatterID");
             formatter = formatterMgr.getFormatter(formatterID);
             retCodeHandlerIn = new RetCodeHandler();
             retCodeHandlerIn.init(XMLConfig.getNode(configurationNode, "RetCodeConversionIn"));
             retCodeHandlerOut = new RetCodeHandler();
             retCodeHandlerOut.init(XMLConfig.getNode(configurationNode, "RetCodeConversionOut"));
-            responseContentType = XMLConfig.get(configurationNode, "@ResponseContentType",
+            responseContentType = XMLConfig.get(configurationNode, "@RespContentType",
                     AdapterHttpConstants.TEXTHTML_MIMETYPE_NAME);
         }
         catch (AdapterHttpInitializationException exc) {
             throw exc;
         }
         catch (Exception exc) {
-            logger.error("HttpServletMapping - Error initializing mapping '" + mapping + "'", exc);
-            throw new AdapterHttpInitializationException("HttpServletMapping - Error initializing mapping '" + mapping
+            logger.error("HttpServletMapping - Error initializing action '" + action + "'", exc);
+            throw new AdapterHttpInitializationException("HttpServletMapping - Error initializing action '" + action
                     + "'", exc);
         }
     }
@@ -134,6 +133,13 @@ public class HttpServletMapping
             formatter.marshall(environment);
 
             GVBuffer request = retCodeHandlerIn.transformInput((GVBuffer) environment.get(AdapterHttpConstants.ENV_KEY_GVBUFFER_INPUT));
+
+            request.setProperty("HTTP_ACTION", action);
+            // get remote transport address...
+            String remAddr = req.getRemoteAddr();
+            request.setProperty("HTTP_REMOTE_ADDR", (remAddr != null ? remAddr : ""));
+
+            
             GVBufferMDC.put(request);
             String operationType = (String) environment.get(AdapterHttpConstants.ENV_KEY_OP_TYPE);
             NMDC.setOperation(operationType);
@@ -176,7 +182,7 @@ public class HttpServletMapping
             level = Level.ERROR;
             mustRollback = false;
             environment.put(AdapterHttpConstants.ENV_KEY_GVBUFFER_OUTPUT, exc);
-            logger.error(mapping + " - handleRequest - Error while handling request parameters: " + exc);
+            logger.error(action + " - handleRequest - Error while handling request parameters: " + exc);
             transInfo.setErrorCode(exc.getErrorCode());
             transInfo.setErrorMessage(exc.getMessage());
             manageHttpResponse(environment);
@@ -203,7 +209,7 @@ public class HttpServletMapping
         	exception = exc;
             level = Level.ERROR;
             environment.put(AdapterHttpConstants.ENV_KEY_GVBUFFER_OUTPUT, exc);
-            logger.error("handleRequest - Service request failed for a runtime error: " + exc);
+            logger.error("handleRequest - Service request failed for a runtime error", exc);
             AdapterHttpException adpEx = new AdapterHttpException("GVHTTP_RUNTIME_ERROR", new String[][]{
                     {"phase", "managing inbound request"}, {"errorName", "" + exc}}, exc);
             transInfo.setErrorCode(adpEx.getErrorCode());
@@ -253,11 +259,11 @@ public class HttpServletMapping
     }
 
     /**
-     * @return the servlet mapping
+     * @return the servlet action
      */
-    public String getMapping()
+    public String getAction()
     {
-        return mapping;
+        return action;
     }
 
     /**
@@ -295,18 +301,13 @@ public class HttpServletMapping
         NMDC.push();
         try {
             Level level = Level.INFO;
-            GreenVulcanoPool greenVulcanoPool = GreenVulcanoPoolManager.instance().getGreenVulcanoPool(SUBSYSTEM);
+            GreenVulcanoPool greenVulcanoPool = GreenVulcanoPoolManager.instance().getGreenVulcanoPool(AdapterHttpConstants.SUBSYSTEM);
             if (greenVulcanoPool == null) {
                 throw new InboundHttpResponseException("GVHTTP_GREENVULCANOPOOL_NOT_CONFIGURED");
             }
 
             try {
-                if ("Request".equals(operationType) || "SendReply".equals(operationType)) {
-                    greenVulcanoPool.forward(gvInput, operationType);
-                }
-                else {
-                    gvOutput = greenVulcanoPool.forward(gvInput, operationType);
-                }
+                gvOutput = greenVulcanoPool.forward(gvInput, operationType);
                 return gvOutput;
             }
             catch (Exception exc) {

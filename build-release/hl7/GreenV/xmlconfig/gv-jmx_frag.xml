@@ -15,7 +15,7 @@
     </entry-point>
     ....
     
-    </mbeans-descriptors>
+    <mbeans-descriptors>
         ....
         <mbean description="Visualizzazione stato HL7 Listener"
            domain="GreenVulcano" group="management" name="HL7ListenerInfo"

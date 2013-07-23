@@ -57,6 +57,7 @@ public class DHFactoryPoolElement extends DHFactory implements ConfigurationList
     @Override
     public void destroy()
     {
+        XMLConfig.removeConfigurationListener(this);
         super.destroy();
     }
 
