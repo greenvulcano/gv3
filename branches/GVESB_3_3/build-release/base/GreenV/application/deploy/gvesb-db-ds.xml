@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <datasources>
     <local-tx-datasource>
-        <jndi-name>ds.Statistics</jndi-name>
-        <use-java-context>false</use-java-context>
-        <connection-url>jdbc:hsqldb:hsql://localhost:9001/gvesb</connection-url>
-        <driver-class>org.hsqldb.jdbc.JDBCDriver</driver-class>
-        <user-name>gv_stats</user-name>
-        <password>gv_stats</password>
-        <check-valid-connection-sql>select 1 from dual</check-valid-connection-sql>
-        <type-mapping>Hypersonic SQL</type-mapping>
-    </local-tx-datasource>
-
-    <local-tx-datasource>
         <jndi-name>ds.gv_test</jndi-name>
         <use-java-context>false</use-java-context>
         <connection-url>jdbc:hsqldb:hsql://localhost:9001/gvesb</connection-url>
