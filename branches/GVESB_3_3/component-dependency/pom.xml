@@ -8,7 +8,7 @@
   <groupId>it.greenvulcano.gvesb</groupId>
   <artifactId>gvesb-component-dependency</artifactId>
   <packaging>pom</packaging>
-  <version>3.3.1-Final</version>
+  <version>3.3.2-Final</version>
   <name>GreenVulcano ESB Component Dependency</name>
 
   <description>
