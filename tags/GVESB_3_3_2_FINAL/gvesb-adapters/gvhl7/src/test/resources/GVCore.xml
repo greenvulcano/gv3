@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+
+<GVCore version="1.0">
+  <GVCryptoHelper name="CRYPTO_HELPER" type="module"/>
+  <GVXPath name="XPATH" type="module">
+    <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
+      <Description>Funzioni estese e namespaces per l&apos;XPath.</Description>
+      <XPathExtension class="it.greenvulcano.util.xpath.search.extension.ExternalDocumentXPathFunction"
+                      function-name="document">
+            <Description>Accede ad un documento esterno. Uso: gvf:document('xml file path')</Description>
+      </XPathExtension>
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema-instance" prefix="xsi" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/soap/" prefix="soap" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl" />
+      <XPathNamespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j" />
+      <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano" prefix="gvesbws"/>
+      <XPathNamespace namespace="http://www.greenvulcano.it/jca/xml" prefix="jca" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc" />
+      <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
+    </XPath>
+  </GVXPath>
+  <GVSystems name="SYSTEMS" type="module">
+    <Systems>
+      <System id-system="GVESB" system-activation="on">
+        <Channel id-channel="TEST_CHANNEL">
+          <hl7-call type="call" class="it.greenvulcano.gvesb.virtual.hl7.HL7CallOperation" name="test_hl7"
+                    host="localhost" port="8282"/>
+        </Channel>
+      </System>
+    </Systems>
+  </GVSystems>
+  <GVBufferDump log-dump-size="-1" name="BUFFER_DUMP" type="module" />
+  <GVDataTransformation name="GVDT" type="module">
+    <DataSourceSets>
+      <DataSourceSet name="Default">
+        <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xsl" name="Default"
+          repositoryHome="target/test-classes/gvdte/datasource/xsl" type="datasource" />
+        <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xsd" name="DefaultXSD"
+          repositoryHome="target/test-classes/gvdte/datasource/xsd" type="datasource" />
+         <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="bin" name="DefaultBIN"
+          repositoryHome="target/test-classes/gvdte/datasource/bin" type="datasource"
+          formatHandlerClass="it.greenvulcano.gvesb.gvdte.config.XMLLoader"/>
+        <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xq" name="Default"
+          repositoryHome="target/test-classes/gvdte/datasource/xq" type="datasource" />
+      </DataSourceSet>
+    </DataSourceSets>
+    <Transformations>
+      <HL72XMLTransformation class="it.greenvulcano.gvesb.gvdte.transformers.hl7.HL72XMLTransformer"
+        name="TestHL72XML" type="transformation"/>
+      <XML2HL7Transformation class="it.greenvulcano.gvesb.gvdte.transformers.hl7.XML2HL7Transformer"
+        name="TestXML2HL7" type="transformation"/>
+    </Transformations>
+  </GVDataTransformation>
+</GVCore>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+
+<GVCore version="1.0">
+  <GVCryptoHelper name="CRYPTO_HELPER" type="module"/>
+  <GVXPath name="XPATH" type="module">
+    <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
+      <Description>Funzioni estese e namespaces per l&apos;XPath.</Description>
+      <XPathExtension class="it.greenvulcano.util.xpath.search.extension.ExternalDocumentXPathFunction"
+                      function-name="document">
+            <Description>Accede ad un documento esterno. Uso: gvf:document('xml file path')</Description>
+      </XPathExtension>
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema-instance" prefix="xsi" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/soap/" prefix="soap" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl" />
+      <XPathNamespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j" />
+      <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano" prefix="gvesbws"/>
+      <XPathNamespace namespace="http://www.greenvulcano.it/jca/xml" prefix="jca" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc" />
+      <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
+    </XPath>
+  </GVXPath>
+  <GVSystems name="SYSTEMS" type="module">
+    <Systems>
+      <System id-system="GVESB" system-activation="on">
+        <Channel id-channel="TEST_CHANNEL">
+          <rules-call class="it.greenvulcano.gvesb.gvrules.virtual.RulesCall" type="call"
+            name="figureFilter" ruleSet="figureFilter" 
+            input-ref-dp="figFilter_InMapDataProvider" 
+            globals-ref-dp="figFilter_GlobMapDataProvider"
+            output-ref-dp="figFilter_OutGVBChangeDataProvider">
+          </rules-call>
+          <rules-call class="it.greenvulcano.gvesb.gvrules.virtual.RulesCall" type="call"
+            name="figureFilterOut" ruleSet="figureFilterOut" 
+            input-ref-dp="figFilterOut_InMapDataProvider" 
+            globals-ref-dp="figFilterOut_GlobMapDataProvider"
+            output-ref-dp="figFilterOut_OutGVBChangeDataProvider">
+          </rules-call>
+          <rules-call class="it.greenvulcano.gvesb.gvrules.virtual.RulesCall" type="call"
+            name="figureFilterOutColl" ruleSet="figureFilterOutColl" 
+            input-ref-dp="figFilterOutColl_InMapDataProvider" 
+            globals-ref-dp="figFilterOutColl_GlobMapDataProvider"
+            output-ref-dp="figFilterOutColl_OutGVBChangeDataProvider">
+          </rules-call>
+        </Channel>
+      </System>
+    </Systems>
+  </GVSystems>
+</GVCore>

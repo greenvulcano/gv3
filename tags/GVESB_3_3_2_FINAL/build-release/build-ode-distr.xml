@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project [
+   <!ENTITY libraries SYSTEM "../thirdparty/libraries.ent">
+]>
+
+<project name="ODE/Build Distribution">
+
+    &libraries;
+
+    <!-- ================================================================== -->
+    <!-- Building                                                           -->
+    <!-- ================================================================== -->
+
+    <target name="build-ode-dist" description="Builds the ODE Adapter distribution">
+        <antcall target="release"/>
+    </target>
+
+    <target name="release"
+            depends="prepare, bundle-docs, bin-tgz, bin-zip"
+            description="Creates the release binary from the distribution">
+    </target>
+
+    <target name="prepare">
+        <delete dir="${release.root}"/>
+
+        <mkdir dir="${release.root}"/>
+
+        <!-- Copy standard files -->
+        <filter token="base.dir" value="${release.id}"/>
+        <copy todir="${release.root}" filtering="true"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode">
+                <include name="readme.*"/>
+            </fileset>
+        </copy>
+        <copy todir="${release.root}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/ode">
+                <include name="**"/>
+                <exclude name="readme.*"/>
+            </fileset>
+        </copy>
+        <copy todir="${release.dtds}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../gvesb/configuration/dtds">
+                <include name="Extra/GVBpel.dtd"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvcore-ode.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${ode.ode.lib}">
+                <include name="*.jar"/>
+                <exclude name="ode-dao-jpa.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="bundle-docs" description="Include license, readme, etc">
+        <!-- Copy the thirdparty/licenses to docs/licenses -->
+        <!--<copy todir="${release.docs}/licenses" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/../thirdparty/licenses">
+                <include name="**"/>
+            </fileset>
+        </copy>-->
+        <!-- Copy the build/docs to the dist root -->
+        <!--<copy todir="${release.gv}/docs/api" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${basedir}/javadocs"/>
+        </copy>-->
+    </target>
+
+    <target name="bin-tgz" description="Build .tar.gz archive">
+        <tar destfile="${module.output}/ODE_${release.id}.tar.gz"
+             longfile="gnu" compression="gzip">
+            <tarfileset dir="${release.root}" prefix="${release.id}">
+                <exclude name="**/bin/*.sh"/>
+            </tarfileset>
+            <tarfileset dir="${release.db.bin}"
+                        prefix="${release.id}/GreenV/hsqldb/bin" mode="755">
+                <include name="*.sh"/>
+            </tarfileset>
+        </tar>
+        <checksum file="${module.output}/ODE_${release.id}.tar.gz"/>
+        <checksum file="${module.output}/ODE_${release.id}.tar.gz" algorithm="SHA-256" />
+    </target>
+
+    <target name="bin-zip" description="Build zip archive">
+        <zip destfile="${module.output}/ODE_${release.id}.zip">
+            <zipfileset dir="${release.root}" prefix="${release.id}"/>
+        </zip>
+        <checksum file="${module.output}/ODE_${release.id}.zip"/>
+        <checksum file="${module.output}/ODE_${release.id}.zip" algorithm="SHA-256" />
+    </target>
+</project>

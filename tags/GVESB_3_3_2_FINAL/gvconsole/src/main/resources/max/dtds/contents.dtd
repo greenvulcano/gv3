@@ -1,0 +1,320 @@
+<!--============================================================================
+    This element is the root of content providers configuration.
+============================================================================-->
+<!ELEMENT contents (description?,alias*,provider*,selector*)>
+
+<!ATTLIST contents copyright CDATA #FIXED "Maxime Informatica Intranet Framework">
+
+
+<!--============================================================================
+    This element defines an alias for a content provider.
+    The names specified for alias have precedence on provider names.
+============================================================================
+    #Label: @alias
+    #Template:
+
+    <xsl:template match="alias">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Alias</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@alias"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Provider</td>
+                <td width="20"></td>
+                <td><xsl:value-of select="@provider"/></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT alias (description?)>
+
+<!--
+    Alias for the provider.
+
+    #NotNull
+-->
+<!ATTLIST alias alias CDATA #REQUIRED>
+
+<!--
+    Provider.
+
+    #References: /contents/provider/@name
+-->
+<!ATTLIST alias provider CDATA #REQUIRED>
+
+
+<!--============================================================================
+    This element defines a content provider.
+============================================================================
+    #Label: @name
+    #Template:
+
+    <xsl:template match="provider">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Name</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@name"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Class</td>
+                <td width="20"></td>
+                <td><xsl:value-of select=".//*[@type='provider']/@class"/></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT provider (description?,(max-provider|max-ascii-provider))>
+
+<!--
+    Name of the content provider. This is the name referenced by Java code.
+
+    #NotNull
+-->
+<!ATTLIST provider name CDATA #REQUIRED>
+
+
+<!--============================================================================
+    This element defines the configuration for the default content provider.
+    The default content provider uses the file system as support for the
+    contents.
+============================================================================
+    #Label: @directory
+    #Template:
+
+    <xsl:template match="max-provider">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Directory</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@directory"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Cache size</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@cache-size"/></b></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT max-provider (description?)>
+<!ATTLIST max-provider type  CDATA #FIXED "provider">
+<!ATTLIST max-provider class CDATA #FIXED "max.def.MaxContentProvider">
+
+<!--
+    Root directory of the content provider.
+
+    #NotNull
+-->
+<!ATTLIST max-provider directory CDATA #REQUIRED>
+
+<!--
+    Maximun number of registry entries to maintain into the memory.
+
+    #NotNull
+-->
+<!ATTLIST max-provider cache-size CDATA #IMPLIED>
+
+
+<!--============================================================================
+    Come max-provider, ma il registry e' mantenuto in ASCII.
+============================================================================
+    #Label: @directory
+    #Template:
+
+    <xsl:template match="max-ascii-provider">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Directory</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@directory"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Cache size</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@cache-size"/></b></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT max-ascii-provider (description?)>
+<!ATTLIST max-ascii-provider type  CDATA #FIXED "provider">
+<!ATTLIST max-ascii-provider class CDATA #FIXED "max.def.MaxASCIIContentProvider">
+
+<!--
+    Root directory of the content provider.
+
+    #NotNull
+-->
+<!ATTLIST max-ascii-provider directory CDATA #REQUIRED>
+
+<!--
+    Maximun number of registry entries to maintain into the memory.
+
+    #NotNull
+-->
+<!ATTLIST max-ascii-provider cache-size CDATA #IMPLIED>
+
+
+<!--============================================================================
+    This element defines a selector.
+    A selector is a rule that selects content attributes according to some
+    criteria.
+============================================================================
+    #Label: @name
+    #Template:
+
+    <xsl:template match="selector">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Name</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@name"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Class</td>
+                <td width="20"></td>
+                <td><xsl:value-of select=".//*[@type='selector']/@class"/></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT selector (description?,(max-selector|max-user-selector))>
+
+<!--
+    Name of the selector. This is the name referenced by Java code.
+
+    #NotNull
+-->
+<!ATTLIST selector name CDATA #REQUIRED>
+
+
+<!--============================================================================
+    This element defines the configuration for the default selector.
+    This selector selects all contents from a category of the given provider.
+    The selector returns only accessible contents for the user.
+============================================================================
+	#Label: @provider
+    #Template:
+
+    <xsl:template match="max-selector">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Provider</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@provider"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Category</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@category"/></b></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT max-selector (description?)>
+<!ATTLIST max-selector type  CDATA #FIXED "selector">
+<!ATTLIST max-selector class CDATA #FIXED "max.def.MaxContentSelectionRule">
+
+<!--
+    Content provider.
+
+    #References: /contents/provider/@name
+    #References: /contents/alias/@alias
+-->
+<!ATTLIST max-selector provider CDATA #REQUIRED>
+
+<!--
+    Category.
+
+    #NotNull
+-->
+<!ATTLIST max-selector category CDATA #REQUIRED>
+
+
+<!--============================================================================
+    This element defines the configuration for a selector that selects
+    contents from a given provider, and from a category with name as the
+    user name.
+    If the user is not logged, the the guest category is searched.
+============================================================================
+	#Label: @provider
+    #Template:
+
+    <xsl:template match="max-user-selector">
+        <table cellpadding="0" cellspacing="0">
+            <tr valign="top">
+                <td>Provider</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@provider"/></b></td>
+            </tr>
+            <tr valign="top">
+                <td>Guest category</td>
+                <td width="20"></td>
+                <td><b><xsl:value-of select="@guest-category"/></b></td>
+            </tr>
+            <xsl:if test="description">
+            <tr valign="top">
+                <td colspan="3"><small><br/><xsl:value-of select="description"/></small></td>
+            </tr>
+            </xsl:if>
+        </table>
+    </xsl:template>
+-->
+<!ELEMENT max-user-selector (description?)>
+<!ATTLIST max-user-selector type  CDATA #FIXED "selector">
+<!ATTLIST max-user-selector class CDATA #FIXED "max.def.MaxUserContentSelectionRule">
+
+<!--
+    Content provider.
+
+    #References: /contents/provider/@name
+    #References: /contents/alias/@alias
+-->
+<!ATTLIST max-user-selector provider CDATA #REQUIRED>
+
+<!--
+    Guest category.
+    Contains contents for guest users.
+
+    #NotNull
+-->
+<!ATTLIST max-user-selector guest-category CDATA #REQUIRED>
+
+
+<!--============================================================================
+    Free text for description.
+============================================================================-->
+<!ELEMENT description (#PCDATA)>

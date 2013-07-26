@@ -1,0 +1,20 @@
+body{font:75%/150% "Trebuchet MS", "Lucida Grande", "Bitstream Vera Sans", Arial, Helvetica, sans-serif;color:#666666;}
+div#login-container{margin: 0 auto;height: 315px;background:url(../images/login/login-bg.png) top no-repeat;padding-left:40px;}
+form#myForm{width: 300px; margin: 0 auto; padding-top: 80px; text-align:left;}
+input{
+	border:0;
+	margin:3px;
+	padding:0px 3px;
+	font:90%/180% "Trebuchet MS", "Lucida Grande", "Bitstream Vera Sans", Arial, Helvetica, sans-serif;
+	color:#666666;
+}
+label{float:left;margin:5px;width:100px;display:block;}
+.clearAll{clear:both;}
+/***** Shadows that wrap around ALL elements ***********/
+.frmShdwTopLt{float:left;background:url(../images/login/shadowUpperLeft.gif) top left no-repeat;}
+.frmShdwBottomRt{float:left;background:url(../images/login/shadowLowerRight.gif) bottom right no-repeat;}
+.frmShdwBottomLt{float:left;background:transparent url(../images/login/shadowBottomLeft.gif) bottom left no-repeat;}
+.frmShdwTopRt{float:left;background:transparent url(../images/login/shadowTopRight.gif) top right no-repeat;}
+/***** styles specific to the SUBMIT BUTTONS **********/
+.frmShdwSubmit{border:0;ackground:#f7f7f7 !important;background:transparent;float:left;font-weight:bold;cursor:pointer;}
+	.frmShdwSubmit:hover{color:#000000;}

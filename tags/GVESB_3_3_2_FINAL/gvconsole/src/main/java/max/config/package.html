@@ -1,0 +1,293 @@
+<body>
+    Questo package implementa i meccanismi di configurazione.
+    <br>
+    La configurazione può essere contenuta su <a href="#configuration">property files</a>
+    oppure su <a href="#xml">files XML</a>.
+
+	<a name="configuration"/><h1>Configuration</h1>
+
+	The Maxime Informatica Intranet Framework is configured using
+	a <a href=#locales>localizable</a> set of configuration
+	files.<p>
+
+	Each configuration file is called property file.<br>
+	A property file, usually, has <i>*.properties</i> extension and
+	contains property definitions.<p>
+
+	<h2>Property files location</h2>
+
+	The property files are contained in the directories specified
+	by the <code>CLASSPATH</code>.<p>
+
+	The first file readed from the configuration directory is
+	<code>root.properties</code>, this file contains the locale
+	properties (see <a href=#locales>locales</a>) and the
+	<code>max.property.files</code> property.<br>
+	The <code>max.property.files</code> is a comma separated list
+	of configuration file names without extension and locale extensions;
+	these files will be readed.<p>
+
+	<h2>Property definitions</h2>
+
+	The property definitions are grouped into sections. A section starts
+	with a line containing a string between <b>[</b> and <b>]</b> chars.<p>
+
+	A section starts with a line like:
+	<pre>
+		[SECTION_NAME]
+	</pre>
+
+	If you does not define any section, the properties are implicitly
+	created into the default section.<p>
+
+	The default section have no name, so <code>null</code> or empty string
+	defines it.<p>
+
+	A property definition is a pair of strings: the property and its
+	value.<br>
+	The code can refers a property obtaining its value.<p>
+
+	A property definition can be <i>single-line</i> or
+	<i>multi-lines</i>.<p>
+
+	The single-line property looks like this:
+	<pre>
+		property.name = property value
+	</pre>
+
+	The multi-line property looks like this:
+	<pre>
+		property.name = {{
+			property
+			value
+		}}
+	</pre>
+
+	In the multi-line properties after each line the <code>\n</code>
+	character is appended and the value is obtained by concatenation
+	of all lines.<p>
+
+	<h2>Trimming</h2>
+
+	In the single-line and in the multi-line properties the property and section
+	names and the values are trimmed before processing, so the spaces
+	in the head and in the tail are discarded.<br>
+	In order to have spaces in the head and in the tail you can use
+	the double quote character (<code>"</code>).<br>
+	The double quote character at head and tail are removed.<br>
+	In the multi-line properties this rule is applied for each line
+	specifing the value.<p>
+
+	For example, consider the following definitions:
+	<pre>
+		property.A = Test string
+		property.B = " Test string "
+		property.C = "" Test string ""
+	</pre>
+
+	The <code>property.A</code> value is
+	<nobr>'<code>Test string</code>'</nobr><br>
+	The <code>property.B</code> value is
+	<nobr>'<code> Test string </code>'</nobr><br>
+	The <code>property.C</code> value is
+	<nobr>'<code>" Test string "</code>'</nobr>.<p>
+
+	In the previous examples the single quote characters are not part
+	of property values.<p>
+
+	<h2>Comments</h2>
+
+	The property definition files can contains comments.<br>
+	The comment lines starts with the <code>#</code> character.<br>
+	You can insert comment also into the multi-line definitions.<p>
+
+	<h2>Substitutions</h2>
+
+	In all properties you can use the substitution mechanism to define
+	a property using other properties.<p>
+
+	In each part of the property value you can insert a string like
+	<code>[[previous.property]]</code> or <code>[[previous.propery::defValue]]</code>
+	to refer the <code>previous.property</code> property value.<p>
+
+	For example, consider the following definitions:
+	<pre>
+		property.A = string
+		property.B = Test [[property.A]]
+	</pre>
+
+	The <code>property.A</code> value is
+	<nobr>'<code>string</code>'</nobr><br>
+	The <code>property.B</code> value is
+	<nobr>'<code>Test string</code>'</nobr>.<p>
+
+	In the previous examples the single quote characters are not part
+	of property values.<p>
+
+	The default value, if specified, are applied if the referred property
+	does not exists.<p>
+
+	The referred property must be in the same section of the defining
+	property (i.e. the property.A must be into the property.B section);
+	it is possible to refer a property into another section with the
+	sintax <code>[[otherSection!previous.property]]</code>
+	or <code>[[otherSection!previous.propery::defValue]]</code>.<p>
+
+	Using the substitution mechanism make attention to circular
+	definitions.<p>
+
+	<h2>Escapes</h2>
+
+	The configuration files manages escape character sequences as Java
+	string literal do (<code>\n</code>, <code>\t</code>,
+	<code>\r</code>, etc.).<br>
+	You can insert escape character sequences into both property
+	names and values.<p>
+
+	<h2>Java property inclusive</h2>
+
+	The Java properties are automatically included in the configuration
+	mechanism, so you can define properties directly at command line
+	using the <code>-D</code> flag of <code>java</code> command.<p>
+
+	The Java properties are intended into the default section.<p>
+
+	The command line options have precedence on the file defined
+	properties.<p>
+
+	<h2>Programming</h2>
+
+    To access configuration you must use the static methods of
+    <code>max.config.Config</code> class.<p>
+
+    Follows some examples:
+    <ul>
+
+    <li>assign to <code>ret</code> the value of the property
+    <code>property.A</code> or <code>null</code> if the
+    <code>property.A</code> is not defined in section <code>sect</code>:<br>
+    <pre>
+    	String ret = Config.get("sect", "property.A");
+    </pre><p>
+
+    <li>assign to <code>ret</code> the value of the property
+    <code>property.A</code> or <code>default value</code> if the
+    <code>property.A</code> is not defined in section <code>sect</code>:<br>
+    <pre>
+    	String ret = Config.getDef("sect", "property.A", "default value");
+    </pre><p>
+
+    <li>assign to <code>ret</code> the value of the property
+    <code>property.A</code> into section <code>sect</code> interpreted as
+    <code>int</code>; if the <code>property.A</code> is not defined or it
+    is not an integer number then an exception is thrown:<br>
+    <pre>
+    	int ret = Config.getInteger("sect", "property.A");
+    </pre><p>
+
+	</ul>
+
+	The <code>Config</code> class provide more methods to access the
+	configuration; see the
+	<a href=Config.html>javadoc documentation</a>
+	for all details.<p>
+
+	<a name="locales"/><h1>Locales</h1>
+
+	The Maxime Informatica Intranet Framework is localizable, this
+	mean that you can specify the properties in
+	<a href=#configuration>configuration files</a>
+	that you can personalize among countries. <p>
+
+	A property file, usually, has <i>*.properties</i> extension.<p>
+
+	<h2>Localized version</h2>
+
+	If you want give a property for different locales you can write
+	a general (or default) property file called, for example,
+	<i>myfile.properties</i>. <br>
+	Then you can give specialized versions for particular languages,
+	for example italian (it) and french (fr); you must write, for
+	example, the files <i>myfile_it.properties</i> and
+	<i>myfile_fr.properties</i>. <br>
+	You can also specialize a version for a particular country, for
+	example Italy, so you can write the file <i>myfile_it_IT.properties</i>. <br>
+	Then, at the end, you can specify also for a variant. <p>
+
+	It is not mandatory that the specialized forms of a property file
+	contains (or redefines) all properties in the default file, but
+	they must only specify the properties who need localization. <p>
+
+	When you read a property, they will be searched first for the
+	current locale, then for the current language and country, then
+	for the current language only and, at the end, in the general
+	file. <br>
+	The following list shows the search order:
+	<ol>
+		<li> myfile_LANG_COUNTRY_VAR.properties
+		<li> myfile_LANG_COUNTRY.properties
+		<li> myfile_LANG.properties
+		<li> myfile.properties
+	</ol><p>
+
+	<h2>Specifying a locale</h2>
+
+	If you don't specify a locale then the system default locale is
+	assumed.<p>
+
+	You can specify a different locale defining, at server startup time,
+	the following properties:
+	<ul>
+		<li> max.locale.language
+		<li> max.locale.country
+		<li> max.locale.variant
+	</ul>
+	For example:<p>
+	<code>
+	java -Dmax.locale.lanuage=en -Dmax.locale.country=US <i>otherOptions... serverClassToStart</i>
+	</code><p>
+	will set the <code>en_US</code> locale. <p>
+
+	Alternatively you can define the previous properties in the
+	<i>root.properties</i> file
+	(see <a href=#configuration>configurations</a>).<br>
+	Note that you can define the locale properties in both the
+	<i>root.properties</i> file and command line options: in this case
+	the command line options have precedence.<br>
+	Note also that the <i>root.properties</i> file is not localizable
+	because the locale depends on its content.<p>
+
+    <hr>
+
+	<a name="xml"/><h1>XML</h1>
+
+    The XML configuration is not localizable and is contained in XML files
+    searched in the CLASSPATH.
+    <p>
+    The XML configuration is accessed using XPath strings and is based on
+    Xalan implementation.
+    <p>
+    To access the configuration parameters it is available the
+    <code>XMLConfig</code> class that exposes many static methods.
+    <p>
+    For example:
+    <pre>
+        // reads all nodes that match the given Xpath
+        //
+        NodeList nodeList = XMLConfig.getNodeList(XMLFILE, XPATH);
+
+        // reads a node value
+        //
+        String value = XMLConfig.get(XMLFILE, XPATH);
+    </pre>
+    <p>
+    To use the result you must import the <code>org.w3c.dom.*</code>
+    package.
+    <p>
+    Note that the files are readed only the first time they are accessed.
+    The files are not checked for changes.<br>
+    To reload all files you must call the <code>XMLConfig.reload()</code>
+    method (note that this method does not actually reload the configuration
+    files, they will be reloaded the next access).
+
+</body>

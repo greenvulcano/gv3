@@ -1,0 +1,25 @@
+<!ENTITY % gvcommons SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCommons.dtd">
+%gvcommons;
+
+....
+
+<!ENTITY % gvsocial SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd">
+%gvsocial;
+
+<!ENTITY % extra-j2ee-calls "">
+<!ENTITY % extra-comm-calls "|%social-calls;">
+<!ENTITY % extra-file-calls "">
+<!ENTITY % extra-db-calls   "">
+<!ENTITY % extra-util-calls "">
+
+<!ENTITY % extra-enqueue "">
+<!ENTITY % extra-dequeue "">
+
+<!ENTITY % extra-dte-transformers "">
+
+<!ENTITY % extra-wf-operations "">
+<!ENTITY % extra-wf-extensions "">
+
+<!ENTITY % extra-core "">
+<!ENTITY % extra-adapters ",GVSocialAdapterManager">
+<!ENTITY % extra-support "">
