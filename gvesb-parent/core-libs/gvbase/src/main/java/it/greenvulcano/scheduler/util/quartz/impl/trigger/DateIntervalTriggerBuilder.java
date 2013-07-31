@@ -41,6 +41,11 @@ public class DateIntervalTriggerBuilder extends BaseTriggerBuilder
     private int                              repeatInterval     = -1;
     private DateIntervalTrigger.IntervalUnit repeatIntervalUnit = null;
 
+    {
+        misfires.put("do-nothing", DateIntervalTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);
+        misfires.put("fire-once-now", DateIntervalTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
+    }
+
     /* (non-Javadoc)
      * @see it.greenvulcano.scheduler.util.quartz.impl.BaseTriggerBuilder#initTB(org.w3c.dom.Node)
      */
@@ -75,7 +80,9 @@ public class DateIntervalTriggerBuilder extends BaseTriggerBuilder
             if (endTime != null) {
                 et = DateUtils.stringToDate(endTime, DateUtils.FORMAT_ISO_DATETIME_L, timeZone.getID());
             }
-            return new DateIntervalTrigger(name, group, taskName, group, st, et, repeatIntervalUnit, repeatInterval);
+            Trigger trigger = new DateIntervalTrigger(name, group, taskName, group, st, et, repeatIntervalUnit, repeatInterval);
+            trigger.setMisfireInstruction(getMisfireMode());
+            return trigger;
         }
         catch (Exception exc) {
             throw new TaskException("Error creating DateIntervalTrigger[" + group + "." + name + "]", exc);
@@ -87,6 +94,6 @@ public class DateIntervalTriggerBuilder extends BaseTriggerBuilder
     {
         return "DateIntervalTriggerBuilder[" + group + "." + name + "]: startTime[" + startTime + "] - endTime["
                 + endTime + "] - repeatInterval[" + repeatInterval + "] - repeatIntervalUnit[" + repeatIntervalUnit
-                + "] - properties[" + properties + "]";
+                + "] - misfireMode[" + misfire + "] - properties[" + properties + "]";
     }
 }
