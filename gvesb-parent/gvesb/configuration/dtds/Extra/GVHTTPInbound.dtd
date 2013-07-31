@@ -9,9 +9,10 @@
 <!ENTITY % ResponseHandlers "(ResponseXMLParamHandler | ResponseFlatParamHandler | ResponseStringParamHandler)">
 <!ENTITY % ResponseErrorHandlers "(XMLParamErrorHandler | FlatParamErrorHandler | StringParamErrorHandler)">
 
-<!ENTITY % Formatter      "(ExtendedInboundParamHandlerFormatter)">
+<!ENTITY % FormatterTypes "(ExtendedInboundParamHandlerFormatter)">
 
 <!ELEMENT GVAdapterHttpConfiguration (InboundConfiguration, Formatters)>
+<!ATTLIST GVAdapterHttpConfiguration version CDATA #FIXED "1.0">
 <!--
     Element type 'module'.
 -->
@@ -39,11 +40,15 @@
 <!ATTLIST RetCodeConversionOut  RetCodeConversion           (ignore | 0to1 | 1to0) #IMPLIED>
 
 <!--
+    Defines a mapping between a request Action and a configured Formatter.
+
     #SelectOnInsert
     #Label: @Action
 -->
 <!ELEMENT ActionMapping (Description?, RetCodeConversionIn?, RetCodeConversionOut?)>
 <!--
+    Defines the action name, referenced by the request parameter GV_ACTION.
+
     #NotNull
     #Unique: ../ActionMapping/@Action
 -->
@@ -54,10 +59,10 @@
 <!ATTLIST ActionMapping FormatterID        CDATA #REQUIRED>
 <!--
     ContentType to be declared while handling HTTP responses to the external system.
-    Default to text/html and is used only if not returned by the formatter.
+    Default to text/html and is used only if not defined by the formatter.
 
     #NotNull
-    #Choice: text/html | text/xml | application/x-www-form-urlencoded
+    #Choice: text/html | text/xml | text/json | text/javascript | application/xml | application/json | application/x-www-form-urlencoded
 -->
 <!ATTLIST ActionMapping  RespContentType   CDATA #IMPLIED>
 <!--
@@ -119,7 +124,7 @@
 <!--
     #SelectOnInsert
 -->
-<!ELEMENT Formatters ((%Formatter;)*)>
+<!ELEMENT Formatters ((%FormatterTypes;)*)>
 
 
 <!--
@@ -153,17 +158,9 @@
     Default to text/html.
 
     #NotNull
-    #Choice: text/html | text/xml | application/x-www-form-urlencoded
+    #Choice: text/html | text/xml | text/json | text/javascript | application/xml | application/json | application/x-www-form-urlencoded
 -->
 <!ATTLIST InboundParamHandlerFormatter  RespContentType         CDATA #IMPLIED>
-<!--
-    ContentType to be declared while handling HTTP responses to the external system.
-    Default to text/html.
-
-    #NotNull
-    #Choice: text/html | text/xml | application/x-www-form-urlencoded
--->
-<!ATTLIST InboundParamHandlerFormatter  ContentType         CDATA #IMPLIED>
 
 <!--
     #SelectOnInsert
@@ -202,7 +199,7 @@
     Default to text/html.
 
     #NotNull
-    #Choice: text/html | text/xml | application/x-www-form-urlencoded
+    #Choice: text/html | text/xml | text/json | text/javascript | application/xml | application/json | application/x-www-form-urlencoded
 -->
 <!ATTLIST ExtendedInboundParamHandlerFormatter  RespContentType         CDATA #IMPLIED>
 <!--
