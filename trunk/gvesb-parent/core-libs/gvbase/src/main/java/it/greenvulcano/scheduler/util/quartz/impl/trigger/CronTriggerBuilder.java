@@ -40,6 +40,11 @@ public class CronTriggerBuilder extends BaseTriggerBuilder
     private String endTime        = null;
     private String cronExpression = "UNDEFINED";
 
+    {
+        misfires.put("do-nothing", CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);
+        misfires.put("fire-once-now", CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
+    }
+
     /* (non-Javadoc)
      * @see it.greenvulcano.scheduler.util.quartz.impl.BaseTriggerBuilder#initTB(org.w3c.dom.Node)
      */
@@ -73,7 +78,9 @@ public class CronTriggerBuilder extends BaseTriggerBuilder
             if (endTime != null) {
                 et = DateUtils.stringToDate(endTime, DateUtils.FORMAT_ISO_DATETIME_L, timeZone.getID());
             }
-            return new CronTrigger(name, group, taskName, group, st, et, cronExpression, timeZone);
+            Trigger trigger = new CronTrigger(name, group, taskName, group, st, et, cronExpression, timeZone);
+            trigger.setMisfireInstruction(getMisfireMode());
+            return trigger;
         }
         catch (Exception exc) {
             throw new TaskException("Error creating CronTrigger[" + group + "." + name + "]", exc);
@@ -84,6 +91,7 @@ public class CronTriggerBuilder extends BaseTriggerBuilder
     public String toString()
     {
         return "CronTriggerBuilder[" + group + "." + name + "]: cronExpression[" + cronExpression + "] - startTime["
-                + startTime + "] - endTime[" + endTime + "] - properties[" + properties + "]";
+                + startTime + "] - endTime[" + endTime + "] - misfireMode[" + misfire + "] - properties[" + properties 
+                + "]";
     }
 }
