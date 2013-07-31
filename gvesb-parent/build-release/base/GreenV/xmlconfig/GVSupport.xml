@@ -373,7 +373,7 @@
                                  id="JMSStore" queue="gvesb/jms/queue/Statistics_Queue"
                                  type="stat-writer"/>
             <JDBCStatisticsWriter class="it.greenvulcano.gvesb.statistics.plugin.JDBCStatisticsWriter"
-                                  dataSource="ds.Statistics" id="DBStore"
+                                  dataSource="gv_stats" id="DBStore"
                                   type="stat-writer"/>
             <DUMMYStatisticsWriter class="it.greenvulcano.gvesb.statistics.plugin.DUMMYStatisticsWriter"
                                    id="DUMMY_STORE" type="stat-writer"/>

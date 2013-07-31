@@ -20,7 +20,7 @@
 package it.greenvulcano.gvesb.statistics.plugin;
 
 import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.j2ee.JNDIHelper;
+import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
 import it.greenvulcano.gvesb.statistics.GVStatisticsException;
 import it.greenvulcano.gvesb.statistics.IStatisticsWriter;
 import it.greenvulcano.gvesb.statistics.StatisticsData;
@@ -31,8 +31,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-
-import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -47,8 +45,6 @@ import org.w3c.dom.Node;
 public class JDBCStatisticsWriter implements IStatisticsWriter
 {
     private static Logger logger         = GVLogger.getLogger(JDBCStatisticsWriter.class);
-    private JNDIHelper    jndiHelper     = null;
-    private DataSource    dataSource     = null;
     private String        dataSourceName = null;
 
     /**
@@ -61,10 +57,8 @@ public class JDBCStatisticsWriter implements IStatisticsWriter
     {
         logger.debug("JDBCStatisticsWriter init");
         try {
-            jndiHelper = new JNDIHelper(XMLConfig.getNode(node, "JNDIHelper"));
-            dataSourceName = XMLConfig.get(node, "@dataSource");
-            logger.debug("JDBCStatisticsWriter - dataSource: " + dataSourceName);
-            initJDBC();
+        	dataSourceName = XMLConfig.get(node, "@dataSource");
+            logger.debug("JDBCStatisticsWriter - dataSourceName: " + dataSourceName);
         }
         catch (Exception exc) {
             logger.error("Error initializing JDBCStatisticsWriter", exc);
@@ -87,13 +81,7 @@ public class JDBCStatisticsWriter implements IStatisticsWriter
         Connection dbConnection = null;
         PreparedStatement insertStatement = null;
         try {
-            try {
-                dbConnection = dataSource.getConnection();
-            }
-            catch (Exception exc) {
-                initJDBC();
-                dbConnection = dataSource.getConnection();
-            }
+            dbConnection =JDBCConnectionBuilder.getConnection(dataSourceName);
             dbConnection.setAutoCommit(true);
             insertStatement = prepareStatement(dbConnection, statisticsData);
             if (insertStatement.executeUpdate() > 0) {
@@ -216,27 +204,6 @@ public class JDBCStatisticsWriter implements IStatisticsWriter
 
     }
 
-    /**
-     * 
-     * @throws GVStatisticsException
-     */
-    private void initJDBC() throws GVStatisticsException
-    {
-        try {
-            dataSource = (DataSource) jndiHelper.lookup(dataSourceName);
-        }
-        catch (Exception exc) {
-            throw new GVStatisticsException("Error initializing JDBC", exc);
-        }
-        finally {
-            try {
-                jndiHelper.close();
-            }
-            catch (Exception exc) {
-                // do nothing
-            }
-        }
-    }
 
     /**
      * Releases the allocated resources.
@@ -253,15 +220,13 @@ public class JDBCStatisticsWriter implements IStatisticsWriter
                 stmt.close();
             }
         }
-        catch (SQLException se) {
+        catch (SQLException exc) {
             // do nothing
         }
         try {
-            if ((conn != null) && !conn.isClosed()) {
-                conn.close();
-            }
+        	JDBCConnectionBuilder.releaseConnection(dataSourceName, conn);
         }
-        catch (SQLException se) {
+        catch (Exception exc) {
             // do nothing
         }
     }

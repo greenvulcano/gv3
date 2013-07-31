@@ -226,6 +226,17 @@
                 <validationQuery>select 1 from dual</validationQuery>
             </PoolParameters>
         </DriverPoolConnectionBuilder>
+    <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
+                                     driver-class="org.hsqldb.jdbcDriver" name="gv_stats"
+                                     password="gv_stats"
+                                     type="jdbc-connection-builder"
+                                     url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                     user="gv_stats">
+            <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
+                            minIdle="1" timeBetweenEvictionRuns="300">
+                <validationQuery>select 1 from dual</validationQuery>
+            </PoolParameters>
+        </DriverPoolConnectionBuilder>
     </GVJDBCConnectionBuilder>
     <GVDataProviderManager name="GVDP" type="module">
         <DataProviders>
@@ -598,7 +609,7 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                              name="RSHRemote" regURL="rmi://localhost:3099" type="rshClient"/>
     </RSHServiceClientConfiguration>
 
-    <GVAdapterHttpConfiguration name="HTTP_ADAPTER" type="module">
+    <GVAdapterHttpConfiguration name="HTTP_ADAPTER" type="module" version="1.0">
         <InboundConfiguration>
             <ActionMappings>
                 <ActionMapping Action="HTTP_TEST" FormatterID="MessageInboundFormatter" enabled="true"/>
