@@ -651,7 +651,12 @@
     #NotNull
 -->
 <!ATTLIST DBOSelect output-data CDATA #IMPLIED>
+<!--
+    Tell the engine the RowSet document creation policy.
+    Default is standard.
 
+-->
+<!ATTLIST DBOSelect rowset-builder (standard|extended) #IMPLIED>
 
 <!--
     DBO optimized for select operations.

@@ -258,39 +258,59 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     protected boolean             isInsert                = true;
 
     /**
-     *
+     * 
      */
-    protected static final String ROW_NAME                = "row";
+    public static final String ROWSET_NAME                = "RowSet";
+    
+    /**
+     * 
+     */
+    public static final String DATA_NAME                  = "data";
 
     /**
      *
      */
-    protected static final String COL_NAME                = "col";
+    public static final String ROW_NAME                   = "row";
 
     /**
      *
      */
-    protected static final String COL_UPDATE_NAME         = "col-update";
+    public static final String COL_NAME                   = "col";
+
+    /**
+    *
+    */
+    public static final String KEY_NAME                   = "key";
 
     /**
      *
      */
-    protected static final String TYPE_NAME               = "type";
+    public static final String COL_UPDATE_NAME            = "col-update";
 
     /**
      *
      */
-    protected static final String NAME_ATTR               = "name";
+    public static final String TYPE_NAME                  = "type";
+
+    /**
+    *
+    */
+   public static final String NULL_NAME                   = "isNull";
 
     /**
      *
      */
-    protected static final String ID_NAME                 = "id";
+    public static final String NAME_ATTR                  = "name";
 
     /**
      *
      */
-    protected static final String UUID_NAME               = "uuid";
+    public static final String ID_NAME                    = "id";
+
+    /**
+     *
+     */
+    public static final String UUID_NAME                  = "uuid";
 
     /**
      *
@@ -305,12 +325,12 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
      *
      */
-    protected static final String XSL_MSG_NAME            = "xsl-message";
+    public static final String XSL_MSG_NAME               = "xsl-message";
 
     /**
      *
      */
-    protected static final String CRITICAL_ERROR          = "critical-error";
+    public static final String CRITICAL_ERROR             = "critical-error";
 
     /**
      *
@@ -335,92 +355,92 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
      *
      */
-    protected static final String STRING_TYPE             = "string";
+    public static final String STRING_TYPE                = "string";
 
     /**
      *
      */
-    protected static final String LONG_STRING_TYPE        = "long-string";
+    public static final String LONG_STRING_TYPE           = "long-string";
 
     /**
      *
      */
-    protected static final String BASE64_TYPE             = "base64";
+    public static final String BASE64_TYPE                = "base64";
 
     /**
      *
      */
-    protected static final String BINARY_TYPE             = "binary";
+    public static final String BINARY_TYPE                = "binary";
 
     /**
      *
      */
-    protected static final String DEFAULT_TYPE            = STRING_TYPE;
+    public static final String DEFAULT_TYPE               = STRING_TYPE;
 
     /**
      *
      */
-    protected static final String TIMESTAMP_TYPE          = "timestamp";
+    public static final String TIMESTAMP_TYPE             = "timestamp";
 
     /**
      *
      */
-    protected static final String NUMERIC_TYPE            = "numeric";
+    public static final String NUMERIC_TYPE               = "numeric";
 
     /**
      *
      */
-    protected static final String FLOAT_TYPE              = "float";
+    public static final String FLOAT_TYPE                 = "float";
 
     /**
     *
     */
-    protected static final String DECIMAL_TYPE            = "decimal";
+    public static final String DECIMAL_TYPE               = "decimal";
    
     /**
      *
      */
-    protected static final String FORMAT_NAME             = "format";
+    public static final String FORMAT_NAME                = "format";
 
     /**
      *
      */
-    protected static final String GRP_SEPARATOR_NAME      = "grouping-separator";
+    public static final String GRP_SEPARATOR_NAME         = "grouping-separator";
 
     /**
      *
      */
-    protected static final String DEC_SEPARATOR_NAME      = "decimal-separator";
+    public static final String DEC_SEPARATOR_NAME         = "decimal-separator";
 
     /**
      *
      */
-    protected static final String DEFAULT_DATE_FORMAT     = "yyyyMMdd HH:mm:ss";
+    public static final String DEFAULT_DATE_FORMAT        = "yyyyMMdd HH:mm:ss";
 
     /**
      *
      */
-    protected static final String DEFAULT_NUMBER_FORMAT   = "#,##0.###";
+    public static final String DEFAULT_NUMBER_FORMAT      = "#,##0.###";
 
     /**
      *
      */
-    protected static final String DEFAULT_GRP_SEPARATOR   = ".";
+    public static final String DEFAULT_GRP_SEPARATOR      = ".";
 
     /**
      *
      */
-    protected static final String DEFAULT_DEC_SEPARATOR   = ",";
+    public static final String DEFAULT_DEC_SEPARATOR      = ",";
 
     /**
      *
      */
-    protected static final String DEFAULT_END_LINE        = "\n";
+    public static final String DEFAULT_END_LINE           = "\n";
 
     /**
      *
      */
-    protected static final String DEFAULT_ENCODING        = "UTF-8";
+    public static final String DEFAULT_ENCODING           = "UTF-8";
 
     /**
      *
