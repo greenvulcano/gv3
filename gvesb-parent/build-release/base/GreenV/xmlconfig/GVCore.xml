@@ -1007,6 +1007,36 @@ var svc = data.getProperty(&quot;SVC&quot;);
                     </Flow>
                 </Operation>
             </Service>
+            <Service group-name="CREDIT_GRP" id-service="CCardQueryREST"
+                     service-activation="on" statistics="off">
+                <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
+                           name="RequestReply" operation-activation="on"
+                           out-check-type="sys-svc-id" type="operation">
+                    <Participant id-channel="CHANNEL_CREDIT_WS" id-system="CREDIT"/>
+                    <Flow first-node="prepare" point-x="20" point-y="150">
+                        <Conditions/>
+                        <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                            dump-in-out="true" id="prepare" input="input"
+                                            next-node-id="check_internal"
+                                            op-type="change GVBuffer" output="input"
+                                            point-x="121" point-y="149" type="flow-node"/>
+                        <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
+                                     default-id="proxy_call" id="check_internal"
+                                     input="input" on-exception-id="end" op-type="check"
+                                     point-x="263" point-y="155" type="flow-node"/>
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         dump-in-out="false" id="proxy_call"
+                                         id-system="CREDIT" input="input"
+                                         next-node-id="end" op-type="call"
+                                         operation-name="query_cnumber" output="output"
+                                         point-x="385" point-y="55" type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   end-business-process="yes" id="end" op-type="end"
+                                   output="output" point-x="616" point-y="169"
+                                   type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
             <Service group-name="CREDIT_GRP" id-service="PersonInsertFull#CREDIT"
                      service-activation="on" statistics="off">
                 <Operation name="Request" operation-activation="on" class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
@@ -2136,6 +2166,16 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                             </DBOUpdate>
                         </DBOBuilder>
                     </dh-call>
+                    <rest-call class="it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation"
+                               name="query_cnumber" type="call">
+                        <RestServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker"
+                                            endpoint="http://localhost:8080/gvaxis2/secure/services/CreditService/Query?cnumber=ognl{{object}}"
+                                            method="GET"
+                                            ref-dp="CREDIT::RestSetAuthDataProvider"
+                                            responseMode="OUT_IN"
+                                            returnType="body-element" timeout="1"
+                                            type="invoker"/>
+                    </rest-call>
                 </Channel>
             </System>
             <System id-system="CREDIT_SIMPLE" system-activation="on">

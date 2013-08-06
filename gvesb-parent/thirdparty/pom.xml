@@ -1004,6 +1004,10 @@
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-http</artifactId>
         </dependency>
         <dependency>

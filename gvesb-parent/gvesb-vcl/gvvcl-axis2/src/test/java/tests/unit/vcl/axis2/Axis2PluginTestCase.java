@@ -66,14 +66,15 @@ public class Axis2PluginTestCase extends TestCase
     @Override
     protected void setUp() throws Exception
     {
-        File repoSrc = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + 
-                           File.separator + "resources" + File.separator + "webservices");
-        File repoDest = new File(System.getProperty("user.dir") + File.separator + "target" + File.separator + "webservices");
+        File repoSrc = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "test"
+                + File.separator + "resources" + File.separator + "webservices");
+        File repoDest = new File(System.getProperty("user.dir") + File.separator + "target" + File.separator
+                + "webservices");
 
-        File xmlSrc = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + 
-                           File.separator + "resources" + File.separator + "axis2.xml");
-        File xmlDest = new File(System.getProperty("user.dir") + File.separator + "target" + 
-                           File.separator + "xmlconfig" + File.separator + "axis2.xml");
+        File xmlSrc = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "test"
+                + File.separator + "resources" + File.separator + "axis2.xml");
+        File xmlDest = new File(System.getProperty("user.dir") + File.separator + "target" + File.separator
+                + "xmlconfig" + File.separator + "axis2.xml");
 
         FileUtils.deleteQuietly(repoDest);
         FileUtils.deleteQuietly(xmlDest);
@@ -173,10 +174,9 @@ public class Axis2PluginTestCase extends TestCase
     /**
      * @throws Exception
      */
-    /*public final void testDUMMY() throws Exception
-    {
-        assertTrue(true);
-    }*/
+    /*
+     * public final void testDUMMY() throws Exception { assertTrue(true); }
+     */
 
     private static final String ns = "http://www.greenvulcano.com/gvesb/webservices";
 

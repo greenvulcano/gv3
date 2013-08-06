@@ -27,8 +27,10 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisEndpoint;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.HandlerDescription;
+import org.apache.axis2.description.WSDL2Constants;
 import org.apache.axis2.dispatchers.AbstractServiceDispatcher;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.Utils;
@@ -71,14 +73,14 @@ public class RequestURIBasedServiceDispatcher extends AbstractServiceDispatcher
                 AxisConfiguration registry = configurationContext.getAxisConfiguration();
                 AxisService axisService = registry.getService(values[0]);
                 if (axisService != null) {
-                    Map endpoints = axisService.getEndpoints();
+                    Map<String, AxisEndpoint> endpoints = axisService.getEndpoints();
                     if (endpoints != null) {
                         if (endpoints.size() == 1) {
-                            messageContext.setProperty("endpoint", endpoints.get(axisService.getEndpointName()));
+                            messageContext.setProperty(WSDL2Constants.ENDPOINT_LOCAL_NAME, endpoints.get(axisService.getEndpointName()));
                         }
                         else {
                             String endpointName = values[0].substring(values[0].indexOf(".") + 1);
-                            messageContext.setProperty("endpoint", endpoints.get(endpointName));
+                            messageContext.setProperty(WSDL2Constants.ENDPOINT_LOCAL_NAME, endpoints.get(endpointName));
                         }
                     }
                 }

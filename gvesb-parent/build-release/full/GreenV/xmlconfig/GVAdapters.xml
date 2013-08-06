@@ -336,6 +336,16 @@ envelope.body.addChild(#payResponse)) : envelope.body.addChild(@org.apache.axis2
                 </Field>
             </Axis2MessageContextDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="CREDIT::RestSetAuthDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">#basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
+#basicAuth.setUsername(&quot;userA&quot;),
+#basicAuth.setPassword(&quot;userA&quot;),
+options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
                                              name="EXTERNAL::QueryWSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
