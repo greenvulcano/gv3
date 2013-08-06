@@ -27,7 +27,6 @@
 <!ENTITY % QueryBaseFormatter  "(QueryXMLBaseFormatter)">
 <!ENTITY % CallSPBaseFormatter "(CallSPSimpleBaseFormatter)">
 <!ENTITY % JavaType            "(string|int|long|byte_array)">
-<!ENTITY % dbo_types           "DBOSelect|DBOThreadSelect|DBOUpdate|DBOInsert|DBOInsertOrUpdate|DBOUpdateOrInsert|DBOCallSP|DBOFlatSelect|DBOMultiFlatSelect">
 <!ENTITY % statement_type "select|insert|update|callsp">
 <!ENTITY % remote_managers "FTPManager|SFTPManager">
 <!ENTITY % fs-monitor "LocalFileSystemMonitor|RemoteFileSystemMonitor">
