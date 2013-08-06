@@ -57,6 +57,7 @@
     <version.javax.mail>1.4.1</version.javax.mail>
     <version.jaxen>1.1.1</version.jaxen>
     <version.jbpm>5.0.0</version.jbpm>
+    <version.jettison>1.3</version.jettison>
     <version.jexcelapi>2.6.10</version.jexcelapi>
     <version.jcifs>1.3.17</version.jcifs>
     <version.joda>1.6.2</version.joda>
@@ -66,7 +67,7 @@
     <version.mvel>2.1.3.Final</version.mvel>
     <version.ode>1.3.5</version.ode>
     <version.ognl>3.0</version.ognl>
-    <version.openejb>3.1.4</version.openejb>
+    <version.openejb>4.5.2</version.openejb>
     <version.openspcoop>1.4.1</version.openspcoop>
     <version.quartz>1.8.5</version.quartz>
     <version.rhino.js>1.7R2</version.rhino.js>
@@ -643,6 +644,12 @@
             <version>${version.axis2}</version>
             <type>jar</type>
             <scope>provided</scope>
+	    <exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+	    </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -739,6 +746,12 @@
             <version>${version.axis2}</version>
             <type>jar</type>
             <scope>provided</scope>
+	        <exclusions>
+	            <exclusion>
+	                <artifactId>jettison</artifactId>
+	                <groupId>org.codehaus.jettison</groupId>
+	            </exclusion>
+	        </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -776,7 +789,7 @@
         <dependency>
             <groupId>org.apache.ws.commons.schema</groupId>
             <artifactId>XmlSchema</artifactId>
-            <version>1.4.3</version>
+            <version>1.4.7</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
@@ -832,6 +845,13 @@
                     <groupId>org.apache.ws.commons.axiom</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jettison</groupId>
+            <artifactId>jettison</artifactId>
+            <version>${version.jettison}</version>
+            <type>bundle</type>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
@@ -1398,7 +1418,7 @@
         <dependency>
             <groupId>org.apache.openejb</groupId>
             <artifactId>javaee-api</artifactId>
-            <version>5.0-2</version>
+            <version>6.0-5</version>
             <type>jar</type>
             <scope>test</scope>
         </dependency>
@@ -1418,6 +1438,13 @@
         <dependency>
             <groupId>org.apache.openejb</groupId>
             <artifactId>openejb-cxf</artifactId>
+            <version>${version.openejb}</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.openejb</groupId>
+            <artifactId>openejb-cxf-rs</artifactId>
             <version>${version.openejb}</version>
             <type>jar</type>
             <scope>test</scope>

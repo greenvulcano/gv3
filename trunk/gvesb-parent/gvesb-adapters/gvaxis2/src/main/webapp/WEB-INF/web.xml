@@ -44,6 +44,21 @@
         <!--<param-value>http://localhost/myrepo/axis2.xml</param-value>-->
         <!--<param-name>axis2.repository.url</param-name>-->
         <!--<param-value>http://localhost/myrepo</param-value>-->
+        
+        <!-- gv.url.remap.x: re-maps incoming URL to target URL by overriding message context's toEPR.
+             FORMAT:
+             <target URL>;<first URL>:<second URL>:<n-th URL>
+             
+             EXAMPLE:
+             /services;/secure/services:/axis2-services:/rest-services
+             
+             When servlet is reached by URL http://localhost:8080/gvaxis2/secure/services, 
+             endpoint is re-mapped to http://localhost:8080/gvaxis2/services
+         -->
+        <init-param>
+            <param-name>gv.url.remap.1</param-name>
+            <param-value>/services;/secure/services</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>

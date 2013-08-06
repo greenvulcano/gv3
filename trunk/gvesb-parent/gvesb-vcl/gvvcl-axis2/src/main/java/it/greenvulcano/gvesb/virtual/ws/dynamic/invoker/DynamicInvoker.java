@@ -313,7 +313,7 @@ public class DynamicInvoker
         OperationDescription opDesc = getOperationDescription();
 
         client = new ServiceClient(Axis2ConfigurationContextHelper.getConfigurationContext(), null);
-        //client = new ServiceClient();
+        // client = new ServiceClient();
         OperationClient operationClient = client.createClient(ServiceClient.ANON_OUT_IN_OP);
         Options options = operationClient.getOptions();
 
@@ -323,7 +323,7 @@ public class DynamicInvoker
             options.setTimeOutInMilliSeconds(timeoutInMilliseconds);
         }
         String soapAction = opDesc.getSOAPAction();
-        if ((soapAction != null) && !"".equals(soapAction)) {
+        if (soapAction != null) {
             logger.debug("Setting Action Header to: " + soapAction);
             options.setAction(soapAction);
         }
@@ -339,7 +339,8 @@ public class DynamicInvoker
             logger.debug("Setting REST Verb: " + opDesc.getVerb());
             options.setProperty(Constants.Configuration.HTTP_METHOD, opDesc.getVerb());
             logger.debug("Setting REST MessageType: " + opDesc.getMediaType());
-            //options.setProperty(Constants.Configuration.MESSAGE_TYPE, opDesc.getMediaType());
+            // options.setProperty(Constants.Configuration.MESSAGE_TYPE,
+            // opDesc.getMediaType());
             options.setProperty(Constants.Configuration.CONTENT_TYPE, HTTPConstants.MEDIA_TYPE_X_WWW_FORM);
             options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_X_WWW_FORM);
         }
@@ -403,9 +404,8 @@ public class DynamicInvoker
                 logger.error("Error invoking operation " + _operationName, exc);
                 postSendFaultOperations(client, modules);
                 if (throwsFault) {
-                    throw new WSCallException("ERROR_INVOKING_OPERATION", new String[][]{{"cause",
-                            "Error invoking operation " + _operationName}, 
-                            {"fault", "" + exc}}, exc);
+                    throw new WSCallException("ERROR_INVOKING_OPERATION", new String[][]{
+                            {"cause", "Error invoking operation " + _operationName}, {"fault", "" + exc}}, exc);
                 }
             }
             result = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
@@ -416,9 +416,8 @@ public class DynamicInvoker
             else {
                 logger.debug("Service request returned with NULL message!");
                 if (fault != null) {
-                    throw new WSCallException("ERROR_INVOKING_OPERATION", new String[][]{{"cause",
-                            "Error invoking operation " + _operationName}, 
-                            {"fault", "" + fault}}, fault);
+                    throw new WSCallException("ERROR_INVOKING_OPERATION", new String[][]{
+                            {"cause", "Error invoking operation " + _operationName}, {"fault", "" + fault}}, fault);
                 }
             }
         }
@@ -428,7 +427,7 @@ public class DynamicInvoker
                     re);
         }
         catch (WSCallException e) {
-        	throw e;
+            throw e;
         }
         catch (Exception e) {
             logger.error("Cannot execute service", e);

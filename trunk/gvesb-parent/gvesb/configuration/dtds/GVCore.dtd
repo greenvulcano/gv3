@@ -4,7 +4,7 @@
 <!ENTITY % flow-nodes "GVOperationNode|GVNodeCheck|ChangeGVBufferNode|GVWaitNode|GVNotificationNode|GVIteratorOperationNode|GVCoreCallNode|GVSubFlowCallNode|GVEndNode|GVSavePointNode">
 <!ENTITY % filters    "IDFilter|RetCodeFilter|SystemFilter|ServiceFilter|PropertyFilter">
 <!ENTITY % j2ee-calls "j2ee-ejb-call|j2ee-jca-call|jmx-call %extra-j2ee-calls;">
-<!ENTITY % comm-calls "smtp-call|pop-call|pop-uid-remove-call|ws-call|http-call %extra-comm-calls;">
+<!ENTITY % comm-calls "smtp-call|pop-call|pop-uid-remove-call|ws-call|rest-call|http-call %extra-comm-calls;">
 <!ENTITY % file-calls "filereader-call|filewriter-call|filemanager-call|fsmonitor-call|remotemanager-call|rsh-call|rsh-filereader-call|rsh-filewriter-call %extra-file-calls;">
 <!ENTITY % db-calls   "db-call|ldap-search-call|ldap-update-call %extra-db-calls;">
 <!ENTITY % util-calls "extract-data-call|routed-call|birt-report-call|test-service-call|generic-call %extra-util-calls;">
@@ -6353,6 +6353,114 @@
     #NotNull
 -->
 <!ATTLIST WSDLInfo wsdl CDATA #REQUIRED>
+
+
+<!--
+    Defines the parameters for calling a Web Service using REST mode.
+
+    #Label: @name
+    #Icon: GVRestCall.png
+    #Category: Web/Mail
+    #Table: ! Web Service Invoker ! *[@type='invoker'] ! Class ! @class ! Description ! Description
+    #Template:
+        <xsl:template match="rest-call">
+            <xsl:if test="Description">
+                <small><br/><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT rest-call (Description?, RestServiceInvoker, Proxy?)>
+
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST rest-call type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST rest-call class CDATA #FIXED "it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='call']/@name
+-->
+<!ATTLIST rest-call   name CDATA #REQUIRED>
+
+<!ELEMENT RestServiceInvoker (Description?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST RestServiceInvoker type CDATA #FIXED "invoker">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST RestServiceInvoker class CDATA #FIXED "it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker">
+<!--
+    Endpoint exposed by the Rest Web Service to invoke. Can contain placeholders.
+    It must be already escaped, if needed.
+
+    #NotNull
+-->
+<!ATTLIST RestServiceInvoker endpoint CDATA #REQUIRED>
+<!--
+    HTTP method to execute to the server.
+-->
+<!ATTLIST RestServiceInvoker method (GET|POST|PUT|DELETE|HEAD|OPTIONS) #REQUIRED>
+<!--
+    Timeout in seconds.
+-->
+<!ATTLIST RestServiceInvoker timeout CDATA #IMPLIED>
+<!--
+    Name of Data Provider to use to prepare the request.
+
+    #References: gvesb:document('GVAdapters')/GVAdapters/GVDataProviderManager/DataProviders/*[@type='dataProvider']/@name
+-->
+<!ATTLIST RestServiceInvoker ref-dp CDATA #IMPLIED>
+<!--
+    If true throws Exception "Error invoking operation".
+    If false returns the Fault response.
+    Defaults to false.
+-->
+<!ATTLIST RestServiceInvoker throwsFault (true|false) #IMPLIED>
+<!--
+    Defines how to set the response data in the object field of output GVBuffer:
+    - context         : the MessageContext
+    - envelope        : the envelope as XML serialized as string
+    - body            : the body as XML serialized as string
+    - body-element    : the first child of body as XML serialized as string
+    - header          : the header as XML serialized as string
+    - envelope-om     : the envelope as OMMessage
+    - body-om         : the body as OMMessage
+    - body-element-om : the first child of body as OMMessage
+    - header-om       : the header as OMMessage
+
+    Default: context
+-->
+<!ATTLIST RestServiceInvoker  returnType  (context|envelope|body|body-element|header|envelope-om|body-om|body-element-om|header-om) #IMPLIED>
+<!--
+    This is used to specify the message format which the message needs to be serialized.
+    See 'messageFormatters' configuration in axis2.xml file.
+    Default value is: 'application/x-www-form-urlencoded'
+-->
+<!ATTLIST RestServiceInvoker mediaType CDATA #IMPLIED>
+<!--
+    This is used to specify the message builder which the message needs to be serialized.
+    See 'messageBuilders' configuration in axis2.xml file.
+    Defaults to the value specified in 'mediaType' attribute.
+-->
+<!ATTLIST RestServiceInvoker contentType CDATA #IMPLIED>
+<!--
+    This is used to specify if invoked service returns a response (OUT_IN) or not (OUT_ONLY).
+    Default value is: OUT_IN
+-->
+<!ATTLIST RestServiceInvoker responseMode (OUT_IN|OUT_ONLY) #IMPLIED>
+
 
 
 
