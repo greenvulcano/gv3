@@ -4,6 +4,7 @@ importPackage(Packages.it.greenvulcano.util.xml);
 importPackage(Packages.it.greenvulcano.util.xpath);
 importPackage(Packages.it.greenvulcano.util.txt);
 importPackage(Packages.it.greenvulcano.configuration);
+importPackage(Packages.it.greenvulcano.gvesb.core.exc);
 importPackage(Packages.java.lang);
 //importPackage(Packages.java.util);
 
