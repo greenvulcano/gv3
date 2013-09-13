@@ -421,8 +421,8 @@ public class GVFlowWF implements GVFlow
             if (output instanceof GVCoreException) {
                 throw (GVCoreException) output;
             }
-            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}},
-                    (Throwable) output);
+            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}, 
+                    {"message", "" + output}}, (Throwable) output);
         }
 
         performOutputCheck(output);
