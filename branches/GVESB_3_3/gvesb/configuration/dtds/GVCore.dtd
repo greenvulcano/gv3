@@ -12953,7 +12953,7 @@
 <!--
     The number of repetitions of the trigger.
     If not defined the task is executed only once.
-    If 'period' == -1, the task is repeated endlessly (or to 'endTime').
+    If repeatCount == -1, the task is repeated endlessly (or to 'endTime').
 
     #NotNull
 -->
@@ -12972,6 +12972,36 @@
     #References: /GVCore/GVTaskManagerConfiguration/GVSchedulerBuilder/Calendars/*[@type='cron-calendar']/@name
 -->
 <!ATTLIST SimpleTriggerBuilder  calendarName CDATA #IMPLIED>
+<!--
+    Defines how to handle misfire situations.
+    Default to smart-policy.
+
+    Misfire policy:
+    - fire-now : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be fired now.
+    - reschedule-now-existing-repeat-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants 
+                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now') 
+                                              with the repeat count left as-is.
+    - reschedule-now-remaining-repeat-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants 
+                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now') with 
+                                              the repeat count set to what it would be, if it had not missed any firings.
+    - reschedule-next-existing-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be 
+                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated 
+                                        Calendar, and with the repeat count left unchanged.
+    - reschedule-next-remaining-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be 
+                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated 
+                                        Calendar, and with the repeat count set to what it would be, if it had not missed any 
+                                        firings. WARNING: using this mode with a trigger that has a non-null end-time may cause 
+                                        the trigger to never fire again if the end-time arrived during the misfire time span.
+
+    If the misfire instruction is set to smart-policy, then the following scheme will be used:
+    - if the repeatCount is 0, then the instruction will be interpreted as fire-now.
+    - if the repeatCount is -1, then the instruction will be interpreted as reschedule-next-remaining-count.
+    - if the repeatCount is > 0, then the instruction will be interpreted as reschedule-now-existing-repeat-count.
+
+    #NotNull
+    #Choice: smart-policy|fire-now|reschedule-now-existing-repeat-count|reschedule-now-remaining-repeat-count|reschedule-next-existing-count|reschedule-next-remaining-count
+-->
+<!ATTLIST SimpleTriggerBuilder  misfireMode CDATA #IMPLIED>
 
 <!--
     A Trigger that is used to fire a Task based upon repeating calendar time intervals.
@@ -13037,6 +13067,23 @@
     #References: /GVCore/GVTaskManagerConfiguration/GVSchedulerBuilder/Calendars/*[@type='cron-calendar']/@name
 -->
 <!ATTLIST DateIntervalTriggerBuilder  calendarName CDATA #IMPLIED>
+<!--
+    Defines how to handle misfire situations.
+    Default to smart-policy.
+
+    Misfire policy:
+    - fire-once-now : instructs the Scheduler that upon a mis-fire situation, the DateIntervalTrigger wants to be fired now.
+    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the DateIntervalTrigger wants to have 
+                      it's next-fire-time updated to the next time in the schedule after the current time (taking into 
+                      account any associated Calendar), but it does not want to be fired now.
+
+    If the misfire instruction is set to smart-policy, then the following scheme will be used:
+    - fire-once-now
+
+    #NotNull
+    #Choice: smart-policy|do-nothing|fire-once-now
+-->
+<!ATTLIST DateIntervalTriggerBuilder  misfireMode CDATA #IMPLIED>
 
 <!--
     A Trigger that is used to fire a Task at given moments in time, defined with Unix 'cron-like' definitions.
@@ -13096,6 +13143,23 @@
     #References: /GVCore/GVTaskManagerConfiguration/GVSchedulerBuilder/Calendars/*[@type='cron-calendar']/@name
 -->
 <!ATTLIST CronTriggerBuilder  calendarName CDATA #IMPLIED>
+<!--
+    Defines how to handle misfire situations.
+    Default to smart-policy.
+
+    Misfire policy:
+    - fire-once-now : instructs the Scheduler that upon a mis-fire situation, the CronTrigger wants to be fired now.
+    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the CronTrigger wants to have 
+                      it's next-fire-time updated to the next time in the schedule after the current time (taking into 
+                      account any associated Calendar), but it does not want to be fired now.
+
+    If the misfire instruction is set to smart-policy, then the following scheme will be used:
+    - fire-once-now
+
+    #NotNull
+    #Choice: smart-policy|do-nothing|fire-once-now
+-->
+<!ATTLIST CronTriggerBuilder  misfireMode CDATA #IMPLIED>
 
 <!--
     Defines the configuration of the GreenVulcanoESB ACL Policy framework.

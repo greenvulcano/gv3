@@ -48,6 +48,8 @@ import org.w3c.dom.NodeList;
 public abstract class Task
 {
     public static String        TASK_FIRST_RUN        = "TASK_FIRST_RUN";
+    public static String        TASK_RECOVERY_RUN     = "TASK_RECOVERY_RUN";
+    public static String        TASK_MISFIRE_RUN      = "TASK_MISFIRE_RUN";
     public static String        TASK_FIRE_TIME        = "TASK_FIRE_TIME";
     private Logger              logger                = null;
     private boolean             mustDestroy           = false;
@@ -92,7 +94,8 @@ public abstract class Task
                     TriggerBuilder tb = (TriggerBuilder) Class.forName(XMLConfig.get(n, "@class")).newInstance();
                     tb.init(group, getName(), n);
                     //triggerBuilders.add(tb);
-                    triggers.add(tb.newTrigger());
+                    Trigger trigger = tb.newTrigger();
+                    triggers.add(trigger);
                     logger.debug("Added Trigger: " + tb);
                 }
             }
@@ -165,11 +168,17 @@ public abstract class Task
             JobDataMap jdm = context.getMergedJobDataMap();
             Map<String, String> locProperties = MapUtils.convertToHMStringString(jdm.getWrappedMap());
             boolean firstRun = jdm.getBooleanValue(TASK_FIRST_RUN);
-            locProperties.put(TASK_FIRST_RUN, String.valueOf(firstRun));
+            boolean recoveryRun = context.isRecovering();
+            Date schedFireTime = context.getScheduledFireTime();
+            //Date fireTime = context.getFireTime();
+            //boolean misfireRun = (fireTime.getTime() - schedFireTime.getTime()) >= (5 * 60 * 1000); // max 5' delay
+            locProperties.put(TASK_FIRST_RUN, String.valueOf(firstRun).toUpperCase());
+            locProperties.put(TASK_RECOVERY_RUN, String.valueOf(recoveryRun).toUpperCase());
+            //locProperties.put(TASK_MISFIRE_RUN, String.valueOf(misfireRun).toUpperCase());
             locProperties.put(TASK_FIRE_TIME,
-                    DateUtils.dateToString(context.getFireTime(), DateUtils.FORMAT_ISO_DATETIME_UTC));
+                    DateUtils.dateToString(schedFireTime, DateUtils.FORMAT_ISO_DATETIME_UTC));
             try {
-                run(evName, context.getFireTime(), locProperties);
+                run(evName, schedFireTime, locProperties);
             }
             finally {
                 JobDataMap jdm2 = context.getJobDetail().getJobDataMap();
@@ -243,7 +252,7 @@ public abstract class Task
         try {
             running = true;
             if (sendHeartBeat()) {
-                id = prepareBeat();
+                id = prepareBeat("TRUE".equals(locProperties.get(TASK_RECOVERY_RUN)) || "TRUE".equals(locProperties.get(TASK_MISFIRE_RUN)));
             }
 
             executeTask(evName, fireTime, locProperties, false);
@@ -278,13 +287,14 @@ public abstract class Task
         return getFullName();
     }
 
+    
     /**
      * @return the temporary beat id.
      */
-    protected int prepareBeat()
+    protected int prepareBeat(boolean isRecovery)
     {
         try {
-            return HeartBeatManager.prepareBeat(getBeatSubSystem());
+            return HeartBeatManager.prepareBeat(getBeatSubSystem() + (isRecovery ? " (Recovered)" : ""));
         }
         catch (Exception exc) {
             // do nothing
