@@ -220,6 +220,10 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 }
 
                 schedRep.bind(scheduler);
+                
+                // Add default trigger listener
+                scheduler.addGlobalTriggerListener(new GVTriggerListener());
+                
                 scheduler.start();
                 logger.debug("END - created Scheduler[" + instanceId + "]");
             }

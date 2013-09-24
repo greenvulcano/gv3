@@ -20,6 +20,7 @@
 package it.greenvulcano.scheduler.util.quartz.impl.trigger;
 
 import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.scheduler.Task;
 import it.greenvulcano.scheduler.TaskException;
 import it.greenvulcano.scheduler.util.quartz.TriggerBuilder;
 import it.greenvulcano.util.txt.DateUtils;
@@ -46,6 +47,13 @@ public abstract class BaseTriggerBuilder implements TriggerBuilder
     protected String              calendarName = null;
     protected TimeZone            timeZone     = DateUtils.getDefaultTimeZone();
 
+    protected String              misfire      = "smart-policy";
+    protected Map<String, Integer> misfires    = new HashMap<String, Integer>();
+    
+    {
+        misfires.put("smart-policy", Trigger.MISFIRE_INSTRUCTION_SMART_POLICY);
+    }
+
     /* (non-Javadoc)
      * @see it.greenvulcano.scheduler.util.quartz.TriggerBuilder#init(java.lang.String, java.lang.String, org.w3c.dom.Node)
      */
@@ -58,6 +66,7 @@ public abstract class BaseTriggerBuilder implements TriggerBuilder
             name = XMLConfig.get(node, "@name");
             calendarName = XMLConfig.get(node, "@calendarName", null);
             timeZone = TimeZone.getTimeZone(XMLConfig.get(node, "@timeZone", DateUtils.getDefaultTimeZone().getID()));
+            misfire = XMLConfig.get(node, "@misfireMode", "smart-policy");
             NodeList pnl = XMLConfig.getNodeList(node, "TgProperties/PropertyDef");
             if ((pnl != null) && (pnl.getLength() > 0)) {
                 for (int i = 0; i < pnl.getLength(); i++) {
@@ -91,6 +100,10 @@ public abstract class BaseTriggerBuilder implements TriggerBuilder
         }
     }
 
+    protected int getMisfireMode() {
+        return misfires.get(misfire);
+    }
+
     protected abstract void initTB(Node node) throws TaskException;
 
     protected abstract Trigger createTrigger() throws TaskException;
@@ -102,6 +115,7 @@ public abstract class BaseTriggerBuilder implements TriggerBuilder
             for (Map.Entry<String, String> prop : properties.entrySet()) {
                 jdm.put(prop.getKey(), prop.getValue());
             }
+            jdm.put(Task.TASK_MISFIRE_RUN, "FALSE");
         }
         catch (Exception exc) {
             throw new TaskException("Error creating updating JobDataMap[" + group + "." + name + " - "

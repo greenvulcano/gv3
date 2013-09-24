@@ -40,6 +40,15 @@ public class SimpleTriggerBuilder extends BaseTriggerBuilder
     private String endTime        = null;
     private long   repeatInterval = 0;
     private int    repeatCount    = 0;
+    
+    {
+        misfires.put("fire-now", SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+        misfires.put("reschedule-now-existing-repeat-count", SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_EXISTING_REPEAT_COUNT);
+        misfires.put("reschedule-now-remaining-repeat-count", SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_REMAINING_REPEAT_COUNT);
+        misfires.put("reschedule-next-existing-count", SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT);
+        misfires.put("reschedule-next-remaining-count", SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT);
+    }
+    
 
     /* (non-Javadoc)
      * @see it.greenvulcano.scheduler.util.quartz.impl.BaseTriggerBuilder#initTB(org.w3c.dom.Node)
@@ -75,7 +84,9 @@ public class SimpleTriggerBuilder extends BaseTriggerBuilder
             if (endTime != null) {
                 et = DateUtils.stringToDate(endTime, DateUtils.FORMAT_ISO_DATETIME_L, timeZone.getID());
             }
-            return new SimpleTrigger(name, group, taskName, group, st, et, repeatCount, repeatInterval);
+            Trigger trigger = new SimpleTrigger(name, group, taskName, group, st, et, repeatCount, repeatInterval);
+            trigger.setMisfireInstruction(getMisfireMode());
+            return trigger;
         }
         catch (Exception exc) {
             throw new TaskException("Error creating SimpleTrigger[" + group + "." + name + "]", exc);
@@ -86,7 +97,7 @@ public class SimpleTriggerBuilder extends BaseTriggerBuilder
     public String toString()
     {
         return "SimpleTriggerBuilder[" + group + "." + name + "]: startTime[" + startTime + "] - endTime[" + endTime
-                + "] - repeatInterval[" + repeatInterval + "] - repeatCount[" + repeatCount + "] - properties["
-                + properties + "]";
+                + "] - repeatInterval[" + repeatInterval + "] - repeatCount[" + repeatCount + "] - misfireMode[" + 
+                misfire + "] - properties[" + properties + "]";
     }
 }
