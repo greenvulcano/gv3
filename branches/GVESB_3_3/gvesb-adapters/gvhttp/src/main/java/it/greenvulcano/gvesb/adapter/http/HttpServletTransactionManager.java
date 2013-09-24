@@ -252,16 +252,8 @@ public class HttpServletTransactionManager
                     logger.debug("init - adding Transaction control for '" + transaction.getKey() + "'");
                 }
             }
-            else {
-                throw new AdapterHttpConfigurationException("GVHTTP_TRANSACTION_MANAGER_INITIALIZATION_ERROR",
-                        new String[][]{{"errorName", "empty Transaction list"}});
-            }
 
             xaHelper = new XAHelper();
-        }
-        catch (AdapterHttpConfigurationException exc) {
-            transactions.clear();
-            throw exc;
         }
         catch (Exception exc) {
             transactions.clear();
