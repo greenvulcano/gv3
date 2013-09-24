@@ -53,19 +53,19 @@
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
-            <artifactId>hapi-structures-v24</artifactId>
+            <artifactId>hapi-structures-v24-gv</artifactId>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
-            <artifactId>hapi-structures-v25</artifactId>
+            <artifactId>hapi-structures-v25-gv</artifactId>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
-            <artifactId>hapi-structures-v251</artifactId>
+            <artifactId>hapi-structures-v251-gv</artifactId>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
-            <artifactId>hapi-structures-v26</artifactId>
+            <artifactId>hapi-structures-v26-gv</artifactId>
         </dependency>
     </dependencies>
 </project>
