@@ -309,7 +309,7 @@ public class BasicPropertyHandler implements PropertyHandler
             }
             else {
                 parser = XMLUtils.getParserInstance();
-                DocumentBuilder db = parser.getDocumentBuilder(false, false, true);
+                DocumentBuilder db = parser.getDocumentBuilder(false, true, true);
                 String xmlDoc = (String) inProperties.get(paramName);
                 if ((xmlDoc == null) || ("".equals(xmlDoc))) {
                     xmlDoc = "<dummy/>";
