@@ -1,18 +1,26 @@
 
 <%
     String currentTransaction = (String) testManager.get("transactionMode");
-    String[] transactionMode = new String[]{"No-transaction", "Commit", "Rollback"};
+    String currentTransactionTm = (String) testManager.get("transactionTimeout");
+    String[] transactionMode = new String[]{"No transaction", "Commit on success", "Rollback"};
 %>
-<td align="left">
-	<div id="radioTransaction">
-	<%	for(int i = 0; i < transactionMode.length; i++) {
-			if(!transactionMode[i].equals(currentTransaction)) {%>
-				<input id="radio<%=i%>" type="radio" name="transaction" value="<%= transactionMode[i] %>" />
-				<label for="radio<%=i%>"><%= transactionMode[i] %></label>
-	<%      }else{ %>
-				<input id="radio<%=i%>" type="radio" name="transaction" value="<%= currentTransaction %>" checked="checked" />
-				<label for="radio<%=i%>"><%= currentTransaction %></label>
-	<%      }
-		} %>
-	</div>
-</td>
+<tr>
+    <td align="left">Transaction Mode</td>
+	<td align="left" style="width: 400px;">
+		<div id="radioTransaction">
+		<%	for(int i = 0; i < transactionMode.length; i++) {
+				if(!transactionMode[i].equals(currentTransaction)) {%>
+					<input id="radio<%=i%>" type="radio" name="transaction" value="<%= transactionMode[i] %>" />
+					<label for="radio<%=i%>"><%= transactionMode[i] %></label>
+		<%      }else{ %>
+					<input id="radio<%=i%>" type="radio" name="transaction" value="<%= currentTransaction %>" checked="checked" />
+					<label for="radio<%=i%>"><%= currentTransaction %></label>
+		<%      }
+			} %>
+		</div>
+	</td>
+</tr>
+<tr>
+    <td align="left">Transaction Time</td>
+    <td align="left"><input type="text" name="txTimeout" class="input30" value="<%=currentTransactionTm%>" />seconds (-1 means use system default)</td>
+</tr>

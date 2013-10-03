@@ -108,6 +108,11 @@ public abstract class EjbCallPlugin implements TestPlugin
      * The transaction mode
      */
     private String           transactionMode    = "";
+    
+    /**
+     * The transaction timeout
+     */
+    private String           transactionTimeout = "-1";
 
     /**
      * The forward name
@@ -188,7 +193,8 @@ public abstract class EjbCallPlugin implements TestPlugin
 
         // Initialize transaction
         //
-        transactionMode = "No-transaction";
+        transactionMode = "No transaction";
+        transactionTimeout = "-1";
 
     }
 
@@ -389,6 +395,16 @@ public abstract class EjbCallPlugin implements TestPlugin
     }
 
     /**
+     * get the transaction timeout
+     *
+     * @return The transaction timeout
+     */
+    public String getTransactionTimeout()
+    {
+        return transactionTimeout;
+    }
+
+    /**
      * Get the input data from GVBuffer and apply toString() method.
      *
      * @return data value with the requested encoding <br>
@@ -544,6 +560,19 @@ public abstract class EjbCallPlugin implements TestPlugin
     public void setTransactionMode(String transactionMode) throws Throwable
     {
         this.transactionMode = transactionMode;
+    }
+
+    /**
+     * Set the input transaction timeout
+     *
+     * @param transactionTimeout
+     *        the encoding requested
+     * @throws Throwable
+     *         If an error occurred
+     */
+    public void setTransactionTimeout(String transactionTimeout) throws Throwable
+    {
+        this.transactionTimeout = transactionTimeout;
     }
 
     /**
@@ -903,6 +932,7 @@ public abstract class EjbCallPlugin implements TestPlugin
         String system = "";
         String service = "";
         String transaction = "";
+        String transactionTm = "";
         String retCode = "";
         String forwardName = "";
 
@@ -969,6 +999,11 @@ public abstract class EjbCallPlugin implements TestPlugin
                     testObject.setParameters("transaction", transaction);
                 }
 
+                transactionTm = request.getParameter("txTimeout");
+                if (transactionTm != null) {
+                    testObject.setParameters("txTimeout", transactionTm);
+                }
+
                 retCode = request.getParameter("retCode");
                 if (retCode != null) {
                     testObject.setParameters("retCode", retCode);
@@ -997,6 +1032,7 @@ public abstract class EjbCallPlugin implements TestPlugin
                     dataValue = (String) testObject.getParameters("dataValue");
                     charEncoding = (String) testObject.getParameters("encoding");
                     transaction = (String) testObject.getParameters("transaction");
+                    transactionTm = (String) testObject.getParameters("txTimeout");
                     retCode = (String) testObject.getParameters("retCode");
                     forwardName = (String) testObject.getParameters("forwardName");
                     propertyNames = (String[]) testObject.getParameters("extName");
@@ -1021,6 +1057,7 @@ public abstract class EjbCallPlugin implements TestPlugin
             gvBufferInput.setObject(dataValue);
         }
         setTransactionMode(transaction);
+        setTransactionTimeout(transactionTm);
 
         Set<String> fields = new HashSet<String>();
         if ((propertyNames != null) && (propertyValues != null)) {

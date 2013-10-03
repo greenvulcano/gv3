@@ -57,28 +57,30 @@
     </tr>
     <tr>
         <td align="left">Properties</td>
-        <td align="left"><input type="button" class="button buttonTesting" value="Add" onclick="addProperties()"/></td>
+        <td align="left"><input type="button" class="button buttonTesting" value="Add" onclick="addProperty()"/></td>
 		<td align="left"></td>
         <td align="left"></td>
 	</tr>
     <tr>
-        <td colspan="4" align="center">
+        <td colspan="4" align="left">
             <script>
     		    var counter = 0;
 
-    		    function addProperties()
+    		    function addProperty()
     		    {
-    		    	name = "property" + counter;
+    		    	var id = "property" + counter;
     		    	counter++;
 
-    		    	$('#fields').append("<div id='" + name + "' style='margin: 4px'>"
+    		    	$('#fields').append("<div id='" + id + "' style='margin: 4px'>"
     		    	+ "<nobr>Name &nbsp;<input type=text class='input60' name='property' value=''/>"
     		    	+ "&nbsp; Value &nbsp;<input type=text class='input60' name='propertyValue' value=''/>"
-    		    	+ "[<span valign=center onclick=\"remove('" + name + "')\" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>"
+    		    	+ "[<span valign=center onclick=\"removeProperty('" + id + "')\" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>"
     		    	+ "</div>");
     		    }
 
-    		    function remove(id){$('#'+id).remove();}
+    		    function removeProperty(id){
+    		    	$('#'+id).remove();
+    		    }
     	    </script>
 <%
     GVBuffer gvBufferInput = (GVBuffer)testManager.get("inputGVBuffer", false);
@@ -93,32 +95,17 @@
 		    	    <nobr>
 		    	        Name &nbsp;<input type="text" class="input60" name="property" value="<%=field%>" />
 		    	        &nbsp; Value &nbsp;<input type="text" class="input60" name="propertyValue" value="<%=value%>" />
-		    	        [<span valign="center" onclick="remove('<%=name%>')" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>
+		    	        [<span valign="center" onclick="removeProperty('<%=name%>')" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>
 		    	    </nobr>
     		   </div>
 <%
             }
 %>
 		    <div id="fields">
-<!--
-		    	<div id='property300' style='margin-top:5px;'>
-    		    	<nobr>Name &nbsp;<input type=text name='property' value='ANNO_MESE'>
-    		    	&nbsp; Value &nbsp;<input type=text name='propertyValue' value='20100301'>
-    		    	&nbsp; [<span valign=center onclick=\"remove('property300')\" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>
-    		    </div>
-		    	<div id='property301' style='margin-top:5px;'>
-    		    	<nobr>Name &nbsp;<input type=text name='property' value='DH_SERVICE_NAME'>
-    		    	&nbsp; Value &nbsp;<input type=text name='propertyValue' value='EGL::CHECK_CONSUMI'>
-    		    	&nbsp; [<span valign=center onclick="remove('property301')" style='text-decoration:underline;cursor:pointer;'>del</span>]</nobr>
-    		    </div>
--->
     		</div>
 		</td>
     </tr>
-    <tr>
-        <td align="left">Transaction Mode</td>
-        <%@ include file="comboTransactionInput.jspf" %>
-    </tr>
+    <%@ include file="comboTransactionInput.jspf" %>
     <tr>
         <td colspan="4">
             <hr></hr>
