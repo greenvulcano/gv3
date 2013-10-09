@@ -28,6 +28,10 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,6 +45,9 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import au.com.bytecode.opencsv.CSVParser;
+import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * This class handle data transformations from generic CSV to XML.
@@ -70,7 +77,7 @@ public class CSVToXMLTransformer implements DTETransformer
     private List<Integer>           groupByIndexes              = new ArrayList<Integer>();
     private Set<Integer>            groupIndexes                = new HashSet<Integer>();
     private boolean                 withGroups                  = false;
-    private Comparator<String>      groupComparator             = null;
+    private Comparator<String[]>    groupComparator             = null;
 
     private List<TransformerHelper> helpers                     = new ArrayList<TransformerHelper>();
 
@@ -143,7 +150,7 @@ public class CSVToXMLTransformer implements DTETransformer
 
         withGroups = (groupByIndexes.size() > 0);
         if (withGroups) {
-            groupComparator = new RowComparatorByFields(groupByIndexes, fieldsSeparator);
+            groupComparator = new RowComparatorByFields(groupByIndexes);
         }
         groupIndexes.addAll(groupByIndexes);
     }
@@ -164,30 +171,34 @@ public class CSVToXMLTransformer implements DTETransformer
     @Override
     public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
     {
+        CSVReader reader = null;
         logger.debug("Transform start");
         try {
-            String inputStr = null;
+            Reader inputStr = null;
             if (input instanceof byte[]) {
-                inputStr = new String((byte[]) input);
+                inputStr = new InputStreamReader(new ByteArrayInputStream((byte[]) input));
             }
             else if (input instanceof String) {
-                inputStr = (String) input;
+                inputStr = new StringReader((String) input);
             }
             else {
                 throw new ClassCastException("Input object is not a binary buffer or String: " + input.getClass());
             }
 
-            // remove \r char as row terminator
-            inputStr = inputStr.replaceAll("\r", "");
+            if (fieldDelimiter.length() > 0) {
+                reader = new CSVReader(inputStr, fieldsSeparator.charAt(0), fieldDelimiter.charAt(0), (excludeFirstRow ? 1 : 0));
+            }
+            else {
+                reader = new CSVReader(inputStr, fieldsSeparator.charAt(0), CSVParser.NULL_CHARACTER, CSVParser.NULL_CHARACTER, (excludeFirstRow ? 1 : 0), false);
+            }
 
-            int fieldDelimiterLen = fieldDelimiter.length();
             XMLUtils parser = null;
             try {
                 parser = XMLUtils.getParserInstance();
                 Document doc = parser.newDocument(tagRoot);
                 Element root = doc.getDocumentElement();
 
-                List<String> rowsStr = TextUtils.splitByStringSeparator(inputStr, "\n");
+                List<String[]> rowsStr = reader.readAll();
                 int idxLen = groupByIndexes.size();
                 if (withGroups) {
                     Collections.sort(rowsStr, groupComparator);
@@ -195,52 +206,40 @@ public class CSVToXMLTransformer implements DTETransformer
 
                 Element groupEl = null;
                 List<String> prevGroup = null;
-                int l = rowsStr.size(), i = (excludeFirstRow ? 1 : 0);
-                for (; i < l; i++) {
-                    String rowStr = rowsStr.get(i);
-                    if (rowStr.length() > 1) {
-                        List<String> colsStr = TextUtils.splitByStringSeparator(rowStr, fieldsSeparator);
-
-                        if (withGroups) {
-                            List<String> curGroup = new ArrayList<String>();
-                            for (int g = 0; g < idxLen; g++) {
-                                String val = colsStr.get(groupByIndexes.get(g));
-                                if ((fieldDelimiterLen > 0) && val.startsWith(fieldDelimiter)
-                                        && val.endsWith(fieldDelimiter)) {
-                                    val = val.substring(fieldDelimiterLen, val.length() - fieldDelimiterLen);
-                                }
-                                curGroup.add(val);
-                            }
-
-                            if ((prevGroup == null) || !prevGroup.equals(curGroup)) {
-                                prevGroup = curGroup;
-                                groupEl = parser.insertElement(root, tagGroup);
-                                for (int g = 0; g < idxLen; g++) {
-                                    parser.setAttribute(groupEl, tagKey + (groupByIndexes.get(g) + 1), curGroup.get(g));
-                                }
-                            }
+                int l = rowsStr.size();
+                for (int i=0; i < l; i++) {
+                    String[] colsStr = rowsStr.get(i);
+                    if (withGroups) {
+                        List<String> curGroup = new ArrayList<String>();
+                        for (int g = 0; g < idxLen; g++) {
+                            String val = colsStr[groupByIndexes.get(g)];
+                            curGroup.add(val);
                         }
 
-                        Element rowsEl = (groupEl == null ? root : groupEl);
-                        Element recordEl = parser.insertElement(rowsEl, tagRecord);
+                        if ((prevGroup == null) || !prevGroup.equals(curGroup)) {
+                            prevGroup = curGroup;
+                            groupEl = parser.insertElement(root, tagGroup);
+                            for (int g = 0; g < idxLen; g++) {
+                                parser.setAttribute(groupEl, tagKey + (groupByIndexes.get(g) + 1), curGroup.get(g));
+                            }
+                        }
+                    }
 
-                        int ll = colsStr.size(), ii = 0;
-                        for (; ii < ll; ii++) {
-                            if (withGroups && groupIndexes.contains(Integer.valueOf(ii))) {
-                                continue;
-                            }
-                            String col = colsStr.get(ii);
-                            if ((fieldDelimiterLen > 0) && col.startsWith(fieldDelimiter)
-                                    && col.endsWith(fieldDelimiter)) {
-                                col = col.substring(fieldDelimiterLen, col.length() - fieldDelimiterLen);
-                            }
-                            Element fieldEl = parser.insertElement(recordEl, tagField);
-                            if (useCDATA) {
-                                parser.insertCDATA(fieldEl, col);
-                            }
-                            else {
-                                parser.insertText(fieldEl, col);
-                            }
+                    Element rowsEl = (groupEl == null ? root : groupEl);
+                    Element recordEl = parser.insertElement(rowsEl, tagRecord);
+
+                    int ll = colsStr.length;
+                    for (int ii=0; ii < ll; ii++) {
+                        if (withGroups && groupIndexes.contains(Integer.valueOf(ii))) {
+                            continue;
+                        }
+                        String col = colsStr[ii];
+                        Element fieldEl = parser.insertElement(recordEl, tagField);
+                        if (useCDATA) {
+                            parser.insertCDATA(fieldEl, col);
+                        }
+                        else {
+                            parser.insertText(fieldEl, col);
                         }
                     }
                 }
@@ -249,6 +248,9 @@ public class CSVToXMLTransformer implements DTETransformer
             }
             finally {
                 XMLUtils.releaseParserInstance(parser);
+                if (reader != null) {
+                	reader.close();
+                }
             }
         }
         catch (ClassCastException exc) {
@@ -316,25 +318,21 @@ public class CSVToXMLTransformer implements DTETransformer
         return helpers;
     }
 
-    public static class RowComparatorByFields implements Comparator<String>
+    public static class RowComparatorByFields implements Comparator<String[]>
     {
         private List<Integer> fieldIndexes;
-        private String        fieldsSeparator;
 
-        public RowComparatorByFields(List<Integer> fieldIndexes, String fieldsSeparator)
+        public RowComparatorByFields(List<Integer> fieldIndexes)
         {
             this.fieldIndexes = fieldIndexes;
-            this.fieldsSeparator = fieldsSeparator;
         }
 
         @Override
-        public int compare(String row1, String row2)
+        public int compare(String[] row1, String[] row2)
         {
-            List<String> cols1 = Arrays.asList(row1.split(fieldsSeparator));
-            List<String> cols2 = Arrays.asList(row2.split(fieldsSeparator));
             for (int i = 0, l = fieldIndexes.size(); i < l; i++) {
                 int index = fieldIndexes.get(i).intValue();
-                int c = cols1.get(index).compareTo(cols2.get(index));
+                int c = row1[index].compareTo(row2[index]);
                 if (c != 0) {
                     return c;
                 }
