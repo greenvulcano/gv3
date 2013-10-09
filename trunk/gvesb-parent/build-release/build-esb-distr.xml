@@ -284,6 +284,9 @@
             <fileset dir="${saxon.saxon.lib}">
                 <include name="*.jar"/>
             </fileset>
+            <fileset dir="${net.sf.opencsv.lib}">
+                <include name="*.jar"/>
+            </fileset>
             <fileset dir="${scout.scout.lib}">
                 <include name="*.jar"/>
             </fileset>
