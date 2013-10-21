@@ -839,6 +839,13 @@
     #References: /GVCore/GVDataTransformation/DataSourceSets/DataSourceSet/@name
 -->
 <!ATTLIST XSLTransformation DataSourceSet CDATA #IMPLIED>
+<!--
+    The FQN of the TransformerFactory class to use.
+    If not configured use the JVM default.
+
+    #NotNull
+-->
+<!ATTLIST XSLTransformation TransformerFactory CDATA #IMPLIED>
 
 <!--
     Defines a XQuery trasformation.
@@ -1005,6 +1012,13 @@
      #NotNull
 -->
 <!ATTLIST XSLFOPTransformation OutputMIME CDATA #IMPLIED>
+<!--
+    The FQN of the TransformerFactory class to use.
+    If not configured use the JVM default.
+
+    #NotNull
+-->
+<!ATTLIST XSLFOPTransformation TransformerFactory CDATA #IMPLIED>
 
 <!--
     Defines a Binary to XML trasformation.

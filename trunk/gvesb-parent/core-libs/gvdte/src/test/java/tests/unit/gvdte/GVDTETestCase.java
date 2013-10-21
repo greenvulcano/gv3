@@ -45,6 +45,8 @@ public class GVDTETestCase extends XMLTestCase
     private static final String  EXPECTED_DOM_DEFNS         = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><out><node>child text</node></out>";
 
     private static final String  TEST_DOM_VAL               = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><doc xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"doc.xsd\"><child>child text</child></doc>";
+    
+    private static final String  EXPECTED_DOM_SAXON_VAL     = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><math><sum>$291.50</sum><mean>$72.88</mean><min>$39.95</min><max>$129.95</max></math>";
 
     private static final String  TEST_TEXT2XML              = "name1;value1\nname2;value2\nname3;value3";
     private static final String  EXPECTED_DOM_TEXT2XML      = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><list><entry name=\"name1\" value=\"value1\"/><entry name=\"name2\" value=\"value2\"/><entry name=\"name3\" value=\"value3\"/></list>";
@@ -141,6 +143,18 @@ public class GVDTETestCase extends XMLTestCase
         Object output = controller.transform("identityXMLValidating", TEST_DOM_VAL.getBytes(), null);
         String dom = XMLUtils.serializeDOM_S((Node) output);
         assertXMLEqual("testXSLValidation failed", TEST_DOM_VAL, dom);
+    }
+
+    /**
+     * Test the XSLTransformer.
+     * 
+     * @throws Exception
+     */
+    public void testXSLSaxon() throws Exception
+    {
+        Object output = controller.transform("TestSaxon", TextUtils.readFileFromCP("bib.xml"), null);
+        String dom = XMLUtils.serializeDOM_S((Node) output);
+        assertXMLEqual("testXSLSaxon failed", EXPECTED_DOM_SAXON_VAL, dom);
     }
 
     /**
