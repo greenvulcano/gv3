@@ -96,10 +96,10 @@ public class DataHandlerCallOperation implements CallOperation
             return gvBuffer;
         }
         catch (DataHandlerException exc) {
-            throw new DataHandlerCallException("GVVCL_DATA_HANDLER_EXCEPTION", exc);
+            throw new DataHandlerCallException("GVVCL_DATA_HANDLER_EXCEPTION", new String[][] {{"message", exc.getMessage()}}, exc);
         }
         catch (GVException exc) {
-            throw new DataHandlerCallException("GVVCL_DATA_HANDLER_EXCEPTION", exc);
+            throw new DataHandlerCallException("GVVCL_DATA_HANDLER_EXCEPTION", new String[][] {{"message", exc.getMessage()}}, exc);
         }
     }
 

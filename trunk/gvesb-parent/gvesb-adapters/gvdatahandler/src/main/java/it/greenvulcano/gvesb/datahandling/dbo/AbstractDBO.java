@@ -655,7 +655,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
             }
             logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + name + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + name + "]: " + exc.getMessage(), exc);
         }
         catch (SAXException exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + name + "]", exc);
@@ -663,7 +663,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
             }
             logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + name + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + name + "]: " + exc.getMessage(), exc);
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + name + "]", exc);
@@ -671,7 +671,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
             }
             logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
-            String msg = "" + exc + " - XSL Message: " + currentXSLMessage;
+            String msg = "" + exc.getMessage() + " - XSL Message: " + currentXSLMessage;
             dhr.addDiscardCause(new DiscardCause(rowCounter, msg));
             throw new DBOException(msg, exc);
         }

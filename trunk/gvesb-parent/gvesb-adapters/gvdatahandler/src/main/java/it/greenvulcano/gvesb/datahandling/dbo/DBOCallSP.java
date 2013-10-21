@@ -998,7 +998,7 @@ public class DBOCallSP extends AbstractDBO
             throw exc;
         }
         catch (Exception exc) {
-            throw new DBOException("Errore nell'estrazione dei parametri di output: " + exc, exc);
+            throw new DBOException("Error processing output parameters: " + exc.getMessage(), exc);
         }
     }
 
