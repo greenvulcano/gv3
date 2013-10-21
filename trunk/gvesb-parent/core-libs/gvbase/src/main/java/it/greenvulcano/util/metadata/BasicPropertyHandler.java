@@ -28,6 +28,8 @@ import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.StringReader;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +70,8 @@ public class BasicPropertyHandler implements PropertyHandler
         PropertiesHandler.registerHandler("escSQL", handler);
         PropertiesHandler.registerHandler("escXML", handler);
         PropertiesHandler.registerHandler("replace", handler);
+        PropertiesHandler.registerHandler("urlEnc", handler);
+        PropertiesHandler.registerHandler("urlDec", handler);
         PropertiesHandler.registerHandler("xmlp", handler);
     }
 
@@ -112,6 +116,8 @@ public class BasicPropertyHandler implements PropertyHandler
      * - escSQL{{string}}   : escapes invalid SQL characters from 'string' (ex. ' -> '')
      * - escXML{{string}}   : escapes invalid XML characters from 'string' (ex. ' -> &apos;)
      * - replace{{string::search::subst}}   : replace in 'string' all occurrences of 'search' with 'replace'
+     * - urlEnc{{string}}   : URL encode invalid characters from 'string'
+     * - urlDec{{string}}   : decode URL encoded characters from 'string'
      * </pre>
      * 
      * @param type
@@ -176,6 +182,12 @@ public class BasicPropertyHandler implements PropertyHandler
         }
         else if (type.startsWith("replace")) {
             return expandReplace(str, inProperties, object, scope, extra);
+        }
+        else if (type.startsWith("urlEnc")) {
+            return expandUrlEnc(str, inProperties, object, scope, extra);
+        }
+        else if (type.startsWith("urlDec")) {
+            return expandUrlDec(str, inProperties, object, scope, extra);
         }
         else if (type.startsWith("xmlp")) {
             // DUMMY replacement - Must be handled by XMLConfig
@@ -666,4 +678,69 @@ public class BasicPropertyHandler implements PropertyHandler
             return "replace" + PROP_START + str + PROP_END;
         }
     }
+    
+    /**
+     * @param str
+     *        the string to valorize
+     * @return the expanded string
+     */
+    private static String expandUrlEnc(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+            Object extra) throws PropertiesHandlerException
+    {
+    	try {
+    		String string = str;
+    		if (!PropertiesHandler.isExpanded(string)) {
+    			string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+    		}
+    		if (!PropertiesHandler.isExpanded(string)) {
+    			return "urlEnc" + PROP_START + str + PROP_END;
+    		}
+    		String encoded = URLEncoder.encode(string, "UTF-8");
+    		return encoded;
+    	}
+        catch (Exception exc) {
+            System.out.println("Error handling 'urlEnc' metadata '" + str + "': " + exc);
+            exc.printStackTrace();
+            if (PropertiesHandler.isExceptionOnErrors()) {
+                if (exc instanceof PropertiesHandlerException) {
+                    throw (PropertiesHandlerException) exc;
+                }
+                throw new PropertiesHandlerException("Error handling 'urlEnc' metadata '" + str + "'", exc);
+            }
+            return "urlEnc" + PROP_START + str + PROP_END;
+        }
+    }
+
+    /**
+     * @param str
+     *        the string to valorize
+     * @return the expanded string
+     */
+    private static String expandUrlDec(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+            Object extra) throws PropertiesHandlerException
+    {
+    	try {
+    		String string = str;
+    		if (!PropertiesHandler.isExpanded(string)) {
+    			string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+    		}
+    		if (!PropertiesHandler.isExpanded(string)) {
+    			return "urlDec" + PROP_START + str + PROP_END;
+    		}
+    		String decoded = URLDecoder.decode(string, "UTF-8");
+    		return decoded;
+    	}
+        catch (Exception exc) {
+            System.out.println("Error handling 'urlDec' metadata '" + str + "': " + exc);
+            exc.printStackTrace();
+            if (PropertiesHandler.isExceptionOnErrors()) {
+                if (exc instanceof PropertiesHandlerException) {
+                    throw (PropertiesHandlerException) exc;
+                }
+                throw new PropertiesHandlerException("Error handling 'urlDec' metadata '" + str + "'", exc);
+            }
+            return "urlDec" + PROP_START + str + PROP_END;
+        }
+    }
+
 }
