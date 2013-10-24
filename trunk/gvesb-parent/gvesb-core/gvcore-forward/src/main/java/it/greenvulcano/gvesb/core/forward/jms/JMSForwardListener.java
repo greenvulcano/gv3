@@ -102,6 +102,7 @@ public class JMSForwardListener implements Runnable
     private ErrorHandlerManager errorHandlerMgr = null;
 
     private boolean             initialized;
+    private boolean             sessionRollBack;
 
     private boolean             run             = false;
     private boolean             connected       = false;
@@ -201,6 +202,13 @@ public class JMSForwardListener implements Runnable
         NMDC.clear();
         NMDC.setServer(serverName);
         NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
+        
+        try {
+            Thread.sleep(1000);
+        }
+        catch (Exception exc) {
+            // do nothing
+        }
 
         if (data.isDebug()) {
             logger.debug("Started Forward [" + name + "/" + forwardName + "] instance");
@@ -291,7 +299,7 @@ public class JMSForwardListener implements Runnable
                                     sleep();
                                 }
                             }
-                            if (!(data.isShutdown() || xaHelper.getTransaction() == null)) {
+                            if (!data.isShutdown()) {
                                 if (!getRollbackOnly()) {
                                     try {
                                         commitTX();
@@ -414,6 +422,7 @@ public class JMSForwardListener implements Runnable
 
     private void beginTX() throws Exception
     {
+    	sessionRollBack = false;
         if (data.isTransacted()) {
             try {
                 xaHelper.setTransactionTimeout(data.getTransactionTimeout());
@@ -437,6 +446,7 @@ public class JMSForwardListener implements Runnable
                 }
             }
             else if ((session != null) && session.getTransacted()) {
+            	sessionRollBack = false;
                 session.commit();
             }
         }
@@ -458,7 +468,8 @@ public class JMSForwardListener implements Runnable
                 }
             }
             else if ((session != null) && session.getTransacted()) {
-                session.commit();
+            	sessionRollBack = true;
+                session.rollback();
             }
         }
         catch (Exception exc) {
@@ -593,7 +604,7 @@ public class JMSForwardListener implements Runnable
     {
         Transaction tx = xaHelper.getTransaction();
         if (tx == null) {
-            return false;
+        	return sessionRollBack;
         }
         int status = tx.getStatus();
         if ((status == Status.STATUS_MARKED_ROLLBACK) || (status == Status.STATUS_ROLLEDBACK)
