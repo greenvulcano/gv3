@@ -539,10 +539,17 @@ public class DBOThreadSelect extends AbstractDBO
             }
 
             xml = XMLUtils.getParserInstance();
+
+            if (statements.isEmpty()) {
+                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
+            }
+        }
+        catch (DBOException exc) {
+            throw exc;
         }
         catch (Exception exc) {
-            logger.error("Error reading configuration of [" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
         }
     }
 
