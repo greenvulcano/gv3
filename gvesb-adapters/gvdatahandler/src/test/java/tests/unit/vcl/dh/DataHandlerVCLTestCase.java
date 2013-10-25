@@ -71,7 +71,7 @@ public class DataHandlerVCLTestCase extends TestCase
      */
     private void createDB() throws SQLException
     {
-        connection.prepareStatement("create table testtable (id INTEGER primary key, name VARCHAR);").execute();
+        connection.prepareStatement("create table testtable (id INTEGER primary key, name VARCHAR(100));").execute();
         connection.prepareStatement("insert into testtable (id, name) values (1, 'testvalue');").execute();
     }
 

@@ -67,8 +67,8 @@ public class DBOSelectFromFile extends AbstractDBO
             readFromCP = XMLConfig.getBoolean(config, "@read-from-cp", true);
         }
         catch (Exception exc) {
-            logger.error("Error reading configuration of [" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
         }
     }
 
