@@ -84,6 +84,7 @@ public class TestGVBufferObject implements TestObject
      * The transaction value it can be NoTransaction/Commit/Rollback
      */
     private String             transaction      = "";
+    private String             txTimeout        = "";
 
     /**
      * The Jndi Name
@@ -228,6 +229,7 @@ public class TestGVBufferObject implements TestObject
     public void initNewObject()
     {
         transaction = "NoTransaction";
+        txTimeout = "-1";
         system = "";
         service = "";
         id = new Id().toString();
@@ -262,7 +264,8 @@ public class TestGVBufferObject implements TestObject
      */
     public void init(Node configNode) throws XMLConfigException
     {
-        transaction = XMLConfig.get(configNode, "@transaction", "No-transaction");
+        transaction = XMLConfig.get(configNode, "@transaction", "No transaction");
+        txTimeout = XMLConfig.get(configNode, "@transaction-timeout", "-1");
         jndiName = XMLConfig.get(configNode, "@jndiName", "");
 
         jndiCtxNode = XMLConfig.getNode(configNode, "JNDIHelper");
@@ -418,13 +421,23 @@ public class TestGVBufferObject implements TestObject
     }
 
     /**
-     * Get the transaction value for test
+     * Get the transaction mode for test
      *
-     * @return transaction value
+     * @return transaction mode
      */
     public String getTransaction()
     {
         return transaction;
+    }
+
+    /**
+     * Get the transaction timeout for test
+     *
+     * @return transaction timeout
+     */
+    public String getTxTimeout()
+    {
+        return txTimeout;
     }
 
     /**
@@ -832,14 +845,25 @@ public class TestGVBufferObject implements TestObject
     }
 
     /**
-     * Set transaction value
+     * Set transaction mode
      *
      * @param transaction
-     *        transaction value
+     *        transaction mode
      */
     public void setTransaction(String transaction)
     {
         this.transaction = transaction;
+    }
+
+    /**
+     * Set transaction timeout
+     *
+     * @param txTimeout
+     *        transaction timeout
+     */
+    public void setTxTimeout(String txTimeout)
+    {
+        this.txTimeout = txTimeout;
     }
 
     /**

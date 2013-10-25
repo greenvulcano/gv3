@@ -182,7 +182,7 @@
 			%>
 			</tr>
 			<tr>
-				<td valign="top"><%@ include file="exception.jspf"%>
+				<td valign="top" align="left"><%@ include file="exception.jspf"%>
 				</td>
 			</tr>
 			<%
