@@ -5,8 +5,15 @@ importPackage(Packages.it.greenvulcano.util.xpath);
 importPackage(Packages.it.greenvulcano.util.txt);
 importPackage(Packages.it.greenvulcano.configuration);
 importPackage(Packages.it.greenvulcano.gvesb.core.exc);
+
+importClass(Packages.it.greenvulcano.gvesb.j2ee.XAHelper);
+importClass(Packages.it.greenvulcano.util.thread.ThreadMap);
+
 importPackage(Packages.java.lang);
-//importPackage(Packages.java.util);
+
+importClass(Packages.java.util.HashMap);
+importClass(Packages.java.util.ArrayList);
+importClass(Packages.java.util.Calendar);
 
 // TEST
 importPackage(Packages.tests.unit.gvrules.bean.figure);
