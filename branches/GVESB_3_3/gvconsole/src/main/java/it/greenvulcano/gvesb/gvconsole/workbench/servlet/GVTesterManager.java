@@ -62,7 +62,10 @@ import javax.transaction.UserTransaction;
  */
 public class GVTesterManager extends HttpServlet
 {
-    private static final long  serialVersionUID = 300L;
+    private static final long  serialVersionUID      = 300L;
+    
+    private static final String TX_COMMIT_ON_SUCCESS = "Commit on success";
+    private static final String TX_ROLLBACK          = "Rollback";
 
     /**
      * The user transaction
@@ -73,6 +76,8 @@ public class GVTesterManager extends HttpServlet
      * The transaction requested
      */
     private String             transaction      = "";
+    
+    private int                txTimeout        = -1;
 
     /**
      * The GVBuffer object output
@@ -143,6 +148,13 @@ public class GVTesterManager extends HttpServlet
         String path = "";
 
         transaction = request.getParameter("transaction");
+        String sTxTimeout = request.getParameter("txTimeout");
+        txTimeout = -1;
+        if (sTxTimeout != null) {
+            txTimeout = Integer.parseInt(sTxTimeout);
+        }
+        System.out.println("GVTest - Transaction: " + transaction + " - TxTimeout: " + txTimeout);
+
         String operationName = request.getParameter("operationName");
 
         fileNameI = request.getParameter("fileNameI");
@@ -342,6 +354,7 @@ public class GVTesterManager extends HttpServlet
         int number = 0;
         countOk = 0;
         countKo = 0;
+        boolean isError = false;
 
         String iteratorNumber = request.getParameter("iteratorNumber");
         GVIdentityHelper.push(new HTTPIdentityInfo(request));
@@ -407,6 +420,7 @@ public class GVTesterManager extends HttpServlet
                                 //
                                 executeTest(testObject, wrapper, testManager, currentTest, i);
                                 setCount(wrapper);
+                                isError = wrapper.getThrowable() != null;
                                 mapTest.put(i, testObject);
                             } // END FOR
 
@@ -434,12 +448,13 @@ public class GVTesterManager extends HttpServlet
                 } // end method != null
             }
             catch (Throwable exc) {
+                isError = true;
                 exc.printStackTrace();
                 wrapper.setThrowable(exc);
             }
             finally {
 
-                endTransaction();
+                endTransaction(isError);
 
                 try {
                     // Close context
@@ -547,7 +562,7 @@ public class GVTesterManager extends HttpServlet
     public void prepareTransaction(TestPlugin testPlugin, InitialContext initialContext) throws Throwable
     {
         if (transaction != null) {
-            if (transaction.equals("Commit") || transaction.equals("Rollback")) {
+            if (transaction.equals(TX_COMMIT_ON_SUCCESS) || transaction.equals(TX_ROLLBACK)) {
 
                 if (initialContext != null) {
                     userTransaction = (UserTransaction) initialContext.lookup("javax.transaction.UserTransaction");
@@ -570,6 +585,12 @@ public class GVTesterManager extends HttpServlet
     public void startTransaction(TestPlugin testPlugin) throws Throwable
     {
         if (transaction != null) {
+            if (txTimeout > 0) {
+                userTransaction.setTransactionTimeout(txTimeout);
+            }
+            else {
+                userTransaction.setTransactionTimeout(0);
+            }
             userTransaction.begin();
         }
     }
@@ -581,10 +602,10 @@ public class GVTesterManager extends HttpServlet
      * @throws Throwable
      *         If an error occurred
      */
-    public void endTransaction() throws Throwable
+    public void endTransaction(boolean isError) throws Throwable
     {
         if ((userTransaction != null) && (transaction != null)) {
-            if (transaction.equals("Commit")) {
+            if (transaction.equals(TX_COMMIT_ON_SUCCESS) && !isError) {
                 userTransaction.commit();
             }
             else {
