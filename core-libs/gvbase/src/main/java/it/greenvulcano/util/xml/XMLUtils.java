@@ -106,21 +106,25 @@ public class XMLUtils
      * Used to parse a DOM from a given XML string.
      */
     private DocumentBuilder                  docBuilder;
+    private DocumentBuilder                  docBuilderComments;
     /**
      * Used to parse a DOM (with namespaceAware) from a given XML string.
      */
     private DocumentBuilder                  docBuilderNamespace;
+    private DocumentBuilder                  docBuilderNamespaceComments;
     /**
      * Used to parse a DOM (with namespaceAware and standard or non-standard
      * validation) from a given XML string.
      */
     private DocumentBuilder                  docBuilderValidatingNamespace;
+    private DocumentBuilder                  docBuilderValidatingNamespaceComments;
 
     /**
      * Used to parse a DOM (with standard or non-standard validation) from a
      * given XML string.
      */
     private DocumentBuilder                  docBuilderValidating;
+    private DocumentBuilder                  docBuilderValidatingComments;
 
     private HashMap<String, DocumentBuilder> docBuilderMap            = null;
 
@@ -293,7 +297,7 @@ public class XMLUtils
         try {
             xmlString = removeDocType(xmlString);
             InputSource xmlSource = new InputSource(new StringReader(xmlString));
-            return docBuilder.parse(xmlSource);
+            return docBuilderNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -304,7 +308,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(new ByteArrayInputStream(xml));
-            return docBuilder.parse(xmlSource);
+            return docBuilderNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -323,7 +327,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(xmlStream);
-            return docBuilder.parse(xmlSource);
+            return docBuilderNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -343,10 +347,27 @@ public class XMLUtils
      */
     public Document parseDOM(String xmlString, boolean isValidating, boolean isNamespaceAware) throws XMLUtilsException
     {
+    	return parseDOM(xmlString, isValidating, isNamespaceAware, true);
+    }
+
+	/**
+     * Returns a DOM parsed from the given XML string.
+     * 
+     * @param xmlString
+     *        A String containing an XML document
+     * @param isValidating
+     * @param isNamespaceAware
+     * @param isIgnoringComments
+     * @return The corresponding DOM
+     * @throws XMLUtilsException
+     *         when errors occur
+     */
+    public Document parseDOM(String xmlString, boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments) throws XMLUtilsException
+    {
         try {
             xmlString = removeDocType(xmlString);
             InputSource xmlSource = new InputSource(new StringReader(xmlString));
-            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware));
+            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
             return docBuilderX.parse(xmlSource);
         }
         catch (Throwable exc) {
@@ -367,9 +388,26 @@ public class XMLUtils
      */
     public Document parseDOM(byte[] xml, boolean isValidating, boolean isNamespaceAware) throws XMLUtilsException
     {
+    	return parseDOM(xml, isValidating, isNamespaceAware, true);
+    }
+    
+    /**
+     * Returns a DOM parsed from the given XML string.
+     * 
+     * @param xml
+     *        A byte array containing an XML document
+     * @param isValidating
+     * @param isNamespaceAware
+     * @param isIgnoringComments
+     * @return The corresponding DOM
+     * @throws XMLUtilsException
+     *         when errors occur
+     */
+    public Document parseDOM(byte[] xml, boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments) throws XMLUtilsException
+    {
         try {
             InputSource xmlSource = new InputSource(new ByteArrayInputStream(xml));
-            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware));
+            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
             return docBuilderX.parse(xmlSource);
         }
         catch (Throwable exc) {
@@ -389,12 +427,30 @@ public class XMLUtils
      * @return a DOM parsed from the given XML input stream.
      * @throws XMLUtilsException
      */
-    public Document parseDOM(InputStream xmlStream, boolean isValidating, boolean isNamespaceAware)
-            throws XMLUtilsException
+    public Document parseDOM(InputStream xmlStream, boolean isValidating, boolean isNamespaceAware) throws XMLUtilsException
     {
-        try {
+    	return parseDOM(xmlStream, isValidating, isNamespaceAware, true);
+    }
+
+    /**
+     * Returns a DOM parsed from the given XML input stream.
+     * 
+     * @param xmlStream
+     *        input document
+     * @param isValidating
+     *        if true try to validating the XML
+     * @param isNamespaceAware
+     *        if true ability to resolver namespace
+     * @param isIgnoringComments
+     * 		  if true ignore XML comments in input
+     * @return a DOM parsed from the given XML input stream.
+     * @throws XMLUtilsException
+     */
+    public Document parseDOM(InputStream xmlStream, boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments) throws XMLUtilsException
+    {
+    	try {
             InputSource xmlSource = new InputSource(xmlStream);
-            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware));
+            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
             return docBuilderX.parse(xmlSource);
         }
         catch (Throwable exc) {
@@ -416,7 +472,26 @@ public class XMLUtils
      */
     public Node parseObject(Object input, boolean isValidating, boolean isNamespaceAware) throws XMLUtilsException
     {
-        try {
+    	return parseObject(input, isValidating, isNamespaceAware, true);
+    }
+    
+    /**
+     * Returns a DOM/Node parsed from the given input object.
+     * 
+     * @param object
+     *        input object
+     * @param isValidating
+     *        if true try to validating the XML
+     * @param isNamespaceAware
+     *        if true ability to resolver namespace
+     * @param isIgnoringComments
+     * 		  if true ignore XML comments in input
+     * @return a DOM/Node parsed from the given input object.
+     * @throws XMLUtilsException
+     */
+    public Node parseObject(Object input, boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments) throws XMLUtilsException
+    {
+    	try {
             InputSource xmlSource = null;
             if (input instanceof Document) {
                 return (Document) input;
@@ -436,7 +511,7 @@ public class XMLUtils
             else {
                 throw new XMLUtilsException("Invalid input type: " + input.getClass());
             }
-            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware));
+            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
             return docBuilderX.parse(xmlSource);
         }
         catch (XMLUtilsException exc) {
@@ -486,10 +561,29 @@ public class XMLUtils
     public static Document parseDOM_S(String xmlString, boolean isValidating, boolean isNamespaceAware)
             throws XMLUtilsException
     {
-        XMLUtils parser = null;
+    	return parseDOM_S(xmlString, isValidating, isNamespaceAware, true);
+    }
+    
+    /**
+     * Returns a DOM parsed from the given XML string.
+     * 
+     * @param xmlString
+     *        A String containing an XML document
+     * @param isValidating
+     * @param isNamespaceAware
+     * @param isIgnoringComments
+     * 		  if true ignore XML comments in input
+     * @return The corresponding DOM
+     * @throws XMLUtilsException
+     *         when errors occur
+     */
+    public static Document parseDOM_S(String xmlString, boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments)
+            throws XMLUtilsException
+    {
+    	XMLUtils parser = null;
         try {
             parser = getParserInstance();
-            return parser.parseDOM(xmlString, isValidating, isNamespaceAware);
+            return parser.parseDOM(xmlString, isValidating, isNamespaceAware, isIgnoringComments);
         }
         finally {
             if (parser != null) {
@@ -513,10 +607,30 @@ public class XMLUtils
     public static Document parseDOM_S(InputStream xmlStream, boolean isValidating, boolean isNamespaceAware)
             throws XMLUtilsException
     {
-        XMLUtils parser = null;
+    	return parseDOM_S(xmlStream, isValidating, isNamespaceAware, true);
+    }
+    
+    /**
+     * Returns a DOM parsed from the given XML input stream.
+     * 
+     * @param xmlStream
+     *        input document
+     * @param isValidating
+     *        if true try to validating the XML
+     * @param isNamespaceAware
+     *        if true ability to resolver namespace
+     * @param isIgnoringComments
+     * 		  if true ignore XML comments in input
+     * @return a DOM parsed from the given XML input stream.
+     * @throws XMLUtilsException
+     */
+    public static Document parseDOM_S(InputStream xmlStream, boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments)
+            throws XMLUtilsException
+    {
+    	XMLUtils parser = null;
         try {
             parser = getParserInstance();
-            return parser.parseDOM(xmlStream, isValidating, isNamespaceAware);
+            return parser.parseDOM(xmlStream, isValidating, isNamespaceAware, isIgnoringComments);
         }
         finally {
             if (parser != null) {
@@ -539,10 +653,29 @@ public class XMLUtils
     public static Document parseDOM_S(byte[] xml, boolean isValidating, boolean isNamespaceAware)
             throws XMLUtilsException
     {
-        XMLUtils parser = null;
+    	return parseDOM_S(xml, isValidating, isNamespaceAware, true);
+    }
+
+    /**
+     * Returns a DOM parsed from the given byte array.
+     * 
+     * @param xml
+     *        A byte array containing an XML document
+     * @param isValidating
+     * @param isNamespaceAware
+     * @param isIgnoringComments
+     * 		  if true ignore XML comments in input
+     * @return The corresponding DOM
+     * @throws XMLUtilsException
+     *         when errors occur
+     */
+    public static Document parseDOM_S(byte[] xml, boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments)
+            throws XMLUtilsException
+    {
+    	XMLUtils parser = null;
         try {
             parser = getParserInstance();
-            return parser.parseDOM(new ByteArrayInputStream(xml), isValidating, isNamespaceAware);
+            return parser.parseDOM(new ByteArrayInputStream(xml), isValidating, isNamespaceAware, isIgnoringComments);
         }
         finally {
             if (parser != null) {
@@ -566,10 +699,30 @@ public class XMLUtils
     public static Node parseObject_S(Object input, boolean isValidating, boolean isNamespaceAware)
             throws XMLUtilsException
     {
-        XMLUtils parser = null;
+    	return parseObject_S(input, isValidating, isNamespaceAware, true);
+    }
+    
+    /**
+     * Returns a DOM/Node parsed from the given input object.
+     * 
+     * @param object
+     *        input object
+     * @param isValidating
+     *        if true try to validating the XML
+     * @param isNamespaceAware
+     *        if true ability to resolver namespace
+     * @param isIgnoringComments
+     * 		  if true ignore XML comments in input
+     * @return a DOM/Node parsed from the given input object.
+     * @throws XMLUtilsException
+     */
+    public static Node parseObject_S(Object input, boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments)
+            throws XMLUtilsException
+    {
+    	XMLUtils parser = null;
         try {
             parser = getParserInstance();
-            return parser.parseObject(input, isValidating, isNamespaceAware);
+            return parser.parseObject(input, isValidating, isNamespaceAware, isIgnoringComments);
         }
         finally {
             if (parser != null) {
@@ -593,7 +746,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(new StringReader(xmlString));
-            return docBuilderValidating.parse(xmlSource);
+            return docBuilderValidatingNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -612,7 +765,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(xmlStream);
-            return docBuilderValidating.parse(xmlSource);
+            return docBuilderValidatingNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -677,7 +830,7 @@ public class XMLUtils
 
         for (int i = 0; i < docs.length; i++) {
             Object obj = docs[i];
-            Node part = parseObject(obj, false, true);
+            Node part = parseObject(obj, false, true, false);
             if (part instanceof Document) {
                 root.appendChild(docOut.importNode(((Document) part).getDocumentElement(), true));
             }
@@ -771,7 +924,7 @@ public class XMLUtils
         XMLUtils parser = null;
         try {
             parser = XMLUtils.getParserInstance();
-            docOut = (Document) parser.parseObject(docs[0], false, true);
+            docOut = (Document) parser.parseObject(docs[0], false, true, false);
             for (int i = 1; i < docs.length; i++) {
             	String xpSD = (String) xpaths[i];
             	int idx = xpSD.indexOf("##");
@@ -779,7 +932,7 @@ public class XMLUtils
                 String xpathDest = xpSD.substring(idx+2);
                 Object srcD = docs[i];
                 if (srcD != null) {
-                    Document docS = (Document) parser.parseObject(srcD, false, true);
+                    Document docS = (Document) parser.parseObject(srcD, false, true, false);
                     NodeList sources = parser.selectNodeList(docS, xpathSrc);
                     if (sources.getLength() > 0) {
                         Node destNode = parser.selectSingleNode(docOut, xpathDest);
@@ -1909,47 +2062,6 @@ public class XMLUtils
 
 
     /**
-     * Creates a new validating, or non-validating, DocumentBuilder
-     * 
-     * @param isValidating
-     *        true if we want a validating DOM Parser
-     * @param nameSpaceAware
-     * @param forceCrimson
-     * @return DocumentBuilder
-     * @throws ParserConfigurationException
-     *         on errors
-     */
-    public DocumentBuilder getDocumentBuilder(boolean isValidating, boolean nameSpaceAware, boolean forceCrimson)
-            throws ParserConfigurationException
-    {
-        DocumentBuilderFactory factory = null;
-        factory = DocumentBuilderFactory.newInstance();
-        // Setup namespace awareness
-        factory.setNamespaceAware(nameSpaceAware);
-        // Setup validation
-        factory.setValidating(isValidating);
-        // Enable XMLSchema validation (if needed)
-        if (isValidating) {
-            try {
-                factory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
-            }
-            catch (IllegalArgumentException exc) {
-                // Underlying parser doesn't support Jaxp 1.2
-            }
-        }
-        // Ignore comments
-        factory.setIgnoringComments(true);
-        // Ignore any whitespace
-        factory.setIgnoringElementContentWhitespace(true);
-        // Instantiate parser
-        DocumentBuilder theDocBuilder = factory.newDocumentBuilder();
-        // install a proper error handler
-        theDocBuilder.setErrorHandler(new ErrHandler());
-        // Return the DocumentBuilder object
-        return theDocBuilder;
-    }
-
-    /**
      * Initialize the DOM parser setting up all needed features.
      * 
      * @throws ParserConfigurationException
@@ -1958,15 +2070,23 @@ public class XMLUtils
     {
         docBuilderMap = new HashMap<String, DocumentBuilder>();
         // Instantiate non-validating DocumentBuilder
-        docBuilder = getDocumentBuilder(false, false);
-        docBuilderMap.put(getKey(false, false), docBuilder);
-        docBuilderNamespace = getDocumentBuilder(false, true);
-        docBuilderMap.put(getKey(false, true), docBuilderNamespace);
-        docBuilderValidatingNamespace = getDocumentBuilder(true, true);
-        docBuilderMap.put(getKey(true, true), docBuilderValidatingNamespace);
+        docBuilder = getDocumentBuilder(false, false, true);
+        docBuilderMap.put(getKey(false, false, true), docBuilder);
+        docBuilderComments = getDocumentBuilder(false, false, false);
+        docBuilderMap.put(getKey(false, false, false), docBuilderComments);
+        docBuilderNamespace = getDocumentBuilder(false, true, true);
+        docBuilderMap.put(getKey(false, true, true), docBuilderNamespace);
+        docBuilderNamespaceComments = getDocumentBuilder(false, true, false);
+        docBuilderMap.put(getKey(false, true, false), docBuilderNamespaceComments);
         // Instantiate validating DocumentBuilder
-        docBuilderValidating = getDocumentBuilder(true, false);
-        docBuilderMap.put(getKey(true, false), docBuilderValidating);
+        docBuilderValidating = getDocumentBuilder(true, false, true);
+        docBuilderMap.put(getKey(true, false, true), docBuilderValidating);
+        docBuilderValidatingComments = getDocumentBuilder(true, false, false);
+        docBuilderMap.put(getKey(true, false, false), docBuilderValidatingComments);
+        docBuilderValidatingNamespace = getDocumentBuilder(true, true, true);
+        docBuilderMap.put(getKey(true, true, true), docBuilderValidatingNamespace);
+        docBuilderValidatingNamespaceComments = getDocumentBuilder(true, true, false);
+        docBuilderMap.put(getKey(true, true, false), docBuilderValidatingNamespaceComments);
     }
 
     /**
@@ -1976,9 +2096,9 @@ public class XMLUtils
      * @param destType
      * @return String sourceType::destType
      */
-    private String getKey(boolean isValidating, boolean isNamespaceAware)
+    private String getKey(boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments)
     {
-        return (isValidating + "::" + isNamespaceAware);
+        return (isValidating + "::" + isNamespaceAware + "::" + isIgnoringComments);
     }
 
     /**
@@ -1990,7 +2110,7 @@ public class XMLUtils
      * @throws ParserConfigurationException
      *         on errors
      */
-    private DocumentBuilder getDocumentBuilder(boolean isValidating, boolean isNamespaceAware)
+    public DocumentBuilder getDocumentBuilder(boolean isValidating, boolean isNamespaceAware, boolean isIgnoringComments)
             throws ParserConfigurationException
     {
         // instantiate the parser
@@ -2009,7 +2129,7 @@ public class XMLUtils
             }
         }
         // Ignore comments
-        factory.setIgnoringComments(true);
+        factory.setIgnoringComments(isIgnoringComments);
         // Ignore any whitespace
         factory.setIgnoringElementContentWhitespace(true);
         // Instantiate parser
