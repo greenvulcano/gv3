@@ -350,6 +350,13 @@ public class DBOCallSP extends AbstractDBO
                 for (int i = 0; i < iNumParam; i++) {
                     spOutputParams.add(new SPOutputParam(nlParameters.item(i)));
                 }
+
+                if (statements.isEmpty()) {
+                    throw new DBOException("Empty/misconfigured statements list for stored procedure call descriptor");
+                }
+            }
+            catch (DBOException exc) {
+                throw exc;
             }
             catch (Exception exc) {
                 throw new DBOException("Error initializing the stored procedure call descriptor", exc);
@@ -998,7 +1005,7 @@ public class DBOCallSP extends AbstractDBO
             throw exc;
         }
         catch (Exception exc) {
-            throw new DBOException("Errore nell'estrazione dei parametri di output: " + exc, exc);
+            throw new DBOException("Error processing output parameters: " + exc.getMessage(), exc);
         }
     }
 

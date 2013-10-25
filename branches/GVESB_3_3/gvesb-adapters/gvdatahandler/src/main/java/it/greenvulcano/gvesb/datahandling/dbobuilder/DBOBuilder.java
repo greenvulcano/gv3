@@ -308,6 +308,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             if (transacted && !isXA) {
+                logger.debug("Committing XML2DB [" + operation + "].");
                 conn.commit();
             }
         }
@@ -315,6 +316,7 @@ public class DBOBuilder implements IDBOBuilder
             if (conn != null) {
                 if (transacted && !isXA) {
                     try {
+                        logger.warn("Rolling-back XML2DB [" + operation + "].");
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -323,12 +325,13 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DataHandlerException("SQL Exception", exc);
+            throw new DataHandlerException("SQL Exception: " + exc.getMessage(), exc);
         }
         catch (Exception exc) {
             if (conn != null) {
                 if (transacted && !isXA) {
                     try {
+                        logger.warn("Rolling-back XML2DB [" + operation + "].");
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -337,7 +340,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
-            throw new DataHandlerException("Unhandled Exception", exc);
+            throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
             cleanup();
@@ -461,6 +464,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             if (transacted && !isXA) {
+                logger.debug("Committing DB2XML [" + operation + "].");
                 conn.commit();
             }
             byte[] xmlFile = null;
@@ -513,6 +517,7 @@ public class DBOBuilder implements IDBOBuilder
             if (conn != null) {
                 if (transacted && !isXA) {
                     try {
+                        logger.warn("Rolling-back DB2XML [" + operation + "].");
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -521,12 +526,13 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DataHandlerException("SQL Exception", exc);
+            throw new DataHandlerException("SQL Exception: " + exc.getMessage(), exc);
         }
         catch (Exception exc) {
             if (conn != null) {
                 if (transacted && !isXA) {
                     try {
+                        logger.warn("Rolling-back DB2XML [" + operation + "].");
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -535,7 +541,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.warn("Unhandled Exception", exc);
-            throw new DataHandlerException("Unhandled Exception", exc);
+            throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
             cleanup();
@@ -653,6 +659,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             if (transacted && !isXA) {
+                logger.debug("Committing CALL [" + operation + "].");
                 conn.commit();
             }
             byte[] xmlFile = (byte[]) dataCache.get(outputDataName);
@@ -670,6 +677,7 @@ public class DBOBuilder implements IDBOBuilder
             if (conn != null) {
                 if (transacted && !isXA) {
                     try {
+                        logger.warn("Rolling-back CALL [" + operation + "].");
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -678,12 +686,13 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DataHandlerException("SQL Exception", exc);
+            throw new DataHandlerException("SQL Exception: " + exc.getMessage(), exc);
         }
         catch (Exception exc) {
             if (conn != null) {
                 if (transacted && !isXA) {
                     try {
+                        logger.warn("Rolling-back CALL [" + operation + "].");
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -692,7 +701,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
-            throw new DataHandlerException("Unhandled Exception", exc);
+            throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
             cleanup();
@@ -893,6 +902,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             if (transacted && !isXA) {
+                logger.debug("Committing EXECUTE [" + operation + "].");
                 conn.commit();
             }
             dhr = (DHResult) dataCache.get(outputDataName);
@@ -1006,6 +1016,7 @@ public class DBOBuilder implements IDBOBuilder
             if (conn != null) {
                 if (transacted && !isXA) {
                     try {
+                    	logger.warn("Rolling-back EXECUTE [" + operation + "].");
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -1014,12 +1025,13 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DataHandlerException("SQL Exception", exc);
+            throw new DataHandlerException("SQL Exception: " + exc.getMessage(), exc);
         }
         catch (Exception exc) {
             if (conn != null) {
                 if (transacted && !isXA) {
                     try {
+                    	logger.warn("Rolling-back EXECUTE [" + operation + "]."); 
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -1028,7 +1040,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
-            throw new DataHandlerException("Unhandled Exception", exc);
+            throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
             cleanup();
