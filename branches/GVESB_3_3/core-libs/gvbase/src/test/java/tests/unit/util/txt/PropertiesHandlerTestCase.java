@@ -322,4 +322,45 @@ public class PropertiesHandlerTestCase extends TestCase
        assertEquals(match, dest);
    }
 
+/**
+    *
+    */
+   @Test
+   public void testExpand17() throws Exception
+   {
+       String src = "urlEnc{{aa bb&c/.=}}";
+       String dest = PropertiesHandler.expand(src, null);
+       assertEquals("aa+bb%26c%2F.%3D", dest);
+   }
+
+   /**
+   *
+   */
+  @Test
+  public void testExpand18() throws Exception
+  {
+      String src = "urlDec{{aa+bb%26c%2F.%3D}}";
+      String dest = PropertiesHandler.expand(src, null);
+      assertEquals("aa bb&c/.=", dest);
+  }
+  
+  /**
+  *
+  */
+  @Test
+  public void testExpand19() throws Exception
+  {
+     String src = "http://www.report.com/report?VAL_SESSIONID=urlEnc{{@{{VAL_SESSIONID}}}}&DAT_RIFERIMENTO=urlEnc{{@{{DAT_RIFERIMENTO}}}}&DAT_CARICAMENTO=urlEnc{{@{{DAT_CARICAMENTO}}}}";
+     
+     HashMap<String, Object> props = new HashMap<String, Object>();
+     props.put("DAT_CARICAMENTO", "2013-10-16T17:36:38.620"); 
+     props.put("DAT_RIFERIMENTO", "2013-10-16");
+     props.put("VAL_SESSIONID", "AC12FAB8526003FD0E9D4425");
+     
+     String dest = PropertiesHandler.expand(src);
+     assertEquals("No encode", src, dest);
+     
+     dest = PropertiesHandler.expand(src, props);
+     assertEquals("Encode", "http://www.report.com/report?VAL_SESSIONID=AC12FAB8526003FD0E9D4425&DAT_RIFERIMENTO=2013-10-16&DAT_CARICAMENTO=2013-10-16T17%3A36%3A38.620", dest);
+  }
 }
