@@ -85,6 +85,8 @@ public class XSLTransformer implements DTETransformer
     private String                 dataSourceSet;
 
     private DataSourceFactory      dsf;
+    
+    private String                 transformerFactory;
 
     private Map<String, Templates> templHashMap = null;
 
@@ -107,6 +109,8 @@ public class XSLTransformer implements DTETransformer
             this.dsf = dsf;
             xslMapName = XMLConfig.get(node, "@XSLMapName");
             dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
+            
+            transformerFactory = XMLConfig.get(node, "@TransformerFactory", "");
 
             String validateXSL = XMLConfig.get(node, "@validate");
             String validateTransformations = XMLConfig.get(node, "../@validate");
@@ -132,7 +136,7 @@ public class XSLTransformer implements DTETransformer
                 }
             }
             logger.debug("init - loaded parameters: xslMapName = " + xslMapName + " - DataSourceSet: " + dataSourceSet
-                    + " - validate = " + validateMap + " - validateDirection = " + validateDirection);
+                    + " - validate = " + validateMap + " - validateDirection = " + validateDirection + " - transformerFactory = " + transformerFactory);
 
             initTemplMap();
 
@@ -192,7 +196,13 @@ public class XSLTransformer implements DTETransformer
             mn = "gvdte://" + mn;
         }
         DataSource reposManager = dsf.getDataSource(dss, mn);
-        TransformerFactory tFactory = TransformerFactory.newInstance();
+        TransformerFactory tFactory = null;
+        if (transformerFactory.equals("")) {
+            tFactory = TransformerFactory.newInstance();
+        }
+        else {
+            tFactory = TransformerFactory.newInstance(transformerFactory, null);
+        }
         tFactory.setURIResolver(new URIResolver(dss, dsf));
         Source source = new StreamSource(new ByteArrayInputStream(reposManager.getResourceAsByteArray(mn)));
         source.setSystemId(reposManager.getResourceURL(mn));

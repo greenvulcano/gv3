@@ -47,5 +47,9 @@
             <groupId>net.sf.saxon</groupId>
             <artifactId>saxon-xpath</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+        </dependency>
     </dependencies>
 </project>

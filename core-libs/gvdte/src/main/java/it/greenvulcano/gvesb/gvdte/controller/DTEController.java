@@ -243,9 +243,13 @@ public class DTEController implements ConfigurationListener
     {
         logger.debug("BEGIN - DTEController destroy");
         XMLConfig.removeConfigurationListener(this);
-        transformerManager.destroy();
+        if (transformerManager != null) {
+        	transformerManager.destroy();
+        }
         transformerManager = null;
-        dataSourceFactory.configurationClean();
+        if (dataSourceFactory != null) {
+        	dataSourceFactory.configurationClean();
+        }
         dataSourceFactory = null;
         logger.debug("END - DTEController destroy");
     }
