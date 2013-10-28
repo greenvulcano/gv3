@@ -45,6 +45,8 @@ public class GVDTETestCase extends XMLTestCase
     private static final String  EXPECTED_DOM_DEFNS         = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><out><node>child text</node></out>";
 
     private static final String  TEST_DOM_VAL               = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><doc xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"doc.xsd\"><child>child text</child></doc>";
+    
+    private static final String  EXPECTED_DOM_SAXON_VAL     = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><math><sum>$291.50</sum><mean>$72.88</mean><min>$39.95</min><max>$129.95</max></math>";
 
     private static final String  TEST_TEXT2XML              = "name1;value1\nname2;value2\nname3;value3";
     private static final String  EXPECTED_DOM_TEXT2XML      = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><list><entry name=\"name1\" value=\"value1\"/><entry name=\"name2\" value=\"value2\"/><entry name=\"name3\" value=\"value3\"/></list>";
@@ -55,13 +57,13 @@ public class GVDTETestCase extends XMLTestCase
     private static final String  TEST_DOM_EXTENSION         = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><date formatIn=\"dd/MM/yyyy HH:mm:SS\" formatOut=\"yyyyMMddHHmmSS\">11/07/2000 12:50:30</date>";
     private static final String  EXPECTED_DOM_EXTENSION     = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><out>20000711125030</out>";
 
-    private static final String  TEST_CSV2XML               = "field1.1,field1.   2,   field1.3    \n\rfield2.1,field2.2,field2.3";
+    private static final String  TEST_CSV2XML               = "field1.1,field1.   2,   field1.3    \r\nfield2.1,field2.2,field2.3";
     private static final String  EXPECTED_DOM_CSV2XML       = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><RowSet><row><col>field1.1</col><col>field1.   2</col><col>   field1.3    </col></row><row><col>field2.1</col><col>field2.2</col><col>field2.3</col></row></RowSet>";
 
-    private static final String  TEST_CSV2XML_EMPTY         = "field1.1,,field1.3\n\r,field2.2,field2.3";
+    private static final String  TEST_CSV2XML_EMPTY         = "field1.1,,field1.3\r\n,field2.2,field2.3";
     private static final String  EXPECTED_DOM_CSV2XML_EMPTY = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><RowSet><row><col>field1.1</col><col/><col>field1.3</col></row><row><col/><col>field2.2</col><col>field2.3</col></row></RowSet>";
 
-    private static final String  TEST_CSV2XML_GRP           = "field1.1,field1.2,field1.3,field1.4\n\rfield1.1,field2.2,field1.3,field2.4\n\rfield3.1,field3.2,field3.3,field3.4";
+    private static final String  TEST_CSV2XML_GRP           = "field1.1,field1.2,field1.3,field1.4\r\nfield1.1,field2.2,field1.3,field2.4\r\nfield3.1,field3.2,field3.3,field3.4";
     private static final String  EXPECTED_DOM_CSV2XML_GRP   = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><RowSet><data key_1=\"field1.1\" key_3=\"field1.3\"><row><col>field1.2</col><col>field1.4</col></row><row><col>field2.2</col><col>field2.4</col></row></data><data key_1=\"field3.1\" key_3=\"field3.3\"><row><col>field3.2</col><col>field3.4</col></row></data></RowSet>";
 
     private static DTEController controller                 = null;
@@ -141,6 +143,18 @@ public class GVDTETestCase extends XMLTestCase
         Object output = controller.transform("identityXMLValidating", TEST_DOM_VAL.getBytes(), null);
         String dom = XMLUtils.serializeDOM_S((Node) output);
         assertXMLEqual("testXSLValidation failed", TEST_DOM_VAL, dom);
+    }
+
+    /**
+     * Test the XSLTransformer.
+     * 
+     * @throws Exception
+     */
+    public void testXSLSaxon() throws Exception
+    {
+        Object output = controller.transform("TestSaxon", TextUtils.readFileFromCP("bib.xml"), null);
+        String dom = XMLUtils.serializeDOM_S((Node) output);
+        assertXMLEqual("testXSLSaxon failed", EXPECTED_DOM_SAXON_VAL, dom);
     }
 
     /**

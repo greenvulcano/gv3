@@ -86,6 +86,8 @@ public class XSLFOPTransformer implements DTETransformer {
     private String                 dataSourceSet;
 
     private DataSourceFactory      dsf;
+    
+    private String                 transformerFactory;
 
     private Map<String, Templates> templHashMap = null;
 
@@ -111,6 +113,9 @@ public class XSLFOPTransformer implements DTETransformer {
             xslMapName = XMLConfig.get(nodo, "@XSLMapName");
             outputMIME = XMLConfig.get(nodo, "@OutputMIME", "application/pdf");
             dataSourceSet = XMLConfig.get(nodo, "@DataSourceSet", "Default");
+            
+            transformerFactory = XMLConfig.get(nodo, "@TransformerFactory", "");
+            
             String validateXSL = XMLConfig.get(nodo, "@validate");
             String validateTransformations = XMLConfig.get(nodo, "../@validate");
             String lvalidationType = XMLConfig.get(nodo, "@validationType");
@@ -135,7 +140,7 @@ public class XSLFOPTransformer implements DTETransformer {
             }
 
             logger.debug("Loaded parameters: outputMIME = " + outputMIME + " - xslMapName = " + xslMapName + " - DataSourceSet: "
-                    + dataSourceSet + " - validate = " + validateXSL);
+                    + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory);
 
             initTemplMap();
 
@@ -194,7 +199,13 @@ public class XSLFOPTransformer implements DTETransformer {
             mn = "gvdte://" + mn;
         }
         DataSource reposManager = dsf.getDataSource(dss, mn);
-        TransformerFactory tFactory = TransformerFactory.newInstance();
+        TransformerFactory tFactory = null;
+        if (transformerFactory.equals("")) {
+            tFactory = TransformerFactory.newInstance();
+        }
+        else {
+            tFactory = TransformerFactory.newInstance(transformerFactory, null);
+        }
         tFactory.setURIResolver(new URIResolver(dss, dsf));
         Source source = new StreamSource(new ByteArrayInputStream(reposManager.getResourceAsByteArray(mn)));
         source.setSystemId(reposManager.getResourceURL(mn));

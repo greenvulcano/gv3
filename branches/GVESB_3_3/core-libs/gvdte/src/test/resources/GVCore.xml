@@ -49,6 +49,9 @@
         name="TestExtension" type="transformation"/>
       <XSLTransformation XSLMapName="TestDefNs.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
         name="TestDefNs" type="transformation"/>
+      <XSLTransformation XSLMapName="TestSaxon.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
+        name="TestSaxon" type="transformation" TransformerFactory="net.sf.saxon.TransformerFactoryImpl"/>
+        
       <Bin2XMLTransformation ConversionMapName="bin2xml.bin" class="it.greenvulcano.gvesb.gvdte.transformers.bin.bin2xml.BinaryToXMLTransformer"
         name="Bin2XML" type="transformation"/>
       <AddTagTransformation TagName="xml" UseCDATA="False"
