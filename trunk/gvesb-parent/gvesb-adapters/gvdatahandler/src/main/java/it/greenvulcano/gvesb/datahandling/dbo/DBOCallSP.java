@@ -340,7 +340,7 @@ public class DBOCallSP extends AbstractDBO
         public SPCallDescriptor(Node node) throws DBOException
         {
             try {
-                statement = XMLConfig.get(node, "statement[@type='callsp']");
+                statement = XMLConfig.get(node, "statement[@type='callsp']", "");
                 // Reading stored procedure output parameters
                 NodeList nlParameters = XMLConfig.getNodeList(node, "SPOutputParameters/SPOutputParameter");
                 int iNumParam = nlParameters.getLength();
@@ -351,7 +351,7 @@ public class DBOCallSP extends AbstractDBO
                     spOutputParams.add(new SPOutputParam(nlParameters.item(i)));
                 }
 
-                if (statements.isEmpty()) {
+                if (statement.equals("")) {
                     throw new DBOException("Empty/misconfigured statements list for stored procedure call descriptor");
                 }
             }

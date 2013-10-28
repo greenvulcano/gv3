@@ -82,6 +82,10 @@ public class DBOFlatSelect extends AbstractDBO
             forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
             isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
             Node stmt = XMLConfig.getNode(config, "statement[@type='select']");
+            if (stmt == null) {
+                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
+            }
+
             stmID = XMLConfig.get(stmt, "@id");
             if (stmID == null) {
                 stmID = Integer.toString(0);
@@ -118,10 +122,6 @@ public class DBOFlatSelect extends AbstractDBO
                         fieldIdToFormatter.put(fForm.getFieldId(), fForm);
                     }
                 }
-            }
-
-            if (stmt == null) {
-                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
             }
         }
         catch (DBOException exc) {
