@@ -209,6 +209,7 @@ public class DebugSynchObject
                         default :
                             res = false;
                     }
+                    mustStop = res;
                 }
             }
         }
