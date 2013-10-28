@@ -245,6 +245,8 @@
                                              value="decode{{ognl{{#object.getProperty(&apos;SQL&apos;)}}::OK::Sql OK::Sql KO}}"/>
                                 <PropertyDef name="MINUTE"
                                              value="Minute decode{{js{{gvesb::timestamp{{mm}} % 2 == 0}}::true::EVEN::ODD}}"/>
+                            <PropertyDef name="NOW_PLUS_30s"
+                                             value="js{{gvesb::DateUtils.dateToString(DateUtils.addTime(DateUtils.createCalendar().getTime(), Calendar.SECOND, 30), DateUtils.FORMAT_ISO_DATETIME_L)}}"/>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
