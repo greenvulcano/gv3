@@ -137,7 +137,7 @@
             <wsdl:input message="gv:sendReplyRequest"/>
             <wsdl:output message="gv:sendReplyResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="executeReply">
+        <wsdl:operation name="execute">
             <wsdl:input message="gv:executeRequest"/>
             <wsdl:output message="gv:executeResponse"/>
         </wsdl:operation>
