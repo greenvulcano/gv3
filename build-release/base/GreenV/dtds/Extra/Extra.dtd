@@ -27,3 +27,6 @@
 <!ENTITY % extra-core "">
 <!ENTITY % extra-adapters ",GVAdapterHttpConfiguration">
 <!ENTITY % extra-support "">
+
+<!ENTITY % extra-input-services "|dh-selector-service">
+<!ENTITY % extra-output-services "">
