@@ -740,16 +740,15 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                          dump-in-out="false" id="extract_data"
                                          id-system="CREDIT" input="to_process"
                                          next-node-id="add_ext" op-type="call"
-                                         operation-name="UserDataAsPDF" output="data"
+                                         operation-name="DataHandler" output="data"
                                          point-x="150" point-y="151" type="flow-node">
                             <InputServices>
-                                <ognl-script-service critical="yes" internal="yes"
+                                <dh-selector-service critical="yes" internal="yes"
                                                      type="service">
-                                    <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
-                                                      name="setDBService" type="call">
-                                        <OGNLScript>setProperty(&quot;DH_SERVICE_NAME&quot;, &quot;UserDataAsPDF&quot;)</OGNLScript>
-                                    </ognl-script-call>
-                                </ognl-script-service>
+                                    <dh-selector-call DH_SERVICE_NAME="UserDataAsPDF"
+                                                      class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation"
+                                                      name="setDBService" type="call"/>
+                                </dh-selector-service>
                             </InputServices>
                         </GVOperationNode>
                         <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
@@ -846,7 +845,16 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                          id-system="CREDIT" input="input"
                                          next-node-id="end" op-type="call"
                                          operation-name="DataHandler" output="output"
-                                         point-x="177" point-y="151" type="flow-node"/>
+                                         point-x="177" point-y="151" type="flow-node">
+                            <InputServices>
+                                <dh-selector-service critical="yes" internal="yes"
+                                                     type="service">
+                                    <dh-selector-call DH_SERVICE_NAME="SearchPerson"
+                                                      class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation"
+                                                      name="setDBService" type="call"/>
+                                </dh-selector-service>
+                            </InputServices>
+                        </GVOperationNode>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
                                    end-business-process="yes" id="end" op-type="end"
                                    output="output" point-x="336" point-y="156"
@@ -865,7 +873,16 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                          id-system="CREDIT" input="input"
                                          next-node-id="end" op-type="call"
                                          operation-name="DataHandler" output="output"
-                                         point-x="164" point-y="148" type="flow-node"/>
+                                         point-x="164" point-y="148" type="flow-node">
+                            <InputServices>
+                                <dh-selector-service critical="yes" internal="yes"
+                                                     type="service">
+                                    <dh-selector-call DH_SERVICE_NAME="CreditUpdate"
+                                                      class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation"
+                                                      name="setDBService" type="call"/>
+                                </dh-selector-service>
+                            </InputServices>
+                        </GVOperationNode>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
                                    end-business-process="yes" id="end" op-type="end"
                                    output="output" point-x="322" point-y="149"
@@ -914,7 +931,16 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                          id-system="CREDIT" input="input"
                                          next-node-id="end" op-type="call"
                                          operation-name="DataHandler" output="output"
-                                         point-x="387" point-y="262" type="flow-node"/>
+                                         point-x="387" point-y="262" type="flow-node">
+                            <InputServices>
+                                <dh-selector-service critical="yes" internal="yes"
+                                                     type="service">
+                                    <dh-selector-call DH_SERVICE_NAME="CCardQuery"
+                                                      class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation"
+                                                      name="setDBService" type="call"/>
+                                </dh-selector-service>
+                            </InputServices>
+                        </GVOperationNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
                                          dump-in-out="false" id="search_external"
                                          id-system="CREDIT_EXTERNAL" input="input"
@@ -990,7 +1016,16 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                          id-system="CREDIT" input="input"
                                          next-node-id="end" op-type="call"
                                          operation-name="DataHandler" output="output"
-                                         point-x="344" point-y="276" type="flow-node"/>
+                                         point-x="344" point-y="276" type="flow-node">
+                            <InputServices>
+                                <dh-selector-service critical="yes" internal="yes"
+                                                     type="service">
+                                    <dh-selector-call DH_SERVICE_NAME="CCardPay"
+                                                      class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation"
+                                                      name="setDBService" type="call"/>
+                                </dh-selector-service>
+                            </InputServices>
+                        </GVOperationNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
                                          dump-in-out="false" id="pay_external"
                                          id-system="CREDIT_EXTERNAL" input="input"
@@ -1066,7 +1101,16 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                          id-system="CREDIT" input="input"
                                          next-node-id="end" op-type="call"
                                          operation-name="DataHandler" output="output"
-                                         point-x="172" point-y="143" type="flow-node"/>
+                                         point-x="172" point-y="143" type="flow-node">
+                            <InputServices>
+                                <dh-selector-service critical="yes" internal="yes"
+                                                     type="service">
+                                    <dh-selector-call DH_SERVICE_NAME="PersonInsertFull"
+                                                      class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation"
+                                                      name="setDBService" type="call"/>
+                                </dh-selector-service>
+                            </InputServices>
+                        </GVOperationNode>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
                                    end-business-process="yes" id="end" op-type="end"
                                    output="output" point-x="363" point-y="154"
@@ -2530,7 +2574,7 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                       reportName="Credit Cards" reportType="excel"
                                       type="call"/>
                     <dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation"
-                             name="UserDataAsPDF" type="call">
+                             name="DataHandler" type="call">
                         <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
                                     jdbc-connection-name="ds.gv_test" name="UserDataAsPDF"
                                     type="dbobuilder">
