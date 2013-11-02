@@ -4947,7 +4947,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT InputServices (Description?, (%internal-services;)+)>
+<!ELEMENT InputServices (Description?, (%internal-services; %extra-input-services;)+)>
 <!--
     After doing any communication you can run an ordered list of
     output services.
@@ -4969,7 +4969,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT OutputServices (Description?, (%internal-services;)+)>
+<!ELEMENT OutputServices (Description?, (%internal-services; %extra-output-services;)+)>
 
 <!--
     Test service.
