@@ -42,3 +42,6 @@
 <!ENTITY % extra-core "">
 <!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVRulesConfigManager,GVSocialAdapterManager">
 <!ENTITY % extra-support "">
+
+<!ENTITY % extra-input-services "|dh-selector-service">
+<!ENTITY % extra-output-services "">

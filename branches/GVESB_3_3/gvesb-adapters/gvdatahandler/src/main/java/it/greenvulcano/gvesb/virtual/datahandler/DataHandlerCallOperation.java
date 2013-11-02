@@ -44,6 +44,8 @@ import org.w3c.dom.Node;
  */
 public class DataHandlerCallOperation implements CallOperation
 {
+    public static final String DH_SERVICE_NAME = "DH_SERVICE_NAME";
+    
     private OperationKey key       = null;
     private DHFactory    dhFactory = null;
 
@@ -69,7 +71,7 @@ public class DataHandlerCallOperation implements CallOperation
     public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
     {
         try {
-            String operation = gvBuffer.getProperty("DH_SERVICE_NAME");
+            String operation = gvBuffer.getProperty(DH_SERVICE_NAME);
             if (operation == null) {
                 operation = gvBuffer.getService();
             }

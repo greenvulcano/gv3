@@ -74,6 +74,70 @@
 <!ELEMENT RetrieverConfig (Description?, GenericRetriever?, TableRetriever?, JavaScriptRetriever?)>
 
 <!--
+    Internal service useful to set DBOBuilder name to call at dh-call operations.
+
+    #Template:
+        <xsl:template match="dh-selector-service">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT dh-selector-service (Description?, dh-selector-call)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST dh-selector-service type CDATA #FIXED "service">
+<!--
+    Unmodifiable.
+-->
+<!ATTLIST dh-selector-service   internal CDATA #FIXED "yes">
+<!--
+    Define if the service is critical.
+    A critical service failure mark the entire communication as failed.
+-->
+<!ATTLIST dh-selector-service critical (yes | no) "yes">
+
+<!--
+    VCL Operation useful to set DBOBuilder name to call at dh-call operations.
+
+    #Label: @name
+    #Template:
+
+        <xsl:template match="dh-selector-call">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT dh-selector-call (Description?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST dh-selector-call type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST dh-selector-call  class CDATA #FIXED "it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation">
+<!--
+    Operation identifier.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST dh-selector-call  name CDATA #FIXED "setDBService">
+<!--
+    DBOBuilder name.
+
+    #NotNull
+    #References: /GVCore/GVSystems/Systems/System[@id-system=current()/ancestor::GVOperationNode/@id-system]/Channel[@id-channel=current()/ancestor::Operation/Participant[@id-system=current()/ancestor::GVOperationNode/@id-system]/@id-channel]/*[@name=current()/ancestor::GVOperationNode/@operation-name]/*[@type='dbobuilder']/@name
+-->
+<!ATTLIST dh-selector-call DH_SERVICE_NAME CDATA #REQUIRED>
+
+<!--
     Allows you to define helper running SQL select and
     return the first field of the first selected record
     as string.
