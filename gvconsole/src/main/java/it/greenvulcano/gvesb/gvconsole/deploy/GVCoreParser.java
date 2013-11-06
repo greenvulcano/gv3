@@ -874,7 +874,7 @@ public class GVCoreParser
 
     private Node getGVBufferDump(Document xml, String nomeServizio) throws XMLUtilsException
     {
-    	Node gvDataDump = XMLUtils.selectSingleNode_S(xml, "/GVCore/GVBufferDump[ServiceDump/@id-service='" + nomeServizio + "']");
+    	Node gvDataDump = XMLUtils.selectSingleNode_S(xml, "/GVCore/GVBufferDump/ServiceDump[@id-service='" + nomeServizio + "']");
         return gvDataDump;
     }
 
