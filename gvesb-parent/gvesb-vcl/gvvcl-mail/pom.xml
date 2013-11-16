@@ -17,16 +17,28 @@
             <artifactId>gvvcl</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.geronimo.javamail</groupId>
+            <artifactId>geronimo-javamail_1.4_mail</artifactId>
+        </dependency>
+        <!--<dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
+        </dependency>-->
+        <!--<dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>dumbster</groupId>
-            <artifactId>dumbster</artifactId>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+        </dependency>-->
+        <dependency>
+            <groupId>com.icegreen</groupId>
+            <artifactId>greenmail</artifactId>
         </dependency>
     </dependencies>
 
-    <build>
+    <!--<build>
        <pluginManagement>
            <plugins>
                 <plugin>
@@ -39,5 +51,5 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-    </build>
+    </build>-->
 </project>
