@@ -1906,16 +1906,18 @@ public class XMLUtils
     {
         return docBuilder.newDocument();
     }
-
+    
     /**
      * Create a new document with a name.
      * 
      * @param rootName
      *        the name of the root element.
      * @return the new document created.
+     * @throws XMLUtilsException
      */
-    public Document newDocument(String rootName)
+    public Document newDocument(String rootName) throws NullPointerException
     {
+        TextUtils.checkNull("Parmeter 'rootName' can't be null", rootName);
         Document doc = docBuilder.newDocument();
         Element root = doc.createElement(rootName);
         doc.appendChild(root);
@@ -1930,9 +1932,12 @@ public class XMLUtils
      * @param namespace
      *        the namespace URI.
      * @return the new document created.
+     * @throws XMLUtilsException
      */
-    public Document newDocument(String rootName, String namespace)
+    public Document newDocument(String rootName, String namespace) throws NullPointerException
     {
+        TextUtils.checkNull("Parmeter 'rootName' can't be null", rootName);
+        TextUtils.checkNull("Parmeter 'namespace' can't be null", namespace);
         Document doc = docBuilder.newDocument();
         Element root = doc.createElementNS(namespace, rootName);
         doc.appendChild(root);
@@ -1949,10 +1954,12 @@ public class XMLUtils
      * @param namespace
      *        the namespace URI.
      * @return the new document created.
+     * @throws NullPointerException
      */
-    public Document newDocument(String rootName, String prefix, String namespace)
+    public Document newDocument(String rootName, String prefix, String namespace) throws NullPointerException
     {
         Document doc = newDocument(rootName, namespace);
+        TextUtils.checkNull("Parmeter 'prefix' can't be null", prefix);
         Element root = doc.getDocumentElement();
         root.setPrefix(prefix);
         return doc;
@@ -1962,10 +1969,13 @@ public class XMLUtils
      * @param doc
      * @param name
      * @return the created element
+     * @throws XMLUtilsException
      * @see org.w3c.dom.Document#createElement(String)
      */
-    public Element createElement(Document doc, String name)
+    public Element createElement(Document doc, String name) throws NullPointerException
     {
+        TextUtils.checkNull("Parmeter 'doc' can't be null", doc);
+        TextUtils.checkNull("Parmeter 'name' can't be null", name);
         return doc.createElement(name);
     }
 
@@ -1975,8 +1985,11 @@ public class XMLUtils
      * @return the created element
      * @see org.w3c.dom.Document#createElement(String)
      */
-    public Element createElementNS(Document doc, String name, String namespace)
+    public Element createElementNS(Document doc, String name, String namespace) throws NullPointerException
     {
+        TextUtils.checkNull("Parmeter 'doc' can't be null", doc);
+        TextUtils.checkNull("Parmeter 'name' can't be null", name);
+        TextUtils.checkNull("Parmeter 'namespace' can't be null", namespace);
         return doc.createElementNS(namespace, name);
     }
 
@@ -1988,6 +2001,8 @@ public class XMLUtils
      */
     public Element insertElement(Element parent, String name) throws XMLUtilsException
     {
+        TextUtils.checkNull("Parmeter 'parent' can't be null", parent);
+        TextUtils.checkNull("Parmeter 'name' can't be null", name);
         Document doc = parent.getOwnerDocument();
         if (doc == null) {
             throw new XMLUtilsException("Passed element have no owner document");
@@ -2018,6 +2033,8 @@ public class XMLUtils
      */
     public Element insertText(Element parent, String value) throws XMLUtilsException
     {
+        TextUtils.checkNull("Parmeter 'parent' can't be null", parent);
+        value = TextUtils.nullToEmpty(value);
         Document doc = parent.getOwnerDocument();
         if (doc == null) {
             throw new XMLUtilsException("Passed element have no owner document");
@@ -2032,9 +2049,12 @@ public class XMLUtils
      * @param name
      * @return the parent element
      * @throws XMLUtilsException
+     * @throws NullPointerException 
      */
-    public Element insertCDATA(Element parent, String value) throws XMLUtilsException
+    public Element insertCDATA(Element parent, String value) throws XMLUtilsException, NullPointerException
     {
+        TextUtils.checkNull("Parmeter 'parent' can't be null", parent);
+        value = TextUtils.nullToEmpty(value);
         Document doc = parent.getOwnerDocument();
         if (doc == null) {
             throw new XMLUtilsException("Passed element have no owner document");
@@ -2049,8 +2069,11 @@ public class XMLUtils
      * @param name
      * @param value
      */
-    public void setAttribute(Element parent, String name, String value)
+    public void setAttribute(Element parent, String name, String value) throws NullPointerException
     {
+        TextUtils.checkNull("Parmeter 'parent' can't be null", parent);
+        TextUtils.checkNull("Parmeter 'name' can't be null", name);
+        value = TextUtils.nullToEmpty(value);
         String namespace = parent.getNamespaceURI();
         if (namespace == null) {
             parent.setAttribute(name, value);
