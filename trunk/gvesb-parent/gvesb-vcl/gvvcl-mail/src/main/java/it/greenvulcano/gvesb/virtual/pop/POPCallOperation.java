@@ -311,9 +311,8 @@ public class POPCallOperation implements CallOperation
                         }
                     }
                     if (!skipMessage) {
-                        Element msg = doc.createElement("Message");
-                        doc.getDocumentElement().appendChild(msg);
-                        dumpPart(msgs[i], msg, doc);
+                        Element msg = xml.insertElement(doc.getDocumentElement(), "Message");
+                        dumpPart(msgs[i], msg, xml);
                     }
                     else {
                         messageCount--;
@@ -444,87 +443,79 @@ public class POPCallOperation implements CallOperation
         }
     }
 
-    private void dumpPart(Part p, Element msg, Document doc) throws Exception
+    private void dumpPart(Part p, Element msg, XMLUtils xml) throws Exception
     {
         if (p instanceof Message) {
-            dumpEnvelope((Message) p, msg, doc);
+            dumpEnvelope((Message) p, msg, xml);
         }
 
         Element content = null;
         String filename = p.getFileName();
         if (p.isMimeType("text/plain") && (filename == null)) {
-            content = doc.createElement("PlainMessage");
-            Text body = doc.createTextNode((String) p.getContent());
-            content.appendChild(body);
+            content = xml.insertElement(msg, "PlainMessage");
+            xml.insertText(content, (String) p.getContent());
         }
         else if (p.isMimeType("text/html") && (filename == null)) {
-            content = doc.createElement("HTMLMessage");
-            CDATASection body = doc.createCDATASection((String) p.getContent());
-            content.appendChild(body);
+            content = xml.insertElement(msg, "HTMLMessage");
+            xml.insertCDATA(content, (String) p.getContent());
         }
         else if (p.isMimeType("multipart/*")) {
             Multipart mp = (Multipart) p.getContent();
             int count = mp.getCount();
-            content = doc.createElement("Multipart");
+            content = xml.insertElement(msg, "Multipart");
             for (int i = 0; i < count; i++) {
-                dumpPart(mp.getBodyPart(i), content, doc);
+                dumpPart(mp.getBodyPart(i), content, xml);
             }
         }
         else if (p.isMimeType("message/rfc822")) {
-            content = doc.createElement("NestedMessage");
-            dumpPart((Part) p.getContent(), content, doc);
+            content = xml.insertElement(msg, "NestedMessage");
+            dumpPart((Part) p.getContent(), content, xml);
         }
         else {
-            content = doc.createElement("EncodedContent");
+            content = xml.insertElement(msg, "EncodedContent");
             DataHandler dh = p.getDataHandler();
             OutputStream os = new ByteArrayOutputStream();
             Base64OutputStream b64os = new Base64OutputStream(os, true, -1, "".getBytes());
             dh.writeTo(b64os);
             b64os.flush();
             b64os.close();
-            content.appendChild(doc.createTextNode(os.toString()));
+            xml.insertText(content, os.toString());
         }
-        msg.appendChild(content);
+
         if (filename != null) {
-            content.setAttribute("file-name", filename);
+            xml.setAttribute(content, "file-name", filename);
         }
         String ct = p.getContentType();
         if (ct != null) {
-            content.setAttribute("content-type", ct);
+            xml.setAttribute(content, "content-type", ct);
         }
         String desc = p.getDescription();
         if (desc != null) {
-            content.setAttribute("description", desc);
+            xml.setAttribute(content, "description", desc);
         }
     }
 
-    private void dumpEnvelope(Message m, Element msg, Document doc) throws Exception
+    private void dumpEnvelope(Message m, Element msg, XMLUtils xml) throws Exception
     {
-        dumpSR(m.getFrom(), msg, "From", doc);
-        dumpSR(m.getRecipients(RecipientType.TO), msg, "To", doc);
-        dumpSR(m.getRecipients(RecipientType.CC), msg, "Cc", doc);
-        dumpSR(m.getRecipients(RecipientType.BCC), msg, "Bcc", doc);
-        dumpSR(m.getReplyTo(), msg, "ReplyTo", doc);
-        Element headers = doc.createElement("Headers");
-        msg.appendChild(headers);
+        dumpSR(m.getFrom(), msg, "From", xml);
+        dumpSR(m.getRecipients(RecipientType.TO), msg, "To", xml);
+        dumpSR(m.getRecipients(RecipientType.CC), msg, "Cc", xml);
+        dumpSR(m.getRecipients(RecipientType.BCC), msg, "Bcc", xml);
+        dumpSR(m.getReplyTo(), msg, "ReplyTo", xml);
+        Element headers = xml.insertElement(msg, "Headers");
         Enumeration<?> hEnum = m.getAllHeaders();
         while (hEnum.hasMoreElements()) {
             Header h = (Header) hEnum.nextElement();
-            Element el = doc.createElement(h.getName());
-            Text txt = doc.createTextNode(h.getValue());
-            el.appendChild(txt);
-            headers.appendChild(el);
+            Element el = xml.insertElement(headers, h.getName());
+            xml.insertText(el, h.getValue());
         }
-        Element subject = doc.createElement("Subject");
-        subject.appendChild(doc.createTextNode(m.getSubject()));
-        msg.appendChild(subject);
+        Element subject = xml.insertElement(msg, "Subject");
+        xml.insertText(subject, m.getSubject());
     }
 
-    private void dumpSR(Address[] addr, Element msg, String container, Document doc) throws Exception
+    private void dumpSR(Address[] addr, Element msg, String container, XMLUtils xml) throws Exception
     {
-        Element cont = doc.createElement(container);
-        msg.appendChild(cont);
-
+        Element cont = xml.insertElement(msg, container);
         Matcher mtc = emailRxPattern.matcher("");
 
         String list = "";
@@ -536,6 +527,6 @@ public class POPCallOperation implements CallOperation
                 }
             }
         }
-        cont.appendChild(doc.createTextNode(list.trim()));
+        xml.insertText(cont, list.trim());
     }
 }

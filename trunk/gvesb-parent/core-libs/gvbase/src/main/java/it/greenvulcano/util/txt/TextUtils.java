@@ -19,6 +19,8 @@
  */
 package it.greenvulcano.util.txt;
 
+import it.greenvulcano.util.xml.XMLUtilsException;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -869,7 +871,7 @@ public class TextUtils
 
     /**
      * @param throwable
-     * @return riturn the stack-trace
+     * @return return the stack-trace
      */
     public static String getStackTrace(Throwable throwable)
     {
@@ -880,5 +882,26 @@ public class TextUtils
         pstream.flush();
         stack = baos.toString();
         return stack;
+    }
+    
+    /**
+     * Check if a given string is null and if so returns an empty string.
+     * 
+     * @param value
+     * @return the input value or an empty string if input is null
+     */
+    public static String nullToEmpty(String value)
+    {
+        if (value == null) {
+            return "";
+        }
+        return value;
+    }
+    
+    public static void checkNull(String message, Object value) throws NullPointerException
+    {
+        if (value == null) {
+            throw new NullPointerException(message);
+        }
     }
 }

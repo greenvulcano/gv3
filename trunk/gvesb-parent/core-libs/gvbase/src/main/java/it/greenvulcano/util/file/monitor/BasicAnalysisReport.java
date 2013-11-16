@@ -74,16 +74,16 @@ public class BasicAnalysisReport implements AnalysisReport
             }
             parser = XMLUtils.getParserInstance();
             xmlReport = initXMLReport(parser);
+            Element root = xmlReport.getDocumentElement();
 
             // if already present, remove the list
-            Node list = parser.selectSingleNode(xmlReport.getDocumentElement(), "FileList[@type='existing']");
+            Node list = parser.selectSingleNode(root, "FileList[@type='existing']");
             if (list != null) {
-                list.getParentNode().removeChild(list);
+                root.removeChild(list);
             }
 
-            Element files = parser.createElement(xmlReport, "FileList");
+            Element files = parser.insertElement(root, "FileList");
             parser.setAttribute(files, "type", "existing");
-            xmlReport.getDocumentElement().appendChild(files);
 
             addFiles(files, fileSet, parser);
             existingFilesCount = fileSet.size();
@@ -110,16 +110,16 @@ public class BasicAnalysisReport implements AnalysisReport
             }
             parser = XMLUtils.getParserInstance();
             xmlReport = initXMLReport(parser);
+            Element root = xmlReport.getDocumentElement();
 
             // if already present, remove the list
-            Node list = parser.selectSingleNode(xmlReport.getDocumentElement(), "FileList[@type='created']");
+            Node list = parser.selectSingleNode(root, "FileList[@type='created']");
             if (list != null) {
-                list.getParentNode().removeChild(list);
+                root.removeChild(list);
             }
 
-            Element files = parser.createElement(xmlReport, "FileList");
+            Element files = parser.insertElement(root, "FileList");
             parser.setAttribute(files, "type", "created");
-            xmlReport.getDocumentElement().appendChild(files);
 
             addFiles(files, fileSet, parser);
             createdFilesCount = fileSet.size();
@@ -146,16 +146,16 @@ public class BasicAnalysisReport implements AnalysisReport
             }
             parser = XMLUtils.getParserInstance();
             xmlReport = initXMLReport(parser);
+            Element root = xmlReport.getDocumentElement();
 
             // if already present, remove the list
-            Node list = parser.selectSingleNode(xmlReport.getDocumentElement(), "FileList[@type='modified']");
+            Node list = parser.selectSingleNode(root, "FileList[@type='modified']");
             if (list != null) {
-                list.getParentNode().removeChild(list);
+                root.removeChild(list);
             }
 
-            Element files = parser.createElement(xmlReport, "FileList");
+            Element files = parser.insertElement(root, "FileList");
             parser.setAttribute(files, "type", "modified");
-            xmlReport.getDocumentElement().appendChild(files);
 
             addFiles(files, fileSet, parser);
             modifiedFilesCount = fileSet.size();
@@ -181,16 +181,16 @@ public class BasicAnalysisReport implements AnalysisReport
             }
             parser = XMLUtils.getParserInstance();
             xmlReport = initXMLReport(parser);
+            Element root = xmlReport.getDocumentElement();
 
             // if already present, remove the list
-            Node list = parser.selectSingleNode(xmlReport.getDocumentElement(), "FileList[@type='deleted']");
+            Node list = parser.selectSingleNode(root, "FileList[@type='deleted']");
             if (list != null) {
-                list.getParentNode().removeChild(list);
+                root.removeChild(list);
             }
 
-            Element files = parser.createElement(xmlReport, "FileList");
+            Element files = parser.insertElement(root, "FileList");
             parser.setAttribute(files, "type", "deleted");
-            xmlReport.getDocumentElement().appendChild(files);
 
             addFiles(files, fileSet, parser);
             deletedFilesCount = fileSet.size();
@@ -227,7 +227,7 @@ public class BasicAnalysisReport implements AnalysisReport
             }
 
             for (FileProperties currFile : fileList) {
-                Element fileElem = parser.createElement(xmlReport, "File");
+                Element fileElem = parser.insertElement(files, "File");
                 fileElem.setAttribute("name", currFile.getName());
                 fileElem.setAttribute("isDirectory", String.valueOf(currFile.isDirectory()));
                 fileElem.setAttribute("size", String.valueOf(currFile.getLength()));
@@ -238,7 +238,6 @@ public class BasicAnalysisReport implements AnalysisReport
                 fileElem.setAttribute("canRead", String.valueOf(currFile.canRead()));
                 fileElem.setAttribute("canWrite", String.valueOf(currFile.canWrite()));
                 fileElem.setAttribute("canExecute", String.valueOf(currFile.canExecute()));
-                files.appendChild(fileElem);
             }
         }
         catch (Exception exc) {
@@ -385,16 +384,13 @@ public class BasicAnalysisReport implements AnalysisReport
         try {
             analysisTime = DateUtils.createCalendar().getTime();
             xmlReport = parser.newDocument("AnalysisReport");
-            parser.setAttribute(xmlReport.getDocumentElement(), "created",
-                    DateUtils.dateToString(analysisTime, DATE_FORMAT));
             Element root = xmlReport.getDocumentElement();
+            parser.setAttribute(root, "created", DateUtils.dateToString(analysisTime, DATE_FORMAT));
 
-            Element dir = parser.createElement(xmlReport, "AnalysisDirectory");
+            Element dir = parser.insertElement(root, "AnalysisDirectory");
             parser.setAttribute(dir, "path", analysisDirectory);
-            root.appendChild(dir);
-            Element f = parser.createElement(xmlReport, "AnalysisFilter");
+            Element f = parser.insertElement(root, "AnalysisFilter");
             parser.setAttribute(f, "filter", analysisFilter);
-            root.appendChild(f);
 
             return xmlReport;
         }
