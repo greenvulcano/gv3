@@ -75,6 +75,7 @@
 
 <!--
     Internal service useful to set DBOBuilder name to call at dh-call operations.
+    Useful only as InputService of GVOperationNode that references a dh-call operation.
 
     #Template:
         <xsl:template match="dh-selector-service">
@@ -100,7 +101,7 @@
 <!ATTLIST dh-selector-service critical (yes | no) "yes">
 
 <!--
-    VCL Operation useful to set DBOBuilder name to call at dh-call operations.
+    VCL Operation useful to set DBOBuilder name to call contained in a dh-call operation.
 
     #Label: @name
     #Template:
