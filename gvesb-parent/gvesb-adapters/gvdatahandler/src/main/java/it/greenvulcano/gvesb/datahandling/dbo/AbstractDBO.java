@@ -30,6 +30,7 @@ import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptio
 import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.txt.DateUtils;
 
 import java.io.ByteArrayInputStream;
@@ -568,8 +569,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException, 
+            InterruptedException {
         try {
             prepare();
             logger.debug("Begin execution of DB data read/update through " + dboclass);
@@ -663,6 +664,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
             }
             logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
+            ThreadUtils.checkInterrupted(exc);
             throw new DBOException("Error on execution of " + dboclass + " with name [" + name + "]: " + exc.getMessage(), exc);
         }
         catch (Exception exc) {
@@ -702,8 +704,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException, 
+            InterruptedException {
         try {
             prepare();
             logger.debug("Begin execution of DB data read/update through " + dboclass);
@@ -748,8 +750,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     @Override
     public void execute(Object dataIn, OutputStream dataOut, Connection conn, Map<String, Object> props)
-            throws DBOException
-    {
+            throws DBOException, InterruptedException {
         prepare();
         throw new DBOException("Unsupported method - DBOxxx::execute(InputStream, OutputStream, Connection, Map)");
     }
@@ -947,6 +948,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     protected void executeStatement() throws SAXException
     {
         try {
+            ThreadUtils.checkInterrupted(getClass().getSimpleName(), name, logger);
             int actualOk = 0;
             Statement sqlStatement = sqlStatementInfo.getStatement();
             if (sqlStatement != null) {
@@ -1012,6 +1014,10 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
             resultMessage.append("SQL Statement Informations:\n").append(sqlStatementInfo);
             resultMessage.append("Record parameters:\n").append(dumpCurrentRowFields());
             resultStatus = STATUS_PARTIAL;
+        }
+        catch (InterruptedException exc) {
+            logger.error("DBO[" + name + "] interrupted", exc);
+            throw new SAXException("DBO[" + name + "] interrupted", exc);
         }
         finally {
             rowCounter++;

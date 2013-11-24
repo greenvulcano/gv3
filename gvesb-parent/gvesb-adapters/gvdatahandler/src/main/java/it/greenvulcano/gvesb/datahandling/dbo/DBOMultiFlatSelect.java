@@ -25,6 +25,7 @@ import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.OutputStream;
@@ -193,6 +194,7 @@ public class DBOMultiFlatSelect extends AbstractDBO
             Iterator<Integer> itr = statIDs.iterator();
             sb = new StringBuffer(sbRowLength);
             while (itr.hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                 String id = itr.next().toString();
                 String stmt = statements.get(id);
                 Map<String, FieldFormatter> fieldNameToFormatter = statIdToNameFormatters.get(id);
@@ -212,6 +214,9 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                         fieldIdToFormatter);
                                 String textVal = null;
                                 while (rs.next()) {
+                                    if (rowCounter % 10 == 0) {
+                                        ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
+                                    }
                                     for (int j = 1; j <= metadata.getColumnCount(); j++) {
                                         FieldFormatter fF = fFormatters[j];
                                         if (fF == null) {

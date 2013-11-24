@@ -46,7 +46,8 @@ import org.w3c.dom.Node;
 public class Base64Transformer implements DTETransformer
 {
     private static final Logger logger = GVLogger.getLogger(Base64Transformer.class);
-
+    
+    private String              name;
     private boolean             encode = false;
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
 
@@ -66,6 +67,7 @@ public class Base64Transformer implements DTETransformer
     {
         logger.debug("Init start");
         try {
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             encode = XMLConfig.get(node, "@Operation").equals("Encode");
             logger.debug("Loaded parameters: operation = " + (encode ? "Encode" : "Decode"));
 
@@ -79,6 +81,11 @@ public class Base64Transformer implements DTETransformer
             logger.error("Unexpected error: " + exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][]{{"msg", " Unexpected error."}}, exc);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**
@@ -95,8 +102,8 @@ public class Base64Transformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+                InterruptedException {
         logger.debug("Transform start");
         try {
             byte[] inputBuffer = null;

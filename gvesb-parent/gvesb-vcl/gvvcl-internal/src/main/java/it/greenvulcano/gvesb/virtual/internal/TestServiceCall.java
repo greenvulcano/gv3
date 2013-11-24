@@ -100,14 +100,15 @@ public class TestServiceCall implements CallOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws CallException
+    public GVBuffer perform(GVBuffer gvBuffer) throws CallException, InterruptedException
     {
         if (sleepOnPerform > 0) {
             try {
                 Thread.sleep(sleepOnPerform);
             }
             catch (InterruptedException exc) {
-                // do nothing
+                Thread.currentThread().interrupt();
+                throw exc;
             }
         }
 
@@ -157,9 +158,8 @@ public class TestServiceCall implements CallOperation
             }
         }
         catch (Exception exc) {
-            logger.error(" TEST SERVICE FAILED", exc);
-            localData.setRetCode(-1);
-            return localData;
+            logger.error("TEST SERVICE FAILED", exc);
+            throw new CallException("TEST SERVICE FAILED", exc);
         }
         finally {
             logger.debug("---------------------------------------------------------------");

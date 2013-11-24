@@ -21,6 +21,7 @@ package it.greenvulcano.gvesb.datahandling.dbo.utils;
 
 import it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO;
 import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -43,6 +44,7 @@ import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -55,6 +57,8 @@ import org.w3c.dom.Text;
  */
 public class StandardRowSetBuilder implements RowSetBuilder
 {
+    private String           name;
+    private Logger           logger;
     private String           numberFormat;
     private String           groupSeparator;
     private String           decSeparator;
@@ -62,7 +66,13 @@ public class StandardRowSetBuilder implements RowSetBuilder
     private SimpleDateFormat dateFormatter;
     private DecimalFormat    numberFormatter;
 
-    public Document createDocument(XMLUtils parser) {
+    public Document createDocument(XMLUtils parser) throws NullPointerException {
+        if (parser == null) {
+            parser = this.parser;
+        }
+        if (parser == null) {
+            throw new NullPointerException("Parser not set");
+        }
         Document doc = parser.newDocument(AbstractDBO.ROWSET_NAME);
         return doc;
     }
@@ -90,6 +100,9 @@ public class StandardRowSetBuilder implements RowSetBuilder
         String colKey = null;
         Map<String, String> keyAttr = new HashMap<String, String>();
         while (rs.next()) {
+            if (rowCounter % 10 == 0) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), name, logger);
+            }
             row = parser.createElement(doc, AbstractDBO.ROW_NAME);
 
             parser.setAttribute(row, AbstractDBO.ID_NAME, id);
@@ -304,6 +317,14 @@ public class StandardRowSetBuilder implements RowSetBuilder
         numberFormatter = null;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setLogger(Logger logger) {
+        this.logger = logger;
+    }
+
     public void setDateFormatter(SimpleDateFormat dateFormatter) {
         this.dateFormatter = dateFormatter;
     }
@@ -326,6 +347,22 @@ public class StandardRowSetBuilder implements RowSetBuilder
 
     public void setXMLUtils(XMLUtils parser) {
         this.parser = parser;
+    }
+
+    @Override
+    public RowSetBuilder getCopy() {
+        StandardRowSetBuilder copy = new StandardRowSetBuilder();
+        
+        copy.name = this.name;
+        copy.logger = this.logger;
+        copy.numberFormat = this.numberFormat;
+        copy.groupSeparator = this.groupSeparator;
+        copy.decSeparator = this.decSeparator;
+        copy.parser = this.parser;
+        copy.dateFormatter = this.dateFormatter;
+        copy.numberFormatter = this.numberFormatter;
+
+        return copy;
     }
 
     private FieldFormatter[] buildFormatterArray(ResultSetMetaData rsm,

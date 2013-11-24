@@ -34,6 +34,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.bin.Dump;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayInputStream;
@@ -230,8 +231,8 @@ public class DBOBuilder implements IDBOBuilder
      *      byte[], java.util.Map)
      */
     @Override
-    public void XML2DB(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException
-    {
+    public void XML2DB(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException,
+            InterruptedException {
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
@@ -269,6 +270,8 @@ public class DBOBuilder implements IDBOBuilder
             AbstractRetriever.setAllConnection(conn, configurationNode);
 
             while (hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
+
                 IDBO idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -340,6 +343,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
@@ -361,8 +365,8 @@ public class DBOBuilder implements IDBOBuilder
      *      byte[], java.util.Map)
      */
     @Override
-    public byte[] DB2XML(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException
-    {
+    public byte[] DB2XML(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException,
+            InterruptedException {
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
@@ -395,6 +399,7 @@ public class DBOBuilder implements IDBOBuilder
             IDBO idbo = firstDBO();
             dataCache.put(idbo.getInputDataName(), file);
             while (hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -541,6 +546,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.warn("Unhandled Exception", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
@@ -562,8 +568,8 @@ public class DBOBuilder implements IDBOBuilder
      *      byte[], java.util.Map)
      */
     @Override
-    public byte[] CALL(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException
-    {
+    public byte[] CALL(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException,
+            InterruptedException {
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
@@ -604,6 +610,7 @@ public class DBOBuilder implements IDBOBuilder
             IDBO idbo = firstDBO();
             dataCache.put(idbo.getInputDataName(), file);
             while (hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -701,6 +708,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
@@ -722,8 +730,8 @@ public class DBOBuilder implements IDBOBuilder
      *      java.lang.Object, java.util.Map)
      */
     @Override
-    public DHResult EXECUTE(String operation, Object object, Map<String, Object> params) throws DataHandlerException
-    {
+    public DHResult EXECUTE(String operation, Object object, Map<String, Object> params) throws DataHandlerException,
+            InterruptedException {
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
@@ -778,6 +786,7 @@ public class DBOBuilder implements IDBOBuilder
             dhr.setData(object);
             dataCache.put(idbo.getInputDataName(), dhr);
             while (hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -1040,6 +1049,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {

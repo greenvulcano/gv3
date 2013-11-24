@@ -26,6 +26,7 @@ import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleError;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
@@ -146,8 +147,8 @@ public class DBOInsertOrUpdate extends AbstractDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
+            InterruptedException {
         prepare();
         throw new DBOException("Unsupported method - DBOInsertOrUpdate::execute(OutputStream, Connection, HashMap)");
     }
@@ -204,6 +205,7 @@ public class DBOInsertOrUpdate extends AbstractDBO
         }
         if ((sqlStatementInfo == null) || (sqlStatementInfoUpdate == null) || !getCurrentId().equals(id)) {
             try {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                 if (sqlStatementInfo != null) {
                     sqlStatementInfo.close();
                     sqlStatementInfo = null;

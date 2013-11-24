@@ -57,6 +57,7 @@ public abstract class AbstractDataProvider implements IDataProvider
      *
      */
     protected static final String           DEFAULT_SOURCE    = "GVBuffer";
+    private String                          name;
     private Map<String, FieldExpressionKey> keys              = new LinkedHashMap<String, FieldExpressionKey>();
     /**
      *
@@ -91,6 +92,7 @@ public abstract class AbstractDataProvider implements IDataProvider
     @Override
     public void init(Node dpConfigNode) throws XMLConfigException
     {
+        name = XMLConfig.get(dpConfigNode, "@name");
         sourceSelector = XMLConfig.get(dpConfigNode, "@source-selector", DEFAULT_SOURCE);
         NodeList nodeList = XMLConfig.getNodeList(dpConfigNode, "*[@type='field']");
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -103,6 +105,11 @@ public abstract class AbstractDataProvider implements IDataProvider
             FieldExpressionKey fKey = new FieldExpressionKey(key, expressionType, expression, direction);
             keys.put(key, fKey);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**
@@ -214,4 +221,8 @@ public abstract class AbstractDataProvider implements IDataProvider
         resetCalled = true;
     }
 
+    @Override
+    public String toString() {
+        return "[" + name + " / " + getClass().getName() + "]";
+    }
 }

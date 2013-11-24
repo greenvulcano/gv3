@@ -25,12 +25,10 @@ import it.greenvulcano.gvesb.datahandling.DataHandlerException;
 import it.greenvulcano.gvesb.datahandling.IDBOBuilder;
 import it.greenvulcano.gvesb.gvdte.controller.DTEController;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.ThreadUtils;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -143,8 +141,9 @@ public class DHFactory
      *         if wrong configuration or no specialized <code>IDBOBuilder</code>
      *         implementation found for requested file type.
      */
-    public IDBOBuilder getDBOBuilder(String name) throws DataHandlerException
+    public IDBOBuilder getDBOBuilder(String name) throws DataHandlerException, InterruptedException
     {
+        ThreadUtils.checkInterrupted("DHFactory", name, logger);
         if (!initialized) {
             throw new DataHandlerException("DHFactory instance not initialized. Call 'initialize' method before.");
         }

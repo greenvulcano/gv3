@@ -36,6 +36,8 @@ import org.w3c.dom.Node;
  */
 public interface IDataProvider
 {
+    public String getName();
+
     /**
      * Returns the {@link FieldExpressionKey} associated with the specified id,
      * otherwise <code>null</code>.

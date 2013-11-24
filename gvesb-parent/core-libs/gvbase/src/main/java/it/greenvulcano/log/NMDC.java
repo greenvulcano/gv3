@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -305,6 +306,20 @@ public final class NMDC
     public static void removeModule()
     {
         MDC.remove(MODULE_KEY);
+    }
+
+    public static Map<String, String> getCurrentContext()
+    {
+        return Collections.unmodifiableMap(MDC.getContext());
+    }
+    
+    public static void setCurrentContext(Map<String, String> context)
+    {
+        Iterator<String> i = context.keySet().iterator();
+        while (i.hasNext()) {
+            String k = i.next();
+            MDC.put(k, context.get(k));
+        }
     }
 
     /**

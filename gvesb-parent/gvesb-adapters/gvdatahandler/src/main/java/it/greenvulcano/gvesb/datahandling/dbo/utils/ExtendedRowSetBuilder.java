@@ -21,6 +21,7 @@ package it.greenvulcano.gvesb.datahandling.dbo.utils;
 
 import it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO;
 import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -43,6 +44,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -57,6 +59,8 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
 {
     private static final String VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
     private static final String NS          = "http://www.greenvulcano.com/database";
+    private String           name;
+    private Logger           logger;
     private String           numberFormat;
     private String           groupSeparator;
     private String           decSeparator;
@@ -66,7 +70,13 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
     private FieldFormatter[] fFormatters; 
     private String[]         colNames; 
 
-    public Document createDocument(XMLUtils parser) {
+    public Document createDocument(XMLUtils parser) throws NullPointerException {
+        if (parser == null) {
+            parser = this.parser;
+        }
+        if (parser == null) {
+            throw new NullPointerException("Parser not set");
+        }
         Document doc = parser.newDocument(AbstractDBO.ROWSET_NAME, NS);
         return doc;
     }
@@ -95,6 +105,9 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
         String colKey = null;
         Map<String, Element> keyCols = new TreeMap<String, Element>();
         while (rs.next()) {
+            if (rowCounter % 10 == 0) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), name, logger);
+            }
             row = parser.createElementNS(doc, AbstractDBO.ROW_NAME, NS);
 
             parser.setAttribute(row, AbstractDBO.ID_NAME, id);
@@ -317,6 +330,14 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
         fFormatters = null; 
         colNames = null;
     }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setLogger(Logger logger) {
+        this.logger = logger;
+    }
 
     public void setDateFormatter(SimpleDateFormat dateFormatter) {
         this.dateFormatter = dateFormatter;
@@ -340,6 +361,22 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
 
     public void setXMLUtils(XMLUtils parser) {
         this.parser = parser;
+    }
+
+    @Override
+    public RowSetBuilder getCopy() {
+        ExtendedRowSetBuilder copy = new ExtendedRowSetBuilder();
+        
+        copy.name = this.name;
+        copy.logger = this.logger;
+        copy.numberFormat = this.numberFormat;
+        copy.groupSeparator = this.groupSeparator;
+        copy.decSeparator = this.decSeparator;
+        copy.parser = this.parser;
+        copy.dateFormatter = this.dateFormatter;
+        copy.numberFormatter = this.numberFormatter;
+
+        return copy;
     }
 
     private void buildFormatterAndNamesArray(ResultSetMetaData rsm,

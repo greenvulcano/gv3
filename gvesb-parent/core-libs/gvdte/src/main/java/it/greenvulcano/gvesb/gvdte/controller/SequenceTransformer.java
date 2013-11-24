@@ -28,6 +28,7 @@ import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
 import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.bin.Dump;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ public class SequenceTransformer implements DTETransformer
      */
     private static final String   NO_BUFFER = "no_buffer";
 
+    private String                name;
     /**
      * List of SequenceElement.
      */
@@ -103,7 +105,13 @@ public class SequenceTransformer implements DTETransformer
      */
     public void init(Node node, DataSourceFactory dsf) throws DTETransfException
     {
+        name = XMLConfig.get(node, "@name", "NO_NAME");
         transformerSequence = loadSequenceFromXPath(node);
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**
@@ -114,8 +122,10 @@ public class SequenceTransformer implements DTETransformer
      * @param mapParam
      * @return the transformation's result
      * @throws DTETransfException
+     * @throws InterruptedException 
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+             InterruptedException
     {
         logger.debug("Transform start");
 
@@ -126,6 +136,7 @@ public class SequenceTransformer implements DTETransformer
         try {
             int i = 0;
             for (SequenceElement currElem : transformerSequence) {
+                ThreadUtils.checkInterrupted("SequenceTransformer", getName(), logger);
                 ++i;
                 logger.debug("Performing sequence step n. " + i);
                 logger.debug("Reading infos for sequence step n. " + i);
@@ -204,6 +215,9 @@ public class SequenceTransformer implements DTETransformer
             logger.debug("Transform stop");
             return finalOutput;
         }
+        catch (InterruptedException exc) {
+            throw exc;
+        }
         catch (DTETransfException exc) {
             throw exc;
         }
@@ -263,8 +277,9 @@ public class SequenceTransformer implements DTETransformer
     /**
      * @param trfManager
      * @throws DTEException
+     * @throws InterruptedException 
      */
-    public void setTransformerManager(DTETransformerManager trfManager) throws DTEException
+    public void setTransformerManager(DTETransformerManager trfManager) throws DTEException, InterruptedException
     {
         manager = trfManager;
         reload();
@@ -272,8 +287,9 @@ public class SequenceTransformer implements DTETransformer
 
     /**
      * @throws DTEException
+     * @throws InterruptedException 
      */
-    public void reload() throws DTEException
+    public void reload() throws DTEException, InterruptedException
     {
         for (int i = 0; i < transformerSequence.size(); i++) {
             logger.debug("Reloading sequence step n. " + (i + 1));

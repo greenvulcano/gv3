@@ -114,9 +114,10 @@ public class ChangeGVBufferNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
         logger.info("Executing ChangeGVBufferNode '" + getId() + "'");
+        checkInterrupted("ChangeGVBufferNode", logger);
         dumpEnvironment(logger, true, environment);
 
         String input = getInput();
@@ -154,6 +155,10 @@ public class ChangeGVBufferNode extends GVFlowNode
                     if (logger.isDebugEnabled() || isDumpInOut()) {
                         logger.info(GVFormatLog.formatOUTPUT(data, false, false));
                     }
+                }
+                catch (InterruptedException exc) {
+                    logger.error("ChangeGVBufferNode [" + getId() + "] interrupted!", exc);
+                    throw exc;
                 }
                 catch (Throwable exc) {
                     logger.error("Error in ChangeGVBufferNode[" + getId() + "]", exc);

@@ -137,7 +137,7 @@ public class GVInternalServiceHandler
      * @throws GVCoreException
      *         if an error occurs at Communication Layer or core level
      */
-    public GVBuffer perform(GVBuffer data) throws GVCoreException, GVInternalException
+    public GVBuffer perform(GVBuffer data) throws GVCoreException, GVInternalException, InterruptedException
     {
         GVBuffer localData = new GVBuffer(data);
 
@@ -145,7 +145,7 @@ public class GVInternalServiceHandler
 
         if (servicesVector.size() > 0) {
             operationManager = ((InvocationContext) InvocationContext.getInstance()).getOperationManager();
-            for (int iLoop = 0; iLoop < servicesVector.size(); iLoop++) {
+            for (int iLoop = 0; (iLoop < servicesVector.size()) && !fnode.isInterrupted(); iLoop++) {
                 serviceParam = servicesVector.get(iLoop);
                 try {
                     if (logger.isInfoEnabled()) {
@@ -158,6 +158,10 @@ public class GVInternalServiceHandler
                         logger.debug("END - Internal Service (" + serviceParam.getName() + "), RetCode ("
                                 + localData.getRetCode() + ")");
                     }
+                }
+                catch (InterruptedException exc) {
+                    logger.error("VCLOperation in GVInternalServiceHandler interrupted.");
+                    throw exc;
                 }
                 catch (Throwable exc) {
                     if (!serviceParam.isCritical()) {
@@ -177,6 +181,10 @@ public class GVInternalServiceHandler
                                 {"exception", exc.toString()}});
                     }
                 }
+            }
+            if (fnode.isInterrupted()) {
+                logger.error("VCLOperation in GVInternalServiceHandler[" + fnode.getId() + "] interrupted.");
+                throw new InterruptedException("VCLOperation in GVInternalServiceHandler interrupted.");
             }
         }
         return localData;
@@ -239,7 +247,7 @@ public class GVInternalServiceHandler
      * @throws GVCoreException
      *         if an error occurs at Communication Layer or core level
      */
-    private GVBuffer handleServices(GVBuffer gvBuffer, GVInternalServiceParam serviceParam) throws GVCoreException
+    private GVBuffer handleServices(GVBuffer gvBuffer, GVInternalServiceParam serviceParam) throws GVCoreException, InterruptedException
     {
         setInternalParameters(serviceParam, gvBuffer);
         gvBuffer = performVCLOpLocalCall(gvBuffer, serviceParam.getVCLOperation(operationManager));
@@ -263,7 +271,7 @@ public class GVInternalServiceHandler
      * @throws GVCoreException
      *         if an error occurs at Communication Layer or core level
      */
-    protected GVBuffer performVCLOpLocalCall(GVBuffer gvBuffer, Operation operation) throws GVCoreException
+    protected GVBuffer performVCLOpLocalCall(GVBuffer gvBuffer, Operation operation) throws GVCoreException, InterruptedException
     {
         logger.debug("BEGIN - Perform Internal Call");
 
@@ -275,6 +283,10 @@ public class GVInternalServiceHandler
             if (logger.isDebugEnabled() && fnode.isDumpInOut()) {
                 logger.debug(GVFormatLog.formatOUTPUT(gvBuffer, false, false));
             }
+        }
+        catch (InterruptedException exc) {
+            logger.error("VCLOperation in GVInternalServiceHandler[" + fnode.getId() + "] interrupted.");
+            throw exc;
         }
         catch (VCLException exc) {
             throw new GVCoreException("GVCORE_VCL_OPERATION_ERROR", new String[][]{{"id", fnode.getId()},

@@ -74,6 +74,7 @@ public class XSLTransformer implements DTETransformer
 {
     private static final Logger    logger       = GVLogger.getLogger(XSLTransformer.class);
 
+    private String                 name;
     private String                 validationType;
 
     private String                 xslMapName;
@@ -107,6 +108,7 @@ public class XSLTransformer implements DTETransformer
         logger.debug("Init start");
         try {
             this.dsf = dsf;
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             xslMapName = XMLConfig.get(node, "@XSLMapName");
             dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
             
@@ -156,6 +158,11 @@ public class XSLTransformer implements DTETransformer
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Unexpected error." } }, exc);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**
@@ -239,8 +246,8 @@ public class XSLTransformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         Transformer transformer = null;
         try {

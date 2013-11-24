@@ -113,9 +113,10 @@ public class GVEndNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
         logger.info("Executing GVEndNode '" + getId() + "'");
+        checkInterrupted("GVEndNode", logger);
         dumpEnvironment(logger, true, environment);
 
         String output = getOutput();

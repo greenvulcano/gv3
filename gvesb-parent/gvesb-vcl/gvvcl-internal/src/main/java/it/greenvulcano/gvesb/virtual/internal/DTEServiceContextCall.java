@@ -63,7 +63,7 @@ public class DTEServiceContextCall implements CallOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws CallException
+    public GVBuffer perform(GVBuffer gvBuffer) throws CallException, InterruptedException
     {
         if (gvBuffer == null) {
             return null;
@@ -81,6 +81,10 @@ public class DTEServiceContextCall implements CallOperation
             output = ((DTEController) InvocationContext.getInstance().getExtraField("DTE_CONTROLLER")).transform(name,
                     input, buildMapParam(gvBuffer));
             gvBuffer.setObject(output);
+        }
+        catch (InterruptedException exc) {
+            logger.error("DTE interrupted", exc);
+            throw exc;
         }
         catch (Exception exc) {
             logger.error("DTE Error: ", exc);

@@ -21,6 +21,7 @@ package it.greenvulcano.excel.reader;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.excel.exception.ExcelException;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -141,7 +142,7 @@ public abstract class BaseReader
         }
     }
 
-    public void processExcel(InputStream in) throws ExcelException {
+    public void processExcel(InputStream in) throws ExcelException, InterruptedException {
         cleanUp();
         Workbook workbook = null;
 
@@ -160,6 +161,7 @@ public abstract class BaseReader
             throw exc;
         }
         catch (Exception exc) {
+            ThreadUtils.checkInterrupted(exc);
             throw new ExcelException("Error parsing WorkBook", exc);
         }
         finally {
@@ -192,6 +194,9 @@ public abstract class BaseReader
                     // for inclusion in the resulting object.
                     int lastRowNum = sheet.getLastRowNum();
                     for (int j = 0; j <= lastRowNum; j++) {
+                        if (j % 10 == 0) {
+                            ThreadUtils.checkInterrupted(getClass().getSimpleName(), "ExcelFile", null);
+                        }
                         Row row = sheet.getRow(j);
                         processRow(row, i, j);
                     }

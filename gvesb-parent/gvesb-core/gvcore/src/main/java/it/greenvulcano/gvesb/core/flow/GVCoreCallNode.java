@@ -130,12 +130,13 @@ public class GVCoreCallNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
         GVBuffer internalData = null;
         String input = getInput();
         String output = getOutput();
         logger.info("Executing GVCoreCallNode '" + getId() + "'");
+        checkInterrupted("GVCoreCallNode", logger);
         dumpEnvironment(logger, true, environment);
 
         Object inData = environment.get(input);
@@ -228,6 +229,10 @@ public class GVCoreCallNode extends GVFlowNode
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatOUTPUT(data, false, false));
             }
+        }
+        catch (InterruptedException exc) {
+            logger.error("GVCoreCallNode [" + getId() + "] interrupted!", exc);
+            throw exc;
         }
         catch (Exception exc) {
             environment.put(output, exc);

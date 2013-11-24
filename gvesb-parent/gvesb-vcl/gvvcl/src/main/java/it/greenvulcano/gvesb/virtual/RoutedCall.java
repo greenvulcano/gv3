@@ -54,7 +54,7 @@ public class RoutedCall implements CallOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer data) throws ConnectionException, CallException, InvalidDataException
+    public GVBuffer perform(GVBuffer data) throws ConnectionException, CallException, InvalidDataException, InterruptedException
     {
         CallOperation operation = getOperation(data);
 

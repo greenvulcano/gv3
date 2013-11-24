@@ -22,6 +22,7 @@ package it.greenvulcano.gvesb.virtual;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -106,11 +107,12 @@ public class CallOperationWrapper implements CallOperation
      *
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
-    {
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException,
+            InterruptedException {
         logger.debug("BEGIN PERFORM: " + description);
 
         try {
+            ThreadUtils.checkInterrupted(description, logger);
             serviceAlias.manageAliasInput(gvBuffer);
             GVBuffer returnData = null;
             NMDC.push();
@@ -137,6 +139,7 @@ public class CallOperationWrapper implements CallOperation
         }
         catch (Throwable exc) {
             logger.error("PERFORM ERROR: " + description, exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new CallException("GVVCL_EXECUTION_ERROR", new String[][]{{"exc", "" + exc},
                     {"key", opKey.toString()}}, exc);
         }

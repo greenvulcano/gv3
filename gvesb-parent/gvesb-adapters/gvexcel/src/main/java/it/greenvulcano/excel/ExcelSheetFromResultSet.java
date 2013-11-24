@@ -26,6 +26,7 @@ import it.greenvulcano.excel.format.CellFormat;
 import it.greenvulcano.excel.format.ColumnFormat;
 import it.greenvulcano.excel.format.FormatCache;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -33,14 +34,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
-
 import jxl.write.DateTime;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.WritableCell;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
+
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -70,8 +71,8 @@ public class ExcelSheetFromResultSet {
         this.formatCache = formatCache;
     }
 
-    public void fillSheet(ResultSet resultset, WritableSheet ws, String title) throws ExcelException
-    {
+    public void fillSheet(ResultSet resultset, WritableSheet ws, String title) throws ExcelException, 
+            InterruptedException {
         String name = ws.getName();
         Vector<ColumnFormat> vector = new Vector<ColumnFormat>();
         if (resultset == null) {
@@ -110,6 +111,7 @@ public class ExcelSheetFromResultSet {
         int j = offset + 2;
         try {
             while (resultset.next()) {
+                ThreadUtils.checkInterrupted("ExcelSheetFromResultSet", configName, logger);
                 for (int l = 1; l <= colCount; l++) {
                     ColumnFormat cf = vector.get(l - 1);
                     WritableCell wc = getCell(l, j, resultset, cf);
