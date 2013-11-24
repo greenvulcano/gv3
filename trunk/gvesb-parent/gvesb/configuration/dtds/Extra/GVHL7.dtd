@@ -45,6 +45,19 @@
     Default to true.
 -->
 <!ATTLIST HL7Listener autoStart (true|false) #IMPLIED>
+<!--
+    Force the Receiving Application MSH field value on automatic response generation.
+
+    #NotNull
+-->
+<!ATTLIST HL7Listener receivingApplication CDATA #IMPLIED>
+<!--
+    Force the Receiving Facility MSH field value on automatic response generation.
+    Used only if receivingApplication is set.
+
+    #NotNull
+-->
+<!ATTLIST HL7Listener receivingFacility CDATA #IMPLIED>
 
 <!--
     #SortChild

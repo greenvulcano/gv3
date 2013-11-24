@@ -147,7 +147,7 @@ public class GVCoreApplication implements Application
         NMDC.clear();
         NMDC.setServer(serverName);
         NMDC.setSubSystem(GVHL7ListenerManager.SUBSYSTEM);
-        
+
         GVIdentityHelper.push(new HL7IdentityInfo(this.name));
         try {
             logger.debug("BEGIN Operation");
@@ -157,8 +157,12 @@ public class GVCoreApplication implements Application
 
             GVBuffer in = new GVBuffer(system, service);
             in.setObject(hl7MsgXmlIn);
+            in.setProperty("HL7_LISTENER", ThreadUtils.getListenerName());
+            in.setProperty("HL7_APPLICATION", getName());
             in.setProperty("HL7_REMOTE_ADDR", ThreadUtils.getIPRef());
-            
+            in.setProperty("HL7_REC_APPLICATION", ThreadUtils.getReceivingApplication());
+            in.setProperty("HL7_REC_FACILITY", ThreadUtils.getReceivingFacility());
+
             if (transacted) {
                 xaHelper.begin();
                 if (txTimeout > 0) {
@@ -184,15 +188,20 @@ public class GVCoreApplication implements Application
             msgOut = hl7XmlParser.parse(hl7MsgXmlOut);
             msgOut.setParser(hl7StringParser);
             logger.debug("Output StringMessage:\n" + msgOut.encode());
-            
+
             if ("Y".equalsIgnoreCase(out.getProperty("HL7_FORCE_TX_ROLLBACK"))) {
                 logger.warn("Output contains HL7_FORCE_TX_ROLLBACK=Y : prepare to roll back transaction");
                 forceTxRollBack = true;
             }
             inError = false;
         }
+        catch (HL7Exception exc) {
+            logger.error("HL7 error processing HL7 message", exc);
+            throw exc;
+        }
         catch (Exception exc) {
             logger.error("Error processing HL7 message", exc);
+            throw new HL7Exception("Error processing HL7 message", exc);
         }
         finally {
             if (transacted) {
@@ -208,6 +217,7 @@ public class GVCoreApplication implements Application
                 }
                 catch (Exception exc) {
                     logger.error("Error handling tansaction", exc);
+                    throw new HL7Exception("Error handling tansaction", exc);
                 }
             }
             logger.debug("END Operation");

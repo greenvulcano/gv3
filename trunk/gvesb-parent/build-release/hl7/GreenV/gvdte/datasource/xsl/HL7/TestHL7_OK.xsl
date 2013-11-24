@@ -6,11 +6,36 @@
 
 <xsl:output method="xml"/>
 
+<xsl:param name="HL7_REC_APPLICATION"/>
+<xsl:param name="HL7_REC_FACILITY"/>
+
 <xsl:template match="/">
 <ACK xmlns="urn:hl7-org:v2xml">
     <MSH>
         <MSH.1>|</MSH.1>
         <MSH.2>^~\&amp;</MSH.2>
+        <MSH.3>
+            <xsl:choose>
+                <xsl:when test="$HL7_REC_APPLICATION != ''">
+                    <xsl:value-of select="$HL7_REC_APPLICATION"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="//hl7:MSH/hl7:MSH.5"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </MSH.3>
+        <MSH.4>
+            <xsl:choose>
+                <xsl:when test="$HL7_REC_FACILITY != ''">
+                    <xsl:value-of select="$HL7_REC_FACILITY"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="//hl7:MSH/hl7:MSH.6"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </MSH.4>
+        <MSH.5><xsl:value-of select="//hl7:MSH/hl7:MSH.3"/></MSH.5>
+        <MSH.6><xsl:value-of select="//hl7:MSH/hl7:MSH.4"/></MSH.6>
         <MSH.7>
             <TS.1><xsl:value-of select="java:it.greenvulcano.util.xml.XSLTUtils.nowToString('yyyyMMddHHmmss.SSS')"/></TS.1>
         </MSH.7>
