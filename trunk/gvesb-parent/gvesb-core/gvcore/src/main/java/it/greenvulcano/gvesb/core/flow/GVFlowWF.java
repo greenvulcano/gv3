@@ -221,7 +221,7 @@ public class GVFlowWF implements GVFlow
      * @throws GVCoreException
      *         if errors occurs
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws GVCoreException {
+    public GVBuffer perform(GVBuffer gvBuffer) throws GVCoreException, InterruptedException {
         return perform(gvBuffer, false);
     }
 
@@ -235,7 +235,8 @@ public class GVFlowWF implements GVFlow
      * @throws GVCoreException
      *         if errors occurs
      */
-    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException {
+    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException, InterruptedException {
+        
         if (!onDebug) {
             onDebug = "true".equalsIgnoreCase(gvBuffer.getProperty("GV_FLOW_DEBUG"));
             if (!onDebug) {
@@ -264,69 +265,14 @@ public class GVFlowWF implements GVFlow
                     }
                 }
                 catch (Exception exc) {
-                    logger.error("Error during statistics management " + exc.getMessage(), exc);
-                }
-            }
-            return outData;
-        }
-        catch (GVCoreException exc) {
-            if (useStatistics) {
-                try {
-                    if (businessFlowTerminated) {
-                        statisticsDataManager.stopStatistics(sd, exc, 0);
-                    }
-                    else {
-                        statisticsDataManager.stopStatistics(sd, exc);
-                    }
-                }
-                catch (Exception exc1) {
-                    logger.error("Error during statistics management " + exc1.getMessage(), exc1);
-                }
-            }
-            throw exc;
-        }
-        finally {
-            cleanUp();
-        }
-    }
-
-    /**
-     * Execute the flow
-     * 
-     * @param gvBuffer
-     *        the input data
-     * @return the output data
-     * @throws GVCoreException
-     *         if errors occurs
-     */
-    public GVBuffer recover(String recoveryNode, Map<String, Object> environment) throws GVCoreException {
-        boolean useStatistics = statisticsEnabled && (statisticsDataManager != null);
-        StatisticsData sd = null;
-
-        try {
-            businessFlowTerminated = false;
-
-            GVBuffer gvBuffer = (GVBuffer) environment.get(flowNodes.get(recoveryNode).getInput());
-
-            if (useStatistics) {
-                sd = statisticsDataManager.startStatistics(gvBuffer, "core", flowName);
-            }
-            GVBuffer outData = internalRecover(gvBuffer, recoveryNode, environment);
-
-            if (useStatistics) {
-                try {
-                    if (businessFlowTerminated) {
-                        statisticsDataManager.stopStatistics(sd, outData, 1);
-                    }
-                    else {
-                        statisticsDataManager.stopStatistics(sd, outData);
-                    }
-                }
-                catch (Exception exc) {
                     logger.error("Error during statistics management", exc);
                 }
             }
             return outData;
+        }
+        catch (InterruptedException exc) {
+            logger.error("GVFlowWF[" + flowName + "] interrupted.");
+            throw exc;
         }
         catch (GVCoreException exc) {
             if (useStatistics) {
@@ -358,7 +304,70 @@ public class GVFlowWF implements GVFlow
      * @throws GVCoreException
      *         if errors occurs
      */
-    private GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException {
+    public GVBuffer recover(String recoveryNode, Map<String, Object> environment) throws GVCoreException, InterruptedException {
+        boolean useStatistics = statisticsEnabled && (statisticsDataManager != null);
+        StatisticsData sd = null;
+
+        try {
+            businessFlowTerminated = false;
+
+            GVBuffer gvBuffer = (GVBuffer) environment.get(flowNodes.get(recoveryNode).getInput());
+
+            if (useStatistics) {
+                sd = statisticsDataManager.startStatistics(gvBuffer, "core", flowName);
+            }
+            GVBuffer outData = internalRecover(gvBuffer, recoveryNode, environment);
+
+            if (useStatistics) {
+                try {
+                    if (businessFlowTerminated) {
+                        statisticsDataManager.stopStatistics(sd, outData, 1);
+                    }
+                    else {
+                        statisticsDataManager.stopStatistics(sd, outData);
+                    }
+                }
+                catch (Exception exc) {
+                    logger.error("Error during statistics management", exc);
+                }
+            }
+            return outData;
+        }
+        catch (InterruptedException exc) {
+            logger.error("GVFlowWF[" + flowName + "] interrupted.");
+            throw exc;
+        }
+        catch (GVCoreException exc) {
+            if (useStatistics) {
+                try {
+                    if (businessFlowTerminated) {
+                        statisticsDataManager.stopStatistics(sd, exc, 0);
+                    }
+                    else {
+                        statisticsDataManager.stopStatistics(sd, exc);
+                    }
+                }
+                catch (Exception exc1) {
+                    logger.error("Error during statistics management", exc1);
+                }
+            }
+            throw exc;
+        }
+        finally {
+            cleanUp();
+        }
+    }
+
+    /**
+     * Execute the flow
+     * 
+     * @param gvBuffer
+     *        the input data
+     * @return the output data
+     * @throws GVCoreException
+     *         if errors occurs
+     */
+    private GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException, InterruptedException {
         if (logger.isDebugEnabled()) {
             logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
         }
@@ -386,7 +395,7 @@ public class GVFlowWF implements GVFlow
             if (synchObj == null) {
                 synchObj = DebugSynchObject.createNew(Thread.currentThread().getName(), inID, info);
             }
-            while (!nextNode.equals("")) {
+            while (!nextNode.equals("") && !isInterrupted()) {
                 operationInfo.setFlowStatus(inID, null, nextNode);
                 flowNode = flowNodes.get(nextNode);
                 if (flowNode == null) {
@@ -400,7 +409,7 @@ public class GVFlowWF implements GVFlow
             synchObj.terminated();
         }
         else {
-            while (!nextNode.equals("")) {
+            while (!nextNode.equals("") && !isInterrupted()) {
                 if (operationInfo != null) {
                     operationInfo.setFlowStatus(inID, null, nextNode);
                 }
@@ -412,6 +421,11 @@ public class GVFlowWF implements GVFlow
                 }
                 nextNode = flowNode.execute(environment);
             }
+        }
+
+        if (isInterrupted()) {
+            logger.error("GVFlowWF[" + flowName + "] interrupted.");
+            throw new InterruptedException("GVFlowWF[" + flowName + "] interrupted.");
         }
 
         Object output = environment.get(flowNode.getOutput());
@@ -444,7 +458,7 @@ public class GVFlowWF implements GVFlow
      *         if errors occurs
      */
     private GVBuffer internalRecover(GVBuffer gvBuffer, String recoveryNode, Map<String, Object> environment)
-            throws GVCoreException {
+            throws GVCoreException, InterruptedException {
         if (logger.isDebugEnabled()) {
             logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
         }
@@ -465,7 +479,7 @@ public class GVFlowWF implements GVFlow
         // tipically flowNode is an instances of GVSavePointNode
         String nextNode = flowNode.getDefaultNextNodeId();
 
-        while (!nextNode.equals("")) {
+        while (!nextNode.equals("") && !isInterrupted()) {
             if (operationInfo != null) {
                 operationInfo.setFlowStatus(inID, null, nextNode);
             }
@@ -476,6 +490,11 @@ public class GVFlowWF implements GVFlow
                         {"flownode", nextNode}});
             }
             nextNode = flowNode.execute(environment);
+        }
+
+        if (isInterrupted()) {
+            logger.error("GVFlowWF[" + flowName + "] interrupted.");
+            throw new InterruptedException("GVFlowWF[" + flowName + "] interrupted.");
         }
 
         Object output = environment.get(flowNode.getOutput());
@@ -632,5 +651,14 @@ public class GVFlowWF implements GVFlow
             }
         }
         flowNodes.clear();
+    }
+    
+    /**
+     * 
+     * @return
+     *        the current Thread interrupted state
+     */
+    public boolean isInterrupted() {
+        return Thread.currentThread().isInterrupted();
     }
 }

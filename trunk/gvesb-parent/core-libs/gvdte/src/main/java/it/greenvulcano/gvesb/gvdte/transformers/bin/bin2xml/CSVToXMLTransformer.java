@@ -25,7 +25,6 @@ import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
 import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
 import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
 import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayInputStream;
@@ -33,7 +32,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -65,6 +63,7 @@ public class CSVToXMLTransformer implements DTETransformer
     private static final String     DEFAULT_TARGET_TAG_FIELD    = "col";
     private static final String     DEFAULT_ATT_KEY_NAME_PREFIX = "key_";
 
+    private String                  name;
     private String                  fieldsSeparator	            = ",";
     private String                  fieldDelimiter              = "";
     private boolean                 useCDATA                    = false;
@@ -101,6 +100,7 @@ public class CSVToXMLTransformer implements DTETransformer
         logger.debug("Init start");
         String tagsStr = "";
         try {
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             fieldsSeparator = XMLConfig.get(node, "@FieldsSeparator", ",");
             fieldDelimiter = XMLConfig.get(node, "@FieldDelimiter", "");
             useCDATA = XMLConfig.getBoolean(node, "@UseCDATA", false);
@@ -155,6 +155,11 @@ public class CSVToXMLTransformer implements DTETransformer
         groupIndexes.addAll(groupByIndexes);
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
     /**
      * The <code>input</code> parameter is a byte array or String. The return
      * value is a Document.
@@ -169,8 +174,8 @@ public class CSVToXMLTransformer implements DTETransformer
      *         if any transformation error occurs.
      */
     @Override
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         CSVReader reader = null;
         logger.debug("Transform start");
         try {

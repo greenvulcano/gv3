@@ -34,6 +34,7 @@ import javax.sql.DataSource;
 import junit.framework.TestCase;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -117,6 +118,70 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("123,45", field3);
     }
 
+    /**
+     * @throws Exception
+     * 
+     */
+    public void testDHCallThreadSelect() throws Exception
+    {
+        String operation = "GVESB::TestThreadSelect";
+        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        DHResult result = dboBuilder.EXECUTE(operation, null, null);
+        assertNotNull(result);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(0, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(2, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+        Document output = (Document) result.getData();
+        assertNotNull(output);
+        assertTrue(output.getDocumentElement().hasChildNodes());
+        
+        NodeList datas = output.getDocumentElement().getChildNodes();
+        assertEquals(2, datas.getLength());
+        for (int i = 0; i < datas.getLength(); i++) {
+            Element data = (Element) datas.item(i);
+            if ("0".equals(data.getAttribute("id"))){
+                testData0(data);
+            }
+            else {
+                testData1(data);
+            }
+        }
+    }
+
+    private void testData0(Node data) {
+        assertTrue(data.hasChildNodes());
+        Node row = data.getChildNodes().item(0);
+        assertTrue(row.hasChildNodes());
+        NodeList cols = row.getChildNodes();
+        assertEquals(4, cols.getLength());
+        String id = cols.item(0).getTextContent();
+        assertEquals("1", id);
+        String field1 = cols.item(1).getTextContent();
+        assertEquals("testvalue", field1);
+        String field2 = cols.item(2).getTextContent();
+        assertEquals("20000101 12:30:45", field2);
+        String field3 = cols.item(3).getTextContent();
+        assertEquals("123,45", field3);
+    }
+
+    private void testData1(Node data) {
+        assertTrue(data.hasChildNodes());
+        Node row = data.getChildNodes().item(0);
+        assertTrue(row.hasChildNodes());
+        NodeList cols = row.getChildNodes();
+        assertEquals(4, cols.getLength());
+        String id = cols.item(0).getTextContent();
+        assertEquals("1", id);
+        String field3 = cols.item(1).getTextContent();
+        assertEquals("123,45", field3);
+        String field1 = cols.item(2).getTextContent();
+        assertEquals("testvalue", field1);
+        String field2 = cols.item(3).getTextContent();
+        assertEquals("20000101 12:30:45", field2);
+    }
     /**
      * @throws Exception
      */

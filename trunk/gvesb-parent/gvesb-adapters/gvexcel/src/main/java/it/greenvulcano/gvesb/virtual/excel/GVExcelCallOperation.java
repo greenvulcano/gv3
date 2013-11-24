@@ -31,6 +31,7 @@ import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -80,8 +81,8 @@ public class GVExcelCallOperation implements CallOperation
     }
 
     @Override
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
-    {
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException, 
+            InterruptedException {
         try {
             Map<String, Object> props = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
             ExcelReport rep = excelReport;
@@ -92,6 +93,7 @@ public class GVExcelCallOperation implements CallOperation
             gvBuffer.setObject(data);
         }
         catch (Exception exc) {
+            ThreadUtils.checkInterrupted(exc);
             throw new CallException("GV_CALL_SERVICE_ERROR", new String[][]{{"service", gvBuffer.getService()},
                     {"system", gvBuffer.getSystem()}, {"tid", gvBuffer.getId().toString()},
                     {"message", exc.getMessage()}}, exc);

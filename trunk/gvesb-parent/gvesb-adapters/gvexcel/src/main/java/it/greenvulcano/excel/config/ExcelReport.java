@@ -27,6 +27,7 @@ import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -216,15 +217,15 @@ public class ExcelReport
         return false;
     }
 
-    public byte[] getExcelReportAsByteArray(Map<String, Object> props) throws ExcelException
-    {
+    public byte[] getExcelReportAsByteArray(Map<String, Object> props) throws ExcelException, 
+            InterruptedException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         writeExcelReportOnOS(baos, props);
         return baos.toByteArray();
     }
 
-    public void writeExcelReportOnOS(OutputStream os, Map<String, Object> props) throws ExcelException
-    {
+    public void writeExcelReportOnOS(OutputStream os, Map<String, Object> props) throws ExcelException, 
+            InterruptedException {
         NMDC.push();
         ConfigurationHandler.setLogContext();
         HashMap<String, Connection> connMap = new HashMap<String, Connection>();
@@ -233,6 +234,9 @@ public class ExcelReport
             ExcelWorkBook ew = new ExcelWorkBook(os, format);
             int i = sheets.size();
             for (int j = 0; j < i; j++) {
+                if (j % 10 == 0) {
+                    ThreadUtils.checkInterrupted("ExcelReport", name, logger);
+                }
                 ReportSheet rs = sheets.get(j);
                 Statement statement = null;
                 ResultSet resultset = null;
@@ -289,8 +293,9 @@ public class ExcelReport
                     resultset = statement.executeQuery(select);
                     ew.fillWithResultSet(resultset, name, title);
                 }
-                catch (Exception exception) {
-                    throw new ExcelException(exception);
+                catch (Exception exc) {
+                    ThreadUtils.checkInterrupted(exc);
+                    throw new ExcelException(exc);
                 }
                 finally {
                     if (resultset != null) {

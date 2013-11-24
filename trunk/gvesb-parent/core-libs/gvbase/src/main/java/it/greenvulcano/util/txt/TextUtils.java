@@ -869,20 +869,6 @@ public class TextUtils
         return new String(Base64.encodeBase64(bval), 0, length).replace('/', '$');
     }
 
-    /**
-     * @param throwable
-     * @return return the stack-trace
-     */
-    public static String getStackTrace(Throwable throwable)
-    {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream pstream = new PrintStream(baos);
-        String stack = null;
-        throwable.printStackTrace(pstream);
-        pstream.flush();
-        stack = baos.toString();
-        return stack;
-    }
     
     /**
      * Check if a given string is null and if so returns an empty string.

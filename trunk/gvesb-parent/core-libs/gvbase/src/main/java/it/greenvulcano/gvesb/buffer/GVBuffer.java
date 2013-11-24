@@ -211,13 +211,26 @@ public class GVBuffer implements Serializable, Cloneable
      */
     public GVBuffer(GVBuffer toCopy)
     {
+        this(toCopy, true);
+    }
+    
+    /**
+     * Copy constructor.
+     *
+     * @param toCopy
+     *      GVBuffer instance to copy
+     * @param copyBody
+     *      if true is copied also the object filed content
+     */
+    public GVBuffer(GVBuffer toCopy, boolean copyBody)
+    {
         if (toCopy != null) {
             system = toCopy.system;
             service = toCopy.service;
             id = toCopy.id;
             retCode = toCopy.retCode;
 
-            if (toCopy.object != null) {
+            if (copyBody && (toCopy.object != null)) {
                 if (toCopy.object instanceof byte[]) {
                     object = new byte[((byte[]) toCopy.object).length];
                     System.arraycopy(toCopy.object, 0, object, 0, ((byte[]) toCopy.object).length);

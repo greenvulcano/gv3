@@ -96,13 +96,13 @@ public class ExcelWorkBook {
         }
     }
 
-    public void fillWithResultSet(ResultSet resultset, String name, String title) throws ExcelException
-    {
+    public void fillWithResultSet(ResultSet resultset, String name, String title) throws ExcelException, 
+            InterruptedException {
         fillWithResultSet(resultset, name, title, defaultFormatName);
     }
 
-    public void fillWithResultSet(ResultSet resultset, String name, String title, String confName) throws ExcelException
-    {
+    public void fillWithResultSet(ResultSet resultset, String name, String title, String confName) throws ExcelException, 
+            InterruptedException {
         NMDC.push();
         ConfigurationHandler.setLogContext();
         try {

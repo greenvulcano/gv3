@@ -321,7 +321,7 @@ public class DHFactoryPool implements ShutdownEventListener
      *
      * @see #getDHFactory(String, long)
      */
-    public DHFactory getDHFactory(String name) throws DataHandlerException
+    public DHFactory getDHFactory(String name) throws DataHandlerException, InterruptedException
     {
         return getDHFactory(name, defaultTimeout);
     }
@@ -335,8 +335,8 @@ public class DHFactoryPool implements ShutdownEventListener
      *         <code>DHFactory</code> prior to timeout
      * @throws DataHandlerException
      */
-    public DHFactory getDHFactory(String name, long timeout) throws DataHandlerException
-    {
+    public DHFactory getDHFactory(String name, long timeout) throws DataHandlerException,
+            InterruptedException {
         if (shutdownFlag) {
             throw new DataHandlerException("ShutdownEvent received, pool disabled");
         }
@@ -389,12 +389,7 @@ public class DHFactoryPool implements ShutdownEventListener
                             + maximumCreation + ")");
                     throw new DataHandlerException("DHFactoryPool Timeout");
                 }
-                try {
-                    wait(waitTime);
-                }
-                catch (InterruptedException exc) {
-                    throw new DataHandlerException("DHFactoryPool - InterruptedException", exc);
-                }
+                wait(waitTime);
             }
         }
     }

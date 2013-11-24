@@ -100,8 +100,8 @@ public class DBOInsert extends AbstractDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
+            InterruptedException {
         prepare();
         throw new DBOException("Unsupported method - DBOInsert::execute(OutputStream, Connection, HashMap)");
     }

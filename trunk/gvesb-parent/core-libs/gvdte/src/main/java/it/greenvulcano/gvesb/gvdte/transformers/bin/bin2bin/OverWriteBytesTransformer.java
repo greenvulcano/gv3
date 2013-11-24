@@ -49,6 +49,7 @@ public class OverWriteBytesTransformer implements DTETransformer
 {
     private static final Logger     logger  = GVLogger.getLogger(OverWriteBytesTransformer.class);
 
+    private String                  name;
     private int                     offset  = 0;
     private byte[]                  vBytes  = null;
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
@@ -72,6 +73,7 @@ public class OverWriteBytesTransformer implements DTETransformer
     {
         logger.debug("Init start");
         try {
+            name = XMLConfig.get(nodo, "@name", "NO_NAME");
             offset = XMLConfig.getInteger(nodo, "@Offset");
             String inputBytesHex = XMLConfig.get(nodo, "@Bytes");
             logger.debug("Loaded parameters: offset = " + offset + " - bytes = " + inputBytesHex);
@@ -95,6 +97,11 @@ public class OverWriteBytesTransformer implements DTETransformer
         }
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
     /**
      * The <code>input</code> parameter is a byte. The return value is a byte array representing
      * the input whith some bytes overwritten.
@@ -108,8 +115,8 @@ public class OverWriteBytesTransformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         try {
             byte[] inputBuffer = (byte[]) input;

@@ -110,7 +110,7 @@ public class DTEController implements ConfigurationListener
      * @return the transformation result
      * @throws DTEException
      */
-    public Object transform(String name, Object input, Map<String, Object> mapParam) throws DTEException
+    public Object transform(String name, Object input, Map<String, Object> mapParam) throws DTEException, InterruptedException
     {
         logger.debug("Transform start");
 
@@ -189,6 +189,10 @@ public class DTEController implements ConfigurationListener
             logger.error("Error while getting requested transformer", exc);
             throw new DTEException("GVDTE_TRASFORMATION_ERROR", new String[][]{
                     {"action", "getting requested transformation"}, {"map", name}}, exc);
+        }
+        catch (InterruptedException exc) {
+            logger.error("Transformation interrupted", exc);
+            throw exc;
         }
         catch (Throwable exc) {
             logger.error("Unexpected error", exc);

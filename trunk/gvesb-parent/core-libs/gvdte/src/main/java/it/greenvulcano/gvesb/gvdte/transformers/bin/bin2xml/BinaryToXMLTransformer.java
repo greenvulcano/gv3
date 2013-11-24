@@ -57,6 +57,7 @@ public class BinaryToXMLTransformer implements DTETransformer
 {
     private static final Logger      logger            = GVLogger.getLogger(BinaryToXMLTransformer.class);
 
+    private String                   name;
     private String                   conversionMapName = "";
     private String                   dataSourceSet;
     private List<TransformerHelper>  helpers           = new ArrayList<TransformerHelper>();
@@ -87,6 +88,7 @@ public class BinaryToXMLTransformer implements DTETransformer
         logger.debug("Init start");
         dataSourceF = dsf;
         try {
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             conversionMapName = XMLConfig.get(node, "@ConversionMapName");
             dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
             logger.debug("Loaded parameters: conversionMapName = " + conversionMapName + " - DataSourceSet: "
@@ -105,6 +107,11 @@ public class BinaryToXMLTransformer implements DTETransformer
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][]{{"msg", " Unexpected error."}}, exc);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**
@@ -143,8 +150,8 @@ public class BinaryToXMLTransformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         try {
             byte[] inputBuffer = (byte[]) input;

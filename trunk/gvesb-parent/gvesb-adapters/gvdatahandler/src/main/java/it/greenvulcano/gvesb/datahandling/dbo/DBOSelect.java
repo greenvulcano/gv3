@@ -28,6 +28,7 @@ import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.OutputStream;
@@ -57,21 +58,17 @@ import org.w3c.dom.NodeList;
  */
 public class DBOSelect extends AbstractDBO
 {
-
     private final Map<String, Set<Integer>>          keysMap;
 
     private String                                   numberFormat           = DEFAULT_NUMBER_FORMAT;
-
     private String                                   groupSeparator         = DEFAULT_GRP_SEPARATOR;
-
     private String                                   decSeparator           = DEFAULT_DEC_SEPARATOR;
-
     private Map<String, Map<String, FieldFormatter>> statIdToNameFormatters = new HashMap<String, Map<String, FieldFormatter>>();
     private Map<String, Map<String, FieldFormatter>> statIdToIdFormatters   = new HashMap<String, Map<String, FieldFormatter>>();
 
     private static final Logger                      logger                 = GVLogger.getLogger(DBOSelect.class);
     
-    private RowSetBuilder                            rowSetBuilder          = new StandardRowSetBuilder();
+    private RowSetBuilder                            rowSetBuilder          = null;
 
     /**
      *
@@ -96,6 +93,12 @@ public class DBOSelect extends AbstractDBO
             if (rsBuilder.equals("extended")) {
                 rowSetBuilder = new ExtendedRowSetBuilder();
             }
+            else {
+                rowSetBuilder = new StandardRowSetBuilder();
+            }
+            rowSetBuilder.setName(getName());
+            rowSetBuilder.setLogger(logger);
+
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='select']");
             String id = null;
             String keys = null;
@@ -194,8 +197,8 @@ public class DBOSelect extends AbstractDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException,
+            InterruptedException {
         XMLUtils parser = null;
         try {
             prepare();
@@ -234,6 +237,7 @@ public class DBOSelect extends AbstractDBO
             rowSetBuilder.setNumberFormat(numberFormat);
             
             for (Entry<String, String> entry : statements.entrySet()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                 Object key = entry.getKey();
                 String stmt = entry.getValue();
                 Set<Integer> keyField = keysMap.get(key);
@@ -255,7 +259,8 @@ public class DBOSelect extends AbstractDBO
                         ResultSet rs = statement.executeQuery(expandedSQL);
                         if (rs != null) {
                             try {
-                                rowCounter += rowSetBuilder.build(doc, "" + key, rs, keyField, fieldNameToFormatter, fieldIdToFormatter);
+                                rowCounter += rowSetBuilder.build(doc, "" + key, rs, keyField, fieldNameToFormatter, 
+                                                                  fieldIdToFormatter);
                             }
                             finally {
                                 if (rs != null) {
@@ -293,6 +298,10 @@ public class DBOSelect extends AbstractDBO
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);
             throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+        }
+        catch (InterruptedException exc) {
+            logger.error("DBO[" + getName() + "] interrupted", exc);
+            throw exc;
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);

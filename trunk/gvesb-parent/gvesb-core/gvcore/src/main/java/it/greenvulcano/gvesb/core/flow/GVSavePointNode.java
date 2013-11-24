@@ -92,9 +92,10 @@ public class GVSavePointNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
         logger.info("Executing GVSavePointNode '" + getId() + "'");
+        checkInterrupted("GVSavePointNode", logger);
         dumpEnvironment(logger, true, environment);
 
         Object data = environment.get(getInput());

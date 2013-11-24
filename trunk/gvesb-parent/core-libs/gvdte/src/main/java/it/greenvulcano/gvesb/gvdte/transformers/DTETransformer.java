@@ -68,7 +68,10 @@ public interface DTETransformer
      * @return the transformation result.
      * @throws DTETransfException if error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException;
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+                  InterruptedException;
+
+    public String getName();
 
     /**
      * @param validate

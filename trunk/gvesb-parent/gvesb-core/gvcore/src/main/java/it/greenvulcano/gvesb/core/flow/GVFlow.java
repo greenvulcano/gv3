@@ -70,7 +70,7 @@ public interface GVFlow
      * @throws GVCoreException
      *         if errors occurs
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws GVCoreException;
+    public GVBuffer perform(GVBuffer gvBuffer) throws GVCoreException, InterruptedException;
 
     /**
      * Execute the flow
@@ -82,7 +82,7 @@ public interface GVFlow
      * @throws GVCoreException
      *         if errors occurs
      */
-    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException;
+    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException, InterruptedException;
 
 
     /**
@@ -94,7 +94,7 @@ public interface GVFlow
      * @throws GVCoreException
      *         if errors occurs
      */
-    public GVBuffer recover(String recoveryNode, Map<String, Object> environment) throws GVCoreException;
+    public GVBuffer recover(String recoveryNode, Map<String, Object> environment) throws GVCoreException, InterruptedException;
 
 
     /**

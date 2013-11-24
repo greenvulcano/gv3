@@ -23,6 +23,7 @@ import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.buffer.Id;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -106,11 +107,12 @@ public class DequeueOperationWrapper implements DequeueOperation
      *
      * @see it.greenvulcano.gvesb.virtual.Operation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, DequeueException, InvalidDataException
-    {
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, DequeueException, InvalidDataException,
+            InterruptedException {
         logger.debug("BEGIN PERFORM: " + description);
 
         try {
+            ThreadUtils.checkInterrupted(description, logger);
             serviceAlias.manageAliasInput(gvBuffer);
             GVBuffer returnData = null;
             NMDC.push();
@@ -136,6 +138,8 @@ public class DequeueOperationWrapper implements DequeueOperation
             throw exc;
         }
         catch (Throwable exc) {
+            logger.error("PERFORM ERROR: " + description, exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DequeueException("GVVM_EXECUTION_ERROR", new String[][]{{"exc", "" + exc},
                     {"key", opKey.toString()}}, exc);
         }

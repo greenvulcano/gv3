@@ -342,6 +342,10 @@ public class GreenVulcano
             logExc(exc, startTime);
             throw exc;
         }
+        catch (InterruptedException exc) {
+            logExcST(exc);
+            throwGVPublicException("GV_INTERRUPTED_ERROR", gvBuffer, exc, startTime);
+        }
         catch (Exception exc) {
             logExcST(exc);
             throwGVPublicException("GV_GENERIC_ERROR", gvBuffer, exc, startTime);
@@ -531,6 +535,10 @@ public class GreenVulcano
         catch (GVPublicException exc) {
             logExc(exc, startTime);
             throw exc;
+        }
+        catch (InterruptedException exc) {
+            logExcST(exc);
+            throwGVPublicException("GV_INTERRUPTED_ERROR", gvBuffer, exc, startTime);
         }
         catch (Exception exc) {
             logExcST(exc);
