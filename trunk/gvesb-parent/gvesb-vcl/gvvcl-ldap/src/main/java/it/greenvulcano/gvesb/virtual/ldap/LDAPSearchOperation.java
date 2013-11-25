@@ -123,7 +123,7 @@ public class LDAPSearchOperation implements CallOperation
                 if (filterArr.length > 0) {
                     currFilterArr = new String[filterArr.length];
                     for (int i = 0; i < filterArr.length; i++) {
-                        currFilterArr[i] = PropertiesHandler.expand(filterArr[i], null, gvBuffer);
+                        currFilterArr[i] = PropertiesHandler.expand(filterArr[i], params, gvBuffer);
                     }
                 }
             }
