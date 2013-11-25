@@ -230,6 +230,9 @@
                             <ChangeGVBuffer clear-data="false">
                                 <PropertyDef name="SQL"
                                              value="sql{{ds.gv_test::select &apos;OK&apos; from dual}}"/>
+                                <PropertyDef name="REF_PROPERTY"
+                                             value="The select returns: @{{SQL}}"/>
+                                <PropertyDef name="XML_PROPERTY" value="xmlp{{xml.property}}"/>
                                 <PropertyDef name="SQLLIST"
                                              value="[sqllist{{ds.gv_test::|::select name from city order by 1}}]"/>
                                 <PropertyDef name="TIMESTAMP"
@@ -245,7 +248,7 @@
                                              value="decode{{ognl{{#object.getProperty(&apos;SQL&apos;)}}::OK::Sql OK::Sql KO}}"/>
                                 <PropertyDef name="MINUTE"
                                              value="Minute decode{{js{{gvesb::timestamp{{mm}} % 2 == 0}}::true::EVEN::ODD}}"/>
-                            <PropertyDef name="NOW_PLUS_30s"
+                                <PropertyDef name="NOW_PLUS_30s"
                                              value="js{{gvesb::DateUtils.dateToString(DateUtils.addTime(DateUtils.createCalendar().getTime(), Calendar.SECOND, 30), DateUtils.FORMAT_ISO_DATETIME_L)}}"/>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
@@ -1824,6 +1827,130 @@ data.setObject(baos.toByteArray());</Script>
                     </Flow>
                 </Operation>
             </Service>
+            <Service group-name="DEFAULT_GRP" id-service="TEST_LDAP_ADD"
+                     service-activation="on" statistics="off">
+                <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
+                           name="RequestReply" operation-activation="on"
+                           out-check-type="sys-svc-id" type="operation">
+                    <Description>Use the input XML to load entries on LDAP server</Description>
+                    <Participant id-channel="TEST_CHANNEL_LDAP" id-system="GVESB"/>
+                    <Flow first-node="request" point-x="50" point-y="150">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         id="request" id-system="GVESB"
+                                         input="input"
+                                         next-node-id="check_status" op-type="call"
+                                         operation-name="LDAPAddPeople"
+                                         output="outpute" point-x="200"
+                                         point-y="150" type="flow-node"/>
+                        <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
+                                     default-id="return_status" id="check_status"
+                                     input="output"
+                                     on-exception-id="return_error" op-type="check"
+                                     point-x="350" point-y="150" type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_status" op-type="end"
+                                   output="outpute" point-x="700" point-y="50"
+                                   type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_error" op-type="end"
+                                   output="outpute" point-x="700" point-y="250"
+                                   type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
+            <Service group-name="DEFAULT_GRP" id-service="TEST_LDAP_SEARCH"
+                     service-activation="on" statistics="off">
+                <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
+                           name="RequestReply" operation-activation="on"
+                           out-check-type="sys-svc-id" type="operation">
+                    <Description>Use the GVLDAP_FILTER property value to search the LDAP server</Description>
+                    <Participant id-channel="TEST_CHANNEL_LDAP" id-system="GVESB"/>
+                    <Flow first-node="request" point-x="50" point-y="150">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         id="request" id-system="GVESB"
+                                         input="input"
+                                         next-node-id="check_status" op-type="call"
+                                         operation-name="LDAPSearchPeople"
+                                         output="outpute" point-x="200"
+                                         point-y="150" type="flow-node"/>
+                        <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
+                                     default-id="return_status" id="check_status"
+                                     input="output"
+                                     on-exception-id="return_error" op-type="check"
+                                     point-x="350" point-y="150" type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_status" op-type="end"
+                                   output="outpute" point-x="700" point-y="50"
+                                   type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_error" op-type="end"
+                                   output="outpute" point-x="700" point-y="250"
+                                   type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
+            <Service group-name="DEFAULT_GRP" id-service="TEST_LDAP_UPDATE"
+                     service-activation="on" statistics="off">
+                <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
+                           name="RequestReply" operation-activation="on"
+                           out-check-type="sys-svc-id" type="operation">
+                    <Participant id-channel="TEST_CHANNEL_LDAP" id-system="GVESB"/>
+                    <Description>Use the input XML to modify/remove entries on LDAP server</Description>
+                    <Flow first-node="request" point-x="50" point-y="150">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         id="request" id-system="GVESB"
+                                         input="input"
+                                         next-node-id="check_status" op-type="call"
+                                         operation-name="LDAPUpdatePeople"
+                                         output="outpute" point-x="200"
+                                         point-y="150" type="flow-node"/>
+                        <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
+                                     default-id="return_status" id="check_status"
+                                     input="output"
+                                     on-exception-id="return_error" op-type="check"
+                                     point-x="350" point-y="150" type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_status" op-type="end"
+                                   output="outpute" point-x="700" point-y="50"
+                                   type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_error" op-type="end"
+                                   output="outpute" point-x="700" point-y="250"
+                                   type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
+            <Service group-name="DEFAULT_GRP" id-service="TEST_LDAP_LOGIN"
+                     service-activation="on" statistics="off">
+                <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
+                           name="RequestReply" operation-activation="on"
+                           out-check-type="sys-svc-id" type="operation">
+                    <Description>Use the GVLDAP_USER and GVLDAP_PASSWORD properties value to login on LDAP server and return the user properties and groups</Description>
+                    <Participant id-channel="TEST_CHANNEL_LDAP" id-system="GVESB"/>
+                    <Flow first-node="request" point-x="50" point-y="150">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         id="request" id-system="GVESB"
+                                         input="input"
+                                         next-node-id="check_status" op-type="call"
+                                         operation-name="LDAPLogin"
+                                         output="outpute" point-x="200"
+                                         point-y="150" type="flow-node"/>
+                        <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
+                                     default-id="return_status" id="check_status"
+                                     input="output"
+                                     on-exception-id="return_error" op-type="check"
+                                     point-x="350" point-y="150" type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_status" op-type="end"
+                                   output="outpute" point-x="700" point-y="50"
+                                   type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_error" op-type="end"
+                                   output="outpute" point-x="700" point-y="250"
+                                   type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
         </Services>
     </GVServices>
     <GVSystems name="SYSTEMS" type="module">
@@ -2199,6 +2326,94 @@ data.setObject(baos.toByteArray());</Script>
                                                type="remote-command"/>
                         </RemoteCommands>
                     </remotemanager-call>
+                </Channel>
+                <Channel id-channel="TEST_CHANNEL_LDAP">
+                    <ldap-update-call class="it.greenvulcano.gvesb.virtual.ldap.LDAPUpdateOperation"
+                                      name="LDAPAddPeople" type="call"
+                                      rootContext="ou=People,o=JNDITutorial,dc=example,dc=com">
+                        <LDAPContext provider-url="ldap://ldap.example.com:389"
+                                    initial-context-factory="com.sun.jndi.ldap.LdapCtxFactory"
+                                    security-principal="CN=admin,DC=example,DC=com"
+                                    security-credentials="secret">
+                            <Advanced security-authentication="simple"/>
+                        </LDAPContext>
+                    </ldap-update-call>
+                    <ldap-update-call class="it.greenvulcano.gvesb.virtual.ldap.LDAPUpdateOperation"
+                                      name="LDAPUpdatePeople" type="call"
+                                      rootContext="o=JNDITutorial,dc=example,dc=com">
+                        <LDAPContext provider-url="ldap://ldap.example.com:389"
+                                    initial-context-factory="com.sun.jndi.ldap.LdapCtxFactory"
+                                    security-principal="CN=admin,DC=example,DC=com"
+                                    security-credentials="secret">
+                            <Advanced security-authentication="simple"/>
+                        </LDAPContext>
+                    </ldap-update-call>
+                    <ldap-search-call class="it.greenvulcano.gvesb.virtual.ldap.LDAPSearchOperation"
+                                      name="LDAPSearchPeople" type="call"
+                                      rootContext="o=JNDITutorial,dc=example,dc=com">
+                        <LDAPContext provider-url="ldap://ldap.example.com:389"
+                                    initial-context-factory="com.sun.jndi.ldap.LdapCtxFactory"
+                                    security-principal="CN=admin,DC=example,DC=com"
+                                    security-credentials="secret">
+                            <Advanced security-authentication="simple"/>
+                        </LDAPContext>
+                        <!--<LDAPFilter>(objectclass=person)</LDAPFilter>-->
+                        <!--<LDAPFilter>(sn=Di Maio)</LDAPFilter>-->
+                        <!--<LDAPFilter>(&amp;(objectclass=person)(sn=Di Maio))</LDAPFilter>-->
+                    </ldap-search-call>
+                    <ldap-search-call class="it.greenvulcano.gvesb.virtual.ldap.LDAPSearchOperation"
+                                      name="LDAPSearchGroups" type="call"
+                                      rootContext="ou=Groups,o=JNDITutorial,dc=example,dc=com">
+                        <LDAPContext provider-url="ldap://ldap.example.com:389"
+                                    initial-context-factory="com.sun.jndi.ldap.LdapCtxFactory"
+                                    security-principal="CN=admin,DC=example,DC=com"
+                                    security-credentials="secret">
+                            <Advanced security-authentication="simple"/>
+                        </LDAPContext>
+                    </ldap-search-call>
+                    <ldap-search-call class="it.greenvulcano.gvesb.virtual.ldap.LDAPSearchOperation"
+                                      name="LDAPLogin" type="call"
+                                      rootContext="o=JNDITutorial,dc=example,dc=com">
+                        <LDAPContext provider-url="ldap://ldap.example.com:389"
+                                    initial-context-factory="com.sun.jndi.ldap.LdapCtxFactory">
+                            <Advanced security-authentication="simple"/>
+                        </LDAPContext>
+                        <LDAPFilter>(&amp;(objectclass=person)(entryDN=@{{GVLDAP_USER}}))</LDAPFilter>
+                        <LDAPFilter>(&amp;(objectclass=groupOfUniqueNames)(uniqueMember=@{{GVLDAP_USER}}))</LDAPFilter>
+                    </ldap-search-call>
+                </Channel>
+                <Channel id-channel="TEST_CHANNEL_HL7">
+                    <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall"
+                                       name="echo_call" service="echo" sleep-on-init="75"
+                                       sleep-on-perform="50" type="call"/>
+                    <hl7-call class="it.greenvulcano.gvesb.virtual.hl7.HL7CallOperation"
+                              host="localhost" name="hl7_call" port="8181" type="call"/>
+                </Channel>
+                <Channel id-channel="TEST_CHANNEL_RULES">
+                    <rules-call class="it.greenvulcano.gvesb.gvrules.virtual.RulesCall"
+                                globals-ref-dp="figFilter_GlobMapDataProvider"
+                                input-ref-dp="figFilter_InMapDataProvider"
+                                name="figureFilter"
+                                output-ref-dp="figFilter_OutGVBChangeDataProvider"
+                                ruleSet="figureFilter" type="call"/>
+                    <rules-call class="it.greenvulcano.gvesb.gvrules.virtual.RulesCall"
+                                globals-ref-dp="figFilterOut_GlobMapDataProvider"
+                                input-ref-dp="figFilterOut_InMapDataProvider"
+                                name="figureFilterOut"
+                                output-ref-dp="figFilterOut_OutGVBChangeDataProvider"
+                                ruleSet="figureFilterOut" type="call"/>
+                    <rules-call class="it.greenvulcano.gvesb.gvrules.virtual.RulesCall"
+                                globals-ref-dp="figFilterOutColl_GlobMapDataProvider"
+                                input-ref-dp="figFilterOutColl_InMapDataProvider"
+                                name="figureFilterOutColl"
+                                output-ref-dp="figFilterOutColl_OutGVBChangeDataProvider"
+                                ruleSet="figureFilterOutColl" type="call"/>
+                </Channel>
+                <Channel id-channel="TEST_CHANNEL_TWEET">
+                    <twitter-update-status account="[ACCOUNT_NAME]"
+                                           class="it.greenvulcano.gvesb.virtual.social.twitter.TwitterUpdateStatusCallOperation"
+                                           name="tweet"
+                                           statusText="ognl{{#object.object}}" type="call"/>
                 </Channel>
             </System>
             <System id-system="CREDIT" system-activation="on">
