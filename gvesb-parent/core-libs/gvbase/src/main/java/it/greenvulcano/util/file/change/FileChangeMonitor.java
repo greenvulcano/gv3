@@ -25,8 +25,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -217,6 +219,21 @@ public class FileChangeMonitor
                 new FileChangeEventSelector(fileList), EVENT_SOURCE);
     }
 
+    public void resetMonitor() {
+        synchronized (timerEntries) {
+            Iterator<Entry<String, FileMonitorTask>> tEntryIt = timerEntries.entrySet().iterator();
+            while (tEntryIt.hasNext()) {
+                Entry<String, FileMonitorTask> tEntry = tEntryIt.next();
+                //String fileName = tEntry.getKey();
+                FileMonitorTask task = tEntry.getValue();
+                if (task != null) {
+                    task.cancel();
+                }
+                tEntryIt.remove();
+                EventHandler.removeAllEventListener(FileChangeEventListener.class, EVENT_SOURCE);
+            }
+        }
+    }
 
     /**
      * Add a monitored file.
