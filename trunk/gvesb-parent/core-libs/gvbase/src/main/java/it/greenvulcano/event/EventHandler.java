@@ -189,6 +189,18 @@ public final class EventHandler {
             List<EventSelector> selectorList, Object source) {
         EventListenerHandler.removeEventListener(listener, elInterface, selectorList, source);
     }
+    
+    /**
+     * Remove all EventListener listening for a given event type and source.
+     *
+     * @param elInterface
+     *            the listener interface
+     * @param source
+     *            the event source
+     */
+    public static void removeAllEventListener(Class<?> elInterface, Object source) {
+        EventListenerHandler.removeAllEventListener(elInterface, source);
+    }
 
     /**
      * Fires a Event on asynchronous manner to all registered EventListener.

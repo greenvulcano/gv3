@@ -24,8 +24,10 @@ import it.greenvulcano.event.interfaces.EventListener;
 import it.greenvulcano.event.interfaces.EventSelector;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * EventListenerHandler class
@@ -217,6 +219,30 @@ public final class EventListenerHandler {
             if (elData.canBeDestroyed()) {
                 elData.destroy();
                 listenersData.remove(listener);
+            }
+        }
+    }
+
+    /**
+     * Remove all EventListener listening for changes on a single event type ad source.
+     *
+     * @param elInterface
+     *            the listener interface
+     * @param source
+     *            the event source
+     */
+    public static synchronized void removeAllEventListener(Class<?> elInterface, Object source) {
+        Iterator<Entry<EventListener, EventListenerData>> elEntryIt = listenersData.entrySet().iterator();
+        while (elEntryIt.hasNext()) {
+            Entry<EventListener, EventListenerData> elEntry = elEntryIt.next();
+            EventListenerData elData = elEntry.getValue();
+            if (elData != null) {
+                elData.removeEventListenerInterface(elInterface);
+                elData.removeSource(source);
+                if (elData.canBeDestroyed()) {
+                    elData.destroy();
+                    elEntryIt.remove();
+                }
             }
         }
     }
