@@ -72,11 +72,39 @@ public class IdentityCondition implements GVCondition
         }
     }
 
+    @Override
+    public String getName() {
+        return condition;
+    }
+
     /* (non-Javadoc)
      * @see it.greenvulcano.gvesb.internal.condition.GVCondition#check(java.lang.String, java.util.Map)
      */
     @Override
     public boolean check(String dataName, Map<String, Object> environment) throws GVConditionException
+    {
+        boolean result = false;
+
+        logger.debug("BEGIN - Cheking IdentityCondition[" + condition + "]");
+        try {
+            result = GVIdentityHelper.isInRole(roles);
+        }
+        catch (Exception exc) {
+            logger.error("Error occurred on IdentityCondition.check()", exc);
+            throw new GVConditionException("IDENTITY_CONDITION_EXEC_ERROR", new String[][]{{"condition", condition},
+                    {"exception", "" + exc}}, exc);
+        }
+        finally {
+            logger.debug("END - Cheking IdentityCondition[" + condition + "]: " + result);
+        }
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see it.greenvulcano.gvesb.internal.condition.GVCondition#check(java.lang.Object)
+     */
+    @Override
+    public boolean check(Object obj) throws GVConditionException
     {
         boolean result = false;
 

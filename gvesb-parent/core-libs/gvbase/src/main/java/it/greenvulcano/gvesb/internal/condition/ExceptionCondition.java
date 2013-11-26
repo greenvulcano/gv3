@@ -34,8 +34,6 @@ import org.w3c.dom.NodeList;
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
  *
- *
- *
  */
 public class ExceptionCondition implements GVCondition
 {
@@ -78,6 +76,11 @@ public class ExceptionCondition implements GVCondition
         }
     }
 
+    @Override
+    public String getName() {
+        return condition;
+    }
+
     /**
      * @throws GVConditionException
      * @see it.greenvulcano.gvesb.internal.condition.GVCondition#check(String,
@@ -88,6 +91,35 @@ public class ExceptionCondition implements GVCondition
         try {
             Object obj = environment.get(dataName);
 
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof Exception)) {
+                return false;
+            }
+
+            return check((Exception) obj);
+        }
+        catch (GVConditionException exc) {
+            throw exc;
+        }
+        catch (Exception exc) {
+            logger.error("Error occurred on ExceptionCondition.check()", exc);
+            if (throwException) {
+                throw new GVConditionException("EXCEPTION_CONDITION_EXEC_ERROR", new String[][]{
+                        {"condition", condition}, {"exception", "" + exc}}, exc);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @throws GVConditionException
+     * @see it.greenvulcano.gvesb.internal.condition.GVCondition#check(Object)
+     */
+    public boolean check(Object obj) throws GVConditionException
+    {
+        try {
             if (obj == null) {
                 return false;
             }

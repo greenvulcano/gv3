@@ -95,6 +95,11 @@ public class JavaScriptCondition implements GVCondition
         }
     }
 
+    @Override
+    public String getName() {
+        return condition;
+    }
+
     /**
      * @throws GVConditionException
      * @see it.greenvulcano.gvesb.internal.condition.GVCondition#check(java.lang.String,
@@ -112,6 +117,47 @@ public class JavaScriptCondition implements GVCondition
             scope = JSInitManager.instance().getJSInit(scopeName).getScope();
             scope = JSInit.setProperty(scope, "environment", environment);
             scope = JSInit.setProperty(scope, "dataName", dataName);
+            scope = JSInit.setProperty(scope, "logger", logger);
+            if (!scriptName.equals(INTERNAL_SCRIPT)) {
+                script = ScriptCache.instance().getScript(scriptName);
+            }
+            String jsResult = JavaScriptHelper.resultToString(JavaScriptHelper.executeScript(script, scriptName, scope,
+                    cx));
+            logger.debug("JavaScriptCondition::check() -- RESULT: [" + jsResult + "]");
+            result = (jsResult.equalsIgnoreCase("true") || jsResult.equalsIgnoreCase("yes") || jsResult.equalsIgnoreCase("on"));
+
+            return result;
+        }
+        catch (Exception exc) {
+            logger.error("Error occurred on JavaScriptCondition.check()", exc);
+            if (throwException) {
+                throw new GVConditionException("JAVASCRIPT_CONDITION_EXEC_ERROR", new String[][]{
+                        {"condition", condition}, {"scopeName", scopeName}, {"scriptName", scriptName},
+                        {"exception", "" + exc}}, exc);
+            }
+        }
+        finally {
+            logger.debug("END - Cheking JavaScriptCondition[" + condition + "]: " + result);
+        }
+
+        return result;
+    }
+
+    /**
+     * @throws GVConditionException
+     * @see it.greenvulcano.gvesb.internal.condition.GVCondition#check(Object)
+     */
+    @Override
+    public final boolean check(Object obj) throws GVConditionException
+    {
+        boolean result = false;
+
+        logger.debug("BEGIN - Cheking JavaScriptCondition[" + condition + "]");
+        try {
+            cx = ContextFactory.getGlobal().enterContext();
+            Scriptable scope = null;
+            scope = JSInitManager.instance().getJSInit(scopeName).getScope();
+            scope = JSInit.setProperty(scope, "data", obj);
             scope = JSInit.setProperty(scope, "logger", logger);
             if (!scriptName.equals(INTERNAL_SCRIPT)) {
                 script = ScriptCache.instance().getScript(scriptName);
