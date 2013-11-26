@@ -284,6 +284,11 @@ public class GVBufferCondition implements GVCondition
         setProperty(node);
     }
 
+    @Override
+    public String getName() {
+        return condition;
+    }
+
     /**
      * Initialize the ReturnCode ranges vector
      * 
@@ -387,6 +392,37 @@ public class GVBufferCondition implements GVCondition
         try {
             Object obj = environment.get(dataName);
 
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof GVBuffer)) {
+                return false;
+            }
+
+            GVBuffer data = (GVBuffer) obj;
+
+            return check(data);
+        }
+        catch (GVConditionException exc) {
+            throw exc;
+        }
+        catch (Exception exc) {
+            logger.error("Error occurred on GVBufferCondition.check()", exc);
+            if (throwException) {
+                throw new GVConditionException("GVBUFFER_CONDITION_EXEC_ERROR", new String[][]{
+                        {"condition", condition}, {"exception", "" + exc}}, exc);
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * @throws GVConditionException
+     * @see it.greenvulcano.gvesb.internal.condition.GVCondition#check(Object)
+     */
+    @Override
+    public boolean check(Object obj) throws GVConditionException {
+        try {
             if (obj == null) {
                 return false;
             }
