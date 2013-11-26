@@ -19,6 +19,8 @@
  */
 package it.greenvulcano.gvesb.core.flow.parallel;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.core.flow.GVSubFlow;
@@ -52,6 +54,7 @@ public class GVSubFlowPool
      */
     private Set<GVSubFlow>        assignedSF                = new HashSet<GVSubFlow>();
 
+    private String                sfName = null;
     private Node                  sfNode = null;
     
     private int initialSize = 1;
@@ -75,12 +78,13 @@ public class GVSubFlowPool
     {
         logger.debug("Initializing the GVSubFlow Pool.");
         this.sfNode = sfNode;
-        /*try {
+        try {
+            this.sfName = XMLConfig.get(sfNode, "@name");
         }
         catch (XMLConfigException exc) {
             logger.warn("GVSubFlowPool initialization error", exc);
             throw new GVCoreConfException("GVSubFlowPool initialization error", exc);
-        }*/
+        }
 
         if (initialSize < 0) {
             throw new GVCoreConfException("GVSubFlowPool initialSize < 0");
@@ -108,6 +112,9 @@ public class GVSubFlowPool
                 + maximumSize + ", maximumCreation=" + maximumCreation);
     }
 
+    public String getSubFlowName() {
+        return this.sfName;
+    }
 
     /**
      * @return Returns the initialSize.

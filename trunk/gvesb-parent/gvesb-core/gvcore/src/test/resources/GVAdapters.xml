@@ -49,6 +49,18 @@
           <Expression type="ognl">split(&quot;,&quot;)</Expression>
         </Field>
       </CollectionDataProvider>
+      <StringDataProvider class="it.greenvulcano.gvesb.gvdp.impl.StringDataProvider" name="first"
+        source-selector="object" type="dataProvider">
+        <Field direction="INOUT" key="buffer" type="field">
+          <Expression type="ognl">split(&quot;,&quot;)[0]</Expression>
+        </Field>
+      </StringDataProvider>
+      <StringDataProvider class="it.greenvulcano.gvesb.gvdp.impl.StringDataProvider" name="second"
+        source-selector="object" type="dataProvider">
+        <Field direction="INOUT" key="buffer" type="field">
+          <Expression type="ognl">split(&quot;,&quot;)[1]</Expression>
+        </Field>
+      </StringDataProvider>
     </DataProviders>
   </GVDataProviderManager>
 </GVAdapters>
