@@ -187,8 +187,8 @@
             <version>${version.javax.mail}</version>
             <type>jar</type>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
+        </dependency>-->
+        <!--<dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
             <version>${version.javax.mail}</version>
