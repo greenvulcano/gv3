@@ -21,6 +21,9 @@ package it.greenvulcano.gvesb.core.flow.parallel;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.flow.GVSubFlow;
+import it.greenvulcano.gvesb.gvdp.DataProviderManager;
+import it.greenvulcano.gvesb.gvdp.IDataProvider;
+import it.greenvulcano.gvesb.log.GVBufferMDC;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.thread.ThreadMap;
 
@@ -39,13 +42,17 @@ public class SubFlowTask implements Callable<Result>
     private GVSubFlowPool       pool;
     private GVBuffer            input;
     private boolean             onDebug;
+    private boolean             changeLogContext;
     private Map<String, String> logContext;
+    private String              inputRefDP;
 
-    public SubFlowTask(GVSubFlowPool pool, GVBuffer input, boolean onDebug, Map<String, String> logContext) {
+    public SubFlowTask(GVSubFlowPool pool, GVBuffer input, boolean onDebug, boolean changeLogContext, Map<String, String> logContext, String inputRefDP) {
         this.pool = pool;
         this.input = input;
         this.onDebug = onDebug;
         this.logContext = logContext;
+        this.changeLogContext = changeLogContext;
+        this.inputRefDP = inputRefDP;
     }
 
     @Override
@@ -55,10 +62,31 @@ public class SubFlowTask implements Callable<Result>
             NMDC.setCurrentContext(logContext);
 
             Result result = null;
-            GVSubFlow subflow = null;
+            GVSubFlow subFlow = null;
             try {
-                subflow = pool.getSubFlow();
-                GVBuffer output = subflow.perform(input, onDebug);
+                GVBuffer internalData = input;
+                
+                if (changeLogContext) {
+                    NMDC.setOperation(pool.getSubFlowName());
+                    GVBufferMDC.put(internalData);
+                }
+                
+                DataProviderManager dataProviderManager = DataProviderManager.instance();
+                if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
+                    IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
+                    try {
+                        internalData = new GVBuffer(input);
+                        dataProvider.setObject(internalData);
+                        Object inputCall = dataProvider.getResult();
+                        internalData.setObject(inputCall);
+                    }
+                    finally {
+                        dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
+                    }
+                }
+
+                subFlow = pool.getSubFlow();
+                GVBuffer output = subFlow.perform(internalData, onDebug);
                 result = new Result(Result.State.STATE_OK, output, input);
             }
             catch (InterruptedException exc) {
@@ -70,7 +98,7 @@ public class SubFlowTask implements Callable<Result>
             }
             finally {
                 if (pool != null) {
-                    pool.releaseSubFlow(subflow);
+                    pool.releaseSubFlow(subFlow);
                 }
             }
             return result;
@@ -78,11 +106,11 @@ public class SubFlowTask implements Callable<Result>
         finally {
             NMDC.pop();
             ThreadMap.clean();
+            
+            this.pool = null;
+            //this.input = null;
+            this.logContext = null;
         }
-    }
-
-    public GVBuffer getInput() {
-        return this.input;
     }
 
     public Result getFailureResult(Throwable cause) {

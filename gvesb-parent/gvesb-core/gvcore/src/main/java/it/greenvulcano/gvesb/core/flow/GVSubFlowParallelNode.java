@@ -27,13 +27,14 @@ import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.core.exc.GVCoreSkippedException;
 import it.greenvulcano.gvesb.core.flow.parallel.BaseParallelNode;
+import it.greenvulcano.gvesb.core.flow.parallel.FlowDef;
 import it.greenvulcano.gvesb.core.flow.parallel.GVSubFlowPool;
 import it.greenvulcano.gvesb.core.flow.parallel.ParallelExecutor;
 import it.greenvulcano.gvesb.core.flow.parallel.Result;
 import it.greenvulcano.gvesb.core.flow.parallel.SubFlowTask;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
-import it.greenvulcano.gvesb.log.GVBufferMDC;
+import it.greenvulcano.gvesb.internal.condition.GVCondition;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.log.GVLogger;
@@ -42,71 +43,65 @@ import it.greenvulcano.util.xpath.XPathFinder;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
- * GVSubFlowSplittedNode class.
+ * GVSubFlowParallelNode class.
  * 
  * @version 3.4.0 Jun 17, 2013
  * @author GreenVulcano Developer Team
  */
-public class GVSubFlowSplittedNode extends BaseParallelNode
+public class GVSubFlowParallelNode extends BaseParallelNode
 {
-    private static final Logger logger           = GVLogger.getLogger(GVSubFlowSplittedNode.class);
+    private static final Logger              logger           = GVLogger.getLogger(GVSubFlowParallelNode.class);
 
     /**
      * the default next flow node id
      */
-    private String              defaultId        = "";
+    private String                           defaultId        = "";
     /**
      * the onException flow node id
      */
-    private String              onExceptionId    = "";
+    private String                           onExceptionId    = "";
     /**
      * the onTimeout flow node id
      */
-    private String              onTimeoutId      = "";
+    private String                           onTimeoutId      = "";
     /**
      * the onSkip flow node id
      */
-    private String              onSkipId         = "";
+    private String                           onSkipId         = "";
     /**
-     * The SubFlow name to invoke.
+     * The SubFlow reference to invoke.
      */
-    private String              flowOp           = "";
+    private List<FlowDef>                    flowDefs         = new ArrayList<FlowDef>();
     /**
-     * The used to change the SubFlow input
+     * The SubFlowPool instances.
      */
-    private String              inputRefDP       = null;
-    /**
-     * Keeps reference to <code>IDataProvider</code> implementation.
-     */
-    private String              partitionDP;
-    /**
-     * The SubFlowPool instance.
-     */
-    private GVSubFlowPool       subFlowPool      = null;
+    private Map<String, GVSubFlowPool>       subFlowPool      = new HashMap<String, GVSubFlowPool>();
     /**
      * the input services
      */
-    private GVInternalServiceHandler inputServices  = new GVInternalServiceHandler();
+    private GVInternalServiceHandler         inputServices    = new GVInternalServiceHandler();
     /**
      * the output services
      */
-    private GVInternalServiceHandler outputServices = new GVInternalServiceHandler();
+    private GVInternalServiceHandler         outputServices   = new GVInternalServiceHandler();
     /**
      * The SubFlow executor
      */
-    private ParallelExecutor    executor         = null;
+    private ParallelExecutor                 executor         = null;
     /**
      * Max executor Thread pool
      */
-    private int                 maxThread        = 5; 
+    private int                              maxThread        = 5;
     /**
      * The desired termination mode
      */
@@ -114,11 +109,11 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
     /**
      * Execution timeout, in seconds
      */
-    private int                 timeout          = 30;
+    private int                              timeout          = 30;
     /**
      * If true update the log context.
      */
-    private boolean             changeLogContext = false;
+    private boolean                          changeLogContext = false;
 
 
     /**
@@ -139,19 +134,12 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
             onSkipId = XMLConfig.get(defNode, "@on-skip-id", "");
             maxThread = XMLConfig.getInteger(defNode, "@max-thread", 5);
             timeout = XMLConfig.getInteger(defNode, "@timeout", 30);
-            termMode = ParallelExecutor.TerminationMode.fromString(XMLConfig.get(defNode, "@termination-mode", 
+            termMode = ParallelExecutor.TerminationMode.fromString(XMLConfig.get(defNode, "@termination-mode",
                     "normal-end"));
-            
+
             changeLogContext = XMLConfig.getBoolean(defNode, "@change-log-context", true);
-            flowOp = XMLConfig.get(defNode, "@subflow");
-            logger.debug("subflow  = " + flowOp);
-            partitionDP = XMLConfig.get(defNode, "@partition-dp", "");
-            inputRefDP = XMLConfig.get(defNode, "@ref-dp", "");
-    
-            if (flowOp.equals("")) {
-                throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'subflow'"},
-                        {"node", XPathFinder.buildXPath(defNode)}});
-            }
+
+            initFlowDefs(defNode);
 
             Node intSvcNode = XMLConfig.getNode(defNode, "InputServices");
             if (intSvcNode != null) {
@@ -174,21 +162,23 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException {
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException,
+            InterruptedException {
         GVBuffer internalData = null;
         List<Result> result = null;
         boolean isSkipped = false;
         boolean isError = false;
         String input = getInput();
         String output = getOutput();
-        logger.info("Executing GVSubFlowSplittedNode '" + getId() + "'");
-        checkInterrupted("GVSubFlowSplittedNode", logger);
+        logger.info("Executing GVSubFlowParallelNode '" + getId() + "'");
+        checkInterrupted("GVSubFlowParallelNode", logger);
         dumpEnvironment(logger, true, environment);
 
         Object inData = environment.get(input);
         if (Throwable.class.isInstance(inData)) {
             environment.put(output, inData);
-            logger.debug("END - Execute GVSubFlowSplittedNode '" + getId() + "' with Exception input -> " + onExceptionId);
+            logger.debug("END - Execute GVSubFlowParallelNode '" + getId() + "' with Exception input -> "
+                    + onExceptionId);
             return onExceptionId;
         }
         try {
@@ -206,17 +196,12 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
             try {
                 NMDC.push();
 
-                /*if (changeLogContext) {
-                    NMDC.setOperation(flowOp);
-                    GVBufferMDC.put(internalData);
-                }*/
-                
                 internalData = inputServices.perform(internalData);
-                
+
                 result = processSubFlow(internalData, onDebug);
-                checkInterrupted("GVSubFlowSplittedNode", logger);
+                checkInterrupted("GVSubFlowParallelNode", logger);
                 internalData = processOutput(internalData, result);
-                
+
                 internalData = outputServices.perform(internalData);
             }
             catch (GVCoreSkippedException exc) {
@@ -232,7 +217,7 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
             }
         }
         catch (InterruptedException exc) {
-            logger.error("GVSubFlowSplittedNode [" + getId() + "] interrupted!", exc);
+            logger.error("GVSubFlowParallelNode [" + getId() + "] interrupted!", exc);
             throw exc;
         }
         catch (Exception exc) {
@@ -255,13 +240,14 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
             nextNodeId = ("".equals(onTimeoutId) ? defaultId : onTimeoutId);
         }
         else {
-            //environment.put(GVNodeCheck.LAST_GV_EXCEPTION, lastException);
+            // environment.put(GVNodeCheck.LAST_GV_EXCEPTION, lastException);
         }
 
-        logger.info("Executing GVSubFlowSplittedNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
+        logger.info("Executing GVSubFlowParallelNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId
+                + "'");
 
         dumpEnvironment(logger, false, environment);
-        logger.debug("END - Execute GVSubFlowSplittedNode '" + getId() + "'");
+        logger.debug("END - Execute GVSubFlowParallelNode '" + getId() + "'");
         return nextNodeId;
     }
 
@@ -297,14 +283,46 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
         }
         executor = null;
         if (subFlowPool != null) {
-            subFlowPool.destroy();
+            for (GVSubFlowPool sfp : subFlowPool.values()) {
+                sfp.destroy();
+            }
+            subFlowPool.clear();
         }
         subFlowPool = null;
         inputServices = null;
         outputServices = null;
     }
 
-    
+
+    /**
+     * @param defNode
+     *        the flow node definition
+     * @throws CoreConfigException
+     *         if errors occurs
+     */
+    private void initFlowDefs(Node defNode) throws GVCoreConfException {
+        try {
+            NodeList fdNodes = XMLConfig.getNodeList(defNode, "FlowDef");
+            if (fdNodes.getLength() == 0) {
+                throw new GVCoreConfException("GVCORE_INVALID_CFG_PARAM_ERROR", new String[][]{{"name", "'FlowDef'"},
+                        {"node", XPathFinder.buildXPath(defNode)}});
+            }
+            for (int i = 0; i < fdNodes.getLength(); i++) {
+                FlowDef fd = new FlowDef();
+                fd.init(fdNodes.item(i));
+                flowDefs.add(fd);
+            }
+        }
+        catch (XMLConfigException exc) {
+            throw new GVCoreConfException("GVCORE_FLOWDEF_SEARCH_ERROR", new String[][]{{"id", getId()},
+                    {"node", XPathFinder.buildXPath(defNode)}}, exc);
+        }
+        catch (GVException exc) {
+            throw new GVCoreConfException("GVCORE_FLOWDEF_SEARCH_ERROR", new String[][]{{"id", getId()},
+                    {"node", XPathFinder.buildXPath(defNode)}}, exc);
+        }
+    }
+
     /**
      * @param defNode
      *        the flow node definition
@@ -313,13 +331,18 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
      */
     private void initSubFlowPool(Node defNode) throws GVCoreConfException {
         try {
-            Node sfNode = XMLConfig.getNode(defNode, "ancestor::Operation/SubFlow[@name='" + flowOp + "']");
-            if (sfNode == null) {
-                throw new GVCoreConfException("GVCORE_INVALID_CFG_PARAM_ERROR", new String[][]{{"name", "'operation'"},
-                        {"node", XPathFinder.buildXPath(defNode)}});
+            for (FlowDef fd : flowDefs) {
+                Node sfNode = XMLConfig.getNode(defNode, "ancestor::Operation/SubFlow[@name='" + 
+                                                fd.getSubflow() + "']");
+                if (sfNode == null) {
+                    throw new GVCoreConfException("GVCORE_INVALID_CFG_ERROR", new String[][]{{"message", 
+                            "missing SubFlow[" + fd.getSubflow() + "]"},
+                            {"node", XPathFinder.buildXPath(defNode)}});
+                }
+                GVSubFlowPool sfp = new GVSubFlowPool();
+                sfp.init(defNode, sfNode);
+                subFlowPool.put(sfp.getSubFlowName(), sfp);
             }
-            subFlowPool = new GVSubFlowPool();
-            subFlowPool.init(defNode, sfNode);
         }
         catch (XMLConfigException exc) {
             throw new GVCoreConfException("GVCORE_SUB_FLOW_SEARCH_ERROR", new String[][]{{"id", getId()},
@@ -331,8 +354,8 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
         }
     }
 
-    private List<Result> processSubFlow(GVBuffer internalData, boolean onDebug) throws CallException, 
-                                       GVCoreSkippedException, InterruptedException {
+    private List<Result> processSubFlow(GVBuffer internalData, boolean onDebug) throws CallException,
+            GVCoreSkippedException, InterruptedException {
         logger.info("BEGIN ProcessSubFlow");
         Map<String, String> logContext = NMDC.getCurrentContext();
         List<SubFlowTask> tasks = new ArrayList<SubFlowTask>();
@@ -341,58 +364,30 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
             if (executor == null) {
                 executor = new ParallelExecutor(getId(), maxThread, logger);
             }
-            DataProviderManager dataProviderManager = DataProviderManager.instance();
-            IDataProvider partitionDataProvider = dataProviderManager.getDataProvider(partitionDP);
-            Collection<Object> input;
-            try {
-                logger.debug("Working on data provider: " + partitionDataProvider);
-                partitionDataProvider.setObject(internalData);
-                input = (Collection<Object>) partitionDataProvider.getResult();
-            }
-            finally {
-                dataProviderManager.releaseDataProvider(partitionDP, partitionDataProvider);
+
+            Iterator<FlowDef> itFlow = flowDefs.iterator();
+            while (itFlow.hasNext() && !isInterrupted()) {
+                FlowDef fd = itFlow.next();
+
+                GVBuffer currInput = new GVBuffer(internalData);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("currInput[" + fd.getName() + "]= " + currInput.toString());
+                }
+                if (fd.check(currInput)) {
+                    tasks.add(new SubFlowTask(subFlowPool.get(fd.getSubflow()), currInput, onDebug, changeLogContext, logContext, fd.getInputRefDP()));
+                }
             }
 
-            IDataProvider inputDataProvider = null;
-            try {
-                if ((inputRefDP != null) && (inputRefDP.length() > 0)) { 
-                     inputDataProvider = dataProviderManager.getDataProvider(inputRefDP);
-                }
-    
-                Iterator<Object> itInput = input.iterator();
-                while (itInput.hasNext() && !isInterrupted()) {
-                    Object currData = itInput.next();
-    
-                    GVBuffer currInput = new GVBuffer(internalData, false);
-                    currInput.setObject(currData);
-                    if (inputDataProvider != null) {
-                        inputDataProvider.setObject(currInput); 
-                        Object inputCall = inputDataProvider.getResult();
-                        currInput.setObject(inputCall);
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("currInput= " + currInput.toString());
-                    }
-                    
-                    tasks.add(new SubFlowTask(subFlowPool, currInput, onDebug, changeLogContext, logContext, null));
-                }
+            checkInterrupted("GVSubFlowParallelNode", logger);
 
-                checkInterrupted("GVSubFlowSplittedNode", logger);
+            if (tasks.isEmpty()) {
+                throw new GVCoreSkippedException("GV_SKIPPED_SPLITTED_SERVICE_ERROR", new String[][]{
+                        {"service", internalData.getService()}, {"system", internalData.getSystem()},
+                        {"id", internalData.getId().toString()}, {"message", "No parallel task to execute"}});
+            }
+            output = executor.execute(internalData.getId(), tasks, termMode, timeout);
 
-                if (tasks.isEmpty()) {
-                    throw new GVCoreSkippedException("GV_SKIPPED_SPLITTED_SERVICE_ERROR", new String[][]{
-                            {"service", internalData.getService()}, {"system", internalData.getSystem()},
-                            {"id", internalData.getId().toString()}, {"message", "No parallel task to execute"}});
-                }
-                output = executor.execute(internalData.getId(), tasks, termMode, timeout);
-            }
-            finally {
-                if (inputDataProvider != null) {
-                    dataProviderManager.releaseDataProvider(inputRefDP, inputDataProvider);
-                }
-            }
             logger.info("END ProcessSubFlow");
-
             return output;
         }
         catch (InterruptedException exc) {
@@ -402,10 +397,10 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
             throw exc;
         }
         catch (Exception exc) {
-            logger.error("An error occurred while performing splitted call", exc);
-            throw new CallException("GV_CALL_SPLITTED_SERVICE_ERROR", new String[][]{
-                      {"service", internalData.getService()}, {"system", internalData.getSystem()},
-                      {"id", internalData.getId().toString()}, {"message", exc.getMessage()}}, exc);
+            logger.error("An error occurred while performing parallel call", exc);
+            throw new CallException("GV_CALL_PARALLEL_SERVICE_ERROR", new String[][]{
+                    {"service", internalData.getService()}, {"system", internalData.getSystem()},
+                    {"id", internalData.getId().toString()}, {"message", exc.getMessage()}}, exc);
         }
         finally {
             tasks.clear();
