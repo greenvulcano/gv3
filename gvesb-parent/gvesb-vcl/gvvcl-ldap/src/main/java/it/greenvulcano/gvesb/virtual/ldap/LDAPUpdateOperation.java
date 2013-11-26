@@ -52,11 +52,12 @@ public class LDAPUpdateOperation implements CallOperation
     private static final Logger   logger      = GVLogger.getLogger(LDAPUpdateOperation.class);
 
     private JNDIHelper            ldapContext = null;
-
+    private String                defUser     = null;
+    private String                defPassword = null;
     private String                rootContext = null;
 
     private LDAPContextXmlBuilder builder     = new LDAPContextXmlBuilder();
-
+    
     private OperationKey          key         = null;
 
     /**
@@ -72,6 +73,8 @@ public class LDAPUpdateOperation implements CallOperation
             rootContext = XMLConfig.get(config, "@rootContext", "");
 
             ldapContext = new JNDIHelper(XMLConfig.getNode(config, "LDAPContext"));
+            defUser = ldapContext.getProperty(Context.SECURITY_PRINCIPAL);
+            defPassword = ldapContext.getProperty(Context.SECURITY_CREDENTIALS);
         }
         catch (Exception exc) {
             throw new InitializationException("GV_CONFIGURATION_ERROR", new String[][]{{"message", exc.getMessage()}},
@@ -92,10 +95,12 @@ public class LDAPUpdateOperation implements CallOperation
             String currPassword = gvBuffer.getProperty(LDAPVclCommons.GVLDAP_PASSWORD);
             String currRootCtx = gvBuffer.getProperty(LDAPVclCommons.GVLDAP_ROOT_CONTEXT);
 
-            currUser = (currUser != null) ? currUser : ldapContext.getProperty(Context.SECURITY_PRINCIPAL);
-            currPassword = (currPassword != null)
-                    ? currPassword
-                    : ldapContext.getProperty(Context.SECURITY_CREDENTIALS);
+            if (currUser == null) {
+                currUser = defUser;
+            }
+            if (currPassword == null) {
+                currPassword = defPassword; 
+            }
             currRootCtx = (currRootCtx != null) ? currRootCtx : rootContext;
 
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
