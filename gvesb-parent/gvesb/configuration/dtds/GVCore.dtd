@@ -3926,7 +3926,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVCoreCallNode (Description?)>
+<!ELEMENT GVCoreCallNode (Description?, InputServices?, OutputServices?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -4123,7 +4123,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowCallNode (Description?, GVRouting*)>
+<!ELEMENT GVSubFlowCallNode (Description?, InputServices?, OutputServices?, GVRouting*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -4748,7 +4748,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowSpawnNode (Description?, FlowDef+)>
+<!ELEMENT GVSubFlowSpawnNode (Description?, InputServices?, FlowDef+)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -4884,7 +4884,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowParallelNode (Description?, FlowDef+, ResultProcessor?)>
+<!ELEMENT GVSubFlowParallelNode (Description?, InputServices?, OutputServices?, FlowDef+, ResultProcessor?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -5042,7 +5042,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowSplittedNode (Description?, ResultProcessor?)>
+<!ELEMENT GVSubFlowSplittedNode (Description?, InputServices?, OutputServices?, ResultProcessor?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.

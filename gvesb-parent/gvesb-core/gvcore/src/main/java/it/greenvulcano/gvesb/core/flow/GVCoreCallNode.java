@@ -89,6 +89,14 @@ public class GVCoreCallNode extends GVFlowNode
 
     private String              inputRefDP            = null;
     private String              outputRefDP           = null;
+    /**
+     * the input services
+     */
+    private GVInternalServiceHandler inputServices    = new GVInternalServiceHandler();
+    /**
+     * the output services
+     */
+    private GVInternalServiceHandler outputServices   = new GVInternalServiceHandler();
 
     /**
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#init(org.w3c.dom.Node)
@@ -113,7 +121,8 @@ public class GVCoreCallNode extends GVFlowNode
     @Override
     public void cleanUp() throws GVCoreException
     {
-        // do nothing
+        inputServices.cleanUp();
+        outputServices.cleanUp();
     }
 
     /**
@@ -122,7 +131,8 @@ public class GVCoreCallNode extends GVFlowNode
     @Override
     public void destroy() throws GVCoreException
     {
-        // do nothing
+        inputServices = null;
+        outputServices = null;
     }
 
     /**
@@ -204,14 +214,16 @@ public class GVCoreCallNode extends GVFlowNode
                         dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
                     }
                 }
-                data = gvOp.perform(internalData, onDebug);
+                internalData = inputServices.perform(internalData);
+                internalData = gvOp.perform(internalData, onDebug);
+                internalData = outputServices.perform(internalData);
                 if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
                     try {
                         logger.debug("Working on Output data provider: " + dataProvider.getClass());
-                        dataProvider.setObject(data);
+                        dataProvider.setObject(internalData);
                         Object outputCall = dataProvider.getResult();
-                        data.setObject(outputCall);
+                        internalData.setObject(outputCall);
                     }
                     finally {
                         dataProviderManager.releaseDataProvider(outputRefDP, dataProvider);
@@ -221,13 +233,13 @@ public class GVCoreCallNode extends GVFlowNode
             finally {
                 NMDC.pop();
                 if (isFlowSysSvcSet) {
-                    data.setSystem(origSystem);
-                    data.setService(origService);
+                    internalData.setSystem(origSystem);
+                    internalData.setService(origService);
                 }
             }
-            environment.put(output, data);
+            environment.put(output, internalData);
             if (logger.isDebugEnabled() || isDumpInOut()) {
-                logger.info(GVFormatLog.formatOUTPUT(data, false, false));
+                logger.info(GVFormatLog.formatOUTPUT(internalData, false, false));
             }
         }
         catch (InterruptedException exc) {
@@ -283,6 +295,15 @@ public class GVCoreCallNode extends GVFlowNode
             if (flowOp.equals("")) {
                 throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'operation'"},
                         {"node", XPathFinder.buildXPath(defNode)}});
+            }
+            
+            Node intSvcNode = XMLConfig.getNode(defNode, "InputServices");
+            if (intSvcNode != null) {
+                inputServices.init(intSvcNode, this, true);
+            }
+            intSvcNode = XMLConfig.getNode(defNode, "OutputServices");
+            if (intSvcNode != null) {
+                outputServices.init(intSvcNode, this, false);
             }
         }
         catch (XMLConfigException exc) {

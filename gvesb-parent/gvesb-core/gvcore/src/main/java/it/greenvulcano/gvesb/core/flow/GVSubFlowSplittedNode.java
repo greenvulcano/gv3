@@ -91,6 +91,14 @@ public class GVSubFlowSplittedNode extends GVFlowNode
      */
     private GVSubFlowPool       subFlowPool      = null;
     /**
+     * the input services
+     */
+    private GVInternalServiceHandler inputServices  = new GVInternalServiceHandler();
+    /**
+     * the output services
+     */
+    private GVInternalServiceHandler outputServices = new GVInternalServiceHandler();
+    /**
      * The SubFlow executor
      */
     private ParallelExecutor    executor         = null;
@@ -143,10 +151,18 @@ public class GVSubFlowSplittedNode extends GVFlowNode
                 throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'subflow'"},
                         {"node", XPathFinder.buildXPath(defNode)}});
             }
-    
+
+            Node intSvcNode = XMLConfig.getNode(defNode, "InputServices");
+            if (intSvcNode != null) {
+                inputServices.init(intSvcNode, this, true);
+            }
+            intSvcNode = XMLConfig.getNode(defNode, "OutputServices");
+            if (intSvcNode != null) {
+                outputServices.init(intSvcNode, this, true);
+            }
             initSubFlowPool(defNode);
         }
-        catch (XMLConfigException exc) {
+        catch (Exception exc) {
             throw new GVCoreConfException("GVCORE_INIT_ERROR", new String[][]{{"id", getId()},
                     {"node", XPathFinder.buildXPath(defNode)}}, exc);
         }
@@ -194,21 +210,24 @@ public class GVSubFlowSplittedNode extends GVFlowNode
                     GVBufferMDC.put(internalData);
                 }
                 
+                internalData = inputServices.perform(internalData);
+                
                 result = processSubFlow(internalData, onDebug);
                 checkInterrupted("GVSubFlowSplittedNode", logger);
-                data = processOutput(internalData, result);
+                internalData = processOutput(internalData, result);
+                
+                internalData = outputServices.perform(internalData);
             }
             catch (GVCoreSkippedException exc) {
                 logger.warn("Get Skipped notification");
                 isSkipped = true;
-                data = internalData;
             }
             finally {
                 NMDC.pop();
             }
-            environment.put(output, data);
+            environment.put(output, internalData);
             if (logger.isDebugEnabled() || isDumpInOut()) {
-                logger.info(GVFormatLog.formatOUTPUT(data, false, false));
+                logger.info(GVFormatLog.formatOUTPUT(internalData, false, false));
             }
         }
         catch (InterruptedException exc) {
@@ -263,6 +282,8 @@ public class GVSubFlowSplittedNode extends GVFlowNode
         if (executor != null) {
             executor.cleanup(true);
         }
+        inputServices.cleanUp();
+        outputServices.cleanUp();
     }
 
     /**
@@ -278,6 +299,8 @@ public class GVSubFlowSplittedNode extends GVFlowNode
             subFlowPool.destroy();
         }
         subFlowPool = null;
+        inputServices = null;
+        outputServices = null;
     }
 
     
