@@ -67,8 +67,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.sun.mail.pop3.POP3Folder;
-
+import com.sun.mail.pop3.POP3Store;
 
 /**
  * Check for emails on POP3 server.
@@ -296,7 +295,7 @@ public class POPCallOperation implements CallOperation
                     boolean skipMessage = false;
 
                     if (!delete_messages) {
-                        if (folder instanceof POP3Folder) {
+                        if (localStore instanceof POP3Store) {
                             String uid = msgs[i].getHeader("Message-ID")[0];
                             if (uid != null) {
                                 if (uidCache.contains(uid)) {
