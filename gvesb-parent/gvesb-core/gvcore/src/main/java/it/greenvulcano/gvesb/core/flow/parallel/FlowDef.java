@@ -63,14 +63,14 @@ public class FlowDef
 
             if (condition != null) {
                 logger.debug("Searching condition '" + condition + "' at Flow or SubFlow level");
-                Node checkNode = XMLConfig.getNode(node, "../../Conditions/*[@condition='" + condition + "']");
+                Node checkNode = XMLConfig.getNode(node, "../../../Conditions/*[@condition='" + condition + "']");
                 if (checkNode == null) {
                     logger.debug("Searching condition '" + condition + "' at Operation level");
-                    checkNode = XMLConfig.getNode(node, "../../../Conditions/*[@condition='" + condition + "']");
+                    checkNode = XMLConfig.getNode(node, "../../../../Conditions/*[@condition='" + condition + "']");
                 }
                 if (checkNode == null) {
                     logger.debug("Searching condition '" + condition + "' at Service level");
-                    checkNode = XMLConfig.getNode(node, "../../../../Conditions/*[@condition='" + condition + "']");
+                    checkNode = XMLConfig.getNode(node, "../../../../../Conditions/*[@condition='" + condition + "']");
                 }
                 if (checkNode == null) {
                     throw new GVCoreConfException("GVCORE_CONDITION_NOT_FOUND_ERROR",

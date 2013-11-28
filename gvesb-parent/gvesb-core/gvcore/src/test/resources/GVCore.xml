@@ -846,8 +846,10 @@ STACK  : ${stackTrace}
                                     op-type="parallel" output="output"
                                     point-x="186" point-y="152" type="flow-node"
                                     termination-mode="normal-end" timeout="30">
-               <FlowDef name="flow1" condition="cond1" subflow="TOUPPER_FLOW"/>
-               <FlowDef name="flow2" condition="cond2" subflow="TOLOWER_FLOW"/>
+               <FlowDefs>
+                 <FlowDef name="flow1" condition="cond1" subflow="TOUPPER_FLOW"/>
+                 <FlowDef name="flow2" condition="cond2" subflow="TOLOWER_FLOW"/>
+               </FlowDefs>
                <ResultProcessor/>
              </GVSubFlowParallelNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
@@ -903,8 +905,10 @@ STACK  : ${stackTrace}
                                     op-type="parallel" output="output"
                                     point-x="186" point-y="152" type="flow-node"
                                     termination-mode="first-end" timeout="30">
-               <FlowDef name="flow1" subflow="TOUPPER_FLOW" ref-dp="first"/>
-               <FlowDef name="flow2" subflow="TOLOWER_FLOW" ref-dp="second"/>
+               <FlowDefs>
+                 <FlowDef name="flow1" subflow="TOUPPER_FLOW" ref-dp="first"/>
+                 <FlowDef name="flow2" subflow="TOLOWER_FLOW" ref-dp="second"/>
+               </FlowDefs>
                <ResultProcessor/>
              </GVSubFlowParallelNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
@@ -960,8 +964,10 @@ STACK  : ${stackTrace}
                                     op-type="parallel" output="output"
                                     point-x="186" point-y="152" type="flow-node"
                                     termination-mode="first-error" timeout="30">
-               <FlowDef name="flow1" subflow="TOUPPER_FLOW" ref-dp="first"/>
-               <FlowDef name="flow2" subflow="TOLOWER_FLOW" ref-dp="second"/>
+               <FlowDefs>
+                 <FlowDef name="flow1" subflow="TOUPPER_FLOW" ref-dp="first"/>
+                 <FlowDef name="flow2" subflow="TOLOWER_FLOW" ref-dp="second"/>
+               </FlowDefs>
                <ResultProcessor/>
              </GVSubFlowParallelNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
