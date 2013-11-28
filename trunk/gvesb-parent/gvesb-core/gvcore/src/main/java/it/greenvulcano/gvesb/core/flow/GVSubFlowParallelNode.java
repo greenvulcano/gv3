@@ -302,7 +302,7 @@ public class GVSubFlowParallelNode extends BaseParallelNode
      */
     private void initFlowDefs(Node defNode) throws GVCoreConfException {
         try {
-            NodeList fdNodes = XMLConfig.getNodeList(defNode, "FlowDef");
+            NodeList fdNodes = XMLConfig.getNodeList(defNode, "FlowDefs/FlowDef");
             if (fdNodes.getLength() == 0) {
                 throw new GVCoreConfException("GVCORE_INVALID_CFG_PARAM_ERROR", new String[][]{{"name", "'FlowDef'"},
                         {"node", XPathFinder.buildXPath(defNode)}});

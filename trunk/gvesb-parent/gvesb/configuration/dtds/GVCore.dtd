@@ -4712,9 +4712,9 @@
     If not defined the subflow is always executed.
 
     #NotNull
-    #References: ../../Conditions/*[@type='condition']/@condition
     #References: ../../../Conditions/*[@type='condition']/@condition
     #References: ../../../../Conditions/*[@type='condition']/@condition
+    #References: ../../../../../Conditions/*[@type='condition']/@condition
 -->
 <!ATTLIST FlowDef  condition CDATA #IMPLIED>
 <!--
@@ -4725,6 +4725,8 @@
     #References: gvesb:document('GVAdapters')/GVAdapters/GVDataProviderManager/DataProviders/*[@type='dataProvider']/@name
 -->
 <!ATTLIST FlowDef  ref-dp CDATA #IMPLIED>
+
+<!ELEMENT FlowDefs (Description?, FlowDef+)>
 
 <!--
     Defines SubFlows output aggregation policy.
@@ -4748,7 +4750,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowSpawnNode (Description?, InputServices?, FlowDef+)>
+<!ELEMENT GVSubFlowSpawnNode (Description?, InputServices?, FlowDefs)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -4870,7 +4872,6 @@
 -->
 <!ATTLIST GVSubFlowSpawnNode dump-env-in-out (true|false) #IMPLIED>
 
-
 <!--
     Node that allows direct invocation of a GreenVulcanoESB core workflow sub-flows as parallel process.
 
@@ -4884,7 +4885,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowParallelNode (Description?, InputServices?, OutputServices?, FlowDef+, ResultProcessor?)>
+<!ELEMENT GVSubFlowParallelNode (Description?, InputServices?, OutputServices?, FlowDefs, ResultProcessor?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -5151,7 +5152,7 @@
 <!--
     Node on which transfer control in case @termination-mode=timeout and not all subflow
     are terminated after @timeout seconds.
-    If not defined the control is transferred to @@default-id node.
+    If not defined the control is transferred to @default-id node.
 
     #References: preceding-sibling::*/@id
     #References: following-sibling::*/@id
