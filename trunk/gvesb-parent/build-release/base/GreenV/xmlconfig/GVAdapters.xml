@@ -435,6 +435,27 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                 </Field>
             </Axis2MessageContextDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="genericPassFullBody_WSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">#resBody = envelope.body,
+#newBody = @org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement()),
+#childs = #newBody.childElements,
+#loop = :[#this != null &amp;&amp;
+                ((#resBody.addChild(#this)) ,
+                  #loop(#childs.hasNext ? #childs.next : null))
+         ],
+#loop(#childs.hasNext ? #childs.next : null)</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="genericPassEnvelopeOM_WSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">envelope = #input.object</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
                                              name="resp_zipAttachment_WSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
