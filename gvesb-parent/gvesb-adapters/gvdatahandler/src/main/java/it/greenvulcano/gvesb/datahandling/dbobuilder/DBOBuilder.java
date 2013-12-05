@@ -192,7 +192,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             
-            NodeList mergeNodes = XMLConfig.getNodeList(builder, "Merge/MergeInfo");
+            NodeList mergeNodes = XMLConfig.getNodeList(builder, "XMLMerge/MergeInfo");
             for (int i = 0; i < mergeNodes.getLength(); i++) {
                 Node mergeNode = mergeNodes.item(i);
                 MergeInfo mergeInfo = new MergeInfo(XMLConfig.get(mergeNode, "@source"), XMLConfig.get(mergeNode, "@xpath-source"),

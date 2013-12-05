@@ -69,10 +69,10 @@
       <DBOSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect" name="TestSelect_2-select" output-data="second">
         <statement id="0" type="select">select '2' as dbo, id, field1, field2, field3 from testtable order by id</statement>
       </DBOSelect>
-      <Merge>
+      <XMLMerge>
          <MergeInfo source="first"/>
          <MergeInfo source="second" xpath-source="/RowSet/data" xpath-dest="/RowSet"/>
-      </Merge>
+      </XMLMerge>
     </DBOBuilder>
 
     <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder" make-dump="text"

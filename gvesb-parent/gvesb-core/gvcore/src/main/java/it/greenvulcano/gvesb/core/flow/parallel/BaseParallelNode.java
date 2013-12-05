@@ -19,13 +19,17 @@
  */
 package it.greenvulcano.gvesb.core.flow.parallel;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.buffer.GVException;
+import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.flow.GVFlowNode;
+import it.greenvulcano.util.xpath.XPathFinder;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
+import org.w3c.dom.Node;
 
 /**
  *
@@ -35,21 +39,24 @@ import java.util.List;
  */
 public abstract class BaseParallelNode extends GVFlowNode
 {
-
-    protected GVBuffer processOutput(GVBuffer inputData, List<Result> result) throws GVException {
-        List<Object> data = new ArrayList<Object>();
-
-        Iterator<Result> itInput = result.iterator();
-        while (itInput.hasNext()) {
-            Result currOutput = itInput.next();
-            if (currOutput.getState() == Result.State.STATE_OK) {
-                Object d = currOutput.getData();
-                if (d != null) {
-                    data.add(((GVBuffer) d).getObject());
-                }
-            }
+    protected ResultProcessor resultProcessor = null;
+    
+    @Override
+    public void init(Node defNode) throws GVCoreConfException {
+        super.init(defNode);
+        try {
+            Node rsNode = XMLConfig.getNode(defNode, "ResultProcessor");
+            resultProcessor = new ResultProcessor();
+            resultProcessor.init(rsNode);
         }
-        inputData.setObject(data);
-        return inputData;
+        catch (XMLConfigException exc) {
+            throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{
+                    {"name", "'ResultProcessor'"}, {"node", XPathFinder.buildXPath(defNode)}});
+        }
+    }
+
+    protected GVBuffer processOutput(GVBuffer inputData, List<Result> results) throws GVException, InterruptedException {
+        GVBuffer outputData = resultProcessor.process(inputData, results);
+        return outputData;
     }
 }

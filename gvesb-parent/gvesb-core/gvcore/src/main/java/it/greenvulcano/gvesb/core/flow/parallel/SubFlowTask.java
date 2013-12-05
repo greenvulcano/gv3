@@ -87,14 +87,14 @@ public class SubFlowTask implements Callable<Result>
 
                 subFlow = pool.getSubFlow();
                 GVBuffer output = subFlow.perform(internalData, onDebug);
-                result = new Result(Result.State.STATE_OK, output, input);
+                result = new Result(Result.State.STATE_OK, input, output);
             }
             catch (InterruptedException exc) {
-                result = new Result(Result.State.STATE_INTERRUPTED, exc, input);
+                result = new Result(Result.State.STATE_INTERRUPTED, input, exc);
                 Thread.currentThread().interrupt();
             }
             catch (Exception exc) {
-                result = new Result(Result.State.STATE_ERROR, exc, input);
+                result = new Result(Result.State.STATE_ERROR, input, exc);
             }
             finally {
                 if (pool != null) {
@@ -114,14 +114,14 @@ public class SubFlowTask implements Callable<Result>
     }
 
     public Result getFailureResult(Throwable cause) {
-        return new Result(Result.State.STATE_ERROR, cause, input);
+        return new Result(Result.State.STATE_ERROR, input, cause);
     }
 
     public Result getTimeoutResult(InterruptedException cause) {
-        return new Result(Result.State.STATE_TIMEOUT, cause, input);
+        return new Result(Result.State.STATE_TIMEOUT, input, cause);
     }
 
     public Result getCancelledResult(CancellationException cause) {
-        return new Result(Result.State.STATE_CANCELLED, cause, input);
+        return new Result(Result.State.STATE_CANCELLED, input, cause);
     }
 }

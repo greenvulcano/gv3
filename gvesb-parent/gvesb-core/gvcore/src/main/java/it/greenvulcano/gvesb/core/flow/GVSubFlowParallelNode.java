@@ -32,9 +32,6 @@ import it.greenvulcano.gvesb.core.flow.parallel.GVSubFlowPool;
 import it.greenvulcano.gvesb.core.flow.parallel.ParallelExecutor;
 import it.greenvulcano.gvesb.core.flow.parallel.Result;
 import it.greenvulcano.gvesb.core.flow.parallel.SubFlowTask;
-import it.greenvulcano.gvesb.gvdp.DataProviderManager;
-import it.greenvulcano.gvesb.gvdp.IDataProvider;
-import it.greenvulcano.gvesb.internal.condition.GVCondition;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.log.GVLogger;
@@ -42,7 +39,6 @@ import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.xpath.XPathFinder;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -165,7 +161,7 @@ public class GVSubFlowParallelNode extends BaseParallelNode
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException,
             InterruptedException {
         GVBuffer internalData = null;
-        List<Result> result = null;
+        List<Result> results = null;
         boolean isSkipped = false;
         boolean isError = false;
         String input = getInput();
@@ -198,9 +194,9 @@ public class GVSubFlowParallelNode extends BaseParallelNode
 
                 internalData = inputServices.perform(internalData);
 
-                result = processSubFlow(internalData, onDebug);
+                results = processSubFlow(internalData, onDebug);
                 checkInterrupted("GVSubFlowParallelNode", logger);
-                internalData = processOutput(internalData, result);
+                internalData = processOutput(internalData, results);
 
                 internalData = outputServices.perform(internalData);
             }
