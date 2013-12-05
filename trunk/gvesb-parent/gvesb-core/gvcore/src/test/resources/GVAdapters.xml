@@ -43,6 +43,12 @@
           <Expression type="xpath">/Radice/data/text()</Expression>
         </Field>
       </CollectionDataProvider>
+      <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider" name="xpathSplitter"
+        source-selector="object" type="dataProvider">
+        <Field direction="INOUT" key="buffer" type="field">
+          <Expression type="xpath">/root/element</Expression>
+        </Field>
+      </CollectionDataProvider>
       <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider" name="ognlCollectionDataProvider"
         source-selector="object" type="dataProvider">
         <Field direction="INOUT" key="buffer" type="field">

@@ -23,18 +23,21 @@ import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.buffer.GVPublicException;
 import it.greenvulcano.gvesb.buffer.Id;
 import it.greenvulcano.gvesb.core.GreenVulcano;
+import it.greenvulcano.util.xml.XMLUtils;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import junit.framework.TestCase;
+import org.custommonkey.xmlunit.XMLTestCase;
+import org.custommonkey.xmlunit.XMLUnit;
+import org.w3c.dom.Document;
 
 /**
  * @version 3.4.0 Jun 17, 2013
  * @author GreenVulcano Developer Team
  */
-public class GVCoreParallelTestCase extends TestCase
+public class GVCoreParallelTestCase extends XMLTestCase
 {
 
     /**
@@ -43,7 +46,7 @@ public class GVCoreParallelTestCase extends TestCase
     @Override
     protected void setUp() throws Exception
     {
-        // do nothing
+        XMLUnit.setIgnoreWhitespace(true);
     }
 
 
@@ -91,6 +94,154 @@ public class GVCoreParallelTestCase extends TestCase
         System.out.println(gvBufferout);
         System.out.println("TEST 3----SPL");
         assertEquals("[CIRO, NUNZIO, GIANFRANCO, ANTONIO]", gvBufferout.getObject().toString());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+    }
+
+    /**
+     * @throws Exception
+     */
+    public void testTestSplitterNormalEnd_OutJS() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TestSplitterNormalEnd_OutJS";
+        String TEST_BUFFER = "ciro,nunzio,gianfranco,antonio";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 1----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 1----SPL");
+        assertEquals("[ciro -> CIRO];[nunzio -> NUNZIO];[gianfranco -> GIANFRANCO];[antonio -> ANTONIO]", gvBufferout.getObject().toString());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 2----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 2----SPL");
+        assertEquals("[ciro -> CIRO];[nunzio -> NUNZIO];[gianfranco -> GIANFRANCO];[antonio -> ANTONIO]", gvBufferout.getObject().toString());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 3----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 3----SPL");
+        assertEquals("[ciro -> CIRO];[nunzio -> NUNZIO];[gianfranco -> GIANFRANCO];[antonio -> ANTONIO]", gvBufferout.getObject().toString());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+    }
+
+    /**
+     * @throws Exception
+     */
+    public void testTestSplitterNormalEnd_OutXML() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TestSplitterNormalEnd_OutXML";
+        String TEST_BUFFER = "<root><element>el1</element><element>el2</element></root>";
+        String OUT_BUFFER = "<Aggregate xmlns=\"http://www.greenvulcano.it/greenvulcano\"><element>el1</element><element>el2</element></Aggregate>";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 1----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 1----SPL");
+        String res = XMLUtils.serializeDOM_S((Document) gvBufferout.getObject());
+        assertXMLEqual("XMLAggregate Failed", OUT_BUFFER, res);
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 2----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 2----SPL");
+        res = XMLUtils.serializeDOM_S((Document) gvBufferout.getObject());
+        assertXMLEqual("XMLAggregate Failed", OUT_BUFFER, res);
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 3----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 3----SPL");
+        res = XMLUtils.serializeDOM_S((Document) gvBufferout.getObject());
+        assertXMLEqual("XMLAggregate Failed", OUT_BUFFER, res);
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+    }
+
+    /**
+     * @throws Exception
+     */
+    public void testTestSplitterNormalEnd_OutOgnl() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TestSplitterNormalEnd_OutOgnl";
+        String TEST_BUFFER = "ciro,nunzio,gianfranco,antonio";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 1----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 1----SPL");
+        assertEquals("[ciro -> CIRO];[nunzio -> NUNZIO];[gianfranco -> GIANFRANCO];[antonio -> ANTONIO]", gvBufferout.getObject().toString());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 2----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 2----SPL");
+        assertEquals("[ciro -> CIRO];[nunzio -> NUNZIO];[gianfranco -> GIANFRANCO];[antonio -> ANTONIO]", gvBufferout.getObject().toString());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 3----SPL");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 3----SPL");
+        assertEquals("[ciro -> CIRO];[nunzio -> NUNZIO];[gianfranco -> GIANFRANCO];[antonio -> ANTONIO]", gvBufferout.getObject().toString());
         assertEquals("DEFAULT", gvBufferout.getProperty("END"));
 
     }
@@ -358,6 +509,73 @@ public class GVCoreParallelTestCase extends TestCase
         outData = (List<Object>) gvBufferout.getObject();
         assertEquals(1, outData.size());
         assertEquals(TEST_BUFFER.toLowerCase(), outData.get(0));
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBuffer.setProperty("P1", "X");
+        gvBuffer.setProperty("P2", "X");
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 4----PAR");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 4----PAR");
+        assertEquals(TEST_BUFFER, gvBufferout.getObject());
+        assertEquals("SKIP", gvBufferout.getProperty("END"));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public void testTestParallelNormalEnd_OutJS() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TestParallelNormalEnd_OutJS";
+        String TEST_BUFFER = "CiRo,NuNzIo,GiAnFrAnCo,AnToNiO";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        gvBuffer.setProperty("P1", "V1");
+        gvBuffer.setProperty("P2", "V2");
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 1----PAR");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 1----PAR");
+        assertEquals("[CiRo,NuNzIo,GiAnFrAnCo,AnToNiO -> CIRO,NUNZIO,GIANFRANCO,ANTONIO];[CiRo,NuNzIo,GiAnFrAnCo,AnToNiO -> ciro,nunzio,gianfranco,antonio]", gvBufferout.getObject());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBuffer.setProperty("P1", "V1");
+        gvBuffer.setProperty("P2", "X");
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 2----PAR");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 2----PAR");
+        assertEquals("[CiRo,NuNzIo,GiAnFrAnCo,AnToNiO -> CIRO,NUNZIO,GIANFRANCO,ANTONIO]", gvBufferout.getObject());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBuffer.setProperty("P1", "X");
+        gvBuffer.setProperty("P2", "V2");
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 3----PAR");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 3----PAR");
+        assertEquals("[CiRo,NuNzIo,GiAnFrAnCo,AnToNiO -> ciro,nunzio,gianfranco,antonio]", gvBufferout.getObject());
         assertEquals("DEFAULT", gvBufferout.getProperty("END"));
 
         id = new Id();

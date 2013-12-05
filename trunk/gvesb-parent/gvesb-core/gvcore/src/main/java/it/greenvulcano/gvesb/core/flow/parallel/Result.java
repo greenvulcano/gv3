@@ -50,21 +50,21 @@ public class Result
     }
 
     private State    state;
-    private Object   data;
+    private Object   output;
     private GVBuffer input;
 
-    public Result(State state, Object data, GVBuffer input) {
+    public Result(State state, GVBuffer input, Object output) {
         this.state = state;
-        this.data = data;
         this.input = input;
+        this.output = output;
     }
 
     public State getState() {
         return this.state;
     }
 
-    public Object getData() {
-        return this.data;
+    public Object getOutput() {
+        return this.output;
     }
 
     public GVBuffer getInput() {
@@ -73,6 +73,6 @@ public class Result
 
     @Override
     public String toString() {
-        return "Result state[" + state + "] data: " + data;
+        return "Result state[" + state + "] output: " + output;
     }
 }

@@ -626,7 +626,7 @@ STACK  : ${stackTrace}
                                     subflow="TOUPPER_FLOW"
                                     termination-mode="normal-end" timeout="30"
                                     type="flow-node">
-               <ResultProcessor/>
+               <ResultProcessor processor-input="only-object" fail-on-error="false"/>
              </GVSubFlowSplittedNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
                id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
@@ -663,6 +663,183 @@ STACK  : ${stackTrace}
          </Operation>
        </Service>
 
+       <Service group-name="DEFAULT_GRP" id-service="TestSplitterNormalEnd_OutJS" service-activation="on" statistics="off">
+         <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="RequestReply" operation-activation="on"
+                    out-check-type="sys-svc-id" type="operation">
+           <Participant id-channel="TEST_CHANNEL" id-system="GVESB"/>
+           <Flow first-node="split" point-x="20" point-y="150">
+             <GVSubFlowSplittedNode class="it.greenvulcano.gvesb.core.flow.GVSubFlowSplittedNode"
+                                    partition-dp="ognlCollectionDataProvider"
+                                    default-id="end" id="split" input="input"
+                                    max-thread="5" on-exception-id="end-exc"
+                                    on-skip-id="end-skip"
+                                    on-timeout-id="end-tout" op-type="splitter"
+                                    output="output" point-x="186" point-y="152"
+                                    subflow="TOUPPER_FLOW"
+                                    termination-mode="normal-end" timeout="30"
+                                    type="flow-node">
+               <ResultProcessor processor-input="only-gvbuffer" fail-on-error="true">
+                 <JavaScript>var str = "";
+for (var i=0; i&lt;results.size(); i++)
+{
+    var inV = results.get(i).getInput().getObject();
+    var outV = results.get(i).getOutput().getObject();
+    str += ";[" + inV + " -&gt; " + outV + "]";
+}
+
+data.setObject(str.substring(1));</JavaScript>
+               </ResultProcessor>
+             </GVSubFlowSplittedNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="DEFAULT"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-exc" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="EXCEPTION"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-tout" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="TIMEOUT"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-skip" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="SKIP"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+           </Flow>
+           <SubFlow first-node="call_server" name="TOUPPER_FLOW" point-x="20" point-y="150">
+             <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="call_server" 
+                              id-system="GVESB" input="input" next-node-id="end" op-type="call" type="flow-node"
+                              operation-name="toupper_call" output="output" point-x="186" point-y="152"/>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node"/>
+           </SubFlow>
+         </Operation>
+       </Service>
+
+       <Service group-name="DEFAULT_GRP" id-service="TestSplitterNormalEnd_OutXML" service-activation="on" statistics="off">
+         <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="RequestReply" operation-activation="on"
+                    out-check-type="sys-svc-id" type="operation">
+           <Participant id-channel="TEST_CHANNEL" id-system="GVESB"/>
+           <Flow first-node="split" point-x="20" point-y="150">
+             <GVSubFlowSplittedNode class="it.greenvulcano.gvesb.core.flow.GVSubFlowSplittedNode"
+                                    partition-dp="xpathSplitter"
+                                    default-id="end" id="split" input="input"
+                                    max-thread="5" on-exception-id="end-exc"
+                                    on-skip-id="end-skip"
+                                    on-timeout-id="end-tout" op-type="splitter"
+                                    output="output" point-x="186" point-y="152"
+                                    subflow="ECHO_FLOW"
+                                    termination-mode="normal-end" timeout="30"
+                                    type="flow-node">
+               <ResultProcessor processor-input="only-gvbuffer" fail-on-error="true">
+                 <XMLAggregate root="Aggregate" namespace="http://www.greenvulcano.it/greenvulcano"/>
+               </ResultProcessor>
+             </GVSubFlowSplittedNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="DEFAULT"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-exc" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="EXCEPTION"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-tout" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="TIMEOUT"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-skip" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="SKIP"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+           </Flow>
+           <SubFlow first-node="call_server" name="ECHO_FLOW" point-x="20" point-y="150">
+             <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="call_server" 
+                              id-system="GVESB" input="input" next-node-id="end" op-type="call" type="flow-node"
+                              operation-name="echo_call" output="output" point-x="186" point-y="152"/>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node"/>
+           </SubFlow>
+         </Operation>
+       </Service>
+       
+       <Service group-name="DEFAULT_GRP" id-service="TestSplitterNormalEnd_OutOgnl" service-activation="on" statistics="off">
+         <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="RequestReply" operation-activation="on"
+                    out-check-type="sys-svc-id" type="operation">
+           <Participant id-channel="TEST_CHANNEL" id-system="GVESB"/>
+           <Flow first-node="split" point-x="20" point-y="150">
+             <GVSubFlowSplittedNode class="it.greenvulcano.gvesb.core.flow.GVSubFlowSplittedNode"
+                                    partition-dp="ognlCollectionDataProvider"
+                                    default-id="end" id="split" input="input"
+                                    max-thread="5" on-exception-id="end-exc"
+                                    on-skip-id="end-skip"
+                                    on-timeout-id="end-tout" op-type="splitter"
+                                    output="output" point-x="186" point-y="152"
+                                    subflow="TOUPPER_FLOW"
+                                    termination-mode="normal-end" timeout="30"
+                                    type="flow-node">
+               <ResultProcessor processor-input="only-gvbuffer" fail-on-error="true">
+                 <OGNLScript>#str = "",
+#iter = #results.iterator,
+#loop = :[#this != null &amp;&amp;
+                ((#str = #str + ";[" + #this.input.object + " -&gt; " + #this.output.object + "]"),
+                  #loop(#iter.hasNext ? #iter.next : null))
+         ],
+#loop(#iter.hasNext ? #iter.next : null),
+#data.setObject(#str.substring(1))</OGNLScript>
+               </ResultProcessor>
+             </GVSubFlowSplittedNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="DEFAULT"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-exc" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="EXCEPTION"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-tout" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="TIMEOUT"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end-skip" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="SKIP"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+           </Flow>
+           <SubFlow first-node="call_server" name="TOUPPER_FLOW" point-x="20" point-y="150">
+             <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="call_server" 
+                              id-system="GVESB" input="input" next-node-id="end" op-type="call" type="flow-node"
+                              operation-name="toupper_call" output="output" point-x="186" point-y="152"/>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node"/>
+           </SubFlow>
+         </Operation>
+       </Service>
+       
        <Service group-name="DEFAULT_GRP" id-service="TestSplitterFirstEnd" service-activation="on" statistics="off">
          <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="RequestReply" operation-activation="on"
                     out-check-type="sys-svc-id" type="operation">
@@ -679,7 +856,7 @@ STACK  : ${stackTrace}
                                     subflow="TOUPPER_FLOW"
                                     termination-mode="first-end" timeout="30"
                                     type="flow-node">
-               <ResultProcessor/>
+               <ResultProcessor processor-input="only-object" fail-on-error="false"/>
              </GVSubFlowSplittedNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
                id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
@@ -732,7 +909,7 @@ STACK  : ${stackTrace}
                                     subflow="TOUPPER_FLOW"
                                     termination-mode="first-error" timeout="30"
                                     type="flow-node">
-               <ResultProcessor/>
+               <ResultProcessor processor-input="only-object" fail-on-error="false"/>
              </GVSubFlowSplittedNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
                id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
@@ -785,7 +962,7 @@ STACK  : ${stackTrace}
                                     subflow="TOUPPER_FLOW"
                                     termination-mode="timeout" timeout="6"
                                     type="flow-node">
-               <ResultProcessor/>
+               <ResultProcessor processor-input="only-object" fail-on-error="false"/>
              </GVSubFlowSplittedNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
                id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
@@ -850,7 +1027,7 @@ STACK  : ${stackTrace}
                  <FlowDef name="flow1" condition="cond1" subflow="TOUPPER_FLOW"/>
                  <FlowDef name="flow2" condition="cond2" subflow="TOLOWER_FLOW"/>
                </FlowDefs>
-               <ResultProcessor/>
+               <ResultProcessor processor-input="only-object" fail-on-error="false"/>
              </GVSubFlowParallelNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
                id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
@@ -893,6 +1070,89 @@ STACK  : ${stackTrace}
            </SubFlow>
          </Operation>
        </Service>
+       
+       <Service group-name="DEFAULT_GRP" id-service="TestParallelNormalEnd_OutJS" service-activation="on" statistics="off">
+         <Conditions>
+            <GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition"
+                               condition="cond1" type="condition">
+              <Property name="P1" operator="equal" type="gvbuffer-field"
+                        value="V1" value-type="text"/>
+            </GVBufferCondition>
+            <GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition"
+                                condition="cond2" type="condition">
+              <Property name="P2" operator="equal" type="gvbuffer-field"
+                        value="V2" value-type="text"/>
+            </GVBufferCondition>
+         </Conditions>
+         <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="RequestReply" operation-activation="on"
+                    out-check-type="sys-svc-id" type="operation">
+           <Participant id-channel="TEST_CHANNEL" id-system="GVESB"/>
+           <Flow first-node="parallel" point-x="20" point-y="150">
+             <GVSubFlowParallelNode class="it.greenvulcano.gvesb.core.flow.GVSubFlowParallelNode"
+                                    default-id="end" id="parallel" input="input"
+                                    max-thread="5" on-exception-id="end-exc"
+                                    on-skip-id="end-skip" on-timeout-id="end-tout"
+                                    op-type="parallel" output="output"
+                                    point-x="186" point-y="152" type="flow-node"
+                                    termination-mode="normal-end" timeout="30">
+               <FlowDefs>
+                 <FlowDef name="flow1" condition="cond1" subflow="TOUPPER_FLOW"/>
+                 <FlowDef name="flow2" condition="cond2" subflow="TOLOWER_FLOW"/>
+               </FlowDefs>
+               <ResultProcessor processor-input="only-gvbuffer" fail-on-error="true">
+                 <JavaScript>var str = "";
+for (var i=0; i&lt;results.size(); i++)
+{
+    var inV = results.get(i).getInput().getObject();
+    var outV = results.get(i).getOutput().getObject();
+    str += ";[" + inV + " -&gt; " + outV + "]";
+}
+
+data.setObject(str.substring(1));</JavaScript>
+               </ResultProcessor>
+             </GVSubFlowParallelNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="DEFAULT"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
+               id="end-exc" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="EXCEPTION"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
+               id="end-tout" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="TIMEOUT"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
+               id="end-skip" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
+               <ChangeGVBuffer clear-data="false">
+                 <PropertyDef name="END" value="SKIP"/>
+               </ChangeGVBuffer>
+             </GVEndNode>
+           </Flow>
+           <SubFlow first-node="call_server" name="TOUPPER_FLOW" point-x="20" point-y="150">
+             <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="call_server"
+                              id-system="GVESB" input="input" next-node-id="end" op-type="call" type="flow-node"
+                              operation-name="toupper_call" output="output" point-x="186" point-y="152"/>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node"/>
+           </SubFlow>
+           <SubFlow first-node="call_server" name="TOLOWER_FLOW" point-x="20" point-y="150">
+             <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="call_server"
+                              id-system="GVESB" input="input" next-node-id="end" op-type="call" type="flow-node"
+                              operation-name="tolower_call" output="output" point-x="186" point-y="152"/>
+             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
+               id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node"/>
+           </SubFlow>
+         </Operation>
+       </Service>
+
        <Service group-name="DEFAULT_GRP" id-service="TestParallelFirstEnd" service-activation="on" statistics="off">
          <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="RequestReply" operation-activation="on"
                     out-check-type="sys-svc-id" type="operation">
@@ -909,7 +1169,7 @@ STACK  : ${stackTrace}
                  <FlowDef name="flow1" subflow="TOUPPER_FLOW" ref-dp="first"/>
                  <FlowDef name="flow2" subflow="TOLOWER_FLOW" ref-dp="second"/>
                </FlowDefs>
-               <ResultProcessor/>
+               <ResultProcessor processor-input="only-object" fail-on-error="false"/>
              </GVSubFlowParallelNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
                id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">
@@ -968,7 +1228,7 @@ STACK  : ${stackTrace}
                  <FlowDef name="flow1" subflow="TOUPPER_FLOW" ref-dp="first"/>
                  <FlowDef name="flow2" subflow="TOLOWER_FLOW" ref-dp="second"/>
                </FlowDefs>
-               <ResultProcessor/>
+               <ResultProcessor processor-input="only-object" fail-on-error="false"/>
              </GVSubFlowParallelNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
                id="end" op-type="end" output="output" point-x="386" point-y="150" type="flow-node">

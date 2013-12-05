@@ -304,30 +304,6 @@
 -->
 <!ELEMENT DHAliasList (Description?, DHAlias+)>
 
-<!--
-    #Label: @source
--->
-<!ELEMENT MergeInfo EMPTY>
-<!--
-    Source document name.
-
-    #NotNull
--->
-<!ATTLIST MergeInfo source CDATA #REQUIRED>
-<!--
-    Source nodes xpath.
-
-    #NotNull
--->
-<!ATTLIST MergeInfo xpath-source CDATA #IMPLIED>
-<!--
-    Destiantion node spath.
-
-    #NotNull
--->
-<!ATTLIST MergeInfo xpath-dest CDATA #IMPLIED>
-
-<!ELEMENT Merge (MergeInfo*)>
 
 <!--
     DataHandler service.
@@ -336,7 +312,7 @@
     #SelectOnInsert
     #Icon: GVDataHandler_DBOBuilder.png
 -->
-<!ELEMENT DBOBuilder (Description?, DHAliasList?, DHVariables?, (%dbo_types;)+, Merge?)>
+<!ELEMENT DBOBuilder (Description?, DHAliasList?, DHVariables?, (%dbo_types;)+, XMLMerge?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.

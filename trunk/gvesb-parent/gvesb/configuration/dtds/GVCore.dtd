@@ -4729,13 +4729,55 @@
 <!ELEMENT FlowDefs (Description?, FlowDef+)>
 
 <!--
-    Defines SubFlows output aggregation policy.
+    Defines SubFlows output aggregation policy:
+    - none          : return a java.util.List containig the SubFlows output
+    - XMLAggregate  : aggregate the SubFlow output as XML
+    - JavaScript    : use JavaScript to process a java.util.List containig the
+                      SubFlows output
+    - OGNLScript    : use OGNL to process a java.util.List containig the
+                      SubFlows output
 
-#TBD!!!!!!
+    If isn't defined a processor the SubFlows output is intended as GVBuffer.output
+    content or an Exception.
+    The JavaScript and OGNLScript processor receives as input a list of
+    it.greenvulcano.gvesb.core.flow.parallel.Result instances that wrapps the SubFlows
+    input and output.
 
     #Icon: resproc.png
 -->
-<!ELEMENT ResultProcessor (Description?)>
+<!ELEMENT ResultProcessor (Description?, (XMLAggregate|OGNLScript|JavaScript)?)>
+<!--
+    Defines the input to pass to the specific processor:
+    - XMLAggregate
+        - only-object   : array of output valid GVBuffer.object content, in the
+                          order of instantiation of SubFlows
+        - only-gvbuffer : same as above
+        - gvbuffer-and-error : same as above
+        - object-and-error   : same as above
+    - JavaScript and OGNLScript
+        - only-object : java.util.List of output valid GVBuffer.object content,
+                        in the order of instantiation of SubFlows
+        - only-gvbuffer : java.util.List of output valid GVBuffer (wrapped as Result
+                          object), in the order of instantiation of SubFlows
+        - gvbuffer-and-error : java.util.List of output valid GVBuffer or Exception
+                               (wrapped as Result object), in the order of instantiation
+                               of SubFlows
+        - object-and-error   : java.util.List of output valid GVBuffer.object content
+                               or Exception , in the order of instantiation of SubFlows
+    The number of elements in the array will depend on several factors related
+    to parallel flow configuration and SubFlow execution.
+
+    If a processor is not defined, the output GVBuffer.object will contain the
+    java.util.List as defined as input for JavaScript and OGNLScript but unwrapped.
+-->
+<!ATTLIST ResultProcessor  processor-input (only-object|only-gvbuffer|object-and-error|gvbuffer-and-error) #REQUIRED>
+<!--
+    If true and any of the SubFlows output contains an Exception then the
+    ResultProcessor returns an error.
+
+    Default to true.
+-->
+<!ATTLIST ResultProcessor  fail-on-error (true|false) #REQUIRED>
 
 <!--
     Node that allows direct invocation of a GreenVulcanoESB core workflow sub-flow as spawned process.
@@ -4885,7 +4927,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowParallelNode (Description?, InputServices?, OutputServices?, FlowDefs, ResultProcessor?)>
+<!ELEMENT GVSubFlowParallelNode (Description?, InputServices?, OutputServices?, FlowDefs, ResultProcessor)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -5043,7 +5085,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowSplittedNode (Description?, InputServices?, OutputServices?, ResultProcessor?)>
+<!ELEMENT GVSubFlowSplittedNode (Description?, InputServices?, OutputServices?, ResultProcessor)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.

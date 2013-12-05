@@ -33,7 +33,6 @@ import it.greenvulcano.gvesb.core.flow.parallel.Result;
 import it.greenvulcano.gvesb.core.flow.parallel.SubFlowTask;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
-import it.greenvulcano.gvesb.log.GVBufferMDC;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.log.GVLogger;
@@ -176,7 +175,7 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException {
         GVBuffer internalData = null;
-        List<Result> result = null;
+        List<Result> results = null;
         boolean isSkipped = false;
         boolean isError = false;
         String input = getInput();
@@ -213,9 +212,9 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
                 
                 internalData = inputServices.perform(internalData);
                 
-                result = processSubFlow(internalData, onDebug);
+                results = processSubFlow(internalData, onDebug);
                 checkInterrupted("GVSubFlowSplittedNode", logger);
-                internalData = processOutput(internalData, result);
+                internalData = processOutput(internalData, results);
                 
                 internalData = outputServices.perform(internalData);
             }
