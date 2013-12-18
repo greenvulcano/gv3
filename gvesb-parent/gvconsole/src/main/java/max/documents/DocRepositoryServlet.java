@@ -320,7 +320,11 @@ public class DocRepositoryServlet extends MaxServlet
         DocumentRepository dr = DocumentRepository.instance();
         DocumentDescriptor dd = dr.getDocumentDescriptor(name);
         if (checkRoles(request, dd.getReadWriteRoles())) {
-            dr.rollback(name, version, notes, request.getRemoteUser());
+            try {
+                dr.rollback(name, version, notes, request.getRemoteUser());
+            } catch (Exception e) {
+                throw new ServletException("You cannot rollback the document '" + name + "'", e);
+            }
         }
         else {
             throw new ServletException("You cannot rollback the document '" + name + "'");

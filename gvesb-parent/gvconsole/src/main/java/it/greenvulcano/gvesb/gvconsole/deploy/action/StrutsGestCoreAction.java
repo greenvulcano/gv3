@@ -46,7 +46,7 @@ import org.apache.struts.action.ActionMapping;
 public class StrutsGestCoreAction extends Action
 {
 
-    private static final Logger logger = GVLogger.getLogger(StrutsDeployAction.class);
+    private static final Logger logger = GVLogger.getLogger(StrutsGestCoreAction.class);
 
     /**
      * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping,
@@ -70,92 +70,99 @@ public class StrutsGestCoreAction extends Action
             if (tipoOggetto.equals("Servizio")) {
                 datiServizio.setEquals(gvCoreParser.getEqualService(nomeServizio));
                 datiServizio.setExist(gvCoreParser.getExist(nomeServizio));
-                if (gvCoreParser.getGvCoreZip(nomeServizio) != null) {
-                    datiServizio.setNodoNew(gvCoreParser.getGvCoreZip(nomeServizio).replaceAll("\n", "").replaceAll(
-                            "\r", "").replaceAll("'", "&apos;"));
+                String sZip = gvCoreParser.getGvCoreZip(nomeServizio);
+                if (sZip != null) {
+                    datiServizio.setNodoNew(sZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-
-                if (gvCoreParser.getGvCoreServer(nomeServizio) != null) {
-                    datiServizio.setNodoServer(gvCoreParser.getGvCoreServer(nomeServizio).replaceAll("\n", "").replaceAll(
-                            "\r", "").replaceAll("'", "&apos;"));
+                String sServer = gvCoreParser.getGvCoreServer(nomeServizio);
+                if (sServer != null) {
+                    datiServizio.setNodoServer(sServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
             }
-            else if (request.getParameter("tipoOggetto").equals("Xpath")) {
+            else if (tipoOggetto.equals("Transformation")) {
+                datiServizio.setEquals(gvCoreParser.getEqualTransformation(nomeServizio));
+                datiServizio.setExist(gvCoreParser.getExistTransformationServer(nomeServizio));
+                String tZip = gvCoreParser.getGvTransformationZip(nomeServizio);
+                if (tZip != null) {
+                    datiServizio.setNodoNew(tZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
+                }
+                String tServer = gvCoreParser.getGvTransformationServer(nomeServizio);
+                if (tServer != null) {
+                    datiServizio.setNodoServer(tServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
+                }
+            }
+            else if (tipoOggetto.equals("XPath")) {
                 datiServizio.setEquals(gvCoreParser.getEqualXpath());
                 datiServizio.setExist(gvCoreParser.getExistXpathServer());
-                if (gvCoreParser.getGvXpathZip() != null) {
-                    datiServizio.setNodoNew(gvCoreParser.getGvXpathZip().replaceAll("\n", "").replaceAll("\r", "").replaceAll(
+                String xpZip = gvCoreParser.getGvXpathZip();
+                if (xpZip != null) {
+                    datiServizio.setNodoNew(xpZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll(
                             "'", "&apos;"));
                 }
-
-                if (gvCoreParser.getGvXpathServer() != null) {
-                    datiServizio.setNodoServer(gvCoreParser.getGvXpathServer().replaceAll("\n", "").replaceAll("\r", "").replaceAll(
+                String xpServer = gvCoreParser.getGvXpathServer();
+                if (xpServer != null) {
+                    datiServizio.setNodoServer(xpServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll(
                             "'", "&apos;"));
                 }
             }
-            else if (request.getParameter("tipoOggetto").equals("PoolManager")) {
+            else if (tipoOggetto.equals("PoolManager")) {
                 datiServizio.setEquals(gvCoreParser.getEqualPoolManager());
                 datiServizio.setExist(gvCoreParser.getExistPoolManagerServer());
-                if (gvCoreParser.getGvPoolManagerZip() != null) {
-                    datiServizio.setNodoNew(gvCoreParser.getGvPoolManagerZip().replaceAll("\n", "").replaceAll("\r", "").replaceAll(
-                            "'", "&apos;"));
+                String pmZip = gvCoreParser.getGvPoolManagerZip();
+                if (pmZip != null) {
+                    datiServizio.setNodoNew(pmZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-
-                if (gvCoreParser.getGvPoolManagerServer() != null) {
-                    datiServizio.setNodoServer(gvCoreParser.getGvPoolManagerServer().replaceAll("\n", "").replaceAll(
-                            "\r", "").replaceAll("'", "&apos;"));
+                String pmServer = gvCoreParser.getGvPoolManagerServer();
+                if (pmServer != null) {
+                    datiServizio.setNodoServer(pmServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
             }
-            else if (request.getParameter("tipoOggetto").equals("Task")) {
+            else if (tipoOggetto.equals("TimerTask")) {
                 datiServizio.setEquals(gvCoreParser.getEqualTask());
                 datiServizio.setExist(gvCoreParser.getExistTaskServer());
-                if (gvCoreParser.getGVTaskZip() != null) {
-                    datiServizio.setNodoNew(gvCoreParser.getGVTaskZip().replaceAll("\n", "").replaceAll("\r", "").replaceAll(
-                            "'", "&apos;"));
+                String tZip = gvCoreParser.getGVTaskZip();
+                if (tZip != null) {
+                    datiServizio.setNodoNew(tZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-
-                if (gvCoreParser.getGVTaskServer() != null) {
-                    datiServizio.setNodoServer(gvCoreParser.getGVTaskServer().replaceAll("\n", "").replaceAll("\r", "").replaceAll(
-                            "'", "&apos;"));
+                String tServer = gvCoreParser.getGVTaskServer();
+                if (tServer != null) {
+                    datiServizio.setNodoServer(tServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
             }
-            else if (request.getParameter("tipoOggetto").equals("ConcurrencyHandler")) {
+            else if (tipoOggetto.equals("ConcurrencyHandler")) {
                 datiServizio.setEquals(gvCoreParser.getEqualConcurrencyHandler());
                 datiServizio.setExist(gvCoreParser.getExistConcurrencyHandlerServer());
-                if (gvCoreParser.getGVConcurrencyHandlerZip() != null) {
-                    datiServizio.setNodoNew(gvCoreParser.getGVConcurrencyHandlerZip().replaceAll("\n", "").replaceAll(
-                            "\r", "").replaceAll("'", "&apos;"));
+                String chZip = gvCoreParser.getGVConcurrencyHandlerZip();
+                if (chZip != null) {
+                    datiServizio.setNodoNew(chZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-
-                if (gvCoreParser.getGVConcurrencyHandlerServer() != null) {
-                    datiServizio.setNodoServer(gvCoreParser.getGVConcurrencyHandlerServer().replaceAll("\n", "").replaceAll(
-                            "\r", "").replaceAll("'", "&apos;"));
+                String chServer = gvCoreParser.getGVConcurrencyHandlerServer();
+                if (chServer != null) {
+                    datiServizio.setNodoServer(chServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
             }
-            else if (request.getParameter("tipoOggetto").equals("CryptoHelper")) {
+            else if (tipoOggetto.equals("CryptoHelper")) {
                 datiServizio.setEquals(gvCoreParser.getEqualCryptoHelper());
                 datiServizio.setExist(gvCoreParser.getExistCryptoHelperServer());
-                if (gvCoreParser.getGVCryptoHelperZip() != null) {
-                    datiServizio.setNodoNew(gvCoreParser.getGVCryptoHelperZip().replaceAll("\n", "").replaceAll("\r",
-                            "").replaceAll("'", "&apos;"));
+                String chZip = gvCoreParser.getGVCryptoHelperZip();
+                if (chZip != null) {
+                    datiServizio.setNodoNew(chZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-
-                if (gvCoreParser.getGVCryptoHelperServer() != null) {
-                    datiServizio.setNodoServer(gvCoreParser.getGVCryptoHelperServer().replaceAll("\n", "").replaceAll(
-                            "\r", "").replaceAll("'", "&apos;"));
+                String chServer = gvCoreParser.getGVCryptoHelperServer();
+                if (chServer != null) {
+                    datiServizio.setNodoServer(chServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
             }
-            else if (request.getParameter("tipoOggetto").equals("Policy")) {
+            else if (tipoOggetto.equals("ACLPolicy")) {
                 datiServizio.setEquals(gvCoreParser.getEqualPolicy());
                 datiServizio.setExist(gvCoreParser.getExistGVPolicyServer());
-                if (gvCoreParser.getGVPolicyZip() != null) {
-                    datiServizio.setNodoNew(gvCoreParser.getGVPolicyZip().replaceAll("\n", "").replaceAll("\r", "").replaceAll(
-                            "'", "&apos;"));
+                String pZip = gvCoreParser.getGVPolicyZip();
+                if (pZip != null) {
+                    datiServizio.setNodoNew(pZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-
-                if (gvCoreParser.getGVPolicyServer() != null) {
-                    datiServizio.setNodoServer(gvCoreParser.getGVPolicyServer().replaceAll("\n", "").replaceAll("\r",
-                            "").replaceAll("'", "&apos;"));
+                String pServer = gvCoreParser.getGVPolicyServer();
+                if (pServer != null) {
+                    datiServizio.setNodoServer(pServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
             }
             Variabili var = new Variabili();

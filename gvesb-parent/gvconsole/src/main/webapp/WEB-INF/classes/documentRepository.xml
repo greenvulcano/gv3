@@ -4,31 +4,24 @@
 
 <documents filter-provider="MAX_XML_PROVIDER">
   <group label="GreenVulcanoESB - Core" name="gvesb_core">
-    <document label="GreenVulcanoESB - Configurazione del Core" name="GVCore">
+    <document label="GreenVulcanoESB - Core services configuration" name="GVCore">
       <FileSystemProxy class="max.documents.FileSystemDocProxy" path="sp{{gv.app.home}}/xmlconfig/GVCore.xml"
         type="proxy" />
-      <description>Configurazione dei servizi di GreenVulcanoESB.</description>
+      <description>GreenVulcanoESB Core services configuration.</description>
       <role access="rw" name="consoleAdministrator" />
       <role access="ro" name="supervisor" />
     </document>
-    <document label="GreenVulcanoESB - Configurazione degli Adapters" name="GVAdapters">
+    <document label="GreenVulcanoESB - Adapters configuration" name="GVAdapters">
       <FileSystemProxy class="max.documents.FileSystemDocProxy" path="sp{{gv.app.home}}/xmlconfig/GVAdapters.xml"
         type="proxy" />
-      <description>Configurazione degli adapters di GreenVulcanoESB.</description>
+      <description>GreenVulcanoESB Adapters configuration.</description>
       <role access="rw" name="consoleAdministrator" />
       <role access="ro" name="supervisor" />
     </document>
-    <document label="GreenVulcanoESB - Configurazione dei file di supporto" name="GVSupport">
+    <document label="GreenVulcanoESB - Support components configuration" name="GVSupport">
       <FileSystemProxy class="max.documents.FileSystemDocProxy" path="sp{{gv.app.home}}/xmlconfig/GVSupport.xml"
         type="proxy" />
-      <description>Configurazione dei file di supporto di GreenVulcanoESB.</description>
-      <role access="rw" name="consoleAdministrator" />
-      <role access="ro" name="supervisor" />
-    </document>
-    <document label="GreenVulcanoESB - Configurazione Variabili Globali" name="GVVariables">
-      <FileSystemProxy class="max.documents.FileSystemDocProxy" path="sp{{gv.app.home}}/xmlconfig/GVVariables.xml"
-        type="proxy" />
-      <description>Configurazione Variabili Globali GreenVulcanoESB.</description>
+      <description>GreenVulcanoESB Support components configuration.</description>
       <role access="rw" name="consoleAdministrator" />
       <role access="ro" name="supervisor" />
     </document>

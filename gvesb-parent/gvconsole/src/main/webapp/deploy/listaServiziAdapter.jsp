@@ -10,7 +10,7 @@
 
 <HTML>
 <HEAD>
-	<TITLE> Lista Funzioni administrator </TITLE>
+	<TITLE>Administration functions</TITLE>
 </HEAD>	
 <BODY>
 <%@ include file="../head.jspf" %>
@@ -38,7 +38,7 @@
 	 </c:forEach>
    <tr>
    <tr>
-   	<td><font color="red" size="4">EXCEL_WORK:</font></td>
+   	<td><font color="red" size="4">EXCEL WORKBOOK:</font></td>
    </tr>
    <%numRighe=0;%>
    <c:forEach items="${listaGVExcelWorkbook}" var="listaGVExcelWorkbook">
@@ -48,7 +48,7 @@
 		<%numRighe++;%>
 	 </c:forEach>
     <tr>
-   	<td><font color="red" size="4">EXCEL_REPO:</font></td>
+   	<td><font color="red" size="4">EXCEL REPORT:</font></td>
    </tr>
    <%numRighe=0;%>
    <c:forEach items="${listaGVExcelRepo}" var="listaGVExcelRepo">
@@ -58,7 +58,7 @@
 		<%numRighe++;%>
 	 </c:forEach>
     <tr>
-    <td><font color="red" size="4">BIRT_REPO:</font></td>
+    <td><font color="red" size="4">BIRT REPORT:</font></td>
    </tr>
    <%numRighe=0;%>
    <c:forEach items="${listaGVBirtRepo}" var="listaGVBirtRepo">
@@ -68,7 +68,7 @@
         <%numRighe++;%>
      </c:forEach>
     <tr>
-    <td><font color="red" size="4">DH_ENGINE:</font></td>
+    <td><font color="red" size="4">DATA HANDLER:</font></td>
    </tr>
    <%numRighe=0;%>
    <c:forEach items="${listaGVDataHandler}" var="listaGVDataHandler">
@@ -118,7 +118,7 @@
         <%numRighe++;%>
      </c:forEach>
    <tr>	
-   	<td><font color="red" size="4">ADAPTER:</font></td>
+   	<td><font color="red" size="4">ADAPTERS:</font></td>
    </tr>
    <%numRighe=0;%>
    <c:forEach items="${listaAdapter}" var="adapter">

@@ -7,6 +7,7 @@
 package max.documents;
 
 import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -66,33 +67,50 @@ public class SaveDocumentAction extends MenuAction {
      *            : the HttpServletResponse object.
      * @throws XMLConfigException
      */
-    public void doSave(XMLBuilder builder, HttpServletRequest req, HttpServletResponse resp) throws MaxException,
-            XMLConfigException {
-        VersionManager vm = VersionManager.instance();
-
-        if (!vm.exists(desc.getName())) {
-            Document doc = documentProxy.load();
-            InputStream in = toInputStream(doc);
-            vm.newDocumentVersion(desc.getName(), in, "First version", req.getRemoteUser(), new Date());
-        }
-
-        builder.encryptDocument();
-        Document document = builder.getDocument();
-        documentProxy.save(document);
-        InputStream in1 = toInputStream(document);
-        vm.newDocumentVersion(desc.getName(), in1, req.getParameter("notes"), req.getRemoteUser(), new Date());
-
+    public void doSave(XMLBuilder builder, HttpServletRequest req, HttpServletResponse resp) throws Exception,
+            Exception {
         HttpSession session = req.getSession();
+        VersionManager vm = VersionManager.instance();
+        String descr = req.getParameter("notes"); 
+        InputStream in = null;
+        GVParser gvParser = null;
+        try {
+            if (!vm.exists(desc.getName())) {
+                descr = descr + " -> First version";
+            }
+            if(!req.getRequestURI().equals("/gvconsole/deploy/save.jsp")){
+                gvParser = new GVParser(false);
+                in = gvParser.copyFileForBackupZip();
+                builder.encryptDocument();
+                Document document = builder.getDocument();
+                documentProxy.save(document);     
+                XMLBuilder.removeFromSession(session);
+            }
+            else{
+                gvParser = (GVParser) session.getAttribute("parser");
+                in = gvParser.readFileZip();
+            }
+       
+            vm.newDocumentVersion(desc.getName(), in, descr, req.getRemoteUser(), new Date());
 
-        XMLBuilder.removeFromSession(session);
-
-        LocksManager.unlockDocument(session.getId());
-        // forward to document page.
-        if(req.getRequestURI().equals("/gvconsole/deploy/save.jsp"))
-        	forward(req, resp, "/deploy/listaServiziCore.jsp");
-        else
-            forward(req, resp, "/def/xmleditor/index.jsp");
-
+            LocksManager.unlockDocument(session.getId());
+            gvParser.deleteFileZip();
+            // forward to document page.
+            if(req.getRequestURI().equals("/gvconsole/deploy/save.jsp"))
+                forward(req, resp, "/deploy/listaServiziCore.jsp");
+            else
+                forward(req, resp, "/def/xmleditor/index.jsp");
+        }
+        finally {
+            if (in != null) {
+                try {
+                    in.close();
+                }
+                catch (Exception exc) {
+                    // do nothing
+                }
+            }
+        }
     }
 
     /**

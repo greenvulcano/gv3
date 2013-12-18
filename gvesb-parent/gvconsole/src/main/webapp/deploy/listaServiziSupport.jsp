@@ -9,7 +9,7 @@
 
 <HTML>
 <HEAD>
-	<TITLE> Lista Funzioni administrator </TITLE>
+	<TITLE>Administration functions</TITLE>
 </HEAD>	
 <BODY>
 <%@ include file="../head.jspf" %>

@@ -175,12 +175,12 @@
 		<listener-class>it.greenvulcano.gvesb.gvconsole.workbench.servlet.WorkbenchServletCtxListener</listener-class>
 	</listener>
 
-	<servlet>
+	<!--<servlet>
 		<description>Usato per rendere le immagini disponibili da http</description>
 		<display-name>FileProviderServlet</display-name>
 		<servlet-name>FileProviderServlet</servlet-name>
 		<servlet-class>it.greenvulcano.gvesb.gvconsole.gvcon.jgraph.FileProviderServlet</servlet-class>
-	</servlet>
+	</servlet>-->
 
 	<servlet>
 		<description>Operazioni per la gestione dei documenti XML.
@@ -441,10 +441,10 @@
 		<servlet-mapping> <servlet-name>UploadServlet</servlet-name>
 		<url-pattern>/UploadServlet</url-pattern> </servlet-mapping>
 	-->
-	<servlet-mapping>
+	<!--<servlet-mapping>
 		<servlet-name>FileProviderServlet</servlet-name>
 		<url-pattern>/gvesbWorkFlow/*</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping>-->
 	<servlet-mapping>
 		<servlet-name>MaxXMLServlet</servlet-name>
 		<url-pattern>/MaxXMLServlet</url-pattern>
@@ -507,10 +507,10 @@
 	</welcome-file-list>
 
 	<error-page>
-                      <exception-type>java.lang.Exception</exception-type>
-                      <location>/def/exception.jsp</location>
-           </error-page>
-           <jsp-config>
+        <exception-type>java.lang.Exception</exception-type>
+        <location>/def/exception.jsp</location>
+    </error-page>
+    <jsp-config>
 		<taglib>
 			<taglib-uri>/birt.tld</taglib-uri>
 			<taglib-location>/WEB-INF/tld/birt.tld</taglib-location>

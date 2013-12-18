@@ -25,6 +25,7 @@ import org.w3c.dom.Node;
  * serve for track all the brought modifications on the file in question through
  * an operation of versioning.
  *
+ * WARNING - modified to use a fixed value for name parameter : GVConfig
  */
 public class VersionManager
 {
@@ -36,6 +37,8 @@ public class VersionManager
     public final static String    VM_NOTES           = "VM_NOTES";
     public final static String    VM_AUTHOR          = "VM_AUTHOR";
     public final static String    VM_DATE            = "VM_DATE";
+    
+    private static final String   FIXED_NAME         = "GVConfig";
 
     /**
      * Configuration file name used with <code>XMLConfig</code>.
@@ -110,7 +113,9 @@ public class VersionManager
     public synchronized int newDocumentVersion(String name, InputStream document, String notes, String author, Date date)
             throws MaxException, XMLConfigException
     {
-
+        // TEMPORARY
+        name = FIXED_NAME;
+        
         ContentProvider provider = Contents.instance().getProvider(providerName);
         int newVersion = getLastVersion(name) + 1;
 
@@ -141,6 +146,9 @@ public class VersionManager
      */
     public synchronized String getNotes(String name, int version) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         String value = "" + version;
         ContentProvider provider = Contents.instance().getProvider(providerName);
         Map mp = provider.getContentAttributes(name, value);
@@ -161,6 +169,9 @@ public class VersionManager
      */
     public synchronized String getAuthor(String name, int version) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         String value = "" + version;
         ContentProvider provider = Contents.instance().getProvider(providerName);
         Map mp = provider.getContentAttributes(name, value);
@@ -180,6 +191,9 @@ public class VersionManager
      */
     public synchronized Date getDate(String name, int version) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         String value = "" + version;
         ContentProvider provider = Contents.instance().getProvider(providerName);
         Map mp = provider.getContentAttributes(name, value);
@@ -199,6 +213,9 @@ public class VersionManager
      */
     public synchronized InputStream getDocument(String name, int version) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         ContentProvider provider = Contents.instance().getProvider(providerName);
         return provider.get(name, "" + version);
     }
@@ -225,6 +242,9 @@ public class VersionManager
      */
     public synchronized InputStream getLastVersionDocument(String name) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         return getDocument(name, getLastVersion(name));
     }
 
@@ -239,6 +259,9 @@ public class VersionManager
      */
     public synchronized int getLastVersion(String name) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         ContentProvider provider = Contents.instance().getProvider(providerName);
         String names[] = provider.getContentNames(name);
 
@@ -268,6 +291,9 @@ public class VersionManager
      */
     public synchronized int getOlderVersion(String name) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         ContentProvider provider = Contents.instance().getProvider(providerName);
         String names[] = provider.getContentNames(name);
 
@@ -302,6 +328,9 @@ public class VersionManager
      */
     public synchronized void rollback(String name, int version) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         ContentProvider provider = Contents.instance().getProvider(providerName);
 
         int lastVersion = getLastVersion(name);
@@ -315,6 +344,9 @@ public class VersionManager
      */
     public synchronized void removeBeforeVersion(String name, int version) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         removeRange(name, getOlderVersion(name), version);
     }
 
@@ -325,6 +357,9 @@ public class VersionManager
      */
     public synchronized void removeBefore(String name, Date date) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         ContentProvider provider = Contents.instance().getProvider(providerName);
         String versions[] = provider.getContentNames(name);
         Map attributes[] = provider.getContentsAttributes(name, versions);
@@ -347,7 +382,9 @@ public class VersionManager
     public synchronized void removeRange(String name, int lowVersion, int highVersion) throws MaxException,
             XMLConfigException
     {
-
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         int olderVersion = getOlderVersion(name);
         if (lowVersion < olderVersion) {
             lowVersion = olderVersion;
@@ -380,6 +417,9 @@ public class VersionManager
      */
     public synchronized boolean exists(String name) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         if (getLastVersion(name) == 0) {
             return false;
         }
@@ -397,6 +437,9 @@ public class VersionManager
      */
     public synchronized boolean exists(String name, int version) throws MaxException, XMLConfigException
     {
+     // TEMPORARY
+        name = FIXED_NAME;
+        
         ContentProvider provider = Contents.instance().getProvider(providerName);
         return provider.exists(name, "" + version);
     }
