@@ -203,7 +203,33 @@ public class GVCoreParser
         logger.debug("getEqualXpath = " + equalXPath);
         return equalXPath;
     }
+    
+    /**
+     * @return
+     * @throws XMLUtilsException 
+     */
+    public boolean getEqualTransformation(String name) throws XMLUtilsException
+    {
+        boolean equalT = getEqualObject(getGVTransformation(serverXml, name), getGVTransformation(newXml, name));
+        logger.debug("getEqualTrasformation = " + equalT);
+        return equalT;
+    }
 
+    /**
+     * @return
+     * @throws 
+     * @throws IOException
+     */
+    public boolean getExistTransformationServer(String name) throws Exception
+    {
+        return getExistTransformation(serverXml, name);
+    }
+
+    public boolean getExistTransformation(Document xml, String name) throws Exception
+    {
+        return XMLUtils.existNode_S(xml, "/GVCore/GVDataTransformation/Transformations/*[@type='transformation' and @name='" + name + "']");
+    }
+    
     /**
      * @return
      * @throws 
@@ -354,7 +380,35 @@ public class GVCoreParser
     		XMLUtils.releaseParserInstance(parser);
     	}
     }
-    
+
+    /**
+     * @param nomeAdapter
+     * @return
+     * @throws XMLUtilsException 
+     */
+    private boolean getEqualObject(List<Node> resultsServer, List<Node> resultsZip) throws XMLUtilsException
+    {
+        boolean equalObject = false;
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            if ((resultsServer != null) && (resultsZip != null)) {
+                if (resultsServer.size() == resultsZip.size()) {
+                    Node server = parser.aggregateXML("Aggregate", null, resultsServer.toArray());
+                    Node zip = parser.aggregateXML("Aggregate", null, resultsZip.toArray());
+                    if (parser.serializeDOM(server).equals(parser.serializeDOM(zip))) {
+                        equalObject = true;
+                    }
+                }
+            }
+            logger.debug("getEqualObject=" + equalObject);
+            return equalObject;
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+
     /**
      * @return
      * @throws 
@@ -367,10 +421,10 @@ public class GVCoreParser
             listaParametri.add("PoolManager");
         }
         if (getExistXpathZip()) {
-            listaParametri.add("Xpath");
+            listaParametri.add("XPath");
         }
         if (getExistTaskZip()) {
-            listaParametri.add("Task");
+            listaParametri.add("TimerTask");
         }
         if (getExistConcurrencyHandlerZip()) {
             listaParametri.add("ConcurrencyHandler");
@@ -379,7 +433,7 @@ public class GVCoreParser
             listaParametri.add("CryptoHelper");
         }
         if (getExistGVPolicyZip()) {
-            listaParametri.add("Policy");
+            listaParametri.add("ACLPolicy");
         }
         String[] listaServizi = new String[listaParametri.size()];
         for (int i = 0; i < listaParametri.size(); i++) {
@@ -421,6 +475,24 @@ public class GVCoreParser
         return getListaServizi(serverXml);
     }
 
+    /**
+     * @return
+     * @throws IOException
+     */
+    public String[] getListaTransformationZip() throws Exception
+    {
+        return getListaObject(newXml, "/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name");
+    }
+
+    /**
+     * @return
+     * @throws IOException
+     */
+    public String[] getListaTransformationServer() throws Exception
+    {
+        return getListaObject(serverXml, "/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name");
+    }
+    
     /**
      * @param nomeServizio
      * @return
@@ -609,6 +681,29 @@ public class GVCoreParser
 			XMLUtils.releaseParserInstance(parser);
 		}
     }
+    
+    private String getGvTransformation(Document xml, String nomeServizio) throws XMLUtilsException
+    {
+        logger.debug("init getGvTransformation");
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            Document localXmlGVCore = parser.newDocument("GVCore");
+            Element e = parser.insertElement(localXmlGVCore.getDocumentElement(), "GVDataTransformation");
+            e = parser.insertElement(e, "Transformations");
+            List<Node> localXml = getGVTransformation(xml, nomeServizio);
+            if (!localXml.isEmpty()) {
+                for (Node node : localXml) {
+                    Node importedNode = localXmlGVCore.importNode(node, true);
+                    e.appendChild(importedNode);                    
+                }
+            }
+            return parser.serializeDOM(localXmlGVCore, false, true);
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
 
     /**
      * @return
@@ -641,6 +736,15 @@ public class GVCoreParser
      * @return
      * @throws XMLUtilsException 
      */
+    public String getGvTransformationZip(String nomeServizio) throws XMLUtilsException
+    {
+        return getGvTransformation(newXml, nomeServizio);
+    }
+    
+    /**
+     * @return
+     * @throws XMLUtilsException 
+     */
     public String getGVTaskServer() throws XMLUtilsException
     {
         return getGVTaskLocal(serverXml);
@@ -664,6 +768,15 @@ public class GVCoreParser
         return getGvXpath(serverXml);
     }
 
+    /**
+     * @return
+     * @throws XMLUtilsException 
+     */
+    public String getGvTransformationServer(String nomeServizio) throws XMLUtilsException
+    {
+        return getGvTransformation(serverXml, nomeServizio);
+    }
+    
     private String getGVConcurrencyHandlerLocal(Document xml) throws XMLUtilsException
     {
         logger.debug("init getGVConcurrencyHandler");
@@ -821,6 +934,32 @@ public class GVCoreParser
     {
     	Node gvXPath = XMLUtils.selectSingleNode_S(xml, "/GVCore/GVXPath");
         return gvXPath;
+    }
+    
+    private List<Node> getGVTransformation(Document xml, String name) throws XMLUtilsException
+    {
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            List<Node> nodes = new ArrayList<Node>(); 
+            Node gvT = parser.selectSingleNode(xml, "/GVCore/GVDataTransformation/Transformations/*[@type='transformation' and @name='" + name + "']");
+            if (gvT!= null) {
+                nodes.add(gvT);
+                String dtType = gvT.getLocalName();
+                if ("SequenceTransformation".equals(dtType)) {
+                    NodeList seqElements = parser.selectNodeList(gvT, "SequenceElement");
+                    for (int i = 0; i < seqElements.getLength(); i++) {
+                        String dtName = parser.get(seqElements.item(i), "@Transformer");
+                        gvT = parser.selectSingleNode(xml, "/GVCore/GVDataTransformation/Transformations/*[@type='transformation' and @name='" + dtName + "']"); 
+                        nodes.add(gvT);
+                    }
+                }
+            }
+            return nodes;
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
     }
 
     private List<Node> getGVForwards(Document xml, String nomeServizio) throws XMLUtilsException 
@@ -1241,13 +1380,16 @@ public class GVCoreParser
         		XMLUtils.releaseParserInstance(parser);
         	}
         }
-        else if (tipoOggetto.equals("Xpath")) {
+        else if (tipoOggetto.equals("Transformation")) {
+            aggiornaGVDataTransformation(nomeServizio);
+        }
+        else if (tipoOggetto.equals("XPath")) {
             aggiornaGVXPath();
         }
         else if (tipoOggetto.equals("PoolManager")) {
             aggiornaGVPoolManager();
         }
-        else if (tipoOggetto.equals("Task")) {
+        else if (tipoOggetto.equals("TimerTask")) {
             aggiornaGVTask();
         }
         else if (tipoOggetto.equals("ConcurrencyHandler")) {
@@ -1256,7 +1398,7 @@ public class GVCoreParser
         else if (tipoOggetto.equals("CryptoHelper")) {
             aggiornaGVCryptoHelper();
         }
-        else if (tipoOggetto.equals("Policy")) {
+        else if (tipoOggetto.equals("ACLPolicy")) {
             aggiornaGVPolicy();
         }
     }
@@ -1774,6 +1916,23 @@ public class GVCoreParser
         }
     }
 
+    private void aggiornaGVDataTransformation(String name) throws Exception
+    {
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+
+            Node gvDataTransformationZip = parser.selectSingleNode(newXml, "/GVCore/GVDataTransformation");
+            if (gvDataTransformationZip != null) {
+                Node baseDT = parser.selectSingleNode(serverXml, "/GVCore/GVDataTransformation/Transformations");
+                aggiornaSingleTransformation(name, gvDataTransformationZip, baseDT, parser);
+            }
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+
     private void aggiornaSingleTransformation(String name, Node gvDataTransformationZip, Node baseDT, XMLUtils parser)
             throws Exception
     {
@@ -2103,7 +2262,11 @@ public class GVCoreParser
     private void copiaFileXsl(Node xslTransformation, XMLUtils parser) throws Exception
     {
         String path = java.lang.System.getProperty("java.io.tmpdir");
-        String nomeFile = parser.get(xslTransformation, "@XSLMapName", parser.get(xslTransformation, "@InputXSLMapName", parser.get(xslTransformation, "@OutputXSLMapName")));
+        String nomeFile = parser.get(xslTransformation, "@XSLMapName", parser.get(xslTransformation, "@InputXSLMapName",
+                parser.get(xslTransformation, "@OutputXSLMapName", "")));
+        if (nomeFile.equals("")) {
+            return;
+        }
         String nomeDataSourceSet = parser.get(xslTransformation, "@DataSourceSet", "Default");
         logger.debug("Prepare XSL file for DT= " + parser.get(xslTransformation, "@name") + " - "
                 + nomeFile + " - " + nomeDataSourceSet);

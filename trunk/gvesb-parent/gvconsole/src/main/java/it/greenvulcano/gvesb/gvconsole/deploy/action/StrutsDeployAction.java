@@ -63,6 +63,7 @@ public class StrutsDeployAction extends Action
         try {
             String file = request.getParameter("file");
             GVParser parser = (GVParser) sessione.getAttribute("parser");
+            parser.copyFileForBackupZip();
             if (file.equals("GVCore")) {
                 String nomeServizio = (String) sessione.getAttribute("servizio");
                 String tipoOggetto = (String) sessione.getAttribute("tipoOggetto");

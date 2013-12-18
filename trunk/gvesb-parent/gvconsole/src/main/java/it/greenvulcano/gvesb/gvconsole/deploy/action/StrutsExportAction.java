@@ -19,6 +19,8 @@
  */
 package it.greenvulcano.gvesb.gvconsole.deploy.action;
 
+import it.greenvulcano.jmx.JMXEntryPoint;
+import it.greenvulcano.jmx.JMXUtils;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.file.FileManager;
 import it.greenvulcano.util.metadata.PropertiesHandler;
@@ -68,7 +70,7 @@ public class StrutsExportAction extends Action
             ByteArrayInputStream is = creaFileZip();
             response.setContentType("application/zip");
             response.setHeader("Content-Disposition",
-                    "attachment; filename=GVExport_" + DateUtils.nowToString("yyyyMMddHHmmss") + ".zip");
+                    "attachment; filename=GVExport_" + JMXEntryPoint.getServerName() + "_" + DateUtils.nowToString("yyyyMMddHHmmss") + ".zip");
             response.setHeader("Connection", "close");
             response.setContentLength(is.available());
             OutputStream resstream = response.getOutputStream();

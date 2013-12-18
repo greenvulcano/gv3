@@ -67,14 +67,13 @@ public class StrutsGestSupportAction extends Action
             DatiServizio datiServizio = new DatiServizio();
             datiServizio.setEquals(gvSupportParser.getEqual(servizio));
             datiServizio.setExist(gvSupportParser.getExist(servizio));
-            if (gvSupportParser.getGvSupportZip(servizio) != null) {
-                datiServizio.setNodoNew(gvSupportParser.getGvSupportZip(servizio).replaceAll("\n", "").replaceAll("\r",
-                        "").replaceAll("'", "&apos;"));
+            String sZip = gvSupportParser.getGvSupportZip(servizio);
+            if (sZip != null) {
+                datiServizio.setNodoNew(sZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
             }
-
-            if (gvSupportParser.getGvSupportServer(servizio) != null) {
-                datiServizio.setNodoServer(gvSupportParser.getGvSupportServer(servizio).replaceAll("\n", "").replaceAll(
-                        "\r", "").replaceAll("'", "&apos;"));
+            String sServer = gvSupportParser.getGvSupportServer(servizio);
+            if (sServer != null) {
+                datiServizio.setNodoServer(sServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
             }
             Variabili var = new Variabili();
             VariabiliGlobali[] variabiliGlobali = var.getVariabiliGlobaliPresenti(gvSupportParser.getGvSupportZip(servizio));

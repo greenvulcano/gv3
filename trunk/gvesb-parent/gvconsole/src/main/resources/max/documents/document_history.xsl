@@ -47,7 +47,6 @@
             <td width="15"></td>
             <td>
                 <small>
-                    <nobr>[<a href="{$invoke}/documents/viewDocumentVersion?name={$name1}&amp;version={$id}" title="View Version" target="_blank" style="color: #191970">view</a>]</nobr>
                     <xsl:if test="permission = 'RW'" >
                         <nobr>[<a href="{$invoke}/def/documents/rollback.jsp?name={$name1}&amp;label={$label1}&amp;version={$id}&amp;notes={$notes1}&amp;author={$author}&amp;date={$date}" title="Restore Version" style="color: #191970">restore</a>]</nobr>
                     </xsl:if>

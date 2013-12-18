@@ -10,7 +10,7 @@
 
 <HTML>
 <HEAD>
-	<TITLE> Lista Funzioni administrator </TITLE>
+	<TITLE>Administration functions</TITLE>
 </HEAD>	
 <BODY>
 <%@ include file="../head.jspf" %>
@@ -33,8 +33,15 @@
     <tr><td><a href="javascript:invocaDeployServizi('<c:out value='${servizi}'/>');"><c:out value='${servizi}'/></a></td></tr>
 		<%numRighe++;%>
 	 </c:forEach>
+   <tr>
+    <td><font color="red" size="4">DTE TRANSFORMATIONS:</font></td>
+  </tr>
+   <c:forEach items="${listaTransformation}" var="transformation">         
+    <tr><td><a href="javascript:invocaDeployTransformation('<c:out value='${transformation}'/>');"><c:out value='${transformation}'/></a></td></tr>
+        <%numRighe++;%>
+     </c:forEach>
 	 <tr>
-	 <td><font color="red" size="4">PARAMETER:</font></td>
+	 <td><font color="red" size="4">EXTRA COMPONENTS:</font></td>
 	 </td>
 	</tr>
 	 <c:forEach items="${listaCoreParametri}" var="parametri">	
@@ -52,6 +59,11 @@
    function invocaDeployServizi(servizio){
     document.forms[0].servizio.value=servizio;
     document.forms[0].tipoOggetto.value='Servizio';
+    document.forms[0].submit();
+   } 
+   function invocaDeployTransformation(transformation){
+    document.forms[0].servizio.value=transformation;
+    document.forms[0].tipoOggetto.value='Transformation';
     document.forms[0].submit();
    } 
    function invocaDeployParameter(parameter){

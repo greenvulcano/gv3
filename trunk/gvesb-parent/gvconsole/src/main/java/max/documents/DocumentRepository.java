@@ -3,12 +3,17 @@ package max.documents;
 import it.greenvulcano.catalog.GVCatalogResolver;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +27,8 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -41,6 +48,8 @@ import max.core.MaxException;
 import max.xml.Check;
 import max.xml.XMLBuilder;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -560,23 +569,38 @@ public class DocumentRepository
      *        The description of the version of category;
      * @param author
      *        The author of the operation.
-     * @throws XMLConfigException
+     * @throws Exception 
      */
-    public synchronized void rollback(String name, int version, String notes, String author) throws MaxException,
-            XMLConfigException
+    public synchronized void rollback(String name, int version, String notes, String author) throws Exception
     {
 
-        VersionManager vm = VersionManager.instance();
+    	VersionManager vm = VersionManager.instance();
 
-        DocumentProxy proxy = getDocumentProxy(name);
-
-        InputStream inputStream = vm.getDocument(name, version);
-        String buffer = convertToString(inputStream);
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer.getBytes());
-        Document document = createDocument(bais);
-        proxy.save(document);
-        bais = new ByteArrayInputStream(buffer.getBytes());
-        vm.newDocumentVersion(name, bais, notes, author, new Date());
+    	DocumentProxy proxy = getDocumentProxy(name);
+    	InputStream inputStream = vm.getDocument(name, version);
+    	
+    	String gvDir = PropertiesHandler.expand("${{gv.app.home}}", null);
+    	
+    	ZipInputStream zipFile = new ZipInputStream(inputStream);
+        ZipEntry zipEntry = null;
+        while((zipEntry=zipFile.getNextEntry())!=null) {
+        	if (zipEntry.isDirectory()) {
+        		String targetSubdirPathname = zipEntry.getName();
+        		FileUtils.forceMkdir(new File(gvDir, targetSubdirPathname));
+        	}
+        	else {
+        		OutputStream os = null;
+        		FileUtils.forceMkdir(new File(gvDir, zipEntry.getName()).getParentFile());
+        		os = new FileOutputStream(new File(gvDir, zipEntry.getName()));
+        		IOUtils.copy(zipFile, os);
+        		os.flush();
+        		os.close();
+        	}	
+        }
+        GVParser gvParser = new GVParser(false);
+        ByteArrayInputStream in = gvParser.copyFileForBackupZip();
+    	vm.newDocumentVersion(name, in, notes, author, new Date());
+    	gvParser.deleteFileZip();
     }
 
     /**
@@ -980,8 +1004,10 @@ public class DocumentRepository
         Element elementNotes = createTag(dom, "notes", vm.getNotes(dd.getName(), version));
         elementVersion.appendChild(elementNotes);
 
-        Element elementDate = createTag(dom, "date", (vm.getDate(dd.getName(), version)).toString());
-        elementVersion.appendChild(elementDate);
+        if(vm.getDate(dd.getName(), version)!=null){
+        	Element elementDate = createTag(dom, "date", (vm.getDate(dd.getName(), version)).toString());
+           elementVersion.appendChild(elementDate);
+        }
 
         Element elementOperationView = createTag(dom, "permission", "R");
         elementVersion.appendChild(elementOperationView);

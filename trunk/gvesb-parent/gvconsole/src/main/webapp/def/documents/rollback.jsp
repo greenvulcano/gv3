@@ -31,7 +31,7 @@
         {
             var version = RollForm.version.value;
             RollForm.cmd.value = "rollback";
-            RollForm.notes.value = "Ripristino della ver. " + version + "\n" + RollForm.notes.value;
+            RollForm.notes.value = "Restore ver. " + version + "\n" + RollForm.notes.value;
         }
 
         function cancel()

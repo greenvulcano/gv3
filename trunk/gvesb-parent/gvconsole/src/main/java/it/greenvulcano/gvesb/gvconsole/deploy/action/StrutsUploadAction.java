@@ -84,6 +84,7 @@ public class StrutsUploadAction extends Action
 
             sessione.setAttribute("fileZip", fileZip);
             sessione.setAttribute("listaServizi", parserService.getListaServiziZip());
+            sessione.setAttribute("listaTransformation", parserService.getListaTransformationZip());
             sessione.setAttribute("listaAdapter", parserAdapter.getListaAdapterZip());
             sessione.setAttribute("listaWebServices", parserAdapter.getListaWebServicesZip());
             sessione.setAttribute("listaDataProvider", parserAdapter.getListaDataProviderZip());

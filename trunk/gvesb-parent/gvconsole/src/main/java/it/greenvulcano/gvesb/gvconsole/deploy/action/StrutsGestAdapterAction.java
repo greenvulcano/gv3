@@ -46,7 +46,7 @@ import org.apache.struts.action.ActionMapping;
 public class StrutsGestAdapterAction extends Action
 {
 
-    private static final Logger logger = GVLogger.getLogger(StrutsDeployAction.class);
+    private static final Logger logger = GVLogger.getLogger(StrutsGestAdapterAction.class);
 
     /**
      * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping,
