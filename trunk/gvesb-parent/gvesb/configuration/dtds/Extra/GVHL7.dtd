@@ -1,8 +1,7 @@
 <!--
 -->
 <!ELEMENT GVHL7ListenerManager (Description?, HL7Listeners)>
-<!ATTLIST GVHL7ListenerManager version CDATA #FIXED "1.0"
->
+<!ATTLIST GVHL7ListenerManager version CDATA #FIXED "1.0">
 <!--
     Element type 'module'.
 -->
@@ -138,7 +137,7 @@
 
 
 <!--
-    Defines a XML to HL7 string trasformation.
+    Defines a XML to HL7 string transformation.
 
     #Label: @name
     #Icon: GVXml2Hl7Transformation.png
