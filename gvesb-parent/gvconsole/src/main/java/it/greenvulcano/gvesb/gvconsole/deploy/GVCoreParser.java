@@ -1058,6 +1058,8 @@ public class GVCoreParser
 	        getListDataProviderCoreIterator(xml, nomeServizio, hlistaDp, parser);
 	        getListDataProviderCoreIteratorCall(xml, nomeServizio, hlistaDp, parser);
 	        getListDataProviderCoreIteratorSubFlowCall(xml, nomeServizio, hlistaDp, parser);
+	        getListDataProviderCoreSubFlowSplitted(xml, nomeServizio, hlistaDp, parser);
+	        getListDataProviderCoreFlowDefs(xml, nomeServizio, hlistaDp, parser);
 	        Set<String> set = hlistaDp.keySet(); // get set-view of keys
 	        logger.debug("getListDataProvider - LISTA DP=" + set);
 	        // get iterator
@@ -1168,6 +1170,37 @@ public class GVCoreParser
         NodeList refdp = parser.selectNodeList(xml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
                 + "']/Operation/*/GVIteratorOperationNode/SubFlowCall/@ref-dp");
         logger.debug("getListDataProviderCoreIteratorSubFlowCall NUM REFDP=" + refdp.getLength());
+        for (int i = 0; i < refdp.getLength(); i++) {
+            String dp = parser.get(refdp.item(i), ".");
+            vlistaDp.put(dp, dp);
+        }
+    }
+    
+    private void getListDataProviderCoreSubFlowSplitted(Document xml, String nomeServizio,
+            Map<String, String> vlistaDp, XMLUtils parser) throws XMLUtilsException
+    {
+        NodeList refdp = parser.selectNodeList(xml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
+                + "']/Operation/*/GVSubFlowSplittedNode/@ref-dp");
+        logger.debug("getListDataProviderCoreSubFlowSplitted NUM REFDP=" + refdp.getLength());
+        for (int i = 0; i < refdp.getLength(); i++) {
+            String dp = parser.get(refdp.item(i), ".");
+            vlistaDp.put(dp, dp);
+        }
+        refdp = parser.selectNodeList(xml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
+                + "']/Operation/*/GVSubFlowSplittedNode/@partition-dp");
+        logger.debug("getListDataProviderCoreSubFlowSplitted NUM PARTITIONDP=" + refdp.getLength());
+        for (int i = 0; i < refdp.getLength(); i++) {
+            String dp = parser.get(refdp.item(i), ".");
+            vlistaDp.put(dp, dp);
+        }
+    }
+    
+    private void getListDataProviderCoreFlowDefs(Document xml, String nomeServizio,
+            Map<String, String> vlistaDp, XMLUtils parser) throws XMLUtilsException
+    {
+        NodeList refdp = parser.selectNodeList(xml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
+                + "']/Operation/*/*/FlowDefs/FlowDef/@ref-dp");
+        logger.debug("getListDataProviderCoreFlowDefs NUM REFDP=" + refdp.getLength());
         for (int i = 0; i < refdp.getLength(); i++) {
             String dp = parser.get(refdp.item(i), ".");
             vlistaDp.put(dp, dp);
