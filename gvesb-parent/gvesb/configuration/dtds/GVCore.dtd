@@ -2460,6 +2460,14 @@
 -->
 <!ATTLIST GVOperationNode point-y CDATA #IMPLIED>
 <!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVOperationNode breakpoint (true|false) #IMPLIED>
+<!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 
@@ -2852,6 +2860,14 @@
 -->
 <!ATTLIST ChangeGVBufferNode      point-y CDATA #IMPLIED>
 <!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST ChangeGVBufferNode breakpoint (true|false) #IMPLIED>
+<!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 -->
@@ -2988,6 +3004,14 @@
     #Freezed
 -->
 <!ATTLIST GVEndNode       point-y CDATA #IMPLIED>
+<!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVEndNode breakpoint (true|false) #IMPLIED>
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
@@ -3182,6 +3206,14 @@
 -->
 <!ATTLIST GVNodeCheck     point-y CDATA #IMPLIED>
 <!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVNodeCheck breakpoint (true|false) #IMPLIED>
+<!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 -->
@@ -3345,6 +3377,14 @@
 -->
 <!ATTLIST GVNotificationNode      point-y CDATA #IMPLIED>
 <!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVNotificationNode breakpoint (true|false) #IMPLIED>
+<!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 -->
@@ -3441,6 +3481,14 @@
     #Freezed
 -->
 <!ATTLIST GVWaitNode      point-y CDATA #IMPLIED>
+<!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVWaitNode breakpoint (true|false) #IMPLIED>
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
@@ -3662,6 +3710,14 @@
     #Freezed
 -->
 <!ATTLIST GVIteratorOperationNode point-y CDATA #IMPLIED>
+<!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVIteratorOperationNode breakpoint (true|false) #IMPLIED>
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
@@ -3950,7 +4006,7 @@
 -->
 <!ATTLIST GVCoreCallNode id CDATA #REQUIRED>
 <!--
-    If 'true' are id-system, id-service and operation attributes cancontains metadata to be resolver at runtime.
+    If 'true' are id-system, id-service and operation attributes can contains metadata to be resolver at runtime.
 -->
 <!ATTLIST GVCoreCallNode  dynamic (true | false) #IMPLIED
 >
@@ -4060,6 +4116,14 @@
     #Freezed
 -->
 <!ATTLIST GVCoreCallNode point-y CDATA #IMPLIED>
+<!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVCoreCallNode breakpoint (true|false) #IMPLIED>
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
@@ -4247,6 +4311,14 @@
 -->
 <!ATTLIST GVSubFlowCallNode point-y CDATA #IMPLIED>
 <!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVSubFlowCallNode breakpoint (true|false) #IMPLIED>
+<!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 -->
@@ -4337,6 +4409,14 @@
     #Freezed
 -->
 <!ATTLIST GVSavePointNode point-y CDATA #IMPLIED>
+<!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVSavePointNode breakpoint (true|false) #IMPLIED>
 
 <!--
     If true enable the dump of the input/output GVBuffer.
@@ -4904,6 +4984,14 @@
 -->
 <!ATTLIST GVSubFlowSpawnNode point-y CDATA #IMPLIED>
 <!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVSubFlowSpawnNode breakpoint (true|false) #IMPLIED>
+<!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 -->
@@ -5060,6 +5148,14 @@
     #Freezed
 -->
 <!ATTLIST GVSubFlowParallelNode point-y CDATA #IMPLIED>
+<!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVSubFlowParallelNode breakpoint (true|false) #IMPLIED>
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
@@ -5237,6 +5333,14 @@
     #Freezed
 -->
 <!ATTLIST GVSubFlowSplittedNode point-y CDATA #IMPLIED>
+<!--
+    Keeps information about this node is a debugger breakpoint in VulCon workflows editor.
+    Immutable, used by VulCon.
+
+    #NotNull
+    #Freezed
+-->
+<!ATTLIST GVSubFlowSplittedNode breakpoint (true|false) #IMPLIED>
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
