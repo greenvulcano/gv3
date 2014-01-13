@@ -336,3 +336,64 @@
     #Pattern: @ \d+ @ specify a timeout in seconds
 -->
 <!ATTLIST hl7-call  timeout CDATA #IMPLIED>
+
+
+<!--
+    HL7 Forward plugin to validate remote HL7 servers connections prior to dequeue JMS message.
+
+    #Label: @name
+    #SelectOnInsert
+    #Template:
+
+        <xsl:template match="HL7ConnectionValidator">
+                <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT HL7ConnectionValidator (Description?, HL7Server+)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST HL7ConnectionValidator type CDATA #FIXED "validator">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST HL7ConnectionValidator class CDATA #FIXED "it.greenvulcano.gvesb.core.forward.preprocess.hl7.HL7ConnectionValidator">
+<!--
+    Validator name.
+
+    #NotNull
+    #Unique: current()/ancestor::GVForwards/ForwardConfiguration/PreProcessor/Validators/*[@type='validator']/@name
+-->
+<!ATTLIST HL7ConnectionValidator name CDATA #REQUIRED>
+
+<!--
+    HL7 Forward plugin to validate remote HL7 servers connections prior to dequeue JMS message.
+
+    #CompositeLabel: !! @host !:! @port
+    #SelectOnInsert
+    #Template:
+
+        <xsl:template match="HL7Server">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT HL7Server (Description?)>
+<!--
+    Host to connect to.
+
+    #NotNull
+-->
+<!ATTLIST HL7Server host CDATA #REQUIRED>
+<!--
+    Port where the service is exposed.
+
+    #NotNull
+    #Pattern: ! ^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$ ! Insert a number between 0 and 65535
+-->
+<!ATTLIST HL7Server  port CDATA #REQUIRED>

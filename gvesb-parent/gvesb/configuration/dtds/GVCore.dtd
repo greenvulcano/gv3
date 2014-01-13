@@ -34,6 +34,7 @@
 <!ENTITY % file-commands "FileSearchCommand|FileMoveCommand|FileDeleteCommand|FileCopyCommand|FileZipCommand|FileUnZipCommand">
 <!ENTITY % remote-file-commands "RemoteSearchCommand|RemoteMoveCommand|RemoteDeleteCommand|RemoteDownloadCommand|RemoteUploadCommand">
 <!ENTITY % jmx-op "(invoke-method|set-attribute|get-attribute)">
+<!ENTITY % preFwdValidators "DUMMY %extra-pre-fwd-validators;">
 
 <!--
     Configuration file for GreenVulcanoESB core modules.
@@ -246,7 +247,7 @@
 <!--
     #CompositeLabel: || @name | - | @forwardName
 -->
-<!ELEMENT ForwardConfiguration (Description?, ForwardDeployment, ErrorHandler*)>
+<!ELEMENT ForwardConfiguration (Description?, ForwardDeployment, PreProcessor?, ErrorHandler*)>
 
 <!--
     Forward configuration name.
@@ -543,6 +544,16 @@
     #Warn: {{../ExceptionDef[@filter-type and not(@message-filter)]}} The 'message-filter' and 'filter-type' attributes must be defined together
 -->
 <!ATTLIST ExceptionDef	filter-type (text|reg-exp) #IMPLIED>
+
+<!--
+
+-->
+<!ELEMENT PreProcessor (Validators?)>
+
+<!--
+
+-->
+<!ELEMENT Validators ((%preFwdValidators;)*)>
 
 
 <!ELEMENT GVDataTransformation (Description?,DataSourceSets,Startup?,Transformations)>
@@ -4006,7 +4017,7 @@
 -->
 <!ATTLIST GVCoreCallNode id CDATA #REQUIRED>
 <!--
-    If 'true' are id-system, id-service and operation attributes can contains metadata to be resolver at runtime.
+    If 'true', the id-system, id-service and operation attributes can contains metadata to be resolver at runtime.
 -->
 <!ATTLIST GVCoreCallNode  dynamic (true | false) #IMPLIED
 >
