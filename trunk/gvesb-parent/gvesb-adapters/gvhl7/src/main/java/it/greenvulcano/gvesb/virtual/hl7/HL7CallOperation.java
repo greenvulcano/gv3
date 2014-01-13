@@ -124,11 +124,11 @@ public class HL7CallOperation implements CallOperation
             request.setParser(hl7StringParser);
             logger.debug("Request StringMessage:\n" + request.encode());
 
-            initConnection();
-
             // The initiator is used to transmit unsolicited messages
-            Initiator initiator = connection.getInitiator();
-            initiator.setTimeoutMillis(timeout);
+            Initiator initiator = initConnection();
+
+            /*Initiator initiator = connection.getInitiator();
+            initiator.setTimeoutMillis(timeout);*/
 
             Message response = null;
 
@@ -136,9 +136,9 @@ public class HL7CallOperation implements CallOperation
                 response = initiator.sendAndReceive(request);
             }
             catch (SocketException exc) {
-                // retry send;
-                closeConnection();
-                initConnection();
+                // retry send
+                closeConnection(true);
+                initiator = initConnection();
                 response = initiator.sendAndReceive(request);
             }
 
@@ -175,10 +175,10 @@ public class HL7CallOperation implements CallOperation
     @Override
     public void destroy()
     {
-        closeConnection();
+        closeConnection(false);
     }
 
-    private void initConnection() throws Exception
+    private Initiator initConnection() throws Exception
     {
         if ((connection == null) || !connection.isOpen()) {
             // The connection hub connects to listening servers
@@ -186,14 +186,24 @@ public class HL7CallOperation implements CallOperation
             // A connection object represents a socket attached to an HL7 server
             connection = connectionHub.attach(host, port, new PipeParser(), MinLowerLayerProtocol.class);
         }
+        
+        Initiator initiator = connection.getInitiator();
+        initiator.setTimeoutMillis(timeout);
+        
+        return initiator;
     }
 
-    private void closeConnection()
+    private void closeConnection(boolean force)
     {
         try {
             if (connection != null) {
                 // Close the connection
-                ConnectionHub.getInstance().detach(connection);
+                if (force) {
+                    ConnectionHub.getInstance().discard(connection);
+                }
+                else {
+                    ConnectionHub.getInstance().detach(connection);
+                }
             }
         }
         catch (Exception exc) {

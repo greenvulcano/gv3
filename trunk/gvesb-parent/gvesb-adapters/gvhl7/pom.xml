@@ -28,6 +28,10 @@
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvcore-forward</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvpolicy</artifactId>
         </dependency>
 

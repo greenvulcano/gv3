@@ -30,3 +30,5 @@
 
 <!ENTITY % extra-input-services "|dh-selector-service">
 <!ENTITY % extra-output-services "">
+
+<!ENTITY % extra-pre-fwd-validators "">

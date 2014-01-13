@@ -28,6 +28,7 @@ import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
 import it.greenvulcano.gvesb.core.forward.jms.JMSForwardData;
 import it.greenvulcano.gvesb.core.forward.jms.JMSForwardListenerPool;
 import it.greenvulcano.gvesb.core.forward.jmx.JMSForwardListenerPoolInfo;
+import it.greenvulcano.gvesb.core.forward.preprocess.ValidatorManager;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
@@ -35,7 +36,6 @@ import it.greenvulcano.log.NMDC;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -121,6 +121,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
         NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
         try {
             logger.debug("BEGIN - Destroing JMSForwardManager");
+            ValidatorManager.instance().reset();
             for (JMSForwardListenerPool pool : jmsListeners) {
                 String forwardName = pool.getName() + "/" + pool.getForwardName();
                 try {

@@ -24,3 +24,5 @@
 <!ENTITY % extra-core "">
 <!ENTITY % extra-adapters ",GVHL7ListenerManager">
 <!ENTITY % extra-support "">
+
+<!ENTITY % extra-pre-fwd-validators "|HL7ConnectionValidator">

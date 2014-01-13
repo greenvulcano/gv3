@@ -25,6 +25,7 @@ import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.buffer.GVPublicException;
 import it.greenvulcano.gvesb.core.GreenVulcano;
 import it.greenvulcano.gvesb.core.forward.JMSForwardException;
+import it.greenvulcano.gvesb.core.forward.preprocess.Validator;
 import it.greenvulcano.gvesb.core.forward.util.ErrorHandlerManager;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
@@ -38,6 +39,8 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadMap;
+
+import java.util.List;
 
 import javax.jms.Connection;
 import javax.jms.Destination;
@@ -216,6 +219,18 @@ public class JMSForwardListener implements Runnable
         try {
             while (isActive() && ((data.getReadBlockCount() < 0) || (readCount < data.getReadBlockCount()))) {
                 try {
+                    if (!checkValidators()) {
+                        if (data.isDebug()) {
+                            logger.debug("Pre-process validation failed for Forward [" + name + "/" + forwardName + "] instance... retrying");
+                        }
+                        try {
+                            Thread.sleep(data.getReconnectInterval());
+                        }
+                        catch (Exception exc2) {
+                            // do nothing
+                        }
+                        continue;
+                    }
                     try {
                         try {
                             connect();
@@ -342,6 +357,20 @@ public class JMSForwardListener implements Runnable
             data.stopListener(this);
             ThreadMap.clean();
         }
+    }
+
+    /**
+     * @throws JMSForwardException 
+     * 
+     */
+    private boolean checkValidators() throws JMSForwardException {
+        List<Validator> validators = data.getValidators();
+        for (Validator validator : validators) {
+            if (!validator.isValid()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void connect() throws Exception
