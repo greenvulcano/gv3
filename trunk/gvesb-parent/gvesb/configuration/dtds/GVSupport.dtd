@@ -741,7 +741,7 @@
 <!--
     #SelectOnInsert
 -->
-<!ELEMENT LogConsole (Description?, LogFilter, Message)>
+<!ELEMENT LogConsole (Description?, LogFilter, Message, LogDownload)>
 <!--
     DataSource JNDI name.
 
@@ -758,6 +758,41 @@
     #NotNull
 -->
 <!ELEMENT Message (#PCDATA)>
+<!--
+    Log files download component.
+-->
+<!ELEMENT LogDownload EMPTY>
+<!--
+    The GV ESB log directory to be searched for files.
+    Default to: sp{{gv.app.home}}/log.
+
+    #NotNull
+-->
+<!ATTLIST LogDownload gv-log-dir      CDATA #IMPLIED>
+<!--
+    Search pattern for log file to compress.
+    Default to: (.*\.@{{DATE_A}}\.log$)|(.*\.@{{DATE_A}}\.log\.zip$)|(.*\.@{{DATE_A}}\.log\.gz$)
+    (@{{DATE_A}} is the requested log date)
+
+    #NotNull
+-->
+<!ATTLIST LogDownload gv-log-filter    CDATA #IMPLIED>
+<!--
+    The JBoss log directory to be searched for files.
+    Default to: sp{{jboss.server.log.dir}}.
+
+    #NotNull
+-->
+<!ATTLIST LogDownload jboss-log-dir      CDATA #IMPLIED>
+<!--
+    Search pattern for log file to compress.
+    Default to: (boot\.log$)|(boot\.log\.zip$)|(boot\.log\.gz$)|(server\.log\.@{{DATE_A}}$)|(server\.log\.@{{DATE_A}}\.zip$)|(server\.log\.@{{DATE_A}}\.gz$)
+    If search date is today: (boot\.log$)|(boot\.log\.zip$)|(boot\.log\.gz$)|(server\.log$)
+    (@{{DATE_A}} is the requested log date)
+
+    #NotNull
+-->
+<!ATTLIST LogDownload jboss-log-filter    CDATA #IMPLIED>
 
 <!--
     Defines standard Locale, TimeZone and holydays for it.greenvulcano.util.txt.DateUtils utility class.
