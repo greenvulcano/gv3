@@ -63,6 +63,7 @@ public class InitAction extends Action {
 
         frm.set("dateFrom", DateUtils.dateToString(dateFrom, "dd/MM/yyyy HH:mm"));
         frm.set("dateTo", DateUtils.dateToString(dateTo,"dd/MM/yyyy HH:mm"));
+        frm.set("date", DateUtils.dateToString(now,"dd/MM/yyyy"));
         session.setAttribute("LogViewerForm", frm);
 
         return mapping.findForward("home");

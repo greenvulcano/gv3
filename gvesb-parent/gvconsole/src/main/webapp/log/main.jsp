@@ -32,6 +32,7 @@
     <script type="text/javascript" src="<%=contextRoot%>/log/main.js"></script>
 <br/>
     <div class="ui-widget-header" style="margin-top:40px;">
+        <div style="width:1100px;">
         <html:form action="/log/HandleLogAction" onsubmit="return checkForm(this);">
             <html:hidden styleId="skipValidation" property="skipValidation" value="true"/>
             <html:hidden styleId="methodToCall" property="methodToCall" value="Filter"/>
@@ -49,7 +50,7 @@
             </div>
             <div style="float:left;margin-right:5px;">
                 <label for="dateFrom">Date From:</label><br>
-                <html:text styleId="dateFrom" property="dateFrom"></html:text>
+                <html:text styleId="dateFrom" property="dateFrom" style="width:10em;"></html:text>
                 <script type="text/javascript">
                     jQuery(document).ready(function() {
                         jQuery("#dateFrom").dynDateTime({
@@ -64,7 +65,7 @@
             </div>
             <div style="float:left;margin-right:5px;">
                 <label for="dateTo">Date To:</label><br>
-                <html:text styleId="dateTo" property="dateTo"></html:text>
+                <html:text styleId="dateTo" property="dateTo" style="width:10em;"></html:text>
                 <script type="text/javascript">
                     jQuery(document).ready(function() {
                         jQuery("#dateTo").dynDateTime({
@@ -90,7 +91,32 @@
             <br>
             <button class="ui-state-default ui-corner-all" type="submit">Go</button>
         </html:form>
+        </div>
+        <div style="width:200px; margin-left:1150px; margin-top:-35px;">
+        <html:form action="/log/HandleLogAction" target="_blank">
+            <html:hidden styleId="skipValidation" property="skipValidation" value="true"/>
+            <html:hidden styleId="methodToCall" property="methodToCall" value="Download"/>
+            <div style="float:left;margin-right:5px;">
+                <label for="date">Date:</label><br>
+                <html:text styleId="date" property="date" style="width:7em;"></html:text>
+                <script type="text/javascript">
+                    jQuery(document).ready(function() {
+                        jQuery("#date").dynDateTime({
+                            showsTime: true,
+                            ifFormat: "dd/MM/yyyy",
+                            align: "TL",
+                            electric: false,
+                            singleClick: true
+                        });
+                    });
+                </script>
+            </div>
+            <br>
+            <button class="ui-state-default ui-corner-all" type="submit">Download</button>
+        </html:form>
+        </div>
     </div>
+    
       <br>
         <table id="tableResult" width="100%" border="1" class="display"  style=" font-size: 0.9em;">
           <thead>

@@ -18,6 +18,7 @@
         <form name="LogViewerForm" validate="false">
             <field property="dateFrom" type="java.lang.String"/>
             <field property="dateTo" type="java.lang.String"/>
+            <field property="date" type="java.lang.String"/>
             <field property="system" type="java.lang.String"/>
             <field property="service" type="java.lang.String"/>
             <field property="id" type="java.lang.String"/>

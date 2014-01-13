@@ -430,6 +430,7 @@
                 order by decode{{@{{ORDER}}::DESC::TSTAMP desc::TSTAMP}}
             </LogFilter>
             <Message>select decode{{@{{MSG_FIELD}}::Msg::MSG::Exc::THROWABLE::NONE}} as MESSAGE from VW_GV_LOG where ID_MSG=@{{ID_MSG}}</Message>
+            <LogDownload/>
         </LogConsole>
     </GVWorkbenchConfig>
 
