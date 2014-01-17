@@ -1577,21 +1577,6 @@ public class GVAdapterParser
         return doc;
     }
 
-    /**
-     * @param variabiliGlobali
-     * @throws XMLUtilsException 
-     */
-    public void sostituisciVariabili(VariabiliGlobali[] variabiliGlobali) throws XMLUtilsException
-    {
-        String strNewXml = XMLUtils.serializeDOM_S(newXml);
-        for (int i = 0; i < variabiliGlobali.length; i++) {
-            logger.debug(variabiliGlobali[i].getNome() + "=" + variabiliGlobali[i].getValore());
-            strNewXml = strNewXml.replaceAll("%%" + variabiliGlobali[i].getNome() + "%%",
-                    variabiliGlobali[i].getValore());
-        }
-        newXml = parseXmlString(strNewXml);
-    }
-
     private void copiaFileAAR(Node businessWS) throws Exception
     {
         String path = java.lang.System.getProperty("java.io.tmpdir");

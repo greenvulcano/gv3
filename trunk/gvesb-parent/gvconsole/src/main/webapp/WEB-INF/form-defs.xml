@@ -26,5 +26,17 @@
             <field property="id_msg" type="java.lang.String"/>
             <field property="dialogType" type="java.lang.String"/>
         </form>
+        
+        <form name="GlobalProperty" beanType="it.greenvulcano.gvesb.gvconsole.gvcon.property.GlobalProperty" validate="false"/>
+        <form name="PropertiesEditorForm" beanType="it.greenvulcano.gvesb.gvconsole.gvcon.property.PropertiesEditorForm" validate="false">
+            <field property="properties"
+                type="java.util.List" exclude="false">
+                <converter type="formdef.plugin.conversion.FormCollectionConverter"
+                           param="GlobalProperty">
+                    <set-property key="formType" value="java.util.ArrayList"/>
+                    <set-property key="beanType" value="java.util.ArrayList"/>
+                </converter>
+            </field>
+        </form>
    </formset>
 </form-definition>

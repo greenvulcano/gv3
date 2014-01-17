@@ -24,8 +24,6 @@ import it.greenvulcano.gvesb.gvconsole.deploy.GVAdapterParser;
 import it.greenvulcano.gvesb.gvconsole.deploy.GVCoreParser;
 import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
 import it.greenvulcano.gvesb.gvconsole.deploy.GVSupportParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.Variabili;
-import it.greenvulcano.gvesb.gvconsole.deploy.VariabiliGlobali;
 import it.greenvulcano.log.GVLogger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,15 +61,9 @@ public class StrutsSaveAction extends Action
         try {
             GVParser parser = (GVParser) sessione.getAttribute("parser");
             String file = request.getParameter("file");
-            VariabiliGlobali[] variabiliGlobali = (VariabiliGlobali[]) sessione.getAttribute("variabili");
-            for (int i = 0; i < variabiliGlobali.length; i++) {
-                String value = request.getParameter("VARIABILE_" + variabiliGlobali[i].getNome());
-                variabiliGlobali[i].setValore(value);
-            }
             if (file.equals("GVCore")) {
                 String nomeServizio = (String) sessione.getAttribute("servizio");
                 GVCoreParser coreParser = parser.getGVCoreParser();
-                coreParser.sostituisciVariabili(variabiliGlobali);
                 DatiServizio datiServizio = new DatiServizio();
                 datiServizio.setEquals(coreParser.getEqualService(nomeServizio));
                 datiServizio.setExist(coreParser.getExist(nomeServizio));
@@ -83,8 +75,6 @@ public class StrutsSaveAction extends Action
                 if (cServer != null) {
                     datiServizio.setNodoServer(cServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-                Variabili var = new Variabili();
-                variabiliGlobali = var.getVariabiliGlobaliPresenti(coreParser.getGvCoreZip(nomeServizio));
             }
             else if (file.equals("GVAdapters")) {
                 String nomeAdapter = (String) sessione.getAttribute("adapter");
@@ -93,7 +83,6 @@ public class StrutsSaveAction extends Action
                 logger.debug("nomeAdapter="+nomeAdapter);
                 GVAdapterParser adapterParser = parser.getGVAdapterParser();
                 adapterParser.loadParser();
-                adapterParser.sostituisciVariabili(variabiliGlobali);
                 DatiServizio datiServizio = new DatiServizio();
                 datiServizio.setEquals(adapterParser.getEqual(nomeAdapter,nomeServizio));
                 datiServizio.setExist(adapterParser.getExist(nomeAdapter,nomeServizio));
@@ -105,14 +94,11 @@ public class StrutsSaveAction extends Action
                 if (aServer != null) {
                     datiServizio.setNodoServer(aServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-                Variabili var = new Variabili();
-                variabiliGlobali = var.getVariabiliGlobaliPresenti(adapterParser.getGvAdapterZip(nomeAdapter,nomeServizio));
             }
             else if (file.equals("GVSupport")) {
                 String support = (String) sessione.getAttribute("support");
                 GVSupportParser supportParser = parser.getGVSupportParser();
                 supportParser.loadParser();
-                supportParser.sostituisciVariabili(variabiliGlobali);
                 DatiServizio datiServizio = new DatiServizio();
                 datiServizio.setEquals(supportParser.getEqual(support));
                 datiServizio.setExist(supportParser.getExist(support));
@@ -124,10 +110,7 @@ public class StrutsSaveAction extends Action
                 if (sServer != null) {
                     datiServizio.setNodoServer(sServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
                 }
-                Variabili var = new Variabili();
-                variabiliGlobali = var.getVariabiliGlobaliPresenti(supportParser.getGvSupportZip(support));
             }
-            sessione.setAttribute("variabili", variabiliGlobali);
             logger.debug("End StrutsSaveAction");
             return mapping.findForward("success");
         }

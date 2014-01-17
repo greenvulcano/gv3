@@ -20,9 +20,7 @@
 package it.greenvulcano.gvesb.gvconsole.savepoint;
 
 import formdef.plugin.util.FormUtils;
-import it.greenvulcano.birt.report.ReportManager;
 import it.greenvulcano.gvesb.datahandling.utils.dao.DataAccessObject;
-import it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsExportAction;
 import it.greenvulcano.log.GVLogger;
 
 import java.util.ArrayList;
