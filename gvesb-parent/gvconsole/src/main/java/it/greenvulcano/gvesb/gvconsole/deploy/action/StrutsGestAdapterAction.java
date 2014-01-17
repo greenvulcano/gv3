@@ -22,9 +22,6 @@ package it.greenvulcano.gvesb.gvconsole.deploy.action;
 import it.greenvulcano.gvesb.gvconsole.deploy.DatiServizio;
 import it.greenvulcano.gvesb.gvconsole.deploy.GVAdapterParser;
 import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.Variabili;
-import it.greenvulcano.gvesb.gvconsole.deploy.VariabiliGlobali;
-import it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm;
 import it.greenvulcano.log.GVLogger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,9 +75,6 @@ public class StrutsGestAdapterAction extends Action
                 datiServizio.setNodoServer(adapterParser.getGvAdapterServer(nomeAdapter, nomeServizio).replaceAll("\n", "").replaceAll(
                         "\r", "").replaceAll("'", "&apos;"));
             }
-            Variabili var = new Variabili();
-            VariabiliGlobali[] variabiliGlobali = var.getVariabiliGlobaliPresenti(adapterParser.getGvAdapterZip(nomeAdapter,nomeServizio));
-            sessione.setAttribute("variabili", variabiliGlobali);
             sessione.setAttribute("datiServizio", datiServizio);
             sessione.setAttribute("file", "GVAdapters");
             sessione.setAttribute("adapter", nomeAdapter);

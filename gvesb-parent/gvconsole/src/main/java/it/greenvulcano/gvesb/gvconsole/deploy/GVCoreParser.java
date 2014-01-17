@@ -2254,17 +2254,6 @@ public class GVCoreParser
         return doc;
     }
 
-    public void sostituisciVariabili(VariabiliGlobali[] variabiliGlobali) throws XMLUtilsException
-    {
-        String strNewXml = newXml.toString();
-        for (int i = 0; i < variabiliGlobali.length; i++) {
-            logger.debug(variabiliGlobali[i].getNome() + "=" + variabiliGlobali[i].getValore());
-            strNewXml = strNewXml.replaceAll("%%" + variabiliGlobali[i].getNome() + "%%",
-                    variabiliGlobali[i].getValore());
-        }
-        newXml = parseXmlString(strNewXml);
-    }
-
     private void copiaFile(String fileOrigine, String fileDestinazione) throws Exception
     {
         FileInputStream in = null;

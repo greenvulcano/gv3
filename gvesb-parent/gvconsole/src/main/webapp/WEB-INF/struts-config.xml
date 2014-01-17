@@ -61,6 +61,15 @@
       <forward name="success" path="/deploy/deployFile.jsp" />
       <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
     </action>
+    
+    <action name="BlankForm" path="/propertiesMain" scope="session" type="it.greenvulcano.gvesb.gvconsole.gvcon.property.InitAction">
+        <forward name="home" path="/def/property/globalProperties.jsp"/>
+    </action>
+    <action input="/def/property/globalProperties.jsp" name="PropertiesEditorForm" parameter="methodToCall" path="/property/HandlePropertiesAction" 
+            scope="session" type="it.greenvulcano.gvesb.gvconsole.gvcon.property.PropertiesAction" validate="true">
+        <forward name="home" path="/def/property/globalProperties.jsp"/>
+    </action>
+    
     <action path="/testing/loadServices" type="it.greenvulcano.gvesb.gvconsole.workbench.action.TestingAction" name="loadServices" scope="session"
       validate="true" input="/testing/index.jsp"/>
     <action path="/testing/loadSystems" type="it.greenvulcano.gvesb.gvconsole.workbench.action.TestingAction" name="loadSystems" scope="session"
@@ -104,12 +113,12 @@
   </action-mappings>
 
   <controller/>
-    <message-resources parameter="Messages"/>
-    <plug-in className="formdef.plugin.validator.CombinedValidatorPlugIn">
-        <set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/form-defs.xml"/>
-    </plug-in>
-    <plug-in className="formdef.plugin.validator.CombinedFormDefPlugIn">
-        <set-property property="defnames" value="/WEB-INF/form-defs.xml"/>
-    </plug-in>
+  <message-resources parameter="Messages"/>
+  <plug-in className="formdef.plugin.validator.CombinedValidatorPlugIn">
+      <set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/form-defs.xml"/>
+  </plug-in>
+  <plug-in className="formdef.plugin.validator.CombinedFormDefPlugIn">
+      <set-property property="defnames" value="/WEB-INF/form-defs.xml"/>
+  </plug-in>
 </struts-config>
 

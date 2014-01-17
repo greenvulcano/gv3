@@ -7,7 +7,7 @@
 <%@ taglib uri="/WEB-INF/maxime.tld" prefix="max"%>
 <script type="text/javascript">$(function() { $("#accordion").accordion();});</script>
     <table align="center">
-     <tr class="search">
+        <tr class="search">
             <td><h1><nobr>Configuration management</nobr></h1></td>
 	        <td class="width4"></td>
 	        <td class=""><%@ include file="/def/xmleditor/xmlmenu.jsp" %></td>
@@ -36,5 +36,10 @@
 	            Using this tool you can select a client document for editing.
             </td>
         </tr> -->
+        <%-- <tr>
+            <td colspan="3">
+                <a href="<%=contextRoot%>/propertiesMain.do">Global Properties Editor</a>
+            </td>
+        </tr> --%>
 </table>
 <%@ include file="../../end.jspf" %>

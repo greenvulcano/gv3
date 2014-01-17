@@ -617,6 +617,11 @@
             <url-pattern>/log/*</url-pattern>
             <url-pattern>/logMain.do</url-pattern>
         </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>PropEditor</web-resource-name>
+            <url-pattern>/property/*</url-pattern>
+            <url-pattern>/propertiesMain.do</url-pattern>
+        </web-resource-collection>
 		<auth-constraint>
 			<role-name>configurator</role-name>
 			<role-name>monitoring</role-name>
