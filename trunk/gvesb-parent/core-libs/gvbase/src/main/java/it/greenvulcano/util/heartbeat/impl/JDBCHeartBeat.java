@@ -76,10 +76,10 @@ public class JDBCHeartBeat extends HeartBeat
     }
 
     /* (non-Javadoc)
-     * @see it.greenvulcano.util.heartbeat.HeartBeat#beat(java.lang.String, long)
+     * @see it.greenvulcano.util.heartbeat.HeartBeat#beat(java.lang.String, long, boolean)
      */
     @Override
-    protected void beat(String subsystem, long timestamp) throws HeartBeatException
+    protected void beat(String subsystem, long timestamp, boolean success) throws HeartBeatException
     {
         if (!initialized) {
             initJDBC();
@@ -89,6 +89,7 @@ public class JDBCHeartBeat extends HeartBeat
                 insStm.setString(1, hostName);
                 insStm.setString(2, subsystem);
                 insStm.setTimestamp(3, new Timestamp(timestamp));
+                insStm.setString(4, (success ? "S" : "F"));
                 insStm.executeUpdate();
             }
             catch (SQLException exc) {
@@ -97,6 +98,7 @@ public class JDBCHeartBeat extends HeartBeat
                 insStm.setString(1, hostName);
                 insStm.setString(2, subsystem);
                 insStm.setTimestamp(3, new Timestamp(timestamp));
+                insStm.setString(4, (success ? "S" : "F"));
                 insStm.executeUpdate();
             }
         }
@@ -184,7 +186,7 @@ public class JDBCHeartBeat extends HeartBeat
     {
         try {
             conn = JDBCConnectionBuilder.getConnection(jdbcConnectionName);
-            insStm = conn.prepareStatement("insert into HEARTBEAT (HOST, SUBSYSTEM, BEAT) values (?, ?, ?)");
+            insStm = conn.prepareStatement("insert into HEARTBEAT (HOST, SUBSYSTEM, BEAT, STATE) values (?, ?, ?, ?)");
             initialized = true;
         }
         catch (Exception exc) {

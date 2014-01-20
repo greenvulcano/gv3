@@ -63,8 +63,13 @@ public class HeartBeatManager
 
     public static void confirmBeat(int id) throws HeartBeatException
     {
+        confirmBeat(id, true);
+    }
+
+    public static void confirmBeat(int id, boolean success) throws HeartBeatException
+    {
         HeartBeat hb = getHandler();
-        hb.confirmBeat(id);
+        hb.confirmBeat(id, success);
     }
 
     public static void cancelBeat(int id) throws HeartBeatException

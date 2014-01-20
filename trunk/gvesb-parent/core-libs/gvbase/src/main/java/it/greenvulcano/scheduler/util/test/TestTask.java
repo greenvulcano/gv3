@@ -74,7 +74,7 @@ public class TestTask extends Task
      * @see it.greenvulcano.scheduler.Task#executeTask(java.lang.String, Date, java.util.Map<java.lang.String, java.lang.String>, booolean)
      */
     @Override
-    protected void executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast)
+    protected boolean executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast)
     {
         System.out.println("-----BEGIN (" + getFullName() + ")-(" + name + ") - ("
                 + DateUtils.nowToString(DateUtils.DEFAULT_FORMAT_TIMESTAMP) + ") - " + Thread.currentThread());
@@ -88,6 +88,8 @@ public class TestTask extends Task
         }
         System.out.println("-----END   (" + getFullName() + ")-(" + name + ") - ("
                 + DateUtils.nowToString(DateUtils.DEFAULT_FORMAT_TIMESTAMP) + ") - " + Thread.currentThread());
+        
+        return true;
     }
 
     /*

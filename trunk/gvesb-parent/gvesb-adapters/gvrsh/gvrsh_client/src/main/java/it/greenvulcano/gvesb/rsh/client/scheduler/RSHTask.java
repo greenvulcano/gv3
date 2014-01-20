@@ -171,8 +171,9 @@ public class RSHTask extends Task
      * @see it.greenvulcano.scheduler.Task#executeTask(java.lang.String, Date, java.util.Map<java.lang.String, java.lang.String>, booolean)
      */
     @Override
-    protected void executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast)
+    protected boolean executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast)
     {
+        boolean success = false;
         try {
             logger.debug("Executing the RSH task: (" + getFullName() + ") - (" + name + ")");
             List<String> realCommand = new ArrayList<String>();
@@ -217,11 +218,12 @@ public class RSHTask extends Task
                 }
             }
 
-            executeCommand(realCommand, realProps, realDirectory);
+            success = executeCommand(realCommand, realProps, realDirectory);
         }
         catch (Exception exc) {
             logger.error("An error occurs executing the RSH Task(" + getFullName() + ") - (" + name + ")", exc);
         }
+        return success;
     }
 
 
@@ -269,9 +271,10 @@ public class RSHTask extends Task
      * @throws NotBoundException
      * @throws RSHException
      */
-    private void executeCommand(List<String> cmds, Map<String, String> props, String directory) throws IOException,
+    private boolean executeCommand(List<String> cmds, Map<String, String> props, String directory) throws IOException,
             InterruptedException, NotBoundException, RSHException
     {
+        boolean success = false;
         RSHServiceClient svcClient = null;
         try {
             svcClient = RSHServiceClientManager.instance().getRSHServiceClient(clientName);
@@ -284,8 +287,8 @@ public class RSHTask extends Task
             logger.debug("Exit status: " + cmdR.getExitCode());
             logger.debug("StdOut:\n" + cmdR.getStdOut());
 
-            if (cmdR.getExitCode() != 0) {
-                String stderr = cmdR.getStdErr();
+            success = cmdR.getExitCode() == 0;
+            if (!success) {
                 logger.error("An error occurred while executing the shell command - ExitCode: " + cmdR.getExitCode());
                 logger.error("StdErr:\n" + cmdR.getStdErr());
             }
@@ -293,5 +296,6 @@ public class RSHTask extends Task
         finally {
             RSHServiceClientManager.instance().releaseRSHServiceClient(svcClient);
         }
+        return success;
     }
 }
