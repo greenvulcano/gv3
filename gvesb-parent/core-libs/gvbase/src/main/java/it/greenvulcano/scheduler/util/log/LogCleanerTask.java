@@ -113,7 +113,7 @@ public class LogCleanerTask extends Task
      * java.util.Map<java.lang.String, java.lang.String>, booolean)
      */
     @Override
-    protected void executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast) {
+    protected boolean executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast) {
         logger.debug("BEGIN (" + getFullName() + ") - properties: " + locProperties);
         try {
             String logDir = PropertiesHandler.expand(logBaseDir, MapUtils.convertToHMStringObject(locProperties));
@@ -139,11 +139,16 @@ public class LogCleanerTask extends Task
                     }
                 }
             }
+            
+            return true;
         }
         catch (Exception exc) {
             logger.error("Error cleaning logs", exc);
+            return false;
         }
-        logger.debug("END (" + getFullName() + ")");
+        finally {
+            logger.debug("END (" + getFullName() + ")");
+        }
 
     }
 

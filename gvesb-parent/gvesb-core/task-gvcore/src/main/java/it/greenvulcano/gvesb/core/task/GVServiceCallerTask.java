@@ -194,9 +194,10 @@ public class GVServiceCallerTask extends Task
      *      java.util.Map<java.lang.String, java.lang.String>, booolean)
      */
     @Override
-    protected void executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast)
+    protected boolean executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast)
     {
         boolean cont = true;
+        boolean success = false;
         int numCalls = maxCalls;
         try {
             do {
@@ -270,23 +271,29 @@ public class GVServiceCallerTask extends Task
                         case CO_CONTINUE_ACTION :
                             commit();
                             cont = true;
+                            success = true;
                             break;
                         case RB_EXIT_ACTION :
                             rollback();
                             cont = false;
+                            success = false;
                             break;
                         case CO_EXIT_ACTION :
                             commit();
                             cont = false;
+                            success = true;
                             break;
                         case RB_CONTINUE_ACTION :
                             rollback();
                             cont = true;
+                            success = false;
                             break;
                         default :
                             logger.error("GVServiceCallerTask(" + getFullName() + ") - Invalid GVTaskAction type: "
                                     + action.toString());
                             cont = false;
+                            rollback();
+                            success = false;
                     }
                 }
                 finally {
@@ -303,7 +310,10 @@ public class GVServiceCallerTask extends Task
         }
         catch (Exception exc) {
             logger.error("Error executing Task (" + getFullName() + "): " + exc, exc);
+            success = false;
         }
+        
+        return success;
     }
 
     /**

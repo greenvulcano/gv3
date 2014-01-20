@@ -44,19 +44,22 @@ public abstract class HeartBeat implements ConfigurationListener, ShutdownEventL
 
     public class BeatData
     {
-        public String subsystem;
-        public long   timestamp;
+        public String  subsystem;
+        public long    timestamp;
+        public boolean success;
 
         public BeatData(String subsystem)
         {
             this.subsystem = subsystem;
             this.timestamp = System.currentTimeMillis();
+            this.success   = false;
         }
 
-        public BeatData(String subsystem, long timestamp)
+        public BeatData(String subsystem, long timestamp, boolean success)
         {
             this.subsystem = subsystem;
             this.timestamp = timestamp;
+            this.success   = success;
         }
     }
 
@@ -68,13 +71,13 @@ public abstract class HeartBeat implements ConfigurationListener, ShutdownEventL
 
     protected abstract void internalInit(Node node) throws HeartBeatException;
 
-    protected abstract void beat(String subsystem, long timestamp) throws HeartBeatException;
+    protected abstract void beat(String subsystem, long timestamp, boolean success) throws HeartBeatException;
 
     public abstract long lastBeat(String subsystems, long fromTime) throws HeartBeatException;
 
     public void beat(String subsystem) throws HeartBeatException
     {
-        beat(subsystem, System.currentTimeMillis());
+        beat(subsystem, System.currentTimeMillis(), true);
     }
 
     public int prepareBeat(String subsystem) throws HeartBeatException
@@ -86,9 +89,14 @@ public abstract class HeartBeat implements ConfigurationListener, ShutdownEventL
 
     public void confirmBeat(int id) throws HeartBeatException
     {
+        confirmBeat(id, true);
+    }
+    
+    public void confirmBeat(int id, boolean success) throws HeartBeatException
+    {
         BeatData bd = beatMap.remove(id);
         if (bd != null) {
-            beat(bd.subsystem, bd.timestamp);
+            beat(bd.subsystem, bd.timestamp, success);
         }
     }
 

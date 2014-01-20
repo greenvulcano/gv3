@@ -255,9 +255,9 @@ public abstract class Task
                 id = prepareBeat("TRUE".equals(locProperties.get(TASK_RECOVERY_RUN)) || "TRUE".equals(locProperties.get(TASK_MISFIRE_RUN)));
             }
 
-            executeTask(evName, fireTime, locProperties, false);
+            boolean success = executeTask(evName, fireTime, locProperties, false);
 
-            confirmBeat(id);
+            confirmBeat(id, success);
         }
         catch (Exception exc) {
             cancelBeat(id);
@@ -306,11 +306,11 @@ public abstract class Task
      * @param id
      *        the temporary beat id to confirm.
      */
-    protected void confirmBeat(int id)
+    protected void confirmBeat(int id, boolean success)
     {
         try {
             if (id != -1) {
-                HeartBeatManager.confirmBeat(id);
+                HeartBeatManager.confirmBeat(id, success);
             }
         }
         catch (Exception exc) {
@@ -348,7 +348,7 @@ public abstract class Task
 
     protected abstract void initTask(Node node) throws TaskException;
 
-    protected abstract void executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast);
+    protected abstract boolean executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast);
 
     protected abstract void destroyTask();
 

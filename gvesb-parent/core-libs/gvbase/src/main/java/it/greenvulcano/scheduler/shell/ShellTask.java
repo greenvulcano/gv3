@@ -164,8 +164,9 @@ public class ShellTask extends Task
      * @see it.greenvulcano.scheduler.Task#executeTask(java.lang.String, Date, java.util.Map<java.lang.String, java.lang.String>, booolean)
      */
     @Override
-    protected void executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast)
+    protected boolean executeTask(String name, Date fireTime, Map<String, String> locProperties, boolean isLast)
     {
+        boolean success = false;
         try {
             logger.debug("Executing the task: (" + getFullName() + ") - (" + name + ")");
             String[] realCommand = null;
@@ -242,7 +243,8 @@ public class ShellTask extends Task
             }
 
             logger.debug("Execution terminated");
-            if (proc.exitValue() != 0) {
+            success = proc.exitValue() == 0;
+            if (!success) {
                 String stderr = errorPumper.getOutput();
                 logger.warn("An error occurs executing the shell task - ExitCode: " + proc.exitValue()
                         + " + StdError: " + stderr);
@@ -252,6 +254,7 @@ public class ShellTask extends Task
         catch (Exception exc) {
             logger.error("An error occurs executing the shell Task(" + getFullName() + ") - (" + name + ")", exc);
         }
+        return success;
     }
 
     /*
