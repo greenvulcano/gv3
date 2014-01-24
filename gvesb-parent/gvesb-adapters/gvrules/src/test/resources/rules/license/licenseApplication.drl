@@ -19,7 +19,7 @@ end
 
 rule "Application was made this year"
 when
-    $a : Application( dateApplied > "01-jan-2013" )
+    $a : Application( dateApplied > "01-jan-2014" )
 then
     $a.setValid( false );
 end
