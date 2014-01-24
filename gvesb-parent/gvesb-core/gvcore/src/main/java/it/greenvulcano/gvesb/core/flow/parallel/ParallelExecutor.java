@@ -261,6 +261,8 @@ public class ParallelExecutor
             for (Future<Result> f : futures) {
                 f.cancel(true);
             }
+            futures.clear();
+            futuresToTasks.clear();
         }
         return results;
     }

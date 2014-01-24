@@ -188,7 +188,8 @@ public class GVFlowWF implements GVFlow
                         GVFlowNode flowNode = null;
                         defNode = nl.item(i);
                         String nodeClass = XMLConfig.get(defNode, "@class");
-                        logger.debug("creating GVFlowNode(" + i + ") of class " + nodeClass);
+                        String nodeId = XMLConfig.get(defNode, "@id");
+                        logger.debug("creating GVFlowNode(" + i + ")[" + nodeId + "] of class " + nodeClass);
                         flowNode = (GVFlowNode) Class.forName(nodeClass).newInstance();
                         flowNode.init(defNode);
                         flowNodes.put(flowNode.getId(), flowNode);
@@ -396,7 +397,7 @@ public class GVFlowWF implements GVFlow
                 synchObj = DebugSynchObject.createNew(Thread.currentThread().getName(), inID, info);
             }
             while (!nextNode.equals("") && !isInterrupted()) {
-                operationInfo.setFlowStatus(inID, null, nextNode);
+                operationInfo.setFlowStatus(inID, nextNode);
                 flowNode = flowNodes.get(nextNode);
                 if (flowNode == null) {
                     logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
@@ -411,7 +412,7 @@ public class GVFlowWF implements GVFlow
         else {
             while (!nextNode.equals("") && !isInterrupted()) {
                 if (operationInfo != null) {
-                    operationInfo.setFlowStatus(inID, null, nextNode);
+                    operationInfo.setFlowStatus(inID, nextNode);
                 }
                 flowNode = flowNodes.get(nextNode);
                 if (flowNode == null) {
@@ -481,7 +482,7 @@ public class GVFlowWF implements GVFlow
 
         while (!nextNode.equals("") && !isInterrupted()) {
             if (operationInfo != null) {
-                operationInfo.setFlowStatus(inID, null, nextNode);
+                operationInfo.setFlowStatus(inID, nextNode);
             }
             flowNode = flowNodes.get(nextNode);
             if (flowNode == null) {

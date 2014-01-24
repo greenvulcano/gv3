@@ -4967,6 +4967,7 @@
 <!--
     Max number of subflow's execution threads.
     Default to 5.
+    WARN!!! ACTUALLY NOT USED, fixed to 5 threads.
 
     #NotNull
 -->

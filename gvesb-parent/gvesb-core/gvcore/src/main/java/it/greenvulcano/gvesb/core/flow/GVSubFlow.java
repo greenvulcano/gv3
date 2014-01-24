@@ -29,8 +29,8 @@ import it.greenvulcano.gvesb.core.debug.DebuggingInvocationHandler;
 import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
-import it.greenvulcano.gvesb.core.jmx.OperationInfo;
 import it.greenvulcano.gvesb.core.jmx.ServiceOperationInfoManager;
+import it.greenvulcano.gvesb.core.jmx.SubFlowInfo;
 import it.greenvulcano.gvesb.gvdte.controller.DTEController;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.gvesb.statistics.StatisticsDataManager;
@@ -69,9 +69,9 @@ public class GVSubFlow
      */
     private String                  flowName       = "";
     /**
-     * the jmx operation info instance
+     * the jmx subflow info instance
      */
-    private OperationInfo           operationInfo  = null;
+    private SubFlowInfo             subflowInfo    = null;
 
     /**
      * Used to get an GVServiceConf of a specific service (SYSTEM + SERVICE).
@@ -234,6 +234,10 @@ public class GVSubFlow
         }
     }
 
+    public String getFlowName() {
+        return this.flowName;
+    }
+
     /**
      * @param gvBuffer
      * @throws GVCoreException
@@ -303,13 +307,15 @@ public class GVSubFlow
     public GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException, InterruptedException
     {
         Level level = null;
+        boolean success = false;
+        String inID = gvBuffer.getId().toString();
         try {
             level = GVLogger.setThreadMasterLevel(loggerLevel);
 
             if (logger.isDebugEnabled()) {
                 logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
             }
-            getGVOperationInfo();
+            getGVSubFlowInfo();
     
             GVFlowNode flowNode = flowNodes.get(firstNode);
             if (flowNode == null) {
@@ -321,16 +327,17 @@ public class GVSubFlow
             Map<String, Object> environment = new HashMap<String, Object>();
             environment.put(flowNode.getInput(), gvBuffer);
             String nextNode = firstNode;
-    
+
             if (onDebug) {
-                String inID = gvBuffer.getId().toString();
                 DebugSynchObject synchObj = DebugSynchObject.getSynchObject(inID, null);
                 ExecutionInfo parent = synchObj.getExecutionInfo();
                 ExecutionInfo info = new ExecutionInfo(parent);
                 info.setSubflow(flowName);
                 synchObj.setExecutionInfo(info);
                 while (!nextNode.equals("") && !isInterrupted()) {
-                    operationInfo.setFlowStatus(inID, flowName, nextNode);
+                    if (subflowInfo != null) {
+                        subflowInfo.setFlowStatus(inID, nextNode);
+                    }
                     flowNode = flowNodes.get(nextNode);
                     if (flowNode == null) {
                         logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
@@ -344,10 +351,9 @@ public class GVSubFlow
             }
             else {
                 while (!nextNode.equals("") && !isInterrupted()) {
-                    /*
-                     * if (operationInfo != null) {
-                     * operationInfo.setFlowStatus(inID, nextNode); }
-                     */
+                    if (subflowInfo != null) {
+                        subflowInfo.setFlowStatus(inID, nextNode);
+                    }
                     flowNode = flowNodes.get(nextNode);
                     if (flowNode == null) {
                         logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
@@ -374,7 +380,8 @@ public class GVSubFlow
             if (logger.isDebugEnabled()) {
                 logger.debug(GVFormatLog.formatEND(flowName, (GVBuffer) output));
             }
-    
+            success = true;
+
             return (GVBuffer) output;
         }
         catch (InterruptedException exc) {
@@ -382,23 +389,26 @@ public class GVSubFlow
             throw exc;
         }
         finally {
+            if (subflowInfo != null) {
+                subflowInfo.flowTerminated(inID, success);
+            }
             GVLogger.removeThreadMasterLevel(level);
         }
     }
 
     /**
-     * Initialize the associated OperationInfo instance
+     * Initialize the associated SubFlowInfo instance
      */
-    private void getGVOperationInfo()
+    private void getGVSubFlowInfo()
     {
-        if (operationInfo == null) {
+        if (subflowInfo == null) {
             try {
-                operationInfo = ServiceOperationInfoManager.instance().getOperationInfo(serviceName, operationName,
-                        true);
+                subflowInfo = ServiceOperationInfoManager.instance().getSubFlowInfo(serviceName, operationName, 
+                        flowName, true);
             }
             catch (Exception exc) {
                 logger.warn("Error on MBean registration: " + exc);
-                operationInfo = null;
+                subflowInfo = null;
             }
         }
     }
@@ -407,6 +417,10 @@ public class GVSubFlow
      * @return the actual logger level
      */
     public Level getLoggerLevel() {
+        getGVSubFlowInfo();
+        if (subflowInfo != null) {
+            return subflowInfo.getLoggerLevelj();
+        }
         return this.loggerLevel;
     }
 

@@ -432,8 +432,10 @@ public class IteratorController
             try {
                 gvContext.push();
                 if (changeLogContext) {
-                    NMDC.setOperation(localFlowOp);
                     GVBufferMDC.put(internalGVBuffer);
+                    NMDC.setOperation(localFlowOp);
+                    NMDC.put(GVBuffer.Field.SERVICE.toString(), localService);
+                    NMDC.put(GVBuffer.Field.SYSTEM.toString(), localSystem);
                 }
                 result = flow.perform(internalGVBuffer, onDebug);
             }
