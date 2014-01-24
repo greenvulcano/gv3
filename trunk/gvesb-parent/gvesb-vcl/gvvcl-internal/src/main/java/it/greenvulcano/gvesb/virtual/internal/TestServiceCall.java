@@ -86,7 +86,7 @@ public class TestServiceCall implements CallOperation
                     Thread.sleep(sleepOnInit);
                 }
                 catch (InterruptedException exc) {
-                    // do nothing
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -102,22 +102,7 @@ public class TestServiceCall implements CallOperation
      */
     public GVBuffer perform(GVBuffer gvBuffer) throws CallException, InterruptedException
     {
-        if (sleepOnPerform > 0) {
-            try {
-                Thread.sleep(sleepOnPerform);
-            }
-            catch (InterruptedException exc) {
-                Thread.currentThread().interrupt();
-                throw exc;
-            }
-        }
-
         GVBuffer localData = gvBuffer;
-
-        if (!exceptionMessage.equals("")) {
-            logger.debug(" TEST SERVICE: thrown exception");
-            throw new CallException(exceptionMessage);
-        }
 
         if (localData == null) {
             return null;
@@ -135,6 +120,21 @@ public class TestServiceCall implements CallOperation
         logger.debug(" removeProperties.: " + removeProperties);
         logger.debug("---------------------------------------------------------------");
         logger.debug(new GVDump(localData));
+
+        if (sleepOnPerform > 0) {
+            try {
+                Thread.sleep(sleepOnPerform);
+            }
+            catch (InterruptedException exc) {
+                Thread.currentThread().interrupt();
+                throw exc;
+            }
+        }
+
+        if (!exceptionMessage.equals("")) {
+            logger.debug(" TEST SERVICE: thrown exception");
+            throw new CallException(exceptionMessage);
+        }
 
         try {
             if (removeProperties) {
