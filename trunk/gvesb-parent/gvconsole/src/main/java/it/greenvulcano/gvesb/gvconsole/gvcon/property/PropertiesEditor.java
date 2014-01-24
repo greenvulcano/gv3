@@ -21,28 +21,28 @@ package it.greenvulcano.gvesb.gvconsole.gvcon.property;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.apache.log4j.Logger;
 
 /**
  * PropertiesEditor class
@@ -51,12 +51,7 @@ import org.apache.log4j.Logger;
  * @author GreenVulcano Developer Team
  */
 public class PropertiesEditor {
-	private static Logger logger = GVLogger.getLogger(PropertiesEditor.class);
-
-	/* private GlobalProperty[] GlobalProperty = null;
-	 private Document serverXml = null;
-	 private Document newXml = null;
-	 private URL url = null;*/
+	//private static Logger logger = GVLogger.getLogger(PropertiesEditor.class);
 
 	private Set<String> coreProps = null;
 	private Set<String> adapterProps = null;
@@ -90,8 +85,8 @@ public class PropertiesEditor {
 			throws FileNotFoundException, IOException {
 
 		Set<String> app = new TreeSet<String>();
-		String payload = TextUtils.readFileFromCP(fileName);
-
+		String payload = TextUtils.readFileFromCP(fileName);		
+        
 		String phPrefix = "xmlp{{";
 		String phSuffix = "}}";
 		int phPlen = phPrefix.length();
@@ -103,7 +98,6 @@ public class PropertiesEditor {
 		while (startNextToken < maxPosition) {
 			endNextToken = payload.indexOf(phPrefix, startNextToken);
 			if (endNextToken != -1) {
-				// String currToken = payload.substring(startNextToken, endNextToken);
 				int endPH = payload.indexOf(phSuffix, endNextToken + phPlen);
 				String phName = payload.substring(endNextToken + phPlen, endPH);
 				app.add(phName);
@@ -141,29 +135,46 @@ public class PropertiesEditor {
 					+ " not found in ClassPath");
 		}
 
-		Properties props = new Properties();
-		props.load(new InputStreamReader(url.openStream()));
-
-		Iterator<Object> it = props.keySet().iterator();
-		while (it.hasNext()) {
-			String pName = (String) it.next();
-			String pVal = props.getProperty(pName);
-			pVal = XMLUtils.replaceXMLEntities(pVal);
-			GlobalProperty prop = new GlobalProperty();
-			prop.setPresent(true);
-			prop.setName(pName);
-			String decVal = XMLConfig.getDecrypted(pVal);
-			if (pVal.equals(decVal)) {
-				prop.setEncrypted(false);
-				prop.setValue(pVal);
-			} else {
-				prop.setEncrypted(true);
-				prop.setValue(decVal);
+		String line;
+		BufferedReader reader = new BufferedReader(new FileReader(url.getFile()));
+		try {
+			String description = "";
+			while ((line = reader.readLine()) != null) {
+				if (line.startsWith("#Modified by GVConsole on ")){
+					continue;
+				} else if (line.startsWith("#")) {
+					description = line.substring(1);
+					continue;
+				} else if (line.contains("=")) {
+					int idx = line.indexOf("=");
+					String pName = line.substring(0, idx);
+					String pVal = line.substring(idx+1);
+					pVal = XMLUtils.replaceXMLEntities(pVal);
+					GlobalProperty prop = new GlobalProperty();
+					prop.setPresent(true);
+					prop.setName(pName);
+					String decVal = XMLConfig.getDecrypted(pVal);
+					if (pVal.equals(decVal)) {
+						prop.setEncrypted(false);
+						prop.setValue(pVal);
+					} else {
+						prop.setEncrypted(true);
+						prop.setValue(decVal);
+					}
+					prop.setUsedIn(getUsedIn(pName));
+					prop.setDescription(description);
+					description = "";
+					localAllProps.remove(pName);
+					app.add(prop);
+				} else
+					throw new XMLConfigException("The " + fileName
+							+ " file is not in properties format");
 			}
-			prop.setUsedIn(getUsedIn(pName));
-			localAllProps.remove(pName);
-			app.add(prop);
-		}
+		} finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
 
 		for(String pName: localAllProps){
 			GlobalProperty prop = new GlobalProperty();
@@ -259,34 +270,45 @@ public class PropertiesEditor {
 			fileSrc.renameTo(fileDst);
 		}
 		
-		Properties properties = new Properties();
-
-		String key = null;
-		String value = null;
-		for (GlobalProperty prop : xmlConfProps) {
-			key = prop.getName();
-			value = prop.getValue();
-			if (!prop.isPresent() && "".equals(prop.getValue())) continue;
-			if (prop.isEncrypted()) {
-				value = XMLConfig.getEncrypted(value);
+		FileWriter fw = new FileWriter(new File(basePath, names[0]));
+		PrintWriter writer = new PrintWriter(new BufferedWriter(fw));
+		try {
+			String key = null;
+			String value = null;
+			String description = null;
+			String heading = "#Modified by GVConsole on " + new Date().toString();
+			writer.println(heading);
+			for (GlobalProperty prop : xmlConfProps) {
+				key = prop.getName();
+				value = prop.getValue();
+				if (!prop.isPresent() && "".equals(prop.getValue()))
+					continue;
+				if (prop.isEncrypted()) {
+					value = XMLConfig.getEncrypted(value);
+				}
+				value = XMLUtils.replaceXMLInvalidChars(value);
+				description = prop.getDescription();
+				if (!description.equals("") && description != null) {
+					writer.println("#" + description);
+				}
+				writer.println(key + "=" + value);
 			}
-			value = XMLUtils.replaceXMLInvalidChars(value);
-			properties.setProperty(key, value);
-		}
-
-		properties.store(new FileOutputStream(new File(basePath, names[0])), null);
-	}
+		} finally {
+            if (writer != null) {
+            	writer.close();
+            }
+        }
 		
+		
+	}
 
 	public List<GlobalProperty> getProperties(){
-		logger.debug("it.greenvulcano.gvesb.gvconsole.deploy.property.PropertiesEditor.getProperties()");
 		return xmlConfProps;
 	}
 	
 	public void setProperties(List<GlobalProperty> props) {
 		this.xmlConfProps = props;
 	}
-
 
 	/**
 	 * @param args
@@ -295,17 +317,17 @@ public class PropertiesEditor {
 	public static void main(String[] args) throws Exception {
 		PropertiesEditor propsEditor = new PropertiesEditor();
 
-		//propsEditor.loadParser();
-		//propsEditor.getVariabiliGlobaliPresenti("ss%%system-activation%%dd");
-
 		//propsEditor.populateAll();
 		
 		for (GlobalProperty prop : propsEditor.xmlConfProps) {
 			System.out.println(prop.toString());
 			//System.out.println(prop.getUsedInStr());
+			if (prop.getName().equals("xml.not.used")){
+				prop.setValue(prop.getValue().toUpperCase());
+			}
 		}
 		
-		//propsEditor.saveGlobalProperties();
+		propsEditor.saveGlobalProperties();
 	}
 
 }

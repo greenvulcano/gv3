@@ -14,7 +14,7 @@
         Boolean present = new Boolean(p);
         boolean used = (!u.isEmpty() && u!=null);
         boolean valued = (!v.isEmpty() && v!=null);
-        
+
         if(present && used && valued) return "black";
         if(present && used && !valued) return "orange";
         if(!present && used) return "red";
@@ -28,6 +28,12 @@
     String mode = (String) session.getAttribute("MODE");
 %>
     <script type="text/javascript" src="<%=contextRoot%>/js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/jquery.timers-1.2.js"></script>
+    <%--    Imports for jquery Alert library    --%>
+    <%-- <script src="<%=contextRoot%>/js/jquery_alert_files/jQuery.js" type="text/javascript"></script> --%>
+    <script src="<%=contextRoot%>/js/jquery_alert_files/jquery.ui.draggable.js" type="text/javascript"></script>
+    <script src="<%=contextRoot%>/js/jquery_alert_files/jquery.alerts.js" type="text/javascript"></script>
+    <link href="<%=contextRoot%>/js/jquery_alert_files/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
 
     <style type="text/css" src="<%=contextRoot%>/css/jquery-ui-1.8.custom.css"></style>
     <script type="text/javascript" src="<%=contextRoot%>/js/jquery-ui-1.8.custom.min.js"></script>
@@ -42,7 +48,7 @@
 
     <br/>
     <div class="ui-widget-header central">
-        <html:form action="/property/HandlePropertiesAction" onsubmit="return checkForm(this);">
+        <html:form styleId="gpForm" action="/property/HandlePropertiesAction" >
             <html:hidden styleId="skipValidation" property="skipValidation" value="true"/>
             <%-- <html:hidden styleId="methodToCall" property="methodToCall" value=""/> --%>
 
@@ -51,13 +57,15 @@
                     <th>Crypted</th>
                     <th>Name</th>
                     <th>Value</th>
+                    <th>&nbsp;</th>
                 </tr>
                 <logic:iterate id="properties" name="PropertiesEditorForm" property="properties" indexId="idx">
                     <tr id='<%="tr_"+idx%>'>
-                        <td id='<%="td_"+idx%>' class="centered crptcontainer" valign="top" nowrap>
+                        <td id='<%="td_"+idx%>' class="centered crptcontainer">
                             <bean:define id="encptd" name="properties" property="encrypted"/>
                             <bean:define id="usedin" name="properties" property="strUsedIn" type="java.lang.String"/>
                             <bean:define id="present" name="properties" property="present" type="java.lang.String"/>
+                            <bean:define id="name" name="properties" property="name" type="java.lang.String"/>
                             <bean:define id="value" name="properties" property="value" type="java.lang.String"/>
                             <html:hidden styleId='<%="cptd_"+idx%>' indexed="true" name="properties" property="encrypted"/>
     <%
@@ -69,13 +77,13 @@
         if(encptd.toString().equals("true")){
             msg = (mode.equals("view"))?"Encrypted":"Encrypted. Click to decrypt.";
     %>
-                            <img id='<%="img_"+idx%>' title="<%=msg%>" class="crptico" alt="Encrypted" src="<%=contextRoot%>/images/properties/encrypted.png" <%=onClick%>/>
+                            <img id='<%="img_"+idx%>' title="<%=msg%>" class="clckblico" alt="Encrypted" src="<%=contextRoot%>/images/properties/encrypted.png" <%=onClick%>/>
     <%
         }
         else{
             msg = (mode.equals("view"))?"Decrypted":"Decrypted. Click to encrypt.";
     %>
-                            <img id='<%="img_"+idx%>' title="<%=msg%>" class="crptico" alt="Decrypted" src="<%=contextRoot%>/images/properties/decrypted.png" <%=onClick%>/>
+                            <img id='<%="img_"+idx%>' title="<%=msg%>" class="clckblico" alt="Decrypted" src="<%=contextRoot%>/images/properties/decrypted.png" <%=onClick%>/>
     <%
         }
     %>
@@ -88,17 +96,25 @@
                             <bean:write name="properties" property="name"/>
                         </td>
                         <td class="centered" valign="top" nowrap>
-                            <html:text name="properties" property="value" styleClass="<%=mode%>" size="60" indexed="true"/>
+                            <html:text name="properties" property="value" styleClass="<%=mode%>" size="40" indexed="true"/>
                             <%-- <html:text name="properties" property="value" size="60" indexed="true"/> --%>
+                        </td>
+                        <%-- <td class="centered" valign="top" nowrap>
+                            <html:text name="properties" property="description" styleClass="<%=mode%>" size="60" indexed="true"/>
+                        </td> --%>
+                        <td id='<%="td_"+idx%>' class="centered">
+                            <bean:define id="desc" name="properties" property="description"/>
+                            <html:hidden styleId='<%="desc_"+idx%>' indexed="true" name="properties" property="description"/>
+                            <img id='<%="info_"+idx%>' title='<%=desc%>' class="clckblico" alt="Info" src="<%=contextRoot%>/images/info.png" onClick="manageDescription(<%=idx%>, '<%=name%>', '<%=desc%>', '<%=mode%>', '<%=contextRoot%>')"/>
                         </td>
                     </tr>
                 </logic:iterate>
             </table>
             <div class="buttonpad">
-                <html:submit styleId="revert" property="methodToCall" onclick="buttonPress(0)" styleClass='<%=mode+" button"%>'>
+                <html:submit styleId="revert" property="methodToCall" styleClass='<%=mode+" button"%>'>
                     <bean:message key="globalprops.revert"/>
                 </html:submit>
-                <html:submit styleId="save" property="methodToCall" onclick="buttonPress(1)" styleClass='<%=mode+" button"%>'>
+                <html:submit styleId="save" property="methodToCall" styleClass='<%=mode+" button"%>'>
                     <bean:message key="globalprops.save"/>
                 </html:submit>
             </div>
