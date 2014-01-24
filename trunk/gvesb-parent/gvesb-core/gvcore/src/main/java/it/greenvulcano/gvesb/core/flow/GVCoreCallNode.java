@@ -198,8 +198,10 @@ public class GVCoreCallNode extends GVFlowNode
                 }
 
                 if (changeLogContext) {
-                    NMDC.setOperation(localFlowOp);
                     GVBufferMDC.put(internalData);
+                    NMDC.setOperation(localFlowOp);
+                    NMDC.put(GVBuffer.Field.SERVICE.toString(), localService);
+                    NMDC.put(GVBuffer.Field.SYSTEM.toString(), localSystem);
                 }
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
                 if ((inputRefDP != null) && (inputRefDP.length() > 0)) {

@@ -384,7 +384,7 @@ public class ServiceOperationInfo
         if (opInfo == null) {
             Map<String, Object> properties = getProperties(null, false);
             properties.put("IDOperation", operation);
-            opInfo = new OperationInfo(operation, jmxSrvcKey);
+            opInfo = new OperationInfo(group, service, operation, jmxSrvcKey);
             opInfo.setAdministrator(isAdministrator);
             opInfo.setCallAdministratorOnInit(callAdministratorOnInit);
 

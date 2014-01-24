@@ -47,8 +47,6 @@ import tests.unit.gvesb.gvcore.jmx.TestMBean;
  */
 public class GVCoreTestCase extends TestCase
 {
-    private static final String  CONFIGURATION_FILE = "gv-jmx.xml";
-
     private static JMXEntryPoint jmx                = null;
 
     private static Set<String>   result             = new HashSet<String>();
@@ -60,7 +58,6 @@ public class GVCoreTestCase extends TestCase
     protected void setUp() throws Exception
     {
         if (jmx == null) {
-            JMXEntryPoint.setConfigurationFile(CONFIGURATION_FILE);
             jmx = JMXEntryPoint.instance();
             MBeanServer server = jmx.getServer();
 

@@ -24,12 +24,16 @@ import it.greenvulcano.gvesb.core.flow.GVSubFlow;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
 import it.greenvulcano.gvesb.log.GVBufferMDC;
+import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.thread.ThreadMap;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
+
+import org.apache.avalon.framework.logger.Loggable;
+import org.apache.log4j.Logger;
 
 /**
  * 
@@ -39,12 +43,17 @@ import java.util.concurrent.CancellationException;
  */
 public class SubFlowTask implements Callable<Result>
 {
-    private GVSubFlowPool       pool;
+    private static final Logger logger            = GVLogger.getLogger(SubFlowTask.class);
+
+    private GVSubFlowPool       pool             = null;
+    private GVSubFlow           subFlow          = null;
     private GVBuffer            input;
     private boolean             onDebug;
     private boolean             changeLogContext;
     private Map<String, String> logContext;
     private String              inputRefDP;
+    private boolean             spawned           = false;
+    private String              spawnedName       = null;
 
     public SubFlowTask(GVSubFlowPool pool, GVBuffer input, boolean onDebug, boolean changeLogContext, Map<String, String> logContext, String inputRefDP) {
         this.pool = pool;
@@ -55,19 +64,49 @@ public class SubFlowTask implements Callable<Result>
         this.inputRefDP = inputRefDP;
     }
 
+    public SubFlowTask(GVSubFlow subFlow, GVBuffer input, boolean onDebug, boolean changeLogContext, Map<String, String> logContext, String inputRefDP) {
+        this.subFlow = subFlow;
+        this.input = input;
+        this.onDebug = onDebug;
+        this.logContext = logContext;
+        this.changeLogContext = changeLogContext;
+        this.inputRefDP = inputRefDP;
+    }
+
+    public void setSpawned(boolean spawned) {
+        this.spawned = spawned;
+    }
+
+    public void setSpawnedName(String spawnedName) {
+        this.spawnedName = spawnedName;
+    }
+
     @Override
     public Result call() throws Exception {
         try {
             NMDC.push();
+            if (spawned && (spawnedName != null)) {
+                Thread th = Thread.currentThread();
+                String thn = th.getName();
+                thn = thn.substring(thn.lastIndexOf("_"));
+                th.setName(spawnedName + thn);
+            }
             NMDC.setCurrentContext(logContext);
 
             Result result = null;
-            GVSubFlow subFlow = null;
+            GVSubFlow currSubFlow = null;
             try {
                 GVBuffer internalData = input;
-                
+
+                if (pool != null) {
+                    currSubFlow = pool.getSubFlow();
+                }
+                else {
+                    currSubFlow = subFlow;
+                }
+
                 if (changeLogContext) {
-                    NMDC.setOperation(pool.getSubFlowName());
+                    NMDC.setOperation(currSubFlow.getFlowName());
                     GVBufferMDC.put(internalData);
                 }
                 
@@ -85,20 +124,28 @@ public class SubFlowTask implements Callable<Result>
                     }
                 }
 
-                subFlow = pool.getSubFlow();
-                GVBuffer output = subFlow.perform(internalData, onDebug);
+                GVBuffer output = currSubFlow.perform(internalData, onDebug);
                 result = new Result(Result.State.STATE_OK, input, output);
             }
             catch (InterruptedException exc) {
+                if (spawned) {
+                    logger.error("SubFlow execution interrupted", exc);
+                }
                 result = new Result(Result.State.STATE_INTERRUPTED, input, exc);
                 Thread.currentThread().interrupt();
             }
             catch (Exception exc) {
+                if (spawned) {
+                    logger.error("SubFlow execution failed", exc);
+                }
                 result = new Result(Result.State.STATE_ERROR, input, exc);
             }
             finally {
                 if (pool != null) {
-                    pool.releaseSubFlow(subFlow);
+                    pool.releaseSubFlow(currSubFlow);
+                }
+                if (subFlow != null) {
+                    subFlow.destroy();
                 }
             }
             return result;
@@ -108,6 +155,7 @@ public class SubFlowTask implements Callable<Result>
             ThreadMap.clean();
             
             this.pool = null;
+            this.subFlow = null;
             //this.input = null;
             this.logContext = null;
         }
