@@ -61,6 +61,7 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.OptionsMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.log4j.Logger;
 import org.w3c.dom.CDATASection;
@@ -85,12 +86,19 @@ public class HTTPCallOperation implements CallOperation
     private static final String RESPONSE_PREFIX        = "GVHTTP_RESPONSE_";
     private static final String RESPONSE_STATUS        = RESPONSE_PREFIX + "STATUS";
     private static final String RESPONSE_HEADER_PREFIX = RESPONSE_PREFIX + "HEADER_";
+    public static final int     DEFAULT_CONN_TIMEOUT   = 10000;
+    public static final int     DEFAULT_SO_TIMEOUT     = 30000;
 
     private String              methodURI;
     private boolean             uriEscaped             = true;
     private HttpClient          httpClient;
+    private String              host;
+    private String              port;
+    private Protocol            protocol               = null;
     private String              refDP;
     private HttpMethodName      methodName;
+    private int                 connTimeout            = DEFAULT_CONN_TIMEOUT;
+    private int                 soTimeout              = DEFAULT_SO_TIMEOUT;
 
     private OperationKey        key                    = null;
 
@@ -108,19 +116,23 @@ public class HTTPCallOperation implements CallOperation
 
         try {
             Node endpointNode = XMLConfig.getNode(config, "endpoint");
-            String host = XMLConfig.get(endpointNode, "@host");
-            int port = XMLConfig.getInteger(endpointNode, "@port", 80);
+            host = XMLConfig.get(endpointNode, "@host");
+            port = XMLConfig.get(endpointNode, "@port", "80");
             boolean secure = XMLConfig.getBoolean(endpointNode, "@secure", false);
+            connTimeout = XMLConfig.getInteger(endpointNode, "@conn-timeout", DEFAULT_CONN_TIMEOUT);
+            soTimeout = XMLConfig.getInteger(endpointNode, "@so-timeout", DEFAULT_SO_TIMEOUT);
+            
+            HttpConnectionManagerParams params = httpClient.getHttpConnectionManager().getParams();
+            params.setConnectionTimeout(connTimeout);
+            params.setSoTimeout(soTimeout);
 
             Node protocolNode = XMLConfig.getNode(endpointNode, "CustomProtocol");
-            Protocol protocol = null;
             if (protocolNode != null) {
                 protocol = ProtocolFactory.create(protocolNode);
             }
             else {
                 protocol = Protocol.getProtocol(secure ? "https" : "http");
             }
-            hostConfiguration.setHost(host, port, protocol);
 
             Node proxyConfigNode = XMLConfig.getNode(endpointNode, "Proxy");
             if (proxyConfigNode != null) {
@@ -159,7 +171,14 @@ public class HTTPCallOperation implements CallOperation
         try {
             String currMethodURI = null;
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
+
+            String currHost = PropertiesHandler.expand(host, params, gvBuffer);
+            String currPort = PropertiesHandler.expand(port, params, gvBuffer);
+            logger.debug("Server Host: " + currHost + " - Port: " + currPort);
+            httpClient.getHostConfiguration().setHost(currHost, Integer.parseInt(currPort), protocol);
+            
             currMethodURI = PropertiesHandler.expand(methodURI, params, gvBuffer);
+            logger.debug("MethodURI[escaped:" + uriEscaped + "]=[" + currMethodURI + "]");
             switch (methodName) {
                 case OPTIONS :
                     method = new OptionsMethod();
