@@ -12522,15 +12522,17 @@
 <!ELEMENT endpoint (Description?, CustomProtocol?, Proxy?)>
 <!--
     Host to connect to.
+    Can contain metadata to be resolved at runtime.
 
     #NotNull
 -->
 <!ATTLIST endpoint   host CDATA #REQUIRED>
 <!--
-    Port where the service is exposed. Default port is '80'.
+    Port where the service is exposed.
+    Can contain metadata to be resolved at runtime.
+    Default port is '80'.
 
     #NotNull
-    #Pattern: ! ^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$ ! Insert a number between 0 and 65535
 -->
 <!ATTLIST endpoint   port CDATA #IMPLIED>
 <!--
@@ -12546,6 +12548,21 @@
     #References: gvesb:document('GVSupport')/GVSupport/GVHTTPClientProtocolConfig/CustomProtocol/@name
 -->
 <!ATTLIST endpoint  custom-protocol CDATA #IMPLIED>
+<!--
+    Defines the connection timeout, in ms.
+    Default to 10000ms.
+
+    #NotNull
+-->
+<!ATTLIST endpoint  conn-timeout CDATA #IMPLIED>
+<!--
+    Defines the timeout to wait for a server response, in ms.
+    Default to 30000ms.
+
+    #NotNull
+-->
+<!ATTLIST endpoint  so-timeout CDATA #IMPLIED>
+
 <!--
     Method to execute to the server.
 -->

@@ -35,6 +35,10 @@
             <endpoint host="localhost" port="8888" secure="false"></endpoint>
             <method request-uri="/index.html" name="GET"/>
           </http-call>
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_dynamic">
+            <endpoint host="@{{HOST}}" port="@{{PORT}}" secure="false"></endpoint>
+            <method request-uri="/index.html" name="GET"/>
+          </http-call>
           <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_post">
             <endpoint host="localhost" port="8888" secure="false"></endpoint>
             <method request-uri="/index.html" name="POST" ref-dp="testHTTPMethodDP"/>

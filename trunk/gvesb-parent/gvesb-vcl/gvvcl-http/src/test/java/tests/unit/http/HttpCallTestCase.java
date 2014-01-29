@@ -79,6 +79,26 @@ public class HttpCallTestCase extends TestCase
      * @throws Exception
      *
      */
+    public void testGETMethodDynamic() throws Exception
+    {
+        Node node = XMLConfig.getNode("GVSystems.xml",
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/http-call[@name='test_http_get_dynamic']");
+        HTTPCallOperation httpCall = new HTTPCallOperation();
+        httpCall.init(node);
+        GVBuffer gvBuffer = new GVBuffer("TEST", "HTTP-GET-CALL");
+        gvBuffer.setProperty("HOST", "localhost");
+        gvBuffer.setProperty("PORT", "8888");
+        GVBuffer result = httpCall.perform(gvBuffer);
+        System.out.println(new GVBufferDump(result).toString());
+        assertNotNull(result);
+        assertEquals(200, Integer.parseInt(result.getProperty("GVHTTP_RESPONSE_STATUS")));
+        assertNotNull(result.getObject());
+    }
+
+    /**
+     * @throws Exception
+     *
+     */
     public void testPOSTMethod() throws Exception
     {
         Node node = XMLConfig.getNode("GVSystems.xml",
