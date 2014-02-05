@@ -637,6 +637,8 @@
 
     Excel Sheet        : select
 
+    DBSelect           : select
+
     #NotNull
     #Choice: {{ancestor::DBOSelect/statement}} select
     #Choice: {{ancestor::DBOThreadSelect/statement}} select
@@ -648,6 +650,7 @@
     #Choice: {{ancestor::DBOUpdateOrInsert/statement}} insert | update
     #Choice: {{ancestor::CallDescriptor/statement}} callsp
     #Choice: {{ancestor::Sheet/statement}} select
+    #Choice: {{ancestor::DBSelect/statement}} select
 -->
 <!ATTLIST statement type CDATA #REQUIRED>
 

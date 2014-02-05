@@ -20,8 +20,10 @@
 package it.greenvulcano.gvesb.core.forward.preprocess.hl7;
 
 import it.greenvulcano.gvesb.core.forward.JMSForwardException;
+import it.greenvulcano.gvesb.gvhl7.utils.HL7Connection;
 import it.greenvulcano.log.GVLogger;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,14 +45,16 @@ import ca.uhn.hl7v2.parser.PipeParser;
  */
 public class HL7ConnectionValidatorHolder
 {
-    private static Logger                       logger      = GVLogger.getLogger(HL7ConnectionValidatorHolder.class);
+    private static Logger                       logger          = GVLogger.getLogger(HL7ConnectionValidatorHolder.class);
 
-    private Map<String, Connection>             connections = null;
-    private Parser                              parser      = null;
-    private static HL7ConnectionValidatorHolder instance    = null;
+    private Map<HL7Connection, Connection>      connections     = null;
+    private Map<String, Boolean>                previousStatus  = null;
+    private Parser                              parser          = null;
+    private static HL7ConnectionValidatorHolder instance        = null;
 
     private HL7ConnectionValidatorHolder() {
-        connections = new TreeMap<String, Connection>();
+        connections = new TreeMap<HL7Connection, Connection>();
+        previousStatus = new HashMap<String, Boolean>();
         parser = new PipeParser();
     }
 
@@ -62,14 +66,22 @@ public class HL7ConnectionValidatorHolder
     }
 
 
-    public synchronized boolean isValid(String name, List<String> urls) throws JMSForwardException {
+    public synchronized boolean isValid(String name, List<HL7Connection> urls) throws JMSForwardException {
+    	boolean isFirst = !previousStatus.containsKey(name);
+    	if (isFirst) {
+    		previousStatus.put(name, false);
+    	}
+    	boolean prevStatus = previousStatus.get(name);
         if (urls.isEmpty()) {
-            logger.debug("Empty HL7ConnectionValidator[" + name + "]: false");
+            if (isFirst || prevStatus) {
+                logger.debug("Empty HL7ConnectionValidator[" + name + "]: false");
+                previousStatus.put(name, false);
+            }
             return false;
         }
-        String url = "";
+        HL7Connection url = null;
         try {
-            Iterator<String> is = urls.iterator();
+            Iterator<HL7Connection> is = urls.iterator();
             while (is.hasNext()) {
                 url = is.next();
                 Connection conn = connections.get(url);
@@ -89,20 +101,27 @@ public class HL7ConnectionValidatorHolder
                     }
                 }
             }
-            //logger.debug("Validated HL7ConnectionValidator[" + name + "]: true");
+            if (isFirst || !prevStatus) {
+                logger.debug("Validated HL7ConnectionValidator[" + name + "]: true");
+                previousStatus.put(name, true);
+            }
             return true;
         }
         catch (Exception exc) {
-            logger.error("Error validating HL7ConnectionValidator[" + name + "]: " + url, exc);
+            if (isFirst || prevStatus) {
+                logger.error("Error validating HL7ConnectionValidator[" + name + "]: " + url, exc);
+                previousStatus.put(name, false);
+            }
             return false;
         }
     }
 
     public synchronized void reset() {
+        previousStatus.clear();
         try {
-            Iterator<String> is = connections.keySet().iterator();
+            Iterator<HL7Connection> is = connections.keySet().iterator();
             while (is.hasNext()) {
-                String url = is.next();
+                HL7Connection url = is.next();
                 Connection conn = connections.get(url);
                 if (conn != null) {
                     ConnectionHub.getInstance().detach(conn);
@@ -115,11 +134,12 @@ public class HL7ConnectionValidatorHolder
         }
     }
 
-    public synchronized void reset(String name, List<String> urls) {
+    public synchronized void reset(String name, List<HL7Connection> urls) {
+        previousStatus.remove(name);
         try {
-            Iterator<String> is = urls.iterator();
+            Iterator<HL7Connection> is = urls.iterator();
             while (is.hasNext()) {
-                String url = is.next();
+                HL7Connection url = is.next();
                 Connection conn = connections.remove(url);
                 if (conn != null) {
                     ConnectionHub.getInstance().detach(conn);
@@ -132,9 +152,10 @@ public class HL7ConnectionValidatorHolder
     }
 
     public synchronized void destroy() {
+        previousStatus.clear();
         try {
-            String url;
-            Iterator<String> is = connections.keySet().iterator();
+            HL7Connection url;
+            Iterator<HL7Connection> is = connections.keySet().iterator();
             while (is.hasNext()) {
                 url = is.next();
                 Connection conn = connections.get(url);
@@ -149,12 +170,9 @@ public class HL7ConnectionValidatorHolder
         }
     }
 
-    private Connection getConnection(String url) throws JMSForwardException {
-        String host = url.split(":")[0];
-        int port = Integer.parseInt(url.split(":")[1]);
-
+    private Connection getConnection(HL7Connection url) throws JMSForwardException {
         try {
-            Connection conn = ConnectionHub.getInstance().attach(host, port, parser, MinLowerLayerProtocol.class);
+            Connection conn = ConnectionHub.getInstance().attach(url.getHost(), url.getPort(), parser, MinLowerLayerProtocol.class);
             return conn;
         }
         catch (Exception exc) {

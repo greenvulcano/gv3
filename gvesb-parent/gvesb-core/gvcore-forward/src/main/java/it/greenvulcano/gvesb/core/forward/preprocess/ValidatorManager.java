@@ -64,7 +64,7 @@ public class ValidatorManager
                 val = (Validator) Class.forName(clazz).newInstance();
                 val.init(node);
                 validators.put(name, val);
-                logger.debug("Created Validator[" + name + "]");
+                logger.debug("Created Validator - " + val);
             }
 
             return val;
