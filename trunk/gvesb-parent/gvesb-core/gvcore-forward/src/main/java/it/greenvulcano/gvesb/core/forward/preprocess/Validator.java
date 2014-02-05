@@ -40,4 +40,7 @@ public interface Validator
     public void reset();
 
     public void destroy();
+    
+    @Override
+    public String toString();
 }
