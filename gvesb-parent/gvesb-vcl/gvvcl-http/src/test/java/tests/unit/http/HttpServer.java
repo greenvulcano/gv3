@@ -50,7 +50,10 @@ public class HttpServer extends Thread
     private static final String BASE_PATH             = System.getProperty("user.dir") + File.separator + "target"
                                                         + File.separator + "test-classes";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
+    private static final long   DEF_TIMEOUT           = 6000;
+
     private int                 listenerPort;
+
 
     enum HttpMethodName {
         OPTIONS, GET, HEAD, POST, PUT, DELETE
@@ -133,6 +136,14 @@ public class HttpServer extends Thread
         }
 
         try {
+            if (path.endsWith("timeout.html")) {
+                try {
+                    Thread.sleep(DEF_TIMEOUT);
+                }
+                catch (Exception exc) {
+                    // do nothing
+                }
+            }
             BufferedInputStream is = new BufferedInputStream(new FileInputStream(BASE_PATH + path));
             int fileType = 99;
             if (method == HttpMethodName.POST) {
