@@ -47,6 +47,21 @@
             <endpoint host="localhost" port="8888" secure="false"></endpoint>
             <method request-uri="/index.html" name="POST" ref-dp="testHTTPMethodSimpleDP"/>
           </http-call>
+
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_res_timeout">
+            <endpoint host="localhost" port="8888" secure="false" conn-timeout="5000" so-timeout="10000"></endpoint>
+            <method request-uri="/timeout.html" name="GET"/>
+          </http-call>
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_res_timeout2">
+            <endpoint host="localhost" port="8888" secure="false" conn-timeout="2000" so-timeout="5000"></endpoint>
+            <method request-uri="/timeout.html" name="GET"/>
+          </http-call>
+
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_conn_timeout">
+            <endpoint host="10.10.10.10" port="8889" secure="false" conn-timeout="2000" so-timeout="5000"></endpoint>
+            <method request-uri="/index.html" name="GET"/>
+          </http-call>
+
         </Channel>
       </System>
     </Systems>

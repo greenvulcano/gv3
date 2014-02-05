@@ -140,4 +140,69 @@ public class HttpCallTestCase extends TestCase
         assertEquals(200, Integer.parseInt(result.getProperty("GVHTTP_RESPONSE_STATUS")));
         assertNotNull(result.getObject());
     }
+    
+    /**
+     * @throws Exception
+     *
+     */
+    public void testGETMethod_ResTimeout() throws Exception
+    {
+        Node node = XMLConfig.getNode("GVSystems.xml",
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/http-call[@name='test_http_get_res_timeout']");
+        HTTPCallOperation httpCall = new HTTPCallOperation();
+        httpCall.init(node);
+        GVBuffer gvBuffer = new GVBuffer("TEST", "HTTP-GET-CALL-RES-TIMEOUT");
+        GVBuffer result = httpCall.perform(gvBuffer);
+        System.out.println(new GVBufferDump(result).toString());
+        assertNotNull(result);
+        assertEquals(200, Integer.parseInt(result.getProperty("GVHTTP_RESPONSE_STATUS")));
+        assertNotNull(result.getObject());
+    }
+    
+    /**
+     * @throws Exception
+     *
+     */
+    public void testGETMethod_ResTimeout2() throws Exception
+    {
+        Node node = XMLConfig.getNode("GVSystems.xml",
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/http-call[@name='test_http_get_res_timeout2']");
+        HTTPCallOperation httpCall = new HTTPCallOperation();
+        httpCall.init(node);
+        GVBuffer gvBuffer = new GVBuffer("TEST", "HTTP-GET-CALL-RES-TIMEOUT2");
+        long start = System.currentTimeMillis();
+        try {
+            GVBuffer result = httpCall.perform(gvBuffer);
+            fail();
+        }
+        catch (Exception exc) {
+            long delta = System.currentTimeMillis() - start;
+            assertTrue("Wrong error cause", exc.toString().indexOf("Read timed out") != -1);
+            assertTrue("Wrong timeout", Math.abs(delta - 5000) < 50);
+        }
+    }
+    
+    /**
+     * @throws Exception
+     *
+     */
+    public void testGETMethod_ConnTimeout() throws Exception
+    {
+        Node node = XMLConfig.getNode("GVSystems.xml",
+                "/GVSystems/Systems/System[@id-system='GVESB']/Channel[@id-channel='TEST_CHANNEL']/http-call[@name='test_http_get_conn_timeout']");
+        HTTPCallOperation httpCall = new HTTPCallOperation();
+        httpCall.init(node);
+        GVBuffer gvBuffer = new GVBuffer("TEST", "HTTP-GET-CALL-CONN-TIMEOUT");
+        long start = System.currentTimeMillis();
+        try {
+            GVBuffer result = httpCall.perform(gvBuffer);
+            fail();
+        }
+        catch (Exception exc) {
+            long delta = System.currentTimeMillis() - start;
+            //assertTrue("Wrong error cause", exc.toString().indexOf("connect timed out") != -1);
+            assertTrue("Wrong error cause", exc.toString().indexOf("The host did not accept the connection within timeout of 2000 ms") != -1);
+            assertTrue("Wrong timeout", Math.abs(delta - 2000) < 50);
+        }
+    }
 }
