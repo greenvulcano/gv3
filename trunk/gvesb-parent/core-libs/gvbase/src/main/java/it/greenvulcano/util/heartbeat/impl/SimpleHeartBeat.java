@@ -64,8 +64,8 @@ public class SimpleHeartBeat extends HeartBeat
     protected void beat(String subsystem, long timestamp, boolean success) throws HeartBeatException
     {
         ssBeatMap.put(subsystem, new BeatData(subsystem, timestamp, success));
-        logger.debug("HeartBeat: [" + DateUtils.dateToString(new Date(timestamp), "yyyyMMdd HH:mm:ss.S") + "] from ["
-                + subsystem + "] [" + (success ? "S" : "F") + "]");
+        logger.debug("HeartBeat: [" + DateUtils.dateToString(new Date(timestamp), "yyyyMMdd HH:mm:ss.SSS") + "] from ["
+                + subsystem + "] [" + (success ? "S" : "F") + "][" + DateUtils.durationToString(System.currentTimeMillis() - timestamp) + "]");
     }
 
     /* (non-Javadoc)

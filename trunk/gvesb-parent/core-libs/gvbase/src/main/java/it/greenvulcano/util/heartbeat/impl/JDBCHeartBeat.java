@@ -90,6 +90,7 @@ public class JDBCHeartBeat extends HeartBeat
                 insStm.setString(2, subsystem);
                 insStm.setTimestamp(3, new Timestamp(timestamp));
                 insStm.setString(4, (success ? "S" : "F"));
+                insStm.setLong(5, System.currentTimeMillis() - timestamp);
                 insStm.executeUpdate();
             }
             catch (SQLException exc) {
@@ -99,6 +100,7 @@ public class JDBCHeartBeat extends HeartBeat
                 insStm.setString(2, subsystem);
                 insStm.setTimestamp(3, new Timestamp(timestamp));
                 insStm.setString(4, (success ? "S" : "F"));
+                insStm.setLong(5, System.currentTimeMillis() - timestamp);
                 insStm.executeUpdate();
             }
         }
@@ -186,7 +188,7 @@ public class JDBCHeartBeat extends HeartBeat
     {
         try {
             conn = JDBCConnectionBuilder.getConnection(jdbcConnectionName);
-            insStm = conn.prepareStatement("insert into HEARTBEAT (HOST, SUBSYSTEM, BEAT, STATE) values (?, ?, ?, ?)");
+            insStm = conn.prepareStatement("insert into HEARTBEAT (HOST, SUBSYSTEM, BEAT, STATE, DURATION) values (?, ?, ?, ?, ?)");
             initialized = true;
         }
         catch (Exception exc) {

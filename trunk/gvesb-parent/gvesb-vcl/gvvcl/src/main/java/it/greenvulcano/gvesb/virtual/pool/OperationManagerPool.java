@@ -412,6 +412,9 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
     @Override
     public String toString()
     {
+        if (pool == null) {
+            return "EMPTY OperationManagerPool";
+        }
         StringBuffer sb = new StringBuffer("OperationManagerPool\n");
         for (Map.Entry<OperationKey, OperationManagerPoolElement> element : pool.entrySet()) {
             sb.append("\n").append(element.getValue());
