@@ -38,6 +38,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -1792,6 +1793,23 @@ public final class DateUtils
     public static int numHoursInDay(String date, String format)
     {
         return numHoursInDay(DateUtils.stringToDate(date, format));
+    }
+
+    /**
+     * Convert a long representing a ms duration into a string in the format HH:mm:ss.S.
+     *
+     * @param millis
+     * @return
+     */
+    public static String durationToString(long millis)
+    {
+        long h = TimeUnit.MILLISECONDS.toHours(millis);
+        millis -= TimeUnit.HOURS.toMillis(h);
+        long m = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis -= TimeUnit.MINUTES.toMillis(m);
+        long s = TimeUnit.MILLISECONDS.toSeconds(millis);
+        millis -= TimeUnit.SECONDS.toMillis(s);
+        return String.format("%d:%02d:%02d.%03d", h, m, s, millis);
     }
 
     /**
