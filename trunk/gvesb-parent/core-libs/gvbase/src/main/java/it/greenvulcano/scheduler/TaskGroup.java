@@ -38,7 +38,8 @@ public class TaskGroup
 {
     private static Logger     logger  = GVLogger.getLogger(TaskGroup.class);
 
-    private String            name    = "UNDEFONED";
+    private String            name    = "UNDEFINED";
+    private boolean           enabled = false;
     private Map<String, Task> tasks   = new HashMap<String, Task>();
     private TaskManager       manager = null;
 
@@ -47,6 +48,7 @@ public class TaskGroup
         try {
             this.manager = manager;
             this.name = XMLConfig.get(node, "@name");
+            this.enabled = XMLConfig.getBoolean(node, "@enabled", true);
 
             NodeList tnl = XMLConfig.getNodeList(node, "*[@type='task']");
             if ((tnl != null) && (tnl.getLength() > 0)) {
@@ -73,6 +75,10 @@ public class TaskGroup
     public String getName()
     {
         return this.name;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
     public Task getTask(String task)

@@ -88,16 +88,24 @@ public abstract class Task
                 logger.debug("Added properties: " + properties);
             }
             NodeList tnl = XMLConfig.getNodeList(node, "Triggers/*[@type='cron-trigger']");
-            if ((tnl != null) && (tnl.getLength() > 0)) {
+            if (tnl != null) {
                 for (int i = 0; i < tnl.getLength(); i++) {
                     Node n = tnl.item(i);
                     TriggerBuilder tb = (TriggerBuilder) Class.forName(XMLConfig.get(n, "@class")).newInstance();
                     tb.init(group, getName(), n);
                     //triggerBuilders.add(tb);
-                    Trigger trigger = tb.newTrigger();
-                    triggers.add(trigger);
-                    logger.debug("Added Trigger: " + tb);
+                    if (tb.isEnabled()) {
+                        Trigger trigger = tb.newTrigger();
+                        triggers.add(trigger);
+                        logger.debug("Added Trigger: " + tb);
+                    }
+                    else {
+                        logger.debug("Disabled Trigger: " + tb);
+                    }
                 }
+            }
+            if (triggers.isEmpty()) {
+                throw new TaskException("Error initializing Task[" + getFullName() + "] - Empty Trigger list");
             }
 
             jobDetail = new JobDetail(getName(), getGroup(), StatefulJob.class);

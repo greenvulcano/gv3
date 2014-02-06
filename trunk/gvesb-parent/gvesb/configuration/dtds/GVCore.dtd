@@ -13305,6 +13305,11 @@
     #Unique: ../TaskGroup/@name
 -->
 <!ATTLIST TaskGroup name         CDATA #REQUIRED>
+<!--
+    TaskGroup activation status.
+    Default to true.
+-->
+<!ATTLIST TaskGroup enabled      (true|false) #IMPLIED>
 
 <!--
     Defines additional properties of the Task.
@@ -13342,10 +13347,12 @@
 <!ATTLIST TestTask name         CDATA #REQUIRED>
 <!--
     If 'true' Task is automatically registered on the timer.
+    Default to true.
 -->
 <!ATTLIST TestTask auto-start   (true|false) #IMPLIED>
 <!--
     Task activation status.
+    Default to true.
 -->
 <!ATTLIST TestTask enabled      (true|false) #IMPLIED>
 <!--
@@ -13394,10 +13401,12 @@
 <!ATTLIST ServiceCallerTask name         CDATA #REQUIRED>
 <!--
     If 'true' Task is automatically registered on the timer.
+    Default to true.
 -->
 <!ATTLIST ServiceCallerTask auto-start   (true|false) #IMPLIED>
 <!--
     Task activation status.
+    Default to true.
 -->
 <!ATTLIST ServiceCallerTask enabled      (true|false) #IMPLIED>
 <!--
@@ -13552,10 +13561,12 @@
 <!ATTLIST ShellTask name         CDATA #REQUIRED>
 <!--
     If 'true' Task is automatically registered on the timer.
+    Default to true.
 -->
 <!ATTLIST ShellTask auto-start   (true|false) #IMPLIED>
 <!--
     Task activation status.
+    Default to true.
 -->
 <!ATTLIST ShellTask enabled      (true|false) #IMPLIED>
 <!--
@@ -13634,6 +13645,16 @@
 -->
 <!ATTLIST RSHTask name CDATA #REQUIRED>
 <!--
+    If 'true' Task is automatically registered on the timer.
+    Default to true.
+-->
+<!ATTLIST RSHTask auto-start   (true|false) #IMPLIED>
+<!--
+    Task activation status.
+    Default to true.
+-->
+<!ATTLIST RSHTask enabled      (true|false) #IMPLIED>
+<!--
     RSH client name.
 
     #NotNull
@@ -13709,10 +13730,12 @@
 <!ATTLIST LogCleanerTask name         CDATA #REQUIRED>
 <!--
     If 'true' Task is automatically registered on the timer.
+    Default to true.
 -->
 <!ATTLIST LogCleanerTask auto-start   (true|false) #IMPLIED>
 <!--
     Task activation status.
+    Default to true.
 -->
 <!ATTLIST LogCleanerTask enabled      (true|false) #IMPLIED>
 <!--
@@ -13801,6 +13824,11 @@
     #Unique: ancestor::TaskGroup//*[@type='cron-trigger']/@name
 -->
 <!ATTLIST SimpleTriggerBuilder name CDATA #REQUIRED>
+<!--
+    Trigger activation status.
+    Default to true.
+-->
+<!ATTLIST SimpleTriggerBuilder enabled  (true|false) #IMPLIED>
 <!--
     Trigger starting time in ISO format: yyyy-MM-dd HH:mm:ss
 
@@ -13900,6 +13928,11 @@
 -->
 <!ATTLIST DateIntervalTriggerBuilder name CDATA #REQUIRED>
 <!--
+    Trigger activation status.
+    Default to true.
+-->
+<!ATTLIST DateIntervalTriggerBuilder enabled  (true|false) #IMPLIED>
+<!--
     Trigger starting time in ISO format: yyyy-MM-dd HH:mm:ss
     If not defined is the server starting time rounded to the nex minute.
 
@@ -13981,6 +14014,11 @@
     #Unique: ancestor::TaskGroup//*[@type='cron-trigger']/@name
 -->
 <!ATTLIST CronTriggerBuilder name CDATA #REQUIRED>
+<!--
+    Trigger activation status.
+    Default to true.
+-->
+<!ATTLIST CronTriggerBuilder enabled  (true|false) #IMPLIED>
 <!--
     Define a cron expression.
     Reference: http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger

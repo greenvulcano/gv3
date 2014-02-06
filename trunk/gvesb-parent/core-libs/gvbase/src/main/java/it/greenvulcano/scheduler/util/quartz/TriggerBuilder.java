@@ -35,5 +35,7 @@ public interface TriggerBuilder
 
     public void init(String group, String task, Node node) throws TaskException;
 
+    public boolean isEnabled();
+
     public Trigger newTrigger() throws TaskException;
 }
