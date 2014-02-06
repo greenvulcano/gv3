@@ -129,7 +129,7 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
                 schedulerBuilder.init(sbNode);
                 Scheduler sch = schedulerBuilder.getScheduler(managerName);
 
-                // Remove already scheduled tasks... needed if cusing lustered configuration
+                // Remove already scheduled tasks... needed if using clustered configuration
                 String jgns[] = sch.getJobGroupNames();
                 for (int i = 0; i < jgns.length; i++) {
                     String gn = jgns[i];
@@ -301,6 +301,11 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
             String groupN = i.next();
             try {
                 TaskGroup group = groups.get(groupN);
+                if (!group.isEnabled()) {
+                    logger.warn("TaskManager[" + managerName + "] - Unable to register Tasks of TaskGroup[" + group.getName()
+                        + "] - TaskGroup disabled!");
+                    continue;
+                }
                 group.startTasks(onlyAutoStart);
             }
             catch (Exception exc) {

@@ -44,6 +44,7 @@ public abstract class BaseTriggerBuilder implements TriggerBuilder
     protected String              group        = "UNDEFINED";
     protected String              taskName     = "UNDEFINED";
     protected String              name         = "UNDEFINED";
+    protected boolean             enabled      = true;
     protected String              calendarName = null;
     protected TimeZone            timeZone     = DateUtils.getDefaultTimeZone();
 
@@ -64,6 +65,7 @@ public abstract class BaseTriggerBuilder implements TriggerBuilder
             this.group = group;
             this.taskName = task;
             name = XMLConfig.get(node, "@name");
+            enabled = XMLConfig.getBoolean(node, "@enabled", true);
             calendarName = XMLConfig.get(node, "@calendarName", null);
             timeZone = TimeZone.getTimeZone(XMLConfig.get(node, "@timeZone", DateUtils.getDefaultTimeZone().getID()));
             misfire = XMLConfig.get(node, "@misfireMode", "smart-policy");
@@ -79,6 +81,11 @@ public abstract class BaseTriggerBuilder implements TriggerBuilder
         catch (Exception exc) {
             throw new TaskException("Error initializing TriggerBuilder", exc);
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
     /* (non-Javadoc)
