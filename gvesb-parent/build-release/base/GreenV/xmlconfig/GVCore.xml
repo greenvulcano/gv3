@@ -108,7 +108,7 @@
                                     <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
                                                       name="serializeDOM" type="call">
                                         <OGNLScript>#document=@it.greenvulcano.util.xml.XMLUtils@parseObject_S(object,false,true),
-                      setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,&apos;//gvesbws:resultUp&apos;))</OGNLScript>
+setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,&apos;//gvesbws:resultUp&apos;))</OGNLScript>
                                     </ognl-script-call>
                                 </ognl-script-service>
                             </OutputServices>
@@ -135,7 +135,7 @@
                                     <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
                                                       name="serializeDOM" type="call">
                                         <OGNLScript>#document=@it.greenvulcano.util.xml.XMLUtils@parseObject_S(object,false,true),
-                      setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,&apos;//gvesbws:str&apos;))</OGNLScript>
+setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,&apos;//gvesbws:str&apos;))</OGNLScript>
                                     </ognl-script-call>
                                 </ognl-script-service>
                             </InputServices>
@@ -366,7 +366,7 @@
                                             point-x="380" point-y="294" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
                                 <OGNLScript>property[&apos;TARGET&apos;]=&apos;discarded&apos;,
-                                    setObject(&apos;&apos; + #environment.get(&apos;payload&apos;))</OGNLScript>
+setObject(&apos;&apos; + #environment.get(&apos;payload&apos;))</OGNLScript>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -486,7 +486,7 @@
                                             point-x="395" point-y="276" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
                                 <OGNLScript>property[&apos;TARGET&apos;]=&apos;discarded&apos;,
-                                    setObject(&apos;&apos; + #environment.get(&apos;payload&apos;))</OGNLScript>
+setObject(&apos;&apos; + #environment.get(&apos;payload&apos;))</OGNLScript>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -614,38 +614,67 @@ var svc = data.getProperty(&quot;SVC&quot;);
                         </Conditions>
                         <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
                                             dump-in-out="true" id="prepare" input="input"
-                                            next-node-id="check_service"
+                                            next-node-id="write_email"
                                             op-type="change GVBuffer" output="prepared"
-                                            point-x="87" point-y="139" type="flow-node">
+                                            point-x="25" point-y="136" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
                                 <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
-                var subject = XMLUtils.get_S(doc,&apos;/Message/Subject&apos;, &apos;NULL&apos;);
-                data.setProperty(&quot;SUBJECT&quot;,subject);
-                var to = XMLUtils.get_S(doc,&apos;/Message/ReplyTo&apos;, &apos;NULL&apos;);
-                data.setProperty(&quot;GV_SMTP_TO&quot;,to);
-                var cc = XMLUtils.get_S(doc,&apos;/Message/Cc&apos;, &apos;NULL&apos;);
-                if (cc != &apos;NULL&apos;) {
-                  data.setProperty(&quot;GV_SMTP_CC&quot;,cc);
-                };
-                data.setProperty(&apos;NAME&apos;, &apos;NULL&apos;);
-                data.setProperty(&apos;TYPE&apos;, &apos;PDF&apos;);
-                var items = subject.trim().split(&quot;!&quot;);
-                for (i=0; i &lt; items.length; i++) {
-                      var  item = items[i].trim().split(&quot;=&quot;);
-                      if (item.length &gt; 1) {
-                          var name = item[0].trim();
-                          var value = item[1].trim();
+data.setObject(doc);
 
-                          data.setProperty(name,value);
-                      }
-                };
-                data.setProperty(&apos;BIRT_REPORT_TYPE&apos;, data.getProperty(&apos;TYPE&apos;).toLowerCase());</Script>
+var subject = XMLUtils.get_S(doc,&apos;/Message/Subject&apos;, &apos;NULL&apos;);
+data.setProperty(&quot;SUBJECT&quot;,subject);
+var to = XMLUtils.get_S(doc,&apos;/Message/ReplyTo&apos;, &apos;NULL&apos;);
+data.setProperty(&quot;GV_SMTP_TO&quot;,to);
+var cc = XMLUtils.get_S(doc,&apos;/Message/Cc&apos;, &apos;NULL&apos;);
+if (cc != &apos;NULL&apos;) {
+    data.setProperty(&quot;GV_SMTP_CC&quot;,cc);
+};
+data.setProperty(&apos;NAME&apos;, &apos;NULL&apos;);
+data.setProperty(&apos;TYPE&apos;, &apos;PDF&apos;);
+var items = subject.trim().split(&quot;!&quot;);
+for (i=0; i &lt; items.length; i++) {
+        var  item = items[i].trim().split(&quot;=&quot;);
+        if (item.length &gt; 1) {
+            var name = item[0].trim();
+            var value = item[1].trim();
+
+            data.setProperty(name,value);
+        }
+};
+data.setProperty(&apos;BIRT_REPORT_TYPE&apos;, data.getProperty(&apos;TYPE&apos;).toLowerCase());
+
+var datInv=DateUtils.convertString(XMLUtils.get_S(doc,&apos;/Message/Headers/Date&apos;), &apos;EEE, dd MMM yyyy HH:mm:ss z&apos;, &apos;GMT&apos;, &apos;en&apos;, &apos;yyyyMMddHHmm&apos;, &apos;Europe/Rome&apos;, &apos;it&apos;);
+var fileName = &apos;Mail.&apos; + datInv + &apos;_&apos; + (to + &apos;_&apos; + subject).replace(/[^\w]/g, &apos;_&apos;) + &apos;.eml&apos;;
+data.setProperty(&apos;EMAIL_FILE_NAME&apos;, fileName);</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         dump-in-out="false" id="write_email"
+                                         id-system="CREDIT" input="prepared"
+                                         next-node-id="check_service" op-type="call"
+                                         operation-name="WriteEmailFile" output="file"
+                                         point-x="115" point-y="136" type="flow-node">
+                            <InputServices>
+                                <ognl-script-service critical="yes" internal="yes"
+                                                     type="service">
+                                    <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
+                                                      name="getEML" type="call">
+                                        <OGNLScript>setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(object, &quot;/Message/EML&quot;))</OGNLScript>
+                                    </ognl-script-call>
+                                </ognl-script-service>
+                                <gvdte-service critical="yes" internal="yes"
+                                               remove-fields="yes" type="service">
+                                    <map-name-param name="map-name" type="param"
+                                                    value="FromBase64"/>
+                                    <gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall"
+                                                        name="FromBase64" type="call"/>
+                                </gvdte-service>
+                            </InputServices>
+                        </GVOperationNode>
                         <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
                                      default-id="send_nosvc_email" id="check_service"
                                      input="prepared" on-exception-id="end-exc"
-                                     op-type="check" point-x="212" point-y="144"
+                                     op-type="check" point-x="198" point-y="136"
                                      type="flow-node">
                             <GVRouting condition="CheckServiceName"
                                        next-node-id="send_user_data"/>
@@ -658,26 +687,26 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                         next-node-id="check_status" op-type="corecall"
                                         operation="ognl{{#object.getProperty(&apos;SVC&apos;)}}"
                                         output="output" overwrite-sys-svc="true"
-                                        point-x="412" point-y="139" type="flow-node"/>
+                                        point-x="404" point-y="136" type="flow-node"/>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
                                          dump-in-out="false" id="send_nosvc_email"
                                          id-system="CREDIT" input="prepared"
                                          next-node-id="check_status" op-type="call"
                                          operation-name="SendEmailNoSVC" output="output"
-                                         point-x="411" point-y="232" type="flow-node"/>
+                                         point-x="397" point-y="232" type="flow-node"/>
                         <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
                                      default-id="end" id="check_status" input="output"
                                      on-exception-id="end-exc" op-type="check"
                                      point-x="597" point-y="136" type="flow-node"/>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
                                    end-business-process="yes" id="end-exc" op-type="end"
-                                   output="output" point-x="430" point-y="317"
+                                   output="output" point-x="421" point-y="319"
                                    type="flow-node">
                             <ChangeGVBuffer clear-data="true"/>
                         </GVEndNode>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
                                    end-business-process="yes" id="end" op-type="end"
-                                   output="output" point-x="741" point-y="23"
+                                   output="output" point-x="720" point-y="136"
                                    type="flow-node">
                             <ChangeGVBuffer clear-data="true"/>
                         </GVEndNode>
@@ -1164,12 +1193,12 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             point-x="7" point-y="166" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
                                 <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
-                                    data.setProperty(&apos;PERSON_NAME&apos;, XMLUtils.get_S(doc,&apos;/PersonData/Name&apos;));
-                                    data.setProperty(&apos;CITY_NAME&apos;, XMLUtils.get_S(doc,&apos;/PersonData/City&apos;));
-                                    data.setProperty(&apos;BIRTHDATE&apos;, XMLUtils.get_S(doc,&apos;/PersonData/BirthDate&apos;));
-                                    data.setProperty(&apos;CNUMBER&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Number&apos;));
-                                    data.setProperty(&apos;CREDIT&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Credit&apos;));
-                                    data.setProperty(&apos;ACTIVE&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Active&apos;));</Script>
+data.setProperty(&apos;PERSON_NAME&apos;, XMLUtils.get_S(doc,&apos;/PersonData/Name&apos;));
+data.setProperty(&apos;CITY_NAME&apos;, XMLUtils.get_S(doc,&apos;/PersonData/City&apos;));
+data.setProperty(&apos;BIRTHDATE&apos;, XMLUtils.get_S(doc,&apos;/PersonData/BirthDate&apos;));
+data.setProperty(&apos;CNUMBER&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Number&apos;));
+data.setProperty(&apos;CREDIT&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Credit&apos;));
+data.setProperty(&apos;ACTIVE&apos;, XMLUtils.get_S(doc,&apos;/PersonData/CardsData/CardData/Active&apos;));</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -1186,7 +1215,7 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             point-x="300" point-y="31" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
                                 <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
-                                    data.setProperty(&apos;ID_PERSON&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
+data.setProperty(&apos;ID_PERSON&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
@@ -1217,7 +1246,7 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             point-x="220" point-y="445" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
                                 <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
-                                    data.setProperty(&apos;ID_CARD&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
+data.setProperty(&apos;ID_CARD&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
@@ -1247,7 +1276,7 @@ var svc = data.getProperty(&quot;SVC&quot;);
                                             point-x="849" point-y="111" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
                                 <Script>var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
-                                    data.setProperty(&apos;ID_PERSON&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
+data.setProperty(&apos;ID_PERSON&apos;, XMLUtils.get_S(doc,&apos;//col&apos;, &apos;NULL&apos;));</Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -1972,77 +2001,78 @@ data.setObject(baos.toByteArray());</Script>
                                       wsdl="file://${{gv.app.home}}/xmlconfig/wsdl/TOUPPER_WSS.wsdl"/>
                             <EngageModule name="rampart" specification="WS-Security"
                                           type="it.greenvulcano.gvesb.virtual.ws.module.rampart.RampartModuleHandler">
-                                <PolicyData policy_key="rampartPolicy">&lt;wsp:Policy wsu:Id=&quot;SigEncr&quot;
-                                                xmlns:wsp=&quot;http://schemas.xmlsoap.org/ws/2004/09/policy&quot;
-                                                xmlns:wsu=&quot;http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd&quot;&gt;
-                                        &lt;wsp:ExactlyOne&gt;
-                                            &lt;wsp:All&gt;
-                                                &lt;sp:AsymmetricBinding xmlns:sp=&quot;http://schemas.xmlsoap.org/ws/2005/07/securitypolicy&quot;&gt;
-                                                    &lt;wsp:Policy&gt;
-                                                        &lt;sp:InitiatorToken&gt;
-                                                            &lt;wsp:Policy&gt;
-                                                                &lt;sp:X509Token sp:IncludeToken=&quot;http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient&quot;&gt;
-                                                                    &lt;wsp:Policy&gt;
-                                                                        &lt;sp:RequireThumbprintReference/&gt;
-                                                                        &lt;sp:WssX509V3Token10/&gt;
-                                                                    &lt;/wsp:Policy&gt;
-                                                                &lt;/sp:X509Token&gt;
-                                                            &lt;/wsp:Policy&gt;
-                                                        &lt;/sp:InitiatorToken&gt;
-                                                        &lt;sp:RecipientToken&gt;
-                                                            &lt;wsp:Policy&gt;
-                                                                &lt;sp:X509Token sp:IncludeToken=&quot;http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never&quot;&gt;
-                                                                    &lt;wsp:Policy&gt;
-                                                                        &lt;sp:RequireThumbprintReference/&gt;
-                                                                        &lt;sp:WssX509V3Token10/&gt;
-                                                                    &lt;/wsp:Policy&gt;
-                                                                &lt;/sp:X509Token&gt;
-                                                            &lt;/wsp:Policy&gt;
-                                                        &lt;/sp:RecipientToken&gt;
-                                                        &lt;sp:AlgorithmSuite&gt;
-                                                            &lt;wsp:Policy&gt;
-                                                                &lt;sp:TripleDesRsa15/&gt;
-                                                            &lt;/wsp:Policy&gt;
-                                                        &lt;/sp:AlgorithmSuite&gt;
-                                                        &lt;sp:Layout&gt;
-                                                            &lt;wsp:Policy&gt;
-                                                                &lt;sp:Strict/&gt;
-                                                            &lt;/wsp:Policy&gt;
-                                                        &lt;/sp:Layout&gt;
-                                                        &lt;sp:IncludeTimestamp/&gt;
-                                                        &lt;sp:OnlySignEntireHeadersAndBody/&gt;
-                                                    &lt;/wsp:Policy&gt;
-                                                &lt;/sp:AsymmetricBinding&gt;
-                                                &lt;sp:Wss10 xmlns:sp=&quot;http://schemas.xmlsoap.org/ws/2005/07/securitypolicy&quot;&gt;
-                                                    &lt;wsp:Policy&gt;
-                                                        &lt;sp:MustSupportRefKeyIdentifier/&gt;
-                                                        &lt;sp:MustSupportRefIssuerSerial/&gt;
-                                                    &lt;/wsp:Policy&gt;
-                                                &lt;/sp:Wss10&gt;
-                                                &lt;sp:SignedParts xmlns:sp=&quot;http://schemas.xmlsoap.org/ws/2005/07/securitypolicy&quot;&gt;
-                                                    &lt;sp:Body/&gt;
-                                                &lt;/sp:SignedParts&gt;
-                                                &lt;sp:EncryptedParts xmlns:sp=&quot;http://schemas.xmlsoap.org/ws/2005/07/securitypolicy&quot;&gt;
-                                                    &lt;sp:Body/&gt;
-                                                &lt;/sp:EncryptedParts&gt;
-                                                &lt;ramp:RampartConfig xmlns:ramp=&quot;http://ws.apache.org/rampart/policy&quot;&gt;
-                                                    &lt;ramp:user&gt;client&lt;/ramp:user&gt;
-                                                    &lt;ramp:encryptionUser&gt;service&lt;/ramp:encryptionUser&gt;
-                                                    &lt;ramp:passwordCallbackClass&gt;it.greenvulcano.gvesb.ws.rampart.policy.pwcb.PwCbBasicHandler&lt;/ramp:passwordCallbackClass&gt;
-                                                    &lt;ramp:signatureCrypto&gt;
-                                                        &lt;ramp:crypto provider=&quot;it.greenvulcano.gvesb.ws.rampart.policy.CryptoAdapter&quot;&gt;
-                                                            &lt;ramp:property name=&quot;it.greenvulcano.wss.crypto.keystore.id&quot;&gt;WSS_client&lt;/ramp:property&gt;
-                                                        &lt;/ramp:crypto&gt;
-                                                    &lt;/ramp:signatureCrypto&gt;
-                                                    &lt;ramp:encryptionCypto&gt;
-                                                        &lt;ramp:crypto provider=&quot;it.greenvulcano.gvesb.ws.rampart.policy.CryptoAdapter&quot;&gt;
-                                                            &lt;ramp:property name=&quot;it.greenvulcano.wss.crypto.keystore.id&quot;&gt;WSS_client&lt;/ramp:property&gt;
-                                                        &lt;/ramp:crypto&gt;
-                                                    &lt;/ramp:encryptionCypto&gt;
-                                                &lt;/ramp:RampartConfig&gt;
-                                            &lt;/wsp:All&gt;
-                                        &lt;/wsp:ExactlyOne&gt;
-                                    &lt;/wsp:Policy&gt;</PolicyData>
+                                <PolicyData policy_key="rampartPolicy"><![CDATA[<wsp:Policy wsu:Id="SigEncr"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+        xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+    <wsp:ExactlyOne>
+        <wsp:All>
+            <sp:AsymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                <wsp:Policy>
+                    <sp:InitiatorToken>
+                        <wsp:Policy>
+                            <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+                                <wsp:Policy>
+                                    <sp:RequireThumbprintReference/>
+                                    <sp:WssX509V3Token10/>
+                                </wsp:Policy>
+                            </sp:X509Token>
+                        </wsp:Policy>
+                    </sp:InitiatorToken>
+                    <sp:RecipientToken>
+                        <wsp:Policy>
+                            <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+                                <wsp:Policy>
+                                    <sp:RequireThumbprintReference/>
+                                    <sp:WssX509V3Token10/>
+                                </wsp:Policy>
+                            </sp:X509Token>
+                        </wsp:Policy>
+                    </sp:RecipientToken>
+                    <sp:AlgorithmSuite>
+                        <wsp:Policy>
+                            <sp:TripleDesRsa15/>
+                        </wsp:Policy>
+                    </sp:AlgorithmSuite>
+                    <sp:Layout>
+                        <wsp:Policy>
+                            <sp:Strict/>
+                        </wsp:Policy>
+                    </sp:Layout>
+                    <sp:IncludeTimestamp/>
+                    <sp:OnlySignEntireHeadersAndBody/>
+                </wsp:Policy>
+            </sp:AsymmetricBinding>
+            <sp:Wss10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                <wsp:Policy>
+                    <sp:MustSupportRefKeyIdentifier/>
+                    <sp:MustSupportRefIssuerSerial/>
+                </wsp:Policy>
+            </sp:Wss10>
+            <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                <sp:Body/>
+            </sp:SignedParts>
+            <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                <sp:Body/>
+            </sp:EncryptedParts>
+
+            <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
+                <ramp:user>client</ramp:user>
+                <ramp:encryptionUser>service</ramp:encryptionUser>
+                <ramp:passwordCallbackClass>it.greenvulcano.gvesb.ws.rampart.policy.pwcb.PwCbBasicHandler</ramp:passwordCallbackClass>
+                <ramp:signatureCrypto>
+                    <ramp:crypto provider="it.greenvulcano.gvesb.ws.rampart.policy.CryptoAdapter">
+                        <ramp:property name="it.greenvulcano.wss.crypto.keystore.id">WSS_client</ramp:property>
+                    </ramp:crypto>
+                </ramp:signatureCrypto>
+                <ramp:encryptionCypto>
+                    <ramp:crypto provider="it.greenvulcano.gvesb.ws.rampart.policy.CryptoAdapter">
+                        <ramp:property name="it.greenvulcano.wss.crypto.keystore.id">WSS_client</ramp:property>
+                    </ramp:crypto>
+                </ramp:encryptionCypto>
+            </ramp:RampartConfig>
+        </wsp:All>
+    </wsp:ExactlyOne>
+</wsp:Policy>]]></PolicyData>
                             </EngageModule>
                         </AxisWebServiceInvoker>
                     </ws-call>
@@ -2076,6 +2106,14 @@ data.setObject(baos.toByteArray());</Script>
                     <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall"
                                        name="echo_call" service="echo" sleep-on-init="75"
                                        sleep-on-perform="50" type="call"/>
+                    <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall"
+                                       name="toupper_call_wait" service="toupper"
+                                       sleep-on-init="75" sleep-on-perform="30000"
+                                       type="call"/>
+                    <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall"
+                                       name="tolower_call_wait" service="tolower"
+                                       sleep-on-init="75" sleep-on-perform="30000"
+                                       type="call"/>
                     <birt-report-call class="it.greenvulcano.gvesb.virtual.birt.report.BIRTReportCallOperation"
                                       groupName="TestGRP" name="TestBirt"
                                       reportName="Sales Invoice" reportType="excel"
@@ -2458,18 +2496,18 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                             <Sheet id="1" name="Person List"
                                    title="Person List - timestamp{{dd/MM/yyyy HH:mm:ss}}">
                                 <statement type="select">select p.NAME as &quot;Name&quot;, p.BIRTHDATE as &quot;Birth Date&quot;, c.NAME as &quot;City&quot;
-                                    from PERSON p, CITY c
-                                    where p.ID_CITY = c.ID
-                                    decode{{@{{NAME}}::NULL::::and p.NAME=&apos;@{{NAME}}&apos;}}
-                                    order by c.NAME, p.NAME</statement>
+from PERSON p, CITY c
+where p.ID_CITY = c.ID
+decode{{@{{NAME}}::NULL::::and p.NAME=&apos;@{{NAME}}&apos;}}
+order by c.NAME, p.NAME</statement>
                             </Sheet>
                             <Sheet id="2" name="Credit Card List"
                                    title="Credit Card List - timestamp{{dd/MM/yyyy HH:mm:ss}}">
                                 <statement type="select">select p.NAME as &quot;Name&quot;, cc.CNUMBER as &quot;Card Number&quot;, cc.CREDIT as &quot;Credit&quot;, decode(cc.ENABLED, &apos;Y&apos;, &apos;Yes&apos;, &apos;No&apos;) as &quot;Active&quot;
-                                    from PERSON p, CREDIT_CARD cc
-                                    where p.ID = cc.ID_OWNER
-                                    decode{{@{{NAME}}::NULL::::and p.NAME=&apos;@{{NAME}}&apos;}}
-                                    order by p.NAME</statement>
+from PERSON p, CREDIT_CARD cc
+where p.ID = cc.ID_OWNER
+decode{{@{{NAME}}::NULL::::and p.NAME=&apos;@{{NAME}}&apos;}}
+order by p.NAME</statement>
                             </Sheet>
                         </GVExcelReport>
                     </excel-call>
@@ -2492,11 +2530,11 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                        name="UserDataAsPDF" transformation="UserDataAsPDF"
                                        type="dbo">
                                 <statement id="1" keys="1,2,3" type="select">select p.NAME, p.BIRTHDATE, c.NAME, cc.CNUMBER, cc.CREDIT, cc.ENABLED
-                                    from PERSON p, CITY c, CREDIT_CARD cc
-                                    where p.ID_CITY = c.ID
-                                    and p.ID = cc.ID_OWNER
-                                    decode{{@{{NAME}}::NULL::::and p.NAME like &apos;%@{{NAME}}%&apos;}}
-                                    order by c.NAME, p.NAME</statement>
+from PERSON p, CITY c, CREDIT_CARD cc
+where p.ID_CITY = c.ID
+and p.ID = cc.ID_OWNER
+decode{{@{{NAME}}::NULL::::and p.NAME like &apos;%@{{NAME}}%&apos;}}
+order by c.NAME, p.NAME</statement>
                             </DBOSelect>
                         </DBOBuilder>
                     </dh-call>
@@ -2509,17 +2547,17 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                               type="retriever">
                                 <DataRetriever cacheable="true" method="getCityID"
                                                signature="NAME">select ID from CITY
-                                  where NAME=&apos;@{{NAME}}&apos;</DataRetriever>
+where NAME=&apos;@{{NAME}}&apos;</DataRetriever>
                                 <DataRetriever cacheable="true" method="getCityName"
                                                signature="ID">select NAME from CITY
-                                  where ID=@{{ID}}</DataRetriever>
+where ID=@{{ID}}</DataRetriever>
                                 <DataRetriever method="getPersonID" signature="NAME,CITY">select ID from PERSON
-                                  where NAME=&apos;@{{NAME}}&apos;
-                                  and ID_CITY=(select ID from CITY where NAME=&apos;@{{CITY}}&apos;)</DataRetriever>
+where NAME=&apos;@{{NAME}}&apos;
+and ID_CITY=(select ID from CITY where NAME=&apos;@{{CITY}}&apos;)</DataRetriever>
                                 <DataRetriever cacheable="true" method="getCardID"
                                                signature="NUMBER,ID_OWNER">select ID from CREDIT_CARD
-                                  where CNUMBER=&apos;@{{NUMBER}}&apos;
-                                  and ID_OWNER=@{{ID_OWNER}}</DataRetriever>
+where CNUMBER=&apos;@{{NUMBER}}&apos;
+and ID_OWNER=@{{ID_OWNER}}</DataRetriever>
                                 <DataRetriever method="getSeqVal">select SEQ_PERSON_ID.nextval from dual</DataRetriever>
                             </GenericRetriever>
                         </RetrieverConfig>
@@ -2537,12 +2575,12 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                        name="SearchPerson" transformation="SearchPerson"
                                        type="dbo">
                                 <statement id="1" keys="1,2,3" type="select">select p.NAME, p.BIRTHDATE, c.NAME, cc.CNUMBER, cc.CREDIT, cc.ENABLED
-                                    from PERSON p, CITY c, CREDIT_CARD cc
-                                    where p.ID_CITY = c.ID
-                                    and p.ID = cc.ID_OWNER
-                                    decode{{@{{NAME}}::NULL::::and p.NAME like &apos;%@{{NAME}}%&apos;}}
-                                    decode{{@{{CITY}}::NULL::::and c.NAME like &apos;%@{{CITY}}%&apos;}}
-                                    order by c.NAME, p.NAME</statement>
+from PERSON p, CITY c, CREDIT_CARD cc
+where p.ID_CITY = c.ID
+and p.ID = cc.ID_OWNER
+decode{{@{{NAME}}::NULL::::and p.NAME like &apos;%@{{NAME}}%&apos;}}
+decode{{@{{CITY}}::NULL::::and c.NAME like &apos;%@{{CITY}}%&apos;}}
+order by c.NAME, p.NAME</statement>
                             </DBOSelect>
                         </DBOBuilder>
                         <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
@@ -2557,10 +2595,10 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                                name="CreditUpdate"
                                                transformation="CreditUpdate" type="dbo">
                                 <statement id="0" type="insert">insert into CREDIT_CARD (ID, ID_OWNER, CNUMBER, CREDIT, ENABLED)
-                                values (SEQ_PERSON_ID.nextval, ?, ?, ?, ?)</statement>
+values (SEQ_PERSON_ID.nextval, ?, ?, ?, ?)</statement>
                                 <statement id="0" type="update">update CREDIT_CARD  set CREDIT=?, ENABLED=?
-                                where CNUMBER=?
-                                and ID_OWNER=?</statement>
+where CNUMBER=?
+and ID_OWNER=?</statement>
                             </DBOUpdateOrInsert>
                         </DBOBuilder>
                         <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
@@ -2575,13 +2613,13 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                        name="PersonInsertFull"
                                        transformation="PersonInsertFull" type="dbo">
                                 <statement id="0" type="update">insert into PERSON (ID, ID_CITY, NAME, BIRTHDATE)
-                                values (?, ?, ?, ?)</statement>
+values (?, ?, ?, ?)</statement>
                                 <statement id="1" type="update">update PERSON set ID_CITY=?
-                                where ID=?</statement>
+where ID=?</statement>
                                 <statement id="2" type="update">insert into CREDIT_CARD (ID, ID_OWNER, CNUMBER, CREDIT, ENABLED)
-                                values (?, ?, ?, ?, ?)</statement>
+values (?, ?, ?, ?, ?)</statement>
                                 <statement id="3" type="update">update CREDIT_CARD  set CREDIT=?, ENABLED=?
-                                where ID=?</statement>
+where ID=?</statement>
                             </DBOUpdate>
                         </DBOBuilder>
                     </dh-call>
@@ -2601,9 +2639,9 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                        name="CCardQuery" transformation="CCardQuery"
                                        type="dbo">
                                 <statement id="1" type="select">select p.NAME, cc.CNUMBER, cc.CREDIT, cc.ENABLED
-                                    from PERSON p, CREDIT_CARD cc
-                                    where p.ID = cc.ID_OWNER
-                                    and cc.CNUMBER = @{{CNUMBER}}</statement>
+from PERSON p, CREDIT_CARD cc
+where p.ID = cc.ID_OWNER
+and cc.CNUMBER = @{{CNUMBER}}</statement>
                             </DBOSelect>
                         </DBOBuilder>
                         <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
@@ -2618,9 +2656,9 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                        name="CCardPay" transformation="CCardPay"
                                        type="dbo">
                                 <statement id="0" type="update">update CREDIT_CARD  set CREDIT= CREDIT - ?
-                                    where CNUMBER=?
-                                    and ENABLED=&apos;Y&apos;
-                                    and CREDIT &gt;= ?</statement>
+where CNUMBER=?
+and ENABLED=&apos;Y&apos;
+and CREDIT &gt;= ?</statement>
                             </DBOUpdate>
                         </DBOBuilder>
                     </dh-call>
@@ -2666,8 +2704,8 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                                   type="db-connection"/>
                             <Statement statementType="PreparedStatement">
                                 <StatementValue>select ID from PERSON
-                                    where NAME=?
-                                    and ID_CITY=(select ID from CITY where NAME=?)</StatementValue>
+where NAME=?
+and ID_CITY=(select ID from CITY where NAME=?)</StatementValue>
                                 <ParamResolvers>
                                     <ParamResolver>
                                         <GVBufferParamResolver class="it.greenvulcano.gvesb.j2ee.db.resolver.GVBufferResolver"
@@ -2703,7 +2741,7 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                                   type="db-connection"/>
                             <Statement statementType="PreparedStatement">
                                 <StatementValue>insert into PERSON (ID, ID_CITY, NAME, BIRTHDATE)
-                                    values (?, (select ID from CITY where NAME=?), ?, to_date(?, &apos;DD/MM/YYYY&apos;))</StatementValue>
+values (?, (select ID from CITY where NAME=?), ?, to_date(?, &apos;DD/MM/YYYY&apos;))</StatementValue>
                                 <ParamResolvers>
                                     <ParamResolver>
                                         <GVBufferParamResolver class="it.greenvulcano.gvesb.j2ee.db.resolver.GVBufferResolver"
@@ -2742,7 +2780,7 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                                   type="db-connection"/>
                             <Statement statementType="PreparedStatement">
                                 <StatementValue>update PERSON set ID_CITY=(select ID from CITY where NAME=?)
-                                    where ID=?</StatementValue>
+where ID=?</StatementValue>
                                 <ParamResolvers>
                                     <ParamResolver>
                                         <GVBufferParamResolver class="it.greenvulcano.gvesb.j2ee.db.resolver.GVBufferResolver"
@@ -2773,7 +2811,7 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                                   type="db-connection"/>
                             <Statement statementType="PreparedStatement">
                                 <StatementValue>select ID from CREDIT_CARD
-                                    where CNUMBER=?</StatementValue>
+where CNUMBER=?</StatementValue>
                                 <ParamResolvers>
                                     <ParamResolver>
                                         <GVBufferParamResolver class="it.greenvulcano.gvesb.j2ee.db.resolver.GVBufferResolver"
@@ -2805,7 +2843,7 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                                   type="db-connection"/>
                             <Statement statementType="PreparedStatement">
                                 <StatementValue>insert into CREDIT_CARD (ID, ID_OWNER, CNUMBER, CREDIT, ENABLED)
-                                    values (SEQ_PERSON_ID.nextval, ?, ?, ?, ?)</StatementValue>
+values (SEQ_PERSON_ID.nextval, ?, ?, ?, ?)</StatementValue>
                                 <ParamResolvers>
                                     <ParamResolver>
                                         <GVBufferParamResolver class="it.greenvulcano.gvesb.j2ee.db.resolver.GVBufferResolver"
@@ -2844,7 +2882,7 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
                                                   type="db-connection"/>
                             <Statement statementType="PreparedStatement">
                                 <StatementValue>update CREDIT_CARD  set CREDIT=?, ENABLED=?
-                                    where ID=?</StatementValue>
+where ID=?</StatementValue>
                                 <ParamResolvers>
                                     <ParamResolver>
                                         <GVBufferParamResolver class="it.greenvulcano.gvesb.j2ee.db.resolver.GVBufferResolver"
@@ -3051,6 +3089,12 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
             </DataSourceSet>
         </DataSourceSets>
         <Transformations>
+            <Base64Transformation Operation="Encode"
+                                  class="it.greenvulcano.gvesb.gvdte.transformers.bin.bin2bin.Base64Transformer"
+                                  name="ToBase64" type="transformation"/>
+            <Base64Transformation Operation="Decode"
+                                  class="it.greenvulcano.gvesb.gvdte.transformers.bin.bin2bin.Base64Transformer"
+                                  name="FromBase64" type="transformation"/>
             <XSLTransformation DataSourceSet="Default" XSLMapName="identity.xsl"
                                class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
                                name="identityXML" type="transformation"/>

@@ -9930,6 +9930,13 @@
     #NotNull
 -->
 <!ATTLIST pop-call email-rx-cleaner CDATA #IMPLIED>
+<!--
+    Also export a message in EML format.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST pop-call export-EML (true|false) #IMPLIED>
 
 <!--
     Plugin for removing emails UID from UID cache, useful for email reprocess.
