@@ -1796,7 +1796,7 @@ public final class DateUtils
     }
 
     /**
-     * Convert a long representing a ms duration into a string in the format HH:mm:ss.S.
+     * Convert a long representing a ms duration into a string in the format HH:mm:ss.SSS.
      *
      * @param millis
      * @return
