@@ -118,6 +118,7 @@ public class POPCallOperation implements CallOperation
     private String              mbox            = "INBOX";
     private boolean             delete_messages = false;
     private boolean             expunge         = false;
+    private boolean             exportEML       = false;
     private Store               store           = null;
     private Pattern             emailRxPattern  = null;
 
@@ -151,6 +152,8 @@ public class POPCallOperation implements CallOperation
 
             delete_messages = XMLConfig.getBoolean(node, "@delete-messages", false);
             expunge = XMLConfig.getBoolean(node, "@expunge", false);
+            
+            exportEML = XMLConfig.getBoolean(node, "@export-EML", false);
 
             Session session = null;
             if (jndiName != null) {
@@ -310,6 +313,16 @@ public class POPCallOperation implements CallOperation
                     if (!skipMessage) {
                         Element msg = xml.insertElement(doc.getDocumentElement(), "Message");
                         dumpPart(msgs[i], msg, xml);
+                        if (exportEML) {
+                            Element eml = xml.insertElement(msg, "EML");
+                            xml.setAttribute(eml, "encoding", "base64");
+                            OutputStream os = new ByteArrayOutputStream();
+                            Base64OutputStream b64os = new Base64OutputStream(os, true, -1, "".getBytes());
+                            msgs[i].writeTo(b64os);
+                            b64os.flush();
+                            b64os.close();
+                            xml.insertText(eml, os.toString());
+                        }
                     }
                     else {
                         messageCount--;
