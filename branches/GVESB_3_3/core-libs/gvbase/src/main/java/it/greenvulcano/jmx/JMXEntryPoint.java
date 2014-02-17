@@ -72,9 +72,17 @@ public class JMXEntryPoint implements ConfigurationListener
     public static final String        MODELER_DTD         = "it/greenvulcano/jmx/modeler.dtd";
 
     /**
+     * XMLConfig file for the <code>JMXEntryPoint</code>.
+     */
+    private static final String       CONFIGURATION_FILE  = "gv-jmx.xml";
+
+    /**
      * Unique instance of the <code>JMXEntryPoint</code>.
      */
     private static JMXEntryPoint      instance            = null;
+    
+    private static boolean            initialized         = false;
+    private static boolean            initializing        = false;
 
     /**
      * Error occurred during initialization.
@@ -87,6 +95,10 @@ public class JMXEntryPoint implements ConfigurationListener
     private Vector<ObjectNameBuilder> objectNameBuilders  = null;
     private MBeanServer               mbeanServer;
 
+    private JMXEntryPoint() {
+        // do nothing
+    }
+    
     /**
      * This method returns the unique instance of the <code>JMXEntryPoint</code>
      * available in the JVM.
@@ -97,18 +109,15 @@ public class JMXEntryPoint implements ConfigurationListener
     public static synchronized JMXEntryPoint instance() throws Exception
     {
         if (instance == null) {
+            initialized = false;
             initializationError = null;
             instance = new JMXEntryPoint();
             try {
                 XMLConfig.addConfigurationListener(instance, CONFIGURATION_FILE);
 
-                // Forces the configuration file loading in order to
-                // trigger the initialization mechanisms.
-                // These mechanisms can set the initializationError
-                //
-                XMLConfig.load(CONFIGURATION_FILE);
+                instance.init();
             }
-            catch (XMLConfigException exc) {
+            catch (Exception exc) {
                 initializationError = exc;
             }
 
@@ -135,31 +144,48 @@ public class JMXEntryPoint implements ConfigurationListener
      */
     private void init() throws Exception
     {
-        // JMXEntryPoint specific configuration
-        objectNameBuilders = null;
-        NodeList nl = XMLConfig.getNodeList(CONFIGURATION_FILE, "/jmx/entry-point/ObjectNameBuilders/ObjectNameBuilder");
-        if (nl != null) {
-            objectNameBuilders = new Vector<ObjectNameBuilder>();
-            for (int i = 0; i < nl.getLength(); i++) {
-                ObjectNameBuilder onb = new ObjectNameBuilder();
-                onb.init(nl.item(i));
-                objectNameBuilders.add(onb);
-            }
+        if (initialized) {
+            return;
         }
 
-        Node serverFinderConf = XMLConfig.getNode(CONFIGURATION_FILE, "/jmx/entry-point/*[@type='server-finder']");
+        synchronized (JMXEntryPoint.class) {
+            if (initialized) {
+                return;
+            }
+            if (initializing) {
+                return;
+            }
 
-        initMBeanServer(serverFinderConf);
-
-        // Modeler configuration
-
-        Node modelerConf = XMLConfig.getNode(CONFIGURATION_FILE, "/jmx/mbeans-descriptors");
-
-        initModeler(modelerConf);
-
-        // Modeler configuration
-
-        invokeInitializers();
+            initializing = true;
+            try {
+                // JMXEntryPoint specific configuration
+                objectNameBuilders = null;
+                NodeList nl = XMLConfig.getNodeList(CONFIGURATION_FILE, "/jmx/entry-point/ObjectNameBuilders/ObjectNameBuilder");
+                if (nl != null) {
+                    objectNameBuilders = new Vector<ObjectNameBuilder>();
+                    for (int i = 0; i < nl.getLength(); i++) {
+                        ObjectNameBuilder onb = new ObjectNameBuilder();
+                        onb.init(nl.item(i));
+                        objectNameBuilders.add(onb);
+                    }
+                }
+        
+                Node serverFinderConf = XMLConfig.getNode(CONFIGURATION_FILE, "/jmx/entry-point/*[@type='server-finder']");
+                initMBeanServer(serverFinderConf);
+        
+                // Modeler configuration
+                Node modelerConf = XMLConfig.getNode(CONFIGURATION_FILE, "/jmx/mbeans-descriptors");
+                initModeler(modelerConf);
+        
+                // Modeler configuration
+                invokeInitializers();
+                
+                initialized = true;
+            }
+            finally {
+                initializing = false;
+            }
+        }
     }
 
     /**
@@ -254,38 +280,6 @@ public class JMXEntryPoint implements ConfigurationListener
         }
     }
 
-    /**
-     * XMLConfig file for the <code>JMXEntryPoint</code>.
-     */
-    private static String CONFIGURATION_FILE = "gv-jmx.xml";
-
-    /**
-     * Returns the configuration file name.
-     * 
-     * @return the configuration file name.
-     */
-    public static synchronized String getXMLConfigFile()
-    {
-        return CONFIGURATION_FILE;
-    }
-
-    /**
-     * Return the configuration file name. This method must be called before use
-     * instance() method.
-     * 
-     * @param configurationFile
-     * 
-     * @exception Exception
-     *            if the <code>JMXEntryPoint</code> is already initialized
-     *            (instance() was already called).
-     */
-    public static synchronized void setConfigurationFile(String configurationFile) throws Exception
-    {
-        if (instance != null) {
-            throw new Exception("Cannot set the configuration file: JMXEntryPoint already initialized.");
-        }
-        CONFIGURATION_FILE = configurationFile;
-    }
 
     /**
      * XMLConfig changed. Reconfigure <code>JMXEntryPoint</code> if the
@@ -294,22 +288,10 @@ public class JMXEntryPoint implements ConfigurationListener
      * @param event
      */
     @Override
-    public synchronized void configurationChanged(ConfigurationEvent event)
+    public void configurationChanged(ConfigurationEvent event)
     {
-        if (event.getCode() == ConfigurationEvent.EVT_FILE_LOADED) {
-            if (event.getFile().equals(CONFIGURATION_FILE)) {
-                System.out.println("Initializing JMXEntryPoint with URL: " + event.getURL());
-                try {
-                    init();
-                }
-                catch (Exception exc) {
-                    exc.printStackTrace();
-                    initializationError = exc;
-                    XMLConfig.removeConfigurationListener(this, CONFIGURATION_FILE);
-                    XMLConfig.discard(CONFIGURATION_FILE);
-                    instance = null;
-                }
-            }
+        if ((event.getCode() == ConfigurationEvent.EVT_FILE_LOADED) && event.getFile().equals(CONFIGURATION_FILE)) {
+            initialized = false;
         }
     }
 
@@ -326,6 +308,8 @@ public class JMXEntryPoint implements ConfigurationListener
      */
     public synchronized void registerObject(Object object, String descriptorName, ObjectName oname) throws Exception
     {
+        init();
+
         ManagedBean managed = registry.findManagedBean(descriptorName);
         ModelMBean mbean = managed.createMBean(object);
         mbeanServer.registerMBean(mbean, oname);
@@ -365,6 +349,8 @@ public class JMXEntryPoint implements ConfigurationListener
     public synchronized ObjectName registerObject(Object object, String descriptorName, String key, String value)
             throws Exception
     {
+        init();
+
         Map<String, String> keyProperties = null;
         if ((key != null) && (value != null)) {
             keyProperties = new HashMap<String, String>();
@@ -387,6 +373,8 @@ public class JMXEntryPoint implements ConfigurationListener
     public synchronized ObjectName registerObject(Object object, String descriptorName,
             Map<String, String> keyProperties) throws Exception
     {
+        init();
+
         ManagedBean managed = registry.findManagedBean(descriptorName);
         ModelMBean mbean = managed.createMBean(object);
         ObjectName oname = calculateObjectName(object, mbeanServer, managed, keyProperties, descriptorName);
@@ -408,6 +396,8 @@ public class JMXEntryPoint implements ConfigurationListener
      */
     public synchronized void registerMBean(Object mbean, ObjectName oname) throws Exception
     {
+        init();
+
         mbeanServer.registerMBean(mbean, oname);
     }
 
@@ -425,6 +415,8 @@ public class JMXEntryPoint implements ConfigurationListener
     public synchronized ObjectName registerMBean(Object mbean, String descriptorName, Map<String, String> keyProperties)
             throws Exception
     {
+        init();
+
         ObjectName oname = calculateMBeanName(mbean, mbeanServer, keyProperties, descriptorName);
         mbeanServer.registerMBean(mbean, oname);
         return oname;
@@ -440,6 +432,8 @@ public class JMXEntryPoint implements ConfigurationListener
      */
     public synchronized void unregisterObject(ObjectName oname) throws Exception
     {
+        init();
+
         if (oname.isPattern()) {
             Exception lastException = null;
 
@@ -492,6 +486,8 @@ public class JMXEntryPoint implements ConfigurationListener
      */
     public synchronized ObjectName unregisterObject(String descriptorName, String key, String value) throws Exception
     {
+        init();
+
         Map<String, String> keyProperties = null;
         if ((key != null) && (value != null)) {
             keyProperties = new HashMap<String, String>();
@@ -513,6 +509,8 @@ public class JMXEntryPoint implements ConfigurationListener
     public synchronized ObjectName unregisterObject(String descriptorName, Map<String, String> keyProperties)
             throws Exception
     {
+        init();
+
         ManagedBean managed = registry.findManagedBean(descriptorName);
         ObjectName oname = calculateObjectName(null, mbeanServer, managed, keyProperties, descriptorName);
         mbeanServer.unregisterMBean(oname);
@@ -533,6 +531,8 @@ public class JMXEntryPoint implements ConfigurationListener
     public synchronized ObjectName unregisterObject(Object object, String descriptorName,
             Map<String, String> keyProperties) throws Exception
     {
+        init();
+
         ManagedBean managed = registry.findManagedBean(descriptorName);
         ObjectName oname = calculateObjectName(object, mbeanServer, managed, keyProperties, descriptorName);
         mbeanServer.unregisterMBean(oname);
@@ -552,6 +552,8 @@ public class JMXEntryPoint implements ConfigurationListener
     public synchronized ObjectName unregisterMBean(String descriptorName, Map<String, String> keyProperties)
             throws Exception
     {
+        init();
+
         ObjectName oname = calculateMBeanName(null, mbeanServer, keyProperties, descriptorName);
         mbeanServer.unregisterMBean(oname);
         return oname;
@@ -571,6 +573,8 @@ public class JMXEntryPoint implements ConfigurationListener
     public synchronized ObjectName unregisterMBean(Object mbean, String descriptorName,
             Map<String, String> keyProperties) throws Exception
     {
+        init();
+
         ObjectName oname = calculateMBeanName(mbean, mbeanServer, keyProperties, descriptorName);
         mbeanServer.unregisterMBean(oname);
         return oname;

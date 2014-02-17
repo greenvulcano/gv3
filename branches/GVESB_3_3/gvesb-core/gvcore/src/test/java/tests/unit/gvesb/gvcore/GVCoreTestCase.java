@@ -60,7 +60,7 @@ public class GVCoreTestCase extends TestCase
     protected void setUp() throws Exception
     {
         if (jmx == null) {
-            JMXEntryPoint.setConfigurationFile(CONFIGURATION_FILE);
+            //JMXEntryPoint.setConfigurationFile(CONFIGURATION_FILE);
             jmx = JMXEntryPoint.instance();
             MBeanServer server = jmx.getServer();
 
