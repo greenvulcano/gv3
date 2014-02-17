@@ -85,12 +85,16 @@ public class HTTPCallOperation implements CallOperation
     private static final String RESPONSE_PREFIX        = "GVHTTP_RESPONSE_";
     private static final String RESPONSE_STATUS        = RESPONSE_PREFIX + "STATUS";
     private static final String RESPONSE_HEADER_PREFIX = RESPONSE_PREFIX + "HEADER_";
+    public static final int     DEFAULT_CONN_TIMEOUT   = 10000;
+    public static final int     DEFAULT_SO_TIMEOUT     = 30000;
 
     private String              methodURI;
     private boolean             uriEscaped             = true;
     private HttpClient          httpClient;
     private String              refDP;
     private HttpMethodName      methodName;
+    private int                 connTimeout            = DEFAULT_CONN_TIMEOUT;
+    private int                 soTimeout              = DEFAULT_SO_TIMEOUT;
 
     private OperationKey        key                    = null;
 
@@ -111,6 +115,11 @@ public class HTTPCallOperation implements CallOperation
             String host = XMLConfig.get(endpointNode, "@host");
             int port = XMLConfig.getInteger(endpointNode, "@port", 80);
             boolean secure = XMLConfig.getBoolean(endpointNode, "@secure", false);
+            connTimeout = XMLConfig.getInteger(endpointNode, "@conn-timeout", DEFAULT_CONN_TIMEOUT);
+            soTimeout = XMLConfig.getInteger(endpointNode, "@so-timeout", DEFAULT_SO_TIMEOUT);
+            
+            httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(connTimeout);
+            httpClient.getHttpConnectionManager().getParams().setSoTimeout(soTimeout);
 
             Node protocolNode = XMLConfig.getNode(endpointNode, "CustomProtocol");
             Protocol protocol = null;
