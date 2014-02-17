@@ -58,6 +58,8 @@ public class HL7Listener extends HL7Service
 
     private int                            port;
     private String                         name;
+    private String                         recApp;
+    private String                         recFac;
     private ServerSocket                   ss           = null;
     private Map<String, GVCoreApplication> applications = new HashMap<String, GVCoreApplication>();
     private boolean						   autoStart    = false;
@@ -76,6 +78,9 @@ public class HL7Listener extends HL7Service
             name = XMLConfig.get(node, "@name");
             port = XMLConfig.getInteger(node, "@port");
             autoStart = XMLConfig.getBoolean(node, "@autoStart", true);
+
+            recApp = XMLConfig.get(node, "@receivingApplication", "");
+            recFac = XMLConfig.get(node, "@receivingFacility", "");
 
             NodeList nl = XMLConfig.getNodeList(node, "HL7Applications/*[@type='hl7application']");
             for (int i = 0; i < nl.getLength(); i++) {
@@ -114,6 +119,8 @@ public class HL7Listener extends HL7Service
          
         try {
         	ThreadUtils.setListenerName(name);
+        	ThreadUtils.setReceivingApplication(recApp);
+        	ThreadUtils.setReceivingFacility(recFac);
             ss = new ServerSocket(port);
             ss.setSoTimeout(SO_TIMEOUT);
             logger.info("HL7Listener[" + name + "] running on port " + ss.getLocalPort());
@@ -150,6 +157,8 @@ public class HL7Listener extends HL7Service
             NMDC.pop();
             ThreadMap.clean();
             ThreadUtils.removeListenerName();
+            ThreadUtils.removeReceivingApplication();
+        	ThreadUtils.removeReceivingFacility();
         }
     }
 

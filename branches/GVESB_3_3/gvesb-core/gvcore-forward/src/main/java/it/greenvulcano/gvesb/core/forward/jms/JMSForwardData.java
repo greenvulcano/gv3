@@ -21,15 +21,20 @@ package it.greenvulcano.gvesb.core.forward.jms;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.core.forward.JMSForwardException;
+import it.greenvulcano.gvesb.core.forward.preprocess.Validator;
+import it.greenvulcano.gvesb.core.forward.preprocess.ValidatorManager;
 import it.greenvulcano.gvesb.core.pool.GreenVulcanoPool;
 import it.greenvulcano.gvesb.core.pool.GreenVulcanoPoolManager;
 import it.greenvulcano.jmx.JMXEntryPoint;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @version 3.2.0 15/gen/2012
@@ -130,6 +135,8 @@ public class JMSForwardData
 
     private AtomicInteger          working              = new AtomicInteger(0);
     private String                 descr                = "";
+    
+    private List<Validator>        validators           = new ArrayList<Validator>();
 
 
     /**
@@ -153,6 +160,15 @@ public class JMSForwardData
 
             debug = XMLConfig.getBoolean(node, "@full-debug", false);
             dumpMessage = XMLConfig.getBoolean(node, "@dump-message", false);
+
+            NodeList vnl = XMLConfig.getNodeList(node, "PreProcessor/Validators/*[@type='validator']");
+            if (vnl.getLength() > 0) {
+                ValidatorManager vm = ValidatorManager.instance();
+                for (int i = 0; i < vnl.getLength(); i++) {
+                    Node vn = vnl.item(i);
+                    validators.add(vm.getValidator(vn));
+                }
+            }
 
             Node fdNode = XMLConfig.getNode(node, "ForwardDeployment");
             connectionFactory = XMLConfig.get(fdNode, "@connection-factory");
@@ -491,6 +507,10 @@ public class JMSForwardData
         this.dumpMessage = dumpMessage;
     }
 
+    public List<Validator> getValidators() {
+        return this.validators;
+    }
+
     /**
      * @return the active
      */
@@ -569,5 +589,6 @@ public class JMSForwardData
             connectionHolder.destroy();
         }
         connectionHolder = null;
+        validators.clear();
     }
 }

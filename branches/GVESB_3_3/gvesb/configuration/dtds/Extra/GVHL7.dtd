@@ -1,8 +1,7 @@
 <!--
 -->
 <!ELEMENT GVHL7ListenerManager (Description?, HL7Listeners)>
-<!ATTLIST GVHL7ListenerManager version CDATA #FIXED "1.0"
->
+<!ATTLIST GVHL7ListenerManager version CDATA #FIXED "1.0">
 <!--
     Element type 'module'.
 -->
@@ -45,6 +44,19 @@
     Default to true.
 -->
 <!ATTLIST HL7Listener autoStart (true|false) #IMPLIED>
+<!--
+    Force the Receiving Application MSH field value on automatic response generation.
+
+    #NotNull
+-->
+<!ATTLIST HL7Listener receivingApplication CDATA #IMPLIED>
+<!--
+    Force the Receiving Facility MSH field value on automatic response generation.
+    Used only if receivingApplication is set.
+
+    #NotNull
+-->
+<!ATTLIST HL7Listener receivingFacility CDATA #IMPLIED>
 
 <!--
     #SortChild
@@ -125,7 +137,7 @@
 
 
 <!--
-    Defines a XML to HL7 string trasformation.
+    Defines a XML to HL7 string transformation.
 
     #Label: @name
     #Icon: GVXml2Hl7Transformation.png
@@ -324,3 +336,104 @@
     #Pattern: @ \d+ @ specify a timeout in seconds
 -->
 <!ATTLIST hl7-call  timeout CDATA #IMPLIED>
+
+
+<!--
+    HL7 Forward plugin to validate remote HL7 servers connections prior to dequeue JMS message.
+
+    #Label: @name
+    #SelectOnInsert
+    #Template:
+
+        <xsl:template match="HL7ConnectionValidator">
+                <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT HL7ConnectionValidator (Description?, HL7Server*, hl7-call-ref*, DBSelect?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST HL7ConnectionValidator type CDATA #FIXED "validator">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST HL7ConnectionValidator class CDATA #FIXED "it.greenvulcano.gvesb.core.forward.preprocess.hl7.HL7ConnectionValidator">
+<!--
+    Validator name.
+
+    #NotNull
+    #Unique: current()/ancestor::GVForwards/ForwardConfiguration/PreProcessor/Validators/*[@type='validator']/@name
+-->
+<!ATTLIST HL7ConnectionValidator name CDATA #REQUIRED>
+
+<!--
+    Remote HL7 server address.
+
+    #CompositeLabel: !! @host !:! @port
+    #SelectOnInsert
+    #Template:
+
+        <xsl:template match="HL7Server">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT HL7Server (Description?)>
+<!--
+    Host to connect to.
+
+    #NotNull
+-->
+<!ATTLIST HL7Server host CDATA #REQUIRED>
+<!--
+    Port where the service is exposed.
+
+    #NotNull
+    #Pattern: ! ^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$ ! Insert a number between 0 and 65535
+-->
+<!ATTLIST HL7Server  port CDATA #REQUIRED>
+
+<!--
+    HL7 VCL operation reference.
+
+    #CompositeLabel: !! @id-system !:! @id-channel !:! @operation
+-->
+<!ELEMENT hl7-call-ref (Description?)>
+<!--
+    System providing the Call operation to call.
+
+    #References: /GVCore/GVSystems/Systems/System/@id-system
+-->
+<!ATTLIST hl7-call-ref   id-system CDATA #REQUIRED>
+<!--
+    System's channel.
+
+    #References: /GVCore/GVSystems/Systems/System[@id-system=current()/@id-system]/Channel/@id-channel
+-->
+<!ATTLIST hl7-call-ref   id-channel CDATA #REQUIRED>
+<!--
+    Channel's HL7 Call operation.
+
+    #References: /GVCore/GVSystems/Systems/System[@id-system=current()/@id-system]/Channel[@id-channel=current()/@id-channel]/hl7-call/@name
+-->
+<!ATTLIST hl7-call-ref   operation CDATA #REQUIRED>
+
+<!--
+    Select from a DB a list of HL7 server's host and port to check.
+    The select statement MUST return (at least) two fields per record: a string representing the
+    server's hostname (or IP) and an integer (or a valid integer as string) representing the server's port.
+    WARN!!! the list is read only once, if the DB data changes must be reloaded the GVCore.xml file.
+
+-->
+<!ELEMENT DBSelect (Description?, statement)>
+<!--
+    DataBase connection name.
+
+    #NotNull
+-->
+<!ATTLIST DBSelect jdbc-connection-name CDATA #REQUIRED >
