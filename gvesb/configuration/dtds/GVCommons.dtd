@@ -9,20 +9,26 @@
 <!ENTITY % encodings  "(US-ASCII | ISO-8859-1 | ISO-8859-15 | ISO-LATIN-1 | UTF-8 | UTF-16BE | UTF-16LE | UTF-16)">
 
 <!--
+    Dummy XML element.
+    To be used as a placeholder.
+-->
+<!ELEMENT DUMMY (Description)?>
+
+<!--
     Can be used to define the proprietary connection parameter.
-	
+
     #Label: @name
 -->
 <!ELEMENT Extended (Description?)>
 <!--
     Connection parameter name.
-	
+
     #NotNull
 -->
 <!ATTLIST Extended   name CDATA #REQUIRED>
 <!--
     Connection parameter value.
-	
+
     #NotNull
 -->
 <!ATTLIST Extended   value CDATA #REQUIRED>
@@ -33,43 +39,43 @@
 <!ELEMENT Advanced (Description?)>
 <!--
     Specifies the list of object factories to use.
-	
+
     #NotNull
 -->
 <!ATTLIST Advanced   object-factories CDATA #IMPLIED>
 <!--
     Specifies the list of state factories to use.
-	
+
     #NotNull
 -->
 <!ATTLIST Advanced  state-factories CDATA #IMPLIED>
 <!--
     Specifies the list of package prefixes to use when loading in URL context factories.
-	
+
     #NotNull
 -->
 <!ATTLIST Advanced url-pkg-prefixes CDATA #IMPLIED>
 <!--
     Specifies the DNS host and domain names to use for the JNDI URL context.
-	
+
     #NotNull
 -->
 <!ATTLIST Advanced  dns-url CDATA #IMPLIED>
 <!--
      Specifies the authoritativeness of the service requested.
-	 
+
     #NotNull
 -->
 <!ATTLIST Advanced        authoritative CDATA #IMPLIED>
 <!--
     Specifies the batch size to use when returning data via the service's protocol.
-	
+
     #NotNull
 -->
 <!ATTLIST Advanced        batchsize CDATA #IMPLIED>
 <!--
     Specifies how referrals encountered by the service provider are to be processed.
-	
+
     #NotNull
 -->
 <!ATTLIST Advanced  referral CDATA #IMPLIED>
@@ -81,13 +87,13 @@
 <!ATTLIST Advanced  security-protocol CDATA #IMPLIED>
 <!--
     Specifies the security level to use.
-	
+
     #NotNull
 -->
 <!ATTLIST Advanced security-authentication CDATA #IMPLIED>
 <!--
     Specifies the preferred language to be used.
-	
+
     #NotNull
 -->
 <!ATTLIST Advanced language CDATA #IMPLIED>
@@ -199,9 +205,9 @@
 <!ELEMENT Script (#PCDATA)>
 
 <!--
-	The content defines a OGNL script.
-	This script is applied to the current GVBuffer object.
-	 Within a node ChangeGVBuffer is "injected" into the variable
+    The content defines a OGNL script.
+    This script is applied to the current GVBuffer object.
+     Within a node ChangeGVBuffer is "injected" into the variable
      'Environment', the current environment, ie a map containing all
       the GVBuffer / exceptions specified in the various parameters of input / output nodes
      of flow in execution.
@@ -615,6 +621,8 @@
 
     Excel Sheet        : select
 
+    DBSelect           : select
+
     #NotNull
     #Choice: {{ancestor::DBOSelect/statement}} select
     #Choice: {{ancestor::DBOThreadSelect/statement}} select
@@ -626,6 +634,7 @@
     #Choice: {{ancestor::DBOUpdateOrInsert/statement}} insert | update
     #Choice: {{ancestor::CallDescriptor/statement}} callsp
     #Choice: {{ancestor::Sheet/statement}} select
+    #Choice: {{ancestor::DBSelect/statement}} select
 -->
 <!ATTLIST statement type CDATA #REQUIRED>
 

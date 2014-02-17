@@ -34,6 +34,7 @@
 <!ENTITY % file-commands "FileSearchCommand|FileMoveCommand|FileDeleteCommand|FileCopyCommand|FileZipCommand|FileUnZipCommand">
 <!ENTITY % remote-file-commands "RemoteSearchCommand|RemoteMoveCommand|RemoteDeleteCommand|RemoteDownloadCommand|RemoteUploadCommand">
 <!ENTITY % jmx-op "(invoke-method|set-attribute|get-attribute)">
+<!ENTITY % preFwdValidators "DUMMY %extra-pre-fwd-validators;">
 
 <!--
     Configuration file for GreenVulcanoESB core modules.
@@ -246,7 +247,7 @@
 <!--
     #CompositeLabel: || @name | - | @forwardName
 -->
-<!ELEMENT ForwardConfiguration (Description?, ForwardDeployment, ErrorHandler*)>
+<!ELEMENT ForwardConfiguration (Description?, ForwardDeployment, PreProcessor?, ErrorHandler*)>
 
 <!--
     Forward configuration name.
@@ -543,6 +544,16 @@
     #Warn: {{../ExceptionDef[@filter-type and not(@message-filter)]}} The 'message-filter' and 'filter-type' attributes must be defined together
 -->
 <!ATTLIST ExceptionDef	filter-type (text|reg-exp) #IMPLIED>
+
+<!--
+
+-->
+<!ELEMENT PreProcessor (Validators?)>
+
+<!--
+
+-->
+<!ELEMENT Validators ((%preFwdValidators;)*)>
 
 
 <!ELEMENT GVDataTransformation (Description?,DataSourceSets,Startup?,Transformations)>
@@ -11705,6 +11716,21 @@
     #References: gvesb:document('GVSupport')/GVSupport/GVHTTPClientProtocolConfig/CustomProtocol/@name
 -->
 <!ATTLIST endpoint  custom-protocol CDATA #IMPLIED>
+<!--
+    Defines the connection timeout, in ms.
+    Default to 10000ms.
+
+    #NotNull
+-->
+<!ATTLIST endpoint  conn-timeout CDATA #IMPLIED>
+<!--
+    Defines the timeout to wait for a server response, in ms.
+    Default to 30000ms.
+
+    #NotNull
+-->
+<!ATTLIST endpoint  so-timeout CDATA #IMPLIED>
+
 <!--
     Method to execute to the server.
 -->
