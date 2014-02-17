@@ -42,7 +42,7 @@ public class JMXConfigurationTestCase extends TestCase
     public void testJMXConfiguration()
     {
         try {
-            JMXEntryPoint.setConfigurationFile(CONFIGURATION_FILE);
+            //JMXEntryPoint.setConfigurationFile(CONFIGURATION_FILE);
             JMXEntryPoint jmx = JMXEntryPoint.instance();
             MBeanServer server = jmx.getServer();
 
