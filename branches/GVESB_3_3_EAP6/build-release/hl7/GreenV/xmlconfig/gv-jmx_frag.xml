@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE jmx SYSTEM "http://www.greenvulcano.com/gvesb/dtds/gv-jmx.dtd">
+
+<jmx version="R1">
+    <entry-point>
+        ....
+        <Initializers>
+            ....
+            <generic-initializer class="it.greenvulcano.gvesb.gvhl7.listener.jmx.RegisterHL7ListenerManager"
+                                 target="${{jboss.server.name}}" type="initializer"/>
+            <TimerTask-initializer class="it.greenvulcano.scheduler.util.RegisterTaskManagerFactory"
+                                 target="${{jboss.server.name}}" type="initializer"/>
+        </Initializers>
+    </entry-point>
+    ....
+    
+    <mbeans-descriptors>
+        ....
+        <mbean description="Visualizzazione stato HL7 Listener"
+           domain="GreenVulcano" group="management" name="HL7ListenerInfo"
+           type="it.greenvulcano.gvesb.gvhl7.listener.jmx.HL7ListenerInfo">
+            <attribute description="The listener name."
+                    displayName="Listener" name="name" readable="true"
+                    type="java.lang.String" writeable="false"/>
+            <attribute description="The listening port."
+                    displayName="Port" name="port" readable="true"
+                    type="java.lang.Integer" writeable="false"/>
+            <attribute description="The listener status."
+                    displayName="Active" name="running" readable="true"
+                    type="java.lang.Boolean" writeable="false"/>
+
+            <operation description="Start the Listener." name="start" />
+            <operation description="Stop the Listener." name="stop" />
+        </mbean>
+    </mbeans-descriptors>
+</jmx>

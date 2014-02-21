@@ -1,0 +1,60 @@
+
+<!ELEMENT configuration-guide (dtd*)>
+<!ATTLIST configuration-guide
+    title           CDATA   #REQUIRED
+    version         CDATA   #REQUIRED
+    date            CDATA   #REQUIRED
+    author          CDATA   #REQUIRED
+    company         CDATA   #REQUIRED
+>
+
+<!--============================================================================
+    DTD
+-->
+
+<!ELEMENT dtd (element*)>
+<!ATTLIST dtd
+    root-element    CDATA   #REQUIRED
+    system-id       CDATA   #REQUIRED
+    public-id       CDATA   #REQUIRED
+    title           CDATA   #REQUIRED
+>
+
+<!ELEMENT element (model,attribute*,value*,not-null?,description?,child*,used-in*)>
+<!ATTLIST element
+    name            CDATA   #REQUIRED
+>
+
+<!ELEMENT attribute (value*,not-null?,description?)>
+<!ATTLIST attribute
+    name            CDATA   #REQUIRED
+    type            CDATA   #REQUIRED
+    default-type    CDATA   #REQUIRED
+    default-value   CDATA   #REQUIRED
+>
+
+<!ELEMENT used-in EMPTY>
+<!ATTLIST used-in
+    element         CDATA   #REQUIRED
+>
+
+<!ELEMENT model (#PCDATA|child)*>
+
+<!ELEMENT child (#PCDATA)>
+
+<!ELEMENT not-null EMPTY>
+
+<!ELEMENT value EMPTY>
+<!ATTLIST value
+    value           CDATA   #REQUIRED
+>
+
+<!--============================================================================
+    Descrizioni
+-->
+
+<!--
+    Contiene elementi di formattazione quali <b>, <br>, <u>, <code> ecc.
+    Sostanzialmente quelli definiti in fop.dtd
+-->
+<!ELEMENT description ANY>

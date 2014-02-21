@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>ca.uhn.hapi</groupId>
+  <artifactId>hapi-structures-v22</artifactId>
+  <version>1.2</version>
+  <versioning>
+    <versions>
+      <version>1.2</version>
+    </versions>
+    <lastUpdated>20120627181849</lastUpdated>
+  </versioning>
+</metadata>

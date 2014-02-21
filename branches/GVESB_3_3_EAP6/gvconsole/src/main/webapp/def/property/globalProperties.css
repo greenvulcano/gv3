@@ -1,0 +1,55 @@
+.name{
+    min-width: 150px;
+    padding: 0 5px;
+}
+
+.black{
+    color:black;
+}
+
+.orange{
+    color:orange;
+}
+
+.red{
+    color:red;
+}
+
+.central{
+    display: table;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.centered{
+    text-align: center;
+	vertical-align: top;
+	min-width: 30px;
+}
+
+.buttonpad{
+    margin: 7px 0 3px 0;
+    text-align: right;
+}
+
+.crptcontainer{
+     height: 26px;
+     width: 26px;
+}
+
+.clckblico{
+     height: 24px;
+     width: 24px;
+     border: 0;
+     /*opacity: .70;*/
+}
+
+.clckblico:hover{
+    /*opacity: 1;*/
+    margin-top: 2px;
+    margin-left: 2px;
+}
+
+#save{
+    margin: 0 3px 0 30px;
+}

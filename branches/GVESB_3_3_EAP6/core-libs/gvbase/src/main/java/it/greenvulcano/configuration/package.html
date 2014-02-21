@@ -1,0 +1,33 @@
+<body>
+    This package implements the configuration mechanisms.
+    <br>
+
+    The XML configuration is contained in XML files searched in the class path.
+    <p>
+    The XML configuration is accessed using XPath strings and is based on
+    Xalan/Jaxen implementation.
+    <p>
+    To access the configuration parameters it is available the
+    <code>XMLConfig</code> class that exposes many static methods.
+    <p>
+    For example:
+    <pre>
+        // reads all nodes that match the given Xpath
+        //
+        NodeList nodeList = XMLConfig.getNodeList(XMLFILE, XPATH);
+
+        // reads a node value
+        //
+        String value = XMLConfig.get(XMLFILE, XPATH);
+    </pre>
+    <p>
+    To use the result you must import the <code>org.w3c.dom.*</code>
+    package.
+    <p>
+    Note that the files are readed only the first time they are accessed.
+    The files are not checked for changes.<br>
+    To reload all files you must call the <code>XMLConfigu.reloadAll()</code>
+    method (note that this method does not actually reload the configuration
+    files, they will be reloaded when requested).
+
+</body>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+  <GVSQLErrorMapping name="SQL_ERROR_MAPPING" type="module">
+    <DefaultMapping code="305">
+      <CatalogMapping code="301" module="ORACLE FATAL">
+        <SQLErrorCode code="3000" />
+        <SQLErrorCode code="3001" />
+        <SQLErrorCode code="3002" />
+      </CatalogMapping>
+    </DefaultMapping>
+    <CustomMapping caller="DATA HANDLER" code="313">
+      <CatalogMapping code="318">
+        <SQLErrorCode code="3000" />
+        <SQLErrorCode code="3001" />
+        <SQLErrorCode code="3002" />
+      </CatalogMapping>
+    </CustomMapping>
+  </GVSQLErrorMapping>
+  <GVDataHandlerConfiguration version="1.0" type="module" name="DH_ENGINE">
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestSelect">
+      <DBOSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect" name="TestSelect-select"
+        transformation="identityXML">
+        <FieldFormatters id="0">
+           <FieldFormatter decimal-separator="," field-id="4" grouping-separator="."
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
+      </DBOSelect>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestThreadSelect">
+      <DBOSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect" name="TestThreadSelect-select"
+        transformation="identityXML">
+        <FieldFormatters id="0">
+           <FieldFormatter decimal-separator="," field-id="4" grouping-separator="."
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <FieldFormatters id="1">
+           <FieldFormatter decimal-separator="," field-id="2" grouping-separator="."
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
+        <statement id="1" type="select">select id, field3, field1, field2 from testtable order by id</statement>
+      </DBOSelect>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestInsert">
+      <DBOInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOInsert" name="TestInsert-insert">
+        <statement type="insert">insert into testtable (id, field1, field2, field3) values (?, ?, ?, ?)</statement>
+      </DBOInsert>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestInsertOrUpdate">
+      <DBOInsertOrUpdate type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOInsertOrUpdate"
+        duplicate-insert-code="-104" name="TestInsertOrUpdate-insertupdate">
+        <statement id="0" type="insert">insert into testtable (id, field1, field2, field3) values (?, ?, ?, ?)</statement>
+        <statement id="0" type="update">update testtable set field1=?, field2=?, field3=? where id=?</statement>
+      </DBOInsertOrUpdate>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestSelectMerge">
+      <DBOSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect" name="TestSelect_1-select" output-data="first">
+        <statement id="0" type="select">select '1' as dbo, id, field1, field2, field3 from testtable order by id</statement>
+      </DBOSelect>
+      <DBOSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect" name="TestSelect_2-select" output-data="second">
+        <statement id="0" type="select">select '2' as dbo, id, field1, field2, field3 from testtable order by id</statement>
+      </DBOSelect>
+      <XMLMerge>
+         <MergeInfo source="first"/>
+         <MergeInfo source="second" xpath-source="/RowSet/data" xpath-dest="/RowSet"/>
+      </XMLMerge>
+    </DBOBuilder>
+
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder" make-dump="text"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestFlatSelect">
+      <DBOFlatSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOFlatSelect" name="TestFlatSelect-select">
+        <FieldFormatters id="0">
+           <FieldFormatter decimal-separator="," field-id="1" grouping-separator="." terminator-char="@"
+                           number-format="###0" type="field-formatter"/>
+           <FieldFormatter field-length="30" field-id="2" filler-char="." terminator-char="@"
+                           padding="right" type="field-formatter"/>
+           <FieldFormatter date-format="yyyyMMdd HHmmss" field-id="3" type="field-formatter" terminator-char="@"/>
+           <FieldFormatter decimal-separator="," field-id="4" grouping-separator="." terminator-char="@"
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
+      </DBOFlatSelect>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder" make-dump="text"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestFlatTZoneSelect">
+      <DBOFlatSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOFlatSelect" name="TestFlatTZoneSelect-select">
+        <FieldFormatters id="0">
+           <FieldFormatter decimal-separator="," field-id="1" grouping-separator="." terminator-char="@"
+                           number-format="###0" type="field-formatter"/>
+           <FieldFormatter field-length="30" field-id="2" filler-char="." terminator-char="@"
+                           padding="right" type="field-formatter"/>
+           <FieldFormatter date-format="yyyyMMdd HHmmss::GMT" field-id="3" type="field-formatter" terminator-char="@"/>
+           <FieldFormatter decimal-separator="," field-id="4" grouping-separator="." terminator-char="@"
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
+      </DBOFlatSelect>
+    </DBOBuilder>
+  </GVDataHandlerConfiguration>
+</GVAdapters>

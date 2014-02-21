@@ -1,0 +1,97 @@
+<!-- STRUTTURA DOCUMENTI ====================================================-->
+
+<!ELEMENT document (cover?,chapter*)>
+<!-- come da specifica FO -->
+<!ATTLIST document font-family CDATA #IMPLIED>
+<!-- come da specifica FO -->
+<!ATTLIST document break-before CDATA #IMPLIED>
+
+<!ELEMENT chapter (title,section*)>
+
+<!ELEMENT section ANY>
+<!ATTLIST section title CDATA #IMPLIED>
+
+<!ELEMENT title ANY>
+<!ATTLIST title subtitle CDATA #IMPLIED>
+
+<!ELEMENT cover EMPTY>
+<!ATTLIST cover
+    title       CDATA   #REQUIRED
+    subtitle    CDATA   #IMPLIED
+    version     CDATA   #IMPLIED
+    date        CDATA   #IMPLIED
+    author      CDATA   #IMPLIED
+    company     CDATA   #IMPLIED
+>
+
+<!-- TABELLE ================================================================-->
+
+<!ELEMENT table (colspec+,row*)>
+<!ATTLIST table width CDATA #REQUIRED>
+
+<!ELEMENT colspec EMPTY>
+<!ATTLIST colspec width CDATA #REQUIRED>
+
+<!ELEMENT row (entry*)>
+
+<!ELEMENT entry ANY>
+
+<!-- LISTE ==================================================================-->
+
+<!ELEMENT ol (li*)>
+<!ATTLIST ol format CDATA #IMPLIED>
+
+<!ELEMENT ul (li*)>
+<!ATTLIST ul point CDATA #IMPLIED>
+
+<!ELEMENT li ANY>
+
+<!-- RITORNI A CAPO =========================================================-->
+
+<!ELEMENT br ANY>
+
+<!ELEMENT p ANY>
+
+<!ELEMENT together ANY>
+
+<!-- STILI DI TESTO =========================================================-->
+
+<!ELEMENT b ANY>
+
+<!ELEMENT u ANY>
+
+<!ELEMENT i ANY>
+
+<!ELEMENT code ANY>
+
+<!ELEMENT small ANY>
+
+<!ELEMENT big ANY>
+
+<!ELEMENT pre ANY>
+
+<!ELEMENT left ANY>
+
+<!ELEMENT right ANY>
+
+<!ELEMENT center ANY>
+
+<!ELEMENT justify ANY>
+
+<!-- REFERENCES =============================================================-->
+
+<!ELEMENT target ANY>
+<!ATTLIST target id CDATA #REQUIRED>
+
+<!ELEMENT reference ANY>
+<!ATTLIST reference id CDATA #REQUIRED>
+
+<!ELEMENT page-of EMPTY>
+<!ATTLIST page-of id CDATA #REQUIRED>
+
+<!-- IMMAGINI ===============================================================-->
+
+<!ELEMENT img EMPTY>
+<!ATTLIST img src    CDATA #REQUIRED>
+<!ATTLIST img width  CDATA #IMPLIED>
+<!ATTLIST img height CDATA #IMPLIED>

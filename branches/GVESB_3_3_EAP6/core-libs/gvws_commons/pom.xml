@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>it.greenvulcano.gvesb</groupId>
+        <artifactId>gvesb.core.libs</artifactId>
+        <version>3.4.0-Trunk</version>
+    </parent>
+
+    <groupId>it.greenvulcano.gvesb</groupId>
+    <artifactId>gvws_commons</artifactId>
+    <name>GreenVulcano WebService Commons</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvbase</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-kernel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-saaj</artifactId>
+       </dependency>
+       <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.security</groupId>
+            <artifactId>wss4j</artifactId>
+        </dependency>
+    </dependencies>
+</project>
