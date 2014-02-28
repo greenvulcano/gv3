@@ -221,8 +221,8 @@
           <version>2.6</version>
           <configuration>
             <skip>false</skip>
-		    <parallel>none</parallel>
-		    <threadCount>1</threadCount>
+            <parallel>none</parallel>
+            <threadCount>1</threadCount>
             <systemPropertyVariables>
               <gv.dtds.home>${greenv.project.home}/gvesb/configuration/dtds</gv.dtds.home>
               <gv.app.home>${basedir}/target</gv.app.home>
@@ -296,11 +296,11 @@
             <type>jar</type>
             <scope>compile</scope>
             <exclusions>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>

@@ -19,6 +19,11 @@
  */
 package it.greenvulcano.gvesb.ws.axis2.message;
 
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.bin.Dump;
+import it.greenvulcano.util.txt.TextUtils;
+import it.greenvulcano.util.xml.XMLUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
@@ -35,6 +40,7 @@ import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
+import javax.xml.stream.XMLStreamReader;
 
 import org.apache.axiom.attachments.Attachments;
 import org.apache.axiom.attachments.ConfigurableDataHandler;
@@ -43,18 +49,185 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.impl.MTOMConstants;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.util.StAXUtils;
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.saaj.SOAPMessageImpl;
 import org.apache.axis2.saaj.util.IDGenerator;
 import org.apache.axis2.saaj.util.SAAJUtil;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * @version 3.2.0 Nov 11, 2012
  * @author GreenVulcano Developer Team
  */
 public class MessageConverter {
+    private static final Logger logger = GVLogger.getLogger(MessageConverter.class);
+
+    /**
+     * Returns a OMElement tree parsed from the given input object.
+     *
+     * @param envelope
+     *        input envelope to populate
+     * @param object
+     *        input object to use as body
+     * @param debug
+     *        if true, the various conversion step outputs are dumped on log
+     * @return a OMElement tree parsed from the given input object.
+     * @throws Exception
+     */
+    public static void setBody(org.apache.axiom.soap.SOAPEnvelope envelope, Object input) throws Exception {
+        envelope.getBody().addChild(toOM(input));
+    }
+
+    /**
+     * Returns a OMElement tree parsed from the given input object.
+     *
+     * @param object
+     *        input object to convert
+     * @param debug
+     *        if true, the various conversion step outputs are dumped on log
+     * @return a OMElement tree parsed from the given input object.
+     * @throws Exception
+     */
+    public static OMElement toOM(Object input) throws Exception {
+        Node n = XMLUtils.parseObject_S(input, false, true);
+        if (n instanceof Document) {
+            n = ((Document) n).getDocumentElement();
+        }
+        OMElement elem = org.apache.axis2.util.XMLUtils.toOM((Element) n);
+        return elem;
+    }
+
+    /**
+     * Returns a OMElement tree parsed from the given input object.
+     *
+     * @param envelope
+     *        input envelope to populate
+     * @param object
+     *        input object to use as body
+     * @param debug
+     *        if true, the various conversion step outputs are dumped on log
+     * @return a OMElement tree parsed from the given input object.
+     * @throws Exception
+     */
+    public static void setBody_gv(org.apache.axiom.soap.SOAPEnvelope envelope, Object input, boolean debug) throws Exception {
+        envelope.getBody().addChild(toOM_gv(input, debug));
+    }
+
+    /**
+     * Returns a OMElement tree parsed from the given input object.
+     *
+     * @param object
+     *        input object to convert
+     * @param debug
+     *        if true, the various conversion step outputs are dumped on log
+     * @return a OMElement tree parsed from the given input object.
+     * @throws Exception
+     */
+    public static OMElement toOM_gv(Object input, boolean debug) throws Exception {
+        boolean debugEnabled = logger.isDebugEnabled();
+
+        if (debugEnabled && debug) {
+            logger.debug("BEGIN conversion");
+        }
+        try {
+            if (debugEnabled && debug) {
+                if (input == null) {
+                    logger.debug("Input: [NULL]");
+                }
+                else {
+                    logger.debug("Input(" + input.getClass() + "):");
+                    if (input instanceof byte[]) {
+                        Dump dump = new Dump((byte[]) input, -1);
+                        logger.debug("\n" + dump.toString());
+                    }
+                    else if (input instanceof Node) {
+                        try {
+                            logger.debug(XMLUtils.serializeDOM_S((Node) input));
+                        }
+                        catch (Exception exc) {
+                            logger.debug("[DUMP ERROR!!!!!].");
+                        }
+                    }
+                    else {
+                        try {
+                            logger.debug(input);
+                        }
+                        catch (Exception exc) {
+                            logger.debug("[DUMP ERROR!!!!!].");
+                        }
+                    }
+                }
+            }
+            Node n = XMLUtils.parseObject_S(input, false, true);
+            byte[] data = XMLUtils.serializeDOMToByteArray_S(n, "UTF-8", true, false);
+
+            if (debugEnabled && debug) {
+                Dump dump = new Dump((byte[]) data, -1);
+                logger.debug("Middle step 1:\n" + dump.toString());
+            }
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+            XMLStreamReader xmlreader = StAXUtils.createXMLStreamReader(bais, "UTF-8");
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            OMElement elem = null;
+            StAXOMBuilder builder = null;
+            try {
+                builder = new StAXOMBuilder(xmlreader);
+                builder.releaseParserOnClose(true);
+
+                elem = builder.getDocumentElement();
+                elem.build();
+                elem.serializeAndConsume(baos);
+                if (debugEnabled && debug) {
+                    logger.debug("Middle step 2:\n" + new String(baos.toByteArray()));
+                }
+                builder.close();
+            }
+            catch (Exception e) {
+                if (builder != null) {
+                    builder.close();
+                }
+            }
+
+            data = TextUtils.replaceSubstring(new String(baos.toByteArray()), "&;", "").getBytes("UTF-8");
+
+            bais = new ByteArrayInputStream(data);
+            xmlreader = StAXUtils.createXMLStreamReader(bais, "UTF-8");
+
+            try {
+                builder = new StAXOMBuilder(xmlreader);
+                builder.releaseParserOnClose(true);
+
+                elem = builder.getDocumentElement();
+                elem.build();
+                builder.close();
+            }
+            catch (Exception e) {
+                if (builder != null) {
+                    builder.close();
+                }
+            }
+
+            if (debugEnabled && debug) {
+                logger.debug("Output:" + elem);
+            }
+            return elem;
+        }
+        finally {
+            if (debugEnabled && debug) {
+                logger.debug("END conversion");
+            }
+        }
+    }
 
 	/**
 	 * Parse a wire representation of a SOAP message (also multipart-related) 

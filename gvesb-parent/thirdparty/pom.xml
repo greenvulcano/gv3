@@ -525,7 +525,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.juddi</groupId>
-            <artifactId>juddi</artifactId>
+            <artifactId>juddi-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>

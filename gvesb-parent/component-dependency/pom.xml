@@ -439,6 +439,12 @@
             <version>${version.jsch}</version>
             <type>jar</type>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>axiom-api</artifactId>
+                    <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
@@ -513,10 +519,16 @@
         </dependency>
         <dependency>
             <groupId>org.apache.juddi</groupId>
-            <artifactId>juddi</artifactId>
+            <artifactId>juddi-client</artifactId>
             <version>2.0.1</version>
             <type>jar</type>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>juddi-parent</artifactId>
+                    <groupId>org.apache.juddi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
@@ -669,6 +681,13 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>wstx-asl</artifactId>
+            <version>3.2.1</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
             <version>${version.axis2}</version>
@@ -798,14 +817,29 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>addressing</artifactId>
+            <version>${version.axis2}</version>
+            <type>mar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.sandesha2</groupId>
             <artifactId>sandesha2-core</artifactId>
             <version>${version.sandesha2}</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
+                    <artifactId>axis2-codegen</artifactId>
+                    <groupId>org.apache.axis2</groupId>
+                </exclusion>
+                <exclusion>
                     <artifactId>axiom-dom</artifactId>
                     <groupId>org.apache.ws.commons.axiom</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>addressing</artifactId>
+                    <groupId>org.apache.axis2</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -1034,6 +1068,12 @@
             <version>${version.hapi}</version>
             <scope>runtime</scope>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hapi-base</artifactId>
+                    <groupId>ca.uhn.hapi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
@@ -1041,6 +1081,12 @@
             <version>${version.hapi}</version>
             <scope>runtime</scope>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hapi-base</artifactId>
+                    <groupId>ca.uhn.hapi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
@@ -1048,6 +1094,12 @@
             <version>${version.hapi}</version>
             <scope>runtime</scope>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hapi-base</artifactId>
+                    <groupId>ca.uhn.hapi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
