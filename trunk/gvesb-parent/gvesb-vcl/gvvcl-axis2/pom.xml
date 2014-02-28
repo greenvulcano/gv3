@@ -11,6 +11,10 @@
     <artifactId>gvvcl-axis2</artifactId>
     <name>GreenVulcano VCL Axis2 Plugin</name>
 
+    <properties>
+        <version.openejb>3.1.4</version.openejb>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
@@ -43,6 +47,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
+            <artifactId>axiom-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-impl</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -58,21 +67,14 @@
         <dependency>
             <groupId>org.apache.openejb</groupId>
             <artifactId>openejb-cxf</artifactId>
-            <version>3.1.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.openejb</groupId>
             <artifactId>openejb-core</artifactId>
-            <version>3.1.4</version>
-            <type>jar</type>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.openejb</groupId>
             <artifactId>openejb-http</artifactId>
-            <version>3.1.4</version>
-            <type>jar</type>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

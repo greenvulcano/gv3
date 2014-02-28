@@ -10,6 +10,8 @@
         name="testAxis2DataProvider" type="dataProvider">
         <Field direction="OUT" key="message" type="field">
           <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(#input.object))</Expression>
+          <!--<Expression type="ognl">envelope.body.addChild(@it.greenvulcano.gvesb.ws.axis2.message.MessageConverter@toOM(#input.object))</Expression>-->
+          <!--<Expression type="ognl">@it.greenvulcano.gvesb.ws.axis2.message.MessageConverter@setBody(envelope, #input.object)</Expression>-->
         </Field>
       </Axis2MessageContextDataProvider>
       <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
