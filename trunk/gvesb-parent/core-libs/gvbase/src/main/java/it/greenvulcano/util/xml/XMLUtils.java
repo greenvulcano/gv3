@@ -284,6 +284,33 @@ public class XMLUtils
     }
 
     /**
+     * Check for XML invalid chars within <tt>input</tt> String.
+     *
+     * @param input
+     *        the input <tt>String</tt>.
+     * @return true if the input string contains XML invalid chars.
+     */
+    public static boolean checkXMLInvalidChars(String input)
+    {
+        if (input == null) {
+            return false;
+        }
+        if (input.equals("")) {
+            return false;
+        }
+
+        boolean foundInvalidChar = false;
+        for (int i = 0; i < input.length(); i++) {
+            if (invalidXMLChars.indexOf(input.charAt(i)) != -1) {
+                foundInvalidChar = true;
+                break;
+            }
+        }
+
+        return foundInvalidChar;
+    }
+
+    /**
      * Returns a DOM parsed from the given XML string.
      * 
      * @param xmlString
