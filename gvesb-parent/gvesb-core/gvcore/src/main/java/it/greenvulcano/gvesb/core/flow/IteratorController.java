@@ -27,10 +27,14 @@ import it.greenvulcano.gvesb.core.config.GVServiceConf;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
 import it.greenvulcano.gvesb.core.config.ServiceConfigManager;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
+import it.greenvulcano.gvesb.core.exc.GVCoreSecurityException;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
+import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.log.GVBufferMDC;
+import it.greenvulcano.gvesb.policy.ACLManager;
+import it.greenvulcano.gvesb.policy.impl.GVCoreServiceKey;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.EnqueueException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
@@ -414,6 +418,12 @@ public class IteratorController
 
             ServiceConfigManager svcMgr = gvContext.getGVServiceConfigManager();
             gvsConfig = svcMgr.getGVSConfig(internalGVBuffer);
+            if (!ACLManager.canAccess(new GVCoreServiceKey(gvsConfig.getGroupName(), gvsConfig.getServiceName(),
+                    localFlowOp))) {
+                throw new GVCoreSecurityException("GV_SERVICE_POLICY_ERROR", new String[][]{
+                        {"service", internalGVBuffer.getService()}, {"system", internalGVBuffer.getSystem()},
+                        {"id", internalGVBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
+            }
             GVFlow flow = gvsConfig.getGVOperation(internalGVBuffer, localFlowOp);
             if ((call_dp != null) && (call_dp.length() > 0)) {
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
