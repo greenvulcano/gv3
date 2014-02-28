@@ -1,9 +1,23 @@
 package max.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
+import it.greenvulcano.util.xml.XMLUtils;
 
-import javax.xml.parsers.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 /**
@@ -213,16 +227,32 @@ public class DOMWriter
             }
 
         // print cdata sections
-        case Node.CDATA_SECTION_NODE: {
-                out.print(normalize(node.getNodeValue(), false));
-                break;
+        case Node.CDATA_SECTION_NODE :{
+            String v = node.getNodeValue().trim();
+            if (!v.equals("")) {
+                if (XMLUtils.checkXMLInvalidChars(v)) {
+                    out.print("<![CDATA[" + node.getNodeValue() + "]]>");
+                }
+                else {
+                    out.print(node.getNodeValue());
+                }
             }
+            break;
+        }
 
-        // print text
-        case Node.TEXT_NODE: {
-                out.print(normalize(node.getNodeValue().trim(), false));
-                break;
+            // print text
+        case Node.TEXT_NODE :{
+            String v = node.getNodeValue().trim();
+            if (!v.equals("")) {
+                if (XMLUtils.checkXMLInvalidChars(v)) {
+                    out.print("<![CDATA[" + node.getNodeValue() + "]]>");
+                }
+                else {
+                    out.print(node.getNodeValue());
+                }
             }
+            break;
+        }
 
         // print processing instruction
         case Node.PROCESSING_INSTRUCTION_NODE: {
