@@ -39,8 +39,8 @@
                         web-service="TOUPPER">
                 <WSOperation operation-qname="{http://www.greenvulcano.it/greenvulcano}toupper"
                              ref-dp="respToupperWSDataProvider">
-                    <Binding gv-operation="execToupper" gv-service="TOUPPER#WS" gv-system="GVESB_WS"
-                             inputType="body-element"/>
+                    <Binding gv-operation="execToupper" gv-service="TOUPPER#WS"
+                             gv-system="GVESB_WS" inputType="body-element"/>
                 </WSOperation>
             </WebService>
             <WebService force-https="false" input-xsd="CreditService_in.xsd"
@@ -62,9 +62,8 @@
                         web-service="TOUPPER_WSS">
                 <WSOperation operation-qname="{http://www.greenvulcano.it/greenvulcano}toupper"
                              ref-dp="respToupperWSDataProvider">
-                    <Binding gv-operation="execToupper"
-                             gv-service="TOUPPER#WS" gv-system="GVESB_WS"
-                             inputType="body-element"/>
+                    <Binding gv-operation="execToupper" gv-service="TOUPPER#WS"
+                             gv-system="GVESB_WS" inputType="body-element"/>
                 </WSOperation>
                 <EngageModule name="addressing" specification="NO-SPEC"
                               type="it.greenvulcano.gvesb.virtual.ws.module.DefaultModuleHandler"/>
@@ -202,8 +201,8 @@
     </GVWebServices>
     <GVJdbc name="JDBC" type="module">
         <Drivers>
-            <Driver class="org.hsqldb.jdbcDriver" enabled="Yes"
-                    initType="static" type="driver"/>
+            <Driver class="org.hsqldb.jdbcDriver" enabled="Yes" initType="static"
+                    type="driver"/>
         </Drivers>
         <Connections>
             <Connection autoCommit="true" connectionMax="5" connectionMin="1"
@@ -244,7 +243,7 @@
                 <validationQuery>select 1 from dual</validationQuery>
             </PoolParameters>
         </DriverPoolConnectionBuilder>
-    <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
+        <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
                                      driver-class="org.hsqldb.jdbcDriver" name="gv_stats"
                                      password="gv_stats"
                                      type="jdbc-connection-builder"
@@ -262,16 +261,16 @@
                                          name="WriteString_JMSBytesMessageDataProvider"
                                          type="dataProvider">
                 <Field direction="OUT" key="output" type="field">
-                    <Expression type="ognl">writeBytes(#input.object.getBytes(&apos;UTF-8&apos;))</Expression>
+                    <Expression type="ognl"><![CDATA[writeBytes(#input.object.getBytes("UTF-8"))]]></Expression>
                 </Field>
             </JMSBytesMessageDataProvider>
             <StringDataProvider class="it.greenvulcano.gvesb.gvdp.impl.StringDataProvider"
                                 name="ReadString_JMSBytesMessageDataProvider"
                                 type="dataProvider">
                 <Field direction="INOUT" key="buffer" type="field">
-                    <Expression type="ognl">#bArr = new
+                    <Expression type="ognl"><![CDATA[#bArr = new
 byte[object.getBodyLength()], object.reset(),
-object.readBytes(#bArr), new java.lang.String(#bArr, &apos;UTF-8&apos;)</Expression>
+object.readBytes(#bArr), new java.lang.String(#bArr, "UTF-8")]]></Expression>
                 </Field>
             </StringDataProvider>
             <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider"
@@ -298,7 +297,7 @@ object.readBytes(#bArr), new java.lang.String(#bArr, &apos;UTF-8&apos;)</Express
                                     name="fileNamesCollectionDP" source-selector="object"
                                     type="dataProvider">
                 <Field direction="INOUT" key="buffer" type="field">
-                    <Expression type="xpath">//FileList/File[@isDirectory=&apos;false&apos;]</Expression>
+                    <Expression type="xpath"><![CDATA[//FileList/File[@isDirectory='false']]]></Expression>
                 </Field>
             </CollectionDataProvider>
             <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider"
@@ -312,24 +311,24 @@ object.readBytes(#bArr), new java.lang.String(#bArr, &apos;UTF-8&apos;)</Express
                                              name="respToupperWSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
-                    <Expression type="ognl">#factory=envelope.body.getOMFactory(),
-#toupperResponse=#factory.createOMElement(&apos;toupperResponse&apos;, &apos;http://www.greenvulcano.it/greenvulcano&apos;, &apos;ns&apos;),
-#return=#factory.createOMElement(&apos;resultUp&apos;,&apos;http://www.greenvulcano.it/greenvulcano&apos;, &apos;ns&apos;),
+                    <Expression type="ognl"><![CDATA[#factory=envelope.body.getOMFactory(),
+#toupperResponse=#factory.createOMElement("toupperResponse", "http://www.greenvulcano.it/greenvulcano", "ns"),
+#return=#factory.createOMElement("resultUp","http://www.greenvulcano.it/greenvulcano", "ns"),
 #toupperResponse.addChild(#return),
 #factory.createOMText(#return, #input.object),
-envelope.body.addChild(#toupperResponse)</Expression>
+envelope.body.addChild(#toupperResponse)]]></Expression>
                 </Field>
             </Axis2MessageContextDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
                                              name="reqToupperWSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
-                    <Expression type="ognl">#factory=envelope.body.getOMFactory(),
-#toupper=#factory.createOMElement(&apos;toupper&apos;, &apos;http://www.greenvulcano.it/greenvulcano&apos;, &apos;ns&apos;),
-#str=#factory.createOMElement(&apos;str&apos;,&apos;http://www.greenvulcano.it/greenvulcano&apos;, &apos;ns&apos;),
+                    <Expression type="ognl"><![CDATA[#factory=envelope.body.getOMFactory(),
+#toupper=#factory.createOMElement("toupper", "http://www.greenvulcano.it/greenvulcano", "ns"),
+#str=#factory.createOMElement("str","http://www.greenvulcano.it/greenvulcano", "ns"),
 #toupper.addChild(#str),
 #factory.createOMText(#str, #input.object),
-envelope.body.addChild(#toupper)</Expression>
+envelope.body.addChild(#toupper)]]></Expression>
                 </Field>
             </Axis2MessageContextDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
@@ -343,91 +342,104 @@ envelope.body.addChild(#toupper)</Expression>
                                              name="CREDIT::PayWSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
-                    <Expression type="ognl">(#input.getProperty(&apos;REC_UPDATE&apos;) != null) ? (
+                    <Expression type="ognl"><![CDATA[(#input.getProperty("REC_UPDATE") != null) ? (
 #factory=envelope.body.getOMFactory(),
-#payResponse=#factory.createOMElement(&apos;PayResponse&apos;, &apos;http://www.credit.com/services&apos;, &apos;ns&apos;),
-#result=#factory.createOMElement(&apos;result&apos;,&apos;http://www.credit.com/services&apos;, &apos;ns&apos;),
-#reason=#factory.createOMElement(&apos;reason&apos;,&apos;http://www.credit.com/services&apos;, &apos;ns&apos;),
+#payResponse=#factory.createOMElement("PayResponse", "http://www.credit.com/services", "ns"),
+#result=#factory.createOMElement("result","http://www.credit.com/services", "ns"),
+#reason=#factory.createOMElement("reason","http://www.credit.com/services", "ns"),
 #payResponse.addChild(#result),
-(#input.getProperty(&apos;REC_UPDATE&apos;) == 1) ? #factory.createOMText(#result,&apos;true&apos;) : (#factory.createOMText(#result,&apos;false&apos;), #payResponse.addChild(#reason), #factory.createOMText(#reason,&apos;Credit Card inactive or insufficient credit&apos;)),
-envelope.body.addChild(#payResponse)) : envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(#input.object.getDocumentElement()))</Expression>
+(#input.getProperty("REC_UPDATE") == 1) ? #factory.createOMText(#result,"true") : (#factory.createOMText(#result,"false"), #payResponse.addChild(#reason), #factory.createOMText(#reason,"Credit Card inactive or insufficient credit")),
+envelope.body.addChild(#payResponse)) : envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(#input.object.getDocumentElement()))]]></Expression>
                 </Field>
             </Axis2MessageContextDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
                                              name="CREDIT::RestSetAuthDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
-                    <Expression type="ognl">#basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
-#basicAuth.setUsername(&quot;userA&quot;),
-#basicAuth.setPassword(&quot;userA&quot;),
+                    <Expression type="ognl"><![CDATA[#basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
+#basicAuth.setUsername("userA"),
+#basicAuth.setPassword("userA"),
 #basicAuth.setPreemptiveAuthentication(true),
-options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)</Expression>
+options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)]]></Expression>
                 </Field>
             </Axis2MessageContextDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
                                              name="EXTERNAL::QueryWSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
-                    <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement())),
+                    <Expression type="ognl"><![CDATA[envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement())),
 #basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
-#basicAuth.setUsername(&quot;userA&quot;),
-#basicAuth.setPassword(&quot;userA&quot;),
+#basicAuth.setUsername("userA"),
+#basicAuth.setPassword("userA"),
 #basicAuth.setPreemptiveAuthentication(true),
-options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)</Expression>
+options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)]]></Expression>
                 </Field>
             </Axis2MessageContextDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
                                              name="EXTERNAL::PayWSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
-                    <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement())),
+                    <Expression type="ognl"><![CDATA[envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement())),
 #basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
-#basicAuth.setUsername(&quot;userA&quot;),
-#basicAuth.setPassword(&quot;userA&quot;),
+#basicAuth.setUsername("userA"),
+#basicAuth.setPassword("userA"),
 #basicAuth.setPreemptiveAuthentication(true),
-options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)</Expression>
+options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)]]></Expression>
                 </Field>
             </Axis2MessageContextDataProvider>
-            <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="toupperInArrayDataProvider" type="dataProvider">
+            <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider"
+                                    name="StringSplitCollectionDP"
+                                    source-selector="object" type="dataProvider">
+                <Field direction="INOUT" key="buffer" type="field">
+                    <Expression type="ognl"><![CDATA[split(",")]]></Expression>
+                </Field>
+            </CollectionDataProvider>
+            <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider"
+                               name="toupperInArrayDataProvider" type="dataProvider">
                 <Field direction="INOUT" key="0" type="field">
-                    <Expression type="ognl">object.split(&quot;,&quot;)</Expression>
+                    <Expression type="ognl"><![CDATA[object.split(",")]]></Expression>
                 </Field>
             </ArrayDataProvider>
-            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="toupperOutGVBChangeDataProvider"
+            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider"
+                                        name="toupperOutGVBChangeDataProvider"
                                         type="dataProvider">
                 <Field direction="OUT" key="buffer" type="field">
                     <Expression type="ognl">object = @java.util.Arrays@toString(#input)</Expression>
                 </Field>
             </GVBufferChangeDataProvider>
-            <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="sumInArrayDataProvider" type="dataProvider">
+            <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider"
+                               name="sumInArrayDataProvider" type="dataProvider">
                 <Field direction="INOUT" key="0" type="field">
-                    <Expression type="ognl">@java.lang.Integer@parseInt(#input.getProperty(&apos;I1&apos;))</Expression>
+                    <Expression type="ognl"><![CDATA[@java.lang.Integer@parseInt(#input.getProperty("I1"))]]></Expression>
                 </Field>
                 <Field direction="INOUT" key="1" type="field">
-                    <Expression type="ognl">@java.lang.Integer@parseInt(#input.getProperty(&apos;I2&apos;))</Expression>
+                    <Expression type="ognl"><![CDATA[@java.lang.Integer@parseInt(#input.getProperty("I2"))]]></Expression>
                 </Field>
             </ArrayDataProvider>
-            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="sumOutGVBChangeDataProvider"
+            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider"
+                                        name="sumOutGVBChangeDataProvider"
                                         type="dataProvider">
                 <Field direction="OUT" key="buffer" type="field">
-                    <Expression type="ognl">#output.setProperty('SUM', @java.lang.String@valueOf(#input))</Expression>
+                    <Expression type="ognl"><![CDATA[#output.setProperty("SUM", @java.lang.String@valueOf(#input))]]></Expression>
                 </Field>
             </GVBufferChangeDataProvider>
-            <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="addTimeInArrayDataProvider" type="dataProvider">
+            <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider"
+                               name="addTimeInArrayDataProvider" type="dataProvider">
                 <Field direction="INOUT" key="0" type="field">
-                    <Expression type="ognl">@it.greenvulcano.util.txt.DateUtils@stringToDate(property['DATE'], 'dd/MM/yyyy HH:mm:ss')</Expression>
+                    <Expression type="ognl"><![CDATA[@it.greenvulcano.util.txt.DateUtils@stringToDate(property["DATE"], "dd/MM/yyyy HH:mm:ss")]]></Expression>
                 </Field>
                 <Field direction="INOUT" key="1" type="field">
                     <Expression type="ognl">@java.util.Calendar@MINUTE</Expression>
                 </Field>
                 <Field direction="INOUT" key="2" type="field">
-                    <Expression type="ognl">@java.lang.Integer@parseInt(property['DELTA'])</Expression>
+                    <Expression type="ognl"><![CDATA[@java.lang.Integer@parseInt(property["DELTA"])]]></Expression>
                 </Field>
             </ArrayDataProvider>
-            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="addTimeOutGVBChangeDataProvider"
+            <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider"
+                                        name="addTimeOutGVBChangeDataProvider"
                                         type="dataProvider">
                 <Field direction="OUT" key="buffer" type="field">
-                    <Expression type="ognl">#output.setProperty('DATE_OUT', @it.greenvulcano.util.txt.DateUtils@dateToString(#input, 'dd/MM/yyyy HH:mm:ss'))</Expression>
+                    <Expression type="ognl"><![CDATA[#output.setProperty("DATE_OUT", @it.greenvulcano.util.txt.DateUtils@dateToString(#input, "dd/MM/yyyy HH:mm:ss"))]]></Expression>
                 </Field>
             </GVBufferChangeDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
@@ -441,14 +453,14 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                                              name="genericPassFullBody_WSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
-                    <Expression type="ognl">#resBody = envelope.body,
+                    <Expression type="ognl"><![CDATA[#resBody = envelope.body,
 #newBody = @org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement()),
 #childs = #newBody.childElements,
-#loop = :[#this != null &amp;&amp;
+#loop = :[#this != null &&
                 ((#resBody.addChild(#this)) ,
                   #loop(#childs.hasNext ? #childs.next : null))
          ],
-#loop(#childs.hasNext ? #childs.next : null)</Expression>
+#loop(#childs.hasNext ? #childs.next : null)]]></Expression>
                 </Field>
             </Axis2MessageContextDataProvider>
             <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
@@ -462,19 +474,18 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                                              name="resp_zipAttachment_WSDataProvider"
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
-                    <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.property[&apos;XML_MESSAGE&apos;], false, true).getDocumentElement())),
+                    <Expression type="ognl"><![CDATA[envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.property["XML_MESSAGE"], false, true).getDocumentElement())),
 
-options.setProperty(@org.apache.axis2.Constants$Configuration@ENABLE_SWA, &apos;TRUE&apos;),
+options.setProperty(@org.apache.axis2.Constants$Configuration@ENABLE_SWA, "TRUE"),
 
-#dataHandler=new javax.activation.DataHandler(new javax.mail.util.ByteArrayDataSource(#input.object,#input.property[&apos;FILE_MIME_TYPE&apos;])),
-#filename=&apos;zipAttachment&apos;,
+#dataHandler=new javax.activation.DataHandler(new javax.mail.util.ByteArrayDataSource(#input.object,#input.property["FILE_MIME_TYPE"])),
+#filename="zipAttachment",
 addAttachment(#filename,#dataHandler),
 
-#contentDisposition=new org.apache.commons.httpclient.Header(&apos;Content-Disposition&apos;,#filename),
-setProperty(@org.apache.axis2.transport.http.HTTPConstants@HTTP_HEADERS,{#contentDisposition})</Expression>
+#contentDisposition=new org.apache.commons.httpclient.Header("Content-Disposition",#filename),
+setProperty(@org.apache.axis2.transport.http.HTTPConstants@HTTP_HEADERS,{#contentDisposition})]]></Expression>
                 </Field>
             </Axis2MessageContextDataProvider>
-
             <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
                              name="figFilter_InMapDataProvider" type="dataProvider">
                 <Field direction="INOUT" key="figset" type="field">
@@ -484,17 +495,16 @@ setProperty(@org.apache.axis2.transport.http.HTTPConstants@HTTP_HEADERS,{#conten
             <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
                              name="figFilter_GlobMapDataProvider" type="dataProvider">
                 <Field direction="INOUT" key="filterColor" type="field">
-                    <Expression type="ognl">property[&apos;COLOR&apos;]</Expression>
+                    <Expression type="ognl"><![CDATA[property["COLOR"]]]></Expression>
                 </Field>
             </MapDataProvider>
             <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider"
                                         name="figFilter_OutGVBChangeDataProvider"
                                         type="dataProvider">
                 <Field direction="OUT" key="buffer" type="field">
-                    <Expression type="ognl">#output.setObject(#input.getValue(&quot;figset&quot;))</Expression>
+                    <Expression type="ognl"><![CDATA[#output.setObject(#input.getValue("figset"))]]></Expression>
                 </Field>
             </GVBufferChangeDataProvider>
-
             <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
                              name="figFilterOut_InMapDataProvider" type="dataProvider">
                 <Field direction="INOUT" key="figset" type="field">
@@ -504,7 +514,7 @@ setProperty(@org.apache.axis2.transport.http.HTTPConstants@HTTP_HEADERS,{#conten
             <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
                              name="figFilterOut_GlobMapDataProvider" type="dataProvider">
                 <Field direction="INOUT" key="filterColor" type="field">
-                    <Expression type="ognl">property[&apos;COLOR&apos;]</Expression>
+                    <Expression type="ognl"><![CDATA[property["COLOR"]]]></Expression>
                 </Field>
                 <Field direction="INOUT" key="[[OUT]]figsetOut" type="field">
                     <Expression type="ognl">new tests.unit.gvrules.bean.figure.FigureBag()</Expression>
@@ -517,7 +527,6 @@ setProperty(@org.apache.axis2.transport.http.HTTPConstants@HTTP_HEADERS,{#conten
                     <Expression type="ognl">#output.setObject(#input)</Expression>
                 </Field>
             </GVBufferChangeDataProvider>
-
             <MapDataProvider class="it.greenvulcano.gvesb.gvdp.impl.MapDataProvider"
                              name="figFilterOutColl_InMapDataProvider" type="dataProvider">
                 <Field direction="INOUT" key="figset" type="field">
@@ -528,7 +537,7 @@ setProperty(@org.apache.axis2.transport.http.HTTPConstants@HTTP_HEADERS,{#conten
                              name="figFilterOutColl_GlobMapDataProvider"
                              type="dataProvider">
                 <Field direction="INOUT" key="filterColor" type="field">
-                    <Expression type="ognl">property[&apos;COLOR&apos;]</Expression>
+                    <Expression type="ognl"><![CDATA[property["COLOR"]]]></Expression>
                 </Field>
                 <Field direction="INOUT" key="[[OUT]]figsetOut" type="field">
                     <Expression type="ognl">new tests.unit.gvrules.bean.figure.FigureBag()</Expression>
@@ -550,13 +559,13 @@ setProperty(@org.apache.axis2.transport.http.HTTPConstants@HTTP_HEADERS,{#conten
             <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
                        name="ListRecoveryPoint" transformation="ListRecoveryPoint"
                        type="dbo">
-                <statement id="1" type="select">select rec_id, id, server, system, service, operation, recovery_node, creation_date, update_date, state
+                <statement id="1" type="select"><![CDATA[select rec_id, id, server, system, service, operation, recovery_node, creation_date, update_date, state
 from gv_recovery_point
 where 1=1
-decode{{@{{ID}}::NULL:: ::and id = &apos;@{{ID}}&apos;}}
-decode{{@{{SERVICE}}::NULL:: ::and service = &apos;@{{SERVICE}}&apos;}}
-decode{{@{{DATE}}::NULL:: ::and trunc(update_date) = to_date(&apos;@{{DATE}}&apos;, &apos;dd/mm/yyyy&apos;)}}
-order by update_date desc</statement>
+decode{{@{{ID}}::NULL:: ::and id = '@{{ID}}'}}
+decode{{@{{SERVICE}}::NULL:: ::and service = '@{{SERVICE}}'}}
+decode{{@{{DATE}}::NULL:: ::and trunc(update_date) = to_date('@{{DATE}}', 'dd/mm/yyyy')}}
+order by update_date desc]]></statement>
                 <statement id="2" keys="1" type="select">select rec_id, name, value
 from gv_recovery_property
 order by rec_id, name</statement>
@@ -567,10 +576,10 @@ order by rec_id, name</statement>
                     type="dbobuilder">
             <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
                        name="CheckRecoveryPoint" type="dbo">
-                <statement id="1" type="select">select count(1)
+                <statement id="1" type="select"><![CDATA[select count(1)
 from gv_recovery_point
 where rec_id = @{{REC_ID}}
-and state = &apos;SAVED&apos;</statement>
+and state = 'SAVED']]></statement>
             </DBOSelect>
         </DBOBuilder>
         <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
@@ -578,10 +587,10 @@ and state = &apos;SAVED&apos;</statement>
                     name="ListRecoveryPointServices" type="dbobuilder">
             <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
                        name="ListRecoveryPointServices" type="dbo">
-                <statement id="1" type="select">select distinct service
+                <statement id="1" type="select"><![CDATA[select distinct service
 from gv_recovery_point
-decode{{@{{DATE}}::NULL:: ::where trunc(update_date) = to_date(&apos;@{{DATE}}&apos;, &apos;dd/mm/yyyy&apos;)}}
-order by service</statement>
+decode{{@{{DATE}}::NULL:: ::where trunc(update_date) = to_date('@{{DATE}}', 'dd/mm/yyyy')}}
+order by service]]></statement>
             </DBOSelect>
         </DBOBuilder>
         <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
@@ -589,22 +598,22 @@ order by service</statement>
                     type="dbobuilder">
             <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
                        name="ListRecoveryPointIDs" type="dbo">
-                <statement id="1" type="select">select distinct id
+                <statement id="1" type="select"><![CDATA[select distinct id
 from gv_recovery_point
-decode{{@{{DATE}}::NULL:: ::where trunc(update_date) = to_date(&apos;@{{DATE}}&apos;, &apos;dd/mm/yyyy&apos;)}}
-order by id</statement>
+decode{{@{{DATE}}::NULL:: ::where trunc(update_date) = to_date('@{{DATE}}', 'dd/mm/yyyy')}}
+order by id]]></statement>
             </DBOSelect>
         </DBOBuilder>
         <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
                     jdbc-connection-name="ds.gv_test" name="ListPersons" type="dbobuilder">
             <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
                        name="ListPersons" type="dbo">
-                <statement id="1" type="select">select &apos;&apos;, &apos;NULL&apos;
+                <statement id="1" type="select"><![CDATA[select '', 'NULL'
 from dual
 union all
 select p.NAME, p.NAME
 from PERSON p
-order by 1</statement>
+order by 1]]></statement>
             </DBOSelect>
         </DBOBuilder>
     </GVDataHandlerConfiguration>
@@ -679,7 +688,6 @@ order by 1</statement>
         </GVExcelWorkbook>
     </GVExcelWorkbookConfiguration>
     <GVExcelCreatorConfiguration name="EXCEL_REPO" type="module" version="1.0"/>
-
     <GVBIRTReportConfiguration name="BIRT_REPO" type="module" version="1.0">
         <Engine logLevel="INFO" reportEngineHome="${{gv.app.home}}/BIRTReportEngine">
             <Renders>
@@ -736,18 +744,18 @@ order by 1</statement>
             </ReportGroup>
         </ReportGroups>
     </GVBIRTReportConfiguration>
-
     <RSHServiceClientConfiguration name="RSH_CLIENT" type="module" version="1.0">
         <RSHServiceClientLocal class="it.greenvulcano.gvesb.rsh.client.impl.RSHServiceClientLocal"
                                name="RSHLocal" type="rshClient"/>
         <RSHServiceClientRMI class="it.greenvulcano.gvesb.rsh.client.impl.RSHServiceClientRMI"
-                             name="RSHRemote" regURL="rmi://localhost:3099" type="rshClient"/>
+                             name="RSHRemote" regURL="rmi://localhost:3099"
+                             type="rshClient"/>
     </RSHServiceClientConfiguration>
-
     <GVAdapterHttpConfiguration name="HTTP_ADAPTER" type="module" version="1.0">
         <InboundConfiguration>
             <ActionMappings>
-                <ActionMapping Action="HTTP_TEST" FormatterID="MessageInboundFormatter" enabled="true"/>
+                <ActionMapping Action="HTTP_TEST" FormatterID="MessageInboundFormatter"
+                               enabled="true"/>
             </ActionMappings>
             <InboundTransactions>
                 <Transaction service="TOUPPER" transacted="false"/>
@@ -756,9 +764,9 @@ order by 1</statement>
         </InboundConfiguration>
         <Formatters>
             <ExtendedInboundParamHandlerFormatter Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.ExtendedInboundParamHandlerFormatter"
-                                                  RespContentType="text/html"
                                                   HandlePostBodyAsParams="true"
                                                   ID="MessageInboundFormatter"
+                                                  RespContentType="text/html"
                                                   Type="FormatterPlugin">
                 <RequestParams>
                     <RequestParam Name="service">
@@ -772,8 +780,8 @@ order by 1</statement>
                     </RequestParam>
                     <RequestParam Name="system" Required="false">
                         <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
-                                            ItemType="Handler"
-                                            OutputType="GVBuffer">
+                                                   ItemType="Handler"
+                                                   OutputType="GVBuffer">
                             <RequestStringParamMapping ItemType="Mapping">
                                 <GVBufferField FieldName="GVBuffer.system"/>
                             </RequestStringParamMapping>
@@ -790,8 +798,8 @@ order by 1</statement>
                     </RequestParam>
                     <RequestParam Name="data" Required="false">
                         <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
-                                            ItemType="Handler"
-                                            OutputType="GVBuffer">
+                                                   ItemType="Handler"
+                                                   OutputType="GVBuffer">
                             <RequestStringParamMapping ItemType="Mapping">
                                 <GVBufferField FieldName="GVBuffer.object"/>
                             </RequestStringParamMapping>
@@ -799,83 +807,87 @@ order by 1</statement>
                     </RequestParam>
                     <RequestParam Name="operation">
                         <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
-                                            ItemType="Handler"
-                                            OutputType="OpType">
+                                                   ItemType="Handler" OutputType="OpType">
                             <RequestStringParamMapping ItemType="Mapping">
                                 <OpType/>
                             </RequestStringParamMapping>
                         </RequestStringParamHandler>
                     </RequestParam>
                 </RequestParams>
-
                 <GVBufferDefaultValues>
-                    <GVBufferFieldDefaultValue FieldName="GVBuffer.system" FieldValue="GVESB"/>
+                    <GVBufferFieldDefaultValue FieldName="GVBuffer.system"
+                                               FieldValue="GVESB"/>
                 </GVBufferDefaultValues>
-
                 <ResponseParams URLEncoding="False">
                     <ResponseParam Name="Data" SendParameterName="False">
                         <ResponseStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
-                                            ItemType="Handler"
-                                            OutputType="HttpParam">
+                                                    ItemType="Handler"
+                                                    OutputType="HttpParam">
                             <ResponseStringParamMapping ItemType="Mapping">
-                                <DefaultValue>&lt;html&gt;
-&lt;body&gt;
-    &lt;table border=&quot;1&quot;&gt;
-        &lt;tr&gt;&lt;td&gt;Service&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;System&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Data&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
-    &lt;/table&gt;
-&lt;/body&gt;
-&lt;/html&gt;</DefaultValue>
+                                <DefaultValue><![CDATA[<html>
+<body>
+    <table border="1">
+        <tr><td>Service</td> <td/></tr>
+        <tr><td>System</td> <td/></tr>
+        <tr><td>ID</td> <td/></tr>
+        <tr><td>Data</td> <td/></tr>
+    </table>
+</body>
+</html>]]></DefaultValue>
                             </ResponseStringParamMapping>
                         </ResponseStringParamHandler>
                         <ResponseXMLParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.XMLParameterHandler"
-                                         ItemType="Handler"
-                                         OutputType="HttpParam">
-                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[1]/td[2]">
+                                                 ItemType="Handler" OutputType="HttpParam">
+                            <ResponseXMLParamMapping ItemType="Mapping"
+                                                     XPath="/html[1]/body[1]/table[1]/tr[1]/td[2]">
                                 <GVBufferField FieldName="GVBuffer.service"/>
                             </ResponseXMLParamMapping>
-                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[2]/td[2]">
+                            <ResponseXMLParamMapping ItemType="Mapping"
+                                                     XPath="/html[1]/body[1]/table[1]/tr[2]/td[2]">
                                 <GVBufferField FieldName="GVBuffer.system"/>
                             </ResponseXMLParamMapping>
-                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[3]/td[2]">
+                            <ResponseXMLParamMapping ItemType="Mapping"
+                                                     XPath="/html[1]/body[1]/table[1]/tr[3]/td[2]">
                                 <GVBufferField FieldName="GVBuffer.id"/>
                             </ResponseXMLParamMapping>
-                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[4]/td[2]">
+                            <ResponseXMLParamMapping ItemType="Mapping"
+                                                     XPath="/html[1]/body[1]/table[1]/tr[4]/td[2]">
                                 <GVBufferField FieldName="GVBuffer.object"/>
                             </ResponseXMLParamMapping>
                         </ResponseXMLParamHandler>
-
                         <StringParamErrorHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
-                                                                ItemType="ErrorHandler"
-                                                                OutputType="HttpParam">
+                                                 ItemType="ErrorHandler"
+                                                 OutputType="HttpParam">
                             <StringParamErrorMapping ItemType="Mapping">
-                                <DefaultErrorMessage>&lt;html&gt;
-&lt;body&gt;
-    &lt;table border=&quot;1&quot;&gt;
-        &lt;tr&gt;&lt;td&gt;Service&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;System&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Error&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
-    &lt;/table&gt;
-&lt;/body&gt;
-&lt;/html&gt;</DefaultErrorMessage>
+                                <DefaultErrorMessage><![CDATA[<html>
+<body>
+    <table border="1">
+        <tr><td>Service</td> <td/></tr>
+        <tr><td>System</td> <td/></tr>
+        <tr><td>ID</td> <td/></tr>
+        <tr><td>Error</td> <td/></tr>
+    </table>
+</body>
+</html>]]></DefaultErrorMessage>
                             </StringParamErrorMapping>
                         </StringParamErrorHandler>
                         <XMLParamErrorHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.XMLParameterHandler"
                                               ItemType="ErrorHandler"
                                               OutputType="HttpParam">
-                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[1]/td[2]">
+                            <XMLParamErrorMapping ItemType="Mapping"
+                                                  XPath="/html[1]/body[1]/table[1]/tr[1]/td[2]">
                                 <GVTransactionErrorInfo Value="GVTransInfo.service"/>
                             </XMLParamErrorMapping>
-                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[2]/td[2]">
+                            <XMLParamErrorMapping ItemType="Mapping"
+                                                  XPath="/html[1]/body[1]/table[1]/tr[2]/td[2]">
                                 <GVTransactionErrorInfo Value="GVTransInfo.system"/>
                             </XMLParamErrorMapping>
-                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[3]/td[2]">
+                            <XMLParamErrorMapping ItemType="Mapping"
+                                                  XPath="/html[1]/body[1]/table[1]/tr[3]/td[2]">
                                 <GVTransactionErrorInfo Value="GVTransInfo.id"/>
                             </XMLParamErrorMapping>
-                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[4]/td[2]">
+                            <XMLParamErrorMapping ItemType="Mapping"
+                                                  XPath="/html[1]/body[1]/table[1]/tr[4]/td[2]">
                                 <GVTransactionErrorInfo Value="GVTransInfo.errorMessage"/>
                             </XMLParamErrorMapping>
                         </XMLParamErrorHandler>
@@ -884,14 +896,15 @@ order by 1</statement>
             </ExtendedInboundParamHandlerFormatter>
         </Formatters>
     </GVAdapterHttpConfiguration>
-
     <GVHL7ListenerManager name="HL7_LISTENERS" type="module" version="1.0">
         <HL7Listeners>
-            <HL7Listener class="it.greenvulcano.gvesb.gvhl7.listener.HL7Listener" name="TestListener" port="8181" type="hl7listener"
-                         receivingApplication="GVApp" receivingFacility="GVFac">
+            <HL7Listener class="it.greenvulcano.gvesb.gvhl7.listener.HL7Listener"
+                         name="TestListener" port="8181" receivingApplication="GVApp"
+                         receivingFacility="GVFac" type="hl7listener">
                 <HL7Applications>
                     <GVCoreApplication class="it.greenvulcano.gvesb.gvhl7.listener.handler.GVCoreApplication"
-                                       gv-operation="RequestReply" gv-service="TestHL7_Listener" gv-system="GVESB"
+                                       gv-operation="RequestReply"
+                                       gv-service="TestHL7_Listener" gv-system="GVESB"
                                        name="TestApplication" type="hl7application">
                         <HL7Activations>
                             <HL7Activation messageType="*" triggerEvent="*"/>
@@ -901,7 +914,6 @@ order by 1</statement>
             </HL7Listener>
         </HL7Listeners>
     </GVHL7ListenerManager>
-
     <GVRulesConfigManager name="RULES_CFG" type="module" version="1.0">
         <GVKnowledgeBaseConfig class="it.greenvulcano.gvesb.gvrules.drools.config.impl.GVKnowledgeBaseConfig"
                                name="figureFilterOutColl" type="knwl-config">
@@ -919,15 +931,17 @@ order by 1</statement>
                           url="file:${{gv.app.home}}/Rules/figure/figureFilter.drl"/>
         </GVKnowledgeBaseConfig>
     </GVRulesConfigManager>
-
     <GVSocialAdapterManager name="GV_SOCIAL" type="module" version="1.0">
         <SocialAdapters>
             <TwitterSocialAdapter class="it.greenvulcano.gvesb.social.twitter.TwitterSocialAdapter"
                                   social="twitter" type="social-adapter">
                 <Accounts>
-                    <Account name="[ACCOUNT_NAME]" consumer_key="[CONS_KEY-CONS_KEY-CONS_KEY-]" consumer_secret="[CONS_SECRET-CONS_SECRET-CONS_SECRET-CO]"
-                        oauth_access_token="[ACCESS_TOKEN-ACCESS_TOKEN-ACCESS_TOKEN-AC]" oauth_access_token_secret="[ACCESS_TOKEN_SECRET-ACCESS_TOKEN_SECRET]"
-                        twitteruserid="[USER_ID___]"/>
+                    <Account consumer_key="[CONS_KEY-CONS_KEY-CONS_KEY-]"
+                             consumer_secret="[CONS_SECRET-CONS_SECRET-CONS_SECRET-CO]"
+                             name="[ACCOUNT_NAME]"
+                             oauth_access_token="[ACCESS_TOKEN-ACCESS_TOKEN-ACCESS_TOKEN-AC]"
+                             oauth_access_token_secret="[ACCESS_TOKEN_SECRET-ACCESS_TOKEN_SECRET]"
+                             twitteruserid="[USER_ID___]"/>
                 </Accounts>
             </TwitterSocialAdapter>
         </SocialAdapters>

@@ -23,14 +23,14 @@
                                             op-type="change GVBuffer" output="input"
                                             point-x="146" point-y="147" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script>var fb = new FigureBag();
-fb.add(new Triangle(&quot;red&quot;));
-fb.add(new Triangle(&quot;green&quot;));
-fb.add(new Square(&quot;red&quot;));
-fb.add(new Circle(&quot;yellow&quot;));
-fb.add(new Circle(&quot;green&quot;));
+                                <Script><![CDATA[var fb = new FigureBag();
+fb.add(new Triangle("red"));
+fb.add(new Triangle("green"));
+fb.add(new Square("red"));
+fb.add(new Circle("yellow"));
+fb.add(new Circle("green"));
 
-data.setObject(fb);</Script>
+data.setObject(fb);]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -65,14 +65,14 @@ data.setObject(fb);</Script>
                                             op-type="change GVBuffer" output="input"
                                             point-x="146" point-y="147" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script>var fb = new FigureBag();
-fb.add(new Triangle(&quot;red&quot;));
-fb.add(new Triangle(&quot;green&quot;));
-fb.add(new Square(&quot;red&quot;));
-fb.add(new Circle(&quot;yellow&quot;));
-fb.add(new Circle(&quot;green&quot;));
+                                <Script><![CDATA[var fb = new FigureBag();
+fb.add(new Triangle("red"));
+fb.add(new Triangle("green"));
+fb.add(new Square("red"));
+fb.add(new Circle("yellow"));
+fb.add(new Circle("green"));
 
-data.setObject(fb);</Script>
+data.setObject(fb);]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -107,14 +107,14 @@ data.setObject(fb);</Script>
                                             op-type="change GVBuffer" output="input"
                                             point-x="146" point-y="147" type="flow-node">
                             <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script>var fb = new FigureBag();
-fb.add(new Triangle(&quot;red&quot;));
-fb.add(new Triangle(&quot;green&quot;));
-fb.add(new Square(&quot;red&quot;));
-fb.add(new Circle(&quot;yellow&quot;));
-fb.add(new Circle(&quot;green&quot;));
+                                <Script><![CDATA[var fb = new FigureBag();
+fb.add(new Triangle("red"));
+fb.add(new Triangle("green"));
+fb.add(new Square("red"));
+fb.add(new Circle("yellow"));
+fb.add(new Circle("green"));
 
-data.setObject(fb);</Script>
+data.setObject(fb);]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
