@@ -20,6 +20,8 @@
 package it.greenvulcano.util.clazz;
 
 import java.lang.reflect.Array;
+import java.net.URL;
+import java.util.Enumeration;
 
 /**
  * @version 3.2.0 31/gen/2012
@@ -94,4 +96,45 @@ public class ClassUtils
         }
         return clazz;
     }
+
+    public static String findResourceAsString(String resource) throws ClassUtilsException
+    {
+        try {
+            String urls = "";
+            ClassLoader classClassLoader = ClassUtils.class.getClassLoader();
+            urls = "From class's ClassLoader:\n";
+            urls += findResource(resource, classClassLoader);
+
+            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+            if((contextClassLoader != null) && (classClassLoader != contextClassLoader)) {
+                urls += "\n\nFrom context ClassLoader:\n";
+                urls += findResource(resource, contextClassLoader);
+            }
+
+            return urls;
+        }
+        catch (Exception exc) {
+            throw new ClassUtilsException("Error finding resource: " + resource, exc);
+        }
+    }
+
+    private static String findResource(String resource, ClassLoader classLoader) throws Exception
+    {
+        String urls = "";
+
+        URL url = classLoader.getResource(resource);
+        if(url == null) {
+            urls = "\t" + resource + " not found\n";
+        }
+        else {
+            urls = "\t" + url.toString() + "\n";
+        }
+        Enumeration en = classLoader.getResources(resource);
+        while(en.hasMoreElements()) {
+            urls += "\t" + en.nextElement().toString() + "\n";
+        }
+
+        return urls;
+    }
+
 }
