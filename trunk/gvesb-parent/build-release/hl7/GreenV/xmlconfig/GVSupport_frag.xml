@@ -36,18 +36,18 @@
             </appender>
             <appender name="DB_LOGGER_FOR_GVHL7_MSG" class="it.greenvulcano.log.db.JDBCAppender">
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
-                <param name="dbclass" value="org.hsqldb.jdbcDriver" />
-                <param name="username" value="gv_log" />
-                <param name="password" value="gv_log" />
-                <param name="table" value="hl7_msg" />
-                <param name="column" value="id#SEQUENCE#log_seq.nextval" />
-                <param name="column" value="timestamp#TIMESTAMP" />
-                <param name="column" value="thread#THREAD" />
-                <param name="column" value="server#MDC#SERVER" />
-                <param name="column" value="listener#MDC#LISTENER" />
-                <param name="column" value="direction#MDC#DIRECTION" />
-                <param name="column" value="remote_ip#MDC#REMOTE_IP" />
-                <param name="column" value="msg#MSG" />
+                <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
+                <param name="username" value="gv_log"/>
+                <param name="password" value="gv_log"/>
+                <param name="table" value="hl7_msg"/>
+                <param name="column" value="id#SEQUENCE#log_seq.nextval"/>
+                <param name="column" value="timestamp#TIMESTAMP"/>
+                <param name="column" value="thread#THREAD"/>
+                <param name="column" value="server#MDC#SERVER"/>
+                <param name="column" value="listener#MDC#LISTENER"/>
+                <param name="column" value="direction#MDC#DIRECTION"/>
+                <param name="column" value="remote_ip#MDC#REMOTE_IP"/>
+                <param name="column" value="msg#MSG"/>
             </appender>
             ....
 

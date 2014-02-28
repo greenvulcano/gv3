@@ -5,7 +5,7 @@
 <GVCore version="1.0">
     <GVServices name="SERVICES" type="module">
         <Persistence enabled="true" jdbc-connection-name="pool_persistence">
-            <SequenceSQL>select recovery_seq(&apos;nextval&apos;)</SequenceSQL>
+            <SequenceSQL><![CDATA[select recovery_seq('nextval')]]></SequenceSQL>
         </Persistence>
     </GVServices>
 </GVCore>
