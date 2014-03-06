@@ -47,7 +47,7 @@ import org.apache.log4j.Logger;
  *
  */
 
-public class ServiceConfigManager implements ConfigurationListener
+public class ServiceConfigManager
 {
     private static Logger              logger                = GVLogger.getLogger(ServiceConfigManager.class);
 
@@ -60,10 +60,6 @@ public class ServiceConfigManager implements ConfigurationListener
      */
     private Map<String, GVServiceConf> gvServiceAliasMap     = new HashMap<String, GVServiceConf>();
     /**
-     * If true must be reload the configuration
-     */
-    private boolean                    confChangedFlag       = false;
-    /**
      * The Statistics StatisticsDataManager to be used
      */
     private StatisticsDataManager      statisticsDataManager = null;
@@ -73,8 +69,6 @@ public class ServiceConfigManager implements ConfigurationListener
      */
     public ServiceConfigManager()
     {
-        XMLConfig.addConfigurationListener(this, GreenVulcanoConfig.getSystemsConfigFileName());
-        XMLConfig.addConfigurationListener(this, GreenVulcanoConfig.getServicesConfigFileName());
         logger.debug("Service Config Manager created");
     }
 
@@ -92,11 +86,8 @@ public class ServiceConfigManager implements ConfigurationListener
     public GVServiceConf getGVSConfig(GVBuffer gvBuffer) throws GVCoreException
     {
         GVServiceConf gvServiceConfig = null;
-        logger.debug("getGVSConfig: Start");
+        logger.debug("getGVSConfig: Start (" + gvBuffer.getService() + ")");
 
-        if (confChangedFlag) {
-            clearConfigMap();
-        }
         String key = generateKey(gvBuffer);
         gvServiceConfig = gvServiceConfigMap.get(key);
 
@@ -109,7 +100,7 @@ public class ServiceConfigManager implements ConfigurationListener
             gvServiceConfig.init(gvBuffer);
             cache(gvServiceConfig);
         }
-        logger.debug("getGVSConfig: End");
+        logger.debug("getGVSConfig: End (" + gvBuffer.getService() + ")");
         return gvServiceConfig;
     }
 
@@ -143,59 +134,6 @@ public class ServiceConfigManager implements ConfigurationListener
     }
 
     /**
-     * Configuration changed. When the configuration changes, the internal
-     * chache is removed.
-     *
-     * @param event
-     *        The configuration event received
-     */
-    @Override
-    public void configurationChanged(ConfigurationEvent event)
-    {
-        logger.debug("BEGIN - Operation (configurationChanged)");
-
-        if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED)
-                && (event.getFile().equals(GreenVulcanoConfig.getSystemsConfigFileName()) || event.getFile().equals(
-                        GreenVulcanoConfig.getServicesConfigFileName()))) {
-            logger.debug("ServiceConfigManager - Operation (configurationChanged)");
-            confChangedFlag = true;
-        }
-    }
-
-    /**
-     * Clear the cache of service configurations
-     */
-    public void clearConfigMap()
-    {
-        logger.debug("clearConfigMap: Start");
-
-        for (GVServiceConf gvServiceConfig : gvServiceConfigMap.values()) {
-            gvServiceConfig.destroy();
-        }
-        gvServiceConfigMap.clear();
-        gvServiceAliasMap.clear();
-        confChangedFlag = false;
-
-        logger.debug("clearConfigMap: End");
-    }
-
-    /**
-     * @return The reloaded configuration flag value
-     */
-    public boolean getConfigurationFlag()
-    {
-        return confChangedFlag;
-    }
-
-    /**
-     * Reset the reloaded configuration flag value
-     */
-    public void resetConfigurationFlag()
-    {
-        confChangedFlag = false;
-    }
-
-    /**
      * @return The Statistics StatisticsDataManager to be used
      */
     public StatisticsDataManager getStatisticsDataManager()
@@ -217,7 +155,12 @@ public class ServiceConfigManager implements ConfigurationListener
      */
     public void destroy()
     {
-        clearConfigMap();
-        XMLConfig.removeConfigurationListener(this);
+        logger.debug("GVSConfig destroy: Start");
+        for (GVServiceConf gvServiceConfig : gvServiceConfigMap.values()) {
+            gvServiceConfig.destroy();
+        }
+        gvServiceConfigMap.clear();
+        gvServiceAliasMap.clear();
+        logger.debug("GVSConfig destroy: End");
     }
 }

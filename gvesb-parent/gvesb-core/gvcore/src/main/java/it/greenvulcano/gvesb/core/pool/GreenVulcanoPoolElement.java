@@ -52,15 +52,14 @@ public class GreenVulcanoPoolElement extends GreenVulcano implements Configurati
         XMLConfig.addConfigurationListener(this, GreenVulcanoConfig.getServicesConfigFileName());
     }
 
-
     /**
      * @see it.greenvulcano.gvesb.core.GreenVulcano#destroy()
      */
     @Override
-    public void destroy()
+    public void destroy(boolean force)
     {
         XMLConfig.removeConfigurationListener(this);
-        super.destroy();
+        super.destroy(force);
         execServices.clear();
     }
 
@@ -156,6 +155,7 @@ public class GreenVulcanoPoolElement extends GreenVulcano implements Configurati
                 && (event.getFile().equals(GreenVulcanoConfig.getSystemsConfigFileName()) || event.getFile().equals(
                         GreenVulcanoConfig.getServicesConfigFileName()))) {
             execServices.clear();
+            setValid(false);
         }
     }
 
