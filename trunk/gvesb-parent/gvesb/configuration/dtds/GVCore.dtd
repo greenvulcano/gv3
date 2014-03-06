@@ -7099,7 +7099,13 @@
     #NotNull
 -->
 <!ATTLIST WSDLInfo wsdl CDATA #REQUIRED>
+<!--
+    Override the endpoint URL defined in the wsdl.
+    Is overridden by the WS_ENDPOINT_URL GVBuffer's property value.
 
+    #NotNull
+-->
+<!ATTLIST WSDLInfo ws-endpoint-url CDATA #IMPLIED>
 
 <!--
     Defines the parameters for calling a Web Service using REST mode.

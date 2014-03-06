@@ -78,6 +78,8 @@ public class GVWebServiceInvoker
     private String                     portName    = "";
 
     private String                     wsdlURL     = "";
+    
+    private String                     wsEndpointURL  = "";
 
     private long                       timeout     = -1;
 
@@ -117,14 +119,24 @@ public class GVWebServiceInvoker
             if (wsdlURL != null) {
                 wsdlURL= TextUtils.replaceSubstring(wsdlURL, "\\", "/");
             }
+            wsEndpointURL = XMLConfig.get(wsdlConfiguration, "@ws-endpoint-url", null);
             if (logger.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder();
-                sb.append("The GVWebServiceInvoker initialization parameters value:\n'");
+                sb.append("The GVWebServiceInvoker initialization parameters value:\n");
                 sb.append("\twsdlURL '").append(wsdlURL).append("'\n");
+                sb.append("\twsEndpointURL '");
+                if (wsEndpointURL != null) {
+                    sb.append(wsEndpointURL).append("'\n");
+                }
+                sb.append("'\n");
                 sb.append("\tserviceNS '").append(serviceNS).append("'\n");
                 sb.append("\tservice '").append(service).append("'\n");
                 sb.append("\toperation '").append(operation).append("'\n");
-                sb.append("\tportName '").append(portName).append("'\n");
+                sb.append("\tportName '");
+                if (portName != null) {
+                    sb.append(portName);
+                }
+                sb.append("'\n");
                 sb.append("\treturnType '").append(returnType).append("'\n");
                 logger.debug(sb.toString());
             }
@@ -192,6 +204,9 @@ public class GVWebServiceInvoker
                 }
 
                 String wsEp = gvBuffer.getProperty("WS_ENDPOINT_URL");
+                if (wsEp == null) {
+                    wsEp = wsEndpointURL;
+                }
                 if (wsEp == null) {
                     wsEp = operationClient.getOptions().getTo().getAddress();
                 }
