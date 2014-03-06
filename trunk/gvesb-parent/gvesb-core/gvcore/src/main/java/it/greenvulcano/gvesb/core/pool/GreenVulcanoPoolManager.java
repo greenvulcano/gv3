@@ -121,7 +121,7 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
     {
         super.finalize();
         XMLConfig.removeConfigurationListener(this);
-        destroyGreenVulcanoPool();
+        destroyGreenVulcanoPools();
     }
 
     /**
@@ -142,38 +142,45 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
             }
 
             logger.debug("Initializing GreenVulcanoPoolManager");
+            // no already initialized pools...
             if (greenVulcanoPools.isEmpty()) {
                 NodeList nl = XMLConfig.getNodeList(CONF_FILE_NAME, "//GreenVulcanoPool");
+                // initialize all configured pools
                 for (int i = 0; i < nl.getLength(); i++) {
-                    GreenVulcanoPool GreenVulcanoPool = new GreenVulcanoPool(nl.item(i));
-                    logger.debug("Initialized GreenVulcanoPool(" + GreenVulcanoPool.getSubsystem() + ")");
-                    register(GreenVulcanoPool);
-                    greenVulcanoPools.put(GreenVulcanoPool.getSubsystem(), GreenVulcanoPool);
+                    GreenVulcanoPool pool = new GreenVulcanoPool(nl.item(i));
+                    logger.debug("Initialized GreenVulcanoPool(" + pool.getSubsystem() + ")");
+                    register(pool);
+                    greenVulcanoPools.put(pool.getSubsystem(), pool);
                 }
                 initialized = true;
                 return;
             }
 
+            // some pools already initialized...
             Map<String, GreenVulcanoPool> tmp = new HashMap<String, GreenVulcanoPool>();
             NodeList nl = XMLConfig.getNodeList(CONF_FILE_NAME, "//GreenVulcanoPool");
             for (int p = 0; p < nl.getLength(); p++) {
-                GreenVulcanoPool GreenVulcanoPool = greenVulcanoPools.remove(XMLConfig.get(nl.item(p), "@subsystem"));
-                if (GreenVulcanoPool == null) {
-                    GreenVulcanoPool = new GreenVulcanoPool(nl.item(p));
+                GreenVulcanoPool pool = greenVulcanoPools.remove(XMLConfig.get(nl.item(p), "@subsystem"));
+                if (pool == null) {
+                    // add new configured pools...
+                    pool = new GreenVulcanoPool(nl.item(p));
                 }
                 else {
-                    GreenVulcanoPool.init(nl.item(p));
+                    // reinitialize already configured pools...
+                    pool.init(nl.item(p));
                 }
-                logger.debug("Initialized GreenVulcanoPool(" + GreenVulcanoPool.getSubsystem() + ")");
-                register(GreenVulcanoPool);
-                tmp.put(GreenVulcanoPool.getSubsystem(), GreenVulcanoPool);
+                logger.debug("Initialized GreenVulcanoPool(" + pool.getSubsystem() + ")");
+                register(pool);
+                // save already configured pools removed from configuration...
+                tmp.put(pool.getSubsystem(), pool);
             }
 
-            for (GreenVulcanoPool GreenVulcanoPool : greenVulcanoPools.values()) {
-                logger.debug("Destroying GreenVulcanoPool(" + GreenVulcanoPool.getSubsystem() + ")");
-                deregister(GreenVulcanoPool, true);
+            // destroy pools removed from configuration...
+            for (GreenVulcanoPool pool : greenVulcanoPools.values()) {
+                logger.debug("Destroying GreenVulcanoPool(" + pool.getSubsystem() + ")");
+                deregister(pool, true);
                 try {
-                    GreenVulcanoPool.destroy();
+                    pool.destroy(true);
                 }
                 catch (Exception exc) {
                     // do nothing
@@ -190,13 +197,13 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
      * Destroy the pools.
      * 
      */
-    private void destroyGreenVulcanoPool()
+    private void destroyGreenVulcanoPools()
     {
-        for (GreenVulcanoPool GreenVulcanoPool : greenVulcanoPools.values()) {
+        for (GreenVulcanoPool pool : greenVulcanoPools.values()) {
             try {
-                logger.debug("Destroying GreenVulcanoPool(" + GreenVulcanoPool.getSubsystem() + ")");
-                deregister(GreenVulcanoPool, true);
-                GreenVulcanoPool.destroy();
+                logger.debug("Destroying GreenVulcanoPool(" + pool.getSubsystem() + ")");
+                deregister(pool, true);
+                pool.destroy(true);
             }
             catch (Exception exc) {
                 // do nothing
