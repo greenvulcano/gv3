@@ -48,6 +48,8 @@
     <version.commons-pool>1.5.5</version.commons-pool>
     <version.drools-api>5.2.0.M1</version.drools-api>
     <version.drools>5.5.0.Final</version.drools>
+    <version.ewsapi>1.1.5</version.ewsapi>
+    <!--<version.ewsapi>1.2.0</version.ewsapi>-->
     <version.flute>1.2</version.flute>
     <version.fop>0.95</version.fop>
     <version.hapi>1.2</version.hapi>
@@ -1481,6 +1483,14 @@
             <groupId>org.openspcoop</groupId>
             <artifactId>openspcoop_stub</artifactId>
             <version>${version.openspcoop}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.ewsjavaapi</groupId>
+            <artifactId>exchange-ws-api</artifactId>
+            <version>${version.ewsapi}</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

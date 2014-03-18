@@ -243,6 +243,9 @@
             <fileset dir="${fop.fop.lib}">
                 <include name="*.jar"/>
             </fileset>
+            <fileset dir="${ewsjavaapi.ewsjavaapi.lib}">
+                <include name="*.jar"/>
+            </fileset>
             <fileset dir="${org.apache.httpcomponents.lib}">
                 <include name="*.jar"/>
             </fileset>
@@ -266,6 +269,9 @@
             </fileset>
             <fileset dir="${com.sun.xml.ws.lib}">
                 <include name="jaxws-rt.jar"/>
+            </fileset>
+            <fileset dir="${jcifs.jcifs.lib}">
+                <include name="*.jar"/>
             </fileset>
             <fileset dir="${jdom.jdom.lib}">
                 <include name="*.jar"/>

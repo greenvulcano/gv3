@@ -33,6 +33,7 @@
         <module>gvvcl-jca</module>
         <module>gvvcl-jmx</module>
         <module>gvvcl-mail</module>
+        <module>gvvcl-msexchange</module>
         <module>gvvcl-ldap</module>
         <module>gvvcl-openspcoop</module>
     </modules>
