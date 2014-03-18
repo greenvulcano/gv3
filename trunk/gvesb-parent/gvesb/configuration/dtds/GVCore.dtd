@@ -4,7 +4,7 @@
 <!ENTITY % flow-nodes "GVOperationNode|GVNodeCheck|ChangeGVBufferNode|GVWaitNode|GVNotificationNode|GVIteratorOperationNode|GVCoreCallNode|GVSubFlowCallNode|GVEndNode|GVSavePointNode|GVSubFlowSpawnNode|GVSubFlowParallelNode|GVSubFlowSplittedNode">
 <!ENTITY % filters    "IDFilter|RetCodeFilter|SystemFilter|ServiceFilter|PropertyFilter">
 <!ENTITY % j2ee-calls "j2ee-ejb-call|j2ee-jca-call|jmx-call %extra-j2ee-calls;">
-<!ENTITY % comm-calls "smtp-call|pop-call|pop-uid-remove-call|ws-call|rest-call|http-call %extra-comm-calls;">
+<!ENTITY % comm-calls "smtp-call|pop-call|pop-uid-remove-call|exchange-send-call|exchange-receive-call|exchange-manage-call|ws-call|rest-call|http-call %extra-comm-calls;">
 <!ENTITY % file-calls "filereader-call|filewriter-call|filemanager-call|fsmonitor-call|remotemanager-call|rsh-call|rsh-filereader-call|rsh-filewriter-call %extra-file-calls;">
 <!ENTITY % db-calls   "db-call|ldap-search-call|ldap-update-call %extra-db-calls;">
 <!ENTITY % util-calls "extract-data-call|routed-call|birt-report-call|test-service-call|generic-call %extra-util-calls;">
@@ -9988,6 +9988,249 @@
     #NotNull
 -->
 <!ATTLIST pop-uid-remove-call jndi-name CDATA #REQUIRED>
+
+<!--
+    Plugin for sending an email from MS Exchange through WS interface..
+
+    #Label: @name
+    #Icon: GVSmtpCall.png
+    #Category: Web/Mail
+    #SelectOnInsert
+    #Template:
+
+        <xsl:template match="exchange-send-call">
+                <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT exchange-send-call (Description?, mail-properties?, mail-message)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST exchange-send-call  type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST exchange-send-call  class CDATA #FIXED "it.greenvulcano.gvesb.virtual.msexchange.SendCallOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST exchange-send-call   name CDATA #REQUIRED>
+<!--
+    User name for authentication.
+
+    #NotNull
+-->
+<!ATTLIST exchange-send-call   userName CDATA #REQUIRED>
+<!--
+    Password for authentication.
+
+    #NotNull
+-->
+<!ATTLIST exchange-send-call   password CDATA #REQUIRED>
+<!--
+    User domain.
+
+    #NotNull
+-->
+<!ATTLIST exchange-send-call   domain CDATA #IMPLIED>
+<!--
+    MS Exchange WS url.
+
+    #NotNull
+-->
+<!ATTLIST exchange-send-call   exchangeURL CDATA #REQUIRED>
+<!--
+    Save a copy of the sent message in "Sent Items" folder.
+    Default true.
+
+    #NotNull
+-->
+<!ATTLIST exchange-send-call   save-copy (true|false) #IMPLIED>
+<!--
+    GVBuffer defines the properties that will contain
+    the MessageID of the message sent.
+    Default to 'messageID'.
+-->
+<!ATTLIST exchange-send-call   message-id-property CDATA #IMPLIED>
+
+<!--
+    Plugin for receiving emails from MS Exchange through WS interface.
+
+    #Label: @name
+    #Icon: GVPopCall.png
+    #Category: Web/Mail
+    #SelectOnInsert
+    #Template:
+
+        <xsl:template match="exchange-receive-call">
+                <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT exchange-receive-call (Description?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST exchange-receive-call   type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST exchange-receive-call   class CDATA #FIXED "it.greenvulcano.gvesb.virtual.msexchange.ReceiveCallOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST exchange-receive-call  name CDATA #REQUIRED>
+<!--
+    User name for authentication.
+
+    #NotNull
+-->
+<!ATTLIST exchange-receive-call   userName CDATA #REQUIRED>
+<!--
+    Password for authentication.
+
+    #NotNull
+-->
+<!ATTLIST exchange-receive-call   password CDATA #REQUIRED>
+<!--
+    User domain.
+
+    #NotNull
+-->
+<!ATTLIST exchange-receive-call   domain CDATA #IMPLIED>
+<!--
+    MS Exchange WS url.
+
+    #NotNull
+-->
+<!ATTLIST exchange-receive-call   exchangeURL CDATA #REQUIRED>
+<!--
+    Folder from wich read emails.
+    Default to Inbox.
+
+    #NotNull
+-->
+<!ATTLIST exchange-receive-call   folderName CDATA #IMPLIED>
+<!--
+    Mark a processed message as DELETED.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST exchange-receive-call   delete-messages (true|false) #IMPLIED>
+<!--
+    RegExp pattern for email address cleaning.
+    Default "[A-z][A-z0-9_]*([.][A-z0-9_]+)*[@][A-z0-9_]+([.][A-z0-9_]+)*[.][A-z]{2,4}".
+
+    #NotNull
+-->
+<!ATTLIST exchange-receive-call   email-rx-cleaner CDATA #IMPLIED>
+<!--
+    Also export a message in EML format.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST exchange-receive-call   export-EML (true|false) #IMPLIED>
+
+<!--
+    Plugin for managing emails on MS Exchange through WS interface.
+    The message on wich operate is identified by its InternetMessageId contained
+    into the MESSAGE_ID property of the input GVBuffer.
+    The property MANAGED_MESSAGE_COUNT in the output GVBuffer contains the number:
+       0 : no message processed
+       1 : message <MESSAGE_ID> processed
+
+    #Label: @name
+    #Icon: GVPopCall.png
+    #Category: Web/Mail
+    #SelectOnInsert
+    #Template:
+
+        <xsl:template match="exchange-manage-call">
+                <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT exchange-manage-call (Description?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST exchange-manage-call type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+
+-->
+<!ATTLIST exchange-manage-call class CDATA #FIXED "it.greenvulcano.gvesb.virtual.msexchange.ManageEmailCallOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST exchange-manage-call name CDATA #REQUIRED>
+<!--
+    User name for authentication.
+
+    #NotNull
+-->
+<!ATTLIST exchange-manage-call userName CDATA #REQUIRED>
+<!--
+    Password for authentication.
+
+    #NotNull
+-->
+<!ATTLIST exchange-manage-call password CDATA #REQUIRED>
+<!--
+    User domain.
+
+    #NotNull
+-->
+<!ATTLIST exchange-manage-call domain CDATA #IMPLIED>
+<!--
+    MS Exchange WS url.
+
+    #NotNull
+-->
+<!ATTLIST exchange-manage-call exchangeURL CDATA #REQUIRED>
+<!--
+    Folder from wich read email.
+    Default to Inbox.
+
+    #NotNull
+-->
+<!ATTLIST exchange-manage-call folderFrom CDATA #IMPLIED>
+<!--
+    Folder on wich copy/move email.
+
+    #NotNull
+-->
+<!ATTLIST exchange-manage-call folderTo CDATA #IMPLIED>
+<!--
+    Action to execute on message.
+
+    #NotNull
+-->
+<!ATTLIST exchange-manage-call action (copy|move|delete|set-read|set-unread) #REQUIRED>
 
 <!--
     Plugin for running a R(emote)SH(ell) command.

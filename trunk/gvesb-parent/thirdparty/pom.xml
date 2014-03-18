@@ -302,6 +302,13 @@
                             </mapping>
                         </dependency>
                         <dependency>
+                            <groupId>com.microsoft.ewsjavaapi</groupId>
+                            <artifactId>exchange-ws-api</artifactId>
+                            <mapping>
+                                <componentId>ewsjavaapi</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
                             <groupId>org.springframework</groupId>
                             <artifactId>*</artifactId>
                             <mapping>
@@ -893,6 +900,10 @@
             <artifactId>openspcoop_stub</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.microsoft.ewsjavaapi</groupId>
+            <artifactId>exchange-ws-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
@@ -1025,6 +1036,10 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-msexchange</artifactId>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
