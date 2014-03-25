@@ -211,7 +211,7 @@
                 <param name="BufferedIO" value="false"/>
                 <param name="BufferSize" value="4096"/>
                 <param name="DatePattern" value="yyyy-MM-dd"/>
-                <param name="File" value="sp{{gv.app.home}}/log/HTTPAdapter.$.log"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVHTTPAdapter.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
                            value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{THREADID}] - %m %n"/>

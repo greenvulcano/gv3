@@ -158,37 +158,52 @@ public class HttpInboundGateway extends HttpServlet
         NMDC.clear();
         NMDC.setServer(JMXEntryPoint.getServerName());
         NMDC.setSubSystem(AdapterHttpConstants.SUBSYSTEM);
-        String mapping = req.getServletPath().substring(1);
-        String gvAction = req.getParameter("GV_ACTION");
-        gvAction = (gvAction != null) ? gvAction : "NULL";
+
         Level level = Level.INFO;
         AdapterHttpException exception = null;
         HttpServletMapping smapping = null;
+        
+        startTime = System.currentTimeMillis();
+        
+        String mapping = req.getPathInfo();
+        if (mapping == null) {
+            mapping = "/";
+        }
+        String gvAction = mapping;
 
         try {
-            startTime = System.currentTimeMillis();
+            smapping = mappingManager.getMapping(mapping);
+            if (smapping == null) {
+                gvAction = req.getParameter("GV_ACTION");
+                gvAction = (gvAction != null) ? gvAction : mapping;
+            }
+
             NMDC.put("HTTP_ACTION", gvAction);
-            logWriter.info(method + " - BEGIN " + mapping + "/" + gvAction);
+            logWriter.info(method + " - BEGIN " + mapping + "|" + gvAction);
 
             // Create and insert the caller in the security context
             GVIdentityHelper.push(new HTTPIdentityInfo(req));
 
             smapping = mappingManager.getMapping(gvAction);
+            if (smapping == null) {
+                throw new AdapterHttpConfigurationException("HttpServletMappingManager - Mapping '" + gvAction
+                        + "' not found");
+            }
             if (!smapping.handleRequest(req, resp)) {
                 level = Level.ERROR;
             }
         }
         catch (AdapterHttpConfigurationException exc) {
             level = Level.ERROR;
-            logWriter.error(method + " " + mapping + "/" + gvAction + " - Can't handle request from client system", exc);
+            logWriter.error(method + " " + mapping + "|" + gvAction + " - Can't handle request from client system", exc);
             exception = exc;
-            throw new ServletException("Can't handle request from client system - " + mapping + "/" + gvAction, exc);
+            throw new ServletException("Can't handle request from client system - " + mapping + "|" + gvAction, exc);
         }
         catch (InboundHttpResponseException exc) {
             level = Level.ERROR;
-            logWriter.error(method + " " + mapping + "/" + gvAction + " - Can't send response to client system: " + exc);
+            logWriter.error(method + " " + mapping + "|" + gvAction + " - Can't send response to client system: " + exc);
             exception = exc;
-            throw new ServletException("Can't send response to client system - " + mapping + "/" + gvAction, exc);
+            throw new ServletException("Can't send response to client system - " + mapping + "|" + gvAction, exc);
         }
         finally {
         	try {
@@ -198,7 +213,7 @@ public class HttpInboundGateway extends HttpServlet
 	            	GVFormatLog gvFormatLog = GVFormatLog.formatENDOperation(exception, totalTime);
 	                logWriter.log(level, gvFormatLog);
 	            }
-	            logWriter.log(level, method + " - END " + mapping + "/" + gvAction + " - ExecutionTime (" + totalTime + ")");
+	            logWriter.log(level, method + " - END " + mapping + "|" + gvAction + " - ExecutionTime (" + totalTime + ")");
         	}
         	finally {
         		// Remove the caller from the security context

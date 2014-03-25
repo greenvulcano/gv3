@@ -30,6 +30,7 @@ import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpInitializationExcepti
 import it.greenvulcano.log.GVLogger;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -50,6 +51,7 @@ public class HttpServletMappingManager implements ConfigurationListener
     private static Logger                   logger               = GVLogger.getLogger(HttpServletMappingManager.class);
 
     private Map<String, HttpServletMapping> mappings             = new HashMap<String, HttpServletMapping>();
+    private Map<String, HttpServletMapping> mappingsWildCards    = new HashMap<String, HttpServletMapping>();
 
     private HttpServletTransactionManager   transactionManager   = null;
 
@@ -93,8 +95,14 @@ public class HttpServletMappingManager implements ConfigurationListener
         HttpServletMapping smapping = mappings.get(action);
 
         if (smapping == null) {
-            throw new AdapterHttpConfigurationException("HttpServletMappingManager - Mapping '" + action
-                    + "' not found");
+            Iterator<String> it = mappingsWildCards.keySet().iterator();
+            while (it.hasNext()) {
+                String map = it.next();
+                if (action.startsWith(map)) {
+                    smapping = mappingsWildCards.get(map);
+                    break;
+                }
+            }
         }
 
         return smapping;
@@ -110,6 +118,10 @@ public class HttpServletMappingManager implements ConfigurationListener
             mapping.destroy();
         }
         mappings.clear();
+        for (HttpServletMapping mapping : mappingsWildCards.values()) {
+            mapping.destroy();
+        }
+        mappingsWildCards.clear();
         if (transactionManager != null) {
             transactionManager.destroy();
             transactionManager = null;
@@ -139,16 +151,27 @@ public class HttpServletMappingManager implements ConfigurationListener
     {
         try {
             NodeList mappingNodes = XMLConfig.getNodeList(AdapterHttpConstants.CFG_FILE,
-                    "/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@enabled='true']");
+                    "/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping' and @enabled='true']");
 
             if (mappingNodes != null) {
                 for (int i = 0; i < mappingNodes.getLength(); i++) {
                     Node confNode = mappingNodes.item(i);
-                    HttpServletMapping smapping = new HttpServletMapping();
+                    String clazz = XMLConfig.get(confNode, "@class");
+                    HttpServletMapping smapping = (HttpServletMapping) Class.forName(clazz).newInstance();
                     smapping.init(transactionManager, formatterMgr, confNode);
-                    mappings.put(smapping.getAction(), smapping);
-                    if (!smapping.getAction().startsWith("/")) {
-                        mappings.put("/" + smapping.getAction(), smapping);
+                    String action = smapping.getAction();
+                    if (action.indexOf("*") == -1) {
+                        mappings.put(action, smapping);
+                        if (!action.startsWith("/")) {
+                            mappings.put("/" + action, smapping);
+                        }
+                    }
+                    else {
+                        action = action.substring(0, action.indexOf("*"));
+                        if (!action.startsWith("/")) {
+                            action = "/" + action;
+                        }
+                        mappingsWildCards.put(action, smapping);
                     }
                 }
             }
@@ -157,6 +180,11 @@ public class HttpServletMappingManager implements ConfigurationListener
             logger.error("HttpServletMappingManager - Error while accessing configuration informations via XMLConfig: "
                     + exc);
             throw new AdapterHttpConfigurationException("GVHA_XML_CONFIG_ERROR", exc);
+        }
+        catch (Exception exc) {
+            logger.error("HttpServletMappingManager - Error while initializing configuration: "
+                    + exc);
+            throw new AdapterHttpConfigurationException("GVHA_INIT_ERROR", exc);
         }
     }
 }

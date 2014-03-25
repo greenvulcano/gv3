@@ -90,6 +90,7 @@ public class HTTPCallOperation implements CallOperation
     public static final int     DEFAULT_SO_TIMEOUT     = 30000;
 
     private String              methodURI;
+    private String              contextPath;
     private boolean             uriEscaped             = true;
     private HttpClient          httpClient;
     private String              host;
@@ -118,6 +119,7 @@ public class HTTPCallOperation implements CallOperation
             Node endpointNode = XMLConfig.getNode(config, "endpoint");
             host = XMLConfig.get(endpointNode, "@host");
             port = XMLConfig.get(endpointNode, "@port", "80");
+            contextPath = XMLConfig.get(endpointNode, "@context-path", "");
             boolean secure = XMLConfig.getBoolean(endpointNode, "@secure", false);
             connTimeout = XMLConfig.getInteger(endpointNode, "@conn-timeout", DEFAULT_CONN_TIMEOUT);
             soTimeout = XMLConfig.getInteger(endpointNode, "@so-timeout", DEFAULT_SO_TIMEOUT);
@@ -177,7 +179,7 @@ public class HTTPCallOperation implements CallOperation
             logger.debug("Server Host: " + currHost + " - Port: " + currPort);
             httpClient.getHostConfiguration().setHost(currHost, Integer.parseInt(currPort), protocol);
             
-            currMethodURI = PropertiesHandler.expand(methodURI, params, gvBuffer);
+            currMethodURI = PropertiesHandler.expand(contextPath + methodURI, params, gvBuffer);
             logger.debug("MethodURI[escaped:" + uriEscaped + "]=[" + currMethodURI + "]");
             switch (methodName) {
                 case OPTIONS :
