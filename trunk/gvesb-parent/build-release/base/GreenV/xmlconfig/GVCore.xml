@@ -5,9 +5,9 @@
 <GVCore version="1.0">
     <GVCryptoHelper name="CRYPTO_HELPER" type="module">
         <KeyStoreID id="WSS_service" key-store-name="service.jks" key-store-prv="SUN"
-                    key-store-pwd="{3DES}41OE8r5rJLM=" key-store-type="JKS"/>
+                    key-store-pwd="xmlp{{keystore.service.password}}" key-store-type="JKS"/>
         <KeyStoreID id="WSS_client" key-store-name="client.jks" key-store-prv="SUN"
-                    key-store-pwd="{3DES}oh2yh6P0/L8=" key-store-type="JKS"/>
+                    key-store-pwd="xmlp{{keystore.client.password}}" key-store-type="JKS"/>
     </GVCryptoHelper>
     <GVXPath name="XPATH" type="module">
         <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
@@ -2589,12 +2589,12 @@ data.setObject(str.substring(1));]]></JavaScript>
                         </LocalFileSystemMonitor>
                     </fsmonitor-call>
                     <filereader-call class="it.greenvulcano.gvesb.virtual.file.reader.FileReader"
-                                     fileName="ognl{{property[&apos;FILE_NAME&apos;]}}"
+                                     fileName="@{{FILE_NAME}}"
                                      name="ReadFile"
                                      srcPath="${{gv.app.home}}/TEST/TESTFS/TestXML/input"
                                      type="call"/>
                     <filewriter-call class="it.greenvulcano.gvesb.virtual.file.writer.FileWriter"
-                                     fileName="ognl{{property[&apos;FILE_NAME&apos;]}}.result"
+                                     fileName="@{{FILE_NAME}}.result"
                                      name="WriteStatusFile"
                                      targetPath="${{gv.app.home}}/TEST/TESTFS/TestXML/discarded"
                                      type="call"/>
@@ -2602,10 +2602,10 @@ data.setObject(str.substring(1));]]></JavaScript>
                                       name="MoveFile" type="call">
                         <FileCommands>
                             <FileMoveCommand class="it.greenvulcano.gvesb.virtual.file.command.GVMove"
-                                             filePattern="ognl{{property[&apos;FILE_NAME&apos;]}}"
+                                             filePattern="@{{FILE_NAME}}"
                                              isCritical="true"
                                              sourcePath="${{gv.app.home}}/TEST/TESTFS/TestXML/input"
-                                             targetPath="${{gv.app.home}}/TEST/TESTFS/TestXML/ognl{{property[&apos;TARGET&apos;]}}"
+                                             targetPath="${{gv.app.home}}/TEST/TESTFS/TestXML/@{{TARGET}}"
                                              type="file-command"/>
                         </FileCommands>
                     </filemanager-call>
@@ -2644,23 +2644,23 @@ data.setObject(str.substring(1));]]></JavaScript>
                                           sort-mode="by-name"/>
                             <FTPManager autoConnect="false"
                                         class="it.greenvulcano.util.remotefs.ftp.FTPManager"
-                                        hostType="UNIX" hostname="localhost"
-                                        password="{3DES}pl1YKFjWlqMfdTIbxY17Mg=="
-                                        port="3021" type="remote-manager"
-                                        username="test_user"/>
+                                        hostType="UNIX" hostname="xmlp{{remote.ftp.host}}"
+                                        password="xmlp{{remote.ftp.password}}"
+                                        port="xmlp{{remote.ftp.port}}" type="remote-manager"
+                                        username="xmlp{{remote.ftp.user}}"/>
                         </RemoteFileSystemMonitor>
                     </fsmonitor-call>
                     <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
                                         name="ReadFile" type="call">
                         <FTPManager autoConnect="false"
                                     class="it.greenvulcano.util.remotefs.ftp.FTPManager"
-                                    hostType="UNIX" hostname="localhost"
-                                    password="{3DES}pl1YKFjWlqMfdTIbxY17Mg==" port="3021"
-                                    type="remote-manager" username="test_user"/>
+                                    hostType="UNIX" hostname="xmlp{{remote.ftp.host}}"
+                                    password="xmlp{{remote.ftp.password}}" port="xmlp{{remote.ftp.port}}"
+                                    type="remote-manager" username="xmlp{{remote.ftp.user}}"/>
                         <RemoteCommands>
                             <RemoteDownloadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"
                                                    isCritical="true"
-                                                   remoteFilePattern="ognl{{property[&apos;FILE_NAME&apos;]}}"
+                                                   remoteFilePattern="@{{FILE_NAME}}"
                                                    remotePath="/home/test_user/TestXML/input"
                                                    toGVBufferExpression="setObject(new java.lang.String(#input))"
                                                    type="remote-command"/>
@@ -2670,15 +2670,15 @@ data.setObject(str.substring(1));]]></JavaScript>
                                         name="WriteStatusFile" type="call">
                         <FTPManager autoConnect="false"
                                     class="it.greenvulcano.util.remotefs.ftp.FTPManager"
-                                    hostType="UNIX" hostname="localhost"
-                                    password="{3DES}pl1YKFjWlqMfdTIbxY17Mg==" port="3021"
-                                    type="remote-manager" username="test_user"/>
+                                    hostType="UNIX" hostname="xmlp{{remote.ftp.host}}"
+                                    password="xmlp{{remote.ftp.password}}" port="xmlp{{remote.ftp.port}}"
+                                    type="remote-manager" username="xmlp{{remote.ftp.user}}"/>
                         <RemoteCommands>
                             <RemoteUploadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"
                                                  fromGVBufferExpression="getObject().getBytes()"
                                                  isCritical="true"
                                                  remotePath="/home/test_user/TestXML/discarded"
-                                                 sourceFilePattern="ognl{{property[&apos;FILE_NAME&apos;]}}.result"
+                                                 sourceFilePattern="@{{FILE_NAME}}.result"
                                                  type="remote-command"/>
                         </RemoteCommands>
                     </remotemanager-call>
@@ -2686,14 +2686,14 @@ data.setObject(str.substring(1));]]></JavaScript>
                                         name="MoveFile" type="call">
                         <FTPManager autoConnect="false"
                                     class="it.greenvulcano.util.remotefs.ftp.FTPManager"
-                                    hostType="UNIX" hostname="localhost"
-                                    password="{3DES}pl1YKFjWlqMfdTIbxY17Mg==" port="3021"
-                                    type="remote-manager" username="test_user"/>
+                                    hostType="UNIX" hostname="xmlp{{remote.ftp.host}}"
+                                    password="xmlp{{remote.ftp.password}}" port="xmlp{{remote.ftp.port}}"
+                                    type="remote-manager" username="xmlp{{remote.ftp.user}}"/>
                         <RemoteCommands>
                             <RemoteMoveCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVMove"
                                                isCritical="true"
-                                               newName="ognl{{property[&apos;TARGET&apos;]}}/ognl{{property[&apos;FILE_NAME&apos;]}}"
-                                               oldName="input/ognl{{property[&apos;FILE_NAME&apos;]}}"
+                                               newName="@{{TARGET}}/@{{FILE_NAME}}"
+                                               oldName="input/@{{FILE_NAME}}"
                                                targetPath="/home/test_user/TestXML"
                                                type="remote-command"/>
                         </RemoteCommands>
