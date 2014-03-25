@@ -12818,6 +12818,12 @@
     #NotNull
 -->
 <!ATTLIST endpoint  so-timeout CDATA #IMPLIED>
+<!--
+    Optional context path to prepend to remote URI call.
+
+    #NotNull
+-->
+<!ATTLIST endpoint  context-path CDATA #IMPLIED>
 
 <!--
     Method to execute to the server.
