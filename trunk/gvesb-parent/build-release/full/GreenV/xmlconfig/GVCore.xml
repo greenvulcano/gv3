@@ -31,6 +31,7 @@
             <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc"/>
             <XPathNamespace namespace="http://drools.org/drools-5.0/change-set"
                             prefix="drools-cs"/>
+            <XPathNamespace namespace="urn:hl7-org:v2xml" prefix="hl7"/>
         </XPath>
     </GVXPath>
     <GVForwards name="JMS_FORWARD" type="module">
@@ -3906,6 +3907,9 @@ where ID=?</StatementValue>
             <XSLTransformation DataSourceSet="Default" XSLMapName="HL7/TestHL7_OK.xsl"
                                class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
                                name="TestHL7_OK" type="transformation"/>
+            <XSLTransformation DataSourceSet="Default" XSLMapName="HL7/TestHL7_KO.xsl"
+                               class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
+                               name="TestHL7_KO" type="transformation"/>
         </Transformations>
     </GVDataTransformation>
     <GVTaskManagerConfiguration name="GVTASKS" type="module">
