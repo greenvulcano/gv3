@@ -193,8 +193,8 @@
             <PasswordCallback>
                 <PwCbBasicHandler class="it.greenvulcano.gvesb.ws.rampart.policy.pwcb.PwCbBasicHandler"
                                   type="pwcb">
-                    <UserDef name="client" password="{3DES}oh2yh6P0/L8="/>
-                    <UserDef name="service" password="{3DES}41OE8r5rJLM="/>
+                    <UserDef name="client" password="xmlp{{wss.client.password}}"/>
+                    <UserDef name="service" password="xmlp{{wss.service.password}}"/>
                 </PwCbBasicHandler>
             </PasswordCallback>
         </AxisExtra>
@@ -206,26 +206,26 @@
         </Drivers>
         <Connections>
             <Connection autoCommit="true" connectionMax="5" connectionMin="1"
-                        connectionString="jdbc:hsqldb:hsql://localhost:9001/gvesb"
-                        enabled="Yes" id="ds.test" password="{3DES}eKsDI/A45FU="
+                        connectionString="xmlp{{db.gv_test.url}}"
+                        enabled="Yes" id="ds.test" password="xmlp{{db.gv_test.password}}"
                         txIsolation="TRANSACTION_NONE" type="connection" user="gv_test"/>
         </Connections>
     </GVJdbc>
     <GVJDBCConnectionBuilder name="GVJDBC" type="module">
         <DriverConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverConnectionBuilder"
                                  driver-class="org.hsqldb.jdbcDriver" name="gv_test"
-                                 password="{3DES}eKsDI/A45FU="
+                                 password="xmlp{{db.gv_test.password}}"
                                  type="jdbc-connection-builder"
-                                 url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                 url="xmlp{{db.gv_test.url}}"
                                  user="gv_test"/>
         <DataSourceConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DataSourceConnectionBuilder"
                                      data-source-jndi="ds.gv_test" name="ds.gv_test"
                                      type="jdbc-connection-builder"/>
         <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
                                      driver-class="org.hsqldb.jdbcDriver"
-                                     name="pool_persistence" password="{3DES}UMofcmk3ugU="
+                                     name="pool_persistence" password="xmlp{{db.gv_pers.password}}"
                                      type="jdbc-connection-builder"
-                                     url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                     url="xmlp{{db.gv_pers.url}}"
                                      user="gv_pers">
             <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
                             minIdle="1" timeBetweenEvictionRuns="300">
@@ -234,9 +234,9 @@
         </DriverPoolConnectionBuilder>
         <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
                                      driver-class="org.hsqldb.jdbcDriver" name="gv_log"
-                                     password="{3DES}+JmCPFHLRXI="
+                                     password="xmlp{{db.gv_log.password}}"
                                      type="jdbc-connection-builder"
-                                     url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                     url="xmlp{{db.gv_log.url}}"
                                      user="gv_log">
             <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
                             minIdle="1" timeBetweenEvictionRuns="300">
@@ -245,9 +245,8 @@
         </DriverPoolConnectionBuilder>
         <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
                                      driver-class="org.hsqldb.jdbcDriver" name="gv_stats"
-                                     password="gv_stats"
-                                     type="jdbc-connection-builder"
-                                     url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                     password="xmlp{{db.gv_stats.password}}" type="jdbc-connection-builder"
+                                     url="xmlp{{db.gv_stats.url}}"
                                      user="gv_stats">
             <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
                             minIdle="1" timeBetweenEvictionRuns="300">
@@ -357,8 +356,8 @@ envelope.body.addChild(#payResponse)) : envelope.body.addChild(@org.apache.axis2
                                              type="dataProvider">
                 <Field direction="OUT" key="message" type="field">
                     <Expression type="ognl"><![CDATA[#basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
-#basicAuth.setUsername("userA"),
-#basicAuth.setPassword("userA"),
+#basicAuth.setUsername("xmlp{{ws.auth.user}}"),
+#basicAuth.setPassword(@it.greenvulcano.configuration.XMLConfig@getDecrypted("xmlp{{ws.auth.password}}")),
 #basicAuth.setPreemptiveAuthentication(true),
 options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)]]></Expression>
                 </Field>
@@ -369,8 +368,8 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                 <Field direction="OUT" key="message" type="field">
                     <Expression type="ognl"><![CDATA[envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement())),
 #basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
-#basicAuth.setUsername("userA"),
-#basicAuth.setPassword("userA"),
+#basicAuth.setUsername("xmlp{{ws.auth.user}}"),
+#basicAuth.setPassword(@it.greenvulcano.configuration.XMLConfig@getDecrypted("xmlp{{ws.auth.password}}")),
 #basicAuth.setPreemptiveAuthentication(true),
 options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)]]></Expression>
                 </Field>
@@ -381,8 +380,8 @@ options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE,
                 <Field direction="OUT" key="message" type="field">
                     <Expression type="ognl"><![CDATA[envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement())),
 #basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
-#basicAuth.setUsername("userA"),
-#basicAuth.setPassword("userA"),
+#basicAuth.setUsername("xmlp{{ws.auth.user}}"),
+#basicAuth.setPassword(@it.greenvulcano.configuration.XMLConfig@getDecrypted("xmlp{{ws.auth.password}}")),
 #basicAuth.setPreemptiveAuthentication(true),
 options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)]]></Expression>
                 </Field>
