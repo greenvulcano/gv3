@@ -32,6 +32,7 @@ import it.greenvulcano.gvesb.adapter.http.formatters.handlers.GVTransactionInfo;
 import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpConstants;
 import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpException;
 import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpInitializationException;
+import it.greenvulcano.gvesb.adapter.http.utils.DumpUtils;
 import it.greenvulcano.gvesb.adapter.http.utils.RetCodeHandler;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.buffer.GVPublicException;
@@ -71,6 +72,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
     private Formatter                     formatter           = null;
     private HttpServletTransactionManager transactionManager  = null;
     private String                        action              = null;
+    private boolean                       dump                = false;
     private RetCodeHandler                retCodeHandlerIn    = null;
     private RetCodeHandler                retCodeHandlerOut   = null;
     private String                        responseContentType = null;
@@ -89,6 +91,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
 
         try {
             action = XMLConfig.get(configurationNode, "@Action");
+            dump = XMLConfig.getBoolean(configurationNode, "@dump-in-out", false);
             String formatterID = XMLConfig.get(configurationNode, "@FormatterID");
             formatter = formatterMgr.getFormatter(formatterID);
             retCodeHandlerIn = new RetCodeHandler();
@@ -114,7 +117,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
      * @return if request handling was successful
      * @throws InboundHttpResponseException
      */
-    public boolean handleRequest(HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException
+    public boolean handleRequest(String methodName, HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException
     {
         logger.debug("handleRequest start");
         long startTime = System.currentTimeMillis();
@@ -128,6 +131,12 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
     	Level level = Level.INFO;
     	
         try {
+            if (dump) {
+                StringBuffer sb = new StringBuffer();
+                DumpUtils.dump(req, sb);
+                logger.info(sb);
+            }
+
             environment.put(AdapterHttpConstants.ENV_KEY_TRANS_INFO, transInfo);
             environment.put(AdapterHttpConstants.ENV_KEY_HTTP_SERVLET_REQUEST, req);
             environment.put(AdapterHttpConstants.ENV_KEY_HTTP_SERVLET_RESPONSE, resp);
@@ -227,7 +236,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
                     logger.error("handleRequest - Transaction failed: " + exc);
                 }
             }
-            
+
             long endTime = System.currentTimeMillis();
             long totalTime = endTime - startTime;
             GVFormatLog gvFormatLog = null;
@@ -247,6 +256,11 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
             environment.clear();
         }
         return status;
+    }
+
+    @Override
+    public boolean isDumpInOut() {
+        return dump;
     }
 
     /**
@@ -377,6 +391,12 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
             out.write(responseString);
             out.flush();
             out.close();
+            
+            if (dump) {
+                StringBuffer sb = new StringBuffer();
+                DumpUtils.dump(resp, sb);
+                logger.info(sb);
+            }
         }
         catch (FormatterExecutionException exc) {
             logger.error("manageResponse - Error while handling response parameters: " + exc);

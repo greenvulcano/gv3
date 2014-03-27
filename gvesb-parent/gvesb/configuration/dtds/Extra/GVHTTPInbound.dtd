@@ -82,6 +82,13 @@
     #NotNull
 -->
 <!ATTLIST GVCoreActionMapping enabled (true | false) #REQUIRED>
+<!--
+    If true enable the dump of the input/output HTTP data.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST GVCoreActionMapping dump-in-out (true|false) #IMPLIED>
 
 <!--
     Defines a mapping between a request Action and a configured Formatter.

@@ -25,10 +25,10 @@ import it.greenvulcano.gvesb.adapter.http.HttpServletTransactionManager;
 import it.greenvulcano.gvesb.adapter.http.exc.InboundHttpResponseException;
 import it.greenvulcano.gvesb.adapter.http.formatters.FormatterManager;
 import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpInitializationException;
+import it.greenvulcano.gvesb.adapter.http.utils.DumpUtils;
 import it.greenvulcano.gvesb.http.ProtocolFactory;
 import it.greenvulcano.log.GVLogger;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -83,7 +83,7 @@ public class ForwardHttpServletMapping implements HttpServletMapping
      * 
      */
     public ForwardHttpServletMapping() {
-        // TODO Auto-generated constructor stub
+        // do nothing
     }
 
     /* (non-Javadoc)
@@ -145,22 +145,19 @@ public class ForwardHttpServletMapping implements HttpServletMapping
      * @see it.greenvulcano.gvesb.adapter.http.HttpServletMapping#handleRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     @Override
-    public boolean handleRequest(HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException {
+    public boolean handleRequest(String methodName, HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException {
         HttpMethod method = null;
         logger.debug("BEGIN forward: " + req.getRequestURI());
         try {
             //httpClient.getHostConfiguration().setHost(host, Integer.parseInt(port), protocol);
         	
-        	ByteArrayOutputStream bodyIn = new ByteArrayOutputStream();
         	ByteArrayOutputStream bodyOut = new ByteArrayOutputStream();
 
-            String methodName = req.getMethod();
             if (methodName.equals("GET")) {
                 method = new GetMethod();
             }
             else if (methodName.equals("POST")) {
                 method = new PostMethod();
-                IOUtils.copy(req.getInputStream(), bodyIn);
             }
             else if (methodName.equals("HEAD")) {
                 method = new HeadMethod();
@@ -170,7 +167,6 @@ public class ForwardHttpServletMapping implements HttpServletMapping
             }
             else if (methodName.equals("PUT")) {
                 method = new PutMethod();
-                IOUtils.copy(req.getInputStream(), bodyIn);
             }
             else if (methodName.equals("DELETE")) {
                 method = new DeleteMethod();
@@ -178,10 +174,10 @@ public class ForwardHttpServletMapping implements HttpServletMapping
             else {
                 throw new InboundHttpResponseException("GV_CALL_SERVICE_ERROR", new String[][]{{"message", "Unknown method = " + methodName}});
             }
-            
+
             if (dump) {
             	StringBuffer sb = new StringBuffer();
-            	Dump(req, bodyIn, sb);
+            	DumpUtils.dump(req, sb);
             	logger.info(sb);
             }
 
@@ -210,10 +206,10 @@ public class ForwardHttpServletMapping implements HttpServletMapping
             }
             
             if (methodName.equals("POST")) {
-                ((PostMethod) method).setRequestBody(new ByteArrayInputStream(bodyIn.toByteArray()));
+                ((PostMethod) method).setRequestBody(req.getInputStream());
             }
             else if (methodName.equals("PUT")) {
-                ((PutMethod) method).setRequestBody(new ByteArrayInputStream(bodyIn.toByteArray()));
+                ((PutMethod) method).setRequestBody(req.getInputStream());
             }
             
             int status = httpClient.executeMethod(method);
@@ -222,7 +218,7 @@ public class ForwardHttpServletMapping implements HttpServletMapping
             
             if (dump) {
             	StringBuffer sb = new StringBuffer();
-            	Dump(method, bodyOut, sb);
+            	DumpUtils.dump(method, bodyOut, sb);
             	logger.info(sb);
             }
             
@@ -263,6 +259,11 @@ public class ForwardHttpServletMapping implements HttpServletMapping
         }
     }
 
+    @Override
+    public boolean isDumpInOut() {
+        return dump;
+    }
+    
     /* (non-Javadoc)
      * @see it.greenvulcano.gvesb.adapter.http.HttpServletMapping#destroy()
      */
@@ -279,67 +280,4 @@ public class ForwardHttpServletMapping implements HttpServletMapping
         return action;
     }
     
-    private void Dump(HttpServletRequest request, ByteArrayOutputStream body, StringBuffer log) {
-        String hN;
-
-        log.append("DUMP HttpServletRequest START").append("\n");
-        log.append("Method: ").append(request.getMethod()).append("\n");
-        log.append("RequestedSessionId: ").append(request.getRequestedSessionId()).append("\n");
-        log.append("Protocol: ").append(request.getProtocol()).append("\n");
-        log.append("ContextPath: ").append(request.getContextPath()).append("\n");
-        log.append("PathInfo: ").append(request.getPathInfo()).append("\n");
-        log.append("QueryString: ").append(request.getQueryString()).append("\n");
-        log.append("RequestURI: ").append(request.getRequestURI()).append("\n");
-        log.append("RequestURL: ").append(request.getRequestURL()).append("\n");
-        log.append("ContentType: ").append(request.getContentType()).append("\n");
-        log.append("ContentLength: ").append(request.getContentLength()).append("\n");
-        log.append("CharacterEncoding: ").append(request.getCharacterEncoding()).append("\n");
-
-        
-        log.append("Headers START\n");
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            hN = headerNames.nextElement();
-            log.append("[" + hN + "]=");
-            Enumeration<String> headers = request.getHeaders(hN);
-            while (headers.hasMoreElements()) {
-            	log.append("[" + headers.nextElement() + "]");
-            }
-            log.append("\n");
-        }
-        log.append("Headers END\n");
-        
-        log.append("Body START\n");
-        log.append(body.toString()).append("\n");
-        log.append("Body END\n");
-       
-        log.append("DUMP HttpServletRequest END \n");
-    }
-    
-    private void Dump(HttpMethod response, ByteArrayOutputStream body, StringBuffer log) {
-        String hN;
-        String hV;
-
-        log.append("DUMP HttpServletResponse START").append("\n");
-        log.append("Status: ").append(response.getStatusLine()).append("\n");
-        log.append("Headers START\n");
-        Header[] responseHeaders = response.getResponseHeaders();
-        for (Header header : responseHeaders) {
-            hN = header.getName();
-            log.append("[" + hN + "]=");
-            hV = header.getValue();
-            if (hV == null) {
-                hV = "";
-            }
-            log.append("[" + hV + "]").append("\n");
-        }
-        log.append("Headers END\n");
-        
-        log.append("Body START\n");
-        log.append(body.toString()).append("\n");
-        log.append("Body END\n");
-       
-        log.append("DUMP HttpServletResponse END \n");
-    }
-
 }
