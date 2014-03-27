@@ -74,6 +74,8 @@ public class PropertiesAction extends LookupDispatchAction {
 			throws Exception {
 
 		HttpSession session = request.getSession();
+        session.removeAttribute("error");
+        session.removeAttribute("warning");
 		try {
 			logger.debug("ActionForward revert");
 			PropertiesEditor pe = new PropertiesEditor();
@@ -87,12 +89,10 @@ public class PropertiesAction extends LookupDispatchAction {
 			session.setAttribute("PropertiesEditorForm", dynaForm);
 			logger.debug("Properties form: " + dynaForm);
 			logger.debug("End ActionForward revert");
-			return mapping.findForward("home");
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			session.setAttribute("iteratorListLog",
-					new ArrayList<List<String>>());
+		} 
+		catch (Exception exc) {
+        	session.setAttribute("error", exc.getMessage());
+            logger.error("Exception loading global properties", exc);
 		}
 
 		return mapping.findForward("home");
@@ -102,6 +102,8 @@ public class PropertiesAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		HttpSession session = request.getSession();
+        session.removeAttribute("error");
+        session.removeAttribute("warning");
 		try {
 			logger.debug("ActionForward save");
 			logger.debug("dynaForm:   " + form);
@@ -125,8 +127,9 @@ public class PropertiesAction extends LookupDispatchAction {
                             this, mapping, request);
         	session.setAttribute("PropertiesEditorForm", dynaForm);
 
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception exc) {
+        	session.setAttribute("warning", exc.getMessage());
+            logger.error("Exception saving global properties", exc);
 		}
 
 		return mapping.findForward("home");

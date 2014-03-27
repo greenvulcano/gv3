@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,7 +50,8 @@ import java.util.TreeSet;
  * @author GreenVulcano Developer Team
  */
 public class PropertiesEditor {
-	//private static Logger logger = GVLogger.getLogger(PropertiesEditor.class);
+	// private static Logger logger =
+	// GVLogger.getLogger(PropertiesEditor.class);
 
 	private Set<String> coreProps = null;
 	private Set<String> adapterProps = null;
@@ -60,24 +60,24 @@ public class PropertiesEditor {
 
 	private List<GlobalProperty> xmlConfProps = null;
 
-
-
 	/**
 	 * @throws IOException
 	 * @throws XMLConfigException
 	 * @throws XMLUtilsException
 	 */
 	public PropertiesEditor() throws IOException, XMLConfigException,
-		XMLUtilsException {
+			XMLUtilsException {
 		populateAll();
 	}
 
 	/**
-	 * Populates a collection containing the names of properties in the three main 
+	 * Populates a collection containing the names of properties in the three
 	 * configuration XML files
+	 * 
 	 * @param fileName
-	 * 	      The configuration file name
-	 * @return A set of property names found in the XML file named <tt>fileName</tt>
+	 *            The configuration file name
+	 * @return A set of property names found in the XML file named
+	 *         <tt>fileName</tt>
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
@@ -85,8 +85,8 @@ public class PropertiesEditor {
 			throws FileNotFoundException, IOException {
 
 		Set<String> app = new TreeSet<String>();
-		String payload = TextUtils.readFileFromCP(fileName);		
-        
+		String payload = TextUtils.readFileFromCP(fileName);
+
 		String phPrefix = "xmlp{{";
 		String phSuffix = "}}";
 		int phPlen = phPrefix.length();
@@ -110,45 +110,52 @@ public class PropertiesEditor {
 	}
 
 	/**
-	 * Populates a collection containing the properties found in the .properties files
+	 * Populates a collection containing the properties found in the .properties
+	 * files
+	 * 
 	 * @param fileName
-	 *        The .properties file name
-	 * @return A list of GlobalProperty objects containing informations found in the 
-	 * specified <tt>fileName</tt>
+	 *            The .properties file name
+	 * @return A list of GlobalProperty objects containing informations found in
+	 *         the specified <tt>fileName</tt>
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws XMLConfigException
 	 */
 	private List<GlobalProperty> populateConfCollection(String fileName)
 			throws FileNotFoundException, IOException, XMLConfigException {
-		
+
 		List<GlobalProperty> app = new ArrayList<GlobalProperty>();
 		Set<String> localAllProps = new TreeSet<String>();
 		localAllProps.addAll(allProps);
-		
+
 		URL url = ClassLoader.getSystemResource(fileName);
 		if (url == null) {
-            url = PropertiesEditor.class.getClassLoader().getResource(fileName);
-        }
+			url = PropertiesEditor.class.getClassLoader().getResource(fileName);
+		}
 		if (url == null) {
 			throw new IOException("File " + fileName
 					+ " not found in ClassPath");
 		}
 
 		String line;
-		BufferedReader reader = new BufferedReader(new FileReader(url.getFile()));
+		BufferedReader reader = new BufferedReader(
+				new FileReader(url.getFile()));
 		try {
 			String description = "";
+			int count = 0;
 			while ((line = reader.readLine()) != null) {
-				if (line.startsWith("#Modified by GVConsole on ")){
+				count++;
+				// logger.debug(fileName + " line [" + ++count + "]: " + line);
+				if (line.startsWith("#Modified by GVConsole on ")
+						|| (line.trim().length() == 0)) {
 					continue;
 				} else if (line.startsWith("#")) {
 					description = line.substring(1);
 					continue;
 				} else if (line.contains("=")) {
 					int idx = line.indexOf("=");
-					String pName = line.substring(0, idx);
-					String pVal = line.substring(idx+1);
+					String pName = line.substring(0, idx).trim();
+					String pVal = line.substring(idx + 1);
 					pVal = XMLUtils.replaceXMLEntities(pVal);
 					GlobalProperty prop = new GlobalProperty();
 					prop.setPresent(true);
@@ -166,24 +173,26 @@ public class PropertiesEditor {
 					description = "";
 					localAllProps.remove(pName);
 					app.add(prop);
-				} else
+				} else {
 					throw new XMLConfigException("The " + fileName
-							+ " file is not in properties format");
+							+ " file is malformed. Error at line [" + count
+							+ "]: " + line);
+				}
 			}
 		} finally {
-            if (reader != null) {
-                reader.close();
-            }
-        }
+			if (reader != null) {
+				reader.close();
+			}
+		}
 
-		for(String pName: localAllProps){
+		for (String pName : localAllProps) {
 			GlobalProperty prop = new GlobalProperty();
 			prop.setName(pName);
 			prop.setUsedIn(getUsedIn(pName));
 			app.add(prop);
 		}
 
-		Collections.sort(app, new Comparator<GlobalProperty>(){
+		Collections.sort(app, new Comparator<GlobalProperty>() {
 			@Override
 			public int compare(GlobalProperty o1, GlobalProperty o2) {
 				return o1.getName().compareTo(o2.getName());
@@ -195,7 +204,7 @@ public class PropertiesEditor {
 	/**
 	 * 
 	 * @param pName
-	 *        The property name
+	 *            The property name
 	 * @return The names of the files containing the property <tt>pName</tt>
 	 */
 	private List<String> getUsedIn(String pName) {
@@ -213,12 +222,14 @@ public class PropertiesEditor {
 	}
 
 	/**
-	 * Initialization of all collections 
+	 * Initialization of all collections
+	 * 
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws XMLConfigException
 	 */
-	private void populateAll() throws FileNotFoundException, IOException, XMLConfigException {
+	private void populateAll() throws FileNotFoundException, IOException,
+			XMLConfigException {
 		coreProps = populateCollection("GVCore.xml");
 		adapterProps = populateCollection("GVAdapters.xml");
 		supportProps = populateCollection("GVSupport.xml");
@@ -227,56 +238,59 @@ public class PropertiesEditor {
 		allProps.addAll(coreProps);
 		allProps.addAll(adapterProps);
 		allProps.addAll(supportProps);
-		
+
 		xmlConfProps = populateConfCollection("XMLConfig.properties");
 	}
 
 	/**
-	 * Saves the current global properties state in the XMLConfig.properties configuration file
+	 * Saves the current global properties state in the XMLConfig.properties
+	 * configuration file
+	 * 
 	 * @throws IOException
 	 * @throws XMLConfigException
 	 * @throws URISyntaxException
 	 */
-	public void saveGlobalProperties() throws IOException, URISyntaxException, XMLConfigException {
+	public void saveGlobalProperties() throws IOException, URISyntaxException,
+			XMLConfigException {
 
-		String[] names = { 
-				"XMLConfig.properties",
-				"XMLConfig.properties.old",
-				"XMLConfig.properties.old.1", 
-				"XMLConfig.properties.old.2",
-				"XMLConfig.properties.old.3", 
-				"XMLConfig.properties.old.4" };
+		String[] names = { "XMLConfig.properties", "XMLConfig.properties.old",
+				"XMLConfig.properties.old.1", "XMLConfig.properties.old.2",
+				"XMLConfig.properties.old.3", "XMLConfig.properties.old.4" };
 
 		URL url = ClassLoader.getSystemResource("XMLConfig.properties");
 		if (url == null) {
-            url = PropertiesEditor.class.getClassLoader().getResource("XMLConfig.properties");
-        }
-		if (url == null) {
-			throw new IOException("File XMLConfig.properties not found in ClassPath");
+			url = PropertiesEditor.class.getClassLoader().getResource(
+					"XMLConfig.properties");
 		}
-		
+		if (url == null) {
+			throw new IOException(
+					"File XMLConfig.properties not found in ClassPath");
+		}
+
 		String basePath = (new File(url.getPath())).getParent();
 		List<File> files = new ArrayList<File>();
 		for (int i = 0; i < names.length; i++) {
 			File f = new File(basePath, names[i]);
-			if (!f.exists()) break;
-			files.add(f);		
+			if (!f.exists())
+				break;
+			files.add(f);
 		}
 
 		int freeBackup = files.size();
-		for (int i=Math.min(freeBackup, names.length-1); i>=1; i--){
-			File fileSrc = files.get(i-1);
+		for (int i = Math.min(freeBackup, names.length - 1); i >= 1; i--) {
+			File fileSrc = files.get(i - 1);
 			File fileDst = new File(basePath, names[i]);
 			fileSrc.renameTo(fileDst);
 		}
-		
+
 		FileWriter fw = new FileWriter(new File(basePath, names[0]));
 		PrintWriter writer = new PrintWriter(new BufferedWriter(fw));
 		try {
 			String key = null;
 			String value = null;
 			String description = null;
-			String heading = "#Modified by GVConsole on " + new Date().toString();
+			String heading = "#Modified by GVConsole on "
+					+ new Date().toString();
 			writer.println(heading);
 			for (GlobalProperty prop : xmlConfProps) {
 				key = prop.getName();
@@ -294,18 +308,17 @@ public class PropertiesEditor {
 				writer.println(key + "=" + value);
 			}
 		} finally {
-            if (writer != null) {
-            	writer.close();
-            }
-        }
-		
-		
+			if (writer != null) {
+				writer.close();
+			}
+		}
+
 	}
 
-	public List<GlobalProperty> getProperties(){
+	public List<GlobalProperty> getProperties() {
 		return xmlConfProps;
 	}
-	
+
 	public void setProperties(List<GlobalProperty> props) {
 		this.xmlConfProps = props;
 	}
@@ -317,17 +330,17 @@ public class PropertiesEditor {
 	public static void main(String[] args) throws Exception {
 		PropertiesEditor propsEditor = new PropertiesEditor();
 
-		//propsEditor.populateAll();
-		
-		for (GlobalProperty prop : propsEditor.xmlConfProps) {
-			System.out.println(prop.toString());
-			//System.out.println(prop.getUsedInStr());
-			if (prop.getName().equals("xml.not.used")){
-				prop.setValue(prop.getValue().toUpperCase());
-			}
-		}
-		
-		propsEditor.saveGlobalProperties();
+		propsEditor.populateAll();
+
+		/*
+		 * for (GlobalProperty prop : propsEditor.xmlConfProps) {
+		 * System.out.println(prop.toString());
+		 * //System.out.println(prop.getUsedInStr()); if
+		 * (prop.getName().equals("xml.not.used")){
+		 * prop.setValue(prop.getValue().toUpperCase()); } }
+		 * 
+		 * propsEditor.saveGlobalProperties();
+		 */
 	}
 
 }

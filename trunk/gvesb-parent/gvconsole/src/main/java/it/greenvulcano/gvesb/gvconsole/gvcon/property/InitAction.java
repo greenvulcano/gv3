@@ -57,6 +57,8 @@ public class InitAction extends Action
     {
         logger.debug("Begin InitAction");
         HttpSession session = request.getSession(false);
+        session.removeAttribute("error");
+        session.removeAttribute("warning");
         try {
         	String mode = (String) request.getParameter("mode");
         	logger.debug("mode: " + mode);
@@ -80,7 +82,7 @@ public class InitAction extends Action
             return mapping.findForward("home");
         }
         catch (Exception exc) {
-        	session.setAttribute("message", exc.getMessage());
+        	session.setAttribute("error", exc.getMessage());
             logger.error("Exception loading global properties", exc);
             return mapping.findForward("home");
         }
