@@ -28,6 +28,7 @@
     String mode = (String) session.getAttribute("MODE");
     String errmsg = (String) session.getAttribute("error");
     String wrnmsg = (String) session.getAttribute("warning");
+    wrnmsg = (wrnmsg==null)?"":wrnmsg;
 %>
     <script type="text/javascript" src="<%=contextRoot%>/js/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="<%=contextRoot%>/js/jquery.timers-1.2.js"></script>
@@ -50,15 +51,14 @@
 
     <br/>
     <div class="ui-widget-header central">
+    <html:hidden styleId="warning" property="warning" value="<%=wrnmsg%>"/>
     <%
         if (errmsg!=null) {
     %>
         <p id="error"><%=errmsg%></p>
     <%
         } else {
-            wrnmsg = (wrnmsg==null)?"":wrnmsg;
     %>
-        <html:hidden styleId="warning" property="warning" value="<%=wrnmsg%>"/>
         <html:form styleId="gpForm" action="/property/HandlePropertiesAction" >
             <html:hidden styleId="skipValidation" property="skipValidation" value="true"/>
             <%-- <html:hidden styleId="methodToCall" property="methodToCall" value=""/> --%>
