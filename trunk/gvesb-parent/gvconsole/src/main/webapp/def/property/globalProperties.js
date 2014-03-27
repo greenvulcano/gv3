@@ -1,11 +1,17 @@
 var buttonPressed;
 
 $(document).ready(function() {
+	//Reports any errors after the last attempt to save
+	var warn = $('#warning').val();
+	if (warn!="") {
+		jAlert(warn, 'Save error');
+	}
+
 	//Disable all writable components if in "view" mode
 	$("input[type=submit].view").attr("disabled", "disabled");
 	$("input[type=text].view").attr("readonly","readonly");
 
-	//Intercept te last button clicked
+	//Intercept the last button clicked
 	$('#gpForm').click(function(e) {
 		$(this).data('clicked',$(e.target));
 	});

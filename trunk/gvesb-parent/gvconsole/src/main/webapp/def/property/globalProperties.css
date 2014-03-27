@@ -53,3 +53,8 @@
 #save{
     margin: 0 3px 0 30px;
 }
+
+#error{
+    color: #FD1010;
+    margin: 20px;
+}
