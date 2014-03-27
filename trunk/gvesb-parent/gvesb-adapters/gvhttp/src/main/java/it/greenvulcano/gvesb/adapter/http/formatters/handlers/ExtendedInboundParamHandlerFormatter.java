@@ -32,10 +32,9 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.bin.Dump;
 import it.greenvulcano.util.txt.TextUtils;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -49,6 +48,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -182,29 +182,21 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
 
             String reqMethod = httpRequest.getMethod();
             if (reqMethod.equals("POST")) {
-                BufferedInputStream bIn = new BufferedInputStream(httpRequest.getInputStream());
-                int contentBufferSize = (httpRequest.getContentLength() == -1 ? 10240 : httpRequest.getContentLength());
-                byte[] buf = new byte[1024];
-                ByteArrayOutputStream bOut = new ByteArrayOutputStream(contentBufferSize);
-                int c;
-                while ((c = bIn.read(buf, 0, buf.length)) != -1) {
-                    bOut.write(buf, 0, c);
-                }
-                bOut.flush();
-                bOut.close();
-                byte[] requestContentBytes = bOut.toByteArray();
+                byte[] requestContentBytes = IOUtils.toByteArray(httpRequest.getInputStream());
                 logger.debug("INPUT - HTTP request content:\n");
                 logger.debug(new Dump(requestContentBytes));
 
                 requestContent = convertContentToString(requestContentBytes, reqCharacterEncoding);
 
-                if (!httpRequest.getContentType().equals(AdapterHttpConstants.URLENCODED_MIMETYPE_NAME)
-                        && handlePostBodyAsParams) {
+                /*if (!httpRequest.getContentType().equals(AdapterHttpConstants.URLENCODED_MIMETYPE_NAME)
+                        && handlePostBodyAsParams) {*/
+                if (httpRequest.getContentType().equals(AdapterHttpConstants.URLENCODED_MIMETYPE_NAME)
+                        || handlePostBodyAsParams) {
                     List<String> entriesList = TextUtils.splitByStringSeparator(requestContent, reqParamEntrySeparator);
                     for (String element : entriesList) {
                         int indexSeparator = element.indexOf(reqParamNameValueSeparator);
                         String paramName = element.substring(0, indexSeparator);
-                        String paramValue = element.substring(indexSeparator + reqParamNameValueSeparator.length());
+                        String paramValue = URLDecoder.decode(element.substring(indexSeparator + reqParamNameValueSeparator.length()), reqCharacterEncoding);
                         logger.debug("manageRequest - paramName: " + paramName + " - paramValue: " + paramValue);
                         requestParam.put(paramName, paramValue);
                     }

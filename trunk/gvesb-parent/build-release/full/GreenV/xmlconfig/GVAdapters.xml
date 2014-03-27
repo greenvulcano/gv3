@@ -754,7 +754,7 @@ order by 1]]></statement>
         <InboundConfiguration>
             <ActionMappings>
                 <GVCoreActionMapping Action="HTTP_TEST" FormatterID="MessageInboundFormatter"
-                                     enabled="true" type="action-mapping" class="it.greenvulcano.gvesb.adapter.http.mapping.GVCoreHttpServletMapping"/>
+                                     enabled="true" dump-in-out="true" type="action-mapping" class="it.greenvulcano.gvesb.adapter.http.mapping.GVCoreHttpServletMapping"/>
             </ActionMappings>
             <InboundTransactions>
                 <Transaction service="TOUPPER" transacted="false"/>

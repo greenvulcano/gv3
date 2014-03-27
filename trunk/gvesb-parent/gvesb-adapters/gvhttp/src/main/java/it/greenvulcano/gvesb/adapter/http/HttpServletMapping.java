@@ -55,8 +55,10 @@ public interface HttpServletMapping
      * @return if request handling was successful
      * @throws InboundHttpResponseException
      */
-    public boolean handleRequest(HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException;
+    public boolean handleRequest(String methodName, HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException;
 
+    public boolean isDumpInOut();
+    
     /**
      *
      */
