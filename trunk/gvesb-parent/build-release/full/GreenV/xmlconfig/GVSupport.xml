@@ -132,7 +132,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVHTTPAdapter.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{HTTP_ACTION}][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%t] - %m %n"/>
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{HTTP_ACTION}][%X{HTTP_METHOD}][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%t] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
