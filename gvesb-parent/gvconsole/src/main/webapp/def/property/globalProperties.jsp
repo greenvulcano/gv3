@@ -26,6 +26,8 @@
 <%
     //String mode = (String) request.getParameter("mode");
     String mode = (String) session.getAttribute("MODE");
+    String errmsg = (String) session.getAttribute("error");
+    String wrnmsg = (String) session.getAttribute("warning");
 %>
     <script type="text/javascript" src="<%=contextRoot%>/js/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="<%=contextRoot%>/js/jquery.timers-1.2.js"></script>
@@ -48,6 +50,15 @@
 
     <br/>
     <div class="ui-widget-header central">
+    <%
+        if (errmsg!=null) {
+    %>
+        <p id="error"><%=errmsg%></p>
+    <%
+        } else {
+            wrnmsg = (wrnmsg==null)?"":wrnmsg;
+    %>
+        <html:hidden styleId="warning" property="warning" value="<%=wrnmsg%>"/>
         <html:form styleId="gpForm" action="/property/HandlePropertiesAction" >
             <html:hidden styleId="skipValidation" property="skipValidation" value="true"/>
             <%-- <html:hidden styleId="methodToCall" property="methodToCall" value=""/> --%>
@@ -69,27 +80,27 @@
                             <bean:define id="value" name="properties" property="value" type="java.lang.String"/>
                             <html:hidden styleId='<%="cptd_"+idx%>' indexed="true" name="properties" property="encrypted"/>
     <%
-        String onClick = "";
-        String msg = "";
-        if(!mode.equals("view")){
-            onClick = "onclick=\"toggleCrypted("+idx+", '"+contextRoot+"')\"";
-        }
-        if(encptd.toString().equals("true")){
-            msg = (mode.equals("view"))?"Encrypted":"Encrypted. Click to decrypt.";
+            String onClick = "";
+            String msg = "";
+            if(!mode.equals("view")){
+                onClick = "onclick=\"toggleCrypted("+idx+", '"+contextRoot+"')\"";
+            }
+            if(encptd.toString().equals("true")){
+                msg = (mode.equals("view"))?"Encrypted":"Encrypted. Click to decrypt.";
     %>
                             <img id='<%="img_"+idx%>' title="<%=msg%>" class="clckblico" alt="Encrypted" src="<%=contextRoot%>/images/properties/encrypted.png" <%=onClick%>/>
     <%
-        }
-        else{
-            msg = (mode.equals("view"))?"Decrypted":"Decrypted. Click to encrypt.";
+            }
+            else{
+                msg = (mode.equals("view"))?"Decrypted":"Decrypted. Click to encrypt.";
     %>
                             <img id='<%="img_"+idx%>' title="<%=msg%>" class="clckblico" alt="Decrypted" src="<%=contextRoot%>/images/properties/decrypted.png" <%=onClick%>/>
     <%
-        }
+            }
     %>
                         </td>
     <%
-            String usdInMsg = (usedin.isEmpty())?"Not Used":"Used in: " + usedin;
+                String usdInMsg = (usedin.isEmpty())?"Not Used":"Used in: " + usedin;
     %>
                         <td class="<%=getColorStyle(present, usedin, value)%> name" title="<%=usdInMsg%>" valign="top" nowrap>
                             <%-- <bean:define id="profile" name="formName"/> --%>
@@ -119,6 +130,9 @@
                 </html:submit>
             </div>
         </html:form>
+    <%
+        }
+    %>
     </div>
     <br>
 
