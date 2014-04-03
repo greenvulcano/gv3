@@ -938,8 +938,6 @@ order by 1]]></statement>
                     <Account consumer_key="[CONS_KEY-CONS_KEY-CONS_KEY-]"
                              consumer_secret="[CONS_SECRET-CONS_SECRET-CONS_SECRET-CO]"
                              name="[ACCOUNT_NAME]"
-                             oauth_access_token="[ACCESS_TOKEN-ACCESS_TOKEN-ACCESS_TOKEN-AC]"
-                             oauth_access_token_secret="[ACCESS_TOKEN_SECRET-ACCESS_TOKEN_SECRET]"
                              twitteruserid="[USER_ID___]"/>
                 </Accounts>
             </TwitterSocialAdapter>
