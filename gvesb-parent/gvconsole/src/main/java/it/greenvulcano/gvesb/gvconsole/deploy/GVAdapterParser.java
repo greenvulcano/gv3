@@ -202,7 +202,7 @@ public class GVAdapterParser
 
     private boolean getExistGVHTTP(String action) throws XMLUtilsException
     {
-        return getExistObject("/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
+        return getExistObject("/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping' and @Action='"
                 + action + "']");
     }
 
@@ -237,8 +237,8 @@ public class GVAdapterParser
 
     private boolean getEqualGVHTTP(String action) throws XMLUtilsException
     {
-        return getEqualObject("/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
-                + action + "']");
+        return getEqualObject("/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping' "
+        		+ "and @Action='" + action + "']");
     }
 
     /**
@@ -848,8 +848,8 @@ public class GVAdapterParser
         XMLUtils parser = null;
         try {
             parser = XMLUtils.getParserInstance();
-            Node localXml = parser.selectSingleNode(xml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
-                    + servizio + "']");
+            Node localXml = parser.selectSingleNode(xml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping' "
+                    + "and @Action='" + servizio + "']");
             Document localXmlGVAdapters = parser.newDocument("GVAdapters");
             if (localXml != null) {
                 Node base = localXmlGVAdapters.getDocumentElement().appendChild(parser.createElement(localXmlGVAdapters, "GVAdapterHttpConfiguration"));
@@ -1205,10 +1205,10 @@ public class GVAdapterParser
             parser = XMLUtils.getParserInstance();
             
             // handle ActionMapping deployment
-            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
-                    + nomeServizio + "']");
-            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping[@Action='"
-                    + nomeServizio + "']");
+            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping' "
+                    + "and @Action='" + nomeServizio + "']");
+            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping' "
+                    + "and @Action='" + nomeServizio + "']");
             Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings");
             if (resultsZip != null) {
                 if (resultsServer == null) {
@@ -1224,21 +1224,23 @@ public class GVAdapterParser
 
                 // handle Formatter deployment
                 String formatter = parser.get(resultsZip, "@FormatterID");
-                resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters/*[@Type='FormatterPlugin' and @ID='"
-                        + formatter + "']");
-                resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters/*[@Type='FormatterPlugin' and @ID='"
-                        + formatter + "']");
-                parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters");
-                if (resultsZip != null) {
-                    if (resultsServer == null) {
-                        Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
-                        parentServer.appendChild(importedNode);
-                        logger.debug("Formatter[" + formatter + "] non esistente, inserimento");
-                    }
-                    else {
-                        Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
-                        parentServer.replaceChild(importedNode, resultsServer);
-                        logger.debug("Formatter[" + formatter + "] esistente, aggiornamento");
+                if (formatter != null) {
+                    resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters/*[@Type='FormatterPlugin' and @ID='"
+                            + formatter + "']");
+                    resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters/*[@Type='FormatterPlugin' and @ID='"
+                            + formatter + "']");
+                    parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVAdapterHttpConfiguration/Formatters");
+                    if (resultsZip != null) {
+                        if (resultsServer == null) {
+                            Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                            parentServer.appendChild(importedNode);
+                            logger.debug("Formatter[" + formatter + "] non esistente, inserimento");
+                        }
+                        else {
+                            Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                            parentServer.replaceChild(importedNode, resultsServer);
+                            logger.debug("Formatter[" + formatter + "] esistente, aggiornamento");
+                        }
                     }
                 }
                 
@@ -1500,7 +1502,7 @@ public class GVAdapterParser
 
     private String[] getListaGVHTTP(Document xml) throws Exception
     {
-        return getListaObject(xml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/ActionMapping/@Action");
+        return getListaObject(xml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping']/@Action");
     }
 
     private String[] getListaGVBirtRepo(Document xml) throws Exception
