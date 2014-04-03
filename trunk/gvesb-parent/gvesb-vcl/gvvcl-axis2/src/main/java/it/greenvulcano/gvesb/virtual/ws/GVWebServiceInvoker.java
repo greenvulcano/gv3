@@ -75,6 +75,8 @@ public class GVWebServiceInvoker
 
     private String                     operation   = "";
 
+    private boolean                    emptyAction = false;
+
     private String                     portName    = "";
 
     private String                     wsdlURL     = "";
@@ -111,6 +113,7 @@ public class GVWebServiceInvoker
             timeout = XMLConfig.getLong(configNode, "@timeout", -1);
             returnType = XMLConfig.get(configNode, "@returnType", "context");
             throwsFault = XMLConfig.getBoolean(configNode, "@throwsFault", false);
+            emptyAction = XMLConfig.getBoolean(configNode, "@emptyAction", false);
 
             logger.debug("Create WSDLInfo");
             // WSDLInfo
@@ -132,6 +135,7 @@ public class GVWebServiceInvoker
                 sb.append("\tserviceNS '").append(serviceNS).append("'\n");
                 sb.append("\tservice '").append(service).append("'\n");
                 sb.append("\toperation '").append(operation).append("'\n");
+                sb.append("\temptyAction '").append(emptyAction).append("'\n");
                 sb.append("\tportName '");
                 if (portName != null) {
                     sb.append(portName);
@@ -176,6 +180,7 @@ public class GVWebServiceInvoker
             invoker = DynamicInvoker.getInvoker(wsdlURL);
             invoker.setService(serviceNS, service, null);
             invoker.setOperation(operation, portName);
+            invoker.setEmptyAction(emptyAction);
             invoker.setTimeout(timeout);
             invoker.setThrowsFault(throwsFault);
 

@@ -7039,6 +7039,11 @@
 -->
 <!ATTLIST AxisWebServiceInvoker operation CDATA #REQUIRED>
 <!--
+    If true the SOAPAction header is not set in the request
+    Default to false.
+-->
+<!ATTLIST AxisWebServiceInvoker emptyAction (true|false) #IMPLIED>
+<!--
         Port Name
 -->
 <!ATTLIST AxisWebServiceInvoker portName CDATA #IMPLIED>
