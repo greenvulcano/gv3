@@ -80,6 +80,7 @@ public class DynamicInvoker
     private String                                     _operationName;
     private String                                     _portName;
     private boolean                                    throwsFault         = false;
+    private boolean                                    emptyAction         = false;
 
     private long                                       timeout             = -1;
 
@@ -322,14 +323,21 @@ public class DynamicInvoker
             long timeoutInMilliseconds = timeout * 1000;
             options.setTimeOutInMilliSeconds(timeoutInMilliseconds);
         }
-        String soapAction = opDesc.getSOAPAction();
-        if (soapAction != null) {
-            logger.debug("Setting Action Header to: " + soapAction);
-            options.setAction(soapAction);
+        if (emptyAction) {
+        	logger.debug("Setting Action Header to: ");
+        	options.setAction("");
+        	options.setProperty(org.apache.axis2.Constants.Configuration.DISABLE_SOAP_ACTION, true);
         }
         else {
-            logger.debug("Setting Action Header to: " + _operationName);
-            options.setAction(_operationName);
+            String soapAction = opDesc.getSOAPAction();
+            if (soapAction != null) {
+                logger.debug("Setting Action Header to: " + soapAction);
+                options.setAction(soapAction);
+            }
+            else {
+                logger.debug("Setting Action Header to: " + _operationName);
+                options.setAction(_operationName);
+            }
         }
         String epr = svcDesc.getAddress();
         if (isREST) {
@@ -632,5 +640,15 @@ public class DynamicInvoker
     public void setThrowsFault(boolean throwsFault)
     {
         this.throwsFault = throwsFault;
+    }
+    
+    public boolean isEmptyAction()
+    {
+        return emptyAction;
+    }
+
+    public void setEmptyAction(boolean emptyAction)
+    {
+        this.emptyAction = emptyAction;
     }
 }
