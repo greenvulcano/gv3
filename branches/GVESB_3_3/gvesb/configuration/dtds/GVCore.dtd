@@ -5929,6 +5929,13 @@
 -->
 <!ATTLIST jms-dequeue  invalidate-conn-on-pool-insertion (false | true) #IMPLIED>
 <!--
+    Specifies if the dequeue must keep input GVBuffer properties, not present in the JMS message,
+    in the output GVBuffer.
+
+    Default: false.
+-->
+<!ATTLIST jms-dequeue   keep-input-extra-properties (true | false) #IMPLIED>
+<!--
     Name of Data Provider to use.
     This Data Provider will receive in input a JMS Message and must
     return the object to be inserted in GVBuffer.
@@ -11708,7 +11715,12 @@
     otherwise, the default connection protocol will be 'https'.
     The default value is 'false'.
 -->
-<!ATTLIST endpoint   secure (false|true) #IMPLIED>
+<!ATTLIST endpoint   secure (false|true) #IMPLIED><!--
+    Context path to prepend to remote URI call.
+
+    #NotNull
+-->
+<!ATTLIST endpoint   context-path CDATA #IMPLIED>
 <!--
     Can be one of those defined locally for this 'http-call', or globally in GreenVulcanoESB on GVSupport configuration.
 
