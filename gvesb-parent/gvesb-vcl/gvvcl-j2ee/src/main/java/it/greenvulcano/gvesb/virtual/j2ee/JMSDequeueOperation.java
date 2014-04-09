@@ -127,6 +127,7 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
     private int                  acknowledge;
     private boolean              useVCLPooling;
     private boolean              invalidateOnReinsert;
+    private boolean              keepInputExtraProperties;
 
     /**
      * Receive timeout. If 0 then the receive blocks indefinitely. If <nobr>&gt;
@@ -200,23 +201,29 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
     {
         connectionFactory = XMLConfig.get(node, "@connection-factory");
         checkAttribute("connection-factory", connectionFactory);
+        logger.debug("Connection factory.....: " + connectionFactory);
 
         String destinationType = XMLConfig.get(node, "@destination-type", "queue");
         checkAttribute("destination-type", destinationType);
         isQueue = destinationType.equals("queue");
+        logger.debug("Destination type.......: " + destinationType);
         destinationName = XMLConfig.get(node, "@destination-name");
         checkAttribute("destination-name", destinationName);
+        logger.debug("Destination name.......: " + destinationName);
 
         String transactedStr = XMLConfig.get(node, "@transacted", "true");
         checkAttribute("transacted", transactedStr);
         transacted = transactedStr.equals("true");
+        logger.debug("Transacted.............: " + transacted);
 
         String poolStr = XMLConfig.get(node, "@use-vcl-pool", "true");
-        checkAttribute("use-vm-pool", poolStr);
+        checkAttribute("use-vcl-pool", poolStr);
         useVCLPooling = poolStr.equals("true");
+        logger.debug("Use VCL pooling........: " + useVCLPooling);
         String invConnStr = XMLConfig.get(node, "@invalidate-conn-on-pool-insertion", "false");
         checkAttribute("invalidate-conn-on-pool-insertion", invConnStr);
         invalidateOnReinsert = invConnStr.equals("true");
+        logger.debug("Invalidate Connection on VCL pool insertion: " + invalidateOnReinsert);
 
         String acknowledgeType = XMLConfig.get(node, "@acknowledge-type", "auto-acknowledge");
         checkAttribute("acknowledge-type", acknowledgeType);
@@ -232,8 +239,10 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
         else {
             acknowledge = Session.AUTO_ACKNOWLEDGE;
         }
+        logger.debug("Acknowledge type.......: " + acknowledgeType);
 
         String receiveType = XMLConfig.get(node, "@receive-type", "non-blocking");
+        logger.debug("Receive type...........: " + receiveType);
         if (receiveType.equals("non-blocking")) {
             configuredReceiveTimeout = TO_NON_BLOCKING;
         }
@@ -242,11 +251,14 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
         }
         else {
             configuredReceiveTimeout = XMLConfig.getLong(node, "@receive-timeout", 1000);
+            logger.debug("Receive timeout....: " + configuredReceiveTimeout);
         }
         String overridable = XMLConfig.get(node, "@receive-timeout-overridable", "false");
         timeoutIsOverridable = overridable.equals("true");
+        logger.debug("Receive timeout overr..: " + timeoutIsOverridable);
 
         configuredMessageSelector = XMLConfig.get(node, "message-selector");
+        logger.debug("Message selector.......: " + configuredMessageSelector);
         String combining = XMLConfig.get(node, "message-selector/@combining", "dynamic-and-configured");
         if (combining.equals("dynamic-and-configured")) {
             messageSelectorCombining = MSC_DYNAMIC_AND_CONFIGURED;
@@ -263,14 +275,21 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
         else if (combining.equals("configured-if-no-dynamic")) {
             messageSelectorCombining = MSC_CONFIGURED_IF_NO_DYNAMIC;
         }
-
+        logger.debug("Message selector comb..: " + combining);
+        
         if (!isQueue) {
             durableSubscriber = XMLConfig.get(node, "@durable-subscriber");
             checkAttribute("durable-subscriber", durableSubscriber);
+            logger.debug("Durable subscriber.: " + durableSubscriber);
             String noLocalStr = XMLConfig.get(node, "@no-local", "true");
             checkAttribute("no-local", noLocalStr);
             noLocal = noLocalStr.equals("true");
+            logger.debug("No-local...........: " + noLocal);
         }
+        
+        keepInputExtraProperties = XMLConfig.getBoolean(node, "@keep-input-extra-properties", false);
+        logger.debug("Keep input properties..: " + keepInputExtraProperties);
+
         resetDequeueOperation();
 
         Node xaHelperNode = null;
@@ -362,7 +381,12 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
                 if (dumpMessage && logger.isDebugEnabled()) {
                     logger.debug("Dequeue " + name + " Received message :\n"  + new JMSMessageDump(message, null));
                 }
-                outBuffer = new GVBuffer();
+                if (keepInputExtraProperties) {
+                    outBuffer = new GVBuffer(inputGVBuffer, false);
+                }
+                else {
+                    outBuffer = new GVBuffer();
+                }
                 JMSMessageDecorator.decorateGVBuffer(message, outBuffer);
 
                 outBuffer.setObject(message);

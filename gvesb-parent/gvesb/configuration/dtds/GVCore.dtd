@@ -6651,6 +6651,13 @@
 -->
 <!ATTLIST jms-dequeue  invalidate-conn-on-pool-insertion (false | true) #IMPLIED>
 <!--
+    Specifies if the dequeue must keep input GVBuffer properties, not present in the JMS message,
+    in the output GVBuffer.
+
+    Default: false.
+-->
+<!ATTLIST jms-dequeue   keep-input-extra-properties (true | false) #IMPLIED>
+<!--
     Name of Data Provider to use.
     This Data Provider will receive in input a JMS Message and must
     return the object to be inserted in GVBuffer.
