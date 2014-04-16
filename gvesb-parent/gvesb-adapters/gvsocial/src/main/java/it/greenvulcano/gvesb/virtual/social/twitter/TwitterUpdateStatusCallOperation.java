@@ -66,9 +66,11 @@ public class TwitterUpdateStatusCallOperation extends TwitterSocialCallOperation
 		try {
 			Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
-			SocialOperation op = new TwitterOperationUpdateStatus(
-					PropertiesHandler.expand(getAccount(), params, gvBuffer),
-					PropertiesHandler.expand(statusText, params, gvBuffer));
+			String acc = PropertiesHandler.expand(getAccount(), params, gvBuffer);
+			String st = PropertiesHandler.expand(statusText, params, gvBuffer);
+			logger.debug("Account: " + acc + " - StatusText: " + st);
+
+			SocialOperation op = new TwitterOperationUpdateStatus(acc, st);
 			instance.directExecute(op);
 			op.updateResult(gvBuffer);
 		}

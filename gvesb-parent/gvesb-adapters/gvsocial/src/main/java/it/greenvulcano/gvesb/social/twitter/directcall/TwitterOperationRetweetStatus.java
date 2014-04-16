@@ -20,6 +20,7 @@
 package it.greenvulcano.gvesb.social.twitter.directcall;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.social.SocialAdapterAccount;
 import it.greenvulcano.gvesb.social.SocialAdapterException;
 import it.greenvulcano.log.GVLogger;
@@ -37,33 +38,33 @@ import twitter4j.TwitterException;
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
  */
-public class TwitterOperationRetweetStatus extends TwitterOperationBase{
+public class TwitterOperationRetweetStatus extends TwitterOperationBase {
+    private static Logger logger = GVLogger.getLogger(TwitterOperationRetweetStatus.class);
 
-	private String statusId;
-	private Status status;
-	private static Logger logger = GVLogger.getLogger(TwitterOperationRetweetStatus.class);
-	
-	public TwitterOperationRetweetStatus(String accountName, String statusText) {
-		super(accountName);
-		this.statusId = statusText;
-	}
+    private String statusId;
+    private Status status;
+    
+    public TwitterOperationRetweetStatus(String accountName, String statusText) {
+        super(accountName);
+        this.statusId = statusText;
+    }
 
-	@Override
-	public void execute(SocialAdapterAccount account) throws SocialAdapterException {
-		try {
-			Twitter twitter = (Twitter) account.getProxyObject();
-			status = twitter.retweetStatus(Long.parseLong(statusId));
-		} catch (NumberFormatException exc) {
-			logger.error("Call to TwitterOperationRetweetStatus failed. Check statusId format.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationRetweetStatus failed. Check statusId format.", exc);
-		} catch (TwitterException exc) {
-			logger.error("Call to TwitterOperationRetweetStatus failed.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationRetweetStatus failed.", exc);
-		}
-	}
+    @Override
+    public void execute(SocialAdapterAccount account) throws SocialAdapterException {
+        try {
+            Twitter twitter = (Twitter) account.getProxyObject();
+            status = twitter.retweetStatus(Long.parseLong(statusId));
+        } catch (NumberFormatException exc) {
+            logger.error("Call to TwitterOperationRetweetStatus failed. Check statusId format.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationRetweetStatus failed. Check statusId format.", exc);
+        } catch (TwitterException exc) {
+            logger.error("Call to TwitterOperationRetweetStatus failed.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationRetweetStatus failed.", exc);
+        }
+    }
 
-	@Override
-	public void updateResult(GVBuffer buffer) {
-		//buffer.setObject(status.getText());
-	}
+    @Override
+    public void updateResult(GVBuffer buffer) throws GVException {
+        buffer.setObject(status.getText());
+    }
 }

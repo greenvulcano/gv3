@@ -82,7 +82,7 @@
     <version.scout>1.2.5</version.scout>
     <version.springframework>2.5.6</version.springframework>
     
-    <version.twitter4j>2.2.6</version.twitter4j>
+    <version.twitter4j>4.0.1</version.twitter4j>
     <version.ws.security>1.6.4</version.ws.security>
     <version.wsdl4j>1.6.2</version.wsdl4j>
     <version.xml-apis>1.3.04</version.xml-apis>
