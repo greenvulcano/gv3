@@ -43,6 +43,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.transaction.Status;
+import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 
 import org.apache.log4j.Logger;
@@ -184,6 +186,21 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
         }
 
         discardOperations();
+
+        try {
+            if (xaHelper.isTransactionActive()) {
+                Transaction tx = xaHelper.getTransaction();
+
+                if (tx.getStatus() != Status.STATUS_ACTIVE) {
+                	throw new VCLException("GVVCL_XA_ERROR - Transaction non active - " + tx);
+                }
+            }
+        }
+        catch (XAHelperException exc) {
+            throw new VCLException("GVVCL_XA_ERROR", exc);
+        } catch (SystemException exc) {
+            throw new VCLException("GVVCL_XA_ERROR", exc);
+        }
 
         OperationManagerPoolElement vclPoolElement = pool.get(key);
 
