@@ -74,6 +74,17 @@
         class="it.greenvulcano.gvesb.gvdte.transformers.bin.bin2xml.CSVToXMLTransformer" name="CSV2XML_GRP" type="transformation" />
       <XQTransformation XQMapName="bib_filter.xq" class="it.greenvulcano.gvesb.gvdte.transformers.xq.XQTransformer"
         name="TestXQuery" type="transformation"/>
+        
+      <XML2JSONTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer"
+        name="TestXml2Json" type="transformation"/>
+      <JSON2XMLTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.JSON2XMLTransformer"
+        name="TestJson2Xml" type="transformation"/>
+
+      <XML2JSONTransformation InputXSLMapName="identity.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer"
+        name="TestXml2Json_Xsl" type="transformation"/>
+      <JSON2XMLTransformation OutputXSLMapName="identity.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.json.JSON2XMLTransformer"
+        name="TestJson2Xml_Xsl" type="transformation"/>
+
     </Transformations>
   </GVDataTransformation>
   

@@ -1986,7 +1986,9 @@ public class GVCoreParser
             if ("XSLTransformation".equals(dtType) ||
             	"XSLFOPTransformation".equals(dtType) ||
         		"HL72XMLTransformation".equals(dtType) ||
-        		"XML2HL7Transformation".equals(dtType)) {
+        		"XML2HL7Transformation".equals(dtType) ||
+        		"JSON2XMLTransformation".equals(dtType) ||
+        		"XML2JSONTransformation".equals(dtType)) {
             	copiaFileXsl(gvDTZip, parser);
             }
             else if ("SequenceTransformation".equals(dtType)) {

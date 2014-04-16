@@ -65,6 +65,7 @@
     <version.jcifs>1.3.17</version.jcifs>
     <version.joda>1.6.2</version.joda>
     <version.jsch>0.1.51</version.jsch>
+    <version.json>20131018</version.json>
     <version.junit>4.11</version.junit>
     <version.log4j>1.2.15</version.log4j>
     <version.mvel>2.1.3.Final</version.mvel>
@@ -482,6 +483,14 @@
             <version>1.0-2</version>
             <type>jar</type>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${version.json}</version>
+            <type>jar</type>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -1506,6 +1515,11 @@
             <artifactId>xmlunit</artifactId>
             <version>${version.xmlunit}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.skyscreamer</groupId>
+            <artifactId>jsonassert</artifactId>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.openejb</groupId>
