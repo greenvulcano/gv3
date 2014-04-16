@@ -19,6 +19,8 @@
  */
 package tests.unit.util;
 
+import java.util.List;
+
 import it.greenvulcano.util.ArrayUtils;
 import junit.framework.TestCase;
 
@@ -33,7 +35,7 @@ public class ArrayUtilsTestCase extends TestCase
     /**
      *
      */
-    public void testArrayUtils()
+    public void test_concat()
     {
         String[] a = {"aaa", "bbb"};
         String[] b = {"ccc", "ddd", "eee"};
@@ -45,5 +47,53 @@ public class ArrayUtilsTestCase extends TestCase
         assertEquals(oresult[2], "ccc");
         assertEquals(oresult[3], "ddd");
         assertEquals(oresult[4], "eee");
+    }
+    
+    /**
+    *
+    */
+    public void test_arrayToList_G()
+    {
+    	Long[] arr = {new Long(1), new Long(2), new Long(3), new Long(4), new Long(5)};
+    	List<Long> list = ArrayUtils.arrayToList(arr);
+
+    	assertTrue(list.size() == 5);
+       	assertEquals(list.get(0).longValue(), 1);
+       	assertEquals(list.get(1).longValue(), 2);
+       	assertEquals(list.get(2).longValue(), 3);
+       	assertEquals(list.get(3).longValue(), 4);
+       	assertEquals(list.get(4).longValue(), 5);
+    }
+   
+    /**
+     *
+     */
+    public void test_arrayToList_O()
+    {
+    	long[] arr = {1, 2, 3, 4, 5};
+        List list = ArrayUtils.arrayToList(arr);
+
+        assertTrue(list.size() == 5);
+        assertEquals(((Long) list.get(0)).longValue(), 1);
+        assertEquals(((Long) list.get(1)).longValue(), 2);
+        assertEquals(((Long) list.get(2)).longValue(), 3);
+        assertEquals(((Long) list.get(3)).longValue(), 4);
+        assertEquals(((Long) list.get(4)).longValue(), 5);
+    }
+    
+    /**
+    *
+    */
+    public void test_arrayToList_O2()
+    {
+    	Object arr = new Long[] {new Long(1), new Long(2), new Long(3), new Long(4), new Long(5)};
+		List list = ArrayUtils.arrayToList(arr);
+
+    	assertTrue(list.size() == 5);
+    	assertEquals(((Long) list.get(0)).longValue(), 1);
+        assertEquals(((Long) list.get(1)).longValue(), 2);
+        assertEquals(((Long) list.get(2)).longValue(), 3);
+        assertEquals(((Long) list.get(3)).longValue(), 4);
+        assertEquals(((Long) list.get(4)).longValue(), 5);
     }
 }
