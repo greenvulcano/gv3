@@ -199,10 +199,12 @@ public class HttpCallTestCase extends TestCase
             fail();
         }
         catch (Exception exc) {
-            long delta = System.currentTimeMillis() - start;
-            //assertTrue("Wrong error cause", exc.toString().indexOf("connect timed out") != -1);
-            assertTrue("Wrong error cause", exc.toString().indexOf("The host did not accept the connection within timeout of 2000 ms") != -1);
-            assertTrue("Wrong timeout", Math.abs(delta - 2000) < 50);
+            if (exc.toString().indexOf("Network is unreachable") == -1) {
+                long delta = System.currentTimeMillis() - start;
+                //assertTrue("Wrong error cause", exc.toString().indexOf("connect timed out") != -1);
+                assertTrue("Wrong error cause", exc.toString().indexOf("The host did not accept the connection within timeout of 2000 ms") != -1);
+                assertTrue("Wrong timeout", Math.abs(delta - 2000) < 50);
+            }
         }
     }
 }
