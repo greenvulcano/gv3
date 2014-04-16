@@ -19,7 +19,13 @@
  */
 package it.greenvulcano.gvesb.social.twitter.directcall;
 
+import org.w3c.dom.Element;
+
+import twitter4j.Status;
 import it.greenvulcano.gvesb.social.SocialOperation;
+import it.greenvulcano.util.txt.DateUtils;
+import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xml.XMLUtilsException;
 
 /**
  * Superclass for all classes implementing a method call on Twitter.
@@ -27,23 +33,37 @@ import it.greenvulcano.gvesb.social.SocialOperation;
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
  */
-public abstract class TwitterOperationBase implements SocialOperation{
+public abstract class TwitterOperationBase implements SocialOperation {
+    private String accountName;
+    final String SOCIAL_NAME = "twitter";
 
-	private String accountName;
-	final String SOCIAL_NAME = "twitter";
+    public TwitterOperationBase(String accountName) {
+        this.accountName = accountName;
+    }
 
-	public TwitterOperationBase(String accountName) {
-		this.accountName = accountName;
-	}
+    @Override
+    public String getSocialName() {
+        return SOCIAL_NAME;
+    }
 
-	@Override
-	public String getSocialName() {
-		return SOCIAL_NAME;
-	}
+    @Override
+    public String getAccountName() {
+        return this.accountName;
+    }
 
-	@Override
-	public String getAccountName() {
-		return this.accountName;
-	}
+    /**
+     * @param parser
+     * @param root
+     * @param status
+     * @throws XMLUtilsException
+     */
+    protected void dumpTweet(XMLUtils parser, Element root, Status status) throws XMLUtilsException {
+        Element tweet = parser.insertElement(root, "Tweet");
+        parser.setAttribute(tweet, "id", String.valueOf(status.getId()));
+        parser.setAttribute(tweet, "createdAt", DateUtils.dateToString(status.getCreatedAt(), DateUtils.FORMAT_ISO_DATETIME_UTC));
+        parser.setAttribute(tweet, "fromUser", status.getUser().getScreenName());
+        parser.setAttribute(tweet, "fromUserId", String.valueOf(status.getUser().getId()));
+        parser.insertText(tweet, status.getText());
+    }
 
 }

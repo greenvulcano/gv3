@@ -68,10 +68,12 @@ public class TwitterSendDirectMessageCallOperation extends TwitterSocialCallOper
 		try {
 			Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
-			SocialOperation op = new TwitterOperationSendDirectMessage(
-					PropertiesHandler.expand(getAccount(), params, gvBuffer),
-					PropertiesHandler.expand(toAccountId, params, gvBuffer),
-					PropertiesHandler.expand(message, params, gvBuffer));
+			String acc = PropertiesHandler.expand(getAccount(), params, gvBuffer);
+			String toId = PropertiesHandler.expand(toAccountId, params, gvBuffer);
+			String mes = PropertiesHandler.expand(message, params, gvBuffer);
+			logger.debug("Account: " + acc + " - ToAccountId: " + toId + " - Message: " + mes);
+
+			SocialOperation op = new TwitterOperationSendDirectMessage(acc, toId, mes);
 			instance.directExecute(op);
 			op.updateResult(gvBuffer);
 		}

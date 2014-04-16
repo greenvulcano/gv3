@@ -24,7 +24,7 @@ import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.social.SocialAdapterManager;
 import it.greenvulcano.gvesb.social.SocialOperation;
-import it.greenvulcano.gvesb.social.twitter.directcall.TwitterOperationGetFollowersIDs;
+import it.greenvulcano.gvesb.social.twitter.directcall.TwitterOperationGetUserTimeline;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.ConnectionException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
@@ -38,51 +38,58 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
 /**
- * Class defining a call to getFollowersIDs on Twitter.
+ * Class defining a call to getUserTimeline on Twitter.
  * 
- * @version 3.3.0 Sep, 2012
+ * @version 3.3.3 Apr, 2014
  * @author GreenVulcano Developer Team
  */
-public class TwitterGetFollowersIDsCallOperation extends TwitterSocialCallOperation {
-    private static Logger logger = GVLogger.getLogger(TwitterGetFollowersIDsCallOperation.class);
-	private String followingId;
-	private String cursor;
-    
+public class TwitterGetUserTimelineCallOperation extends TwitterSocialCallOperation {
+    private static Logger logger = GVLogger.getLogger(TwitterGetUserTimelineCallOperation.class);
+    private String userId;
+    private String sinceId;
+    private String maxId;
+    private String count;
+
     @Override
-	public void init(Node node) throws InitializationException {
-		try{
-			super.init(node);
-			followingId = XMLConfig.get(node, "@followingId");
-			cursor = XMLConfig.get(node, "@cursor");
-		}
+    public void init(Node node) throws InitializationException {
+        try{
+            super.init(node);
+            userId = XMLConfig.get(node, "@userId", "");
+            sinceId = XMLConfig.get(node, "@sinceId", "");
+            maxId = XMLConfig.get(node, "@maxId", "");
+            count = XMLConfig.get(node, "@count", "");
+        }
         catch (Exception exc) {
-            logger.error("ERROR TwitterGetFollowersIDsCallOperation[" + getName() + "] initialization", exc);
+            logger.error("ERROR TwitterGetUserTimelineCallOperation[" + getName() + "] initialization", exc);
             throw new InitializationException("GV_CONF_ERROR", new String[][]{{"message", exc.getMessage()}}, exc);
         }
-	}
-	
-	@Override
-	public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException,
-			CallException, InvalidDataException {
-		SocialAdapterManager instance = SocialAdapterManager.getInstance();
-		try {
-			Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
+    }
+    
+    @Override
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException,
+            CallException, InvalidDataException {
+        SocialAdapterManager instance = SocialAdapterManager.getInstance();
+        try {
+            Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
 			String acc = PropertiesHandler.expand(getAccount(), params, gvBuffer);
-			String foId = PropertiesHandler.expand(followingId, params, gvBuffer);
-			String cur = PropertiesHandler.expand(cursor, params, gvBuffer);
-			logger.debug("Account: " + acc + " - FollowingId: " + foId + " - Cursor: " + cur);
+			String uId = PropertiesHandler.expand(userId, params, gvBuffer);
+			String sId = PropertiesHandler.expand(sinceId, params, gvBuffer);
+			String mId = PropertiesHandler.expand(maxId, params, gvBuffer);
+			String co = PropertiesHandler.expand(count, params, gvBuffer);
+			logger.debug("Account: " + acc + " - UserId: " + uId + " - SinceId: " + sId + " - MaxId: " + mId
+					+ " - Count: " + co);
 
-			SocialOperation op = new TwitterOperationGetFollowersIDs(acc, foId, cur);
-			instance.directExecute(op);
-			op.updateResult(gvBuffer);
-		}
+            SocialOperation op = new TwitterOperationGetUserTimeline(acc, uId, sId, mId, co);
+            instance.directExecute(op);
+            op.updateResult(gvBuffer);
+        }
         catch (Exception exc) {
-        	logger.error("ERROR TwitterGetFollowersIDsCallOperation[" + getName() + "] execution", exc);
+            logger.error("ERROR TwitterGetUserTimelineCallOperation[" + getName() + "] execution", exc);
             throw new CallException("GV_CALL_SERVICE_ERROR", new String[][]{{"service", gvBuffer.getService()},
                     {"system", gvBuffer.getSystem()}, {"id", gvBuffer.getId().toString()},
                     {"message", exc.getMessage()}}, exc);
         }
-		return gvBuffer;
-	}
+        return gvBuffer;
+    }
 }

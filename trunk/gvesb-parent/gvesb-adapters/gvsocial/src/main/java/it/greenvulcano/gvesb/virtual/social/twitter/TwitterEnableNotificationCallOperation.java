@@ -24,7 +24,7 @@ import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.social.SocialAdapterManager;
 import it.greenvulcano.gvesb.social.SocialOperation;
-import it.greenvulcano.gvesb.social.twitter.directcall.TwitterOperationRetweetStatus;
+import it.greenvulcano.gvesb.social.twitter.directcall.TwitterOperationEnableNotification;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.ConnectionException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
@@ -66,9 +66,11 @@ public class TwitterEnableNotificationCallOperation extends TwitterSocialCallOpe
 		try {
 			Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
-			SocialOperation op = new TwitterOperationRetweetStatus(
-					PropertiesHandler.expand(getAccount(), params, gvBuffer),
-					PropertiesHandler.expand(fromAccountId, params, gvBuffer));
+			String acc = PropertiesHandler.expand(getAccount(), params, gvBuffer);
+			String frmAcc = PropertiesHandler.expand(fromAccountId, params, gvBuffer);
+			logger.debug("Account: " + acc + " - FromAccount: " + frmAcc);
+
+			SocialOperation op = new TwitterOperationEnableNotification(acc, frmAcc);
 			instance.directExecute(op);
 			op.updateResult(gvBuffer);
 		}

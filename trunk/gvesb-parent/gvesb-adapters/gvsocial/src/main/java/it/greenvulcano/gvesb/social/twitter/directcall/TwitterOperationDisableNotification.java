@@ -20,6 +20,7 @@
 package it.greenvulcano.gvesb.social.twitter.directcall;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.social.SocialAdapterAccount;
 import it.greenvulcano.gvesb.social.SocialAdapterException;
 import it.greenvulcano.log.GVLogger;
@@ -36,33 +37,42 @@ import twitter4j.User;
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
  */
-public class TwitterOperationDisableNotification extends TwitterOperationBase{
+public class TwitterOperationDisableNotification extends TwitterOperationBase {
+    private static Logger logger = GVLogger.getLogger(TwitterOperationDisableNotification.class);
 
-	private String fromAccountId;
-	private User user;
-	private static Logger logger = GVLogger.getLogger(TwitterOperationDisableNotification.class);
-	
-	public TwitterOperationDisableNotification(String accountName, String statusText) {
-		super(accountName);
-		this.fromAccountId = statusText;
-	}
+    private String fromAccountId;
+    private User user;
+    
+    public TwitterOperationDisableNotification(String accountName, String fromAccountId) {
+        super(accountName);
+        this.fromAccountId = fromAccountId;
+    }
 
-	@Override
-	public void execute(SocialAdapterAccount account) throws SocialAdapterException {
-		try {
-			Twitter twitter = (Twitter) account.getProxyObject();
-			user = twitter.disableNotification(Long.parseLong(fromAccountId));
-		} catch (NumberFormatException exc) {
-			logger.error("Call to TwitterOperationDisableNotification failed. Check fromAccountId format.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationDisableNotification failed. Check fromAccountId format.", exc);
-		} catch (TwitterException exc) {
-			logger.error("Call to TwitterOperationDisableNotification failed.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationDisableNotification failed.", exc);
-		}
-	}
+    @Override
+    public void execute(SocialAdapterAccount account) throws SocialAdapterException {
+        try {
+            Twitter twitter = (Twitter) account.getProxyObject();
+            try {
+                long id = Long.parseLong(fromAccountId);
+                user = twitter.destroyFriendship(id);
+            }
+            catch (NumberFormatException exc) {
+                user = twitter.destroyFriendship(fromAccountId);
+            }
+        } catch (NumberFormatException exc) {
+            logger.error("Call to TwitterOperationDisableNotification failed. Check fromAccountId[" + fromAccountId
+            		+ "] format.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationDisableNotification failed. Check fromAccountId["
+            		+ fromAccountId + "] format.", exc);
+        } catch (TwitterException exc) {
+            logger.error("Call to TwitterOperationDisableNotification fromAccountId[" + fromAccountId + "] failed.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationDisableNotification fromAccountId[" + fromAccountId
+            		+ "] failed.", exc);
+        }
+    }
 
-	@Override
-	public void updateResult(GVBuffer buffer) {
-		//buffer.setObject(user.getId());
-	}
+    @Override
+    public void updateResult(GVBuffer buffer) throws GVException  {
+        buffer.setObject(user.getId());
+    }
 }
