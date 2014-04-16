@@ -20,6 +20,9 @@
 package it.greenvulcano.util;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -41,7 +44,6 @@ public class ArrayUtils
      */
     public static final Object[] concat(Object[] a, Object[] b, Class<?> type)
     {
-
         if (a == null) {
             a = (Object[]) Array.newInstance(type, 0);
         }
@@ -56,5 +58,56 @@ public class ArrayUtils
         System.arraycopy(b, 0, result, a.length, b.length);
 
         return result;
+    }
+    
+    public static final <T> List<T> arrayToList(final T[] array) {
+    	final List<T> list = new ArrayList<T>(array.length);
+
+    	for (final T item : array) {
+    		list.add(item);
+    	}
+    	return list;
+    }
+    
+    public static final List arrayToList(Object arr) {
+    	List list = null; 
+
+    	Class<?> ac = arr.getClass();
+    	if (!ac.isArray()) {
+    		throw new IllegalArgumentException("The input parameter isn't an array");
+    	}
+
+    	Class<?> act = ac.getComponentType();
+    	if (act.isPrimitive()) {
+    		if (act.equals(boolean.class)) {
+    			list = Arrays.asList(org.apache.commons.lang.ArrayUtils.toObject((boolean[]) arr));
+    		}
+    		else if (act.equals(byte.class)) {
+    			list = Arrays.asList(org.apache.commons.lang.ArrayUtils.toObject((byte[]) arr));
+    		}
+    		else if (act.equals(char.class)) {
+    			list = Arrays.asList(org.apache.commons.lang.ArrayUtils.toObject((char[]) arr));
+    		}
+    		else if (act.equals(short.class)) {
+    			list = Arrays.asList(org.apache.commons.lang.ArrayUtils.toObject((short[]) arr));
+    		}
+    		else if (act.equals(int.class)) {
+    			list = Arrays.asList(org.apache.commons.lang.ArrayUtils.toObject((int[]) arr));
+    		}
+    		else if (act.equals(long.class)) {
+    			list = Arrays.asList(org.apache.commons.lang.ArrayUtils.toObject((long[]) arr));
+    		}
+    		else if (act.equals(float.class)) {
+    			list = Arrays.asList(org.apache.commons.lang.ArrayUtils.toObject((float[]) arr));
+    		}
+    		else if (act.equals(double.class)) {
+    			list = Arrays.asList(org.apache.commons.lang.ArrayUtils.toObject((double[]) arr));
+    		}
+    	}
+    	else {
+    		list = arrayToList((Object[]) arr); 
+    	}
+
+    	return list;
     }
 }
