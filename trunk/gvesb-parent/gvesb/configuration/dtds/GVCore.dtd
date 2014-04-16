@@ -707,7 +707,7 @@
             </table>
         </xsl:template>
 -->
-<!ELEMENT Transformations (Description?,(SequenceTransformation|XSLTransformation|Bin2XMLTransformation|XML2BinTransformation|AddTagTransformation|CSV2XMLTransformation|XSLFOPTransformation|Base64Transformation|CryptoTransformation|OverWriteBytesTransformation|ChangeCharTransformation|XQTransformation %extra-dte-transformers;)*)>
+<!ELEMENT Transformations (Description?,(SequenceTransformation|XSLTransformation|Bin2XMLTransformation|XML2BinTransformation|AddTagTransformation|CSV2XMLTransformation|XSLFOPTransformation|JSON2XMLTransformation|XML2JSONTransformation|Base64Transformation|CryptoTransformation|OverWriteBytesTransformation|ChangeCharTransformation|XQTransformation %extra-dte-transformers;)*)>
 
 <!--
     Global validation flag.
@@ -1030,6 +1030,178 @@
     #NotNull
 -->
 <!ATTLIST XSLFOPTransformation TransformerFactory CDATA #IMPLIED>
+
+<!--
+    Defines a XML/JSON trasformation.
+
+    #Label: @name
+    #Icon: GVXSLFopTransformation.png
+    #Template:
+
+        <xsl:template match="XML2JSONTransformation">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+            <xsl:if test="TransformationAlias">
+                <table cellpadding="0" cellspacing="0">
+                    <tr valign="top">
+                        <td>TransformationAliases:</td>
+                        <td width="20"></td>
+                        <td>
+                            <xsl:for-each select="TransformationAlias">
+                                <b><xsl:value-of select="@name"/></b><br/>
+                            </xsl:for-each>
+                        </td>
+                    </tr>
+                </table>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT XML2JSONTransformation (Description?, TransformationAlias*,(%dte-transformer-helpers;)*)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST XML2JSONTransformation type CDATA #FIXED "transformation">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST XML2JSONTransformation class CDATA #FIXED "it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer">
+<!--
+    Transformation name.
+
+    #Unique: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #NotNull
+-->
+<!ATTLIST XML2JSONTransformation name CDATA #REQUIRED>
+<!--
+    Validation desired (true | false).
+-->
+<!ATTLIST XML2JSONTransformation validate %validateValues; #IMPLIED>
+<!--
+    Validation direction (in | out | in-out).
+-->
+<!ATTLIST XML2JSONTransformation validateDirection %validateDirectionValues; #IMPLIED>
+<!--
+    Validation type (xsd | dtd).
+-->
+<!ATTLIST XML2JSONTransformation validationType %validationTypes; #IMPLIED>
+<!--
+    Style-sheet to be used in trasformation.
+
+    #NotNull
+-->
+<!ATTLIST XML2JSONTransformation InputXSLMapName CDATA #IMPLIED>
+<!--
+    XSD Schema that describe the input XML.
+
+-->
+<!ATTLIST XML2JSONTransformation SchemaInput CDATA #IMPLIED>
+<!--
+    XSD Schema that describe the output XML.
+
+-->
+<!ATTLIST XML2JSONTransformation SchemaOutput CDATA #IMPLIED>
+<!--
+    DataSourceSet name from wich retrieve the transformation map and validation schema.
+
+    #References: /GVCore/GVDataTransformation/DataSourceSets/DataSourceSet/@name
+-->
+<!ATTLIST XML2JSONTransformation DataSourceSet CDATA #IMPLIED>
+<!--
+    The FQN of the TransformerFactory class to use.
+    If not configured use the JVM default.
+
+    #NotNull
+-->
+<!ATTLIST XML2JSONTransformation TransformerFactory CDATA #IMPLIED>
+
+<!--
+    Defines a JSON/XML trasformation.
+
+    #Label: @name
+    #Icon: GVXSLFopTransformation.png
+    #Template:
+
+        <xsl:template match="JSON2XMLTransformation">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+            <xsl:if test="TransformationAlias">
+                <table cellpadding="0" cellspacing="0">
+                    <tr valign="top">
+                        <td>TransformationAliases:</td>
+                        <td width="20"></td>
+                        <td>
+                            <xsl:for-each select="TransformationAlias">
+                                <b><xsl:value-of select="@name"/></b><br/>
+                            </xsl:for-each>
+                        </td>
+                    </tr>
+                </table>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT JSON2XMLTransformation (Description?, TransformationAlias*,(%dte-transformer-helpers;)*)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST JSON2XMLTransformation type CDATA #FIXED "transformation">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST JSON2XMLTransformation class CDATA #FIXED "it.greenvulcano.gvesb.gvdte.transformers.json.JSON2XMLTransformer">
+<!--
+    Transformation name.
+
+    #Unique: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #NotNull
+-->
+<!ATTLIST JSON2XMLTransformation name CDATA #REQUIRED>
+<!--
+    Validation desired (true | false).
+-->
+<!ATTLIST JSON2XMLTransformation validate %validateValues; #IMPLIED>
+<!--
+    Validation direction (in | out | in-out).
+-->
+<!ATTLIST JSON2XMLTransformation validateDirection %validateDirectionValues; #IMPLIED>
+<!--
+    Validation type (xsd | dtd).
+-->
+<!ATTLIST JSON2XMLTransformation validationType %validationTypes; #IMPLIED>
+<!--
+    Style-sheet to be used in trasformation.
+
+    #NotNull
+-->
+<!ATTLIST JSON2XMLTransformation OutputXSLMapName CDATA #IMPLIED>
+<!--
+    XSD Schema that describe the input XML.
+
+-->
+<!ATTLIST JSON2XMLTransformation SchemaInput CDATA #IMPLIED>
+<!--
+    XSD Schema that describe the output XML.
+
+-->
+<!ATTLIST JSON2XMLTransformation SchemaOutput CDATA #IMPLIED>
+<!--
+    DataSourceSet name from wich retrieve the transformation map and validation schema.
+
+    #References: /GVCore/GVDataTransformation/DataSourceSets/DataSourceSet/@name
+-->
+<!ATTLIST JSON2XMLTransformation DataSourceSet CDATA #IMPLIED>
+<!--
+    The FQN of the TransformerFactory class to use.
+    If not configured use the JVM default.
+
+    #NotNull
+-->
+<!ATTLIST JSON2XMLTransformation TransformerFactory CDATA #IMPLIED>
 
 <!--
     Defines a Binary to XML trasformation.
