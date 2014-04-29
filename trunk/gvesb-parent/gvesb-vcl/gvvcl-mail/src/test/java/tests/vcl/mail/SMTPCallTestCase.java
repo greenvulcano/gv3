@@ -87,6 +87,7 @@ public class SMTPCallTestCase extends TestCase
 
         GVBuffer gvBuffer = new GVBuffer(TEST_SYSTEM, TEST_SERVICE);
         gvBuffer.setObject(TEST_MESSAGE);
+        gvBuffer.setProperty("MAIL_SENDER", "SENDER ADDITIONAL INFO");
 
         op.perform(gvBuffer);
         
