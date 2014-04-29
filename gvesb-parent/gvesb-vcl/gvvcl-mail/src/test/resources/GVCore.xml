@@ -29,7 +29,7 @@
         <Channel id-channel="TEST_CHANNEL">
           <smtp-call name="SendEmail" jndi-name="openejb:Resource/mailServerSend" class="it.greenvulcano.gvesb.virtual.smtp.SMTPCallOperation"
             type="call">
-            <mail-message sender-display-name="test sender" content-type="text-plain" subject="Notifica SendEmail"
+            <mail-message sender-display-name="test sender @{{MAIL_SENDER}}" content-type="text-plain" subject="Notifica SendEmail"
               high-priority="true">
               <destinations>
                 <to>
