@@ -209,6 +209,40 @@ public class GVCoreTestCase extends TestCase
     /**
      * @throws Exception
      */
+    public void testGVSubFlowCallDyn() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_SUBFLOW_DYNAMIC";
+        String TEST_BUFFER = "tEsT iNpUt dAtA";
+        String OUT_BUFFER_U = "TEST INPUT DATA";
+        String OUT_BUFFER_L = "test input data";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        GreenVulcano greenVulcano = new GreenVulcano();
+        
+        gvBuffer.setProperty("MODE", "TOUPPER");
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        assertEquals(OUT_BUFFER_U, gvBufferout.getObject());
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBuffer.setProperty("MODE", "TOLOWER");
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        assertEquals(OUT_BUFFER_L, gvBufferout.getObject());
+
+        System.out.println(OperationManagerPool.instance().toString());
+    }
+
+    /**
+     * @throws Exception
+     */
     public void testGVCoreIteratorSubFlow() throws Exception
     {
         String SYSTEM_NAME = "GVESB";
