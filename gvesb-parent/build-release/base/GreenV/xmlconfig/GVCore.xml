@@ -2313,7 +2313,7 @@ data.setObject(str.substring(1));]]></JavaScript>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
                                          id="call_server" id-system="GVESB" input="input"
                                          next-node-id="end" op-type="call"
-                                         operation-name="http_call" output="output"
+                                         operation-name="http_toupper" output="output"
                                          point-x="186" point-y="152" type="flow-node"/>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
                                    end-business-process="yes" id="end" op-type="end"
@@ -2529,6 +2529,7 @@ data.setObject(str.substring(1));]]></JavaScript>
                                  connection-factory="java:/XAConnectionFactory"
                                  destination-name="gvesb/jms/queue/TOUPPER_A_Response_Queue"
                                  destination-type="queue" dump-message="true"
+                                 keep-input-extra-properties="true"
                                  name="JMSDequeueFrom::TOUPPER_A_Resp"
                                  receive-timeout="10000"
                                  receive-timeout-overridable="false"
@@ -2760,6 +2761,13 @@ data.setObject(str.substring(1));]]></JavaScript>
                         <endpoint conn-timeout="10000" host="www.greenvulcano.com"
                                   port="80" secure="false" so-timeout="5000"/>
                         <method name="GET" request-uri="/"/>
+                    </http-call>
+                    <http-call class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation"
+                               name="http_toupper" type="call">
+                        <endpoint conn-timeout="10000" host="localhost"
+                                  port="8080" secure="false" so-timeout="5000"/>
+                        <method name="POST" request-uri="/gvhttp/inbound/HTTP_TEST"
+                                ref-dp="HTTP_toupper"/>
                     </http-call>
                 </Channel>
                 <Channel id-channel="TEST_CHANNEL_PARALLEL">
@@ -3037,10 +3045,13 @@ and CREDIT >= ?]]></statement>
                         <RestServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker"
                                             endpoint="http://localhost:8080/gvaxis2/secure/services/CreditService/Query?cnumber=ognl{{object}}"
                                             method="GET"
-                                            ref-dp="CREDIT::RestSetAuthDataProvider"
+                                            ref-dp="generic_RestDataProvider"
                                             responseMode="OUT_IN"
-                                            returnType="body-element" timeout="1"
-                                            type="invoker"/>
+                                            returnType="body-element" timeout="10"
+                                            type="invoker">
+                            <BasicHttpAuth type="http-auth" class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth"
+                                           user="xmlp{{ws.auth.user}}" password="xmlp{{ws.auth.password}}"/>
+                        </RestServiceInvoker>
                     </rest-call>
                 </Channel>
             </System>
@@ -3287,20 +3298,25 @@ where ID=?</StatementValue>
                              name="QueryExternal" type="call">
                         <AxisWebServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.GVWebServiceInvoker"
                                                operation="Query" throwsFault="true"
-                                               ref-dp="EXTERNAL::QueryWSDataProvider"
+                                               ref-dp="genericPassBody_WSDataProvider"
                                                returnType="body-element" type="invoker">
                             <WSDLInfo type="wsdlinfo"
                                       wsdl="file://${{gv.app.home}}/xmlconfig/wsdl/ExternalCreditService.wsdl"/>
+                            <BasicHttpAuth type="http-auth" class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth"
+                                           user="xmlp{{ws.auth.user}}" password="xmlp{{ws.auth.password}}"/>
                         </AxisWebServiceInvoker>
                     </ws-call>
                     <ws-call class="it.greenvulcano.gvesb.virtual.ws.WSCallOperation"
                              name="PayExternal" type="call">
                         <AxisWebServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.GVWebServiceInvoker"
-                                               operation="Pay" throwsFault="true"
-                                               ref-dp="EXTERNAL::PayWSDataProvider"
-                                               returnType="body-element" type="invoker">
+                                               operation="Pay"
+                                               ref-dp="genericPassBody_WSDataProvider"
+                                               returnType="body-element"
+                                               throwsFault="true" type="invoker">
                             <WSDLInfo type="wsdlinfo"
                                       wsdl="file://${{gv.app.home}}/xmlconfig/wsdl/ExternalCreditService.wsdl"/>
+                            <BasicHttpAuth type="http-auth" class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth"
+                                           user="xmlp{{ws.auth.user}}" password="xmlp{{ws.auth.password}}"/>
                         </AxisWebServiceInvoker>
                     </ws-call>
                 </Channel>

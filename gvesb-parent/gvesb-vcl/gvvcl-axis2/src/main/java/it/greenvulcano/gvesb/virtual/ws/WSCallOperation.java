@@ -26,8 +26,6 @@ import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.log.GVLogger;
 
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -86,17 +84,6 @@ public class WSCallOperation implements CallOperation
 
             wsiObject = (GVWebServiceInvoker) wsiObjectClass.newInstance();
             wsiObject.init(invokerConfigNode);
-
-            Node proxyConfigNode = XMLConfig.getNode(node, "Proxy");
-            if (proxyConfigNode != null) {
-                String strHost = XMLConfig.get(proxyConfigNode, "@host");
-                String strPort = XMLConfig.get(proxyConfigNode, "@port");
-                String strUser = XMLConfig.get(proxyConfigNode, "@user");
-                String strPassword = XMLConfig.getDecrypted(proxyConfigNode, "@password");
-
-                setProxyProperties(strHost, strPort, strUser, strPassword);
-            }
-
         }
         catch (Exception exc) {
             logger.error("An error occurred initializing the WS Call Operation", exc);
@@ -136,15 +123,6 @@ public class WSCallOperation implements CallOperation
     public String getServiceAlias(GVBuffer gvBuffer)
     {
         return gvBuffer.getService();
-    }
-
-    private void setProxyProperties(String host, String port, String user, String password)
-    {
-        Properties props = System.getProperties();
-        props.put("http.proxyHost", host);
-        props.put("http.proxyPort", port);
-        props.put("http.proxyUser", user);
-        props.put("http.proxyPassword", password);
     }
 
     /**

@@ -85,17 +85,6 @@ public class RestCallOperation implements CallOperation
 
             wsiObject = (RestServiceInvoker) wsiObjectClass.newInstance();
             wsiObject.init(invokerConfigNode);
-
-            Node proxyConfigNode = XMLConfig.getNode(node, "Proxy");
-            if (proxyConfigNode != null) {
-                String strHost = XMLConfig.get(proxyConfigNode, "@host");
-                String strPort = XMLConfig.get(proxyConfigNode, "@port");
-                String strUser = XMLConfig.get(proxyConfigNode, "@user");
-                String strPassword = XMLConfig.getDecrypted(proxyConfigNode, "@password");
-
-                setProxyProperties(strHost, strPort, strUser, strPassword);
-            }
-
         }
         catch (Exception exc) {
             logger.error("An error occurred initializing the WS Call Operation", exc);
@@ -137,14 +126,6 @@ public class RestCallOperation implements CallOperation
         return gvBuffer.getService();
     }
 
-    private void setProxyProperties(String host, String port, String user, String password)
-    {
-        Properties props = System.getProperties();
-        props.put("http.proxyHost", host);
-        props.put("http.proxyPort", port);
-        props.put("http.proxyUser", user);
-        props.put("http.proxyPassword", password);
-    }
 
     /**
      * @see it.greenvulcano.gvesb.virtual.Operation#cleanUp()
