@@ -19,8 +19,6 @@
  */
 package it.greenvulcano.util.txt;
 
-import it.greenvulcano.util.xml.XMLUtilsException;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
