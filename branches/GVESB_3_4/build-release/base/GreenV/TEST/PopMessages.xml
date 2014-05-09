@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Message SYSTEM "file:/home/gianluca/applicazioni/GreenV-Ent/TEST/PopMessages.dtd">
+<Message>
+    <From>gv2@gv.com</From>
+    <To>gv2@gv.com gv2@gv.com gv1@gv.com</To>
+    <Cc>gv1@gv.com</Cc>
+    <Bcc/>
+    <ReplyTo>gv2@gv.com</ReplyTo>
+    <Headers>
+        <Return-Path>&lt;gv2@gv.com&gt;</Return-Path>
+        <Received>from win-host (HELO dmghost1); Sun Jul 18 16:22:00 CEST 2010</Received>
+        <Message-ID>&lt;003c01cb2684$9654a7a0$0a64aec0@dmghost1&gt;</Message-ID>
+        <From>"GV 2" &lt;gv2@gv.com&gt;</From>
+        <To>"GV 2" &lt;gv2@gv.com&gt;</To>
+        <To>gv2@gv.com, gv1@gv.com</To>
+        <Cc>&lt;gv1@gv.com&gt;</Cc>
+        <References>&lt;002f01cb2684$816d3eb0$0a64aec0@dmghost1&gt;</References>
+        <Subject>Re: test</Subject>
+        <Date>Sun, 18 Jul 2010 16:22:00 +0200</Date>
+        <MIME-Version>1.0</MIME-Version>
+        <Content-Type>multipart/mixed;&#13;
+    boundary="----=_NextPart_000_0038_01CB2695.59D2C940"</Content-Type>
+        <X-Priority>3</X-Priority>
+        <X-MSMail-Priority>Normal</X-MSMail-Priority>
+        <X-Mailer>Microsoft Outlook Express 6.00.2900.3664</X-Mailer>
+        <X-MimeOLE>Produced By Microsoft MimeOLE V6.00.2900.3664</X-MimeOLE>
+    </Headers>
+    <Subject>Re: test</Subject>
+    <Multipart
+        content-type="multipart/mixed;&#13;&#10;&#9;boundary=&quot;----=_NextPart_000_0038_01CB2695.59D2C940&quot;">
+        <Multipart
+            content-type="multipart/alternative;&#13;&#10;&#9;boundary=&quot;----=_NextPart_001_0039_01CB2695.59D2C940&quot;">
+            <PlainMessage content-type="text/plain;&#13;&#10;&#9;charset=&quot;iso-8859-1&quot;"
+                >&#13;
+        ----- Original Message ----- &#13;
+        From: GV 2 &#13;
+        To: gv1@gv.com ; gv1@gv.com ; gv2@gv.com &#13;
+        Cc: gv2@gv.com &#13;
+        Sent: Sunday, July 18, 2010 4:20 PM&#13;
+        Subject: test&#13;
+        &#13;
+        &#13;
+        AAAAAAAAAAAAAA</PlainMessage>
+            <HTMLMessage content-type="text/html;&#13;&#10;&#9;charset=&quot;iso-8859-1&quot;"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<META content="MSHTML 6.00.6000.17063" name=GENERATOR>
+<STYLE></STYLE>
+</HEAD>
+<BODY bgColor=#ffffff>
+<DIV>&nbsp;</DIV>
+<BLOCKQUOTE dir=ltr
+style="PADDING-RIGHT: 0px; PADDING-LEFT: 5px; MARGIN-LEFT: 5px; BORDER-LEFT: #000000 2px solid; MARGIN-RIGHT: 0px">
+  <DIV style="FONT: 10pt arial">----- Original Message ----- </DIV>
+  <DIV
+  style="BACKGROUND: #e4e4e4; FONT: 10pt arial; font-color: black"><B>From:</B>
+  <A title=gv2@gv.com href="mailto:gv2@gv.com">GV 2</A> </DIV>
+  <DIV style="FONT: 10pt arial"><B>To:</B> <A title=gv1@gv.com
+  href="mailto:gv1@gv.com">gv1@gv.com</A> ; <A title=gv1@gv.com
+  href="mailto:gv1@gv.com">gv1@gv.com</A> ; <A title=gv2@gv.com
+  href="mailto:gv2@gv.com">gv2@gv.com</A> </DIV>
+  <DIV style="FONT: 10pt arial"><B>Cc:</B> <A title=gv2@gv.com
+  href="mailto:gv2@gv.com">gv2@gv.com</A> </DIV>
+  <DIV style="FONT: 10pt arial"><B>Sent:</B> Sunday, July 18, 2010 4:20 PM</DIV>
+  <DIV style="FONT: 10pt arial"><B>Subject:</B> test</DIV>
+  <DIV><BR></DIV>
+  <DIV><FONT face=Arial
+size=2>AAAAAAAAAAAAAA</FONT></DIV></BLOCKQUOTE></BODY></HTML>
+]]></HTMLMessage>
+        </Multipart>
+        <EncodedContent
+            content-type="application/octet-stream;&#13;&#10;&#9;name=&quot;NtlmHttpFilter.properties&quot;"
+            file-name="NtlmHttpFilter.properties"
+            >I2pjaWZzLmh0dHAuZG9tYWluQ29udHJvbGxlcj1ncnRwbWRjMQpqY2lmcy5zbWIuY2xpZW50LmRvbWFpbj1ncnRuCmpjaWZzLm5ldGJpb3Mud2lucz1ncnRwbWdjMS5ncnRuLGdydHBtZGMxLmdydG4KamNpZnMuc21iLmxtQ29tcGF0aWJpbGl0eT0zCmpjaWZzLmh0dHAuaW5zZWN1cmVCYXNpYz10cnVlCmpjaWZzLmVuY29kaW5nPUFTQ0lJCmpjaWZzLnV0aWwubG9nbGV2ZWw9LTE=</EncodedContent>
+    </Multipart>
+</Message>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+    <GVJDBCConnectionBuilder name="GVJDBC" type="module">
+        <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
+                                     driver-class="oracle.jdbc.driver.OracleDriver"
+                                     name="gv_log" password="gv_log"
+                                     type="jdbc-connection-builder"
+                                     url="jdbc:oracle:thin:@localhost:1525:XE"
+                                     user="gv_log">
+            <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
+                            minIdle="1" timeBetweenEvictionRuns="300">
+                <validationQuery>select 1 from dual</validationQuery>
+            </PoolParameters>
+        </DriverPoolConnectionBuilder>
+    </GVJDBCConnectionBuilder>
+</GVAdapters>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE xml SYSTEM "file://max/dtds/xml.dtd">
+
+<xml copyright="Maxime Informatica Intranet Framework" provider="MAX_XML_PROVIDER">
+  <context context="/gvconsole" invoke="/gvconsole/MaxXMLServlet" />
+  <stylesheet use-pool="false" />
+  <details category="detailsXSLT" />
+  <entity-resolver>
+    <max-entity-resolver category="entities" class="it.greenvulcano.catalog.GVCatalogResolver" prefix="file://" type="entity-resolver" />
+  </entity-resolver>
+  <xpath xpath-factory="max.xpath.jaxen.JaxenXPathAPIFactoryImpl">
+    <description>Funzioni estese e namespaces per l&apos;XPath.</description>
+    <xpath-extension class="max.documents.MaxDocumentXPathFunction" function-name="document" namespace="http://www.greenvulcano.it/gvesb">
+      <description>Accede ad un documento registrato nel DocumentRepository.</description>
+    </xpath-extension>
+    <xpath-namespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+    <xpath-namespace namespace="http://www.w3.org/2001/XMLSchema-instance" prefix="xsi" />
+    <xpath-namespace namespace="http://www.greenvulcano.it/gvesb" prefix="gvesb" />
+    <xpath-namespace namespace="http://schemas.xmlsoap.org/soap/encoding/" prefix="soapenc" />
+    <xpath-namespace namespace="http://schemas.xmlsoap.org/wsdl/soap/" prefix="soap" />
+    <xpath-namespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl" />
+    <xpath-namespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j" />
+    <xpath-namespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml" />
+    <xpath-namespace namespace="http://www.openspcoop.org/dao/config" prefix="openspcoop"/>
+  </xpath>
+</xml>

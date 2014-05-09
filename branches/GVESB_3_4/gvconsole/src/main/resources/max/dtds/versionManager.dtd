@@ -1,0 +1,42 @@
+<!--============================================================================
+    This elements holds the configuration for the VersionManager.
+============================================================================
+-->
+<!ELEMENT version-manager (description?,content-provider)>
+
+<!ATTLIST version-manager copyright CDATA #FIXED "Maxime Informatica Intranet Framework">
+
+<!--============================================================================
+    Defines wich content provider must be used.
+============================================================================
+    #Label: @name
+    #Template:
+
+        <xsl:template match="content-provider">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>Content provider name:</td>
+                    <td width="20"></td>
+                    <td><b><xsl:value-of select="@name"/></b></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT content-provider (description?)>
+
+<!--
+    Content provider to use for store older versions of documents.
+    
+    #Config: contents.xml : /contents/provider/@name
+    #Config: contents.xml : /contents/alias/@provider
+-->
+<!ATTLIST content-provider name CDATA #REQUIRED>
+
+<!--============================================================================
+    Free description.
+============================================================================-->
+<!ELEMENT description (#PCDATA)>

@@ -1,0 +1,37 @@
+
+Prerequisites:
+- JDK 1.6.x
+- Eclipse 3.7.x
+    - m2eclipse plug-in   (Maven integration)
+    - subversive plug-in  (Subversion client)
+
+Download from repository http://svn.code.sf.net/p/greenvulcanoesb/source/trunk the 'gvesb-parent' project.
+Identify as GV_PROJECT_HOME the project path.
+
+Common propaedeutic steps
+- modify the (GV_PROJECT_HOME)/tools/maven/conf/user-settings.xml file content properly:
+    - the 'localRepository' element must be populated with (GV_PROJECT_HOME)/maven-repository path
+    - the 'greenv.project.home' element into the 'base-cfg' profile must be populated with (GV_PROJECT_HOME) path
+  this file should be used for user-specific configurations and should NOT be uploaded to the SVN repository
+
+Command line compilation
+- open a shell
+- change the PATH variable by entering at the beginning (GV_PROJECT_HOME)/tools/bin (Ant) and (GV_PROJECT_HOME)/tools/maven/bin (Maven2)
+  or
+  - modify the setenv.sh or setenv.bat setting the GV_PROJECT_HOME variable (the modified files should NOT be uploaded to the SVN repository)
+  - lauch the appropriate OS script:
+    - Unix: . setenv.sh
+    - Windows: setenv.bat
+- use the mvn command to start the compilation
+
+Compilation by Eclipse GUI
+- start Eclipse in a new workspace and install the specified plug-in
+- configure the Maven plug-in:
+    - from Installations tab add an external installation of Maven2: (GV_PROJECT_HOME)/tools/maven
+    - form User Settings tab select the (GV_PROJECT_HOME)/tools/maven/conf/user-settings.xml file
+- import the root project:
+    - Import -> Maven -> Existing Maven Projects -> root directory=(GV_PROJECT_HOME)
+    - import all projects found
+- if you are installing new Eclipse plug-ins, it is possible the .project file or the .settings directory to be changed: these changes are NOT to be uploaded to the SVN repository
+
+In order to make the various installation packages refers to (GV_PROJECT_HOME)/build-release/readme.eng

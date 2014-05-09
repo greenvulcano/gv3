@@ -1,0 +1,4 @@
+<%
+    String exception = testManager.getWrapper().getThrowableMessage();
+%>
+<div id="exceptionContent" ><%=exception%></div>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+    <GVDataHandlerConfiguration version="1.0" type="module" name="DH_ENGINE">
+    </GVDataHandlerConfiguration>
+    <GVBIRTReportConfiguration version="1.0" type="module" name="BIRT_REPO">
+        <Engine reportEngineHome="${{gv.app.home}}/test-classes/BIRTReportEngine" logLevel="INFO">
+            <Renders>
+                <ExcelReportRender type="report-render" class="it.greenvulcano.birt.report.internal.ExcelReportRenderOptions"/>
+                <PDFReportRender type="report-render" class="it.greenvulcano.birt.report.internal.PDFReportRenderOptions"/>
+                <HTMLReportRender type="report-render" class="it.greenvulcano.birt.report.internal.HTMLReportRenderOptions"/>
+            </Renders>
+        </Engine>
+        <ReportGroups>
+            <ReportGroup name="TestGRP">
+                <Report name="Hello World" config="hello_world.rptdesign" type="report" />
+                <Report name="Test" config="test.rptdesign" type="report" />
+                <Report name="Sales Invoice Expr" config="SalesInvoice.rptdesign" type="report">
+                    <Parameters>
+                        <Parameter name="OrderNumber" expression="@java.lang.Integer@parseInt(#params.get(&apos;ORDER_NUMBER&apos;))" />
+                    </Parameters>
+                </Report>
+                <Report name="Sales Invoice Excel" config="SalesInvoice.rptdesign" type="report">
+                    <Renders>
+                        <ExcelReportRender class="it.greenvulcano.birt.report.internal.ExcelReportRenderOptions" type="report-render">
+                            <Options>
+                                <Option name="sheet_name" value="'Sales Invoice'"></Option>
+                            </Options>
+                        </ExcelReportRender>
+                    </Renders>
+                    <Parameters>
+                        <Parameter name="OrderNumber" expression="@java.lang.Integer@parseInt(#params.get(&apos;ORDER_NUMBER&apos;))" />
+                    </Parameters>
+                </Report>
+                <Report name="Sales Invoice Param" config="SalesInvoice.rptdesign" type="report"/>
+            </ReportGroup>
+        </ReportGroups>
+    </GVBIRTReportConfiguration>
+</GVAdapters>
