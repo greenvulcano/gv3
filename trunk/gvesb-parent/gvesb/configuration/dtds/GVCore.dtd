@@ -7171,7 +7171,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT ws-call (Description?, AxisWebServiceInvoker, Proxy?)>
+<!ELEMENT ws-call (Description?, AxisWebServiceInvoker)>
 
 <!--
     Unmodifiable.
@@ -7192,7 +7192,7 @@
 -->
 <!ATTLIST ws-call   name CDATA #REQUIRED>
 
-<!ELEMENT AxisWebServiceInvoker (Description?, XPathNamespace*, WSDLInfo, EngageModule*)>
+<!ELEMENT AxisWebServiceInvoker (Description?, XPathNamespace*, WSDLInfo, (BasicHttpAuth | NTLMHttpAuth)?, Proxy?, EngageModule*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -7204,17 +7204,17 @@
 -->
 <!ATTLIST AxisWebServiceInvoker  class CDATA #FIXED "it.greenvulcano.gvesb.virtual.ws.GVWebServiceInvoker">
 <!--
-        Service name.
+    Service name.
 -->
 <!ATTLIST AxisWebServiceInvoker service CDATA #IMPLIED>
 <!--
-        Service NameSpace.
+    Service NameSpace.
 -->
 <!ATTLIST AxisWebServiceInvoker serviceNS CDATA #IMPLIED>
 <!--
-        Operation name.
+    Operation name.
 
-        #NotNull
+    #NotNull
 -->
 <!ATTLIST AxisWebServiceInvoker operation CDATA #REQUIRED>
 <!--
@@ -7223,11 +7223,11 @@
 -->
 <!ATTLIST AxisWebServiceInvoker emptyAction (true|false) #IMPLIED>
 <!--
-        Port Name
+    Port Name
 -->
 <!ATTLIST AxisWebServiceInvoker portName CDATA #IMPLIED>
 <!--
-        Timeout in seconds.
+    Timeout in seconds.
 -->
 <!ATTLIST AxisWebServiceInvoker timeout CDATA #IMPLIED>
 <!--
@@ -7305,7 +7305,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT rest-call (Description?, RestServiceInvoker, Proxy?)>
+<!ELEMENT rest-call (Description?, RestServiceInvoker)>
 
 <!--
     Unmodifiable.
@@ -7326,7 +7326,7 @@
 -->
 <!ATTLIST rest-call   name CDATA #REQUIRED>
 
-<!ELEMENT RestServiceInvoker (Description?)>
+<!ELEMENT RestServiceInvoker (Description?, (BasicHttpAuth | NTLMHttpAuth)?, Proxy?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -12959,7 +12959,7 @@
 <!--
     Endpoint configuration to connect to the server.
 -->
-<!ELEMENT endpoint (Description?, CustomProtocol?, Proxy?)>
+<!ELEMENT endpoint (Description?, CustomProtocol?, (BasicHttpAuth | NTLMHttpAuth)?, Proxy?)>
 <!--
     Host to connect to.
     Can contain metadata to be resolved at runtime.

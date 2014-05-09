@@ -21,6 +21,15 @@
 			<groupId>it.greenvulcano.gvesb</groupId>
 			<artifactId>gvws_commons</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvhttp_commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvdp-axis2</artifactId>
+            <scope>test</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>org.apache.axis2</groupId>
@@ -47,11 +56,6 @@
 			<groupId>org.apache.ws.commons.axiom</groupId>
 			<artifactId>axiom-dom</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>it.greenvulcano.gvesb</groupId>
-			<artifactId>gvdp-axis2</artifactId>
-			<scope>test</scope>
 		</dependency>
  		<dependency>
 			<groupId>org.apache.openejb</groupId>

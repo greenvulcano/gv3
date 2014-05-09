@@ -24,6 +24,9 @@ import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
+import it.greenvulcano.gvesb.http.auth.HttpAuth;
+import it.greenvulcano.gvesb.http.auth.HttpAuthFactory;
+import it.greenvulcano.gvesb.http.proxy.HttpProxy;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.ws.dynamic.invoker.DynamicInvoker;
@@ -33,6 +36,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.txt.TextUtils;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -92,6 +96,9 @@ public class GVWebServiceInvoker
     private boolean                    useSAAJ     = false;
 
     private boolean                    throwsFault = false;
+    
+    private HttpProxy                  proxy       = null;
+    private HttpAuth                   auth        = null;
 
     /**
      * It initializes the object whit the his configuration.
@@ -151,6 +158,11 @@ public class GVWebServiceInvoker
             addNamespaces(XMLConfig.getNodeList(configNode, "XPathNamespace"));
 
             registerModules(XMLConfig.getNodeList(configNode, "EngageModule"));
+            
+            proxy = new HttpProxy();
+            proxy.init(XMLConfig.getNode(configNode, "Proxy"));
+            
+            auth = HttpAuthFactory.getInstance(XMLConfig.getNode(configNode, "*[@type='http-auth']"));
         }
         catch (Exception exc) {
             logger.error("Exception: " + exc, exc);
@@ -190,7 +202,7 @@ public class GVWebServiceInvoker
             if (!useSAAJ) {
                 MessageContext messageContext = null;
                 OperationClient operationClient = invoker.prepareOperationClient();
-
+                
                 if ((refDP != null) && (refDP.length() > 0)) {
                     logger.debug("Calling configured Data Provider: " + refDP);
                     DataProviderManager dataProviderManager = DataProviderManager.instance();
@@ -216,6 +228,15 @@ public class GVWebServiceInvoker
                     wsEp = operationClient.getOptions().getTo().getAddress();
                 }
                 wsEp = PropertiesHandler.expand(wsEp, params, gvBuffer);
+
+                URL ws = new URL(wsEp);
+                String host = ws.getHost();
+                /*int port = ws.getPort();
+                if (port == -1) {
+                    port = ws.getDefaultPort();
+                }*/
+                auth.setAuthentication(messageContext.getOptions(), host, gvBuffer, params);
+                proxy.setProxy(messageContext.getOptions(), gvBuffer, params);
 
                 // Invoke the web service
                 result = invoker.execute(operationClient, messageContext, modulesMap, wsEp);

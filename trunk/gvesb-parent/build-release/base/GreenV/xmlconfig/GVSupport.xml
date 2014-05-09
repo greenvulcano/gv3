@@ -394,7 +394,7 @@
                  fileNameOutput="sp{{gv.app.home}}/log/TestOutput.txt" id="Core"
                  jndiName="gvesb/core/GreenVulcano" type="test">
             <Description>Parameters to invoke the Core Ejb</Description>
-            <JNDIHelper provider-url="jnp://localhost:1099"/>
+            <JNDIHelper provider-url="jnp://sp{{java.rmi.server.hostname}}:env{{JBOSS_JNP_PORT}}"/>
             <Loop className="it.greenvulcano.gvesb.gvconsole.workbench.plugin.TestGVBufferObject"
                   fileName="sp{{gv.app.home}}/log/Output.txt" id="Core" type="loop">
                 <Test enabled="yes" transaction="NoTransaction">
@@ -408,9 +408,9 @@
             </Loop>
         </EJBTest>
         <LogConsole jdbc-connection-name="gv_log">
-            <LogFilter>select  SOURCE, ID_MSG, to_char(TSTAMP, &apos;DD/MM/YYYY HH24:MI:SS.FF&apos;) as TSTAMP,
+            <LogFilter><![CDATA[select  SOURCE, ID_MSG, to_char(TSTAMP, 'DD/MM/YYYY HH24:MI:SS.FF') as TSTAMP,
         PRIO, IPRIO, CAT, THREAD, SERVER, ID, SYSTEM_N as "SYSTEM", SERVICE, OPERATION_N as "OPERATION", MSG_SIZE,
-case when MSG_SIZE &lt; 500
+case when MSG_SIZE < 500
     then MSG
     else null
 end as MSG,
@@ -419,14 +419,14 @@ case when length(THROWABLE) = 0
     else 1
 end as THROWABLE_PRESENT
 from VW_GV_LOG
-where TSTAMP &gt;= to_timestamp(&apos;@{{DATE_FROM}}&apos;, &apos;DD/MM/YYYY HH24:MI&apos;)
-and TSTAMP &lt;= to_timestamp(&apos;@{{DATE_TO}}&apos;, &apos;DD/MM/YYYY HH24:MI&apos;) + 1 MINUTE
-decode{{@{{SYSTEM}}::NULL::::and SYSTEM_N = &apos;@{{SYSTEM}}&apos;}}
-decode{{@{{SERVICE}}::NULL::::and SERVICE like &apos;%@{{SERVICE}}%&apos;}}
-decode{{@{{OPERATION}}::NULL::::and OPERATION_N like &apos;%@{{OPERATION}}%&apos;}}
-decode{{@{{ID}}::NULL::::and ID = &apos;@{{ID}}&apos;}}
-decode{{@{{PRIO}}::NULL::::and PRIO in (decode{{@{{PRIO}}::DEBUG::&apos;DEBUG&apos;,&apos;INFO&apos;,&apos;WARNING&apos;,&apos;ERROR&apos;::INFO::&apos;INFO&apos;,&apos;WARNING&apos;,&apos;ERROR&apos;::WARNING::&apos;WARNING&apos;,&apos;ERROR&apos;::ERROR::&apos;ERROR&apos;::''}})}}
-order by decode{{@{{ORDER}}::DESC::TSTAMP desc::TSTAMP}}</LogFilter>
+where TSTAMP >= to_timestamp('@{{DATE_FROM}}', 'DD/MM/YYYY HH24:MI')
+and TSTAMP <= to_timestamp('@{{DATE_TO}}', 'DD/MM/YYYY HH24:MI') + 1 MINUTE
+decode{{@{{SYSTEM}}::NULL::::and SYSTEM_N = '@{{SYSTEM}}'}}
+decode{{@{{SERVICE}}::NULL::::and SERVICE like '%@{{SERVICE}}%'}}
+decode{{@{{OPERATION}}::NULL::::and OPERATION_N like '%@{{OPERATION}}%'}}
+decode{{@{{ID}}::NULL::::and ID = '@{{ID}}'}}
+decode{{@{{PRIO}}::NULL::::and PRIO in (decode{{@{{PRIO}}::DEBUG::'DEBUG','INFO','WARNING','ERROR'::INFO::'INFO','WARNING','ERROR'::WARNING::'WARNING','ERROR'::ERROR::'ERROR'::''}})}}
+order by decode{{@{{ORDER}}::DESC::TSTAMP desc::TSTAMP}}]]></LogFilter>
             <Message>select decode{{@{{MSG_FIELD}}::Msg::MSG::Exc::THROWABLE::NONE}} as MESSAGE from VW_GV_LOG where ID_MSG=@{{ID_MSG}}</Message>
             <LogDownload/>
         </LogConsole>

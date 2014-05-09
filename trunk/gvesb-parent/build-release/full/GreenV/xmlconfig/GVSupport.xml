@@ -488,7 +488,7 @@
                  fileNameOutput="sp{{gv.app.home}}/log/TestOutput.txt" id="Core"
                  jndiName="gvesb/core/GreenVulcano" type="test">
             <Description>Parameters to invoke the Core Ejb</Description>
-            <JNDIHelper provider-url="jnp://localhost:1099"/>
+            <JNDIHelper provider-url="jnp://sp{{java.rmi.server.hostname}}:env{{JBOSS_JNP_PORT}}"/>
             <Loop className="it.greenvulcano.gvesb.gvconsole.workbench.plugin.TestGVBufferObject"
                   fileName="sp{{gv.app.home}}/log/Output.txt" id="Core" type="loop">
                 <Test enabled="yes" transaction="NoTransaction">

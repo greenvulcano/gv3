@@ -23,12 +23,16 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
+import it.greenvulcano.gvesb.http.auth.HttpAuth;
+import it.greenvulcano.gvesb.http.auth.HttpAuthFactory;
+import it.greenvulcano.gvesb.http.proxy.HttpProxy;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.virtual.ws.invoker.ResponseMode;
 import it.greenvulcano.gvesb.virtual.ws.invoker.RestDynamicInvoker;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 
+import java.net.URL;
 import java.util.Map;
 
 import org.apache.axiom.attachments.Attachments;
@@ -69,6 +73,9 @@ public class RestServiceInvoker
     private String              returnType   = "";
 
     private boolean             throwsFault  = false;
+    
+    private HttpProxy           proxy        = null;
+    private HttpAuth            auth         = null;
 
     /**
      * It initializes the object whit the his configuration.
@@ -103,6 +110,11 @@ public class RestServiceInvoker
             }
 
             refDP = XMLConfig.get(configNode, "@ref-dp", "");
+            
+            proxy = new HttpProxy();
+            proxy.init(XMLConfig.getNode(configNode, "Proxy"));
+            
+            auth = HttpAuthFactory.getInstance(XMLConfig.getNode(configNode, "*[@type='http-auth']"));
         }
         catch (Exception exc) {
             logger.error("Exception: " + exc, exc);
@@ -165,6 +177,15 @@ public class RestServiceInvoker
                 wsEp = operationClient.getOptions().getTo().getAddress();
             }
             wsEp = PropertiesHandler.expand(wsEp, params, gvBuffer);
+
+            URL ws = new URL(wsEp);
+            String host = ws.getHost();
+            /*int port = ws.getPort();
+            if (port == -1) {
+                port = ws.getDefaultPort();
+            }*/
+            auth.setAuthentication(messageContext.getOptions(), host, gvBuffer, params);
+            proxy.setProxy(messageContext.getOptions(), gvBuffer, params);
 
             // Invoke the web service
             result = invoker.execute(operationClient, messageContext, wsEp);

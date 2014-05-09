@@ -701,7 +701,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT Proxy (Description?)>
+<!ELEMENT Proxy (Description?, (BasicHttpAuth | NTLMHttpAuth)?)>
 <!--
     Proxy server IP or name.
 
@@ -710,25 +710,96 @@
 <!ATTLIST Proxy host CDATA #REQUIRED>
 <!--
     Proxy server port.
-    Default: 80
+    Default: 8080
 
     #NotNull
     #Pattern: ! ^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$ ! Insert a number between 0 and 65535
 -->
 <!ATTLIST Proxy port CDATA #IMPLIED>
+
+<!--
+    Http Basic authentication configuration.
+
+    #SelectOnInsert
+    #Template:
+        <xsl:template match="BasicHttpAuth">
+            <xsl:if test="Description">
+                <small><br/><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT BasicHttpAuth (Description?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST BasicHttpAuth type CDATA #FIXED "http-auth">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST BasicHttpAuth class CDATA #FIXED "it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth">
 <!--
     User name.
 
     #NotNull
 -->
-<!ATTLIST Proxy  user CDATA #IMPLIED>
+<!ATTLIST BasicHttpAuth user CDATA #REQUIRED>
 <!--
     User password.
 
     #NotNull
     #Encrypted
 -->
-<!ATTLIST Proxy   password CDATA #IMPLIED>
+<!ATTLIST BasicHttpAuth password CDATA #IMPLIED>
+<!--
+    Realm.
+
+    #NotNull
+-->
+<!ATTLIST BasicHttpAuth realm CDATA #IMPLIED>
+
+<!--
+    Http NTLM authentication configuration.
+
+    #SelectOnInsert
+    #Template:
+        <xsl:template match="NTLMHttpAuth">
+            <xsl:if test="Description">
+                <small><br/><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT NTLMHttpAuth (Description?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST NTLMHttpAuth type CDATA #FIXED "http-auth">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST NTLMHttpAuth class CDATA #FIXED "it.greenvulcano.gvesb.http.auth.impl.NTLMHttpAuth">
+<!--
+    User name.
+
+    #NotNull
+-->
+<!ATTLIST NTLMHttpAuth user CDATA #REQUIRED>
+<!--
+    User password.
+
+    #NotNull
+    #Encrypted
+-->
+<!ATTLIST NTLMHttpAuth password CDATA #REQUIRED>
+<!--
+    Domain.
+
+    #NotNull
+-->
+<!ATTLIST NTLMHttpAuth domain CDATA #REQUIRED>
 
 <!--
     Defines a trasformation name alias.

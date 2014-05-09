@@ -24,6 +24,9 @@ import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
 import it.greenvulcano.gvesb.http.ProtocolFactory;
+import it.greenvulcano.gvesb.http.auth.HttpAuth;
+import it.greenvulcano.gvesb.http.auth.HttpAuthFactory;
+import it.greenvulcano.gvesb.http.proxy.HttpProxy;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.CallOperation;
@@ -49,12 +52,9 @@ import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -100,6 +100,8 @@ public class HTTPCallOperation implements CallOperation
     private HttpMethodName      methodName;
     private int                 connTimeout            = DEFAULT_CONN_TIMEOUT;
     private int                 soTimeout              = DEFAULT_SO_TIMEOUT;
+    private HttpProxy           proxy                  = null;
+    private HttpAuth            auth                   = null;
 
     private OperationKey        key                    = null;
 
@@ -113,7 +115,6 @@ public class HTTPCallOperation implements CallOperation
     public void init(Node config) throws InitializationException
     {
         httpClient = new HttpClient();
-        HostConfiguration hostConfiguration = httpClient.getHostConfiguration();
 
         try {
             Node endpointNode = XMLConfig.getNode(config, "endpoint");
@@ -136,18 +137,10 @@ public class HTTPCallOperation implements CallOperation
                 protocol = Protocol.getProtocol(secure ? "https" : "http");
             }
 
-            Node proxyConfigNode = XMLConfig.getNode(endpointNode, "Proxy");
-            if (proxyConfigNode != null) {
-                String proxyHost = XMLConfig.get(proxyConfigNode, "@host");
-                int proxyPort = XMLConfig.getInteger(proxyConfigNode, "@port", 80);
-                String proxyUser = XMLConfig.get(proxyConfigNode, "@user");
-                String proxyPassword = XMLConfig.getDecrypted(proxyConfigNode, "@password", "");
-                hostConfiguration.setProxy(proxyHost, proxyPort);
-                if (proxyUser != null) {
-                    httpClient.getState().setProxyCredentials(new AuthScope(proxyHost, proxyPort),
-                            new UsernamePasswordCredentials(proxyUser, proxyPassword));
-                }
-            }
+            proxy = new HttpProxy();
+            proxy.init(XMLConfig.getNode(endpointNode, "Proxy"));
+            
+            auth = HttpAuthFactory.getInstance(XMLConfig.getNode(endpointNode, "*[@type='http-auth']"));
 
             Node methodNode = XMLConfig.getNode(config, "method");
             refDP = XMLConfig.get(methodNode, "@ref-dp", "");
@@ -178,7 +171,10 @@ public class HTTPCallOperation implements CallOperation
             String currPort = PropertiesHandler.expand(port, params, gvBuffer);
             logger.debug("Server Host: " + currHost + " - Port: " + currPort);
             httpClient.getHostConfiguration().setHost(currHost, Integer.parseInt(currPort), protocol);
-            
+
+            auth.setAuthentication(httpClient, host, Integer.parseInt(currPort), gvBuffer, params);
+            proxy.setProxy(httpClient, gvBuffer, params);
+
             currMethodURI = PropertiesHandler.expand(contextPath + methodURI, params, gvBuffer);
             logger.debug("MethodURI[escaped:" + uriEscaped + "]=[" + currMethodURI + "]");
             switch (methodName) {
