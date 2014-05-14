@@ -1,0 +1,68 @@
+﻿----------------------------------------------------
+Servizio: TestSplitterFirstEnd
+Input:
+    Payload: ciro,gianfranco,nunzio,antonio
+Output:
+    Payload: [NUNZIO]
+    Property: END = DEFAULT
+
+----------------------------------------------------
+Servizio: TestSplitterNormalEnd_OutJS
+Input:
+    Payload: ciro,gianfranco,nunzio,antonio
+Output:
+    Payload: [ciro -> CIRO];[gianfranco -> GIANFRANCO];[nunzio -> NUNZIO];[antonio -> ANTONIO]
+    Property: END = DEFAULT
+
+----------------------------------------------------
+Servizio: TestParallelNormalEnd_OutOGNL
+Input:
+    Payload: ciro,gianfranco,nunzio,antonio
+Output:
+    Payload: ciro,gianfranco,nunzio,antonio
+    Property: END = SKIP
+
+Input:
+    Payload: ciro,gianfranco,nunzio,antonio
+    Property: P1 = V1
+Output:
+    Payload: [ciro,gianfranco,nunzio,antonio -> CIRO,GIANFRANCO,NUNZIO,ANTONIO]
+    Property: END = DEFAULT
+              P1  = V1
+
+Input:
+    Payload: ciro,gianfranco,nunzio,antonio
+    Property: P2 = V2
+Output:
+    Payload: [ciro,gianfranco,nunzio,antonio -> ciro,gianfranco,nunzio,antonio]
+    Property: END = DEFAULT
+              P2  = V2
+
+Input:
+    Payload: ciro,gianfranco,nunzio,antonio
+    Property: P1 = V1
+              P2 = V2
+Output:
+    Payload: [ciro,gianfranco,nunzio,antonio -> CIRO,GIANFRANCO,NUNZIO,ANTONIO];[ciro,gianfranco,nunzio,antonio -> ciro,gianfranco,nunzio,antonio]
+    Property: END = DEFAULT
+              P1  = V1
+              P2  = V2
+
+----------------------------------------------------
+Servizio: TestSpawnNormalEnd
+Input:
+    Payload: ciro,gianfranco,nunzio,antonio
+Output:
+    Payload: ciro,gianfranco,nunzio,antonio
+    Property: END = SKIP
+
+Input:
+    Payload: ciro,gianfranco,nunzio,antonio
+    Property: P1 = V1
+              P2 = V2
+Output:
+    Payload: ciro,gianfranco,nunzio,antonio
+    Property: END = DEFAULT
+              P1  = V1
+              P2  = V2
+check the file GVCore.TestSpawnNormalEnd.<date>.log to see the execution trace of the two indipendent subflows: TOUPPER_FLOW e TOLOWER_FLOW

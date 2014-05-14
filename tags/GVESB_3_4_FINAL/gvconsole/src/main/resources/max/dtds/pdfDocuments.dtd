@@ -1,0 +1,185 @@
+<!ENTITY % document "configuration-guide|configuration-document" >
+
+<!ENTITY % commons SYSTEM "file://max/dtds/commons.dtd" >
+%commons;
+
+<!--
+    Definizione dei documenti PDF generati a partire dai DTD.
+
+    #Table: ! Documents ! documents ! Title ! @title ! Version ! @version ! Author ! @author ! Owner ! @owner ! Id ! @id ! Description ! description
+-->
+<!ELEMENT documents (description?, ((%document;)*) )>
+<!ATTLIST documents version CDATA   #FIXED  "1.0">
+
+<!--
+    Definizione dei documenti PDF generati a partire dai DTD.
+
+    #Table: ! Documents ! documents ! Title ! @title ! Version ! @version ! Author ! @author ! Owner ! @owner ! Id ! @id ! Description ! description
+
+	#Template:
+        <xsl:template match="cover">
+        	<table>
+        		<tr valign="top">
+        			<td><b>Description:</b></td>
+        			<td width="15"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="description"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Title:</b></td>
+        			<td width="15"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@title"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Version:</b></td>
+        			<td width="15"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@version"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Author:</b></td>
+        			<td width="15"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@author"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Owner:</b></td>
+        			<td width="15"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@owner"/><xsl:text> </xsl:text></td>
+        		</tr>
+        		<tr valign="top">
+        			<td><b>Date:</b></td>
+        			<td width="15"><xsl:text> </xsl:text></td>
+        			<td><xsl:value-of select="@date"/><xsl:text> </xsl:text></td>
+        		</tr>
+        	</table>
+        </xsl:template>        
+-->
+<!ELEMENT cover (description?) >
+
+<!--
+    Titolo del documento.
+
+    #NotNull
+-->
+<!ATTLIST cover title   CDATA   #REQUIRED>
+
+<!--
+    Versione del documento.
+
+    #NotNull
+-->
+<!ATTLIST cover version CDATA   #REQUIRED>
+
+<!--
+    Autore del documento.
+
+    #NotNull
+-->
+<!ATTLIST cover author  CDATA   #REQUIRED>
+
+<!--
+    Proprietario del documento.
+
+    #NotNull
+-->
+<!ATTLIST cover owner   CDATA   #REQUIRED>
+
+<!--
+    Data del documento.
+    Se non specificato e' automaticamente inserita.
+
+    #NotNull
+-->
+<!ATTLIST cover date        CDATA   #IMPLIED>
+
+<!--
+    La documentazione DTD da trasformare in PDF.
+
+    #SelectOnInsert
+    #Label: cover/@title
+-->
+<!ELEMENT configuration-guide (cover, dtd-ref+, description?)>
+
+<!--
+    Il tipo di documentazione.
+    In questo caso la documentazione si basa su "dtd".
+-->
+<!ATTLIST configuration-guide type CDATA    #FIXED  "document">
+
+<!--
+    Il fully qualified name del plugin che produce la documentazione.
+-->
+<!ATTLIST configuration-guide class CDATA   #FIXED  "max.documentation.dtd.DtdDocumentationPlugin">
+
+<!--
+    Identificativo univoco del documento.
+
+    Inizia per lettera, e puo' contenere solo lettere, numeri e i caratteri _.-
+
+    #Pattern: ! [a-zA-Z][a-zA-Z0-9_.-]* ! Inserire un identificativo univoco valido
+    #Unique: parent::documents/*/@id
+-->
+<!ATTLIST configuration-guide id CDATA  #REQUIRED>
+
+<!--
+    DTD da inserire nella documentazione.
+
+    #SelectOnInsert
+    #Label: @title
+-->
+<!ELEMENT dtd-ref (description?)>
+
+<!ATTLIST dtd-ref publicId      CDATA   #REQUIRED>
+
+<!--
+    #NotNull
+-->
+<!ATTLIST dtd-ref systemId      CDATA   #REQUIRED>
+<!--
+    #NotNull
+-->
+<!ATTLIST dtd-ref rootElement   CDATA   #REQUIRED>
+<!--
+    #NotNull
+-->
+<!ATTLIST dtd-ref title         CDATA   #REQUIRED>
+
+<!--
+    La documentazione DTD da trasformare in PDF.
+
+    #SelectOnInsert
+    #Warn: {{self::configuration-document[(count(xml-ref)>1) and not(@rootElement)] }} Il 'rootElement' e' obbligatorio se si definiscono piu' documenti xml.
+    #Label: cover/@title
+-->
+<!ELEMENT configuration-document (cover, (%stylesheet-src;)?, (%proxy-plug-in-ro;)+, description?)>
+
+<!--
+    Il tipo di documentazione.
+    In questo caso la documentazione si basa su "xml".
+-->
+<!ATTLIST configuration-document type CDATA #FIXED  "document">
+
+<!--
+    Il fully qualified name del plugin che produce la documentazione.
+-->
+<!ATTLIST configuration-document class CDATA    #FIXED  "max.documentation.xml.XmlDocumentationPlugin">
+
+<!--
+    Identificativo univoco del documento.
+
+    Inizia per lettera, e puo' contenere solo lettere, numeri e i caratteri _.-
+
+    #Pattern: ! [a-zA-Z][a-zA-Z0-9_.-]* ! Inserire un identificativo univoco valido
+    #Unique: parent::documents/*/@id
+-->
+<!ATTLIST configuration-document id CDATA  #REQUIRED>
+
+<!--
+    #NotNull
+-->
+<!ATTLIST configuration-document rootElement CDATA    #IMPLIED >
+
+<!--
+    Descrizione e note.
+
+    #SelectOnInsert
+-->
+<!ELEMENT description (#PCDATA)>

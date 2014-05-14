@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PersonsData>
+    <PersonData>
+        <Name>ANTONIO ROSSI</Name>
+        <BirthDate>05/02/1980</BirthDate>
+        <City>MILANO</City>
+        <CardsData>
+            <CardData>
+                <Number>1111222233338888</Number>
+                <Credit>250.00</Credit>
+                <Enabled>Y</Enabled>
+            </CardData>
+            <CardData>
+                <Number>1234123414444789</Number>
+                <Credit>600.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+    <PersonData>
+        <Name>MARIO BIANCHI</Name>
+        <BirthDate>15/08/1970</BirthDate>
+        <City>MILANO</City>
+        <CardsData>
+            <CardData>
+                <Number>1234123415555666</Number>
+                <Credit>300.00</Credit>
+                <Enabled>Y</Enabled>
+            </CardData>
+            <CardData>
+                <Number>1234123412341234</Number>
+                <Credit>100.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+    <PersonData>
+        <Name>MARIO ROSSI</Name>
+        <BirthDate>10/10/1960</BirthDate>
+        <City>MILANO</City>
+        <CardsData>
+            <CardData>
+                <Number>0000111122223333</Number>
+                <Credit>200.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+    <PersonData>
+        <Name>PAOLO VERDI</Name>
+        <BirthDate>15/09/1974</BirthDate>
+        <City>MILANO</City>
+        <CardsData>
+            <CardData>
+                <Number>1111222233330000</Number>
+                <Credit>0.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+    <PersonData>
+        <Name>CIRO ROSSI</Name>
+        <BirthDate>10/07/1984</BirthDate>
+        <City>NAPOLI</City>
+        <CardsData>
+            <CardData>
+                <Number>1111222233336666</Number>
+                <Credit>100.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+            <CardData>
+                <Number>1111222233337777</Number>
+                <Credit>10.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+    <PersonData>
+        <Name>ANCO MARZIO</Name>
+        <BirthDate>02/10/1979</BirthDate>
+        <City>ROMA</City>
+        <CardsData>
+            <CardData>
+                <Number>1111222233335555</Number>
+                <Credit>250.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+    <PersonData>
+        <Name>TOPOLINO</Name>
+        <BirthDate>17/03/2000</BirthDate>
+        <City>TOPOLINIA</City>
+        <CardsData>
+            <CardData>
+                <Number>1111222233334444</Number>
+                <Credit>380.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+</PersonsData>

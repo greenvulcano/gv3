@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RowSet>
+    <data id="1" key_1="ANTONIO ROSSI" key_2="19800205 00:00:00" key_3="MILANO">
+        <row id="1">
+            <col type="string">1111222233338888</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">250.00</col>
+            <col type="string">Y</col>
+        </row>
+        <row id="1">
+            <col type="string">1234123414444789</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">600.00</col>
+            <col type="string">Y</col>
+        </row>
+    </data>
+    <data id="1" key_1="MARIO BIANCHI" key_2="19700815 00:00:00" key_3="MILANO">
+        <row id="1">
+            <col type="string">1234123415555666</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">300.00</col>
+            <col type="string">Y</col>
+        </row>
+        <row id="1">
+            <col type="string">1234123412341234</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">100.00</col>
+            <col type="string">Y</col>
+        </row>
+    </data>
+    <data id="1" key_1="MARIO ROSSI" key_2="19601010 00:00:00" key_3="MILANO">
+        <row id="1">
+            <col type="string">0000111122223333</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">200.00</col>
+            <col type="string">Y</col>
+        </row>
+    </data>
+    <data id="1" key_1="PAOLO VERDI" key_2="19740915 00:00:00" key_3="MILANO">
+        <row id="1">
+            <col type="string">1111222233330000</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">0.00</col>
+            <col type="string">Y</col>
+        </row>
+    </data>
+    <data id="1" key_1="CIRO ROSSI" key_2="19840710 00:00:00" key_3="NAPOLI">
+        <row id="1">
+            <col type="string">1111222233336666</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">100.00</col>
+            <col type="string">Y</col>
+        </row>
+        <row id="1">
+            <col type="string">1111222233337777</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">10.00</col>
+            <col type="string">Y</col>
+        </row>
+    </data>
+    <data id="1" key_1="ANCO MARZIO" key_2="19791002 00:00:00" key_3="ROMA">
+        <row id="1">
+            <col type="string">1111222233335555</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">250.00</col>
+            <col type="string">Y</col>
+        </row>
+    </data>
+    <data id="1" key_1="TOPOLINO" key_2="20000317 00:00:00" key_3="TOPOLINIA">
+        <row id="1">
+            <col type="string">1111222233334444</col>
+            <col decimal-separator="." format="#0.00" grouping-separator="," type="float">380.00</col>
+            <col type="string">Y</col>
+        </row>
+    </data>
+</RowSet>

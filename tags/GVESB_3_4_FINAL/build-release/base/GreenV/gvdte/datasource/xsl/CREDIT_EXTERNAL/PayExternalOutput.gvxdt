@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<gvxdt:gvxdt xmlns:tmodel="http://www.greenvulcano.it/xsd/gvxdt/tmodel.xsd" xmlns:graphic="http://www.greenvulcano.it/xsd/gvxdt/graphic.xsd" xmlns:gvxdt="http://www.greenvulcano.it/xsd/gvxdt/gvxdt.xsd">
+    <tmodel:tmodel>
+        <tmodel:schemas>
+            <tmodel:schema direction="source" id="schema-8"
+                           name="ExternalCreditService_out.xsd" rootname="PayResponse"/>
+            <tmodel:schema direction="target" id="schema-9" name="CreditService_out.xsd"
+                           rootname="PayResponse"/>
+        </tmodel:schemas>
+        <tmodel:functions/>
+        <tmodel:links>
+            <tmodel:link condition="" end="xsd:schema-9:/int:PayResponse/int:result"
+                         mode="" priority=""
+                         start="xsd:schema-8:/ext:PayResponse/ext:result" type="template"/>
+            <tmodel:link condition="" end="xsd:schema-9:/int:PayResponse/int:reason"
+                         mode="" priority=""
+                         start="xsd:schema-8:/ext:PayResponse/ext:reason" type="template"/>
+        </tmodel:links>
+        <tmodel:xsl filename=""/>
+    </tmodel:tmodel>
+    <graphic:graphic>
+        <graphic:box h="50" modelid="schema-8" w="50" x="47" y="50"/>
+        <graphic:box h="50" modelid="schema-9" w="50" x="500" y="50"/>
+    </graphic:graphic>
+</gvxdt:gvxdt>

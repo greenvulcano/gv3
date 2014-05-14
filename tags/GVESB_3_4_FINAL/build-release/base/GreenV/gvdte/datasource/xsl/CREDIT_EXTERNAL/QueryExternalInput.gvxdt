@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<gvxdt:gvxdt xmlns:tmodel="http://www.greenvulcano.it/xsd/gvxdt/tmodel.xsd" xmlns:graphic="http://www.greenvulcano.it/xsd/gvxdt/graphic.xsd" xmlns:gvxdt="http://www.greenvulcano.it/xsd/gvxdt/gvxdt.xsd">
+    <tmodel:tmodel>
+        <tmodel:schemas>
+            <tmodel:schema direction="source" id="schema-3" name="CreditService_in.xsd"
+                           rootname="Query"/>
+            <tmodel:schema direction="target" id="schema-4"
+                           name="ExternalCreditService_in.xsd" rootname="Query"/>
+        </tmodel:schemas>
+        <tmodel:functions/>
+        <tmodel:links>
+            <tmodel:link condition="" end="xsd:schema-4:/ext:Query/ext:cnumber" mode=""
+                         priority="" start="xsd:schema-3:/int:Query/int:cnumber"
+                         type="template"/>
+        </tmodel:links>
+        <tmodel:xsl filename=""/>
+    </tmodel:tmodel>
+    <graphic:graphic>
+        <graphic:box h="50" modelid="schema-3" w="50" x="74" y="50"/>
+        <graphic:box h="50" modelid="schema-4" w="50" x="500" y="50"/>
+    </graphic:graphic>
+</gvxdt:gvxdt>

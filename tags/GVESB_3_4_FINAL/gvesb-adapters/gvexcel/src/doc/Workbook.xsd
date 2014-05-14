@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:element name="workbook">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="sheet"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="sheet">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="name"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="row"/>
+      </xs:sequence>
+      <xs:attribute name="number" type="xs:long" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="row">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="col"/>
+      </xs:sequence>
+      <xs:attribute name="number" type="xs:long" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="col">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="data"/>
+        <xs:element minOccurs="0" ref="format"/>
+      </xs:sequence>
+      <xs:attribute name="number" type="xs:long" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="name" type="xs:string"/>
+  <xs:element name="data" type="xs:string"/>
+
+  <xs:element name="format">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="font"/>
+        <xs:element minOccurs="0" ref="background"/>
+        <xs:element minOccurs="0" ref="border"/>
+        <xs:element minOccurs="0" ref="format_string"/>
+      </xs:sequence>
+      <xs:attribute name="wrap" default="false">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="align" default="general">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="general"/>
+            <xs:enumeration value="left"/>
+            <xs:enumeration value="centre"/>
+            <xs:enumeration value="right"/>
+            <xs:enumeration value="fill"/>
+            <xs:enumeration value="justify"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="valign" default="bottom">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="top"/>
+            <xs:enumeration value="centre"/>
+            <xs:enumeration value="bottom"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="orientation" default="horizontal">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="horizontal"/>
+            <xs:enumeration value="vertical"/>
+            <xs:enumeration value="up90"/>
+            <xs:enumeration value="down90"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="font">
+    <xs:complexType>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="point_size" use="required"/>
+      <xs:attribute name="bold_weight" use="required"/>
+      <xs:attribute name="italic" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="underline" use="required"/>
+      <xs:attribute name="colour" use="required"/>
+      <xs:attribute name="script" default="normal">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="normal"/>
+            <xs:enumeration value="super"/>
+            <xs:enumeration value="sub"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="border">
+    <xs:complexType>
+      <xs:attribute name="top" default="none"/>
+      <xs:attribute name="bottom" default="none"/>
+      <xs:attribute name="left" default="none"/>
+      <xs:attribute name="right" default="none"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="background">
+    <xs:complexType>
+      <xs:attribute name="colour" default="default background"/>
+      <xs:attribute name="pattern" default="none"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="format_string">
+    <xs:complexType>
+      <xs:attribute name="string" default=""/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
