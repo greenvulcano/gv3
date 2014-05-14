@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.greenvulcano.gvesb</groupId>
         <artifactId>gvesb.core.libs</artifactId>
-        <version>3.4.0-Trunk</version>
+        <version>3.4.0-Final</version>
     </parent>
 
     <groupId>it.greenvulcano.gvesb</groupId>
