@@ -18,6 +18,7 @@
   <url>http://www.greenvulcano.com/</url>
 
   <properties>
+    <version.adam>2.0.7</version.adam>
     <version.antlr>3.3</version.antlr>
     <version.apache.mime4j.core>0.7.2</version.apache.mime4j.core>
     <version.apache.poi>3.9</version.apache.poi>
@@ -68,6 +69,7 @@
     <version.json>20131018</version.json>
     <version.junit>4.11</version.junit>
     <version.log4j>1.2.15</version.log4j>
+    <version.lucene>2.0.0</version.lucene>
     <version.mvel>2.1.3.Final</version.mvel>
     <version.ode>1.3.5</version.ode>
     <version.ognl>3.0</version.ognl>
@@ -1503,6 +1505,29 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>net.sf.adam</groupId>
+            <artifactId>adam-core</artifactId>
+            <version>${version.adam}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.adam</groupId>
+            <artifactId>adam-core-xml</artifactId>
+            <version>${version.adam}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>${version.lucene}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>junit</groupId>
