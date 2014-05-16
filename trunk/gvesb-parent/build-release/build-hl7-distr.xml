@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project [
-   <!ENTITY libraries SYSTEM "../thirdparty/libraries.ent">
+   <!ENTITY libraries SYSTEM "../thirdparty/target/libraries.ent">
 ]>
 
 <project name="HL7/Build Distribution">
@@ -68,7 +68,7 @@
         <!-- Copy the thirdparty/licenses to docs/licenses -->
         <!--<copy todir="${release.docs}/licenses" filtering="false"
               preservelastmodified="true" overwrite="true">
-            <fileset dir="${basedir}/../thirdparty/licenses">
+            <fileset dir="${basedir}/../thirdparty/target/licenses">
                 <include name="**"/>
             </fileset>
         </copy>-->

@@ -73,7 +73,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         </condition>
 
         <property name="module.output" value="${basedir}/target"/>
-        <property name="project.thirdparty" value="${basedir}/../thirdparty/libraries"/>
+        <property name="project.thirdparty" value="${basedir}/../thirdparty/target/libraries"/>
 
         <!-- Release structure -->
         <property name="release.id" value="${module.name}-${module.version}"/>
@@ -206,7 +206,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
     <target name="checkthirdparty" unless="skip.thirdparty">
         <!--<if>
             <not>
-                <available file="${basedir}/../thirdparty/libraries.ent"/>
+                <available file="${basedir}/../thirdparty/target/libraries.ent"/>
             </not>
         <then>-->
             <antcall target="createthirdparty"/>
@@ -222,6 +222,11 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         <!--<maven basedir="${basedir}/../thirdparty"
                options="${thirdparty.maven.opts}"
                goal="dependency:tree"/>-->
+
+        <maven basedir="${basedir}/../thirdparty"
+               options="${thirdparty.maven.opts}"
+               goal="clean"
+               resultproperty="maven.thirdparty.result"/>
 
         <maven basedir="${basedir}/../thirdparty"
                options="${thirdparty.maven.opts}"
@@ -289,12 +294,29 @@ Please ensure that build.properties exists in the build dir of the checkout tree
                 </not>
             </condition>
         </fail>
+
+        <maven basedir="${basedir}"
+               options="${maven.clean.opts}"
+               goal="clean"
+               resultproperty="maven.clean.result"/>
+
+        <fail message="Unable to clean maven modules.  See maven output for details.">
+            <condition>
+                <not>
+                    <equals arg1="${maven.clean.result}" arg2="0"/>
+                </not>
+            </condition>
+        </fail>
     </target>
 
     <!-- Clean up all generated files -->
     <target name="purge" depends="clean, maven-clean"
             description="Cleans up all generated files.">
         <delete file="${module.root}/*_run.log"/>
+
+        <!-- clean-up released artifacts -->
+        <delete dir="${basedir}/../maven-repository/it/greenvulcano"/>
+        <!-- clean-up old release folder -->
         <delete file="${basedir}/../thirdparty/libraries.ent"/>
         <delete dir="${basedir}/../thirdparty/libraries"/>
         <delete dir="${basedir}/../thirdparty/licenses"/>

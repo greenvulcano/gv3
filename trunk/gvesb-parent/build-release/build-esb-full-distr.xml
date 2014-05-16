@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project [
-   <!ENTITY libraries SYSTEM "../thirdparty/libraries.ent">
+   <!ENTITY libraries SYSTEM "../thirdparty/target/libraries.ent">
 ]>
 
 <project name="GVESB/Build Full Distribution">
@@ -11,9 +11,9 @@
       <exclude name="**/.svn/**"/>
       <exclude name="**/target/**"/>
       <exclude name="**/maven-repository/**"/>
-      <exclude name="**/libraries/**"/>
+      <!--<exclude name="**/libraries/**"/>
       <exclude name="**/licenses/**"/>
-      <exclude name="**/libraries.ent"/>
+      <exclude name="**/libraries.ent"/>-->
       <exclude name="**/id_file"/>
    </patternset>
 
@@ -543,7 +543,7 @@
         <!-- Copy the thirdparty/licenses to docs/licenses -->
         <copy todir="${release.docs}/licenses" filtering="false"
               preservelastmodified="true" overwrite="true">
-            <fileset dir="${basedir}/../thirdparty/licenses">
+            <fileset dir="${basedir}/../thirdparty/target/licenses">
                 <include name="**"/>
             </fileset>
         </copy>
