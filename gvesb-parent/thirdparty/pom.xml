@@ -28,8 +28,8 @@
                             <goal>download-licenses</goal>
                         </goals>
                         <configuration>
-                            <licensesOutputDirectory>${basedir}/licenses</licensesOutputDirectory>
-                            <licensesOutputFile>${basedir}/licenses/licenses.xml</licensesOutputFile>
+                            <licensesOutputDirectory>${project.build.directory}/licenses</licensesOutputDirectory>
+                            <licensesOutputFile>${project.build.directory}/licenses/licenses.xml</licensesOutputFile>
                             <quiet>true</quiet>
                         </configuration>
                     </execution>
@@ -46,9 +46,9 @@
                             <goal>build-thirdparty</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/libraries</outputDirectory>
-                            <librariesEnt>${basedir}/libraries.ent</librariesEnt>
-                            <aliasesEnt>${basedir}/aliases.ent</aliasesEnt>
+                            <outputDirectory>${project.build.directory}/libraries</outputDirectory>
+                            <librariesEnt>${project.build.directory}/libraries.ent</librariesEnt>
+                            <aliasesEnt>${project.build.directory}/aliases.ent</aliasesEnt>
                             <includedScopes>
                                 <scope>compile</scope>
                                 <scope>runtime</scope>
