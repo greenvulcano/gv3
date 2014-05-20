@@ -22,13 +22,17 @@ package it.greenvulcano.gvesb.adapter.http;
 import it.greenvulcano.gvesb.adapter.http.exc.InboundHttpResponseException;
 import it.greenvulcano.gvesb.adapter.http.formatters.handlers.AdapterHttpConfigurationException;
 import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpConstants;
-import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpException;
+import it.greenvulcano.gvesb.adapter.http.utils.DumpUtils;
+import it.greenvulcano.gvesb.http.MultiReadHttpServletRequest;
+import it.greenvulcano.gvesb.http.MultiReadHttpServletResponse;
 import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.identity.impl.HTTPIdentityInfo;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+
+import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -124,7 +128,7 @@ public class HttpInboundGateway extends HttpServlet
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException
     {
-        perform("doGet", req, resp);
+        perform("GET", req, resp);
     }
 
     /**
@@ -140,9 +144,73 @@ public class HttpInboundGateway extends HttpServlet
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException
     {
-        perform("doPost", req, resp);
+        perform("POST", req, resp);
     }
 
+    /**
+     * Handle HTTP requests from external system submitted with method PUT.
+     * 
+     * @param req
+     *        An HttpServletRequest object
+     * @param resp
+     *        An HttpServletResponse object
+     * @throws ServletException
+     *         if any error occurs.
+     */
+    @Override
+    public void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException
+    {
+        perform("PUT", req, resp);
+    }
+    
+    /**
+     * Handle HTTP requests from external system submitted with method HEAD.
+     * 
+     * @param req
+     *        An HttpServletRequest object
+     * @param resp
+     *        An HttpServletResponse object
+     * @throws ServletException
+     *         if any error occurs.
+     */
+    @Override
+    public void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException
+    {
+        perform("HEAD", req, resp);
+    }
+    
+    /**
+     * Handle HTTP requests from external system submitted with method OPTIONS.
+     * 
+     * @param req
+     *        An HttpServletRequest object
+     * @param resp
+     *        An HttpServletResponse object
+     * @throws ServletException
+     *         if any error occurs.
+     */
+    @Override
+    public void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException
+    {
+        perform("OPTIONS", req, resp);
+    }
+
+    /**
+     * Handle HTTP requests from external system submitted with method DELETE.
+     * 
+     * @param req
+     *        An HttpServletRequest object
+     * @param resp
+     *        An HttpServletResponse object
+     * @throws ServletException
+     *         if any error occurs.
+     */
+    @Override
+    public void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException
+    {
+        perform("DELETE", req, resp);
+    }
+    
     /**
      * @param req
      * @param resp
@@ -158,47 +226,77 @@ public class HttpInboundGateway extends HttpServlet
         NMDC.clear();
         NMDC.setServer(JMXEntryPoint.getServerName());
         NMDC.setSubSystem(AdapterHttpConstants.SUBSYSTEM);
-        String mapping = req.getServletPath().substring(1);
-        String gvAction = req.getParameter("GV_ACTION");
-        gvAction = (gvAction != null) ? gvAction : "NULL";
+
         Level level = Level.INFO;
-        AdapterHttpException exception = null;
+        Exception exception = null;
         HttpServletMapping smapping = null;
+        
+        startTime = System.currentTimeMillis();
+        
+        String mapping = req.getPathInfo();
+        if (mapping == null) {
+            mapping = "/";
+        }
+        String gvAction = mapping;
 
         try {
-            startTime = System.currentTimeMillis();
+            req = new MultiReadHttpServletRequest(req);
+            resp = new MultiReadHttpServletResponse(resp);
+
+            NMDC.put("HTTP_METHOD", method);
             NMDC.put("HTTP_ACTION", gvAction);
-            logWriter.info(method + " - BEGIN " + mapping + "/" + gvAction);
+            logWriter.info(method + " - BEGIN " + gvAction);
+
+            smapping = mappingManager.getMapping(gvAction);
+            if (smapping == null) {
+                throw new AdapterHttpConfigurationException("HttpServletMappingManager - Mapping '" + gvAction
+                        + "' not found");
+            }
 
             // Create and insert the caller in the security context
             GVIdentityHelper.push(new HTTPIdentityInfo(req));
 
-            smapping = mappingManager.getMapping(gvAction);
-            if (!smapping.handleRequest(req, resp)) {
+            if (!smapping.handleRequest(method, req, resp)) {
                 level = Level.ERROR;
             }
         }
         catch (AdapterHttpConfigurationException exc) {
             level = Level.ERROR;
-            logWriter.error(method + " " + mapping + "/" + gvAction + " - Can't handle request from client system", exc);
+            logWriter.error(method + " " + gvAction + " - Can't handle request from client system", exc);
             exception = exc;
-            throw new ServletException("Can't handle request from client system - " + mapping + "/" + gvAction, exc);
+            throw new ServletException("Can't handle request from client system - " + gvAction, exc);
         }
         catch (InboundHttpResponseException exc) {
             level = Level.ERROR;
-            logWriter.error(method + " " + mapping + "/" + gvAction + " - Can't send response to client system: " + exc);
+            logWriter.error(method + " " + gvAction + " - Can't send response to client system: " + exc);
             exception = exc;
-            throw new ServletException("Can't send response to client system - " + mapping + "/" + gvAction, exc);
+            throw new ServletException("Can't send response to client system - " + gvAction, exc);
+        }
+        catch (IOException exc) {
+            level = Level.ERROR;
+            logWriter.error(method + " " + gvAction + " - Can't read request data: " + exc);
+            exception = exc;
+            throw new ServletException("Can't read request data - " + gvAction, exc);
         }
         finally {
         	try {
 	            endTime = System.currentTimeMillis();
 	            totalTime = endTime - startTime;
+	            if (level == Level.ERROR) {
+	                StringBuffer sb = new StringBuffer();
+	                try {
+	                    DumpUtils.dump(req, sb);
+	                }
+	                catch (Exception exc) {
+                        sb.append("--- ERROR MAKING HTTP DUMP: ").append(exc);
+                    }
+	                logWriter.error(sb);
+	            }
 	            if (exception != null) {
 	            	GVFormatLog gvFormatLog = GVFormatLog.formatENDOperation(exception, totalTime);
 	                logWriter.log(level, gvFormatLog);
 	            }
-	            logWriter.log(level, method + " - END " + mapping + "/" + gvAction + " - ExecutionTime (" + totalTime + ")");
+	            logWriter.log(level, method + " - END " + gvAction + " - ExecutionTime (" + totalTime + ")");
         	}
         	finally {
         		// Remove the caller from the security context

@@ -25,7 +25,7 @@
 
 <!ELEMENT InboundConfiguration (ActionMappings, InboundTransactions)>
 
-<!ELEMENT ActionMappings (ActionMapping*)>
+<!ELEMENT ActionMappings ((GVCoreActionMapping|ForwardActionMapping)*)>
 
 <!ELEMENT RetCodeConversionIn EMPTY>
 <!--
@@ -41,22 +41,33 @@
 
 <!--
     Defines a mapping between a request Action and a configured Formatter.
+    Used to call a GVESB Service.
 
     #SelectOnInsert
     #Label: @Action
 -->
-<!ELEMENT ActionMapping (Description?, RetCodeConversionIn?, RetCodeConversionOut?)>
+<!ELEMENT GVCoreActionMapping (Description?, RetCodeConversionIn?, RetCodeConversionOut?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST GVCoreActionMapping    type CDATA #FIXED "action-mapping">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST GVCoreActionMapping    class CDATA #FIXED "it.greenvulcano.gvesb.adapter.http.mapping.GVCoreHttpServletMapping">
 <!--
     Defines the action name, referenced by the request parameter GV_ACTION.
 
     #NotNull
-    #Unique: ../ActionMapping/@Action
+    #Unique: ../*[@type='action-mapping']/@Action
 -->
-<!ATTLIST ActionMapping Action             CDATA #REQUIRED>
+<!ATTLIST GVCoreActionMapping Action             CDATA #REQUIRED>
 <!--
     #References: /GVAdapters/GVAdapterHttpConfiguration/Formatters/*[@Type='FormatterPlugin']/@ID
 -->
-<!ATTLIST ActionMapping FormatterID        CDATA #REQUIRED>
+<!ATTLIST GVCoreActionMapping FormatterID        CDATA #REQUIRED>
 <!--
     ContentType to be declared while handling HTTP responses to the external system.
     Default to text/html and is used only if not defined by the formatter.
@@ -64,13 +75,59 @@
     #NotNull
     #Choice: text/html | text/xml | text/json | text/javascript | application/xml | application/json | application/x-www-form-urlencoded
 -->
-<!ATTLIST ActionMapping  RespContentType   CDATA #IMPLIED>
+<!ATTLIST GVCoreActionMapping  RespContentType   CDATA #IMPLIED>
 <!--
     This parameter defines if an action must be processed.
 
     #NotNull
 -->
-<!ATTLIST ActionMapping enabled (true | false) #REQUIRED>
+<!ATTLIST GVCoreActionMapping enabled (true | false) #REQUIRED>
+<!--
+    If true enable the dump of the input/output HTTP data.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST GVCoreActionMapping dump-in-out (true|false) #IMPLIED>
+
+<!--
+    Defines a mapping between a request Action and a configured Formatter.
+    Used to perform an HTTP Forward to a remote server.
+
+    #SelectOnInsert
+    #Label: @Action
+-->
+<!ELEMENT ForwardActionMapping (Description?, endpoint)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST ForwardActionMapping    type CDATA #FIXED "action-mapping">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST ForwardActionMapping    class CDATA #FIXED "it.greenvulcano.gvesb.adapter.http.mapping.ForwardHttpServletMapping">
+<!--
+    Defines the action name, referenced by the request parameter GV_ACTION.
+
+    #NotNull
+    #Unique: ../*[@type='action-mapping']/@Action
+-->
+<!ATTLIST ForwardActionMapping Action             CDATA #REQUIRED>
+<!--
+    This parameter defines if an action must be processed.
+
+    #NotNull
+-->
+<!ATTLIST ForwardActionMapping enabled (true | false) #REQUIRED>
+<!--
+    If true enable the dump of the input/output HTTP data.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST ForwardActionMapping dump-in-out (true|false) #IMPLIED>
 
 <!--
     This element contains the transaction definitions for the manged services.

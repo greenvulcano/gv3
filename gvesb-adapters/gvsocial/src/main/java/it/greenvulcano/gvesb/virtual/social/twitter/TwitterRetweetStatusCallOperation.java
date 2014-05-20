@@ -66,9 +66,11 @@ public class TwitterRetweetStatusCallOperation extends TwitterSocialCallOperatio
 		try {
 			Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
-			SocialOperation op = new TwitterOperationRetweetStatus(
-					PropertiesHandler.expand(getAccount(), params, gvBuffer),
-					PropertiesHandler.expand(statusId, params, gvBuffer));
+			String acc = PropertiesHandler.expand(getAccount(), params, gvBuffer);
+			String sId = PropertiesHandler.expand(statusId, params, gvBuffer);
+			logger.debug("Account: " + acc + " - StatusId: " + sId);
+
+			SocialOperation op = new TwitterOperationRetweetStatus(acc, sId);
 			instance.directExecute(op);
 			op.updateResult(gvBuffer);
 		}

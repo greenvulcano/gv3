@@ -24,6 +24,7 @@ import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.social.SocialAdapterAccount;
 import it.greenvulcano.gvesb.social.SocialAdapterException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.ArrayUtils;
 
 import org.apache.log4j.Logger;
 
@@ -38,36 +39,37 @@ import twitter4j.TwitterException;
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
  */
-public class TwitterOperationGetFriendsIDs extends TwitterOperationBase{
+public class TwitterOperationGetFriendsIDs extends TwitterOperationBase {
+    private static Logger logger = GVLogger.getLogger(TwitterOperationGetFriendsIDs.class);
 
-	private String cursor;
-	private IDs ids;
-	private static Logger logger = GVLogger.getLogger(TwitterOperationGetFriendsIDs.class);
-	
-	public TwitterOperationGetFriendsIDs(String accountName, String cursor) {
-		super(accountName);
-		this.cursor = cursor;
-	}
+    private String cursor;
+    private IDs ids;
+    
+    public TwitterOperationGetFriendsIDs(String accountName, String cursor) {
+        super(accountName);
+        this.cursor = cursor;
+    }
 
-	@Override
-	public void execute(SocialAdapterAccount account) throws SocialAdapterException {
-		try {
-			Twitter twitter = (Twitter) account.getProxyObject();
-			ids = twitter.getFriendsIDs(Long.parseLong(cursor));
-		} catch (NumberFormatException exc) {
-			logger.error("Call to TwitterOperationGetFriendsIDs failed. Check cursor format.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationGetFriendsIDs failed. Check cursor format.", exc);
-		} catch (TwitterException exc) {
-			logger.error("Call to TwitterOperationGetFriendsIDs failed.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationGetFriendsIDs failed.", exc);
-		}
-	}
+    @Override
+    public void execute(SocialAdapterAccount account) throws SocialAdapterException {
+        try {
+            Twitter twitter = (Twitter) account.getProxyObject();
+            ids = twitter.getFriendsIDs(Long.parseLong(cursor));
+        } catch (NumberFormatException exc) {
+            logger.error("Call to TwitterOperationGetFriendsIDs failed. Check cursor[" + cursor + "] format.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationGetFriendsIDs failed. Check cursor[" + cursor
+            		+ "] format.", exc);
+        } catch (TwitterException exc) {
+            logger.error("Call to TwitterOperationGetFriendsIDs cursor[" + cursor + "] failed.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationGetFriendsIDs cursor[" + cursor + "] failed.", exc);
+        }
+    }
 
-	/**
-	 * Sets a long[] with all the ids retrieved into the {@link GVBuffer}.
-	 */
-	@Override
-	public void updateResult(GVBuffer buffer) throws GVException {
-		buffer.setObject(ids.getIDs());
-	}
+    /**
+     * Sets a List of longs with all the ids retrieved into the {@link GVBuffer}.
+     */
+    @Override
+    public void updateResult(GVBuffer buffer) throws GVException {
+        buffer.setObject(ArrayUtils.arrayToList(ids.getIDs()));
+    }
 }

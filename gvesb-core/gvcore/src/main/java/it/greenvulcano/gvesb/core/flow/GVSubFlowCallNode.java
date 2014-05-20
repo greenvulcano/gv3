@@ -27,12 +27,17 @@ import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
+import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.log.GVBufferMDC;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.metadata.PropertiesHandlerException;
 import it.greenvulcano.util.xpath.XPathFinder;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
@@ -62,14 +67,25 @@ public class GVSubFlowCallNode extends GVFlowNode
      */
     private Vector<GVRouting>   routingVector    = new Vector<GVRouting>();
     /**
+     * Definition node.
+     */
+    private Node                defNode          = null;
+    /**
      * The SubFlow name to invoke.
      */
     private String              flowOp           = "";
     /**
-     * The SubFlow instance.
+     * If true the input SubFlow name are handled as metadata and resolved at runtime.
+     */
+    private boolean             isSubFlowNameDynamic = false;
+    /**
+     * The current SubFlow instance.
      */
     private GVSubFlow           subFlow          = null;
-
+    /**
+     * The SubFlow instances cache.
+     */
+    private Map<String, GVSubFlow> subFlowMap       = null;
     /**
      * If true update the log context.
      */
@@ -151,10 +167,13 @@ public class GVSubFlowCallNode extends GVFlowNode
             try {
                 NMDC.push();
 
+                String localFlowOp = createSubFlow(internalData);
+
                 if (changeLogContext) {
-                    NMDC.setOperation(flowOp);
+                    NMDC.setOperation(localFlowOp);
                     GVBufferMDC.put(internalData);
                 }
+
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
                 if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
@@ -271,11 +290,16 @@ public class GVSubFlowCallNode extends GVFlowNode
     @Override
     public void destroy() throws GVCoreException
     {
-        routingVector.clear();
-        if (subFlow != null) {
-            subFlow.destroy();
-        }
+        defNode = null;
         subFlow = null;
+        routingVector.clear();
+        if (subFlowMap != null) {
+            Iterator<String> i = subFlowMap.keySet().iterator();
+            while (i.hasNext()) {
+                subFlowMap.get(i.next()).destroy();
+            }
+            subFlowMap.clear();
+        }
     }
 
     /**
@@ -287,7 +311,11 @@ public class GVSubFlowCallNode extends GVFlowNode
     private void initSubFlow(Node defNode) throws GVCoreConfException
     {
         try {
+            subFlowMap = new HashMap<String, GVSubFlow>();
+            this.defNode = defNode;
             changeLogContext = XMLConfig.getBoolean(defNode, "@change-log-context", true);
+            isSubFlowNameDynamic = XMLConfig.getBoolean(defNode, "@dynamic", false);
+            logger.debug("isSubFlowNameDynamic  = " + isSubFlowNameDynamic);
             flowOp = XMLConfig.get(defNode, "@subflow");
             logger.debug("subflow  = " + flowOp);
             inputRefDP = XMLConfig.get(defNode, "@input-ref-dp", "");
@@ -298,15 +326,13 @@ public class GVSubFlowCallNode extends GVFlowNode
                         {"node", XPathFinder.buildXPath(defNode)}});
             }
 
-            Node fNode = XMLConfig.getNode(defNode, "ancestor::Operation/SubFlow[@name='" + flowOp + "']");
-            if (fNode == null) {
-                throw new GVCoreConfException("GVCORE_INVALID_CFG_PARAM_ERROR", new String[][]{{"name", "'operation'"},
-                        {"node", XPathFinder.buildXPath(defNode)}});
-            }
-            subFlow = new GVSubFlow();
-            subFlow.init(fNode, true);
+            createSubFlow(null);
         }
         catch (XMLConfigException exc) {
+            throw new GVCoreConfException("GVCORE_SUB_FLOW_SEARCH_ERROR", new String[][]{{"id", getId()},
+                    {"node", XPathFinder.buildXPath(defNode)}}, exc);
+        }
+        catch (PropertiesHandlerException exc) {
             throw new GVCoreConfException("GVCORE_SUB_FLOW_SEARCH_ERROR", new String[][]{{"id", getId()},
                     {"node", XPathFinder.buildXPath(defNode)}}, exc);
         }
@@ -314,6 +340,37 @@ public class GVSubFlowCallNode extends GVFlowNode
             throw new GVCoreConfException("GVCORE_SUB_FLOW_SEARCH_ERROR", new String[][]{{"id", getId()},
                     {"node", XPathFinder.buildXPath(defNode)}}, exc);
         }
+    }
+
+    /**
+     * @param data
+     * @throws XMLConfigException
+     * @throws GVCoreConfException
+     * @throws PropertiesHandlerException 
+     */
+    private String createSubFlow(GVBuffer data) throws XMLConfigException, GVCoreConfException, PropertiesHandlerException {
+        String localFlowOp = flowOp;
+        if (isSubFlowNameDynamic) {
+            if (data == null) {
+                return localFlowOp;
+            }
+            Map<String, Object> props = GVBufferPropertiesHelper.getPropertiesMapSO(data, true);
+            localFlowOp = PropertiesHandler.expand(localFlowOp, props, data);
+            logger.debug("Calling SubFlow: " + localFlowOp);
+        }
+        subFlow = subFlowMap.get(localFlowOp);
+        if (subFlow == null) {
+            Node fNode = XMLConfig.getNode(defNode, "ancestor::Operation/SubFlow[@name='" + localFlowOp + "']");
+            if (fNode == null) {
+                throw new GVCoreConfException("GVCORE_INVALID_CFG_PARAM_ERROR", new String[][]{{"name", "'subflow'"},
+                        {"subflow", localFlowOp}, {"node", XPathFinder.buildXPath(defNode)}});
+            }
+    
+            subFlow = new GVSubFlow();
+            subFlow.init(fNode, true);
+            subFlowMap.put(localFlowOp, subFlow);
+        }
+        return localFlowOp;
     }
 
 }

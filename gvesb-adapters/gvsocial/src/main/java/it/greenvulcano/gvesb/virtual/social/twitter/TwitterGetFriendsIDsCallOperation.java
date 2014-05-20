@@ -66,9 +66,11 @@ public class TwitterGetFriendsIDsCallOperation extends TwitterSocialCallOperatio
 		try {
 			Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
-			SocialOperation op = new TwitterOperationGetFriendsIDs(
-					PropertiesHandler.expand(getAccount(), params, gvBuffer),
-					PropertiesHandler.expand(cursor, params, gvBuffer));
+			String acc = PropertiesHandler.expand(getAccount(), params, gvBuffer);
+			String cur = PropertiesHandler.expand(cursor, params, gvBuffer);
+			logger.debug("Account: " + acc + " - Cursor: " + cur);
+
+			SocialOperation op = new TwitterOperationGetFriendsIDs(acc, cur);
 			instance.directExecute(op);
 			op.updateResult(gvBuffer);
 		}

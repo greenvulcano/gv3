@@ -24,6 +24,8 @@ import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import org.custommonkey.xmlunit.XMLTestCase;
+import org.custommonkey.xmlunit.XMLUnit;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.w3c.dom.Node;
 
 /**
@@ -66,12 +68,14 @@ public class GVDTETestCase extends XMLTestCase
     private static final String  TEST_CSV2XML_GRP           = "field1.1,field1.2,field1.3,field1.4\r\nfield1.1,field2.2,field1.3,field2.4\r\nfield3.1,field3.2,field3.3,field3.4";
     private static final String  EXPECTED_DOM_CSV2XML_GRP   = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><RowSet><data key_1=\"field1.1\" key_3=\"field1.3\"><row><col>field1.2</col><col>field1.4</col></row><row><col>field2.2</col><col>field2.4</col></row></data><data key_1=\"field3.1\" key_3=\"field3.3\"><row><col>field3.2</col><col>field3.4</col></row></data></RowSet>";
 
+   
     private static DTEController controller                 = null;
 
     @Override
     protected void setUp() throws Exception
     {
         super.setUp();
+        XMLUnit.setIgnoreWhitespace(true);
         String cfgFileName = "GVDataTransformation.xml";
         controller = new DTEController(cfgFileName);
     }
@@ -241,6 +245,63 @@ public class GVDTETestCase extends XMLTestCase
         String outXML = TextUtils.readFileFromCP("bib_filter.out");
         //System.out.println("TestXQuery: " + dom);
         assertXMLEqual("testXQ failed", outXML, dom);
+    }
+    
+    /**
+     * Test the XML2JSONTransformer.
+     * 
+     * @throws Exception
+     */
+    public void testXML2JSON() throws Exception
+    {
+        Object output = controller.transform("TestXml2Json", TextUtils.readFileFromCP("bib.xj"), null);
+        String json = (String) output;
+        String outJSON = TextUtils.readFileFromCP("bib.json");
+        //System.out.println("TestXml2Json: " + json);
+        JSONAssert.assertEquals(outJSON, json, true);
+    }
+
+    /**
+     * Test the JSON2XMLTransformer.
+     * 
+     * @throws Exception
+     */
+    public void testJSON2XML() throws Exception
+    {
+        Object output = controller.transform("TestJson2Xml", TextUtils.readFileFromCP("bib.json"), null);
+        //String dom = XMLUtils.serializeDOM_S((Node) output);
+        String dom = (String) output;
+        String outXML = TextUtils.readFileFromCP("bib.xj");
+        //System.out.println("TestJson2Xml: " + dom);
+        assertXMLEqual("TestJson2Xml failed", outXML, dom);
+    }
+
+    /**
+     * Test the XML2JSONTransformer.
+     * 
+     * @throws Exception
+     */
+    public void testXML2JSON_Xsl() throws Exception
+    {
+        Object output = controller.transform("TestXml2Json_Xsl", TextUtils.readFileFromCP("bib.xj"), null);
+        String json = (String) output;
+        String outJSON = TextUtils.readFileFromCP("bib.json");
+        //System.out.println("TestXml2Json_Xsl: " + json);
+        JSONAssert.assertEquals(outJSON, json, true);
+    }
+
+    /**
+     * Test the JSON2XMLTransformer.
+     * 
+     * @throws Exception
+     */
+    public void testJSON2XML_Xsl() throws Exception
+    {
+        Object output = controller.transform("TestJson2Xml_Xsl", TextUtils.readFileFromCP("bib.json"), null);
+        String dom = XMLUtils.serializeDOM_S((Node) output);
+        String outXML = TextUtils.readFileFromCP("bib.xj");
+        //System.out.println("TestJson2Xml_Xsl: " + dom);
+        assertXMLEqual("TestJson2Xml_Xsl failed", outXML, dom);
     }
 
 }
