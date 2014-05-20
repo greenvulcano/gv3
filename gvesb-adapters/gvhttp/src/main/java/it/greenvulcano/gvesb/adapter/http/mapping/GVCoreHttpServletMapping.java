@@ -146,6 +146,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
             GVBuffer request = retCodeHandlerIn.transformInput((GVBuffer) environment.get(AdapterHttpConstants.ENV_KEY_GVBUFFER_INPUT));
 
             request.setProperty("HTTP_ACTION", action);
+            request.setProperty("HTTP_METHOD", methodName);
             // get remote transport address...
             String remAddr = req.getRemoteAddr();
             request.setProperty("HTTP_REMOTE_ADDR", (remAddr != null ? remAddr : ""));
