@@ -20,6 +20,7 @@
 package it.greenvulcano.gvesb.social.twitter.directcall;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.social.SocialAdapterAccount;
 import it.greenvulcano.gvesb.social.SocialAdapterException;
 import it.greenvulcano.log.GVLogger;
@@ -37,39 +38,48 @@ import twitter4j.TwitterException;
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
  */
-public class TwitterOperationSendDirectMessage extends TwitterOperationBase{
+public class TwitterOperationSendDirectMessage extends TwitterOperationBase {
+    private static Logger logger = GVLogger.getLogger(TwitterOperationSendDirectMessage.class);
 
-	private String toAccountId;
-	private String message;
-	private DirectMessage status;
-	private static Logger logger = GVLogger.getLogger(TwitterOperationSendDirectMessage.class);
-	
-	public TwitterOperationSendDirectMessage(String accountName, String toAccountId, String message) {
-		super(accountName);
-		this.toAccountId = toAccountId;
-		this.message = message;
-	}
+    private String toAccountId;
+    private String message;
+    private DirectMessage status;
+    
+    public TwitterOperationSendDirectMessage(String accountName, String toAccountId, String message) {
+        super(accountName);
+        this.toAccountId = toAccountId;
+        this.message = message;
+    }
 
-	@Override
-	public void execute(SocialAdapterAccount account) throws SocialAdapterException {
-		try {
-			Twitter twitter = (Twitter) account.getProxyObject();
-			if (message.length() > 140) {
-				message = message.substring(0, 139);
-				logger.warn("TwitterOperationSendDirectMessage - Message shortened to 140 characters.");
-			}
-			status = twitter.sendDirectMessage(Long.parseLong(toAccountId), message);
-		} catch (NumberFormatException exc) {
-			logger.error("Call to TwitterOperationSendDirectMessage failed. Check toAccountId format.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationSendDirectMessage failed. Check toAccountId format.", exc);
-		} catch (TwitterException exc) {
-			logger.error("Call to TwitterOperationSendDirectMessage failed.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationSendDirectMessage failed.", exc);
-		}
-	}
+    @Override
+    public void execute(SocialAdapterAccount account) throws SocialAdapterException {
+        try {
+            Twitter twitter = (Twitter) account.getProxyObject();
+            if (message.length() > 140) {
+                message = message.substring(0, 139);
+                logger.warn("TwitterOperationSendDirectMessage - Message shortened to 140 characters.");
+            }
+            try {
+                long id = Long.parseLong(toAccountId);
+                status = twitter.sendDirectMessage(id, message);
+            }
+            catch (NumberFormatException exc) {
+                status = twitter.sendDirectMessage(toAccountId, message);
+            }
+        } catch (NumberFormatException exc) {
+            logger.error("Call to TwitterOperationSendDirectMessage failed. Check toAccountId[" + toAccountId
+            		+ "] format.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationSendDirectMessage failed. Check toAccountId["
+            		+ toAccountId +"] format.", exc);
+        } catch (TwitterException exc) {
+            logger.error("Call to TwitterOperationSendDirectMessage toAccountId[" + toAccountId +"] failed.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationSendDirectMessage toAccountId[" + toAccountId
+            		+ "] failed.", exc);
+        }
+    }
 
-	@Override
-	public void updateResult(GVBuffer buffer) {
-		//buffer.setObject(status.getText());
-	}
+    @Override
+    public void updateResult(GVBuffer buffer) throws GVException {
+        buffer.setObject(status.getText());
+    }
 }

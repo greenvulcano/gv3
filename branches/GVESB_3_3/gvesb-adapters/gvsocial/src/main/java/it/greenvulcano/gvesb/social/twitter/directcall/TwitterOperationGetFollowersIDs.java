@@ -24,6 +24,7 @@ import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.social.SocialAdapterAccount;
 import it.greenvulcano.gvesb.social.SocialAdapterException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.ArrayUtils;
 
 import org.apache.log4j.Logger;
 
@@ -38,38 +39,53 @@ import twitter4j.TwitterException;
  * @version 3.3.0 Sep, 2012
  * @author GreenVulcano Developer Team
  */
-public class TwitterOperationGetFollowersIDs extends TwitterOperationBase{
+public class TwitterOperationGetFollowersIDs extends TwitterOperationBase {
+    private static Logger logger = GVLogger.getLogger(TwitterOperationGetFollowersIDs.class);
 
-	private String followingId;
-	private String cursor;
-	private IDs ids;
-	private static Logger logger = GVLogger.getLogger(TwitterOperationGetFollowersIDs.class);
-	
-	public TwitterOperationGetFollowersIDs(String accountName, String followingId, String cursor) {
-		super(accountName);
-		this.followingId = followingId;
-		this.cursor = cursor;
-	}
+    private String followingId;
+    private String cursor;
+    private IDs ids;
+    
+    public TwitterOperationGetFollowersIDs(String accountName, String followingId, String cursor) {
+        super(accountName);
+        this.followingId = followingId;
+        this.cursor = cursor;
+    }
 
-	@Override
-	public void execute(SocialAdapterAccount account) throws SocialAdapterException {
-		try {
-			Twitter twitter = (Twitter) account.getProxyObject();
-			ids = twitter.getFollowersIDs(Long.parseLong(followingId), Long.parseLong(cursor));
-		} catch (NumberFormatException exc) {
-			logger.error("Call to TwitterOperationGetFollowersIDs failed. Check followingId and cursor format.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationGetFollowersIDs failed. Check followingId and cursor format.", exc);
-		} catch (TwitterException exc) {
-			logger.error("Call to TwitterOperationGetFollowersIDs failed.", exc);
-			throw new SocialAdapterException("Call to TwitterOperationGetFollowersIDs failed.", exc);
-		}
-	}
+    @Override
+    public void execute(SocialAdapterAccount account) throws SocialAdapterException {
+        try {
+            Twitter twitter = (Twitter) account.getProxyObject();
+            if ((followingId == null) || "".equals(followingId)) {
+                ids = twitter.getFollowersIDs(Long.parseLong(cursor));
+            }
+            else {
+                try {
+                    long id = Long.parseLong(followingId);
+                    ids = twitter.getFollowersIDs(id, Long.parseLong(cursor));
+                }
+                catch (NumberFormatException exc) {
+                    ids = twitter.getFollowersIDs(followingId, Long.parseLong(cursor));
+                }
+            }
+        } catch (NumberFormatException exc) {
+            logger.error("Call to TwitterOperationGetFollowersIDs failed. Check followingId[" + followingId
+            		+ "] and cursor[" + cursor + "] format.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationGetFollowersIDs failed. Check followingId["
+            		+ followingId + "] and cursor[" + cursor + "] format.", exc);
+        } catch (TwitterException exc) {
+            logger.error("Call to TwitterOperationGetFollowersIDs followingId[" + followingId + "] and cursor[" + cursor
+            		+ "] failed.", exc);
+            throw new SocialAdapterException("Call to TwitterOperationGetFollowersIDs followingId[" + followingId
+            		+ "] and cursor[" + cursor + "] failed.", exc);
+        }
+    }
 
-	/**
-	 * Sets a long[] with all the ids retrieved into the {@link GVBuffer}.
-	 */
-	@Override
-	public void updateResult(GVBuffer buffer) throws GVException {
-		buffer.setObject(ids.getIDs());
-	}
+    /**
+     * Sets a List of longs with all the ids retrieved into the {@link GVBuffer}.
+     */
+    @Override
+    public void updateResult(GVBuffer buffer) throws GVException {
+        buffer.setObject(ArrayUtils.arrayToList(ids.getIDs()));
+    }
 }

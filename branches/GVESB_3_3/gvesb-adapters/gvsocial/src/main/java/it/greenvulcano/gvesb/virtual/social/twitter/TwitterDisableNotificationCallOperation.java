@@ -66,9 +66,11 @@ public class TwitterDisableNotificationCallOperation extends TwitterSocialCallOp
 		try {
 			Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
-			SocialOperation op = new TwitterOperationDisableNotification(
-					PropertiesHandler.expand(getAccount(), params, gvBuffer),
-					PropertiesHandler.expand(fromAccountId, params, gvBuffer));
+			String acc = PropertiesHandler.expand(getAccount(), params, gvBuffer);
+			String frmAcc = PropertiesHandler.expand(fromAccountId, params, gvBuffer);
+			logger.debug("Account: " + acc + " - FromAccount: " + frmAcc);
+
+			SocialOperation op = new TwitterOperationDisableNotification(acc, frmAcc);
 			instance.directExecute(op);
 			op.updateResult(gvBuffer);
 		}

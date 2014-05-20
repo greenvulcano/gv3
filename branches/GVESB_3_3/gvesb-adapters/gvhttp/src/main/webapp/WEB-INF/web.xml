@@ -11,11 +11,11 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>HttpInboundGateway</servlet-name>
-        <url-pattern>/inbound</url-pattern>
+        <url-pattern>/inbound/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>HttpInboundGateway</servlet-name>
-        <url-pattern>/secure/inbound</url-pattern>
+        <url-pattern>/secure/inbound/*</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>15</session-timeout>
