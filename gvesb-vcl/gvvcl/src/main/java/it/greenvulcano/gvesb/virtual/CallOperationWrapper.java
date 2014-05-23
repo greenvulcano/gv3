@@ -20,8 +20,14 @@
 package it.greenvulcano.gvesb.virtual;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.j2ee.XAHelper;
+import it.greenvulcano.gvesb.virtual.pool.OperationManagerPool;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.ThreadMap;
+
+import javax.transaction.Status;
+import javax.transaction.Transaction;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -62,6 +68,8 @@ public class CallOperationWrapper implements CallOperation
      * The service name aliasing manager.
      */
     private ServiceAlias        serviceAlias = null;
+    
+    private XAHelper            xaHelper     = null;
 
     /**
      * Constructor.
@@ -73,6 +81,7 @@ public class CallOperationWrapper implements CallOperation
      */
     public CallOperationWrapper(CallOperation operation, String description)
     {
+        this.xaHelper = OperationManagerPool.instance().getXAHelper();
         this.operation = operation;
         this.description = description;
     }
@@ -106,10 +115,10 @@ public class CallOperationWrapper implements CallOperation
      *
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
-    {
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException  {
         logger.debug("BEGIN PERFORM: " + description);
 
+        boolean isError = false;
         try {
             serviceAlias.manageAliasInput(gvBuffer);
             GVBuffer returnData = null;
@@ -117,8 +126,31 @@ public class CallOperationWrapper implements CallOperation
             try {
                 returnData = operation.perform(gvBuffer);
             }
+            catch (Throwable exc) {
+                isError = true;
+                throw exc;
+            }
             finally {
                 NMDC.pop();
+                try {
+                    Transaction tx = xaHelper.getTransaction();
+                    if ((tx != null) && (tx.getStatus() != Status.STATUS_NO_TRANSACTION)) {
+                        if (tx.getStatus() != Status.STATUS_ACTIVE) {
+                            String xaAbort = (String) ThreadMap.get("IS_XA_ABORT");
+                            if (xaAbort == null) {
+                                ThreadMap.put("IS_XA_ABORT", "Y");
+                                if (!isError) {
+                                    throw new VCLException("GVVCL_XA_ERROR - Transaction aborted - " + tx);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception exc) {
+                    if (!isError) {
+                        throw new VCLException("GVVCL_XA_ERROR", exc);
+                    }
+                }
             }
             serviceAlias.manageAliasOutput(returnData);
             return returnData;
@@ -167,6 +199,7 @@ public class CallOperationWrapper implements CallOperation
     public void destroy()
     {
         logger.debug("BEGIN DESTROY: " + description);
+        xaHelper = null;
         try {
             operation.destroy();
         }

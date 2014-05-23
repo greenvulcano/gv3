@@ -62,7 +62,7 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
 
     private static OperationManagerPool                    instance              = null;
     /**
-     * Pool of OperationManager istances.
+     * Pool of OperationManager instances.
      */
     private Map<OperationKey, OperationManagerPoolElement> pool                  = new ConcurrentHashMap<OperationKey, OperationManagerPoolElement>();
 
@@ -89,17 +89,19 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
     private AtomicBoolean                                  shutdownFlag          = new AtomicBoolean(false);
 
     private XAHelper                                       xaHelper              = new XAHelper();
+    
+    private static boolean                                 debugXA               = Boolean.getBoolean("it.greenvulcano.gvesb.virtual.pool.OperationManagerPool.debugXA");
 
 
     /**
      * @throws GVException
      */
-    private OperationManagerPool() throws GVException
+    private OperationManagerPool()
     {
         init();
     }
 
-    public static synchronized OperationManagerPool instance() throws GVException
+    public static synchronized OperationManagerPool instance()
     {
         if (instance == null) {
             instance = new OperationManagerPool();
@@ -110,9 +112,12 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
     /**
      * @throws GVException
      */
-    private void init() throws GVException
+    private void init()
     {
         logger.info("Initializing the Operation Manager Pool.");
+        if (debugXA) {
+            xaHelper.setLogger(logger);
+        }
         ShutdownEventLauncher.addEventListener(this);
         XMLConfig.addConfigurationListener(this);
     }
@@ -218,7 +223,7 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
         Operation operation = vclPoolElement.getOperation();
 
         try {
-            if (xaHelper.isTransactionActive()) {
+            if (xaHelper.isTransactionRunning()) {
                 Transaction tx = xaHelper.getTransaction();
                 VCLXASynchronization vclXA = xaInUseOperations.get(tx);
 
@@ -301,7 +306,7 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
         }
 
         try {
-            if (xaHelper.isTransactionActive()) {
+            if (xaHelper.isTransactionRunning()) {
                 return;
             }
         }
@@ -318,7 +323,8 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
      */
     public void xaReleaseOperation(VCLXASynchronization xaSync)
     {
-        xaInUseOperations.remove(xaSync.getTransaction());
+        Transaction tx = xaSync.getTransaction();
+        xaInUseOperations.remove(tx);
 
         for (Operation operation : xaSync.getVCLOperations()) {
             intReleaseOperation(operation);
@@ -387,6 +393,10 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
         destroy();
     }
 
+    public XAHelper getXAHelper() {
+        return this.xaHelper;
+    }
+
     /**
      * @see it.greenvulcano.configuration.ConfigurationListener#configurationChanged(it.greenvulcano.configuration.ConfigurationEvent)
      */
@@ -412,6 +422,9 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
     @Override
     public String toString()
     {
+        if (pool == null) {
+            return "EMPTY OperationManagerPool";
+        }
         StringBuffer sb = new StringBuffer("OperationManagerPool\n");
         for (Map.Entry<OperationKey, OperationManagerPoolElement> element : pool.entrySet()) {
             sb.append("\n").append(element.getValue());
