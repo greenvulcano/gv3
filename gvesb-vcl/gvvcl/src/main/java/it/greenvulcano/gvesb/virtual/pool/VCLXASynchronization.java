@@ -81,14 +81,10 @@ public class VCLXASynchronization implements Synchronization
     @Override
     public void afterCompletion(int status)
     {
-        logger.debug("Closing Transaction of VCLXASynchronization [" + transaction + "]");
-        try {
-            OperationManagerPool.instance().xaReleaseOperation(this);
-        }
-        catch (GVException exc) {
-            logger.error("Error releasing Operation from Transaction [" + transaction + "]", exc);
-        }
-        logger.debug("Closed Transaction of VCLXASynchronization [" + transaction + "]");
+        Transaction localTx = transaction;
+        logger.debug("Closing Transaction of VCLXASynchronization [" + localTx + "]");
+        OperationManagerPool.instance().xaReleaseOperation(this);
+        logger.debug("Closed Transaction of VCLXASynchronization [" + localTx + "]");
     }
 
     /**

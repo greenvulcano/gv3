@@ -50,6 +50,7 @@ public class OperationManagerPoolElement
 
     private ConcurrentLinkedQueue<Operation> vclOps        = new ConcurrentLinkedQueue<Operation>();
     private Set<Operation>                   vclOpsManaged = Collections.synchronizedSet(new HashSet<Operation>());
+    private Set<Operation>                   vclOpsInUse   = Collections.synchronizedSet(new HashSet<Operation>());
     private OperationKey                     key           = null;
     private String                           type          = null;
     private AtomicBoolean                    valid         = new AtomicBoolean(true);
@@ -111,6 +112,7 @@ public class OperationManagerPoolElement
             // OK. The operation is in cache, so we return it.
             if (operation != null) {
                 logger.debug("OperationManagerPoolElement - GET - found Operation instance in pool for key: " + key);
+                vclOpsInUse.add(operation);
                 return operation;
             }
 
@@ -121,6 +123,7 @@ public class OperationManagerPoolElement
             operation = OperationFactory.createOperation(key, type);
 
             vclOpsManaged.add(operation);
+            vclOpsInUse.add(operation);
 
             // Return the operation
             return operation;
@@ -140,13 +143,20 @@ public class OperationManagerPoolElement
         if (operation != null) {
             if (valid.get()) {
                 if (vclOpsManaged.contains(operation)) {
-                    logger.debug("OperationManagerPoolElement - releasing instance in pool for key: " + key);
-                    vclOps.add(operation);
+                    if (vclOpsInUse.contains(operation)) {
+                        logger.debug("OperationManagerPoolElement - releasing instance in pool for key: " + key);
+                        vclOps.add(operation);
+                        vclOpsInUse.remove(operation);
+                    }
+                    else {
+                        logger.warn("OperationManagerPoolElement - releasing already released instance in pool for key: " + key);
+                    }
                     return;
                 }
             }
             else {
                 vclOpsManaged.remove(operation);
+                vclOpsInUse.remove(operation);
             }
 
             try {
@@ -169,6 +179,7 @@ public class OperationManagerPoolElement
             valid.set(false);
             synchronized (vclOpsManaged) {
                 vclOps.clear();
+                vclOpsInUse.clear();
                 for (Iterator<Operation> iterator = vclOpsManaged.iterator(); iterator.hasNext();) {
                     Operation operation = iterator.next();
                     iterator.remove();
@@ -193,7 +204,7 @@ public class OperationManagerPoolElement
         StringBuffer sb = new StringBuffer("OperationManagerPoolElement Key[").append(key).append("]");
         int man = vclOpsManaged.size();
         int pol = vclOps.size();
-        int use = man - pol;
+        int use = vclOpsInUse.size();
         sb.append("\nManaged: ").append(man);
         sb.append("\nPooled : ").append(pol);
         sb.append("\nInUse  : ").append(use);
