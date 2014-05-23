@@ -156,8 +156,8 @@ public class XAHelper
                 catch (NameNotFoundException exc2) {
                     // do nothing
                 }
-                throw new XAHelperException("J2EE_XAHELPER_INIT_ERROR", new String[][]{{"cause", exc.getMessage()}},
-                        exc);
+                //throw new XAHelperException("J2EE_XAHELPER_INIT_ERROR", new String[][]{{"cause", exc.getMessage()}}, exc);
+                noXA = true;
             }
             /*try {
                 userT = (UserTransaction) initialContext.lookup(userTransactionJNDI);
@@ -167,9 +167,9 @@ public class XAHelper
                         exc);
             }*/
         }
-        catch (XAHelperException exc) {
+        /*catch (XAHelperException exc) {
             throw exc;
-        }
+        }*/
         catch (NoInitialContextException exc) {
             noXA = true;
         }
@@ -224,8 +224,36 @@ public class XAHelper
             }
             int status = transaction.getStatus();
             debug("Transaction status == " + status + " - is active == " + (status != Status.STATUS_NO_TRANSACTION)
-                    + " - Transaction: " + transaction);
+                    + " - Transaction: [" + transaction.hashCode() + "] " + transaction);
             return (status != Status.STATUS_NO_TRANSACTION);
+        }
+        catch (Exception exc) {
+            error("Error testing transaction status ", exc);
+            throw new XAHelperException("J2EE_XAHELPER_ERROR", new String[][]{{"cause", exc.getMessage()}}, exc);
+        }
+    }
+
+    /**
+     * @return the transaction status
+     * @throws XAHelperException
+     *         if error occurs
+     */
+    public final boolean isTransactionRunning() throws XAHelperException
+    {
+        init();
+        if (noXA) {
+            return false;
+        }
+        try {
+            Transaction transaction = tManager.getTransaction();
+            if (transaction == null) {
+                debug("Transaction is null");
+                return false;
+            }
+            int status = transaction.getStatus();
+            debug("Transaction status == " + status + " - is running == " + (status != Status.STATUS_ACTIVE)
+                    + " - Transaction: [" + transaction.hashCode() + "] " + transaction);
+            return (status == Status.STATUS_ACTIVE);
         }
         catch (Exception exc) {
             error("Error testing transaction status ", exc);
@@ -241,13 +269,16 @@ public class XAHelper
     public final Transaction getTransaction() throws XAHelperException
     {
         init();
+        if (noXA) {
+            return null;
+        }
         try {
             Transaction transaction = tManager.getTransaction();
             if (transaction == null) {
                 debug("Transaction not active");
                 return null;
             }
-            debug("Transaction active: " + transaction);
+            debug("Transaction active: [" + transaction.hashCode() + "] " + transaction);
             return transaction;
         }
         catch (Exception exc) {
