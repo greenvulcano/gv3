@@ -55,6 +55,7 @@ import it.greenvulcano.gvesb.utils.concurrency.ConcurrencyHandler;
 import it.greenvulcano.gvesb.utils.concurrency.ServiceConcurrencyInfo;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.ThreadMap;
 
 import java.util.Map;
 
@@ -363,6 +364,7 @@ public class GreenVulcano
 
             gvContext.pop();
             NMDC.pop();
+            ThreadMap.remove("IS_XA_ABORT");
         }
 
         return returnData;
@@ -554,6 +556,7 @@ public class GreenVulcano
             gvContext.pop();
             gvContext.cleanup();
             NMDC.pop();
+            ThreadMap.remove("IS_XA_ABORT");
         }
 
         return returnData;
