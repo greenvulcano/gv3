@@ -19,9 +19,15 @@
  */
 package it.greenvulcano.gvesb.virtual;
 
+import javax.transaction.Status;
+import javax.transaction.Transaction;
+
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.j2ee.XAHelper;
+import it.greenvulcano.gvesb.virtual.pool.OperationManagerPool;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.ThreadMap;
 import it.greenvulcano.util.thread.ThreadUtils;
 
 import org.apache.log4j.Logger;
@@ -63,6 +69,8 @@ public class EnqueueOperationWrapper implements EnqueueOperation
      * The service name aliasing manager.
      */
     private ServiceAlias        serviceAlias = null;
+    
+    private XAHelper            xaHelper     = null;
 
     /**
      * Constructor.
@@ -74,6 +82,7 @@ public class EnqueueOperationWrapper implements EnqueueOperation
      */
     public EnqueueOperationWrapper(EnqueueOperation operation, String description)
     {
+        this.xaHelper = OperationManagerPool.instance().getXAHelper();
         this.operation = operation;
         this.description = description;
     }
@@ -111,6 +120,7 @@ public class EnqueueOperationWrapper implements EnqueueOperation
             InterruptedException {
         logger.debug("BEGIN PERFORM: " + description);
 
+        boolean isError = false;
         try {
             ThreadUtils.checkInterrupted(description, logger);
             serviceAlias.manageAliasInput(gvBuffer);
@@ -119,8 +129,31 @@ public class EnqueueOperationWrapper implements EnqueueOperation
             try {
                 returnData = operation.perform(gvBuffer);
             }
+            catch (Throwable exc) {
+                isError = true;
+                throw exc;
+            }
             finally {
                 NMDC.pop();
+                try {
+                    Transaction tx = xaHelper.getTransaction();
+                    if ((tx != null) && (tx.getStatus() != Status.STATUS_NO_TRANSACTION)) {
+                        if (tx.getStatus() != Status.STATUS_ACTIVE) {
+                            String xaAbort = (String) ThreadMap.get("IS_XA_ABORT");
+                            if (xaAbort == null) {
+                                ThreadMap.put("IS_XA_ABORT", "Y");
+                                if (!isError) {
+                                    throw new VCLException("GVVCL_XA_ERROR - Transaction aborted - " + tx);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception exc) {
+                    if (!isError) {
+                        throw new VCLException("GVVCL_XA_ERROR", exc);
+                    }
+                }
             }
             serviceAlias.manageAliasOutput(returnData);
             return returnData;
@@ -170,6 +203,7 @@ public class EnqueueOperationWrapper implements EnqueueOperation
     public void destroy()
     {
         logger.debug("BEGIN DESTROY: " + description);
+        xaHelper = null;
         try {
             operation.destroy();
         }
