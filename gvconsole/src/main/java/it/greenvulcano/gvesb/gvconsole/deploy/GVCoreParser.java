@@ -1408,6 +1408,7 @@ public class GVCoreParser
 	            aggiornaGVDataTransformationForService(nomeServizio, parser);
 	            aggiornaGVDataProviderService(nomeServizio, parser);
 	            aggiornaGVKnowledgeBaseConfigService(nomeServizio, parser);
+                       aggiornaGVPolicyService(nomeServizio, parser);
         	}
         	finally {
         		XMLUtils.releaseParserInstance(parser);
@@ -1570,6 +1571,85 @@ public class GVCoreParser
         	finally {
         		XMLUtils.releaseParserInstance(parser);
         	}
+        }
+    }
+
+    private void aggiornaGVPolicyService(String nomeServizio, XMLUtils parser) throws XMLUtilsException
+    {
+        Node gvPolicyServer = getGVPolicy(serverXml);
+        Node gvPolicyRolesServer = parser.selectSingleNode(gvPolicyServer, "Roles");
+        Node gvPolicyAddressesServer = parser.selectSingleNode(gvPolicyServer, "Addresses");
+        Node gvPolicyACLServer = parser.selectSingleNode(gvPolicyServer, "ACLGreenVulcano");
+        
+        // remove actual rules for service
+        NodeList gvPolicyServiceListServer = parser.selectNodeList(gvPolicyACLServer, "ServiceRes[@service='" + nomeServizio + "']");
+        for (int i = 0; i < gvPolicyServiceListServer.getLength(); i++) {
+            Node serviceRes = gvPolicyServiceListServer.item(i);
+            gvPolicyACLServer.removeChild(serviceRes);
+        }
+
+        // add new rules for service
+        Node gvPolicyZip = getGVPolicy(newXml);
+        if (gvPolicyZip != null) {
+            NodeList gvPolicyServiceListZip = parser.selectNodeList(gvPolicyZip, "ACLGreenVulcano/ServiceRes[@service='" + nomeServizio + "']");
+            
+            for (int i = 0; i < gvPolicyServiceListZip.getLength(); i++) {
+                Node gvPolicyServiceZip = gvPolicyServiceListZip.item(i); 
+                String group     = parser.get(gvPolicyServiceZip, "@group", "");
+                String service   = parser.get(gvPolicyServiceZip, "@service", "");
+                String operation = parser.get(gvPolicyServiceZip, "@operation", "");
+                
+                Node importedNode = gvPolicyACLServer.getOwnerDocument().importNode(gvPolicyServiceZip, true);
+                gvPolicyACLServer.appendChild(importedNode);
+                logger.debug("Nodo ServiceRes[" + group + ":" + service + ":" + operation + "] inserito");
+                
+                aggiornaGVPolicyRoles(gvPolicyRolesServer, gvPolicyServiceZip, parser);
+                aggiornaGVPolicyAddresses(gvPolicyAddressesServer, gvPolicyServiceZip, parser);
+            }
+        }
+    }
+    
+    private void aggiornaGVPolicyRoles(Node gvPolicyRolesServer, Node serviceResZip, XMLUtils parser) throws XMLUtilsException
+    {
+        NodeList gvPolicyRoleRefListZip = parser.selectNodeList(serviceResZip, "ACL/RoleRef");
+
+        for (int i = 0; i < gvPolicyRoleRefListZip.getLength(); i++) {
+            String role = ((Element) gvPolicyRoleRefListZip.item(i)).getAttribute("name");
+            Node gvPolicyRoleZip = parser.selectSingleNode(serviceResZip, "../../Roles/Role[@name='"  + role + "']"); 
+            Node gvPolicyRoleServer = parser.selectSingleNode(gvPolicyRolesServer, "Role[@name='"  + role + "']");
+            
+            if (gvPolicyRoleServer == null) {
+                Node importedNode = gvPolicyRolesServer.getOwnerDocument().importNode(gvPolicyRoleZip, true);
+                gvPolicyRolesServer.appendChild(importedNode);
+                logger.debug("Nodo Role[" + role + "] non esistente inserimento");
+            }
+            else {
+                Node importedNode = gvPolicyRolesServer.getOwnerDocument().importNode(gvPolicyRoleZip, true);
+                gvPolicyRolesServer.replaceChild(importedNode, gvPolicyRoleServer);
+                logger.debug("Nodo Role[" + role + "] gia esistente aggiornamento");
+            }
+        }
+    }
+
+    private void aggiornaGVPolicyAddresses(Node gvPolicyAddressesServer, Node serviceResZip, XMLUtils parser) throws XMLUtilsException
+    {
+        NodeList gvPolicyAddressSetRefListZip = parser.selectNodeList(serviceResZip, "ACL/AddressSetRef");
+
+        for (int i = 0; i < gvPolicyAddressSetRefListZip.getLength(); i++) {
+            String aset = ((Element) gvPolicyAddressSetRefListZip.item(i)).getAttribute("name");
+            Node gvPolicyAddressSetZip = parser.selectSingleNode(serviceResZip, "../../Addresses/AddressSet[@name='"  + aset + "']"); 
+            Node gvPolicyAddressSetServer = parser.selectSingleNode(gvPolicyAddressesServer, "AddressSet[@name='"  + aset + "']");
+            
+            if (gvPolicyAddressSetServer == null) {
+                Node importedNode = gvPolicyAddressesServer.getOwnerDocument().importNode(gvPolicyAddressSetZip, true);
+                gvPolicyAddressesServer.appendChild(importedNode);
+                logger.debug("Nodo AddressSet[" + aset + "] non esistente inserimento");
+            }
+            else {
+                Node importedNode = gvPolicyAddressesServer.getOwnerDocument().importNode(gvPolicyAddressSetZip, true);
+                gvPolicyAddressesServer.replaceChild(importedNode, gvPolicyAddressSetServer);
+                logger.debug("Nodo AddressSet[" + aset + "] gia esistente aggiornamento");
+            }
         }
     }
 
@@ -2183,9 +2263,23 @@ public class GVCoreParser
         if (wsdl != null) {
             for (int j = 0; j < wsdl.getLength(); j++) {
                 String nameWSDL = parser.get(wsdl.item(j), "@wsdl");
-                nameWSDL = nameWSDL.substring(nameWSDL.lastIndexOf("/")+1);
-                logger.debug("WSDL[" + j + "]=" + nameWSDL);
-                copiaFileWSDL(nameWSDL);
+                int idx = nameWSDL.lastIndexOf("/wsdl/");
+                if (idx != -1) {
+                    nameWSDL = nameWSDL.substring(nameWSDL.lastIndexOf("/wsdl/")+6);
+                    idx = nameWSDL.indexOf("/");
+                    if (idx != -1) {
+                        logger.debug("WSDL[" + j + "]=" + nameWSDL);
+                        copiaDirWSDL(nameWSDL);
+                    }
+                    else {
+                        nameWSDL = nameWSDL.substring(nameWSDL.lastIndexOf("/")+1);
+                        logger.debug("WSDL[" + j + "]=" + nameWSDL);
+                        copiaFileWSDL(nameWSDL);                        
+                    }
+                }
+                else {
+                    logger.debug("Skip WSDL[" + j + "]=" + nameWSDL);
+                }
             }
         }
     }
@@ -2281,6 +2375,21 @@ public class GVCoreParser
                 out.close();
             }
         }
+    }
+
+    private void copiaDir(String dirOrigine, String dirDestinazione) throws Exception
+    {
+        File srcDir = null;
+        File destDir = null;
+        try {
+            srcDir = new File(dirOrigine);
+        }
+        catch (Exception exc) {
+            logger.error("Directory [" + dirOrigine + "] not found");
+            return;
+        }
+        destDir = new File(PropertiesHandler.expand(dirDestinazione, null));
+        FileUtils.copyDirectoryToDirectory(srcDir, destDir);
     }
 
     private void copiaFileXsl(Node xslTransformation, XMLUtils parser) throws Exception
@@ -2445,6 +2554,22 @@ public class GVCoreParser
             logger.debug("inputFile  = " + nomeFile);
             logger.debug("outputFile = " + outputFile);
             copiaFile(inputFile, outputFile);
+        }
+    }
+
+    private void copiaDirWSDL(String nomeFile) throws Exception
+    {
+        logger.debug("inputFile  = " + nomeFile);
+        String path = java.lang.System.getProperty("java.io.tmpdir");
+        nomeFile = nomeFile.substring(0, nomeFile.indexOf("/"));
+        String inputDir = path + File.separator + "conf" + File.separator + "wsdl" + File.separator + nomeFile;
+        File fin = new File(inputDir);
+        if (fin.exists()) {
+            String outputDir = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "xmlconfig"
+                    + File.separator + "wsdl", null);
+            logger.debug("inputDir  = " + inputDir);
+            logger.debug("outputDir = " + outputDir);
+            copiaDir(inputDir, outputDir);
         }
     }
 
