@@ -28,24 +28,20 @@ import it.greenvulcano.gvesb.virtual.ConnectionException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
+import it.greenvulcano.gvesb.ws.axis2.message.MessageConverter;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xml.XMLUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
 import java.rmi.RemoteException;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.stream.StreamSource;
 
-import org.apache.axiom.om.OMNode;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis.client.Stub;
-import org.apache.axis.utils.ByteArrayOutputStream;
-import org.apache.commons.fileupload.MultipartParser;
+import org.apache.axis2.context.MessageContext;
 import org.apache.log4j.Logger;
 import org.openspcoop.pdd.services.IntegrationManager;
 import org.openspcoop.pdd.services.IntegrationManagerServiceLocator;
@@ -63,24 +59,8 @@ import org.w3c.dom.Node;
  */
 public class OpenSpCoopCallOperation implements CallOperation
 {
-
-
     private static Logger       logger                  = GVLogger.getLogger(OpenSpCoopCallOperation.class);
 
-    private OperationKey        key                     = null;
-    private String              url                     = null;
-    private String              username                = null;
-    private String              password                = null;
-    private String              comando                 = null;
-    private String              tipoDestinatario        = null;
-    private String              destinatario            = null;
-    private String              tipoServizio            = null;
-    private String              servizio                = null;
-    private String              azione                  = null;
-    private String              nomeServizioApplicativo = null;
-    private String              imbustamento            = null;
-    private String              locationPD              = null;
-    private String              collaborazione          = null;
     private static final String ID_APPLICATIVO          = "ID_APPLICATIVO";
     private static final String ID_RIFERIMENTO          = "ID_RIFERIMENTO";
     private static final String COUNTER                 = "COUNTER";
@@ -99,6 +79,21 @@ public class OpenSpCoopCallOperation implements CallOperation
     private static final String MITTENTE                = "MITTENTE";
     private static final String LOCATION_PD             = "LOCATION_PD";
 
+    private OperationKey        key                     = null;
+    private String              url                     = null;
+    private String              username                = null;
+    private String              password                = null;
+    private String              comando                 = null;
+    private String              tipoDestinatario        = null;
+    private String              destinatario            = null;
+    private String              tipoServizio            = null;
+    private String              servizio                = null;
+    private String              azione                  = null;
+    private String              nomeServizioApplicativo = null;
+    private String              imbustamento            = null;
+    private String              locationPD              = null;
+    private String              collaborazione          = null;
+
     /*
      * (non-Javadoc)
      *
@@ -110,20 +105,30 @@ public class OpenSpCoopCallOperation implements CallOperation
         logger.debug("Init start");
         try {
             url = XMLConfig.get(node, "@url");
+            logger.debug("url = " + url);
             username = XMLConfig.get(node, "@username");
+            logger.debug("username = " + username);
             password = XMLConfig.get(node, "@password");
             comando = XMLConfig.get(node, "@comando");
+            logger.debug("comando = " + comando);
             tipoDestinatario = XMLConfig.get(node, "@tipoDestinatario");
+            logger.debug("tipoDestinatario = " + tipoDestinatario);
             destinatario = XMLConfig.get(node, "@destinatario");
+            logger.debug("destinatario = " + destinatario);
             servizio = XMLConfig.get(node, "@servizio");
+            logger.debug("servizio = " + servizio);
             azione = XMLConfig.get(node, "@azione");
+            logger.debug("azione = " + azione);
             nomeServizioApplicativo = XMLConfig.get(node, "@servizioApplicativo");
+            logger.debug("nomeServizioApplicativo = " + nomeServizioApplicativo);
             imbustamento = XMLConfig.get(node, "@imbustamento");
+            logger.debug("imbustamento = " + imbustamento);
             locationPD = XMLConfig.get(node, "@locationPD");
+            logger.debug("locationPD = " + locationPD);
             collaborazione = XMLConfig.get(node, "@idCollaborazione");
-            logger.debug("init - loaded parameters: url = " + url);
+            logger.debug("collaborazione = " + collaborazione);
 
-            logger.debug("Init stop");
+            logger.debug("Init end");
         }
         catch (Exception exc) {
             throw new InitializationException("GV_INIT_SERVICE_ERROR", new String[][]{{"message", exc.getMessage()}},
@@ -144,7 +149,6 @@ public class OpenSpCoopCallOperation implements CallOperation
     {
         Object gvobj = gvBuffer.getObject();
         SOAPMessage soapMessage = null;
-        SOAPMessage message = null;
         try {
             logger.debug("Request String Message:\n" + gvBuffer.getObject());
             IntegrationManagerServiceLocator locator = new IntegrationManagerServiceLocator();
@@ -215,16 +219,17 @@ public class OpenSpCoopCallOperation implements CallOperation
             String idApplicativo = gvBuffer.getProperty(ID_APPLICATIVO);
             msg.setIDApplicativo(idApplicativo);
             if (gvBuffer.getProperty(SERVIZIO_APPLICATIVO) != null) {
-                msg.setServizioApplicativo(nomeServizioApplicativo);
+                msg.setServizioApplicativo(gvBuffer.getProperty(SERVIZIO_APPLICATIVO));
             }
             else {
-                msg.setServizioApplicativo(gvBuffer.getProperty(SERVIZIO_APPLICATIVO));
+                msg.setServizioApplicativo(nomeServizioApplicativo);
             }
             msg.setSpcoopHeaderInfo(spcoopHeaderInfo);
 
-            logger.debug("Calls =" + gvobj.getClass().getName());
-            if (gvobj instanceof java.lang.String) {
-                logger.debug("Inizio creazione soap from String\n");
+            logger.debug("payload class= " + gvobj.getClass());
+
+            if (gvobj instanceof String) {
+                logger.debug("Inizio creazione soap from String");
                 Document doc = XMLUtils.parseDOM_S((String) gvobj, false, true);
                 soapMessage = MessageFactory.newInstance().createMessage();
                 SOAPBody body = soapMessage.getSOAPBody();
@@ -232,7 +237,7 @@ public class OpenSpCoopCallOperation implements CallOperation
                 soapMessage.saveChanges();
             }
             else if (gvobj instanceof byte[]) {
-                logger.debug("Inizio creazione soap from byte[]\n");
+                logger.debug("Inizio creazione soap from byte[]");
                 Document doc = XMLUtils.parseDOM_S((byte[]) gvobj, false, true);
                 soapMessage = MessageFactory.newInstance().createMessage();
                 SOAPBody body = soapMessage.getSOAPBody();
@@ -240,28 +245,28 @@ public class OpenSpCoopCallOperation implements CallOperation
                 soapMessage.saveChanges();
             }
             else if (gvobj instanceof org.w3c.dom.Document) {
-                logger.debug("Inizio creazione soap from dom\n");
+                logger.debug("Inizio creazione soap from Document");
                 soapMessage = MessageFactory.newInstance().createMessage();
                 SOAPBody body = soapMessage.getSOAPBody();
                 body.addDocument((Document) gvobj);
                 soapMessage.saveChanges();
             }
-            else if (gvobj instanceof javax.xml.soap.SOAPMessage) {
-                logger.debug("Inizio creazione soap from SOAPMessage\n");
-                soapMessage = (SOAPMessage) gvobj;
-
+            else if (gvobj instanceof MessageContext) {
+                logger.debug("Inizio creazione soap from MessageContext");
+                soapMessage = MessageConverter.createSOAPMessage((MessageContext) gvobj);
             }
+            else if (gvobj instanceof javax.xml.soap.SOAPMessage) {
+                logger.debug("Inizio creazione soap from SOAPMessage");
+                soapMessage = (SOAPMessage) gvobj;
+            }
+            
             if (gvobj instanceof org.apache.axiom.soap.SOAPEnvelope) {
-                logger.debug("Inizio creazione soap from SOAPEnvelope\n");
+                logger.debug("Inizio creazione soap from SOAPEnvelope");
                 SOAPEnvelope envelope = (SOAPEnvelope) gvobj;
                 msg.setMessage(envelope.toString().getBytes());
             }
             else {
-                ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-                soapMessage.writeTo(byteBuffer);
-                logger.debug("set message\n" + byteBuffer.toString());
-                msg.setMessage(byteBuffer.toByteArray());
-                logger.debug("MESS=" + soapMessage.toString());
+                msg.setMessage(MessageConverter.serializeSOAPMessage(soapMessage));
             }
 
             printSPCoopMessage(msg);
@@ -270,68 +275,62 @@ public class OpenSpCoopCallOperation implements CallOperation
 
             if (msgResponse != null) {
                 setRetProperties(msgResponse, gvBuffer);
-                if (msgResponse.getMessage() != null) {
-                    String msgOut = new String(msgResponse.getMessage());
-                    logger.debug("Response XMLMessage:\n" + msgOut);
-                    int idxB = msgOut.indexOf("----=_"); // is multipart?
-                    if (idxB != -1) {
-                        //List<PartDescriptor> parts = MultipartParser.parseToPartList(msgOut);
-                        SOAPMessage soapM = MultipartParser.parseToSOAPMessage(msgOut);
-                        gvBuffer.setObject(soapM);
-                    }
-                    else {
-                        MessageFactory messageFactory = MessageFactory.newInstance();
-                        message = messageFactory.createMessage();
-                        ByteArrayInputStream input = new ByteArrayInputStream(msgResponse.getMessage());
-                        StreamSource source = new StreamSource(input);
-                        message.getSOAPPart().setContent(source);
-                        if (gvobj instanceof java.lang.String) {
-                            gvBuffer.setObject(message.getSOAPBody().toString());
+
+                byte[] respMsg = msgResponse.getMessage();
+                if (respMsg != null) {
+                	logger.debug("Response Message:\n" + new String(respMsg));
+                	
+                	MessageContext respCtx = MessageConverter.createMessageContext(respMsg);
+                	gvBuffer.setObject(respCtx);
+                	
+                	String returnType = gvBuffer.getProperty("SPC_RETURN_TYPE");
+                	if (returnType != null) {
+                		logger.debug("SPC_RETURN_TYPE:" + returnType);
+                		
+                		Object result = respCtx;
+                        if (returnType.equals("envelope")) {
+                            result = respCtx.getEnvelope().toString();
                         }
-                        else if (gvobj instanceof byte[]) {
-                            gvBuffer.setObject(message.getSOAPBody().getFirstChild().toString().getBytes());
+                        else if (returnType.equals("body")) {
+                            result = respCtx.getEnvelope().getBody().toString();
                         }
-                        else if (gvobj instanceof org.w3c.dom.Document) {
-                            Document doc = XMLUtils.parseDOM_S(message.getSOAPBody().getFirstChild().toString(), false,
-                                    true);
-                            gvBuffer.setObject(doc);
+                        else if (returnType.equals("body-element")) {
+                            result = respCtx.getEnvelope().getBody().getFirstElement().toString();
                         }
-                        else if (gvobj instanceof javax.xml.soap.SOAPMessage) {
-                            gvBuffer.setObject(message);
+                        else if (returnType.equals("header")) {
+                            result = respCtx.getEnvelope().getHeader().toString();
                         }
-                        else if (gvobj instanceof org.apache.axiom.soap.SOAPEnvelope) {
-                            StringReader inputString = null;
-                            OMNode newElement = null;
-                            SOAPEnvelope soapEnvelope = (SOAPEnvelope) gvobj;
-                            SOAPFactory factory = (org.apache.axiom.soap.SOAPFactory) soapEnvelope.getOMFactory();
-                            SOAPEnvelope newSoapEnvelope = factory.createSOAPEnvelope();
-                            if (message.getSOAPHeader() != null) {
-                                inputString = new StringReader(message.getSOAPHeader().getFirstChild().toString());
-                                newElement = org.apache.axis2.util.XMLUtils.toOM(inputString);
-                                factory.createSOAPHeader(newSoapEnvelope).addChild(newElement);
-                            }
-                            if (message.getSOAPBody() != null) {
-                                inputString = new StringReader(message.getSOAPBody().getFirstChild().toString());
-                                newElement = org.apache.axis2.util.XMLUtils.toOM(inputString);
-                                factory.createSOAPBody(newSoapEnvelope).addChild(newElement);
-                            }
-                            gvBuffer.setObject(newSoapEnvelope);
+                        else if (returnType.equals("envelope-om")) {
+                            result = respCtx.getEnvelope();
                         }
-                    }
+                        else if (returnType.equals("body-om")) {
+                            result = respCtx.getEnvelope().getBody();
+                        }
+                        else if (returnType.equals("body-element-om")) {
+                            result = respCtx.getEnvelope().getBody().getFirstElement();
+                        }
+                        else if (returnType.equals("header-om")) {
+                            result = respCtx.getEnvelope().getHeader();
+                        }
+                        else {// returnType.equals("context")
+                            // do nothing
+                        }
+                        gvBuffer.setObject(result);
+                	}
                 }
                 else {
                     gvBuffer.setObject(null);
                 }
             }
         }
-        catch (SPCoopException ex) {
+        catch (SPCoopException exc) {
             if (gvobj instanceof org.apache.axiom.soap.SOAPEnvelope) {
                 try {
                     SOAPEnvelope soapEnvelope = (SOAPEnvelope) gvobj;
                     SOAPFactory factory = (org.apache.axiom.soap.SOAPFactory) soapEnvelope.getOMFactory();
                     SOAPEnvelope newSoapEnvelope = factory.createSOAPEnvelope();
                     org.apache.axiom.soap.SOAPBody soapBody = factory.createSOAPBody(newSoapEnvelope);
-                    soapBody.addFault(ex);
+                    soapBody.addFault(exc);
                     gvBuffer.setObject(newSoapEnvelope);
                 }
                 catch (Exception e) {
@@ -342,7 +341,7 @@ public class OpenSpCoopCallOperation implements CallOperation
             else {
                 throw new CallException("GV_CALL_SERVICE_ERROR", new String[][]{{"service", gvBuffer.getService()},
                         {"system", gvBuffer.getSystem()}, {"tid", gvBuffer.getId().toString()},
-                        {"message", ex.getMessage()}}, ex);
+                        {"message", exc.getMessage()}}, exc);
             }
 
         }
