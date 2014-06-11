@@ -20,6 +20,10 @@
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvws_commons</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.openspcoop</groupId>
