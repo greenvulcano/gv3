@@ -9,6 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvhttp</artifactId>
+    <version>3.4.0.1-Final</version>
     <packaging>war</packaging>
     <name>GreenVulcano HTTP Adapter</name>
 

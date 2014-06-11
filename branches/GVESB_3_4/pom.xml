@@ -278,21 +278,21 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvbase</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdte</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp_commons</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
             <exclusions>
@@ -305,21 +305,21 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvws_commons</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvpolicy</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvthroughput</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -327,21 +327,21 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdp-http</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdp-axis2</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdp-jms</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -349,112 +349,112 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>ejb-test</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>ejb3-test</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-internal</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-j2ee</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-axis2</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-rest</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-http</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-jca</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-jmx</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-mail</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-msexchange</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-ldap</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-file</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-db</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-openspcoop</artifactId>
-            <version>${project.version}</version>
+    		<version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -462,14 +462,14 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvstatistics</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>ejb-gvstatistics</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>ejb</type>
             <scope>compile</scope>
         </dependency>
@@ -477,49 +477,49 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore-ode</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>ejb-gvcore</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>ejb</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>ejb3-gvcore</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>ejb</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>ejb3-gvdebug</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>ejb</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore-forward</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>task-gvcore</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -527,77 +527,77 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdatahandler</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvbirt</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvexcel</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp</artifactId>
-            <version>${project.version}</version>
+    		<version>3.4.0.1-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvaxis2</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvjbpm</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvrules</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvrules</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhl7</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvsocial</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvzmq</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -605,21 +605,21 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvrsh_commons</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvrsh_server</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvrsh_client</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -627,7 +627,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>jboss51-utils</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -635,21 +635,21 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvboot</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdebug</artifactId>
-            <version>${project.version}</version>
+            <version>3.4.0-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvconsole</artifactId>
-            <version>${project.version}</version>
+    		<version>3.4.0.1-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
