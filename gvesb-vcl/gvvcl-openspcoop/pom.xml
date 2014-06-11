@@ -9,6 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvvcl-openspcoop</artifactId>
+    <version>3.4.0.1-Final</version>
     <name>GreenVulcano VCL OpenSPCoop Plugin</name>
 
     <dependencies>
