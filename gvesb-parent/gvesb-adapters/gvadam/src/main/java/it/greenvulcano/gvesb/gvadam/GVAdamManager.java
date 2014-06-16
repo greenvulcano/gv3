@@ -28,8 +28,19 @@ import it.greenvulcano.event.util.shutdown.ShutdownEventLauncher;
 import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
 import it.greenvulcano.log.GVLogger;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import net.sf.adam.an.ApplicationSession;
+import net.sf.adam.core.AdamException;
+import net.sf.adam.core.Engine;
+import net.sf.adam.core.sec.Security;
+import net.sf.adam.core.sec.auth.DefaultLoginHandler;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -38,11 +49,14 @@ import org.w3c.dom.Document;
  */
 public class GVAdamManager implements ConfigurationListener, ShutdownEventListener
 {
-    private static Logger                logger                 = GVLogger.getLogger(GVAdamManager.class);
+    private static Logger        logger                 = GVLogger.getLogger(GVAdamManager.class);
 
-    private static final String          DEFAULT_CONF_FILE_NAME = "GVAdamAdapter-Configuration.xml";
+    private static final String  DEFAULT_CONF_FILE_NAME = "GVAdamAdapter-Configuration.xml";
 
-    private static GVAdamManager  instance               = null;
+    private static GVAdamManager instance               = null;
+	private Engine               engine                 = null; 
+			
+    private Map<String, DefaultLoginHandler> sessions = new HashMap<String, DefaultLoginHandler>();
 
     public static synchronized GVAdamManager instance() throws AdamAdapterException
     {
@@ -82,14 +96,19 @@ public class GVAdamManager implements ConfigurationListener, ShutdownEventListen
             if (globalConfig == null) {
                 return;
             }
-
-            if (false) {
-                throw new AdamAdapterException("BOOOOM!!!");
+            
+            NodeList sNodes = XMLConfig.getNodeList(globalConfig, "GVAdamAdapterManager/SessionConfiguration/Session");
+            //DefaultLoginHandler session = null;
+            for (int i = 0; i < sNodes.getLength(); i++) {
+                Node fn = sNodes.item(i);
+                String uSession = XMLConfig.get(fn, "@name");
+                String user = XMLConfig.get(fn, "@user");
+                String password = XMLConfig.get(fn, "@password");
+                String realm = XMLConfig.get(fn, "@realm");
+                sessions.put(uSession, new DefaultLoginHandler(user, password, realm));
+                logger.debug("Added a Session configuration [name=" + uSession + ", user=" + user + ", realm=" + realm + "].");
             }
-        }
-        catch (AdamAdapterException exc) {
-            logger.error("Error initializing GVAdamManager", exc);
-            throw exc;
+
         }
         catch (Exception exc) {
             logger.error("Error initializing GVAdamManager", exc);
@@ -101,15 +120,42 @@ public class GVAdamManager implements ConfigurationListener, ShutdownEventListen
     public void destroy()
     {
         logger.debug("BEGIN - Destroing GVAdamManager");
+        sessions.clear();
         try {
-
+			Engine.instance().shutdown();
         }
         catch (Exception exc) {
-            // TODO: handle exception
+            logger.warn("Error while shutting down ADAM engine", exc);
         }
+        engine = null;
         logger.debug("END - Destroing GVAdamManager");
     }
 
+    private synchronized Engine getAdamEngine(){
+    	if (engine == null) {
+    		engine = Engine.instance();
+    		engine.startup(GVAdamManager.class.getClassLoader());
+    	}
+    	return engine;
+    }
+    
+    /**
+	 * @return
+	 * @throws AdamAdapterException
+	 * @throws AdamException
+	 */
+	public ApplicationSession getSession(String uSession, String archive) throws AdamAdapterException, AdamException {
+		//Instantiating ADAM engine
+		Engine engine = instance().getAdamEngine();
+		
+		DefaultLoginHandler callback = sessions.get(uSession);
+		if (callback == null) {
+			throw new AdamAdapterException("Unknown ADAM session. Session[name=" + uSession + "].");
+		}
+		ApplicationSession session = engine.createSession(Security.DEFAULT_LOGIN_MODULE, callback, archive, null);
+		return session;
+	}
+    
     /*
      * (non-Javadoc)
      *

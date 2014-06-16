@@ -21,16 +21,26 @@ package it.greenvulcano.gvesb.virtual.adam;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.gvadam.GVAdamManager;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.ConnectionException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
+import it.greenvulcano.gvesb.virtual.adam.filter.Filter;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.xml.XMLUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sf.adam.an.ApplicationSession;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 /**
@@ -43,9 +53,10 @@ public class AdamSearchCallOperation implements CallOperation
     private static Logger    logger          = GVLogger.getLogger(AdamSearchCallOperation.class);
 
     private OperationKey     key             = null;
-    private String           host            = null;
-    private int              port            = -1;
-    private int              timeout         = 10000;
+    private String           name            = null;
+    private String           uSession        = null;
+    private String           archive         = null;
+    private List<Filter>     filters         = new ArrayList<Filter>();
 
 
 
@@ -59,13 +70,24 @@ public class AdamSearchCallOperation implements CallOperation
     {
         logger.debug("Init start");
         try {
-            host = XMLConfig.get(node, "@host");
-            port = XMLConfig.getInteger(node, "@port");
-            timeout = XMLConfig.getInteger(node, "@timeout", 10) * 1000;
+            name = XMLConfig.get(node, "@name");
+            uSession = XMLConfig.get(node, "@user-session");
+            archive = XMLConfig.get(node, "@arch-name");
 
-            logger.debug("init - loaded parameters: host = " + host + " - port: " + port + " - timeout: " + timeout);
+            logger.debug("init - loaded parameters: name = " + name + " - user-session: " + uSession + " - archive: " + archive);
 
+            logger.debug("Listing for Filters.");
+            NodeList fNodes = XMLConfig.getNodeList(node, "*[@type='filter']");
+            Filter filter = null;
+            for (int i = 0; i < fNodes.getLength(); i++) {
+                Node fn = fNodes.item(i);
+                String clazz = XMLConfig.get(fn, "@class");
 
+                filter = (Filter) Class.forName(clazz).newInstance();
+                filter.init(fn);
+                filters.add(filter);
+                logger.debug("Added a Filter class [" + clazz + "].");
+            }
             logger.debug("Init stop");
         }
         catch (Exception exc) {
@@ -85,35 +107,32 @@ public class AdamSearchCallOperation implements CallOperation
     @Override
     public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
     {
+    	XMLUtils parser = null;
+    	
         try {
-            Object input = gvBuffer.getObject();
-            if (input instanceof String) {
-                logger.debug("Input object is a String");
+        	ApplicationSession session = GVAdamManager.instance().getSession(uSession, archive);
+        	
+	        parser = XMLUtils.getParserInstance();
+        	Document doc = parser.newDocument("AdamResult");
+        	
+        	for (Filter filter : filters) {
+    			filter.filter(parser, doc.getDocumentElement(), session, gvBuffer);
+    		}
 
-            }
-            else if (input instanceof byte[]) {
-                logger.debug("Input object is a byte array");
-
-            }
-            else if (input instanceof Node) {
-                logger.debug("Input object is a Node");
-
-            }
-            else {
-                throw new Exception("Invalid input type: " + input.getClass());
-            }
-
-            Object out = null;
-
-            gvBuffer.setObject(out);
+            gvBuffer.setObject(doc);
         }
         catch (Exception exc) {
             throw new CallException("GV_CALL_SERVICE_ERROR", new String[][]{{"service", gvBuffer.getService()},
                     {"system", gvBuffer.getSystem()}, {"tid", gvBuffer.getId().toString()},
                     {"message", exc.getMessage()}}, exc);
         }
+        finally {
+        	XMLUtils.releaseParserInstance(parser);
+        }
         return gvBuffer;
     }
+
+	
 
     /*
      * (non-Javadoc)
@@ -123,7 +142,9 @@ public class AdamSearchCallOperation implements CallOperation
     @Override
     public void cleanUp()
     {
-        // do nothing
+    	for (Filter filter : filters) {
+			filter.cleanUp();
+		}
     }
 
     /*
@@ -134,7 +155,10 @@ public class AdamSearchCallOperation implements CallOperation
     @Override
     public void destroy()
     {
-        // do nothing
+    	for (Filter filter : filters) {
+			filter.destroy();
+		}
+    	filters.clear();
     }
 
     /*
