@@ -103,7 +103,7 @@ public class GVAdamManager implements ConfigurationListener, ShutdownEventListen
                 Node fn = sNodes.item(i);
                 String uSession = XMLConfig.get(fn, "@name");
                 String user = XMLConfig.get(fn, "@user");
-                String password = XMLConfig.get(fn, "@password");
+                String password = XMLConfig.getDecrypted(fn, "@password");
                 String realm = XMLConfig.get(fn, "@realm");
                 sessions.put(uSession, new DefaultLoginHandler(user, password, realm));
                 logger.debug("Added a Session configuration [name=" + uSession + ", user=" + user + ", realm=" + realm + "].");
