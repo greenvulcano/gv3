@@ -327,11 +327,13 @@ public class DBOMultiFlatSelect extends AbstractDBO
         }
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         finally {
             //cleanup();
