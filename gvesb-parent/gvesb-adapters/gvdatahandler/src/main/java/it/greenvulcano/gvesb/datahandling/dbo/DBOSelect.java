@@ -297,7 +297,8 @@ public class DBOSelect extends AbstractDBO
         }
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         catch (InterruptedException exc) {
             logger.error("DBO[" + getName() + "] interrupted", exc);
@@ -305,7 +306,8 @@ public class DBOSelect extends AbstractDBO
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         finally {
             // cleanup();
