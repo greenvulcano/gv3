@@ -19,6 +19,7 @@
  */
 package it.greenvulcano.boot;
 
+import it.greenvulcano.event.internal.shutdown.ShutdownHandler;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
 
@@ -88,6 +89,9 @@ public class GVServletContextListener implements ServletContextListener
      */
     public void contextDestroyed(ServletContextEvent evt)
     {
-        // do nothing
+        System.out.println("+--------------------------------------------------------------------------");
+        System.out.println("| GreenVulcanoESB Boot - Shutting down");
+        System.out.println("+--------------------------------------------------------------------------");
+        (new ShutdownHandler()).run();
     }
 }
