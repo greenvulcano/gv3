@@ -113,6 +113,7 @@ public class GVNotificationNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
+        long startTime = System.currentTimeMillis();
         if ((notificationVector.size() == 0)) {
             logger.info("Skipping execution of GVNotificationNode '" + getId()
                     + "': No GVNotification configured for this GVNotificationNode");
@@ -165,7 +166,8 @@ public class GVNotificationNode extends GVFlowNode
         }
 
         dumpEnvironment(logger, false, environment);
-        logger.debug("END - Execute GVNotificationNode '" + getId() + "'");
+        long endTime = System.currentTimeMillis();
+        logger.info("END - Execute GVNotificationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
 
         return nextNodeId;
     }
