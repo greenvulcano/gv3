@@ -48,6 +48,7 @@ public class HL7ConnectionValidator implements Validator
 {
     private String name;
     private List<HL7Connection> urls = new ArrayList<HL7Connection>();
+    private HL7ConnectionValidatorHolder cHolder = HL7ConnectionValidatorHolder.instance();
 
     /* (non-Javadoc)
      * @see it.greenvulcano.gvesb.core.forward.preprocess.Validator#init(org.w3c.dom.Node)
@@ -152,7 +153,7 @@ public class HL7ConnectionValidator implements Validator
      */
     @Override
     public boolean isValid() throws JMSForwardException {
-        return HL7ConnectionValidatorHolder.instance().isValid(name, urls);
+        return cHolder.isValid(name, urls);
     }
 
     /* (non-Javadoc)
@@ -160,7 +161,7 @@ public class HL7ConnectionValidator implements Validator
      */
     @Override
     public void reset() {
-        HL7ConnectionValidatorHolder.instance().reset(name, urls);
+        cHolder.reset(name, urls);
     }
 
     /* (non-Javadoc)
@@ -168,7 +169,7 @@ public class HL7ConnectionValidator implements Validator
      */
     @Override
     public void destroy() {
-        HL7ConnectionValidatorHolder.instance().reset(name, urls);
+        cHolder.reset(name, urls);
         urls.clear();
     }
     
