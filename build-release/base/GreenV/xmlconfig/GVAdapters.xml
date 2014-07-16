@@ -1,0 +1,787 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+    <GVSQLErrorMapping name="SQL_ERROR_MAPPING" type="module">
+        <DefaultMapping code="305">
+            <CatalogMapping code="301" module="ORACLE FATAL">
+                <SQLErrorCode code="3000"/>
+                <SQLErrorCode code="3001"/>
+                <SQLErrorCode code="3002"/>
+            </CatalogMapping>
+        </DefaultMapping>
+        <CustomMapping caller="DATA HANDLER" code="313">
+            <CatalogMapping code="318">
+                <SQLErrorCode code="3000"/>
+                <SQLErrorCode code="3001"/>
+                <SQLErrorCode code="3002"/>
+            </CatalogMapping>
+        </CustomMapping>
+    </GVSQLErrorMapping>
+    <GVWebServices name="WEB_SERVICES" type="module" version="1.0">
+        <GreenVulcanoWebServices>
+            <GreenVulcanoWebService gv-operation="RequestReply" gv-service="TOUPPER"
+                                    type="greenvulcanowebservice"/>
+            <GreenVulcanoWebService gv-operation="Request" gv-service="TOUPPER_A"
+                                    type="greenvulcanowebservice"/>
+            <GreenVulcanoWebService gv-operation="GetReply" gv-service="TOUPPER_A"
+                                    type="greenvulcanowebservice"/>
+        </GreenVulcanoWebServices>
+        <BusinessWebServices authenticated-http-soap-address="http://localhost:8080/gvaxis2/services"
+                             authenticated-https-soap-address="https://localhost:8080/gvaxis2/services"
+                             http-soap-address="http://localhost:8080/gvaxis2/services"
+                             https-soap-address="https://localhost:8080/gvaxis2/services"
+                             services-directory="${{gv.app.home}}/webservices/services"
+                             wsdl-directory="${{gv.app.home}}/xmlconfig/wsdl">
+            <WebService force-https="false" input-xsd="Toupper_in.xsd"
+                        output-xsd="Toupper_out.xsd" targetNS-from-xsd="false"
+                        web-service="TOUPPER">
+                <WSOperation operation-qname="{http://www.greenvulcano.it/greenvulcano}toupper"
+                             ref-dp="respToupperWSDataProvider">
+                    <Binding gv-operation="execToupper" gv-service="TOUPPER#WS" gv-system="GVESB_WS"
+                             inputType="body-element"/>
+                </WSOperation>
+            </WebService>
+            <WebService force-https="false" input-xsd="CreditService_in.xsd"
+                        output-xsd="CreditService_out.xsd" targetNS-from-xsd="true"
+                        web-service="CreditService">
+                <WSOperation operation-qname="{http://www.credit.com/services}Query"
+                             ref-dp="CREDIT::QueryWSDataProvider">
+                    <Binding gv-operation="RequestReply" gv-service="CCardQuery"
+                             gv-system="CREDIT" inputType="body-element"/>
+                </WSOperation>
+                <WSOperation operation-qname="{http://www.credit.com/services}Pay"
+                             ref-dp="CREDIT::PayWSDataProvider">
+                    <Binding gv-operation="RequestReply" gv-service="CCardPay"
+                             gv-system="CREDIT" inputType="body-element"/>
+                </WSOperation>
+            </WebService>
+            <WebService force-https="false" input-xsd="Toupper_in.xsd"
+                        output-xsd="Toupper_out.xsd" targetNS-from-xsd="false"
+                        web-service="TOUPPER_WSS">
+                <WSOperation operation-qname="{http://www.greenvulcano.it/greenvulcano}toupper"
+                             ref-dp="respToupperWSDataProvider">
+                    <Binding gv-operation="execToupper"
+                             gv-service="TOUPPER#WS" gv-system="GVESB_WS"
+                             inputType="body-element"/>
+                </WSOperation>
+                <EngageModule name="addressing" specification="NO-SPEC"
+                              type="it.greenvulcano.gvesb.virtual.ws.module.DefaultModuleHandler"/>
+                <EngageModule name="rampart" specification="WS-Security"
+                              type="it.greenvulcano.gvesb.virtual.ws.module.rampart.RampartModuleHandler">
+                    <PolicyData policy_key="rampartPolicy"><![CDATA[<wsp:Policy wsu:Id="SigEncr"
+                xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <sp:AsymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:InitiatorToken>
+                            <wsp:Policy>
+                                <sp:X509Token
+                                        sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+                                    <wsp:Policy>
+                                        <sp:RequireThumbprintReference/>
+                                        <sp:WssX509V3Token10/>
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:InitiatorToken>
+                        <sp:RecipientToken>
+                            <wsp:Policy>
+                                <sp:X509Token
+                                        sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:RequireThumbprintReference/>
+                                        <sp:WssX509V3Token10/>
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:RecipientToken>
+                        <sp:AlgorithmSuite>
+                            <wsp:Policy>
+                                <sp:TripleDesRsa15/>
+                            </wsp:Policy>
+                        </sp:AlgorithmSuite>
+                        <sp:Layout>
+                            <wsp:Policy>
+                                <sp:Strict/>
+                            </wsp:Policy>
+                        </sp:Layout>
+                        <sp:IncludeTimestamp/>
+                        <sp:OnlySignEntireHeadersAndBody/>
+                    </wsp:Policy>
+                </sp:AsymmetricBinding>
+                <sp:Wss10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:MustSupportRefKeyIdentifier/>
+                        <sp:MustSupportRefIssuerSerial/>
+                    </wsp:Policy>
+                </sp:Wss10>
+                <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <sp:Body/>
+                </sp:SignedParts>
+                <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <sp:Body/>
+                </sp:EncryptedParts>
+
+                <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
+                    <ramp:user>service</ramp:user>
+                    <ramp:encryptionUser>client</ramp:encryptionUser>
+                    <ramp:passwordCallbackClass>it.greenvulcano.gvesb.ws.rampart.policy.pwcb.PwCbBasicHandler</ramp:passwordCallbackClass>
+
+                    <ramp:signatureCrypto>
+                        <ramp:crypto provider="it.greenvulcano.gvesb.ws.rampart.policy.CryptoAdapter">
+                            <ramp:property name="it.greenvulcano.wss.crypto.keystore.id">WSS_service</ramp:property>
+                        </ramp:crypto>
+                    </ramp:signatureCrypto>
+                    <ramp:encryptionCypto>
+                        <ramp:crypto provider="it.greenvulcano.gvesb.ws.rampart.policy.CryptoAdapter">
+                            <ramp:property name="it.greenvulcano.wss.crypto.keystore.id">WSS_service</ramp:property>
+                        </ramp:crypto>
+                    </ramp:encryptionCypto>
+                </ramp:RampartConfig>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>]]></PolicyData>
+                </EngageModule>
+            </WebService>
+        <WebService force-https="false" targetNS-from-xsd="false"
+                        web-service="FileManagerService">
+                <WSOperation operation-qname="{http://www.greenvulcano.it/greenvulcano}listFile"
+                             ref-dp="genericPassBody_WSDataProvider">
+                    <Binding gv-operation="listFile" gv-service="FileManagerService"
+                             gv-system="FILE_MANAGER" inputType="body-element"/>
+                </WSOperation>
+                <WSOperation operation-qname="{http://www.greenvulcano.it/greenvulcano}getFile"
+                             ref-dp="resp_zipAttachment_WSDataProvider">
+                    <Binding gv-operation="getFile" gv-service="FileManagerService"
+                             gv-system="FILE_MANAGER" inputType="body-element"/>
+                </WSOperation>
+                <WSOperation operation-qname="{http://www.greenvulcano.it/greenvulcano}putFile"
+                             ref-dp="genericPassBody_WSDataProvider">
+                    <Binding gv-operation="putFile" gv-service="FileManagerService"
+                             gv-system="FILE_MANAGER" inputType="context"/>
+                </WSOperation>
+            </WebService>
+        </BusinessWebServices>
+        <UDDI>
+            <JAXMLRegistry class="it.greenvulcano.gvesb.j2ee.xmlRegistry.impl.RegistryImpl"
+                           id-registry="Registry" organization-name="GreenVulcano"
+                           password="{3DES}siC67hYHbN4="
+                           publish-url="http://localhost:8080/juddi/publish?wsdl"
+                           query-url="http://localhost:8080/juddi/inquiry?wsdl"
+                           type="xmlregistry" user-name="gvesb">
+                <Description>Private JUDDI Registry</Description>
+                <Properties>
+                    <connectionFactory value="org.apache.ws.scout.registry.ConnectionFactoryImpl"/>
+                    <connectionProperty name="javax.xml.registry.queryManagerURL"
+                                        type="classproperty"
+                                        value="http://localhost:8080/juddi/inquiry"/>
+                    <connectionProperty name="javax.xml.registry.lifeCycleManagerURL"
+                                        type="classproperty"
+                                        value="http://localhost:8080/juddi/publish"/>
+                    <connectionProperty name="javax.xml.registry.uddi.maxRows"
+                                        type="classproperty" value="10"/>
+                    <connectionProperty name="scout.proxy.transportClass"
+                                        type="classproperty"
+                                        value="org.apache.ws.scout.transport.AxisTransport"/>
+                </Properties>
+            </JAXMLRegistry>
+        </UDDI>
+        <AxisExtra>
+            <PasswordCallback>
+                <PwCbBasicHandler class="it.greenvulcano.gvesb.ws.rampart.policy.pwcb.PwCbBasicHandler"
+                                  type="pwcb">
+                    <UserDef name="client" password="{3DES}oh2yh6P0/L8="/>
+                    <UserDef name="service" password="{3DES}41OE8r5rJLM="/>
+                </PwCbBasicHandler>
+            </PasswordCallback>
+        </AxisExtra>
+    </GVWebServices>
+    <GVJdbc name="JDBC" type="module">
+        <Drivers>
+            <Driver class="org.hsqldb.jdbcDriver" enabled="Yes"
+                    initType="static" type="driver"/>
+        </Drivers>
+        <Connections>
+            <Connection autoCommit="true" connectionMax="5" connectionMin="1"
+                        connectionString="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                        enabled="Yes" id="ds.test" password="{3DES}eKsDI/A45FU="
+                        txIsolation="TRANSACTION_NONE" type="connection" user="gv_test"/>
+        </Connections>
+    </GVJdbc>
+    <GVJDBCConnectionBuilder name="GVJDBC" type="module">
+        <DriverConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverConnectionBuilder"
+                                 driver-class="org.hsqldb.jdbcDriver" name="gv_test"
+                                 password="{3DES}eKsDI/A45FU="
+                                 type="jdbc-connection-builder"
+                                 url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                 user="gv_test"/>
+        <DataSourceConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DataSourceConnectionBuilder"
+                                     data-source-jndi="ds.gv_test" name="ds.gv_test"
+                                     type="jdbc-connection-builder"/>
+        <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
+                                     driver-class="org.hsqldb.jdbcDriver"
+                                     name="pool_persistence" password="{3DES}UMofcmk3ugU="
+                                     type="jdbc-connection-builder"
+                                     url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                     user="gv_pers">
+            <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
+                            minIdle="1" timeBetweenEvictionRuns="300">
+                <validationQuery>select 1 from dual</validationQuery>
+            </PoolParameters>
+        </DriverPoolConnectionBuilder>
+        <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
+                                     driver-class="org.hsqldb.jdbcDriver" name="gv_log"
+                                     password="{3DES}+JmCPFHLRXI="
+                                     type="jdbc-connection-builder"
+                                     url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                     user="gv_log">
+            <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
+                            minIdle="1" timeBetweenEvictionRuns="300">
+                <validationQuery>select 1 from dual</validationQuery>
+            </PoolParameters>
+        </DriverPoolConnectionBuilder>
+        <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
+                                     driver-class="org.hsqldb.jdbcDriver" name="gv_stats"
+                                     password="gv_stats"
+                                     type="jdbc-connection-builder"
+                                     url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                     user="gv_stats">
+            <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
+                            minIdle="1" timeBetweenEvictionRuns="300">
+                <validationQuery>select 1 from dual</validationQuery>
+            </PoolParameters>
+        </DriverPoolConnectionBuilder>
+    </GVJDBCConnectionBuilder>
+    <GVDataProviderManager name="GVDP" type="module">
+        <DataProviders>
+            <JMSBytesMessageDataProvider class="it.greenvulcano.gvesb.gvdp.impl.JMSBytesMessageDataProvider"
+                                         name="WriteString_JMSBytesMessageDataProvider"
+                                         type="dataProvider">
+                <Field direction="OUT" key="output" type="field">
+                    <Expression type="ognl">writeBytes(#input.object.getBytes(&apos;UTF-8&apos;))</Expression>
+                </Field>
+            </JMSBytesMessageDataProvider>
+            <StringDataProvider class="it.greenvulcano.gvesb.gvdp.impl.StringDataProvider"
+                                name="ReadString_JMSBytesMessageDataProvider"
+                                type="dataProvider">
+                <Field direction="INOUT" key="buffer" type="field">
+                    <Expression type="ognl">#bArr = new
+                    byte[object.getBodyLength()], object.reset(),
+                    object.readBytes(#bArr), new java.lang.String(#bArr, &apos;UTF-8&apos;)</Expression>
+                </Field>
+            </StringDataProvider>
+            <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider"
+                                    name="CREDIT::SVCEmailListDataProvider"
+                                    source-selector="object" type="dataProvider">
+                <Field direction="INOUT" key="buffer" type="field">
+                    <Expression type="xpath">/MailMessages/Message</Expression>
+                </Field>
+            </CollectionDataProvider>
+            <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider"
+                                    name="PersonsCollectionDP" source-selector="object"
+                                    type="dataProvider">
+                <Field direction="INOUT" key="buffer" type="field">
+                    <Expression type="xpath">//PersonData</Expression>
+                </Field>
+            </CollectionDataProvider>
+            <StringDataProvider class="it.greenvulcano.gvesb.gvdp.impl.StringDataProvider"
+                                name="stringSerializeNodeDataProvider" type="dataProvider">
+                <Field direction="INOUT" key="buffer" type="field">
+                    <Expression type="ognl">@it.greenvulcano.util.xml.XMLUtils@serializeDOM_S(object)</Expression>
+                </Field>
+            </StringDataProvider>
+            <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider"
+                                    name="fileNamesCollectionDP" source-selector="object"
+                                    type="dataProvider">
+                <Field direction="INOUT" key="buffer" type="field">
+                    <Expression type="xpath">//FileList/File[@isDirectory=&apos;false&apos;]</Expression>
+                </Field>
+            </CollectionDataProvider>
+            <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider"
+                                    name="testXMLCollectionDP" source-selector="object"
+                                    type="dataProvider">
+                <Field direction="INOUT" key="buffer" type="field">
+                    <Expression type="xpath">//element/text()</Expression>
+                </Field>
+            </CollectionDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="respToupperWSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">#factory=envelope.body.getOMFactory(),
+#toupperResponse=#factory.createOMElement(&apos;toupperResponse&apos;, &apos;http://www.greenvulcano.it/greenvulcano&apos;, &apos;ns&apos;),
+#return=#factory.createOMElement(&apos;resultUp&apos;,&apos;http://www.greenvulcano.it/greenvulcano&apos;, &apos;ns&apos;),
+#toupperResponse.addChild(#return),
+#factory.createOMText(#return, #input.object),
+envelope.body.addChild(#toupperResponse)</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="reqToupperWSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">#factory=envelope.body.getOMFactory(),
+#toupper=#factory.createOMElement(&apos;toupper&apos;, &apos;http://www.greenvulcano.it/greenvulcano&apos;, &apos;ns&apos;),
+#str=#factory.createOMElement(&apos;str&apos;,&apos;http://www.greenvulcano.it/greenvulcano&apos;, &apos;ns&apos;),
+#toupper.addChild(#str),
+#factory.createOMText(#str, #input.object),
+envelope.body.addChild(#toupper)</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="CREDIT::QueryWSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(#input.object.getDocumentElement()))</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="CREDIT::PayWSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">(#input.getProperty(&apos;REC_UPDATE&apos;) != null) ? (
+#factory=envelope.body.getOMFactory(),
+#payResponse=#factory.createOMElement(&apos;PayResponse&apos;, &apos;http://www.credit.com/services&apos;, &apos;ns&apos;),
+#result=#factory.createOMElement(&apos;result&apos;,&apos;http://www.credit.com/services&apos;, &apos;ns&apos;),
+#reason=#factory.createOMElement(&apos;reason&apos;,&apos;http://www.credit.com/services&apos;, &apos;ns&apos;),
+#payResponse.addChild(#result),
+(#input.getProperty(&apos;REC_UPDATE&apos;) == 1) ? #factory.createOMText(#result,&apos;true&apos;) : (#factory.createOMText(#result,&apos;false&apos;), #payResponse.addChild(#reason), #factory.createOMText(#reason,&apos;Credit Card inactive or insufficient credit&apos;)),
+envelope.body.addChild(#payResponse)) : envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(#input.object.getDocumentElement()))</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="EXTERNAL::QueryWSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement())),
+#basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
+#basicAuth.setUsername(&quot;userA&quot;),
+#basicAuth.setPassword(&quot;userA&quot;),
+options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+            <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="EXTERNAL::PayWSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement())),
+#basicAuth = new org.apache.axis2.transport.http.HttpTransportProperties$Authenticator(),
+#basicAuth.setUsername(&quot;userA&quot;),
+#basicAuth.setPassword(&quot;userA&quot;),
+options.setProperty(@org.apache.axis2.transport.http.HTTPConstants@AUTHENTICATE, #basicAuth)</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+        <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="toupperInArrayDataProvider" type="dataProvider">
+        <Field direction="INOUT" key="0" type="field">
+          <Expression type="ognl">object.split(&quot;,&quot;)</Expression>
+        </Field>
+      </ArrayDataProvider>
+      <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="toupperOutGVBChangeDataProvider"
+                                  type="dataProvider">
+        <Field direction="OUT" key="buffer" type="field">
+          <Expression type="ognl">object = @java.util.Arrays@toString(#input)</Expression>
+        </Field>
+      </GVBufferChangeDataProvider>
+      <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="sumInArrayDataProvider" type="dataProvider">
+        <Field direction="INOUT" key="0" type="field">
+          <Expression type="ognl">@java.lang.Integer@parseInt(#input.getProperty(&apos;I1&apos;))</Expression>
+        </Field>
+        <Field direction="INOUT" key="1" type="field">
+          <Expression type="ognl">@java.lang.Integer@parseInt(#input.getProperty(&apos;I2&apos;))</Expression>
+        </Field>
+      </ArrayDataProvider>
+      <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="sumOutGVBChangeDataProvider"
+                                  type="dataProvider">
+        <Field direction="OUT" key="buffer" type="field">
+          <Expression type="ognl">#output.setProperty('SUM', @java.lang.String@valueOf(#input))</Expression>
+        </Field>
+      </GVBufferChangeDataProvider>
+      <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="addTimeInArrayDataProvider" type="dataProvider">
+        <Field direction="INOUT" key="0" type="field">
+          <Expression type="ognl">@it.greenvulcano.util.txt.DateUtils@stringToDate(property['DATE'], 'dd/MM/yyyy HH:mm:ss')</Expression>
+        </Field>
+        <Field direction="INOUT" key="1" type="field">
+          <Expression type="ognl">@java.util.Calendar@MINUTE</Expression>
+        </Field>
+        <Field direction="INOUT" key="2" type="field">
+          <Expression type="ognl">@java.lang.Integer@parseInt(property['DELTA'])</Expression>
+        </Field>
+      </ArrayDataProvider>
+      <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="addTimeOutGVBChangeDataProvider"
+                                  type="dataProvider">
+        <Field direction="OUT" key="buffer" type="field">
+          <Expression type="ognl">#output.setProperty('DATE_OUT', @it.greenvulcano.util.txt.DateUtils@dateToString(#input, 'dd/MM/yyyy HH:mm:ss'))</Expression>
+        </Field>
+      </GVBufferChangeDataProvider>
+        <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="genericPassBody_WSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.object, false, true).getDocumentElement()))</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+        <Axis2MessageContextDataProvider class="it.greenvulcano.gvesb.gvdp.impl.Axis2MessageContextDataProvider"
+                                             name="resp_zipAttachment_WSDataProvider"
+                                             type="dataProvider">
+                <Field direction="OUT" key="message" type="field">
+                    <Expression type="ognl">envelope.body.addChild(@org.apache.axis2.util.XMLUtils@toOM(@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#input.property[&apos;XML_MESSAGE&apos;], false, true).getDocumentElement())),
+
+options.setProperty(@org.apache.axis2.Constants$Configuration@ENABLE_SWA, &apos;TRUE&apos;),
+
+#dataHandler=new javax.activation.DataHandler(new javax.mail.util.ByteArrayDataSource(#input.object,#input.property[&apos;FILE_MIME_TYPE&apos;])),
+#filename=&apos;zipAttachment&apos;,
+addAttachment(#filename,#dataHandler),
+
+#contentDisposition=new org.apache.commons.httpclient.Header(&apos;Content-Disposition&apos;,#filename),
+setProperty(@org.apache.axis2.transport.http.HTTPConstants@HTTP_HEADERS,{#contentDisposition})</Expression>
+                </Field>
+            </Axis2MessageContextDataProvider>
+        </DataProviders>
+    </GVDataProviderManager>
+    <GVDataHandlerConfiguration name="DH_ENGINE" type="module" version="1.0">
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="pool_persistence" name="ListRecoveryPoint"
+                    type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="ListRecoveryPoint" transformation="ListRecoveryPoint"
+                       type="dbo">
+                <statement id="1" type="select">select rec_id, id, server, system, service, operation, recovery_node, creation_date, update_date, state
+                    from gv_recovery_point
+                    where 1=1
+                    decode{{@{{ID}}::NULL:: ::and id = &apos;@{{ID}}&apos;}}
+                    decode{{@{{SERVICE}}::NULL:: ::and service = &apos;@{{SERVICE}}&apos;}}
+                    decode{{@{{DATE}}::NULL:: ::and trunc(update_date) = to_date(&apos;@{{DATE}}&apos;, &apos;dd/mm/yyyy&apos;)}}
+                    order by update_date desc</statement>
+                <statement id="2" keys="1" type="select">select rec_id, name, value
+                    from gv_recovery_property
+                    order by rec_id, name</statement>
+            </DBOSelect>
+        </DBOBuilder>
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="pool_persistence" name="CheckRecoveryPoint"
+                    type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="CheckRecoveryPoint" type="dbo">
+                <statement id="1" type="select">select count(1)
+                    from gv_recovery_point
+                    where rec_id = @{{REC_ID}}
+                    and state = &apos;SAVED&apos;</statement>
+            </DBOSelect>
+        </DBOBuilder>
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="pool_persistence"
+                    name="ListRecoveryPointServices" type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="ListRecoveryPointServices" type="dbo">
+                <statement id="1" type="select">select distinct service
+                    from gv_recovery_point
+                    decode{{@{{DATE}}::NULL:: ::where trunc(update_date) = to_date(&apos;@{{DATE}}&apos;, &apos;dd/mm/yyyy&apos;)}}
+                    order by service</statement>
+            </DBOSelect>
+        </DBOBuilder>
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="pool_persistence" name="ListRecoveryPointIDs"
+                    type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="ListRecoveryPointIDs" type="dbo">
+                <statement id="1" type="select">select distinct id
+                    from gv_recovery_point
+                    decode{{@{{DATE}}::NULL:: ::where trunc(update_date) = to_date(&apos;@{{DATE}}&apos;, &apos;dd/mm/yyyy&apos;)}}
+                    order by id</statement>
+            </DBOSelect>
+        </DBOBuilder>
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="ds.gv_test" name="ListPersons" type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="ListPersons" type="dbo">
+                <statement id="1" type="select">select &apos;&apos;, &apos;NULL&apos;
+                    from dual
+                    union all
+                    select p.NAME, p.NAME
+                    from PERSON p
+                    order by 1</statement>
+            </DBOSelect>
+        </DBOBuilder>
+    </GVDataHandlerConfiguration>
+    <GVExcelWorkbookConfiguration name="EXCEL_WORK" type="module" version="1.0">
+        <GVExcelWorkbook configName="default" maxNumberOfSheets="50"
+                         sheetDefaultName="Foglio">
+            <SheetConfig offset="4">
+                <Title columnsFromLeft="0" rowsFromTop="1">
+                    <Format alignment="LEFT" hasBorder="false" maxWidth="50" minWidth="8">
+                        <Font isBold="true" size="10" type="ARIAL"/>
+                    </Format>
+                </Title>
+                <TableHeader>
+                    <Format alignment="CENTRE" backgroundColour="GRAY_25" hasBorder="true"
+                            maxWidth="30" scaleFactor="1.35">
+                        <Font isBold="true" size="10" type="ARIAL"/>
+                    </Format>
+                </TableHeader>
+                <TextColumn>
+                    <Format alignment="LEFT" hasBorder="true" maxWidth="100"
+                            scaleFactor="1.2">
+                        <Font isBold="false" size="10" type="ARIAL"/>
+                    </Format>
+                </TextColumn>
+                <DateColumn>
+                    <Format alignment="CENTRE" hasBorder="true" maxWidth="30"
+                            pattern="dd/MM/yyyy hh.mm.ss" scaleFactor="1.1">
+                        <Font isBold="false" isItalic="true" size="10" type="ARIAL"/>
+                    </Format>
+                </DateColumn>
+                <NumberColumn>
+                    <Format alignment="RIGHT" hasBorder="true" maxWidth="30" minWidth="8"
+                            pattern="@" scaleFactor="1">
+                        <Font isBold="false" size="10" type="ARIAL"/>
+                    </Format>
+                </NumberColumn>
+            </SheetConfig>
+        </GVExcelWorkbook>
+        <GVExcelWorkbook configName="report1" maxNumberOfSheets="12"
+                         sheetDefaultName="Foglio">
+            <SheetConfig offset="0">
+                <Title columnsFromLeft="1" rowsFromTop="1">
+                    <Format alignment="LEFT" backgroundColour="RED" hasBorder="false"
+                            maxWidth="30">
+                        <Font isBold="true" size="14" type="TIMES"/>
+                    </Format>
+                </Title>
+                <TableHeader>
+                    <Format alignment="CENTRE" backgroundColour="GRAY_25" hasBorder="true"
+                            maxWidth="30" scaleFactor="1.3">
+                        <Font isBold="true" size="10" type="ARIAL"/>
+                    </Format>
+                </TableHeader>
+                <TextColumn>
+                    <Format alignment="LEFT" hasBorder="true" maxWidth="40">
+                        <Font isBold="false" size="10" type="ARIAL"/>
+                    </Format>
+                </TextColumn>
+                <DateColumn>
+                    <Format alignment="CENTRE" backgroundColour="WHITE" hasBorder="true"
+                            maxWidth="30" pattern="dd/MM/yyyy hh:mm:ss" scaleFactor="1.1">
+                        <Font isBold="false" isItalic="true" size="10" type="ARIAL"/>
+                    </Format>
+                </DateColumn>
+                <NumberColumn>
+                    <Format alignment="RIGHT" hasBorder="true" maxWidth="30" pattern="@"
+                            scaleFactor="0.8">
+                        <Font isBold="false" size="10" type="ARIAL"/>
+                    </Format>
+                </NumberColumn>
+            </SheetConfig>
+        </GVExcelWorkbook>
+    </GVExcelWorkbookConfiguration>
+    <GVExcelCreatorConfiguration name="EXCEL_REPO" type="module" version="1.0"/>
+
+    <GVBIRTReportConfiguration name="BIRT_REPO" type="module" version="1.0">
+        <Engine logLevel="INFO" reportEngineHome="${{gv.app.home}}/BIRTReportEngine">
+            <Renders>
+                <ExcelReportRender class="it.greenvulcano.birt.report.internal.ExcelReportRenderOptions"
+                                   type="report-render"/>
+                <PDFReportRender class="it.greenvulcano.birt.report.internal.PDFReportRenderOptions"
+                                 type="report-render"/>
+                <HTMLReportRender class="it.greenvulcano.birt.report.internal.HTMLReportRenderOptions"
+                                  type="report-render"/>
+            </Renders>
+        </Engine>
+        <ReportGroups>
+            <ReportGroup name="TestGRP">
+                <Report config="SalesInvoice.rptdesign" name="Sales Invoice" type="report">
+                    <Parameters>
+                        <Parameter control-type="SELECT"
+                                   expression="new java.lang.Float(&quot;10100&quot;)"
+                                   name="OrderNumber">
+                            <FixedSource class="it.greenvulcano.birt.report.internal.field.FixedSource"
+                                         type="source">
+                                <ListItem text="The Sharp Gifts Warehouse" value="10400"/>
+                                <ListItem text="Blauer See Auto, Co." value="10300"/>
+                                <ListItem text="King Kong Collectables, Co." value="10200"/>
+                                <ListItem text="Online Diecast Creations Co."
+                                          value="10100"/>
+                            </FixedSource>
+                        </Parameter>
+                    </Parameters>
+                </Report>
+                <Report config="MyReports/overall.rptdesign" name="Multi Report"
+                        type="report"/>
+                <Report config="CreditCards.rptdesign" name="Credit Cards" type="report">
+                    <Parameters>
+                        <Parameter control-type="SELECT" label="Nome" name="NAME">
+                            <DHSource class="it.greenvulcano.birt.report.internal.field.DHSource"
+                                      service="ListPersons" sort="true" type="source"
+                                      use-string-map="true"/>
+                        </Parameter>
+                    </Parameters>
+                </Report>
+            </ReportGroup>
+            <ReportGroup name="GV Statistics">
+                <Report config="GVStatistics.rptdesign" name="GV Statistics" type="report">
+                    <Parameters>
+                        <Parameter label="Analisys Date" name="REPORT_DATE"/>
+                    </Parameters>
+                </Report>
+                <Report config="GVServiceStatistics.rptdesign"
+                        name="GV Service Statistics" type="report">
+                    <Parameters>
+                        <Parameter label="Service" name="service"/>
+                    </Parameters>
+                </Report>
+            </ReportGroup>
+        </ReportGroups>
+    </GVBIRTReportConfiguration>
+
+    <RSHServiceClientConfiguration name="RSH_CLIENT" type="module" version="1.0">
+        <RSHServiceClientLocal class="it.greenvulcano.gvesb.rsh.client.impl.RSHServiceClientLocal"
+                               name="RSHLocal" type="rshClient"/>
+        <RSHServiceClientRMI class="it.greenvulcano.gvesb.rsh.client.impl.RSHServiceClientRMI"
+                             name="RSHRemote" regURL="rmi://localhost:3099" type="rshClient"/>
+    </RSHServiceClientConfiguration>
+
+    <GVAdapterHttpConfiguration name="HTTP_ADAPTER" type="module" version="1.0">
+        <InboundConfiguration>
+            <ActionMappings>
+                <GVCoreActionMapping Action="HTTP_TEST" FormatterID="MessageInboundFormatter"
+                                     enabled="true" dump-in-out="true" type="action-mapping" class="it.greenvulcano.gvesb.adapter.http.mapping.GVCoreHttpServletMapping"/>
+            </ActionMappings>
+            <InboundTransactions>
+                <Transaction service="TOUPPER" transacted="false"/>
+                <Transaction service="TOUPPER_A" transacted="true"/>
+            </InboundTransactions>
+        </InboundConfiguration>
+        <Formatters>
+            <ExtendedInboundParamHandlerFormatter Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.ExtendedInboundParamHandlerFormatter"
+                                                  RespContentType="text/html"
+                                                  HandlePostBodyAsParams="true"
+                                                  ID="MessageInboundFormatter"
+                                                  Type="FormatterPlugin">
+                <RequestParams>
+                    <RequestParam Name="service">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                                   ItemType="Handler"
+                                                   OutputType="GVBuffer">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <GVBufferField FieldName="GVBuffer.service"/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                    <RequestParam Name="system" Required="false">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                            ItemType="Handler"
+                                            OutputType="GVBuffer">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <GVBufferField FieldName="GVBuffer.system"/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                    <RequestParam Name="id" Required="false">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                                   ItemType="Handler"
+                                                   OutputType="GVBuffer">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <GVBufferField FieldName="GVBuffer.id"/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                    <RequestParam Name="data" Required="false">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                            ItemType="Handler"
+                                            OutputType="GVBuffer">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <GVBufferField FieldName="GVBuffer.object"/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                    <RequestParam Name="operation">
+                        <RequestStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                            ItemType="Handler"
+                                            OutputType="OpType">
+                            <RequestStringParamMapping ItemType="Mapping">
+                                <OpType/>
+                            </RequestStringParamMapping>
+                        </RequestStringParamHandler>
+                    </RequestParam>
+                </RequestParams>
+
+                <GVBufferDefaultValues>
+                    <GVBufferFieldDefaultValue FieldName="GVBuffer.system" FieldValue="GVESB"/>
+                </GVBufferDefaultValues>
+
+                <ResponseParams URLEncoding="False">
+                    <ResponseParam Name="Data" SendParameterName="False">
+                        <ResponseStringParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                            ItemType="Handler"
+                                            OutputType="HttpParam">
+                            <ResponseStringParamMapping ItemType="Mapping">
+                                <DefaultValue>&lt;html&gt;
+&lt;body&gt;
+    &lt;table border=&quot;1&quot;&gt;
+        &lt;tr&gt;&lt;td&gt;Service&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;System&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Data&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</DefaultValue>
+                            </ResponseStringParamMapping>
+                        </ResponseStringParamHandler>
+                        <ResponseXMLParamHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.XMLParameterHandler"
+                                         ItemType="Handler"
+                                         OutputType="HttpParam">
+                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[1]/td[2]">
+                                <GVBufferField FieldName="GVBuffer.service"/>
+                            </ResponseXMLParamMapping>
+                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[2]/td[2]">
+                                <GVBufferField FieldName="GVBuffer.system"/>
+                            </ResponseXMLParamMapping>
+                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[3]/td[2]">
+                                <GVBufferField FieldName="GVBuffer.id"/>
+                            </ResponseXMLParamMapping>
+                            <ResponseXMLParamMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[4]/td[2]">
+                                <GVBufferField FieldName="GVBuffer.object"/>
+                            </ResponseXMLParamMapping>
+                        </ResponseXMLParamHandler>
+
+                        <StringParamErrorHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.StringParameterHandler"
+                                                                ItemType="ErrorHandler"
+                                                                OutputType="HttpParam">
+                            <StringParamErrorMapping ItemType="Mapping">
+                                <DefaultErrorMessage>&lt;html&gt;
+&lt;body&gt;
+    &lt;table border=&quot;1&quot;&gt;
+        &lt;tr&gt;&lt;td&gt;Service&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;System&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Error&lt;/td&gt; &lt;td/&gt;&lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</DefaultErrorMessage>
+                            </StringParamErrorMapping>
+                        </StringParamErrorHandler>
+                        <XMLParamErrorHandler Class="it.greenvulcano.gvesb.adapter.http.formatters.handlers.XMLParameterHandler"
+                                              ItemType="ErrorHandler"
+                                              OutputType="HttpParam">
+                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[1]/td[2]">
+                                <GVTransactionErrorInfo Value="GVTransInfo.service"/>
+                            </XMLParamErrorMapping>
+                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[2]/td[2]">
+                                <GVTransactionErrorInfo Value="GVTransInfo.system"/>
+                            </XMLParamErrorMapping>
+                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[3]/td[2]">
+                                <GVTransactionErrorInfo Value="GVTransInfo.id"/>
+                            </XMLParamErrorMapping>
+                            <XMLParamErrorMapping ItemType="Mapping" XPath="/html[1]/body[1]/table[1]/tr[4]/td[2]">
+                                <GVTransactionErrorInfo Value="GVTransInfo.errorMessage"/>
+                            </XMLParamErrorMapping>
+                        </XMLParamErrorHandler>
+                    </ResponseParam>
+                </ResponseParams>
+            </ExtendedInboundParamHandlerFormatter>
+        </Formatters>
+    </GVAdapterHttpConfiguration>
+</GVAdapters>

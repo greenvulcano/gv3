@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>it.greenvulcano.gvesb</groupId>
+        <artifactId>gvesb.core.libs</artifactId>
+        <version>3.3.4-Final</version>
+    </parent>
+
+    <groupId>it.greenvulcano.gvesb</groupId>
+    <artifactId>gvesb.core.libs.gvdp</artifactId>
+    <packaging>pom</packaging>
+    <name>GreenVulcano ESB Data Providers Parent Project</name>
+
+    <modules>
+        <module>gvdp-jms</module>
+        <module>gvdp-axis2</module>
+        <module>gvdp-http</module>
+    </modules>
+</project>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="TwitterQuery">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="Tweet" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="createdAt" type="xs:dateTime"/>
+            <xs:attribute name="user" type="xs:string"/>
+            <xs:attribute name="userId" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="TwitterTimeline">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="Tweet" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="createdAt" type="xs:dateTime"/>
+            <xs:attribute name="user" type="xs:string"/>
+            <xs:attribute name="userId" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="Tweet">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="createdAt" type="xs:dateTime"/>
+                    <xs:attribute name="fromUser" type="xs:string"/>
+                    <xs:attribute name="fromUserId" type="xs:string"/>
+                    <xs:attribute name="id" type="xs:string"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
