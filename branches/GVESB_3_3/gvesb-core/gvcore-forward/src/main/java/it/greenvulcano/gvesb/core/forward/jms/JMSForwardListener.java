@@ -219,6 +219,9 @@ public class JMSForwardListener implements Runnable
         try {
             while (isActive() && ((data.getReadBlockCount() < 0) || (readCount < data.getReadBlockCount()))) {
                 try {
+                	if (data.isDebug()) {
+                        logger.debug("Begin receiving message...");
+                    }
                     if (!checkValidators()) {
                         if (data.isDebug()) {
                             logger.debug("Pre-process validation failed for Forward [" + name + "/" + forwardName + "] instance... retrying");
@@ -253,6 +256,9 @@ public class JMSForwardListener implements Runnable
                                 try {
                                     if (data.isTransacted() && !xaHelper.isAutoEnlist()
                                             && xaHelper.isTransactionActive()) {
+                                    	if (data.isDebug()) {
+                                            logger.debug("Enlisting Session in TX...");
+                                        }
                                         xaHelper.enlistResource(((XASession) session).getXAResource());
                                     }
                                 }
@@ -289,7 +295,9 @@ public class JMSForwardListener implements Runnable
                                     try {
                                         if (!data.isShutdown()
                                                 && (!xaHelper.isAutoEnlist() && xaHelper.isTransactionActive())) {
-                                            //logger.debug("Forward [" + forwardName + "] delist XA resource...");
+                                        	if (data.isDebug()) {
+                                                logger.debug("Delisting Session from TX...");
+                                            }
                                             xaHelper.delistResource();
                                         }
                                     }
@@ -349,6 +357,11 @@ public class JMSForwardListener implements Runnable
                         rollbackTX();
                     }*/
                 }
+                finally {
+                	if (data.isDebug()) {
+                        logger.debug("End receiving message...");
+                    }
+                }
             }
         }
         finally {
@@ -377,6 +390,9 @@ public class JMSForwardListener implements Runnable
     {
         if (connected || data.isShutdown()) {
             return;
+        }
+        if (data.isDebug()) {
+            logger.debug("Conneting to JMS server...");
         }
         try {
             if (data.isDebug()) {
@@ -427,6 +443,9 @@ public class JMSForwardListener implements Runnable
 
     private void disconnect()
     {
+        if (data.isDebug()) {
+            logger.debug("Disconneting from JMS server...");
+        }
         if (messageConsumer != null) {
             try {
                 messageConsumer.close();
@@ -451,6 +470,9 @@ public class JMSForwardListener implements Runnable
 
     private void beginTX() throws Exception
     {
+        if (data.isDebug()) {
+            logger.debug("Starting TX...");
+        }
     	sessionRollBack = false;
         if (data.isTransacted()) {
             try {
@@ -467,6 +489,9 @@ public class JMSForwardListener implements Runnable
     private void commitTX() throws Exception
     {
         Transaction tx = null;
+        if (data.isDebug()) {
+            logger.debug("Committing TX...");
+        }
         try {
             if (data.isTransacted()) {
                 if (xaHelper.isTransactionActive()) {
@@ -489,6 +514,9 @@ public class JMSForwardListener implements Runnable
     private void rollbackTX()
     {
         Transaction tx = null;
+        if (data.isDebug()) {
+            logger.debug("Rolling back TX...");
+        }
         try {
             if (data.isTransacted()) {
                 if (xaHelper.isTransactionActive()) {
@@ -526,9 +554,9 @@ public class JMSForwardListener implements Runnable
         if (!initialized) {
             throw new JMSForwardException("Forward [" + name + "/" + forwardName + "] NOT initialized");
         }
-        if (data.isDebug()) {
-            logger.debug("Forward [" + name + "/" + forwardName + "]: Processing incoming message");
-        }
+        String cid = msg.getJMSCorrelationID();
+        logger.debug("Forward [" + name + "/" + forwardName + "]: Processing incoming message [" + cid + "]");
+
         GVBuffer gvBuffer = null;
         long startTime = System.currentTimeMillis();
 
@@ -568,14 +596,18 @@ public class JMSForwardListener implements Runnable
                 throw new JMSForwardException("The forward [" + name + "/" + forwardName + "] received a unmanageable message", exc);
             }
             GVBufferMDC.put(gvBuffer);
+            if (data.isDebug()) {
+                logger.debug("Begin Core call");
+            }
             execute(gvBuffer, flowSystem, flowService);
+            if (data.isDebug()) {
+                logger.debug("End Core call");
+            }
         }
         finally {
             long endTime = System.currentTimeMillis();
-            if (data.isDebug()) {
-                logger.debug("Forward [" + name + "/" + forwardName + "]: Processed message - ExecutionTime ("
+            logger.debug("Forward [" + name + "/" + forwardName + "]: Processed message  [" + cid + "] - ExecutionTime ("
                         + (endTime - startTime) + ")");
-            }
         }
     }
 
@@ -682,6 +714,9 @@ public class JMSForwardListener implements Runnable
     {
         if (!run || (data.getSleepTimeout() <= 0)) {
             return;
+        }
+        if (data.isDebug()) {
+            logger.debug("Sleeping after error...");
         }
         try {
             Thread.sleep(data.getSleepTimeout());

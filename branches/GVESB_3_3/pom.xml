@@ -5,14 +5,14 @@
   <parent>
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvesb-component-dependency</artifactId>
-    <version>3.3.3-Final</version>
+    <version>3.3.4-Final</version>
     <relativePath>component-dependency</relativePath>
   </parent>
 
   <groupId>it.greenvulcano.gvesb</groupId>
   <artifactId>gvesb-parent</artifactId>
   <packaging>pom</packaging>
-  <version>3.3.3-Final</version>
+  <version>3.3.4-Final</version>
   <name>GreenVulcano ESB Parent Project</name>
 
   <issueManagement>
