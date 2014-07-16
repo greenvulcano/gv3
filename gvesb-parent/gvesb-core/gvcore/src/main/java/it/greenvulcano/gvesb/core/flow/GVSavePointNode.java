@@ -94,6 +94,7 @@ public class GVSavePointNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
+        long startTime = System.currentTimeMillis();
         logger.info("Executing GVSavePointNode '" + getId() + "'");
         checkInterrupted("GVSavePointNode", logger);
         dumpEnvironment(logger, true, environment);
@@ -126,7 +127,8 @@ public class GVSavePointNode extends GVFlowNode
             environment.put(getOutput(), exc);
         }
 
-        logger.debug("END - Execute GVSavePointNode '" + getId() + "'");
+        long endTime = System.currentTimeMillis();
+        logger.info("END - Execute GVSavePointNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
     }
 

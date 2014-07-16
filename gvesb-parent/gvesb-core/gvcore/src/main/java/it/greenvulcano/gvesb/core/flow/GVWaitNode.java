@@ -106,6 +106,7 @@ public class GVWaitNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
+        long startTime = System.currentTimeMillis();
         Object data = null;
         long locTimeout = timeout;
         boolean sleep = (sleepIf == SLEEP_IF_BOTH);
@@ -154,7 +155,8 @@ public class GVWaitNode extends GVFlowNode
             environment.put(getInput(), exc);
         }
 
-        logger.debug("END - Execute GVWaitNode '" + getId() + "'");
+        long endTime = System.currentTimeMillis();
+        logger.info("END - Execute GVWaitNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
     }
 
