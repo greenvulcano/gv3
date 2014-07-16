@@ -1,0 +1,10 @@
+<module name="skipheaders" class="it.greenvulcano.gvesb.axis2.module.GVModuleAxis2">
+
+    <Description>SkipHeadersHandler GreenVulcano module.</Description>
+	    
+    <InFlow>
+	<handler name="skipHeadersDispatcher" class="it.greenvulcano.gvesb.axis2.handler.SkipHeadersHandler">
+	<order phase="Transport" phaseFirst="true"/>
+      </handler> 
+    </InFlow>
+</module>

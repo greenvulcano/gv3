@@ -1,0 +1,16 @@
+
+<%@ include file="exception.jspf" %>
+
+<%
+	String endContextRoot=request.getContextPath();
+%>
+
+<hr>
+<div id="footer"><a href="<%=endContextRoot%>" class="footer"
+	target="_top">Home</a> <br>
+GreenVulcano ESB - Powered by <a href="http://www.greenvulcano.com/"
+	class="footer" target="_top">GreenVulcano s.r.l.</a> P.IVA 10544871006
+<p style="text-align: center;"></p>
+</div>
+</body>
+</html>

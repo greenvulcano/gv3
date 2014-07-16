@@ -1,0 +1,12 @@
+Definizioni:
+GV_HOME: percorso che indica la home in cui si trova GreenVulcano (esempio:/home/user/@base.dir@/GreenV)
+ADAPTER_HOME: Adapter_openspcoop/GreenV
+
+Istruzioni di installazione:
+- Copiare nella directory GV_HOME/application/deploy/gvesb-javaee5.ear/lib le librerie .jar presenti nella directory ADAPTER_HOME/application/deploy/gvesb-javaee5.ear/lib
+- Accedere alla directory GV_HOME/dtds/Extra
+    - Copiare nella directory corrente il file ADAPTER_HOME/dtds/Extra/GVOpenSpCoop.dtd
+    - Modificare il file Extra.dtd inserendo il codice presente in ADAPTER_HOME/dtds/Extra/Extra_frag.dtd
+- Accedere alla directory GV_HOME/xmlconfig
+    - Modificare il file gvesb-catalog.xml inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/gvesb-catalog_frag.xml
+

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+
+<GVCore version="1.0">
+  <GVCryptoHelper name="CRYPTO_HELPER" type="module"/>
+  <GVXPath name="XPATH" type="module">
+    <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
+      <Description>Funzioni estese e namespaces per l&apos;XPath.</Description>
+      <XPathExtension class="it.greenvulcano.util.xpath.search.extension.ExternalDocumentXPathFunction"
+                      function-name="document">
+            <Description>Accede ad un documento esterno. Uso: gvf:document('xml file path')</Description>
+      </XPathExtension>
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema-instance" prefix="xsi" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/soap/" prefix="soap" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl" />
+      <XPathNamespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j" />
+      <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano" prefix="gvesbws"/>
+      <XPathNamespace namespace="http://www.greenvulcano.it/jca/xml" prefix="jca" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc" />
+      <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
+    </XPath>
+  </GVXPath>
+  <GVSystems name="SYSTEMS" type="module">
+    <Systems>
+      <System id-system="GVESB" system-activation="on">
+        <Channel id-channel="TEST_CHANNEL">
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_head">
+            <endpoint host="localhost" port="8888" secure="false"></endpoint>
+            <method request-uri="/index.html" name="HEAD"/>
+          </http-call>
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get">
+            <endpoint host="localhost" port="8888" secure="false"></endpoint>
+            <method request-uri="/index.html" name="GET"/>
+          </http-call>
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_dynamic">
+            <endpoint host="@{{HOST}}" port="@{{PORT}}" secure="false"></endpoint>
+            <method request-uri="/index.html" name="GET"/>
+          </http-call>
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_post">
+            <endpoint host="localhost" port="8888" secure="false"></endpoint>
+            <method request-uri="/index.html" name="POST" ref-dp="testHTTPMethodDP"/>
+          </http-call>
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_simple_post">
+            <endpoint host="localhost" port="8888" secure="false"></endpoint>
+            <method request-uri="/index.html" name="POST" ref-dp="testHTTPMethodSimpleDP"/>
+          </http-call>
+
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_res_timeout">
+            <endpoint host="localhost" port="8888" secure="false" conn-timeout="5000" so-timeout="10000"></endpoint>
+            <method request-uri="/timeout.html" name="GET"/>
+          </http-call>
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_res_timeout2">
+            <endpoint host="localhost" port="8888" secure="false" conn-timeout="2000" so-timeout="5000"></endpoint>
+            <method request-uri="/timeout.html" name="GET"/>
+          </http-call>
+
+          <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_conn_timeout">
+            <endpoint host="10.10.10.10" port="8889" secure="false" conn-timeout="2000" so-timeout="5000"></endpoint>
+            <method request-uri="/index.html" name="GET"/>
+          </http-call>
+
+        </Channel>
+      </System>
+    </Systems>
+  </GVSystems>
+  <GVBufferDump log-dump-size="-1" name="BUFFER_DUMP" type="module"/>
+</GVCore>

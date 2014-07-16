@@ -1,0 +1,457 @@
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<body>
+    This package realizes the XML editor functionalities.
+    <p>
+    The XML Editor (simply editor in the following) is a tool to compile XML
+    documents driven by a DTD. The editor provides a user interface that allows
+    to the user only valid actions on the document. For example if an attribute
+    is optional the editor provides the delete operation if the attribute is
+    already in the document, it provides the insert operation if the attribute
+    in not in the document. For another example the editor does not provide
+    operation to delete mandatory sub elements, etc.
+    <p>
+    All you need to build a user interface for a given document is register a
+    valid DTD to the editor. Registering a DTD instruct the editor about valid
+    operations on the document.<br>
+    The document il bind to the DTD through the DOCTYPE directive.
+    <p>
+    The DTD provides minimal instructions for the editor.
+    You can extends editor behaviours inserting features on DTD comments.
+    <p>
+    The simplest feature for the DTD is the comment. Probably you already write
+    documented DTD using the usual &lt;!-- ... --&gt; syntax.<br>
+    Putting comments before element and attributes declarations (ELEMENT and
+    ATTLIST) you build on-line documentation provided to the user by the editor.
+    <p>
+    <b>For example:</b>
+    <pre>
+    &lt;!--
+        The 'transaction' element defines transactional behaviours.
+    --&gt;
+    &lt;ELEMENT transaction EMPTY&gt;
+
+    &lt;!--
+        The 'status' attribute defines the transaction activation:
+        on:  the transaction is active
+        off: the transaction in not active
+    --&gt;
+    &lt;ATTLIST transaction status (on|off) #REQUIRED&gt;
+    </pre>
+    The comments will be act as on-line documentation for the user.
+    <b>*</b>
+    <p>
+    There are other feature that you can put in the comments. Elements and
+    attributes uses different features.
+    <p>
+    A generic feature is put into the comment and have the following forms:
+    <pre>
+        #FeatureName: {{xpath}} parameter
+        #FeatureName: parameter
+        #FeatureName: {{xpath}}
+        #FeatureName
+    </pre>
+    The FeatureName is the feature.<br>
+    {{xpath}} is an optional xpath that defines the context where the feature is
+    applied. The xpath is applied, a list of element are returned, the feature
+    applies only if the element is returned in the list.<br>
+    The parameter is feature specific.
+    <p>
+    <b>For example:</b>
+    <pre>
+    &lt;!--
+        The first-name is the first name of the person.
+
+        #NotNull
+    --&gt;
+    &lt;ATTLIST person first-name CDATA #REQUIRED&gt;
+    </pre>
+    The first-name attribute is constrained to have a not null value.
+    <b>*</b>
+    <p>
+    You can repeat features and you can use different features.
+    Generally this is made using the context.<br>
+    <b>For example:</b>
+    <pre>
+    &lt;!--
+        ...
+
+        #NotNull: {{../*[@is-person='yes']}}
+        #Warn: {{../*[@is-person='no'][@first-name != '*']}} The fist-name must be '*'
+    --&gt;
+    &lt;ATTLIST someone first-name CDATA #REQUIRED&gt;
+    </pre>
+    The first-name must not be null if the is-person attribute is 'yes'.
+    Moreover first-name must be '*' if the is-person is 'no'.
+    <b>*</b>
+    <p>
+    <b>Features</b>
+    <br>
+    The following table shows the currently available features:
+    <p>
+    <table cellpadding="4" cellspacing="0">
+        <tr bgcolor="#99FF33">
+            <td valign="top"><b>Feature</b></td>
+            <td width="15"></td>
+            <td valign="top"><b>Apply to</b></td>
+            <td width="15"></td>
+            <td valign="top"><b>Parameter</b></td>
+            <td width="15"></td>
+            <td valign="top"><b>Description</b></td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td colspan="7"><hr></td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#References</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top">xpath</td>
+            <td></td>
+            <td valign="top">
+                Selection - applies the xpath to the current document;
+                the xpath is relative to the current node (of course the xpath
+                can be also absolute);
+                obtains many values;
+                the user can choose these values.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td valign="top">#Choice</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top">| separated constant values</td>
+            <td></td>
+            <td valign="top">
+                Selection - the difference with the enumerations provided by
+                the DTD, is that the feature can be applied in a context;
+                applies also to the elements.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#Config</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top">file:xpath</td>
+            <td></td>
+            <td valign="top">
+                Selection - applies the xpath to the given configuration file;
+                the xpath is absolute;
+                obtains many values;
+                the user can choose these values.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td valign="top">#Document</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top">document-name:xpath</td>
+            <td></td>
+            <td valign="top">
+                Selection - applies the xpath to the given document contained in the document repository;
+                the xpath is absolute;
+                obtains many values;
+                the user can choose these values.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#CompositeRef</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top" nowrap>sep nodes-xpath [sep [str1] sep xpath1 sep str2 sep xpath2...]</td>
+            <td></td>
+            <td valign="top">
+                Selection - applies the nodes-xpath (relative to the current element) and selects many nodes.
+                For each node, applies the xpath1... xpaths and obtains many values.
+                The final value, for each node, is obtained by concatenation of str1 xpath1 str2 etc.
+                <br/>
+                sep is a single character used in order to separate the following tokens. Can be any character
+                that never happens into the following tokens.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td valign="top">#CompositeLabel</td>
+            <td></td>
+            <td valign="top">Element</td>
+            <td></td>
+            <td valign="top" nowrap>sep [str1] sep xpath1 sep str2 sep xpath2...</td>
+            <td></td>
+            <td valign="top">
+                User interface - applies all the xpath to the current element; obtain a value to show
+                in the user interface close to the element name, by concatenation of str1 xpath1 str2 xpath2...
+                <br/>
+                sep is a single character used in order to separate the following tokens. Can be any character
+                that never happens into the following tokens.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#Label</td>
+            <td></td>
+            <td valign="top">Element</td>
+            <td></td>
+            <td valign="top">xpath</td>
+            <td></td>
+            <td valign="top">
+                User interface - applies the xpath; obtain a value to show
+                in the user interface close to the element name.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td valign="top">#Pattern</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top">
+                <nobr>sep regexp [sep error-description]</nobr>
+            </td>
+            <td></td>
+            <td valign="top">
+                Check - the value must match the given regular expression.
+                In case of error the error-description is used (if present);
+                if not present, an automatic error description is generated.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#NotNull</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top"></td>
+            <td></td>
+            <td valign="top">
+                Check - the value can not be an empty string; before the check
+                the value is trimmed.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td valign="top">#Warn</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top">free message</td>
+            <td></td>
+            <td valign="top">
+                Check - raise a warning with the given message;
+                use is with the context xpath!
+            </td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#Unique</td>
+            <td></td>
+            <td valign="top">Element Attribute</td>
+            <td></td>
+            <td valign="top">xpath</td>
+            <td></td>
+            <td valign="top">
+                Check - applies the xpath; obtains a node list; check that the
+                current attribute or node have not resulting values.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td valign="top">#Freezed</td>
+            <td></td>
+            <td valign="top">Attribute</td>
+            <td></td>
+            <td valign="top"></td>
+            <td></td>
+            <td valign="top">
+                Behavioural - the attribute value can be set at creation time;
+                the attribute value cannot be changed.
+                Should be used with #REQUIRED attributes.
+                Using #Freezed with #IMPLIED attributes, ALL element attributes
+                are unfreezed when you add the implied attribute.
+                Combine it with #NotNull and #Unique for better results.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#Counter</td>
+            <td></td>
+            <td valign="top">Attribute</td>
+            <td></td>
+            <td valign="top">xpath</td>
+            <td></td>
+            <td valign="top">
+                Behavioural - the xpath is applied in order to obtain a list of
+                values; the attribute will be set with the max value + 1.
+                Use the #Counter feature with #NotNull and #Unique for better
+                behaviour when the attribute is #IMPLIED.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td valign="top">#ExternalData</td>
+            <td></td>
+            <td valign="top">Element</td>
+            <td></td>
+            <td valign="top">when : Java class : free text parameter</td>
+            <td></td>
+            <td valign="top">
+                User interface - each time the interface is built, the class is
+                invoked with:
+                <ul>
+                    <li>Building interface Document. This document must be used to
+                        create external data representation.
+                    <li>Current XMLBuilder object.
+                    <li>Element to which applies the external data.
+                </ul>
+                The Java class return a node that is put into the interface.<br>
+                The given Java class must extend the max.xml.ExternalData
+                class.<br>
+                the 'when' parameter can be 'element', 'child' or 'all' and
+                specifies when apply the feature:
+                <ul>
+                    <li>'element': the feature is applied when the element is the
+                        current element.
+                    <li>'child': the feature is applied when the current element is
+                        the parent of the "featured" element.
+                    <li>'all': applies everytime.
+                </ul>
+            </td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#SelectOnInsert</td>
+            <td></td>
+            <td valign="top">Element</td>
+            <td></td>
+            <td valign="top">-</td>
+            <td></td>
+            <td valign="top">
+                User interface - The element will automatically selected at
+                creation time.
+            </td>
+        </tr>
+        <tr bgcolor="#99FF33">
+            <td valign="top">#Table</td>
+            <td></td>
+            <td valign="top">Element</td>
+            <td></td>
+            <td valign="top" nowrap>sep table-name sep xpath sep column sep xpath sep *ext-column sep xpath</td>
+            <td></td>
+            <td valign="top">
+                User interface - This feature allows the data presentation in
+                a tabular form.<br>
+                The #Table feature parameter defines:
+                <ul>
+                    <li>Field separator.
+                        This is the first character of the table definition.
+                        This character is used as separator for following
+                        fields.
+                    <li>Table name.
+                        This is a free text defining the table name.
+                    <li>XPath selecting table rows.
+                        This XPath is applied from the current element and
+                        selects all nodes to be presented in a tabular fashion.
+                    <li>Internal columns.
+                        You can specify zero or more internal columns.
+                        Each column is specified by a label and a xpath separated
+                        by the field separator (see above).
+                        The label is showed in the top of the column.
+                        For each row of the table, the xpath is used in order to
+                        select values from the node.
+                    <li>External columns.
+                        External columns act as internal columns, but the shown
+                        data are selected from the external data (see the
+                        #ExternalData feature).
+                        The xpath is relative to the external data returned
+                        by the #ExternalData feature.
+                        The external columns are identified by a '*' as first
+                        character of the label.
+                </ul>
+            </td>
+        </tr>
+        <tr bgcolor="#99FF66">
+            <td valign="top">#Template</td>
+            <td></td>
+            <td valign="top">Element</td>
+            <td></td>
+            <td valign="top">multirow, one or many xlst templates</td>
+            <td></td>
+            <td valign="top">
+                User interface - uses the stylesheet in order to show a rich
+                set of information on the user interface.
+                The context not applies to this feature. The parameter starts
+                from the following row and span all the rest of comment.
+            </td>
+        </tr>
+		<tr bgcolor="#99FF33">
+			<td valign="top">#Hidden</td>
+            <td></td>
+            <td valign="top">Element</td>
+            <td></td>
+            <td valign="top">-</td>
+            <td></td>
+            <td valign="top">
+                User interface - The element is not displayed in text mode.
+            </td>
+		</tr>
+    </table>
+
+    <h3>Notes about XPath</h3>
+
+    XPath used into features are extended with parameters.
+    <p/>
+    Before execute the search, the XPath is first preprocessed in order to
+    substitute some <i>parameters</i> from the XPath.
+    <p/>
+    A parameter is a XPath itself contained into the <code><b>$[...]$</b></code>
+    syntax.
+    <br/>
+    The XPath contained into a parameter is evaluated respect to the context
+    node, the result is substituted to the <code><b>$[...]$</b></code> syntax.
+    <br/>
+    When all parameters are evaluated, the resulting XPath is evaluated and
+    the result is returned.
+    <p/>
+    For example consider the following XML node:
+    <pre>
+    ...
+    <b>&lt;service server="MSP" name="RICARICA"&gt;
+    &lt;/service&gt;</b>
+    &lt;server server-name="MSP" description="Motore Servizi Prepagato"&gt;
+    &lt;/server&gt;
+    &lt;server server-name="OPSC" description="Mobile billing"&gt;
+    &lt;/server&gt;
+    ...
+    </pre>
+    Suppose that the context node is in bold text.
+    <br/>
+    The extended XPath <b><nobr><code>//server[@server-name='$[@server]$']/@description</code></nobr></b>
+    will produce the XPath <b><nobr><code>//server[@server-name='MSP']/@description</code></nobr></b>.
+    Evaluating the XPath we obtain <b><nobr><code>Motore Servizi Prepagato</code></nobr></b>.
+    <p/>
+    <b>NOTE</b>: parameters cannot be nested.<br/>
+    <b>NOTE: consider the <code>$[...]$</code> syntax deprecated. Use <code>current()</code>
+    XPath function instead.</b><br/>
+
+    <h3>max:document() function</h3>
+    
+    Into each XPath used for specify features in the DTD, you can use the <code>max:document()</code>
+    function.<br/>
+    This function obtains a document from the DocumentRepository and return it. So using the
+    <code>max:document()</code> function you can reference any information in the registered
+    documents.<br/>
+    In effect this function obsoletes the #Document feature, extending all the other features.
+    <p/>
+    Example: the following features are equivalens:
+    <pre>
+   	&lt!--
+   		#Document: documentName : /root/element/@name
+   		#References: max:document('documentName')/root/element/@name
+   	--&gt;
+   	&lt;!ATTLIST element-name name CDATA #REQUIRED&gt;
+    </pre>
+    <p/>
+    Example: the following feature raise a warning if the 'id' attribute of the current
+    element does not match the 'id' attribute of another element contained in a document
+    registered with the name 'otherDocument':
+    <pre>
+   	&lt!--
+   		#Warn: {{../element-name[not(@id=max:document('otherDocument')/root/other-element/@id)]}} Id not present in...
+   	--&gt;
+   	&lt;!ATTLIST element-name id CDATA #REQUIRED&gt;
+    </pre>
+
+</body>

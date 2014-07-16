@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<gvxdt:gvxdt xmlns:tmodel="http://www.greenvulcano.it/xsd/gvxdt/tmodel.xsd" xmlns:graphic="http://www.greenvulcano.it/xsd/gvxdt/graphic.xsd" xmlns:gvxdt="http://www.greenvulcano.it/xsd/gvxdt/gvxdt.xsd">
+    <tmodel:tmodel>
+        <tmodel:schemas>
+            <tmodel:schema direction="source" id="schema-3"
+                           name="ExternalCreditService_out.xsd" rootname="QueryResponse"/>
+            <tmodel:schema direction="target" id="schema-4" name="CreditService_out.xsd"
+                           rootname="QueryResponse"/>
+        </tmodel:schemas>
+        <tmodel:functions>
+            <tmodel:function id="func-0" name="constant">
+                <tmodel:property name="value" value="EXTERNAL CARD"/>
+            </tmodel:function>
+            <tmodel:function id="func-1" name="constant">
+                <tmodel:property name="value" value="0"/>
+            </tmodel:function>
+        </tmodel:functions>
+        <tmodel:links>
+            <tmodel:link condition="" end="xsd:schema-4:/int:QueryResponse/int:name"
+                         mode="" priority="" start="fid:func-0" type="template"/>
+            <tmodel:link condition="" end="xsd:schema-4:/int:QueryResponse/int:cnumber"
+                         mode="" priority=""
+                         start="xsd:schema-3:/ext:QueryResponse/ext:cnumber"
+                         type="template"/>
+            <tmodel:link condition="" end="xsd:schema-4:/int:QueryResponse/int:active"
+                         mode="" priority=""
+                         start="xsd:schema-3:/ext:QueryResponse/ext:active"
+                         type="template"/>
+            <tmodel:link condition="" end="xsd:schema-4:/int:QueryResponse/int:credit"
+                         mode="" priority="" start="fid:func-1" type="template"/>
+        </tmodel:links>
+        <tmodel:xsl filename=""/>
+    </tmodel:tmodel>
+    <graphic:graphic>
+        <graphic:box h="50" modelid="schema-3" w="50" x="35" y="83"/>
+        <graphic:box h="50" modelid="schema-4" w="50" x="500" y="50"/>
+        <graphic:box h="50" modelid="func-0" w="50" x="314" y="84"/>
+        <graphic:box h="50" modelid="func-1" w="50" x="337" y="158"/>
+    </graphic:graphic>
+</gvxdt:gvxdt>

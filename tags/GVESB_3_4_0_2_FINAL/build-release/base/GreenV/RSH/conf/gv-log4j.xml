@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<log4j:configuration debug="false" threshold="all"
+                     xmlns:log4j="http://jakarta.apache.org/log4j/">
+    <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+              name="LOGGER_FOR_RSH">
+        <param name="Append" value="true"/>
+        <param name="ImmediateFlush" value="true"/>
+        <param name="BufferedIO" value="false"/>
+        <param name="BufferSize" value="4096"/>
+        <param name="DatePattern" value="yyyy-MM-dd"/>
+        <param name="File" value="sp{{rsh.app.home}}/log/GVRSH.$.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{RSH_ID}][%X{CMD_ID}][%t] - %m %n"/>
+        </layout>
+    </appender>
+
+    <logger additivity="false" name="it.greenvulcano">
+        <level value="DEBUG"/>
+        <appender-ref ref="LOGGER_FOR_RSH"/>
+    </logger>
+</log4j:configuration>
