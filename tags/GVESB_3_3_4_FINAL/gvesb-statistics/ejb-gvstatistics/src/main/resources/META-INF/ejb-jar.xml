@@ -1,0 +1,31 @@
+<!DOCTYPE ejb-jar PUBLIC "-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN" "http://java.sun.com/dtd/ejb-jar_2_0.dtd">
+
+
+<ejb-jar>
+    <enterprise-beans>
+        <message-driven>
+            <ejb-name>MDBStatisticsReader</ejb-name>
+            <ejb-class>it.greenvulcano.gvesb.statistics.ejb.MDBStatisticsReaderBean</ejb-class>
+            <transaction-type>Container</transaction-type>
+            <acknowledge-mode>Auto-acknowledge</acknowledge-mode>
+            <message-driven-destination>
+                <destination-type>javax.jms.Queue</destination-type>
+            </message-driven-destination>
+            <env-entry>
+              <env-entry-name>StatisticsWriterID</env-entry-name>
+              <env-entry-type>java.lang.String</env-entry-type>
+              <env-entry-value>DUMMY_STORE</env-entry-value>
+            </env-entry>
+        </message-driven>
+    </enterprise-beans>
+    <assembly-descriptor>
+        <container-transaction>
+            <method>
+                <ejb-name>MDBStatisticsReader</ejb-name>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+        </container-transaction>
+    </assembly-descriptor>
+</ejb-jar>
+

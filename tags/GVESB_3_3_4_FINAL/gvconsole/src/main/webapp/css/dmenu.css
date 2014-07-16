@@ -1,0 +1,13 @@
+@charset "iso-8859-1";
+/*--------------------------------------------------|
+| dMenu 1.00 |                                      |
+|---------------------------------------------------|
+| Copyright (c) 2003 Maxime Informatica             |
+|--------------------------------------------------*/
+*.menutable-ie {font: normal 11px Verdana;line-height: 14px;margin: 2;}
+*.menutable-ns {font: normal 11px Verdana;height: 14px;padding: 2;}
+*.menuskin {position: absolute;width: 120px;background-color: menu;border: 1px solid gray;z-index: 100;visibility: hidden;margin: 2;}
+*.menuskin a {text-decoration: none;color: black;}
+*#mouseoverstyle {background-color: #99FF33;}
+*#mouseoverstyle a {color: white;}
+

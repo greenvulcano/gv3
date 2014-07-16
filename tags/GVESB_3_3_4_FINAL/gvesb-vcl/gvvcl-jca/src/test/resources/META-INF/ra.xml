@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connector xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
+	version="1.5" id="GVJCATestConnector">
+	<display-name>File System Adapter</display-name>
+	<vendor-name>GreenVulcano S.r.l.</vendor-name>
+	<eis-type>FileSystem</eis-type>
+	<resourceadapter-version>1.0</resourceadapter-version>
+	<resourceadapter id="GVJCATest">
+		<resourceadapter-class>tests.unit.vcl.jca.ra.cci.GVJCATestCciConnectionFactory</resourceadapter-class>
+		<outbound-resourceadapter>
+			<connection-definition>
+				<managedconnectionfactory-class>tests.unit.vcl.jca.ra.GVJCATestManagedConnectionFactory</managedconnectionfactory-class>
+				<config-property>
+					<config-property-name>FileName</config-property-name>
+					<config-property-type>java.lang.String</config-property-type>
+					<config-property-value>target/test-eis.txt</config-property-value>
+				</config-property>
+				<connectionfactory-interface>javax.resource.cci.ConnectionFactory</connectionfactory-interface>
+				<connectionfactory-impl-class>tests.unit.vcl.jca.ra.cci.GVJCATestCciConnectionFactory</connectionfactory-impl-class>
+				<connection-interface>javax.resource.cci.Connection</connection-interface>
+				<connection-impl-class>tests.unit.vcl.jca.ra.cci.GVJCATestCciConnection</connection-impl-class>
+			</connection-definition>
+			<transaction-support>NoTransaction</transaction-support>
+
+			<reauthentication-support>true</reauthentication-support>
+		</outbound-resourceadapter>
+	</resourceadapter>
+</connector>

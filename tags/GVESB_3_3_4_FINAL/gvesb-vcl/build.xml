@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== -->
+<!--                                                                        -->
+<!--  GreenVulcano, the OpenSource ESB                                      -->
+<!--                                                                        -->
+<!--  Distributable under LGPL license.                                     -->
+<!--  See terms of license at http://www.gnu.org.                           -->
+<!--                                                                        -->
+<!-- ====================================================================== -->
+
+<project default="main" name="GVESB/VCLRoot">
+
+  <property environment="env"/>
+
+  <target name="init" unless="init.disable">
+  </target>
+
+  <target name="main" depends="maven-install"/>
+  <target name="clean" depends="maven-clean"/>
+
+  <!-- Define a macro for calling maven -->
+  <macrodef name="maven">
+    <attribute name="options" default="" />
+    <attribute name="goal" />
+    <attribute name="basedir" />
+    <attribute name="resultproperty" default="maven.result" />
+    <element name="args" implicit="true" optional="true" />
+    <sequential>
+      <java classname="org.codehaus.classworlds.Launcher" fork="true"
+            dir="@{basedir}" resultproperty="@{resultproperty}">
+        <jvmarg value="-Xmx512m"/>
+        <classpath>
+          <fileset dir="${maven.home}/boot">
+            <include name="*.jar" />
+          </fileset>
+          <fileset dir="${maven.home}/lib">
+            <include name="*.jar" />
+          </fileset>
+        </classpath>
+        <sysproperty key="classworlds.conf" value="${maven.home}/bin/m2.conf" />
+        <sysproperty key="maven.home" value="${maven.home}" />
+        <!-- Use a private maven repo for GVESB -->
+        <sysproperty key="maven.repo.local" value="${env.GV_PROJECT_HOME}/maven-repository"/>
+        <arg line="--batch-mode -s ${env.GV_PROJECT_HOME}/tools/maven/conf/settings.xml @{options} @{goal}" />
+      </java>
+    </sequential>
+  </macrodef>
+
+  <target name="maven-init" unless="init.disable" depends="init">
+    <property name="maven.home" location="${env.GV_PROJECT_HOME}/tools/maven"/>
+    <echo message="Maven Home set to ${maven.home}"/>
+  </target>
+
+  <!-- Call maven to build the mavenized modules -->
+  <target name="maven-install" description="Run the install goal against the maven build"
+          depends="maven-init">
+
+     <property name="maven.opts" value=""/>
+     <property name="maven.install.opts" value=" ${maven.opts}"/>
+
+     <maven basedir="${basedir}"
+            options="${maven.install.opts}"
+            goal="install"
+            resultproperty="maven.install.result"/>
+
+     <fail message="Unable to build maven modules.  See maven output for details.">
+       <condition>
+         <not>
+           <equals arg1="${maven.install.result}" arg2="0"/>
+         </not>
+       </condition>
+     </fail>
+  </target>
+
+  <!-- Call maven to clean the mavenized modules -->
+  <target name="maven-clean" description="Run the clean goal against the maven build."
+          depends="maven-init">
+
+     <property name="maven.clean.opts" value=""/>
+
+     <maven basedir="${basedir}"
+            options="${maven.clean.opts}"
+            goal="clean"
+            resultproperty="maven.clean.result"/>
+
+     <fail message="Unable to clean maven modules.  See maven output for details.">
+       <condition>
+         <not>
+           <equals arg1="${maven.clean.result}" arg2="0"/>
+         </not>
+       </condition>
+     </fail>
+  </target>
+</project>

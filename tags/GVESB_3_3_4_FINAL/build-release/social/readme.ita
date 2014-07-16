@@ -1,0 +1,27 @@
+Definizioni:
+GV_HOME: percorso che indica la home in cui si trova GreenVulcano (esempio:/home/user/@base.dir@/GreenV)
+ADAPTER_HOME: Adapter_Social/GreenV
+
+Istruzioni di installazione:
+- Copiare nella directory GV_HOME/application/deploy/gvesb-javaee5.ear/lib le librerie .jar presenti nella directory ADAPTER_HOME/application/deploy/gvesb-javaee5.ear/lib
+- Accedere alla directory GV_HOME/dtds/Extra
+    - Copiare nella directory corrente il file ADAPTER_HOME/dtds/Extra/GVSocial.dtd
+    - Modificare il file Extra.dtd inserendo il codice presente in ADAPTER_HOME/dtds/Extra/Extra_frag.dtd
+- Accedere alla directory GV_HOME/xmlconfig
+    - Modificare il file GVAdapters.xml            inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/GVAdapters_frag.xml
+    - Modificare il file GVCore.xml                inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/GVCore_frag.xml
+    - Modificare il file gvesb-catalog.xml         inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/gvesb-catalog_frag.xml
+    - Modificare il file GVSupport.xml             inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/GVSupport_frag.xml
+    - Modificare il file XMLConfigSplit.properties inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/XMLConfigSplit_frag.properties
+    - Creare il file TwitterAccounts.properties inserendo le due righe seguenti per ogni account configurato che si vuole rendere attivo:
+            ACCOUNT_NAME.oauth_access_token=...
+            ACCOUNT_NAME.oauth_access_token_secret=...
+
+Test:
+E' stato definito un servizo GV per testare l'adapter Twitter:
+- TWEET:
+    pubblica un tweet col testo contenuto del campo data;
+    configurare in GVAdapters.xml e TwitterAccounts.properties i parametri di autenticazione per l'account da utilizzare,
+    vedere http://www.greenvulcano.com/gvwiki/index.php/GVSocialAdapter-Configuration
+    affinché si possa considerare il test riuscito, effettuando la RequestReply, si dovrà verificare sull'account
+    twitter utilizzato che sia stato pubblicato il messaggio.

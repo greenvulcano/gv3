@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<gvxdt:gvxdt xmlns:tmodel="http://www.greenvulcano.it/xsd/gvxdt/tmodel.xsd" xmlns:graphic="http://www.greenvulcano.it/xsd/gvxdt/graphic.xsd" xmlns:gvxdt="http://www.greenvulcano.it/xsd/gvxdt/gvxdt.xsd">
+    <tmodel:tmodel>
+        <tmodel:schemas>
+            <tmodel:schema direction="source" id="schema-10" name="DataHandler.xsd"
+                           rootname="RowSet"/>
+            <tmodel:schema direction="target" id="schema-11" name="CreditPersons.xsd"
+                           rootname="PersonsData"/>
+        </tmodel:schemas>
+        <tmodel:functions>
+            <tmodel:function id="func-0" name="custom">
+                <tmodel:property name="numarg" value="3"/>
+                <tmodel:property name="name"
+                                 value="it.greenvulcano.util.xml.XSLTUtils.convertDate"/>
+                <tmodel:property name="prefix" value="java"/>
+                <tmodel:property name="label" value="convertDate"/>
+                <tmodel:property name="namespace" value="http://xml.apache.org/xalan/java"/>
+            </tmodel:function>
+            <tmodel:function id="func-1" name="constant">
+                <tmodel:property name="value" value="yyyyMMdd HH:mm:ss"/>
+            </tmodel:function>
+            <tmodel:function id="func-2" name="constant">
+                <tmodel:property name="value" value="dd/MM/yyyy"/>
+            </tmodel:function>
+        </tmodel:functions>
+        <tmodel:links>
+            <tmodel:link condition="" end="xsd:schema-11:/PersonsData/PersonData" mode=""
+                         priority="" start="xsd:schema-10:/RowSet/data" type="template"/>
+            <tmodel:link condition="" end="xsd:schema-11:/PersonsData/PersonData/Name"
+                         mode="" priority="" start="xsd:schema-10:/RowSet/data/@key_1"
+                         type="template"/>
+            <tmodel:link condition=""
+                         end="xsd:schema-11:/PersonsData/PersonData/CardsData/CardData"
+                         mode="" priority="" start="xsd:schema-10:/RowSet/data/row"
+                         type="template"/>
+            <tmodel:link condition=""
+                         end="xsd:schema-11:/PersonsData/PersonData/CardsData/CardData/Number"
+                         mode="" priority="" start="xsd:schema-10:/RowSet/data/row/col[1]"
+                         type="template"/>
+            <tmodel:link condition=""
+                         end="xsd:schema-11:/PersonsData/PersonData/CardsData/CardData/Credit"
+                         mode="" priority="" start="xsd:schema-10:/RowSet/data/row/col[2]"
+                         type="template"/>
+            <tmodel:link condition=""
+                         end="xsd:schema-11:/PersonsData/PersonData/CardsData/CardData/Active"
+                         mode="" priority="" start="xsd:schema-10:/RowSet/data/row/col[3]"
+                         type="template"/>
+            <tmodel:link condition="" end="xsd:schema-11:/PersonsData/PersonData/City"
+                         mode="" priority="" start="xsd:schema-10:/RowSet/data/@key_3"
+                         type="template"/>
+            <tmodel:link condition="" end="fid:func-0,param_1" mode="" priority=""
+                         start="fid:func-1" type="template"/>
+            <tmodel:link condition="" end="fid:func-0,param_2" mode="" priority=""
+                         start="fid:func-2" type="template"/>
+            <tmodel:link condition="" end="fid:func-0,param_0" mode="" priority=""
+                         start="xsd:schema-10:/RowSet/data/@key_2" type="template"/>
+            <tmodel:link condition=""
+                         end="xsd:schema-11:/PersonsData/PersonData/BirthDate" mode=""
+                         priority="" start="fid:func-0" type="template"/>
+        </tmodel:links>
+        <tmodel:xsl filename=""/>
+    </tmodel:tmodel>
+    <graphic:graphic>
+        <graphic:box h="50" modelid="schema-10" w="50" x="12" y="-8"/>
+        <graphic:box h="50" modelid="schema-11" w="50" x="678" y="5"/>
+        <graphic:box h="50" modelid="func-0" w="50" x="507" y="103"/>
+        <graphic:box h="50" modelid="func-1" w="50" x="351" y="139"/>
+        <graphic:box h="50" modelid="func-2" w="50" x="376" y="207"/>
+    </graphic:graphic>
+</gvxdt:gvxdt>
