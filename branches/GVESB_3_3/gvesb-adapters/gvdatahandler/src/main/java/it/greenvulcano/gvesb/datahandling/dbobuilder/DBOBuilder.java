@@ -345,7 +345,7 @@ public class DBOBuilder implements IDBOBuilder
         finally {
             cleanup();
             try {
-                JDBCConnectionBuilder.releaseConnection(jdbcConnectionName, conn);
+                JDBCConnectionBuilder.releaseConnection(intConnName, conn);
             }
             catch (Exception exc) {
                 // do nothing
@@ -546,7 +546,7 @@ public class DBOBuilder implements IDBOBuilder
         finally {
             cleanup();
             try {
-                JDBCConnectionBuilder.releaseConnection(jdbcConnectionName, conn);
+                JDBCConnectionBuilder.releaseConnection(intConnName, conn);
             }
             catch (Exception exc) {
                 // do nothing
@@ -706,7 +706,7 @@ public class DBOBuilder implements IDBOBuilder
         finally {
             cleanup();
             try {
-                JDBCConnectionBuilder.releaseConnection(jdbcConnectionName, conn);
+                JDBCConnectionBuilder.releaseConnection(intConnName, conn);
             }
             catch (Exception exc) {
                 // do nothing
@@ -1045,7 +1045,7 @@ public class DBOBuilder implements IDBOBuilder
         finally {
             cleanup();
             try {
-                JDBCConnectionBuilder.releaseConnection(jdbcConnectionName, conn);
+                JDBCConnectionBuilder.releaseConnection(intConnName, conn);
             }
             catch (Exception exc) {
                 // do nothing
