@@ -419,7 +419,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-mail</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -477,7 +477,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -512,7 +512,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore-forward</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -527,7 +527,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdatahandler</artifactId>
-            <version>3.4.0-Final</version>
+    		<version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -548,7 +548,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp</artifactId>
-    		<version>3.4.0.1-Final</version>
+    		<version>3.4.0.2-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
@@ -583,7 +583,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhl7</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
