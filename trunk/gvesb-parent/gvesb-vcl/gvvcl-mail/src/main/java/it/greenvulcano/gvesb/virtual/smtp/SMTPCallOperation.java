@@ -215,7 +215,18 @@ public class SMTPCallOperation implements CallOperation
                     Node property = nodeList.item(i);
                     String name = XMLConfig.get(property, "@name");
                     String value = XMLConfig.get(property, "@value");
-                    if (name.contains(".password")) {
+                    if (name.contains(".host")) {
+                        logger.debug("Logging-in to host: " + value);
+                        serverHost = value;
+                    }
+                    else if (name.contains(".user")) {
+                        logger.debug("Logging-in as user: " + value);
+                        loginUser = value;
+                    }
+                    else if (name.contains(".password")) {
+                        value = XMLConfig.getDecrypted(value);
+                        //logger.debug("Logging-in with password: " + value);
+                        loginPassword = value;
                         performLogin = true;
                     }
                     if (!PropertiesHandler.isExpanded(value)) {
@@ -239,7 +250,7 @@ public class SMTPCallOperation implements CallOperation
 
             if (!dynamicServer) {
                 if (serverProps != null) {
-                    session = Session.getDefaultInstance(serverProps, null);
+                    session = Session.getInstance(serverProps, null);
                 }
 
                 if (session == null) {
