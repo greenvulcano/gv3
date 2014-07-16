@@ -183,6 +183,7 @@ public class GVOperationNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
     {
+    	long startTime = System.currentTimeMillis();
         Object data = null;
         String input = getInput();
         String output = getOutput();
@@ -232,11 +233,12 @@ public class GVOperationNode extends GVFlowNode
         }
 
         dumpEnvironment(logger, false, environment);
+        long endTime = System.currentTimeMillis();
         if (isError) {
             logger.error("END - Execute GVOperationNode '" + getId() + "'. Exception: " + error);
         }
         else {
-            logger.debug("END - Execute GVOperationNode '" + getId() + "'");
+            logger.info("END - Execute GVOperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         }
         return nextNodeId;
     }
