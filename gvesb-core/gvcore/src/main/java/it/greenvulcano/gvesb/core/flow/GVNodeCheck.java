@@ -112,6 +112,7 @@ public class GVNodeCheck extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
+        long startTime = System.currentTimeMillis();
         logger.debug("BEGIN - Execute GVNodeCheck '" + getId() + "'");
         checkInterrupted("GVNodeCheck", logger);
         dumpEnvironment(logger, true, environment);
@@ -174,8 +175,9 @@ public class GVNodeCheck extends GVFlowNode
             }
         }
         environment.put(LAST_GV_EXCEPTION, lastException);
+        long endTime = System.currentTimeMillis();
         logger.info("Executing GVNodeCheck '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
-        logger.debug("END - Execute GVNodeCheck '" + getId() + "'");
+        logger.info("END - Execute GVNodeCheck '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
     }
 

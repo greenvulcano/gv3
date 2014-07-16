@@ -158,8 +158,8 @@ public class GVSubFlowParallelNode extends BaseParallelNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException,
-            InterruptedException {
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException {
+        long startTime = System.currentTimeMillis();
         GVBuffer internalData = null;
         List<Result> results = null;
         boolean isSkipped = false;
@@ -243,7 +243,8 @@ public class GVSubFlowParallelNode extends BaseParallelNode
                 + "'");
 
         dumpEnvironment(logger, false, environment);
-        logger.debug("END - Execute GVSubFlowParallelNode '" + getId() + "'");
+        long endTime = System.currentTimeMillis();
+        logger.info("END - Execute GVSubFlowParallelNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
     }
 
