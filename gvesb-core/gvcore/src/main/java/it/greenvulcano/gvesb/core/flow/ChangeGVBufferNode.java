@@ -116,6 +116,7 @@ public class ChangeGVBufferNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
     {
+    	long startTime = System.currentTimeMillis();
         logger.info("Executing ChangeGVBufferNode '" + getId() + "'");
         dumpEnvironment(logger, true, environment);
 
@@ -166,7 +167,8 @@ public class ChangeGVBufferNode extends GVFlowNode
         }
 
         dumpEnvironment(logger, false, environment);
-        logger.debug("END - Execute ChangeGVBufferNode '" + getId() + "'");
+        long endTime = System.currentTimeMillis();
+        logger.info("END - Execute ChangeGVBufferNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
     }
 

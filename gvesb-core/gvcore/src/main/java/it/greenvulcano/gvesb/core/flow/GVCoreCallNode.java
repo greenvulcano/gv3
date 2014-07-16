@@ -132,6 +132,7 @@ public class GVCoreCallNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
     {
+    	long startTime = System.currentTimeMillis();
         GVBuffer internalData = null;
         String input = getInput();
         String output = getOutput();
@@ -234,7 +235,8 @@ public class GVCoreCallNode extends GVFlowNode
         }
 
         dumpEnvironment(logger, false, environment);
-        logger.debug("END - Execute GVCoreCallNode '" + getId() + "'");
+        long endTime = System.currentTimeMillis();
+        logger.info("END - Execute GVCoreCallNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
     }
 
