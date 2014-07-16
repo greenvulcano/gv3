@@ -23,11 +23,11 @@ import it.greenvulcano.gvesb.core.forward.JMSForwardException;
 import it.greenvulcano.gvesb.gvhl7.utils.HL7Connection;
 import it.greenvulcano.log.GVLogger;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.log4j.Logger;
 
@@ -45,16 +45,16 @@ import ca.uhn.hl7v2.parser.PipeParser;
  */
 public class HL7ConnectionValidatorHolder
 {
-    private static Logger                       logger          = GVLogger.getLogger(HL7ConnectionValidatorHolder.class);
+    private static Logger                            logger          = GVLogger.getLogger(HL7ConnectionValidatorHolder.class);
 
-    private Map<HL7Connection, Connection>      connections     = null;
-    private Map<String, Boolean>                previousStatus  = null;
-    private Parser                              parser          = null;
-    private static HL7ConnectionValidatorHolder instance        = null;
+    private ConcurrentMap<HL7Connection, Connection> connections     = null;
+    private ConcurrentMap<String, Boolean>           previousStatus  = null;
+    private Parser                                   parser          = null;
+    private static HL7ConnectionValidatorHolder      instance        = null;
 
     private HL7ConnectionValidatorHolder() {
-        connections = new TreeMap<HL7Connection, Connection>();
-        previousStatus = new HashMap<String, Boolean>();
+        connections = new ConcurrentHashMap<HL7Connection, Connection>();
+        previousStatus = new ConcurrentHashMap<String, Boolean>();
         parser = new PipeParser();
     }
 
