@@ -148,6 +148,7 @@ public class GVInternalServiceHandler
             for (int iLoop = 0; (iLoop < servicesVector.size()) && !fnode.isInterrupted(); iLoop++) {
                 serviceParam = servicesVector.get(iLoop);
                 try {
+                    long startTime = System.currentTimeMillis();
                     if (logger.isInfoEnabled()) {
                         logger.info("Executing Internal Service (" + serviceParam.getName() + "), Critical ("
                                 + serviceParam.isCritical() + ")");
@@ -155,8 +156,11 @@ public class GVInternalServiceHandler
                     localData = handleServices(localData, serviceParam);
                     if (logger.isDebugEnabled() && fnode.isDumpInOut()) {
                         logger.debug(GVFormatLog.formatOUTPUT(localData, false, false));
-                        logger.debug("END - Internal Service (" + serviceParam.getName() + "), RetCode ("
-                                + localData.getRetCode() + ")");
+                    }
+                    if (logger.isInfoEnabled()) {
+                    	  long endTime = System.currentTimeMillis();
+                        logger.info("END - Internal Service (" + serviceParam.getName() + "), RetCode ("
+                                + localData.getRetCode() + ") - ExecutionTime (" + (endTime - startTime) + ")");
                     }
                 }
                 catch (InterruptedException exc) {

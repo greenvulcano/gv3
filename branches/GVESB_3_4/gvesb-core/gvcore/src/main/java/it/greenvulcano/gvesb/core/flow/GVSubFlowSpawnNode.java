@@ -123,8 +123,8 @@ public class GVSubFlowSpawnNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException,
-            InterruptedException {
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException {
+        long startTime = System.currentTimeMillis();
         GVBuffer internalData = null;
         boolean isSkipped = false;
         boolean isError = false;
@@ -197,7 +197,8 @@ public class GVSubFlowSpawnNode extends GVFlowNode
                 + "'");
 
         dumpEnvironment(logger, false, environment);
-        logger.debug("END - Execute GVSubFlowSpawnNode '" + getId() + "'");
+        long endTime = System.currentTimeMillis();
+        logger.info("END - Execute GVSubFlowSpawnNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
     }
 

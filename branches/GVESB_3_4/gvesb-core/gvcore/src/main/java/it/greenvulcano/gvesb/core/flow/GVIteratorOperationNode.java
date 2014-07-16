@@ -118,6 +118,7 @@ public class GVIteratorOperationNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
+        long startTime = System.currentTimeMillis();
         Object data = null;
         String input = getInput();
         String output = getOutput();
@@ -155,7 +156,8 @@ public class GVIteratorOperationNode extends GVFlowNode
         }
 
         dumpEnvironment(logger, false, environment);
-        logger.debug("END - Execute OperationNode '" + getId() + "'");
+        long endTime = System.currentTimeMillis();
+        logger.info("END - Execute OperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
     }
 
