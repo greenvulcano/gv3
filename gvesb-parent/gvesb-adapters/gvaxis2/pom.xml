@@ -28,12 +28,6 @@
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore-ode</artifactId>
             <scope>provided</scope>
-            <exclusions>
-              <exclusion>
-                <groupId>org.jencks</groupId> <!-- Imports conflicting versions of geronimo libs -->
-                <artifactId>jencks</artifactId>
-              </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
