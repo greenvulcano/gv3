@@ -288,6 +288,11 @@
                 <level value="INFO"/>
                 <appender-ref ref="LOGGER_FOR_APACHE"/>
             </logger>
+            <logger additivity="false" name="httpclient.wire">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_HTTP"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
             <logger additivity="false" name="httpclient.wire.header">
                 <level value="INFO"/>
                 <appender-ref ref="LOGGER_FOR_HTTP"/>
