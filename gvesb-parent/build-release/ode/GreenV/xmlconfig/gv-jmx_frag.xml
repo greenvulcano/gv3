@@ -7,11 +7,11 @@
         ....
         <Initializers>
             ....
-            <generic-initializer class="it.greenvulcano.gvesb.core.bpel.jmx.RegisterBpelManager"
-                                 target="${{jboss.server.name}}" type="initializer"/>
+            <Bpel-initializer class="it.greenvulcano.gvesb.core.bpel.jmx.RegisterBpelManager"
+                              target="${{jboss.server.name}}" type="initializer"/>
             ....
             <TimerTask-initializer class="it.greenvulcano.scheduler.util.RegisterTaskManagerFactory"
-                                 target="${{jboss.server.name}}" type="initializer"/>
+                                   target="${{jboss.server.name}}" type="initializer" delayed-init="25"/>
         </Initializers>
     </entry-point>
     ....
