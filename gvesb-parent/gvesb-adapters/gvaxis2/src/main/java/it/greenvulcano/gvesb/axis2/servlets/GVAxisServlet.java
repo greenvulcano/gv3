@@ -36,8 +36,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.AxisServlet;
+import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.log4j.Logger;
 
 /**
@@ -52,6 +57,7 @@ public class GVAxisServlet extends AxisServlet
     private static final long     serialVersionUID = -5175240846209837248L;
 
     private static final Logger   logger           = GVLogger.getLogger(GVAxisServlet.class);
+    private static boolean        isFirst          = true;
 
     private Map<String, String[]> eprMap           = new HashMap<String, String[]>();
 
@@ -62,7 +68,25 @@ public class GVAxisServlet extends AxisServlet
     public void init(ServletConfig config) throws ServletException
     {
         super.init(new ServletConfigWrapper(config));
+        if (isFirst && (this.configContext != null)) {
+            synchronized (GVAxisServlet.class) {
+                if (isFirst) {
+                    ConfigurationContext context = this.configContext;
+                    context.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, true);
+                    context.setProperty(HTTPConstants.AUTO_RELEASE_CONNECTION, false);
+                    MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager = new MultiThreadedHttpConnectionManager();
+                    HttpConnectionManagerParams params = new HttpConnectionManagerParams();
+                    params.setDefaultMaxConnectionsPerHost(50); //Set this value as per your need.
+                    params.setMaxTotalConnections(200);
+                    multiThreadedHttpConnectionManager.setParams(params);
+                    HttpClient httpClient = new HttpClient(multiThreadedHttpConnectionManager);
+                    context.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
+                    isFirst = false;
+                }
+            }
+        }
         Axis2ConfigurationContextHelper.setConfigurationContext(this.configContext);
+
         Enumeration<?> initParameterNames = this.servletConfig.getInitParameterNames();
         while (initParameterNames.hasMoreElements()) {
             String paramName = (String) initParameterNames.nextElement();
