@@ -86,16 +86,16 @@
                                  target="${{jboss.server.name}}" type="initializer"/>
             <generic-initializer class="it.greenvulcano.gvesb.http.jmx.RegisterHttpClientProtocolManager"
                                  target="${{jboss.server.name}}" type="initializer" />
-            <generic-initializer class="it.greenvulcano.gvesb.core.savepoint.jmx.ResetGVCoreSavePoint"
-                                 target="${{jboss.server.name}}" type="initializer"/>
-            <generic-initializer class="it.greenvulcano.gvesb.core.bpel.jmx.RegisterBpelManager"
-                                 target="${{jboss.server.name}}" type="initializer"/>
-            <generic-initializer class="it.greenvulcano.gvesb.core.forward.jmx.RegisterJMSForwardManager"
-                                 target="${{jboss.server.name}}" type="initializer" />
-            <generic-initializer class="it.greenvulcano.gvesb.gvhl7.listener.jmx.RegisterHL7ListenerManager"
-                                 target="${{jboss.server.name}}" type="initializer"/>
+            <SavePoint-initializer class="it.greenvulcano.gvesb.core.savepoint.jmx.ResetGVCoreSavePoint"
+                                   target="${{jboss.server.name}}" type="initializer" delayed-init="30"/>
+            <Bpel-initializer class="it.greenvulcano.gvesb.core.bpel.jmx.RegisterBpelManager"
+                              target="${{jboss.server.name}}" type="initializer"/>
+            <JMSForward-initializer class="it.greenvulcano.gvesb.core.forward.jmx.RegisterJMSForwardManager"
+                                    target="${{jboss.server.name}}" type="initializer" delayed-init="20"/>
+            <HL7Listener-initializer class="it.greenvulcano.gvesb.gvhl7.listener.jmx.RegisterHL7ListenerManager"
+                                     target="${{jboss.server.name}}" type="initializer" delayed-init="15"/>
             <TimerTask-initializer class="it.greenvulcano.scheduler.util.RegisterTaskManagerFactory"
-                                 target="${{jboss.server.name}}" type="initializer"/>
+                                   target="${{jboss.server.name}}" type="initializer" delayed-init="25"/>
         </Initializers>
     </entry-point>
     <mbeans-descriptors>

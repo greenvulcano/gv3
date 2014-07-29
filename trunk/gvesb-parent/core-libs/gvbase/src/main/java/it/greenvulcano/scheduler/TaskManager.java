@@ -203,13 +203,15 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
     {
         if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(cfgFileName)) {
             confChangedFlag = true;
-
+            // destroy now
+            killTasks();
+            // initialize after a delay
             Runnable rr = new Runnable() {
                 @Override
                 public void run()
                 {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(30000);
                     }
                     catch (InterruptedException exc) {
                         // do nothing
