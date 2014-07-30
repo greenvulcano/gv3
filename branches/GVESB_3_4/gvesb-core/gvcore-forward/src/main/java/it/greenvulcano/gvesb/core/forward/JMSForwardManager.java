@@ -31,6 +31,7 @@ import it.greenvulcano.gvesb.core.forward.jmx.JMSForwardListenerPoolInfo;
 import it.greenvulcano.gvesb.core.forward.preprocess.ValidatorManager;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.BaseThread;
 import it.greenvulcano.log.NMDC;
 
 import java.util.ArrayList;
@@ -145,13 +146,31 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     {
         logger.debug("BEGIN - JMSForwardManager Operation(reload Configuration)");
         if ((evt.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && evt.getFile().equals(JMS_FORWARD_FILE_NAME)) {
+             // destroy now
             destroy();
-            try {
-                init();
-            }
-            catch (Exception exc) {
-                logger.error("Error initializing JMSForwardManager", exc);
-            }
+            // initialize after a delay
+            Runnable rr = new Runnable() {
+                @Override
+                public void run()
+                {
+                    try {
+                        Thread.sleep(20000);
+                    }
+                    catch (InterruptedException exc) {
+                        // do nothing
+                    }
+                    try {
+                        init();
+                    }
+                    catch (Exception exc) {
+                        logger.error("Error initializing JMSForwardManager", exc);
+                    }
+                }
+            };
+
+            BaseThread bt = new BaseThread(rr, "Config reloader for: JMSForwardManager");
+            bt.setDaemon(true);
+            bt.start();
         }
         logger.debug("END - JMSForwardManager Operation(reload Configuration)");
     }
