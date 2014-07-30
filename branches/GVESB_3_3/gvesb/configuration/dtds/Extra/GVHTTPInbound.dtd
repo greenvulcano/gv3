@@ -25,7 +25,7 @@
 
 <!ELEMENT InboundConfiguration (ActionMappings, InboundTransactions)>
 
-<!ELEMENT ActionMappings ((GVCoreActionMapping|ForwardActionMapping)*)>
+<!ELEMENT ActionMappings ((GVCoreActionMapping|ForwardActionMapping|RESTActionMapping)*)>
 
 <!ELEMENT RetCodeConversionIn EMPTY>
 <!--
@@ -42,6 +42,12 @@
 <!--
     Defines a mapping between a request Action and a configured Formatter.
     Used to call a GVESB Service.
+    
+    Input GVBuffer:
+    - HTTP_ACTION
+    - HTTP_PATH
+    - HTTP_METHOD
+    - HTTP_REMOTE_ADDR
 
     #SelectOnInsert
     #Label: @Action
@@ -91,7 +97,7 @@
 <!ATTLIST GVCoreActionMapping dump-in-out (true|false) #IMPLIED>
 
 <!--
-    Defines a mapping between a request Action and a configured Formatter.
+    Defines a mapping between a request Action and remote server.
     Used to perform an HTTP Forward to a remote server.
 
     #SelectOnInsert
@@ -128,6 +134,147 @@
     #NotNull
 -->
 <!ATTLIST ForwardActionMapping dump-in-out (true|false) #IMPLIED>
+
+<!--
+    Defines a mapping between a request Action and a GV ESB workflow.
+    Used to call a GVESB Service.
+    
+    Input GVBuffer:
+    - HTTP_ACTION
+    - HTTP_PATH
+    - HTTP_METHOD
+    - HTTP_REMOTE_ADDR
+    - HTTP_REQ_CONTENT_TYPE
+    - HTTP_REQ_ACCEPT
+    - query string parameters (or form-url-encoded parameters) as properties
+    - HTTP_REQ_HEADERS contains, if requested, the request HTTP headers as xml document;
+    <Hdr>
+        <h n="hdr name" v="hdr value"/>
+        <h n="hdr name" v="hdr value"/>
+    </Hdr>
+    - if the request content type is application/xml or application/json or text/* the request GVBuffer object
+      will contain String
+    - for other request content types the request GVBuffer object will contain a byte[]
+    
+    Output GVBuffer;
+    - HTTP_RESP_STATUS_CODE, optional, define the status response code
+    - HTTP_RESP_STATUS_MSG, optional, if defined the couple HTTP_RESP_STATUS_CODE and HTTP_RESP_STATUS_MSG
+                            defines the error response code
+    - HTTP_RESP_CHAR_ENCODING, optional, defines the response character encoding
+    - HTTP_RESP_CONTENT_TYPE, optional, defines the rsponse content type
+    - if the response content type is application/xml or application/json or text/* the response GVBuffer object
+      must contains a byte[] a String or a Document to be serialized
+    - for other response content types the response GVBuffer object must contains a byte[]
+
+    #SelectOnInsert
+    #Label: @Action
+-->
+<!ELEMENT RESTActionMapping (Description?, OperationMappings)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST RESTActionMapping    type CDATA #FIXED "action-mapping">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST RESTActionMapping    class CDATA #FIXED "it.greenvulcano.gvesb.adapter.http.mapping.RESTHttpServletMapping">
+<!--
+    Defines the action name, referenced by the request parameter GV_ACTION.
+
+    #NotNull
+    #Unique: ../*[@type='action-mapping']/@Action
+-->
+<!ATTLIST RESTActionMapping Action             CDATA #REQUIRED>
+<!--
+    This parameter defines if an action must be processed.
+
+    #NotNull
+-->
+<!ATTLIST RESTActionMapping enabled (true | false) #REQUIRED>
+<!--
+    CharacterEncoding to handle responses to the external system.
+    Default to UTF-8.
+
+    #NotNull
+-->
+<!ATTLIST RESTActionMapping  RespCharacterEncoding   %JavaCharEncodings; #IMPLIED>
+<!--
+    ContentType to be declared while handling HTTP responses to the external system.
+    Default to application/xml.
+
+    #NotNull
+    #Choice: text/html | text/xml | text/json | text/javascript | application/xml | application/json | application/x-www-form-urlencoded
+-->
+<!ATTLIST RESTActionMapping  RespContentType         CDATA #IMPLIED>
+
+<!--
+    If true enable the dump of the input/output HTTP data.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST RESTActionMapping dump-in-out (true|false) #IMPLIED>
+
+<!--
+    This element contains the mappings from request URIs/Methods and GV ESB services.
+
+-->
+<!ELEMENT OperationMappings (Mapping+)>
+
+<!--
+    This element contains the mappings from request URI/Method and GV ESB service.
+
+    #CompositeLabel: || @method | # | @pattern | -> | @service | / | @operation
+    #SelectOnInsert
+-->
+<!ELEMENT Mapping (Description?)>
+<!--
+    #NotNull
+-->
+<!ATTLIST Mapping method (GET|PUT|POST|DELETE) #REQUIRED>
+<!--
+    Defines the rules to be matched in order to identify the request URI.
+    The URI pattern refers to the Path component only:
+    http://localhost:8080/gvhttp/inbound/AddressBook/entry/123
+    Path -> /AddressBook/entry/123
+    Sample mapping: /APPLICATION=AddressBook/E_COLLECTION=entry/E_UUID=\d+
+    The URL is splitted on / and must start with the string 'AddressBook', then must contain the string 'entry',
+    then the last tocken must match the regular expression '\d+' (must be a number of at least 1 digit).
+    On match, the input GVBuffer will contain the following properties:
+        APPLICATION  = AddressBook
+        E_COLLECTION = entry
+        E_UUID       = 123
+
+    #NotNull
+-->
+<!ATTLIST Mapping pattern CDATA #REQUIRED>
+<!--
+    #NotNull
+    #References: gvesb:document('GVCore')/GVCore/GVServices/Services/Service/@id-service
+-->
+<!ATTLIST Mapping service CDATA #REQUIRED>
+<!--
+    Optional system name.
+
+    #NotNull
+    #References: gvesb:document('GVCore')/GVCore/GVSystems/Systems/System/@id-system
+-->
+<!ATTLIST Mapping system CDATA #IMPLIED>
+<!--
+    #NotNull
+    #References: gvesb:document('GVCore')/GVCore/GVServices/Services/Service[@id-service=current()/@service]/Operation[@name!='Forward']/@name
+    #References: gvesb:document('GVCore')/GVCore/GVServices/Services/Service[@id-service=current()/@service]/Operation[@name='Forward']/@forward-name
+-->
+<!ATTLIST Mapping operation CDATA #REQUIRED>
+<!--
+    This parameter defines if the request headers must be extracted..
+
+    #NotNull
+-->
+<!ATTLIST Mapping extract-headers (true | false) #IMPLIED>
+
 
 <!--
     This element contains the transaction definitions for the manged services.
