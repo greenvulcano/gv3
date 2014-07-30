@@ -181,7 +181,7 @@ public class ExtendedInboundParamHandlerFormatter implements Formatter
             }
 
             String reqMethod = httpRequest.getMethod();
-            if (reqMethod.equals("POST")) {
+            if (reqMethod.equals("POST") || reqMethod.equals("PUT")) {
                 byte[] requestContentBytes = IOUtils.toByteArray(httpRequest.getInputStream());
                 logger.debug("INPUT - HTTP request content:\n");
                 logger.debug(new Dump(requestContentBytes));
