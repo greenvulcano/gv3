@@ -42,6 +42,12 @@
 <!--
     Defines a mapping between a request Action and a configured Formatter.
     Used to call a GVESB Service.
+    
+    Input GVBuffer:
+    - HTTP_ACTION
+    - HTTP_PATH
+    - HTTP_METHOD
+    - HTTP_REMOTE_ADDR
 
     #SelectOnInsert
     #Label: @Action
@@ -132,6 +138,33 @@
 <!--
     Defines a mapping between a request Action and a GV ESB workflow.
     Used to call a GVESB Service.
+    
+    Input GVBuffer:
+    - HTTP_ACTION
+    - HTTP_PATH
+    - HTTP_METHOD
+    - HTTP_REMOTE_ADDR
+    - HTTP_REQ_CONTENT_TYPE
+    - HTTP_REQ_ACCEPT
+    - query string parameters (or form-url-encoded parameters) as properties
+    - HTTP_REQ_HEADERS contains, if requested, the request HTTP headers as xml document;
+    <Hdr>
+        <h n="hdr name" v="hdr value"/>
+        <h n="hdr name" v="hdr value"/>
+    </Hdr>
+    - if the request content type is application/xml or application/json or text/* the request GVBuffer object
+      will contain String
+    - for other request content types the request GVBuffer object will contain a byte[]
+    
+    Output GVBuffer;
+    - HTTP_RESP_STATUS_CODE, optional, define the status response code
+    - HTTP_RESP_STATUS_MSG, optional, if defined the couple HTTP_RESP_STATUS_CODE and HTTP_RESP_STATUS_MSG
+                            defines the error response code
+    - HTTP_RESP_CHAR_ENCODING, optional, defines the response character encoding
+    - HTTP_RESP_CONTENT_TYPE, optional, defines the rsponse content type
+    - if the response content type is application/xml or application/json or text/* the response GVBuffer object
+      must contains a byte[] a String or a Document to be serialized
+    - for other response content types the response GVBuffer object must contains a byte[]
 
     #SelectOnInsert
     #Label: @Action
@@ -235,6 +268,12 @@
     #References: gvesb:document('GVCore')/GVCore/GVServices/Services/Service[@id-service=current()/@service]/Operation[@name='Forward']/@forward-name
 -->
 <!ATTLIST Mapping operation CDATA #REQUIRED>
+<!--
+    This parameter defines if the request headers must be extracted..
+
+    #NotNull
+-->
+<!ATTLIST Mapping extract-headers (true | false) #IMPLIED>
 
 
 <!--

@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -86,6 +89,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
         private String service;
         private String system;
         private String operation;
+        private boolean extractHdr;
         private List<String> propNames = new ArrayList<String>();
         private List<Pattern> patterns = new ArrayList<Pattern>();
         
@@ -112,6 +116,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
                 if ((operation == null) || "".equals(operation)) {
                     throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + method + "#" + pattern + "]: empty @operation");
                 }
+                this.extractHdr = XMLConfig.getBoolean(node, "@extract-headers", false);
             }
             catch (XMLConfigException exc) {
                 throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern: error reading configuration", exc);
@@ -183,6 +188,10 @@ public class RESTHttpServletMapping implements HttpServletMapping
             catch (Exception exc) {
                 throw new AdapterHttpExecutionException("RESTHttpServletMapping - Error evaluating Pattern[" + method + "#" + pattern + "]", exc);
             }
+        }
+
+        public boolean isExtractHdr() {
+            return this.extractHdr;
         }
 
         @Override
@@ -257,7 +266,10 @@ public class RESTHttpServletMapping implements HttpServletMapping
 
             GVBuffer request = new GVBuffer();
             String operationType = null;
-            for (PatternResolver pr : operationMappings) {
+            PatternResolver pr = null;
+            Iterator<PatternResolver> i = operationMappings.iterator();
+            while (i.hasNext()) {
+                pr = i.next();
                 operationType = pr.match(req, methodName, path, request);
                 if (operationType != null) {
                     break;
@@ -282,7 +294,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
             String remAddr = req.getRemoteAddr();
             request.setProperty("HTTP_REMOTE_ADDR", (remAddr != null ? remAddr : ""));
 
-            parseRequest(req, methodName, request);
+            parseRequest(req, methodName, pr, request);
             
             GVBufferMDC.put(request);
             NMDC.setOperation(operationType);
@@ -347,7 +359,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
      * @param request
      * @throws GVException
      */
-    private void parseRequest(HttpServletRequest req, String methodName, GVBuffer request) throws GVException {
+    private void parseRequest(HttpServletRequest req, String methodName, PatternResolver pr, GVBuffer request) throws GVException {
         try {
             Map<String, String[]> params = req.getParameterMap();
             Iterator<String> i = params.keySet().iterator();
@@ -374,6 +386,29 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     request.setObject(requestContent);
                 }
             }
+            
+            if (pr.isExtractHdr()) {
+                XMLUtils parser = null;
+                try {
+                    parser = XMLUtils.getParserInstance();
+                    Document doc = parser.newDocument("Hdr");
+                    Element root = doc.getDocumentElement();
+
+                    Enumeration<?> hn = req.getHeaderNames();
+                    while (hn.hasMoreElements()) {
+                        Element h = parser.insertElement(root, "h");
+                        String name = (String) hn.nextElement();
+                        String val = req.getHeader(name);
+                        parser.setAttribute(h, "n", name);
+                        parser.setAttribute(h, "v", val);
+                    }
+                    request.setProperty("HTTP_REQ_HEADERS", parser.serializeDOM(doc, true, false));
+                }
+                finally {
+                    XMLUtils.releaseParserInstance(parser);
+                }
+            }
+            
         }
         catch (Exception exc) {
             throw new AdapterHttpExecutionException("RESTHttpServletMapping - Error parsing request data", exc);
