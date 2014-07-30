@@ -30,7 +30,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.transport.http.AxisServlet;
+import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 
 /**
  * GVAxisServlet class.
@@ -42,6 +47,7 @@ import org.apache.axis2.transport.http.AxisServlet;
 public class GVAxisServlet extends AxisServlet
 {
     private static final long serialVersionUID = -5175240846209837248L;
+    private static boolean        isFirst          = true;
 
     /**
      * @see org.apache.axis2.transport.http.AxisServlet#init(javax.servlet.ServletConfig)
@@ -50,6 +56,23 @@ public class GVAxisServlet extends AxisServlet
     public void init(ServletConfig config) throws ServletException
     {
         super.init(new ServletConfigWrapper(config));
+        if (isFirst && (this.configContext != null)) {
+            synchronized (GVAxisServlet.class) {
+                if (isFirst) {
+                    ConfigurationContext context = this.configContext;
+                    context.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, true);
+                    context.setProperty(HTTPConstants.AUTO_RELEASE_CONNECTION, false);
+                    MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager = new MultiThreadedHttpConnectionManager();
+                    HttpConnectionManagerParams params = new HttpConnectionManagerParams();
+                    params.setDefaultMaxConnectionsPerHost(50); //Set this value as per your need.
+                    params.setMaxTotalConnections(200);
+                    multiThreadedHttpConnectionManager.setParams(params);
+                    HttpClient httpClient = new HttpClient(multiThreadedHttpConnectionManager);
+                    context.setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
+                    isFirst = false;
+                }
+            }
+        }
         Axis2ConfigurationContextHelper.setConfigurationContext(this.configContext);
     }
 

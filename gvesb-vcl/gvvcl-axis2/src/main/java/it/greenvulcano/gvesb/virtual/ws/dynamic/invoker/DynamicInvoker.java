@@ -313,12 +313,11 @@ public class DynamicInvoker
         OperationDescription opDesc = getOperationDescription();
 
         client = new ServiceClient(Axis2ConfigurationContextHelper.getConfigurationContext(), null);
-        //client = new ServiceClient();
         OperationClient operationClient = client.createClient(ServiceClient.ANON_OUT_IN_OP);
         Options options = operationClient.getOptions();
 
         boolean isREST = opDesc.getVerb() != null;
-        if (timeout != -1) {
+        if (timeout > 0) {
             long timeoutInMilliseconds = timeout * 1000;
             options.setTimeOutInMilliSeconds(timeoutInMilliseconds);
         }
