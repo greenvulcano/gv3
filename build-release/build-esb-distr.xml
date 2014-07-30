@@ -241,6 +241,9 @@
             <fileset dir="${joda.time.lib}">
                 <include name="*.jar"/>
             </fileset>
+            <fileset dir="${json.json.lib}">
+                <include name="*.jar"/>
+            </fileset>
             <fileset dir="${rhino.rhino.lib}">
                 <include name="*.jar"/>
             </fileset>

@@ -302,6 +302,13 @@
                             </mapping>
                         </dependency>
                         <dependency>
+                            <groupId>org.json</groupId>
+                            <artifactId>json</artifactId>
+                            <mapping>
+                                <componentId>json</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
                             <groupId>org.apache.woden</groupId>
                             <artifactId>*</artifactId>
                             <mapping>
