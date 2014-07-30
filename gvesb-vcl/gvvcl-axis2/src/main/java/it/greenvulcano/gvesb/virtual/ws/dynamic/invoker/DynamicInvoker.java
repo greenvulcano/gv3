@@ -314,12 +314,11 @@ public class DynamicInvoker
         OperationDescription opDesc = getOperationDescription();
 
         client = new ServiceClient(Axis2ConfigurationContextHelper.getConfigurationContext(), null);
-        // client = new ServiceClient();
         OperationClient operationClient = client.createClient(ServiceClient.ANON_OUT_IN_OP);
         Options options = operationClient.getOptions();
 
         boolean isREST = opDesc.getVerb() != null;
-        if (timeout != -1) {
+        if (timeout > 0) {
             long timeoutInMilliseconds = timeout * 1000;
             options.setTimeOutInMilliSeconds(timeoutInMilliseconds);
         }
@@ -347,8 +346,7 @@ public class DynamicInvoker
             logger.debug("Setting REST Verb: " + opDesc.getVerb());
             options.setProperty(Constants.Configuration.HTTP_METHOD, opDesc.getVerb());
             logger.debug("Setting REST MessageType: " + opDesc.getMediaType());
-            // options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-            // opDesc.getMediaType());
+            // options.setProperty(Constants.Configuration.MESSAGE_TYPE, opDesc.getMediaType());
             options.setProperty(Constants.Configuration.CONTENT_TYPE, HTTPConstants.MEDIA_TYPE_X_WWW_FORM);
             options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_X_WWW_FORM);
         }
