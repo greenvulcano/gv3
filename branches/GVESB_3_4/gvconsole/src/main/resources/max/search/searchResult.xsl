@@ -49,7 +49,7 @@
         </xsl:variable>
         <tr valign="top" bgcolor="{$color}">
             <td>
-                <b><nobr><a href="{$invoke1}/def/search/selectNode.jsp?nodeId={@index}"><xsl:value-of select="@node-name"/></a></nobr></b>
+                <b><nobr><a href="{$invoke1}/search/selectNode.jsp?nodeId={@index}"><xsl:value-of select="@node-name"/></a></nobr></b>
             </td>
             <td width="5"></td>
         	<td><nobr><xsl:value-of select="count(match)"/> match(es)</nobr></td>
