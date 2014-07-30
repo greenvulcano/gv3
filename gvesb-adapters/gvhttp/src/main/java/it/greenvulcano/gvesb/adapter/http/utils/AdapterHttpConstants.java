@@ -44,6 +44,16 @@ public final class AdapterHttpConstants
     public final static String TEXTXML_MIMETYPE_NAME             = "text/xml";
 
     /**
+     * Http MIME-Type value "text/json".
+     */
+    public final static String TEXTJSON_MIMETYPE_NAME            = "text/json";
+
+    /**
+     * Http MIME-Type value "text/javascript".
+     */
+    public final static String TEXTJS_MIMETYPE_NAME              = "text/javascript";
+
+    /**
      * Http MIME-Type value "application/octet-stream".
      */
     public final static String OCTETSTREAM_MIMETYPE_NAME         = "application/octet-stream";
@@ -52,6 +62,16 @@ public final class AdapterHttpConstants
      * Http MIME-Type value "application/x-www-form-urlencoded".
      */
     public final static String URLENCODED_MIMETYPE_NAME          = "application/x-www-form-urlencoded";
+
+    /**
+     * Http MIME-Type value "application/xml".
+     */
+    public final static String APPXML_MIMETYPE_NAME              = "application/xml";
+
+    /**
+     * Http MIME-Type value "application/json".
+     */
+    public final static String APPJSON_MIMETYPE_NAME             = "application/json";
 
     /**
      *
