@@ -417,7 +417,7 @@
 <!ATTLIST ObjectNameProperty default-value CDATA #IMPLIED>
 
 <!--
-	Element useful to register a generic initializer.
+    Element useful to register a generic initializer.
 
      #Template:
         <xsl:template match="generic-initializer">
@@ -476,6 +476,13 @@
     #NotNull
 -->
 <!ATTLIST generic-initializer target CDATA #IMPLIED>
+<!--
+    Defines the number of seconds to wait, during ESB start-up, before initialize the module.
+    Default to -1 == disabled.
+
+    #NotNull
+-->
+<!ATTLIST generic-initializer delayed-init CDATA #IMPLIED>
 
 <!--
      The inizializer that allows to set a group of Java properties within
@@ -543,6 +550,13 @@
     #NotNull
 -->
 <!ATTLIST JavaProperties-initializer target CDATA #IMPLIED>
+<!--
+    Defines the number of seconds to wait, during ESB start-up, before initialize the module.
+    Default to -1 == disabled.
+
+    #NotNull
+-->
+<!ATTLIST JavaProperties-initializer delayed-init CDATA #IMPLIED>
 
 <!--
     The Java property that you wish to set within the runtime
@@ -651,7 +665,13 @@
     #NotNull
 -->
 <!ATTLIST TimerTask-initializer target CDATA #IMPLIED>
+<!--
+    Defines the number of seconds to wait, during ESB start-up, before initialize the module.
+    Default to -1 == disabled.
 
+    #NotNull
+-->
+<!ATTLIST TimerTask-initializer delayed-init CDATA #IMPLIED>
 
 <!--
      DTD for the Model MBeans Configuration File
@@ -1044,6 +1064,3 @@
     #NotNull
 -->
 <!ATTLIST parameter         type         %ClassName;    #IMPLIED>
-
-
-

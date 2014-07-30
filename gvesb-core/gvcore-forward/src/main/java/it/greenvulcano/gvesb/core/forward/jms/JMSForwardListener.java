@@ -205,13 +205,6 @@ public class JMSForwardListener implements Runnable
         NMDC.clear();
         NMDC.setServer(serverName);
         NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
-        
-        try {
-            Thread.sleep(1000);
-        }
-        catch (Exception exc) {
-            // do nothing
-        }
 
         if (data.isDebug()) {
             logger.debug("Started Forward [" + name + "/" + forwardName + "] instance");
