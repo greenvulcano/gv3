@@ -24,6 +24,8 @@ import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.metadata.PropertiesHandlerException;
+import it.greenvulcano.util.thread.BaseThread;
 import it.greenvulcano.util.xml.DOMWriter;
 
 import java.io.ByteArrayInputStream;
@@ -260,21 +262,62 @@ public class JMXEntryPoint implements ConfigurationListener
                 "/jmx/entry-point/Initializers/*[@type='initializer']");
 
         for (int i = 0; i < list.getLength(); ++i) {
-            Node node = list.item(i);
-            String className = XMLConfig.get(node, "@class");
-            if (className != null) {
-                String sName = PropertiesHandler.expand(XMLConfig.get(node, "@target", ""), null);
-                if ((sName.length() == 0) || (sName.indexOf(serverName) != -1)) {
-                    try {
-                        Class<?> cls = Class.forName(className);
-                        MBeanServerInitializer initializer = (MBeanServerInitializer) cls.newInstance();
-                        initializer.init(node);
-                        initializer.initializeMBeanServer(mbeanServer);
+            final Node node = list.item(i);
+            final int delayedInit = XMLConfig.getInteger(node, "@delayed-init", -1);
+            if (delayedInit > 0) {
+            	final String className = XMLConfig.get(node, "@class");
+
+            	Runnable rr = new Runnable() {
+            		private Node lnode = node;
+            		private long ldelay = delayedInit * 1000;
+                    @Override
+                    public void run()
+                    {
+                        try {
+                            Thread.sleep(ldelay);
+                        }
+                        catch (InterruptedException exc) {
+                            // do nothing
+                        }
+                        try {
+                               createInitializer(lnode);
+                        } catch (Exception exc) {
+                               System.err.println("Error initializing class " + className);
+                               exc.printStackTrace();
+                        }
                     }
-                    catch (Exception exc) {
-                        System.err.println("Error initializing class " + className);
-                        exc.printStackTrace();
-                    }
+                };
+
+                BaseThread bt = new BaseThread(rr, "Initializer for: " + className);
+                bt.setDaemon(true);
+                bt.start();
+            }
+            else {
+	            createInitializer(node);
+            }
+        }
+    }
+
+    /**
+     * @param node
+     * @throws XMLConfigException
+     * @throws PropertiesHandlerException
+     */
+    private void createInitializer(Node node) throws XMLConfigException,
+                       PropertiesHandlerException {
+        String className = XMLConfig.get(node, "@class");
+        if (className != null) {
+            String sName = PropertiesHandler.expand(XMLConfig.get(node, "@target", ""), null);
+            if ((sName.length() == 0) || (sName.indexOf(serverName) != -1)) {
+                try {
+                    Class<?> cls = Class.forName(className);
+                    MBeanServerInitializer initializer = (MBeanServerInitializer) cls.newInstance();
+                    initializer.init(node);
+                    initializer.initializeMBeanServer(mbeanServer);
+                }
+                catch (Exception exc) {
+                    System.err.println("Error initializing class " + className);
+                    exc.printStackTrace();
                 }
             }
         }

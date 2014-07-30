@@ -106,12 +106,15 @@ public class TaskManagerFactory implements ConfigurationListener
     {
         if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(CFG_FILE_NAME)) {
             confChangedFlag = true;
+            // destroy now
+            killTaskManagers();
+            // initialize after a delay
             Runnable rr = new Runnable() {
                 @Override
                 public void run()
                 {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(30000);
                     }
                     catch (InterruptedException exc) {
                         // do nothing

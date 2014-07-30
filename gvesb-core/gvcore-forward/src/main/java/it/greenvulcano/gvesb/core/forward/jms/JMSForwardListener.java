@@ -205,13 +205,6 @@ public class JMSForwardListener implements Runnable
         NMDC.clear();
         NMDC.setServer(serverName);
         NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
-        
-        try {
-            Thread.sleep(1000);
-        }
-        catch (Exception exc) {
-            // do nothing
-        }
 
         if (data.isDebug()) {
             logger.debug("Started Forward [" + name + "/" + forwardName + "] instance");
@@ -219,7 +212,7 @@ public class JMSForwardListener implements Runnable
         try {
             while (isActive() && ((data.getReadBlockCount() < 0) || (readCount < data.getReadBlockCount()))) {
                 try {
-                	if (data.isDebug()) {
+                    if (data.isDebug()) {
                         logger.debug("Begin receiving message...");
                     }
                     if (!checkValidators()) {
@@ -256,7 +249,7 @@ public class JMSForwardListener implements Runnable
                                 try {
                                     if (data.isTransacted() && !xaHelper.isAutoEnlist()
                                             && xaHelper.isTransactionActive()) {
-                                    	if (data.isDebug()) {
+                                        if (data.isDebug()) {
                                             logger.debug("Enlisting Session in TX...");
                                         }
                                         xaHelper.enlistResource(((XASession) session).getXAResource());
@@ -473,7 +466,7 @@ public class JMSForwardListener implements Runnable
         if (data.isDebug()) {
             logger.debug("Starting TX...");
         }
-    	sessionRollBack = false;
+        sessionRollBack = false;
         if (data.isTransacted()) {
             try {
                 xaHelper.setTransactionTimeout(data.getTransactionTimeout());
