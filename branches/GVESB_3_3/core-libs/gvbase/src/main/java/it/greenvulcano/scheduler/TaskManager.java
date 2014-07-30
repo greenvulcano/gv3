@@ -129,7 +129,7 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
                 schedulerBuilder.init(sbNode);
                 Scheduler sch = schedulerBuilder.getScheduler(managerName);
 
-                // Remove already scheduled tasks... needed if cusing lustered configuration
+                // Remove already scheduled tasks... needed if using clustered configuration
                 String jgns[] = sch.getJobGroupNames();
                 for (int i = 0; i < jgns.length; i++) {
                     String gn = jgns[i];
@@ -203,13 +203,15 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
     {
         if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(cfgFileName)) {
             confChangedFlag = true;
-
+            // destroy now
+            killTasks();
+            // initialize after a delay
             Runnable rr = new Runnable() {
                 @Override
                 public void run()
                 {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(30000);
                     }
                     catch (InterruptedException exc) {
                         // do nothing
