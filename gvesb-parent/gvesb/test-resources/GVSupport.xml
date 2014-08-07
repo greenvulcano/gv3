@@ -91,18 +91,6 @@
             value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{DH_DBO}] - %m %n" />
         </layout>
       </appender>
-      <appender class="it.greenvulcano.log.GVDailyRollingFileAppender" name="LOGGER_FOR_GVCONNECTOR">
-        <param name="Append" value="false" />
-        <param name="ImmediateFlush" value="true" />
-        <param name="BufferedIO" value="false" />
-        <param name="BufferSize" value="4096" />
-        <param name="DatePattern" value="yyyy-MM-dd" />
-        <param name="File" value="sp{{gv.app.home}}/log/GVConnector.$.log" />
-        <layout class="org.apache.log4j.PatternLayout">
-          <param name="ConversionPattern"
-            value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{SUBSYSTEM}][%X{CALLOPERATION}][%X{SRVTARGET}][%X{THREADID}] - %m %n" />
-        </layout>
-      </appender>
       <appender class="it.greenvulcano.log.GVDailyRollingFileAppender" name="LOGGER_FOR_WS">
         <param name="Append" value="false" />
         <param name="ImmediateFlush" value="true" />
@@ -308,10 +296,6 @@
       <logger additivity="false" name="org.apache.commons.httpclient">
         <level value="INFO" />
         <appender-ref ref="LOGGER_FOR_HTTP" />
-      </logger>
-      <logger additivity="false" name="it.greenvulcano.gvesb.connector">
-        <level value="INFO" />
-        <appender-ref ref="LOGGER_FOR_GVCONNECTOR" />
       </logger>
       <logger additivity="false" name="it.greenvulcano.gvesb.adapter.http">
         <level value="INFO" />
