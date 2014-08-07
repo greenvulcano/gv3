@@ -20,7 +20,6 @@
 package it.greenvulcano.util.txt;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
@@ -416,6 +414,7 @@ public class TextUtils
     {
         BufferedReader reader = null;
         try {
+            filename = adjustPath(filename);
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
             return IOUtils.toString(reader);
         }
@@ -425,6 +424,7 @@ public class TextUtils
             }
         }
     }
+
 
     /**
      * Opens and loads the content of a text file into a String
@@ -462,6 +462,7 @@ public class TextUtils
     {
         BufferedReader reader = null;
         try {
+            filename = adjustPath(filename);
             URL url = ClassLoader.getSystemResource(filename);
             if (url == null) {
                 url = TextUtils.class.getClassLoader().getResource(filename);
@@ -516,6 +517,7 @@ public class TextUtils
     {
         BufferedReader reader = null;
         try {
+            filename = adjustPath(filename);
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
             return IOUtils.readLines(reader);
         }
@@ -540,6 +542,7 @@ public class TextUtils
     {
         BufferedReader reader = null;
         try {
+            filename = adjustPath(filename);
             URL url = ClassLoader.getSystemResource(filename);
             if (url == null) {
                 url = TextUtils.class.getClassLoader().getResource(filename);
@@ -609,6 +612,7 @@ public class TextUtils
     {
         PrintWriter out = null;
         try {
+            filename = adjustPath(filename);
             out = new PrintWriter(new FileWriter(filename, append));
             out.print(contentString);
             out.flush();
@@ -649,6 +653,7 @@ public class TextUtils
     {
         PrintWriter out = null;
         try {
+            filename = adjustPath(filename);
             out = new PrintWriter(new FileWriter(filename, append));
             IOUtils.write(contentString, out);
             out.flush();
@@ -694,6 +699,7 @@ public class TextUtils
     {
         FileOutputStream out = null;
         try {
+            filename = adjustPath(filename);
             if ((endline == null) || endline.equals("")) {
                 endline = "\n";
             }
@@ -888,4 +894,19 @@ public class TextUtils
             throw new NullPointerException(message);
         }
     }
+    
+    /**
+     * @param filename
+     * @return
+     */
+    public static String adjustPath(String filename) {
+        if (File.separator.equals("\\")) {
+            filename = filename.replace("\\", File.separator);
+        }
+        else {
+            filename = filename.replace("/", File.separator);
+        }
+        return filename;
+    }
+
 }
