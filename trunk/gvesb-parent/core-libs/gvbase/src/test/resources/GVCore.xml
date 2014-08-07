@@ -35,6 +35,186 @@
       <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
     </XPath>
   </GVXPath>
+  <GVServices name="SERVICES" type="module">
+    <Management call-administration-on-init="no"/>
+    <Groups>
+      <Group group-activation="on" id-group="DEFAULT_GRP"/>
+    </Groups>
+    <Services>
+      <Service group-name="DEFAULT_GRP" id-service="TestScript"
+               service-activation="on" statistics="off">
+        <Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="Request"
+                   operation-activation="on" out-check-type="sys-svc-id" type="operation">
+          <Participant id-channel="TEST_CHANNEL" id-system="GVESB"/>
+          <Flow first-node="testJS" point-x="20" point-y="150">
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJS"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="js"><![CDATA[var services = {"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"};
+var svc = data.getProperty("SVC");
+("1" == services[svc]);]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testOGNL"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="ognl"><![CDATA[#services = #{"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"},
+#svc = data.getProperty("SVC"),
+("1" == #services[#svc])]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testGroovy"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="groovy"><![CDATA[services = ["LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"]
+svc = data.getProperty("SVC")
+("1" == services[svc])]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJRuby"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="jruby"><![CDATA[services = {"LIST_EXCEL"=>"1", "LIST_PDF"=>"1", "LIST_BIRT"=>"1"}
+svc = $data.getProperty("SVC")
+("1" == services[svc])]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJS_props"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="js"><![CDATA[var services = {"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"};
+("1" == services["@{{SVC}}"]);]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testOGNL_props"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="ognl"><![CDATA[#services = #{"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"},
+("1" == #services["@{{SVC}}"])]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testGroovy_props"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="groovy"><![CDATA[services = ["LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"]
+("1" == services["@{{SVC}}"])]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJRuby_props"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="jruby"><![CDATA[services = {"LIST_EXCEL"=>"1", "LIST_PDF"=>"1", "LIST_BIRT"=>"1"}
+("1" == services["@{{SVC}}"])]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJS_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="js" file="test.js"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testOGNL_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="ognl" file="test.ognl"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testGroovy_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="groovy" file="test.groovy"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJRuby_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="jruby" file="test.rb"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJS_inc_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="js" file="test_inc.js"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testOGNL_inc_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="ognl" file="test_inc.ognl"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testGroovy_inc_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="groovy" file="test_inc.groovy"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJRuby_inc_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="jruby" file="test_inc.rb"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                       end-business-process="yes" id="end" op-type="end"
+                       output="data" point-x="345" point-y="151"
+                       type="flow-node"/>
+          </Flow>
+        </Operation>
+      </Service>
+    </Services>
+  </GVServices>
   <GVSystems name="SYSTEMS" type="module">
     <Systems>
       <System id-system="GVESB" system-activation="on">

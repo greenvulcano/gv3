@@ -1,0 +1,221 @@
+/*
+ * Copyright (c) 2009-2014 GreenVulcano ESB Open Source Project. All rights
+ * reserved.
+ * 
+ * This file is part of GreenVulcano ESB.
+ * 
+ * GreenVulcano ESB is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * 
+ * GreenVulcano ESB is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ * for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
+ */
+package it.greenvulcano.script;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.script.util.ScriptCache;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+
+/**
+ * 
+ * @version 3.5.0 06/ago/2014
+ * @author GreenVulcano Developer Team
+ */
+public class ScriptExecutor
+{
+    private static Logger              logger      = GVLogger.getLogger(ScriptExecutor.class);
+    private static ScriptEngineManager engManager  = new ScriptEngineManager();
+
+    private String                     lang        = null;
+    private String                     script      = null;
+    private boolean                    initialized = false;
+    private ScriptEngine               engine      = null;
+    private CompiledScript             compScript  = null;
+    private Bindings                   bindings    = null;
+
+    /**
+     * 
+     */
+    public ScriptExecutor() {
+        // do nothing
+    }
+
+    public void init(Node node) throws GVScriptException {
+        try {
+            lang = XMLConfig.get(node, "@lang", "JavaScript");
+            String file = XMLConfig.get(node, "@file", "");
+            if (!"".equals(file)) {
+                script = ScriptCache.instance().getScript(file); 
+            }
+            else {
+                script = XMLConfig.get(node, ".", null);
+            }
+
+            if ((script == null) || "".equals(script)) {
+                throw new GVScriptException("Empty configured script!");
+            }
+
+            engine = engManager.getEngineByName(lang);
+            if (engine == null) {
+                throw new GVScriptException("ScriptEngine[" + lang + "] not found!");
+            }
+
+            if (engine instanceof Compilable) {
+                if (PropertiesHandler.isExpanded(script)) {
+                    logger.debug("Static script, can be compiled for performance");
+                    compScript = ((Compilable) engine).compile(script);
+                }
+            }
+            bindings = engine.createBindings();
+
+            initialized = true;
+        }
+        catch (GVScriptException exc) {
+            logger.error("Error initializing ScriptExecutor", exc);
+            throw exc;
+        }
+        catch (Exception exc) {
+            logger.error("Error initializing ScriptExecutor", exc);
+            throw new GVScriptException("Error initializing ScriptExecutor", exc);
+        }
+    }
+
+    /**
+     * Add the name/value pair to the script Bindings.
+     * 
+     * @param name
+     *        property name
+     * @param value
+     *        property value
+     * @throws GVScriptException
+     */
+    public void putProperty(String name, Object value) throws GVScriptException {
+        isInitialized();
+        bindings.put(name, value);
+    }
+
+    /**
+     * Add all the Map entries to the script Bindings.
+     * 
+     * @param props
+     *        the properties to set
+     * @throws GVScriptException
+     */
+    public void putAllProperties(Map<String, Object> props) throws GVScriptException {
+        isInitialized();
+        bindings.putAll(props);
+    }
+
+    /**
+     * Read the named property from the script Bindings.
+     * 
+     * @param name
+     *        the property name
+     * @return the property value, or null if not present
+     * @throws GVScriptException
+     */
+    public Object getProperty(String name) throws GVScriptException {
+        isInitialized();
+        return bindings.get(name);
+    }
+
+    /**
+     * Remove the named property from the script Bindings.
+     * 
+     * @param name
+     *        the property name
+     * @return the previous property value, or null if not present
+     * @throws GVScriptException
+     */
+    public Object removeProperty(String name) throws GVScriptException {
+        isInitialized();
+        return bindings.remove(name);
+    }
+
+    /**
+     * Execute the read script. If the script uses metadata, then these are
+     * resolved prior to execution.
+     * 
+     * @param input
+     *        used to resolve script's metadata, if used
+     * @return the script execution result
+     * @throws GVScriptException
+     */
+    public Object execute(Object input) throws GVScriptException {
+        isInitialized();
+
+        String localScript = script;
+        try {        
+            if (compScript != null) {
+                return compScript.eval(bindings);
+            }
+            if (!PropertiesHandler.isExpanded(localScript)) {
+                Map<String, Object> params = new HashMap<String, Object>();
+                try {
+                    PropertiesHandler.enableExceptionOnErrors();
+                    if ((input != null) && (input instanceof GVBuffer)) {
+                        GVBufferPropertiesHelper.addProperties(params, (GVBuffer) input, true);
+                    }
+                    localScript = PropertiesHandler.expand(localScript, params, input);
+                    logger.debug("Executing script[" + lang + "]:\n" + localScript);
+                }
+                finally {
+                    PropertiesHandler.disableExceptionOnErrors();
+                }
+            }
+            return engine.eval(localScript, bindings);
+        }
+        catch (Exception exc) {
+            logger.error("Error executing script[" + lang + "]:\n" + localScript, exc);
+            throw new GVScriptException("Error executing script[" + lang + "]", exc);
+        }
+    }
+
+    /**
+     * Clean-up the script environment after every execution
+     */
+    public void cleanup() {
+
+    }
+
+    /**
+     * Release allocated resources. After calling this method, the current
+     * instance can't be reused.
+     */
+    public void destroy() {
+        initialized = false;
+        lang        = null;
+        script      = null;
+        engine      = null;
+        compScript  = null;
+        bindings    = null;
+    }
+
+    private void isInitialized() throws GVScriptException {
+        if (!initialized) {
+            throw new GVScriptException("ScriptExecutor not inizialized!");
+        }
+    }
+}

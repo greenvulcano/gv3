@@ -422,7 +422,7 @@ public class DataProviderTestCase extends TestCase
      * 
      * @throws Exception
      */
-    public final void testGVBufferDataProvider_JS() throws Exception
+    public final void _testGVBufferDataProvider_JS() throws Exception
     {
         String refDP = "JS-gvBufferChangeDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
