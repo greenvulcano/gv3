@@ -19,6 +19,8 @@
  */
 package it.greenvulcano.util.bin;
 
+import it.greenvulcano.util.txt.TextUtils;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -275,6 +277,7 @@ public final class BinaryUtils
      */
     public static byte[] readFileAsBytesFromCP(String filename) throws IOException
     {
+        filename = TextUtils.adjustPath(filename);
         URL url = ClassLoader.getSystemResource(filename);
         if (url == null) {
             throw new IOException("File " + filename + " not found in classpath");
@@ -306,6 +309,7 @@ public final class BinaryUtils
     {
         FileInputStream in = null;
         try {
+            filename = TextUtils.adjustPath(filename);
             in = new FileInputStream(filename);
             return inputStreamToBytes(in);
         }
@@ -374,6 +378,7 @@ public final class BinaryUtils
     {
         OutputStream fOut = null;
         try {
+            filename = TextUtils.adjustPath(filename);
             fOut = new FileOutputStream(filename);
             IOUtils.copyLarge(in, fOut);
         }
@@ -417,6 +422,7 @@ public final class BinaryUtils
     {
         BufferedOutputStream bufOut = null;
         try {
+            filename = TextUtils.adjustPath(filename);
             bufOut = new BufferedOutputStream(new FileOutputStream(filename, append), 10240);
             IOUtils.write(contentArray, bufOut);
             bufOut.flush();
