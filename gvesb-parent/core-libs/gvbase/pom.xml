@@ -43,6 +43,14 @@
             <artifactId>js</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby-complete</artifactId>
+        </dependency>
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
@@ -70,6 +78,10 @@
         <dependency>
             <groupId>ognl</groupId>
             <artifactId>ognl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ognl</groupId>
+            <artifactId>ognl-engine</artifactId>
         </dependency>
         <dependency>
             <groupId>javassist</groupId>
