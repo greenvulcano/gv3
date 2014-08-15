@@ -210,8 +210,8 @@ public class DBOUpdateOrInsert extends AbstractDBO
                     sqlStatementInfoUpdate.close();
                     sqlStatementInfoUpdate = null;
                 }
-                String expandedSQL = PropertiesHandler.expand(statements.get(id), getCurrentProps(), getInternalConn(),
-                        null);
+                String expandedSQL = PropertiesHandler.expand(statements.get(id), getCurrentProps(), null,
+                        getInternalConn());
                 Statement statement = getInternalConn().prepareStatement(expandedSQL);
                 sqlStatementInfo = new StatementInfo(id, expandedSQL, statement);
                 expandedSQL = PropertiesHandler.expand(statements_update.get(id), getCurrentProps(), getInternalConn(),

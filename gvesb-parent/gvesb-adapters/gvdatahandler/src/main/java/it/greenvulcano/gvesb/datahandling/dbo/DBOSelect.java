@@ -251,7 +251,7 @@ public class DBOSelect extends AbstractDBO
                 }
 
                 if (stmt != null) {
-                    String expandedSQL = PropertiesHandler.expand(stmt, localProps, conn, null);
+                    String expandedSQL = PropertiesHandler.expand(stmt, localProps, null, conn);
                     Statement statement = null;
                     try {
                         statement = getInternalConn(conn).createStatement();

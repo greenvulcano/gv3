@@ -29,16 +29,16 @@
         <Channel id-channel="TEST_CHANNEL">
           <rsh-call name="rsh_rem_single_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"
                     rsh-client-name="RSHRemote" directory="@{{WORK_DIR}}" type="call">
-               <cmd>cat ognl{{property[&apos;FILE_NAME&apos;]}}</cmd>
+               <cmd>cat ognl{{#object.property[&apos;FILE_NAME&apos;]}}</cmd>
           </rsh-call>
           <rsh-call name="rsh_rem_multi_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"
                     rsh-client-name="RSHRemote" directory="@{{WORK_DIR}}" type="call">
                <cmd-array-elem>/bin/sh</cmd-array-elem>
-               <cmd-array-elem>cat ognl{{property[&apos;FILE_NAME&apos;]}}</cmd-array-elem>
+               <cmd-array-elem>cat js{{object.getProperty(&apos;FILE_NAME&apos;)}}</cmd-array-elem>
                <cmd-array-elem>exit</cmd-array-elem>
           </rsh-call>
           <rsh-call name="rsh_loc_single_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"
-                    rsh-client-name="RSHLocal" directory="ognl{{property[&apos;WORK_DIR&apos;]}}" type="call">
+                    rsh-client-name="RSHLocal" directory="ognl{{#object.property[&apos;WORK_DIR&apos;]}}" type="call">
                <cmd>cat @{{FILE_NAME}}</cmd>
           </rsh-call>
           <rsh-call name="rsh_loc_multi_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"
@@ -51,16 +51,16 @@
         <Channel id-channel="TEST_CHANNEL_WIN">
           <rsh-call name="rsh_rem_single_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"
                     rsh-client-name="RSHRemote" directory="@{{WORK_DIR}}" type="call">
-               <cmd>cmd /C type ognl{{property[&apos;FILE_NAME&apos;]}}</cmd>
+               <cmd>cmd /C type ognl{{#object.property[&apos;FILE_NAME&apos;]}}</cmd>
           </rsh-call>
           <rsh-call name="rsh_rem_multi_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"
                     rsh-client-name="RSHRemote" directory="@{{WORK_DIR}}" type="call">
                <cmd-array-elem>cmd</cmd-array-elem>
-			   <cmd-array-elem>type ognl{{property[&apos;FILE_NAME&apos;]}}</cmd-array-elem>
+			   <cmd-array-elem>type js{{object.getProperty(&apos;FILE_NAME&apos;)}}</cmd-array-elem>
 			   <cmd-array-elem>exit</cmd-array-elem>
           </rsh-call>
           <rsh-call name="rsh_loc_single_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"
-                    rsh-client-name="RSHLocal" directory="ognl{{property[&apos;WORK_DIR&apos;]}}" type="call">
+                    rsh-client-name="RSHLocal" directory="ognl{{#object.property[&apos;WORK_DIR&apos;]}}" type="call">
                <cmd>cmd /C type @{{FILE_NAME}}</cmd>
           </rsh-call>
           <rsh-call name="rsh_loc_multi_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"

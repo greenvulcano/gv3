@@ -97,6 +97,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testMapDataProvider() throws Exception
     {
+        System.out.println("Start: testMapDataProvider");
         String refDP = "mapDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -120,6 +121,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testMapDataProvider_JS() throws Exception
     {
+        System.out.println("Start: testMapDataProvider_JS");
         String refDP = "JS-mapDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -142,6 +144,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testArrayDataProvider() throws Exception
     {
+        System.out.println("Start: testArrayDataProvider");
         String refDP = "arrayDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -164,6 +167,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testArrayDataProvider_JS() throws Exception
     {
+        System.out.println("Start: testArrayDataProvider_JS");
         String refDP = "JS-arrayDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -186,6 +190,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testObjectDataProvider() throws Exception
     {
+        System.out.println("Start: testObjectDataProvider");
         String refDP = "objectDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -210,6 +215,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testObjectDataProvider_JS() throws Exception
     {
+        System.out.println("Start: testObjectDataProvider_JS");
         String refDP = "JS-objectDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -234,6 +240,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testStringDataProvider() throws Exception
     {
+        System.out.println("Start: testStringDataProvider");
         String refDP = "stringDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -258,6 +265,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testStringDataProvider_JS() throws Exception
     {
+        System.out.println("Start: testStringDataProvider_JS");
         String refDP = "JS-stringDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -282,6 +290,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testCollectionDataProvider() throws Exception
     {
+        System.out.println("Start: testCollectionDataProvider");
         String refDP = "xpathNodeCollectionDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -357,6 +366,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testEventCollectionDataProvider() throws Exception
     {
+        System.out.println("Start: testEventCollectionDataProvider");
         String refDP = "eventCollectionDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -393,6 +403,7 @@ public class DataProviderTestCase extends TestCase
      */
     public final void testGVBufferDataProvider() throws Exception
     {
+        System.out.println("Start: testGVBufferDataProvider");
         String refDP = "gvBufferChangeDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {
@@ -422,8 +433,9 @@ public class DataProviderTestCase extends TestCase
      * 
      * @throws Exception
      */
-    public final void _testGVBufferDataProvider_JS() throws Exception
+    public final void testGVBufferDataProvider_JS() throws Exception
     {
+        System.out.println("Start: testGVBufferDataProvider_JS");
         String refDP = "JS-gvBufferChangeDataProvider";
         IDataProvider iDataProvider = dataProvidersManager.getDataProvider(refDP);
         try {

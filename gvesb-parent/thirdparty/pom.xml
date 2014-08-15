@@ -323,6 +323,20 @@
                             </mapping>
                         </dependency>
                         <dependency>
+                            <groupId>org.codehaus.groovy</groupId>
+                            <artifactId>groovy-all</artifactId>
+                            <mapping>
+                                <componentId>groovy</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.jruby</groupId>
+                            <artifactId>jruby-complete</artifactId>
+                            <mapping>
+                                <componentId>jruby</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
                             <groupId>org.apache.woden</groupId>
                             <artifactId>*</artifactId>
                             <mapping>
@@ -462,8 +476,12 @@
             <artifactId>quartz-oracle</artifactId>
         </dependency>
         <dependency>
-            <groupId>rhino</groupId>
-            <artifactId>js</artifactId>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby-complete</artifactId>
         </dependency>
         <dependency>
             <groupId>jcifs</groupId>

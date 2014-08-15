@@ -1179,7 +1179,7 @@ public class DBOBuilder implements IDBOBuilder
                     for (Entry<String, Object> entry : allProps.entrySet()) {
                         String name = entry.getKey();
                         String value = (String) entry.getValue();
-                        String nValue = PropertiesHandler.expand(value, allProps, null, null);
+                        String nValue = PropertiesHandler.expand(value, allProps);
                         if (!PropertiesHandler.isExpanded(nValue) && ((nValue != null) && (!nValue.equals(value)))) {
                             toDecode = true;
                         }

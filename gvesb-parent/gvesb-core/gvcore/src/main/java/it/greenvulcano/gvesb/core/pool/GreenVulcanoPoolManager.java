@@ -25,6 +25,7 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.core.jmx.GreenVulcanoPoolInfo;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.script.util.BaseContextManager;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -68,6 +69,7 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
         if (_instance == null) {
             _instance = new GreenVulcanoPoolManager();
             XMLConfig.addConfigurationListener(_instance, CONF_FILE_NAME);
+            XMLConfig.addConfigurationListener(_instance, BaseContextManager.CFG_FILE);
         }
         return _instance;
     }
@@ -90,8 +92,19 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
     @Override
     public synchronized void configurationChanged(ConfigurationEvent event)
     {
-        if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(CONF_FILE_NAME)) {
-            initialized = false;
+        if (event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) { 
+            if (event.getFile().equals(CONF_FILE_NAME)) {
+                initialized = false;
+            }
+            else if (event.getFile().equals(BaseContextManager.CFG_FILE)) {
+                initialized = false;
+                try {
+                    initGreenVulcanoPool();
+                }
+                catch (Exception exc) {
+                    logger.error("Error reinizializing GreenVulcanoPool configuration", exc);
+                }
+            }
         }
     }
 

@@ -53,7 +53,7 @@ public class ServletConfigWrapper implements ServletConfig
         String initParam = servletConfig.getInitParameter(s);
         try {
             if (!PropertiesHandler.isExpanded(initParam)) {
-                initParam = PropertiesHandler.expand(initParam, null);
+                initParam = PropertiesHandler.expand(initParam);
             }
         }
         catch (PropertiesHandlerException exc) {

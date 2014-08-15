@@ -282,9 +282,14 @@
             <fileset dir="${json.json.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${rhino.rhino.lib}">
+
+            <fileset dir="${groovy.groovy.lib}">
                 <include name="*.jar"/>
             </fileset>
+            <fileset dir="${jruby.jruby.lib}">
+                <include name="*.jar"/>
+            </fileset>
+
             <fileset dir="${com.jcraft.lib}">
                 <include name="*.jar"/>
             </fileset>

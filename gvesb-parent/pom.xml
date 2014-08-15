@@ -227,6 +227,7 @@
               <gv.dtds.home>${greenv.project.home}/gvesb/configuration/dtds</gv.dtds.home>
               <gv.app.home>${basedir}/target</gv.app.home>
               <it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath>GVCore.xml&#124;/GVCore/GVXPath/XPath</it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath>
+              <org.jruby.embed.localcontext.scope>threadsafe</org.jruby.embed.localcontext.scope>
             </systemPropertyVariables>
           </configuration>
         </plugin>

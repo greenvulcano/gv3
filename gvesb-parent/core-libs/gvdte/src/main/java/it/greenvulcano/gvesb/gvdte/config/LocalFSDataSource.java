@@ -107,7 +107,7 @@ public class LocalFSDataSource implements DataSource
     {
         boolean isValidRoot = true;
         try {
-            String reposRoot = PropertiesHandler.expand(XMLConfig.get(node, "@repositoryHome"), null);
+            String reposRoot = PropertiesHandler.expand(XMLConfig.get(node, "@repositoryHome"));
             dataSourceName = XMLConfig.get(node, "@name");
             cache = XMLConfig.get(node, "@cache", "no").equals("yes");
             formatHandlerClass = XMLConfig.get(node, "@formatHandlerClass", "");

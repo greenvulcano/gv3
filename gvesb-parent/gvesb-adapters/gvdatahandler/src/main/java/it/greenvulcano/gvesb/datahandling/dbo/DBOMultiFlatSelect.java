@@ -201,7 +201,7 @@ public class DBOMultiFlatSelect extends AbstractDBO
                 Map<String, FieldFormatter> fieldIdToFormatter = statIdToIdFormatters.get(id);
 
                 if (stmt != null) {
-                    String expandedSQL = PropertiesHandler.expand(stmt, localProps, conn, null);
+                    String expandedSQL = PropertiesHandler.expand(stmt, localProps, null, conn);
                     Statement sqlStatement = null;
                     try {
                         sqlStatement = getInternalConn(conn).createStatement();

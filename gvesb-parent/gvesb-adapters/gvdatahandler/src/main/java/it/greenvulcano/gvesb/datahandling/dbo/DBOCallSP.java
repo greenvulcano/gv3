@@ -1061,7 +1061,7 @@ public class DBOCallSP extends AbstractDBO
                     throw new SAXException("SQL Call descriptor with id " + id + " not found.");
                 }
                 String expandedSQL = PropertiesHandler.expand(spCallDescriptor.getStatement(), getCurrentProps(),
-                        getInternalConn(), null);
+                        null, getInternalConn());
                 logger.debug("expandedSQL stmt: " + expandedSQL);
                 Statement statement = getInternalConn().prepareCall(expandedSQL);
                 sqlStatementInfo = new StatementInfo(id, expandedSQL, statement);

@@ -120,5 +120,11 @@ public class Binding
         return this.txTimeout;
     }
 
-
+    @Override
+    protected void finalize() throws Throwable {
+        if (cGVBuffer != null) {
+            cGVBuffer.destroy();
+        }
+        super.finalize();
+    }
 }

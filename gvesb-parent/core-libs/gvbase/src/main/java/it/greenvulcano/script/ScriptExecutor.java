@@ -19,19 +19,13 @@
  */
 package it.greenvulcano.script;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.buffer.GVBuffer;
-import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.script.util.ScriptCache;
-import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.script.util.BaseContextManager;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.script.Bindings;
-import javax.script.Compilable;
-import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -43,63 +37,53 @@ import org.w3c.dom.Node;
  * @version 3.5.0 06/ago/2014
  * @author GreenVulcano Developer Team
  */
-public class ScriptExecutor
+public abstract class ScriptExecutor
 {
-    private static Logger              logger      = GVLogger.getLogger(ScriptExecutor.class);
-    private static ScriptEngineManager engManager  = new ScriptEngineManager();
+    private static Logger                logger          = GVLogger.getLogger(ScriptExecutor.class);
 
-    private String                     lang        = null;
-    private String                     script      = null;
-    private boolean                    initialized = false;
-    private ScriptEngine               engine      = null;
-    private CompiledScript             compScript  = null;
-    private Bindings                   bindings    = null;
+    protected static ScriptEngineManager engManager      = new ScriptEngineManager();
+
+    protected String                     lang            = null;
+    protected String                     scriptName      = null;
 
     /**
      * 
      */
-    public ScriptExecutor() {
+    protected ScriptExecutor() {
         // do nothing
     }
 
-    public void init(Node node) throws GVScriptException {
-        try {
-            lang = XMLConfig.get(node, "@lang", "JavaScript");
-            String file = XMLConfig.get(node, "@file", "");
-            if (!"".equals(file)) {
-                script = ScriptCache.instance().getScript(file); 
-            }
-            else {
-                script = XMLConfig.get(node, ".", null);
-            }
+    /**
+     * Initialize the instance.
+     * 
+     * @param node
+     *        the configuration node
+     * @throws GVScriptException
+     */
+    public abstract void init(Node node) throws GVScriptException;
 
-            if ((script == null) || "".equals(script)) {
-                throw new GVScriptException("Empty configured script!");
-            }
+    /**
+     * Initialize the instance.
+     * 
+     * @param lang
+     *        script engine language
+     * @param script
+     *        the script to configure; if null the script must be passes in the execute method; overridden by 'file'
+     * @param file
+     *        if not null, defines the script file to read
+     * @param bcName
+     *        defines the BaseContext to be used to enrich the script;
+     *        if null is used the default context for the given language, if defined
+     * @throws GVScriptException
+     */
+    public abstract void init(String lang, String script, String file, String bcName) throws GVScriptException;
 
-            engine = engManager.getEngineByName(lang);
-            if (engine == null) {
-                throw new GVScriptException("ScriptEngine[" + lang + "] not found!");
-            }
+    public String getEngineName() {
+        return this.lang;
+    }
 
-            if (engine instanceof Compilable) {
-                if (PropertiesHandler.isExpanded(script)) {
-                    logger.debug("Static script, can be compiled for performance");
-                    compScript = ((Compilable) engine).compile(script);
-                }
-            }
-            bindings = engine.createBindings();
-
-            initialized = true;
-        }
-        catch (GVScriptException exc) {
-            logger.error("Error initializing ScriptExecutor", exc);
-            throw exc;
-        }
-        catch (Exception exc) {
-            logger.error("Error initializing ScriptExecutor", exc);
-            throw new GVScriptException("Error initializing ScriptExecutor", exc);
-        }
+    public String getScriptName() {
+        return this.scriptName;
     }
 
     /**
@@ -111,10 +95,8 @@ public class ScriptExecutor
      *        property value
      * @throws GVScriptException
      */
-    public void putProperty(String name, Object value) throws GVScriptException {
-        isInitialized();
-        bindings.put(name, value);
-    }
+    public abstract void putProperty(String name, Object value) throws GVScriptException;
+
 
     /**
      * Add all the Map entries to the script Bindings.
@@ -123,10 +105,8 @@ public class ScriptExecutor
      *        the properties to set
      * @throws GVScriptException
      */
-    public void putAllProperties(Map<String, Object> props) throws GVScriptException {
-        isInitialized();
-        bindings.putAll(props);
-    }
+    public abstract void putAllProperties(Map<String, Object> props) throws GVScriptException;
+
 
     /**
      * Read the named property from the script Bindings.
@@ -136,10 +116,8 @@ public class ScriptExecutor
      * @return the property value, or null if not present
      * @throws GVScriptException
      */
-    public Object getProperty(String name) throws GVScriptException {
-        isInitialized();
-        return bindings.get(name);
-    }
+    public abstract Object getProperty(String name) throws GVScriptException;
+
 
     /**
      * Remove the named property from the script Bindings.
@@ -149,46 +127,98 @@ public class ScriptExecutor
      * @return the previous property value, or null if not present
      * @throws GVScriptException
      */
-    public Object removeProperty(String name) throws GVScriptException {
-        isInitialized();
-        return bindings.remove(name);
+    public abstract Object removeProperty(String name) throws GVScriptException;
+
+    /**
+     * Execute the read script. If the script uses metadata, then these are
+     * resolved prior to execution.
+     * 
+     * @param object
+     *        used as 'object' to resolve script's metadata, if used
+     * @return the script execution result
+     * @throws GVScriptException
+     */
+    public Object execute(Object object) throws GVScriptException {
+        return execute(new HashMap<String, Object>(), object);
+    }
+
+    /**
+     * Execute the passed script. If the script uses metadata, then these are
+     * resolved prior to execution.
+     * 
+     * @param script
+     *        the script to execute
+     * @param object
+     *        used as 'object' to resolve script's metadata, if used
+     * @return the script execution result
+     * @throws GVScriptException
+     */
+    public Object execute(String script, Object object) throws GVScriptException {
+        return execute(script, new HashMap<String, Object>(), object);
     }
 
     /**
      * Execute the read script. If the script uses metadata, then these are
      * resolved prior to execution.
      * 
-     * @param input
-     *        used to resolve script's metadata, if used
+     * @param properties
+     *        used as '@{{...}}' to resolve script's metadata, if used
+     * @param object
+     *        used as 'object' to resolve script's metadata, if used
      * @return the script execution result
      * @throws GVScriptException
      */
-    public Object execute(Object input) throws GVScriptException {
-        isInitialized();
+    public abstract Object execute(Map<String, Object> properties, Object object) throws GVScriptException;
 
-        String localScript = script;
-        try {        
-            if (compScript != null) {
-                return compScript.eval(bindings);
+    /**
+     * Execute the passed script. If the script uses metadata, then these are
+     * resolved prior to execution.
+     * 
+     * @param script
+     *        the script to execute
+     * @param properties
+     *        used as '@{{...}}' to resolve script's metadata, if used
+     * @param object
+     *        used as 'object' to resolve script's metadata, if used
+     * @return the script execution result
+     * @throws GVScriptException
+     */
+    public abstract Object execute(String script, Map<String, Object> properties, Object object) throws GVScriptException;
+
+    /**
+     * Utility method to execute the given script in the given language engine.
+     * Doesn't resolve metadata.
+     * 
+     * @param lang
+     *        script language
+     * @param script
+     *        script to execute
+     * @param bindings
+     *        name/value pairs to be set in the script context
+     * @param bcName
+     *        script base context; if null is used the script engine default
+     * @return the script execution result
+     * @throws GVScriptException
+     */
+    public static Object execute(String lang, String script, Map<String, Object> bindings, String bcName) throws GVScriptException {
+        try {
+            ScriptEngine engine = engManager.getEngineByName(lang);
+            if (engine == null) {
+                throw new GVScriptException("ScriptEngine[" + lang + "] not found!");
             }
-            if (!PropertiesHandler.isExpanded(localScript)) {
-                Map<String, Object> params = new HashMap<String, Object>();
-                try {
-                    PropertiesHandler.enableExceptionOnErrors();
-                    if ((input != null) && (input instanceof GVBuffer)) {
-                        GVBufferPropertiesHelper.addProperties(params, (GVBuffer) input, true);
-                    }
-                    localScript = PropertiesHandler.expand(localScript, params, input);
-                    logger.debug("Executing script[" + lang + "]:\n" + localScript);
-                }
-                finally {
-                    PropertiesHandler.disableExceptionOnErrors();
-                }
+            String baseContext = BaseContextManager.instance().getBaseContextScript(lang, bcName);
+            if (baseContext != null) {
+                script = baseContext + "\n\n" + (script != null ? script : "");
             }
-            return engine.eval(localScript, bindings);
+            else if (bcName != null) {
+                throw new GVScriptException("BaseContext[" + lang + "/" + bcName + "] not found!");
+            }
+            Bindings b = engine.createBindings();
+            b.putAll(bindings);
+            return engine.eval(script, b);
         }
         catch (Exception exc) {
-            logger.error("Error executing script[" + lang + "]:\n" + localScript, exc);
+            logger.error("Error executing script[" + lang + "]:\n" + script, exc);
             throw new GVScriptException("Error executing script[" + lang + "]", exc);
         }
     }
@@ -196,26 +226,11 @@ public class ScriptExecutor
     /**
      * Clean-up the script environment after every execution
      */
-    public void cleanup() {
-
-    }
+    public abstract void cleanUp();
 
     /**
      * Release allocated resources. After calling this method, the current
      * instance can't be reused.
      */
-    public void destroy() {
-        initialized = false;
-        lang        = null;
-        script      = null;
-        engine      = null;
-        compScript  = null;
-        bindings    = null;
-    }
-
-    private void isInitialized() throws GVScriptException {
-        if (!initialized) {
-            throw new GVScriptException("ScriptExecutor not inizialized!");
-        }
-    }
+    public abstract void destroy();
 }

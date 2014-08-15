@@ -235,7 +235,9 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope'
+     - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope'
+     - ognl{{script}}        : evaluate a OGNL script
      - sql{{conn::statement}}            : execute a select sql statement sql and return the value of
                                            the first field of the first selected record.
                                            The 'conn' parameter is the JNDI name of a DataSource
@@ -246,7 +248,6 @@
      - sqltable{{conn::statement}}       : executes a select sql statement and returns all values of
                                            returned cursor as an XML.
                                            The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script
 
     #Label: @method
     #SelectOnInsert
@@ -1130,7 +1131,9 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope'
+     - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope'
+     - ognl{{script}}        : evaluate a OGNL script
      - sql{{[conn::]statement}}     : execute a select sql statement sql and return the value of
                                       the first field of the first selected record.
                                       The 'conn' parameter is the JNDI name of a DataSource,
@@ -1142,7 +1145,6 @@
      - sqltable{{conn::statement}}  : executes a select sql statement and returns all values of
                                       returned cursor as an XML.
                                       The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script
 
     #NotNull
 -->

@@ -24,7 +24,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -151,7 +150,7 @@ public class MaxContentProvider implements ContentProvider {
 
         if (PropertiesHandler.isExpanded(rootDirStr)) {
             try {
-                rootDirStr = PropertiesHandler.expand(rootDirStr, null);
+                rootDirStr = PropertiesHandler.expand(rootDirStr);
             }
             catch (PropertiesHandlerException exc) {
                 exc.printStackTrace();

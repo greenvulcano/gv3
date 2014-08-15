@@ -1,4 +1,4 @@
 #include "inc/inc.ognl" // include a file
 
-#svc = #data.getProperty("SVC"),
+#svc = #data.property["SVC"],
 #findMatch(#svc)

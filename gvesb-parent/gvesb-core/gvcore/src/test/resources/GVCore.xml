@@ -189,20 +189,90 @@ STACK  : ${stackTrace}
               input="input_toupper" next-node-id="check_status" op-type="call" operation-name="toupper_call" output="output_toupper"
               point-x="200" point-y="150" type="flow-node">
               <InputServices>
-                <ognl-script-service type="service" internal="yes" critical="yes">
-                    <ognl-script-call name="test_ognl_service_IN" class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
-                                      type="call">
-                         <OGNLScript>setProperty('PIPPO', 'PIPPO'), setProperty('PLUTO', 'PLUTO')</OGNLScript>
-                    </ognl-script-call>
-                </ognl-script-service>
+                <script-service type="service" internal="yes" critical="yes">
+                    <script-call name="test_ognl_service_IN" class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
+                                 type="call">
+                         <Script lang="ognl">#data.setProperty('PIPPO', 'PIPPO'), #data.setProperty('PLUTO', 'PLUTO')</Script>
+                    </script-call>
+                </script-service>
               </InputServices>
               <OutputServices>
-                <ognl-script-service type="service" internal="yes" critical="yes">
-                    <ognl-script-call name="test_ognl_service_OUT" class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
+                <script-service type="service" internal="yes" critical="yes">
+                    <script-call name="test_ognl_service_OUT" class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
                                       type="call">
-                         <OGNLScript>#appo=getProperty('PIPPO'), setProperty('PIPPO', getProperty('PLUTO')), setProperty('PLUTO', #appo)</OGNLScript>
-                    </ognl-script-call>
-                </ognl-script-service>
+                         <Script lang="ognl">#appo=#data.getProperty('PIPPO'), #data.setProperty('PIPPO', #data.getProperty('PLUTO')), #data.setProperty('PLUTO', #appo)</Script>
+                    </script-call>
+                </script-service>
+              </OutputServices>
+            </GVOperationNode>
+            <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="return_status" id="check_status"
+              input="output_toupper" on-exception-id="return_error" op-type="check" point-x="350" point-y="150" type="flow-node" />
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_status" op-type="end" output="output_toupper"
+              point-x="700" point-y="50" type="flow-node" end-business-process="yes"/>
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_error" op-type="end" output="output_toupper"
+              point-x="700" point-y="250" type="flow-node" end-business-process="yes"/>
+          </Flow>
+        </Operation>
+      </Service>
+      <Service group-name="DEFAULT_GRP" id-service="TOUPPER_SCRIPT_OGNL" service-activation="on">
+        <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id" 
+                   type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+          <Description>VulCon generated Operation</Description>
+          <Participant id-channel="TEST_CHANNEL" id-system="GVESB" />
+          <Flow first-node="request" point-x="50" point-y="150">
+            <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="request" id-system="GVESB"
+              input="input_toupper" next-node-id="check_status" op-type="call" operation-name="toupper_call" output="output_toupper"
+              point-x="200" point-y="150" type="flow-node">
+              <InputServices>
+                <script-service type="service" internal="yes" critical="yes">
+                    <script-call name="test_ognl_service_IN" class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
+                                      type="call">
+                         <Script lang="ognl">#data.setProperty('PIPPO', 'PIPPO'), #data.setProperty('PLUTO', 'PLUTO')</Script>
+                    </script-call>
+                </script-service>
+              </InputServices>
+              <OutputServices>
+                <script-service type="service" internal="yes" critical="yes">
+                    <script-call name="test_ognl_service_OUT" class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
+                                      type="call">
+                         <Script lang="ognl">#appo=#data.getProperty('PIPPO'), #data.setProperty('PIPPO', #data.getProperty('PLUTO')), #data.setProperty('PLUTO', #appo)</Script>
+                    </script-call>
+                </script-service>
+              </OutputServices>
+            </GVOperationNode>
+            <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="return_status" id="check_status"
+              input="output_toupper" on-exception-id="return_error" op-type="check" point-x="350" point-y="150" type="flow-node" />
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_status" op-type="end" output="output_toupper"
+              point-x="700" point-y="50" type="flow-node" end-business-process="yes"/>
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_error" op-type="end" output="output_toupper"
+              point-x="700" point-y="250" type="flow-node" end-business-process="yes"/>
+          </Flow>
+        </Operation>
+      </Service>
+      <Service group-name="DEFAULT_GRP" id-service="TOUPPER_SCRIPT_JS" service-activation="on">
+        <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id" 
+                   type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+          <Description>VulCon generated Operation</Description>
+          <Participant id-channel="TEST_CHANNEL" id-system="GVESB" />
+          <Flow first-node="request" point-x="50" point-y="150">
+            <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="request" id-system="GVESB"
+              input="input_toupper" next-node-id="check_status" op-type="call" operation-name="toupper_call" output="output_toupper"
+              point-x="200" point-y="150" type="flow-node">
+              <InputServices>
+                <script-service type="service" internal="yes" critical="yes">
+                    <script-call name="test_js_service_IN" class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
+                                      type="call">
+                         <Script lang="js">data.setProperty('PIPPO', 'PIPPO'); data.setProperty('PLUTO', 'PLUTO');</Script>
+                    </script-call>
+                </script-service>
+              </InputServices>
+              <OutputServices>
+                <script-service type="service" internal="yes" critical="yes">
+                    <script-call name="test_js_service_OUT" class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
+                                      type="call">
+                         <Script lang="js">var appo=data.getProperty('PIPPO'); data.setProperty('PIPPO', data.getProperty('PLUTO')); data.setProperty('PLUTO', appo);</Script>
+                    </script-call>
+                </script-service>
               </OutputServices>
             </GVOperationNode>
             <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="return_status" id="check_status"
@@ -264,7 +334,7 @@ STACK  : ${stackTrace}
             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_status" op-type="end" output="output_toupper"
               point-x="700" point-y="50" type="flow-node" end-business-process="yes">
               <ChangeGVBuffer clear-data="false" compress-op="compress">
-                <OGNLScript>setObject(getObject().getBytes())</OGNLScript>
+                <Script lang="ognl">#data.setObject(#data.getObject().getBytes())</Script>
               </ChangeGVBuffer>
             </GVEndNode>
             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_unc_error" op-type="end" output="compressed_input"
@@ -711,7 +781,7 @@ STACK  : ${stackTrace}
                                     termination-mode="normal-end" timeout="30"
                                     type="flow-node">
                <ResultProcessor processor-input="only-gvbuffer" fail-on-error="true">
-                 <JavaScript>var str = "";
+                 <Script lang="js" basic-context="basic">var str = "";
 for (var i=0; i&lt;results.size(); i++)
 {
     var inV = results.get(i).getInput().getObject();
@@ -719,7 +789,7 @@ for (var i=0; i&lt;results.size(); i++)
     str += ";[" + inV + " -&gt; " + outV + "]";
 }
 
-data.setObject(str.substring(1));</JavaScript>
+data.setObject(str.substring(1));</Script>
                </ResultProcessor>
              </GVSubFlowSplittedNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
@@ -827,14 +897,14 @@ data.setObject(str.substring(1));</JavaScript>
                                     termination-mode="normal-end" timeout="30"
                                     type="flow-node">
                <ResultProcessor processor-input="only-gvbuffer" fail-on-error="true">
-                 <OGNLScript>#str = "",
+                 <Script lang="ognl">#str = "",
 #iter = #results.iterator,
 #loop = :[#this != null &amp;&amp;
                 ((#str = #str + ";[" + #this.input.object + " -&gt; " + #this.output.object + "]"),
                   #loop(#iter.hasNext ? #iter.next : null))
          ],
 #loop(#iter.hasNext ? #iter.next : null),
-#data.setObject(#str.substring(1))</OGNLScript>
+#data.setObject(#str.substring(1))</Script>
                </ResultProcessor>
              </GVSubFlowSplittedNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes" 
@@ -1132,7 +1202,7 @@ data.setObject(str.substring(1));</JavaScript>
                  <FlowDef name="flow2" condition="cond2" subflow="TOLOWER_FLOW"/>
                </FlowDefs>
                <ResultProcessor processor-input="only-gvbuffer" fail-on-error="true">
-                 <JavaScript>var str = "";
+                 <Script lang="js" basic-context="basic">var str = "";
 for (var i=0; i&lt;results.size(); i++)
 {
     var inV = results.get(i).getInput().getObject();
@@ -1140,7 +1210,7 @@ for (var i=0; i&lt;results.size(); i++)
     str += ";[" + inV + " -&gt; " + outV + "]";
 }
 
-data.setObject(str.substring(1));</JavaScript>
+data.setObject(str.substring(1));</Script>
                </ResultProcessor>
              </GVSubFlowParallelNode>
              <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" end-business-process="yes"
@@ -1458,8 +1528,8 @@ data.setObject(str.substring(1));</JavaScript>
 
           <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall" name="change_wait_call" service="toupper"
             type="call">
-            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-               <Script>
+            <ChangeGVBuffer clear-data="false">
+               <Script lang="js">
                   var str=data.getObject();
                   if (str == "gianfranco" || str == "GiAnFrAnCo") {
                       Thread.sleep(2000);
@@ -1481,8 +1551,8 @@ data.setObject(str.substring(1));</JavaScript>
           </test-service-call>
           <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall" name="change_error_call" service="toupper"
             type="call">
-            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-               <Script>
+            <ChangeGVBuffer clear-data="false">
+               <Script lang="js" base-context="gvesb">
                   var str=data.getObject();
                   if (str == "gianfranco" || str == "GiAnFrAnCo") {
                       Thread.sleep(5000);

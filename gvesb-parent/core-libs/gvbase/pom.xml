@@ -38,10 +38,10 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>rhino</groupId>
             <artifactId>js</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>

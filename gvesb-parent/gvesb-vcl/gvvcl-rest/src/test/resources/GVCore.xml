@@ -31,7 +31,7 @@
               method="GET" ref-dp="testAxis2DataProvider" type="invoker" returnType="context" />
           </rest-call>
           <rest-call class="it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation" name="test-customer" type="call">
-            <RestWebServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker" endpoint="http://127.0.0.1:4204/classpath.ear/test/api/customers/ognl{{property[&apos;customer_id&apos;]}}"
+            <RestWebServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker" endpoint="http://127.0.0.1:4204/classpath.ear/test/api/customers/ognl{{#object.property[&apos;customer_id&apos;]}}"
               method="GET" ref-dp="testOMAxis2DataProvider" type="invoker" returnType="context" />
           </rest-call>
           <rest-call class="it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation" name="test-customer2" type="call">
@@ -47,7 +47,7 @@
               method="POST" ref-dp="testAxis2DataProvider" type="invoker" returnType="context" mediaType="application/xml"  />
           </rest-call>
           <rest-call class="it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation" name="test-del" type="call">
-            <RestWebServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker" endpoint="http://127.0.0.1:4204/classpath.ear/test/api/customers/ognl{{property[&apos;customer_id&apos;]}}"
+            <RestWebServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker" endpoint="http://127.0.0.1:4204/classpath.ear/test/api/customers/ognl{{#object.property[&apos;customer_id&apos;]}}"
               method="DELETE" ref-dp="testAxis2DataProvider" type="invoker" returnType="context" responseMode="OUT_ONLY" />
           </rest-call>
           <rest-call class="it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation" name="test-json-get" type="call">
@@ -63,7 +63,7 @@
               method="POST" ref-dp="testAxis2JSONDP" type="invoker" returnType="context" mediaType="application/xml"  />
           </rest-call>
           <rest-call class="it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation" name="test-json-del" type="call">
-            <RestWebServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker" endpoint="http://127.0.0.1:4204/classpath.ear/test/api/customers/ognl{{property[&apos;customer_id&apos;]}}"
+            <RestWebServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker" endpoint="http://127.0.0.1:4204/classpath.ear/test/api/customers/ognl{{#object.property[&apos;customer_id&apos;]}}"
               method="DELETE" ref-dp="testAxis2JSONDP" type="invoker" returnType="context" responseMode="OUT_ONLY" />
           </rest-call>
           <rest-call class="it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation" name="test-json-customers" type="call">

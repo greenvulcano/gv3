@@ -171,7 +171,7 @@ public class ObjectNameBuilder
             String name = XMLConfig.get(n, "@name", "undefined");
             String defValue = XMLConfig.get(n, "@default-value", "undefined");
             String value = XMLConfig.get(n, "@value", defValue);
-            value = PropertiesHandler.expand(value, null);
+            value = PropertiesHandler.expand(value);
             if (value.equals("")) {
                 value = defValue;
             }
@@ -238,7 +238,7 @@ public class ObjectNameBuilder
                 PropertyValues propertyValues = toresolveKeyProperties.get(name);
                 String value = "";
                 try {
-                    value = PropertiesHandler.expand(propertyValues.value, properties, obj, null);
+                    value = PropertiesHandler.expand(propertyValues.value, properties, obj);
                 }
                 catch (PropertiesHandlerException exc) {
                     exc.printStackTrace();

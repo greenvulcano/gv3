@@ -65,7 +65,7 @@ var svc = data.getProperty("SVC");
                                 point-y="151" type="flow-node">
               <ChangeGVBuffer clear-data="false">
                 <Script lang="ognl"><![CDATA[#services = #{"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"},
-#svc = data.getProperty("SVC"),
+#svc = #data.property["SVC"],
 ("1" == #services[#svc])]]></Script>
               </ChangeGVBuffer>
             </ChangeGVBufferNode>

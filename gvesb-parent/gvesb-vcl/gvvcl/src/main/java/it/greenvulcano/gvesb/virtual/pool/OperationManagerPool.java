@@ -35,6 +35,7 @@ import it.greenvulcano.gvesb.virtual.Operation;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.gvesb.virtual.VCLException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.script.util.BaseContextManager;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -405,7 +406,12 @@ public class OperationManagerPool implements ConfigurationListener, ShutdownEven
     {
         if (event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) {
             String file = event.getFile();
-            filesToDiscard.add(file);
+            if (BaseContextManager.CFG_FILE.equals(file)) {
+                filesToDiscard.addAll(filesToKeys.keySet());
+            }
+            else {
+                filesToDiscard.add(file);
+            }
         }
     }
 

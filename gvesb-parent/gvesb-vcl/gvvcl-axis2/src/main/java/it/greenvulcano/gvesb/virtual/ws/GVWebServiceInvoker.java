@@ -125,7 +125,7 @@ public class GVWebServiceInvoker
             logger.debug("Create WSDLInfo");
             // WSDLInfo
             Node wsdlConfiguration = XMLConfig.getNode(configNode, "*[@type='wsdlinfo']");
-            wsdlURL = PropertiesHandler.expand(XMLConfig.get(wsdlConfiguration, "@wsdl"), null);
+            wsdlURL = PropertiesHandler.expand(XMLConfig.get(wsdlConfiguration, "@wsdl"));
             if (wsdlURL != null) {
                 wsdlURL= TextUtils.replaceSubstring(wsdlURL, "\\", "/");
             }

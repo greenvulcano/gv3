@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2009-2014 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- *
+ * 
  * This file is part of GreenVulcano ESB.
- *
+ * 
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- *
+ * 
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,7 +28,7 @@ import java.util.HashMap;
 
 /**
  * Perform a script file cache.
- *
+ * 
  * @version 3.5.0 06/ago/2014
  * @author GreenVulcano Developer Team
  */
@@ -43,13 +43,18 @@ public final class ScriptCache
      */
     private static final int        INCLUDE_DIR_SIZE = INCLUDE_DIR.length();
     /**
+     * define the default script name.
+     */
+    public static final String      INTERNAL_SCRIPT  = "internal";
+
+    /**
      * Base script directory.
      */
     private static String           basePath;
     /**
      * Singleton reference.
      */
-    private static ScriptCache      _instance        = null;
+    private static ScriptCache      instance         = null;
     /**
      * Script file map.
      */
@@ -57,7 +62,7 @@ public final class ScriptCache
 
     static {
         try {
-            basePath = PropertiesHandler.expand("sp{{gv.app.home}}" + File.separator + "scripts" + File.separator);
+            basePath = PropertiesHandler.expand("sp{{gv.app.home}}" + File.separator + "scripts");
         }
         catch (PropertiesHandlerException exc) {
             exc.printStackTrace();
@@ -67,39 +72,52 @@ public final class ScriptCache
     /**
      * Constructor.
      */
-    private ScriptCache()
-    {
+    private ScriptCache() {
         // do nothing
     }
 
     /**
      * Singleton entry point.
-     *
+     * 
      * @return the instance reference
      */
-    public static synchronized ScriptCache instance()
-    {
-        if (_instance == null) {
-            _instance = new ScriptCache();
+    public static synchronized ScriptCache instance() {
+        if (instance == null) {
+            instance = new ScriptCache();
         }
-        return _instance;
+        return instance;
     }
 
-   public static String getBasePath() {
-       return basePath;
-   }
+    /**
+     * Set the base script folder.
+     * If the new value differs from the current value, reset the script cache.
+     * 
+     * @param basePath
+     */
+    public static void setBasePath(String basePath) {
+        if (ScriptCache.basePath.equals(basePath)) {
+            return;
+        }
+        ScriptCache.basePath = basePath;
+        if (instance != null) {
+            instance.clearCache();
+        }
+    }
+
+    public static String getBasePath() {
+        return basePath;
+    }
 
     /**
      * Get the requested script from cache.
-     *
+     * 
      * @param name
      *        the script file name
      * @return the requested script
      * @throws Exception
      *         if error occurs
      */
-    public synchronized String getScript(String name) throws Exception
-    {
+    public synchronized String getScript(String name) throws Exception {
         String script = scriptMap.get(name);
 
         if (script == null) {
@@ -112,16 +130,15 @@ public final class ScriptCache
 
     /**
      * Read the requested script from $gv.app.home/scripts path.
-     *
+     * 
      * @param name
      *        the script file name
      * @return the requested script
      * @throws Exception
      *         if error occurs
      */
-    private String readScript(String name) throws Exception
-    {
-        String script = TextUtils.readFile(ScriptCache.getBasePath() + name);
+    private String readScript(String name) throws Exception {
+        String script = TextUtils.readFile(ScriptCache.getBasePath() + File.separator + name);
         if (script.indexOf(INCLUDE_DIR) != -1) {
             StringBuilder sb = new StringBuilder(script);
             handleImport(sb);
@@ -131,23 +148,20 @@ public final class ScriptCache
     }
 
     /**
-     * Viene invocato da JSInitManager a fronte di un reload della
-     * configurazione.
+     * Called by BaseContextManager on configuration reload.
      */
-    public synchronized void clearMap()
-    {
+    public synchronized void clearCache() {
         scriptMap.clear();
     }
 
     /**
      * Resolve '#include' directive.
-     *
+     * 
      * @param sb
      *        current script to process.
      * @throws Exception
      */
-    private void handleImport(StringBuilder sb) throws Exception
-    {
+    private void handleImport(StringBuilder sb) throws Exception {
         int idx = sb.indexOf(INCLUDE_DIR);
         while (idx != -1) {
             int start = sb.indexOf("\"", idx + INCLUDE_DIR_SIZE) + 1;

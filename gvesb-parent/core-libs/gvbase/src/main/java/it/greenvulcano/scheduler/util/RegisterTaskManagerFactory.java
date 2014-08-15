@@ -61,7 +61,7 @@ public class RegisterTaskManagerFactory implements MBeanServerInitializer
                 Node node = list.item(i);
                 String key = XMLConfig.get(node, "@name", "undef");
                 String value = XMLConfig.get(node, "@value", "undef");
-                properties.put(key, PropertiesHandler.expand(value, null));
+                properties.put(key, PropertiesHandler.expand(value));
             }
         }
         catch (Exception exc) {

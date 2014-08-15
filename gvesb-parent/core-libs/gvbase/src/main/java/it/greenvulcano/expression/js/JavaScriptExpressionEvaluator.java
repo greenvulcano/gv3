@@ -21,18 +21,13 @@ package it.greenvulcano.expression.js;
 
 import it.greenvulcano.expression.ExpressionEvaluator;
 import it.greenvulcano.expression.ExpressionEvaluatorException;
-import it.greenvulcano.js.initializer.JSInit;
-import it.greenvulcano.js.initializer.JSInitManager;
-import it.greenvulcano.js.util.JavaScriptHelper;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.script.ScriptExecutor;
+import it.greenvulcano.script.ScriptExecutorFactory;
 
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.NativeJavaObject;
-import org.mozilla.javascript.Scriptable;
 
 /**
  * Uses JSCRIPT_EXPRESSION_LANGUAGE to evaluate expressions on POJO.
@@ -43,9 +38,7 @@ import org.mozilla.javascript.Scriptable;
 public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
 {
     private static final Logger logger    = GVLogger.getLogger(JavaScriptExpressionEvaluator.class);
-    private Context             context   = null;
-    private Scriptable          scope     = null;
-    private String              scopeName = "gvesb";
+    private ScriptExecutor      script   = null;
 
     /* (non-Javadoc)
      * @see it.greenvulcano.expression.ExpressionEvaluator#addToContext(java.lang.String, java.lang.Object)
@@ -55,7 +48,7 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
     {
         try {
             initContext();
-            scope = JSInit.setProperty(scope, key, value);
+            script.putProperty(key, value);
         }
         catch (Exception exc) {
             logger.error("JavaScriptExpressionEvaluator - Error setting key[" + key + "] in context", exc);
@@ -70,14 +63,7 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
     {
         try {
             initContext();
-            for (Map.Entry<String, Object> element : context.entrySet()) {
-                try {
-                    scope = JSInit.setProperty(scope, element.getKey(), element.getValue());
-                }
-                catch (Exception exc) {
-                    logger.error("JavaScriptExpressionEvaluator - Error setting key[" + element.getKey() + "] in context", exc);
-                }
-            }
+            script.putAllProperties(context);
         }
         catch (Exception exc) {
             logger.error("JavaScriptExpressionEvaluator - Error initializing context", exc);
@@ -92,12 +78,8 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
     {
         try {
         	initContext();
-            scope = JSInit.setProperty(scope, "root", object);
-            Object result = JavaScriptHelper.executeScript(expression, "JavaScriptExpressionEvaluator", scope, context);
-            if (result instanceof NativeJavaObject) {
-                result = ((NativeJavaObject) result).unwrap();
-            }
-            return result;
+        	script.putProperty("root", object);
+            return script.execute(expression, object);
         }
         catch (Exception exc) {
             logger.error("Error evaluating the expression [\n" + expression + "\n].", exc);
@@ -120,18 +102,17 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
     @Override
     public void cleanUp()
     {
-        if (context != null) {
-            context = null;
-            Context.exit();
+        if (script != null) {
+            script.destroy();
+            script = null;
         }
     }
 
     private void initContext() throws Exception
     {
-        if (context == null) {
-            context = ContextFactory.getGlobal().enterContext();
-            scope = JSInitManager.instance().getJSInit(scopeName).getScope();
-            scope = JSInit.setProperty(scope, "logger", logger);
+        if (script == null) {
+            script = ScriptExecutorFactory.createSE("js", null, null, null);
+            script.putProperty("logger", logger);
         }
     }
 }

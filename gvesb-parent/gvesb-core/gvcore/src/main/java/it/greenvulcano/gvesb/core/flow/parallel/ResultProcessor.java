@@ -20,16 +20,13 @@
 package it.greenvulcano.gvesb.core.flow.parallel;
 
 import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.expression.ExpressionEvaluator;
-import it.greenvulcano.expression.ExpressionEvaluatorException;
-import it.greenvulcano.expression.ExpressionEvaluatorHelper;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
-import it.greenvulcano.js.initializer.JSInit;
-import it.greenvulcano.js.initializer.JSInitManager;
-import it.greenvulcano.js.util.JavaScriptHelper;
+import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.script.ScriptExecutor;
+import it.greenvulcano.script.ScriptExecutorFactory;
 import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xpath.XPathFinder;
@@ -39,9 +36,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Node;
 
 /**
@@ -96,12 +90,8 @@ public class ResultProcessor
     private String              aggregateRoot      = null;
     private String              aggregateNamespace = null;
 
-    // OGNL
-    private String              ognlScript         = null;
-
-    // JavaScript
-    private String              javaScript         = null;
-    private String              jsScope            = null;
+    // Script
+    private ScriptExecutor      script             = null;
 
     public void init(Node node) throws GVCoreConfException {
         processorInput = ProcessorInput.fromString(XMLConfig.get(node, "@processor-input", ""));
@@ -115,11 +105,17 @@ public class ResultProcessor
         // XMLAggregate
         aggregateRoot = XMLConfig.get(node, "XMLAggregate/@root", null);
         aggregateNamespace = XMLConfig.get(node, "XMLAggregate/@namespace", null);
-        // OGNL
-        ognlScript = XMLConfig.get(node, "OGNLScript", null);
-        // JavaScript
-        javaScript = XMLConfig.get(node, "JavaScript", null);
-        jsScope = XMLConfig.get(node, "JavaScript/@scope-name", "gvesb");
+        // Script
+        try {
+            Node sNode = XMLConfig.getNode(node, "Script");
+            if (sNode != null) {
+                script = ScriptExecutorFactory.createSE(sNode);
+            }
+        }
+        catch (Exception exc) {
+            throw new GVCoreConfException("GVCORE_CFG_PARAM_ERROR", new String[][]{
+                    {"name", "'Script'"}, {"node", XPathFinder.buildXPath(node)}}, exc);
+        }
 
         logger.debug("Configured " + toString());
     }
@@ -129,13 +125,9 @@ public class ResultProcessor
             logger.debug("Using XMLAggregate Processor: root[" + aggregateNamespace + ":" + aggregateRoot + "]");
             return xmlProcessor(input, results);
         }
-        if ((ognlScript != null) && !"".equals(ognlScript)) {
-            logger.debug("Using OGNL Processor:\n" + ognlScript);
-            return ognlProcessor(input, results);
-        }
-        if ((javaScript != null) && !"".equals(javaScript)) {
-            logger.debug("Using JavaScript Processor:\n" + javaScript);
-            return jsProcessor(input, results);
+        if (script != null) {
+            logger.debug("Using Script Processor: " + script.getEngineName() + "/" + script.getScriptName());
+            return scriptProcessor(input, results);
         }
         logger.debug("Using Default Processor");
         return defaultProcessor(input, results);
@@ -147,11 +139,8 @@ public class ResultProcessor
         if ((aggregateRoot != null) && !"".equals(aggregateRoot)) {
             desc += " - Use XMLAggregate Processor: root[" + aggregateNamespace + ":" + aggregateRoot + "]";
         }
-        else if ((ognlScript != null) && !"".equals(ognlScript)) {
-            desc += " - Use OGNL Processor:\n" + ognlScript;
-        }
-        else if ((javaScript != null) && !"".equals(javaScript)) {
-            desc += " - Use JavaScript Processor:\n" + javaScript;
+        else if (script != null) {
+            desc += " - Use Script Processor: [" + script.getEngineName() + "/" + script.getScriptName() + "]";
         }
         else {
             desc += " - Use Default Processor";
@@ -235,7 +224,7 @@ public class ResultProcessor
         }
     }
 
-    private GVBuffer ognlProcessor(GVBuffer input, List<Result> results) throws GVCoreException, InterruptedException {
+    private GVBuffer scriptProcessor(GVBuffer input, List<Result> results) throws GVCoreException, InterruptedException {
         List<Object> toProcess = new ArrayList<Object>();
 
         Iterator<Result> itInput = results.iterator();
@@ -272,69 +261,11 @@ public class ResultProcessor
             }
         }
 
-        ExpressionEvaluatorHelper.startEvaluation();
         try {
-            ExpressionEvaluatorHelper.addToContext("results", toProcess);
-            ExpressionEvaluatorHelper.addToContext("data", input);
-            ExpressionEvaluator expressionEvaluator = ExpressionEvaluatorHelper.getExpressionEvaluator(ExpressionEvaluatorHelper.OGNL_EXPRESSION_LANGUAGE);
-            expressionEvaluator.getValue(ognlScript, input);
-        }
-        catch (ExpressionEvaluatorException exc) {
-            ThreadUtils.checkInterrupted(exc);
-            throw new GVCoreException("GVCORE_PARALLEL_OGNL_AGGREGATE_ERROR", new String[][]{{"message", "" + exc}},
-                    exc);
-        }
-        finally {
-            ExpressionEvaluatorHelper.endEvaluation();
-        }
-        return input;
-    }
-
-    private GVBuffer jsProcessor(GVBuffer input, List<Result> results) throws GVCoreException, InterruptedException {
-        List<Object> toProcess = new ArrayList<Object>();
-
-        Iterator<Result> itInput = results.iterator();
-        while (itInput.hasNext()) {
-            Result currOutput = itInput.next();
-            Object d = currOutput.getOutput();
-            if (failOnError && (currOutput.getState() != Result.State.STATE_OK)) {
-                throw new GVCoreException("GVCORE_PARALLEL_EXEC_ERROR", new String[][]{{"message", "" + d}},
-                        (Throwable) d);
-            }
-            switch (processorInput) {
-                case PROCESS_GVBUFFER_ERROR :
-                    if (currOutput.getState() != Result.State.STATE_OK) {
-                        toProcess.add(currOutput);
-                    }
-                case PROCESS_ONLY_GVBUFFER :
-                    if (currOutput.getState() == Result.State.STATE_OK) {
-                        toProcess.add(currOutput);
-                    }
-                    break;
-                case PROCESS_OBJECT_ERROR :
-                    if (currOutput.getState() != Result.State.STATE_OK) {
-                        if (d != null) {
-                            toProcess.add(d);
-                        }
-                    }
-                case PROCESS_ONLY_OBJECT :
-                    if (currOutput.getState() == Result.State.STATE_OK) {
-                        if (d != null) {
-                            toProcess.add(((GVBuffer) d).getObject());
-                        }
-                    }
-                    break;
-            }
-        }
-
-        Context cx = ContextFactory.getGlobal().enterContext();
-        Scriptable scope = null;
-        try {
-            scope = JSInitManager.instance().getJSInit(jsScope).getScope();
-            scope = JSInit.setProperty(scope, "results", toProcess);
-            scope = JSInit.setProperty(scope, "data", input);
-            scope = JSInit.setProperty(scope, "logger", logger);
-            JavaScriptHelper.executeScript(javaScript, "ResultProcessor", scope, cx);
+            script.putProperty("results", toProcess);
+            script.putProperty("data", input);
+            script.putProperty("logger", logger);
+            script.execute(GVBufferPropertiesHelper.getPropertiesMapSO(input, true), input);
         }
         catch (Exception exc) {
             ThreadUtils.checkInterrupted(exc);

@@ -93,7 +93,7 @@ public class SimpleGVBufferBodyMaker implements GVBufferBodyMaker
             logger.debug("Initialized SimpleGVBufferBodyMaker from Node");
         }
         else {
-            fileName = PropertiesHandler.expand(XMLConfig.get(node, "@file-name"), null);
+            fileName = PropertiesHandler.expand(XMLConfig.get(node, "@file-name"));
             readOnce = XMLConfig.getBoolean(node, "@read-once", true);
             setBody();
             logger.debug("Initialized SimpleGVBufferBodyMaker from file: " + fileName);

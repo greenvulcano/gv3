@@ -92,8 +92,8 @@
         <Channel id-channel="TEST_CHANNEL">
           <zmq-call type="call" class="it.greenvulcano.gvesb.virtual.zmq.ZMQCallOperation" name="call_ZMQ"
                address="tcp://127.0.0.1:5557" debug="true">
-               <JSDecoder class="it.greenvulcano.gvesb.gvzmq.marshall.JSMarshaller" type="zmq-decoder" scope-name="gvesb">
-                   <Script>var sb = new StringBuffer();
+               <ScriptDecoder class="it.greenvulcano.gvesb.gvzmq.marshall.ScriptMarshaller" type="zmq-decoder" scope-name="gvesb">
+                   <Script lang="js">var sb = new StringBuffer();
                        var it = msgIn.iterator();
                        while (it.hasNext()) {
                            var zf = it.next();
@@ -104,9 +104,9 @@
                        }
                        gvbOut.setObject(sb.toString());
                    </Script>
-               </JSDecoder>
-               <JSEncoder class="it.greenvulcano.gvesb.gvzmq.marshall.JSMarshaller" type="zmq-encoder" scope-name="gvesb">
-                   <Script>var obj = gvbIn.getObject();
+               </ScriptDecoder>
+               <ScriptEncoder class="it.greenvulcano.gvesb.gvzmq.marshall.ScriptMarshaller" type="zmq-encoder" scope-name="gvesb">
+                   <Script lang="js">var obj = gvbIn.getObject();
                        if (instanceOf(obj, ZMsg)) {
                            msgOut = obj;
                        }
@@ -117,11 +117,11 @@
                            msgOut.add("" + obj);
                        }
                    </Script>
-               </JSEncoder>
+               </ScriptEncoder>
           </zmq-call>
           <zmq-publish type="call" class="it.greenvulcano.gvesb.virtual.zmq.ZMQPublishOperation" name="publish_ZMQ"
                publisher-name="TestZMQPublisher" debug="true">
-               <JSEncoder class="it.greenvulcano.gvesb.gvzmq.marshall.JSMarshaller" type="zmq-encoder" scope-name="gvesb">
+               <ScriptEncoder class="it.greenvulcano.gvesb.gvzmq.marshall.ScriptMarshaller" type="zmq-encoder" scope-name="gvesb">
                    <Script>var obj = gvbIn.getObject();
                        if (instanceOf(obj, ZMsg)) {
                            msgOut = obj;
@@ -133,7 +133,7 @@
                            msgOut.add("" + obj);
                        }
                    </Script>
-               </JSEncoder>
+               </ScriptEncoder>
           </zmq-publish>
         </Channel>
       </System>

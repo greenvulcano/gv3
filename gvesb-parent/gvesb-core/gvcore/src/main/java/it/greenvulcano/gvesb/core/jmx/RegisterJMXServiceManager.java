@@ -70,7 +70,7 @@ public class RegisterJMXServiceManager implements MBeanServerInitializer
                 Node node = list.item(i);
                 String key = XMLConfig.get(node, "@name", "undef");
                 String value = XMLConfig.get(node, "@value", "undef");
-                prop.put(key, PropertiesHandler.expand(value, null));
+                prop.put(key, PropertiesHandler.expand(value));
             }
         }
         catch (Exception exc) {

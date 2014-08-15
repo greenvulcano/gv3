@@ -19,10 +19,9 @@
  */
 package it.greenvulcano.gvesb.datahandling.utils;
 
-import it.greenvulcano.js.initializer.JSInit;
-import it.greenvulcano.js.initializer.JSInitManager;
-import it.greenvulcano.js.util.JavaScriptHelper;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.script.ScriptExecutor;
+import it.greenvulcano.script.ScriptExecutorFactory;
 import it.greenvulcano.util.txt.TextUtils;
 
 import java.util.List;
@@ -30,8 +29,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
 
 
 /**
@@ -81,22 +78,16 @@ public class JavaScriptRetriever extends AbstractRetriever
         String jsFunction = retr.getDataRetriever(method, paramL);
         String result = null;
         if (jsFunction != null) {
-            Context ctx = null;
             try {
-                ctx = Context.enter();
-                Scriptable scope = JSInitManager.instance().getJSInit(jsScope).getScope();
+                ScriptExecutor script = ScriptExecutorFactory.createSE("js",jsFunction, null, jsScope);
                 Map<String, Object> params = retr.getMethodParamMap(method, paramL);
-                handleArguments(scope, jsFunction, params);
-                result = JavaScriptHelper.resultToString(JavaScriptHelper.executeScript(jsFunction, method, scope, ctx));
+                handleArguments(script, jsFunction, params);
+                Object obj = script.execute(null);
+                result = (obj == null) ? "" : obj.toString();
             }
             catch (Exception exc) {
                 throw new Exception("Error executing the javascript function in JavaScriptRetriever '" + method
                         + "' method.", exc);
-            }
-            finally {
-                if (ctx != null) {
-                    Context.exit();
-                }
             }
         }
 
@@ -109,7 +100,7 @@ public class JavaScriptRetriever extends AbstractRetriever
         return result;
     }
 
-    private static void handleArguments(Scriptable scope, String jsFunction, Map<String, Object> params)
+    private static void handleArguments(ScriptExecutor script, String jsFunction, Map<String, Object> params)
             throws Exception
     {
         StringTokenizer st = new StringTokenizer(jsFunction, "\"'=!<>()+*-%\\/,; ");
@@ -117,9 +108,9 @@ public class JavaScriptRetriever extends AbstractRetriever
             String varName = st.nextToken();
             if (params.containsKey(varName)) {
                 Object varValue = params.get(varName);
-                JSInit.setProperty(scope, varName, varValue);
+                script.putProperty(varName, varValue);
             }
         }
-        JSInit.setProperty(scope, "props", params);
+        script.putProperty("props", params);
     }
 }

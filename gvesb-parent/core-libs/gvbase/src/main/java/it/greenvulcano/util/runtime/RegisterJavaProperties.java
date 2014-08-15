@@ -91,7 +91,7 @@ public class RegisterJavaProperties implements MBeanServerInitializer {
         Set<String> propNames = customProperties.keySet();
         for (String currPropName : propNames) {
             String currPropValue = customProperties.get(currPropName);
-            String actualPropValue = PropertiesHandler.expand(currPropValue, null);
+            String actualPropValue = PropertiesHandler.expand(currPropValue);
             System.setProperty(currPropName, actualPropValue);
             System.out.println(currPropName + " = " + System.getProperty(currPropName));
         }

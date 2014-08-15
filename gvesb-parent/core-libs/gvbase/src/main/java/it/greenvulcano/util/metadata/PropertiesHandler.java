@@ -28,14 +28,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
-import org.mozilla.javascript.Scriptable;
-
 /**
  * Helper class for metadata substitution in strings.
  *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- *
  *
  **/
 public final class PropertiesHandler
@@ -175,8 +172,10 @@ public final class PropertiesHandler
 
     /**
      * This method insert the correct values for the dynamic parameter found in
-     * the input string. The property value can be a combination of: - fixed : a
-     * text string; - ${{propname}} : a System property name.
+     * the input string.
+     * The property value can be a combination of:
+     * - fixed : a text string;
+     * - ${{propname}} : a System property name.
      *
      * @param str
      *        the string to value
@@ -187,14 +186,16 @@ public final class PropertiesHandler
      */
     public static String expand(String str) throws PropertiesHandlerException
     {
-        return expand(str, null, null, null, null);
+        return expand(str, null, null, null);
     }
 
     /**
      * This method insert the correct values for the dynamic parameter found in
-     * the input string. The property value can be a combination of: - fixed : a
-     * text string; - ${{propname}} : a System property name; - @{{propname}} :
-     * a inProperties property name;
+     * the input string.
+     * The property value can be a combination of:
+     * - fixed : a text string;
+     * - ${{propname}} : a System property name;
+     * - @{{propname}} : a inProperties property name;
      *
      * @param str
      *        the string to value
@@ -207,16 +208,19 @@ public final class PropertiesHandler
      */
     public static String expand(String str, Map<String, Object> inProperties) throws PropertiesHandlerException
     {
-        return expand(str, inProperties, null, null, null);
+        return expand(str, inProperties, null, null);
     }
 
     /**
      * This method insert the correct values for the dynamic parameter found in
-     * the input string. The property value can be a combination of: - fixed : a
-     * text string; - %{{class}} : the object class name; - %{{fqclass}} : the
-     * object fully qualified class name; - %{{package}} : the object package
-     * name; - ${{propname}} : a System property name; - @{{propname}} : a
-     * inProperties property name;
+     * the input string.
+     * The property value can be a combination of:
+     * - fixed : a text string;
+     * - %{{class}} : the object class name;
+     * - %{{fqclass}} : the object fully qualified class name;
+     * - %{{package}} : the object package name;
+     * - ${{propname}} : a System property name;
+     * - @{{propname}} : a inProperties property name;
      *
      * @param str
      *        the string to value
@@ -232,16 +236,21 @@ public final class PropertiesHandler
     public static String expand(String str, Map<String, Object> inProperties, Object obj)
             throws PropertiesHandlerException
     {
-        return expand(str, inProperties, obj, null, null);
+        return expand(str, inProperties, obj, null);
     }
+
 
     /**
      * This method insert the correct values for the dynamic parameter found in
-     * the input string. The property value can be a combination of: - fixed : a
-     * text string; - %{{class}} : the object class name; - %{{fqclass}} : the
-     * object fully qualified class name; - %{{package}} : the obj package name;
-     * - ${{propname}} : a System property name; - @{{propname}} : a
-     * inProperties property name; - &{{script}} : a JavaScript script;
+     * the input string.
+     * The property value can be a combination of:
+     * - fixed : a text string;
+     * - %{{class}} : the object class name;
+     * - %{{fqclass}} : the object fully qualified class name;
+     * - %{{package}} : the object package name;
+     * - ${{propname}} : a System property name;
+     * - @{{propname}} : a inProperties property name;
+     * - &{{script}} : a JavaScript script;
      *
      * @param str
      *        the string to value
@@ -249,35 +258,6 @@ public final class PropertiesHandler
      *        the hashTable containing the properties
      * @param obj
      *        the object to work with
-     * @param scope
-     *        the JavaScript scope
-     * @return the expanded string
-     *
-     * @throws PropertiesHandlerException
-     *         if error occurs and the flag THROWS_EXCEPTION is set
-     */
-    public static String expand(String str, Map<String, Object> inProperties, Object obj, Scriptable scope)
-            throws PropertiesHandlerException
-    {
-        return expand(str, inProperties, obj, scope, null);
-    }
-
-    /**
-     * This method insert the correct values for the dynamic parameter found in
-     * the input string. The property value can be a combination of: - fixed : a
-     * text string; - %{{class}} : the object class name; - %{{fqclass}} : the
-     * object fully qualified class name; - %{{package}} : the object package
-     * name; - ${{propname}} : a System property name; - @{{propname}} : a
-     * inProperties property name; - &{{script}} : a JavaScript script;
-     *
-     * @param str
-     *        the string to value
-     * @param inProperties
-     *        the hashTable containing the properties
-     * @param obj
-     *        the object to work with
-     * @param scope
-     *        the JavaScript scope
      * @param extra
      *        a extra object passed to property handlers
      * @return the expanded string
@@ -285,7 +265,7 @@ public final class PropertiesHandler
      * @throws PropertiesHandlerException
      *         if error occurs and the flag THROWS_EXCEPTION is set
      */
-    public static String expand(String str, Map<String, Object> inProperties, Object obj, Scriptable scope, Object extra)
+    public static String expand(String str, Map<String, Object> inProperties, Object obj, Object extra)
             throws PropertiesHandlerException
     {
         if (str == null) {
@@ -297,7 +277,7 @@ public final class PropertiesHandler
         PropertyToken token = null;
         try {
             token = PropertiesHandler.parse(str);
-            return token.getValue(inProperties, obj, scope, extra);
+            return token.getValue(inProperties, obj, extra);
         }
         catch (PropertiesHandlerException exc) {
             if (isExceptionOnErrors()) {
@@ -317,20 +297,19 @@ public final class PropertiesHandler
      * @param value
      * @param inProperties
      * @param obj
-     * @param scope
      * @param extra
      *        a extra object passed to property handlers
      * @return the expanded string
      * @throws PropertiesHandlerException
      */
     public static String expandInternal(String type, String value, Map<String, Object> inProperties, Object obj,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Object extra) throws PropertiesHandlerException
     {
         PropertyHandler handler = propHandlers.get(type);
         if (handler == null) {
             return value;
         }
-        return handler.expand(type, value, inProperties, obj, scope, extra);
+        return handler.expand(type, value, inProperties, obj, extra);
     }
 
     private static PropertyToken parse(String str)

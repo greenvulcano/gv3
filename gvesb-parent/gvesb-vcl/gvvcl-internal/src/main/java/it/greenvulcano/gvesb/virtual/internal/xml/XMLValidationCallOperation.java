@@ -21,7 +21,6 @@ package it.greenvulcano.gvesb.virtual.internal.xml;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
-import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.ConnectionException;
@@ -118,7 +117,7 @@ public class XMLValidationCallOperation implements CallOperation
             defaultXSD = XMLConfig.get(node, "@default-xsd");
             if (!PropertiesHandler.isExpanded(defaultXSD)) {
                 try {
-                    defaultXSD = PropertiesHandler.expand(defaultXSD, null);
+                    defaultXSD = PropertiesHandler.expand(defaultXSD);
                 }
                 catch (Exception exc) {
                     logger.warn("Cannot expand placeholder: " + defaultXSD, exc);
@@ -305,7 +304,7 @@ public class XMLValidationCallOperation implements CallOperation
         URL url = XMLValidationCallOperation.class.getClassLoader().getResource(xsdResource);
 
         if (url == null) {
-            xsdResource =  PropertiesHandler.expand(xsdFile, null);
+            xsdResource =  PropertiesHandler.expand(xsdFile);
             logger.debug("looking in filesystem for " + xsdResource);
 
             File xsd = new File(xsdResource);

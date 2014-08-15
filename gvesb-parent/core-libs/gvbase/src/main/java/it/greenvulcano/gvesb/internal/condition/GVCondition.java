@@ -20,7 +20,6 @@
 package it.greenvulcano.gvesb.internal.condition;
 
 import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.buffer.GVBuffer;
 
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public interface GVCondition
      * @throws XMLConfigException
      *         if errors occurs
      */
-    void init(Node node) throws XMLConfigException;
+    void init(Node node) throws GVConditionException;
 
     /**
      * 

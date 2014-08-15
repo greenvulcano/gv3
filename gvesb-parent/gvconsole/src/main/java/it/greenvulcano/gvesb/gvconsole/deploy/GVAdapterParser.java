@@ -1589,7 +1589,7 @@ public class GVAdapterParser
         File fin = new File(inputFile);
         if (fin.exists()) {
             String outputFile = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "webservices"
-                    + File.separator + "services" + File.separator + nomeFile, null);
+                    + File.separator + "services" + File.separator + nomeFile);
             logger.debug("inputFile  = " + inputFile);
             logger.debug("outputFile = " + outputFile);
             copiaFile(inputFile, outputFile);
@@ -1618,7 +1618,7 @@ public class GVAdapterParser
         File fin = new File(inputFile);
         if (fin.exists()) {
             String outputFile = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "xmlconfig"
-                    + File.separator + "xsds" + File.separator + nomeFile, null);
+                    + File.separator + "xsds" + File.separator + nomeFile);
             logger.debug("inputFile  = " + nomeFile);
             logger.debug("outputFile = " + outputFile);
             copiaFile(inputFile, outputFile);
@@ -1641,7 +1641,7 @@ public class GVAdapterParser
         File fin = new File(inputFile);
         if (fin.exists()) {
             String outputFile = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "xmlconfig"
-                    + File.separator + "wsdl" + File.separator + nomeFile, null);
+                    + File.separator + "wsdl" + File.separator + nomeFile);
             logger.debug("inputFile  = " + nomeFile);
             logger.debug("outputFile = " + outputFile);
             copiaFile(inputFile, outputFile);
@@ -1671,7 +1671,7 @@ public class GVAdapterParser
                 logger.error("File [" + fileOrigine + "] not found");
                 return;
             }
-            out = new FileOutputStream(PropertiesHandler.expand(fileDestinazione, null));
+            out = new FileOutputStream(PropertiesHandler.expand(fileDestinazione));
             IOUtils.copy(in, out);
         }
         finally {
@@ -1694,7 +1694,7 @@ public class GVAdapterParser
             logger.error("Directory [" + dirOrigine + "] not found");
             return;
         }
-        dirDestinazione = PropertiesHandler.expand(dirDestinazione, null);
+        dirDestinazione = PropertiesHandler.expand(dirDestinazione);
         FileUtils.forceMkdir(new File(dirDestinazione));
         FileManager.cp(dirOrigine, dirDestinazione, null);
     }

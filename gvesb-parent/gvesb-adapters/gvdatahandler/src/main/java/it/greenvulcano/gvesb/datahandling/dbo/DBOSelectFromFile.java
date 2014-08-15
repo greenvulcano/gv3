@@ -105,7 +105,7 @@ public class DBOSelectFromFile extends AbstractDBO
                 fileData = TextUtils.readFile(fileName);
             }
 
-            fileData = PropertiesHandler.expand(fileData, props, conn, null);
+            fileData = PropertiesHandler.expand(fileData, props, null, conn);
 
             dataOut.write(fileData.getBytes());
 

@@ -83,9 +83,9 @@ public class GVParser
         String nomeZipDir="GVDeploy_"+ DateUtils.nowToString("yyyyMMddHHmmss");
         nomeZipFile= nomeZipDir + ".zip";
         try {
-            tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}", null);        
+            tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}");        
             appoDir = tmpDir + File.separator + nomeZipDir;
-            gvDir = PropertiesHandler.expand("${{gv.app.home}}", null);
+            gvDir = PropertiesHandler.expand("${{gv.app.home}}");
             String xmlDir = File.separator + "xmlconfig";
             String xsdsDir = xmlDir + File.separator + "xsds";
             String wsdlDir = xmlDir + File.separator + "wsdl";
@@ -139,14 +139,14 @@ public class GVParser
      */
     public InputStream readFileZip() throws Exception
     {
-        String tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}", null);
+        String tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}");
         InputStream is = new FileInputStream(new File(tmpDir, nomeZipFile));
         return is;
     }
 
     public void deleteFileZip() throws Exception
     {
-        String tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}", null);
+        String tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}");
         FileManager.rm(tmpDir, nomeZipFile);
     }
 

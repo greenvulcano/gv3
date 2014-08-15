@@ -84,7 +84,7 @@ public abstract class AbstractRetriever
         if (method2DataRetr.isEmpty()) {
             initStatementMap();
         }
-        String expandedFunction = PropertiesHandler.expand(method2DataRetr.get(method), params, getConnection(), null);
+        String expandedFunction = PropertiesHandler.expand(method2DataRetr.get(method), params, null, getConnection());
         logger.debug("Expanded Function [" + method + "]: " + expandedFunction);
         return expandedFunction;
     }
@@ -108,7 +108,7 @@ public abstract class AbstractRetriever
         for (int i = 0; i < paramList.size(); i++) {
             params.put(signature.get(i), paramList.get(i));
         }
-        String expandedFunction = PropertiesHandler.expand(method2DataRetr.get(method), params, getConnection(), null);
+        String expandedFunction = PropertiesHandler.expand(method2DataRetr.get(method), params, null, getConnection());
         logger.debug("Expanded Function [" + method + "]: " + expandedFunction);
         return expandedFunction;
     }

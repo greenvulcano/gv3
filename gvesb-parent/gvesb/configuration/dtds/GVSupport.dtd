@@ -12,7 +12,7 @@
 <!--
     GreenVulcano ESB Support Configuration File.
 -->
-<!ELEMENT GVSupport (GVLog4JConfiguration?,GVJavaScriptConfig?,GVDateUtils?,GVJNDIBuildersConfig?,GVStatisticsConfig?,GVMonitoringConfig?,GVWorkbenchConfig?,GVHTTPClientProtocolConfig?,GVHeartBeatConfig?,GVTaskManagerFactory?)>
+<!ELEMENT GVSupport (GVLog4JConfiguration?,GVScriptConfig?,GVDateUtils?,GVJNDIBuildersConfig?,GVStatisticsConfig?,GVMonitoringConfig?,GVWorkbenchConfig?,GVHTTPClientProtocolConfig?,GVHeartBeatConfig?,GVTaskManagerFactory?)>
 <!--
     Current GreenVulcano ESB version.
 -->
@@ -28,59 +28,87 @@
 -->
 <!ATTLIST GVLog4JConfiguration name    CDATA   #FIXED  "LOG4J">
 
-<!ENTITY % jsinits "BasicJSInit">
 
 <!--
-    Defines the JavaScript execution scope initializers.
+    Defines the Script engine/context initializers.
 
 -->
-<!ELEMENT GVJavaScriptConfig (Description?, JavaScriptInitializers)>
+<!ELEMENT GVScriptConfig (Description?, ScriptCache?, ScriptEngines)>
 <!--
     Element type 'module'.
 -->
-<!ATTLIST GVJavaScriptConfig type    CDATA   #FIXED  "module">
+<!ATTLIST GVScriptConfig type    CDATA   #FIXED  "module">
 <!--
-    Module id always set to 'JAVASCRIPT'.
+    Module id always set to 'SCRIPT'.
 -->
-<!ATTLIST GVJavaScriptConfig name    CDATA   #FIXED  "JAVASCRIPT">
+<!ATTLIST GVScriptConfig name    CDATA   #FIXED  "SCRIPT">
 
 <!--
-    Defines the scope initializers.
+    Defines the script file cache configuration.
+
 -->
-<!ELEMENT JavaScriptInitializers (Description?, (%jsinits;)*)>
+<!ELEMENT ScriptCache (Description?)>
+<!--
+    Base path for script files access.
+    Default to $GV_HOME/scripts.
+    
+    #NotNull
+-->
+<!ATTLIST ScriptCache base-path   CDATA #IMPLIED>
 
 <!--
-    Basic Initializer.
+    Defines the engine/context initializers.
+-->
+<!ELEMENT ScriptEngines (Description?, ScriptEngine*)>
+
+<!--
+    Script Engine Initializer.
+
+    #Label: @lang
+-->
+<!ELEMENT ScriptEngine (Description?, BaseContext*)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST ScriptEngine type         CDATA #FIXED "script-engine">
+<!--
+    Script Engine language.
+
+    #NotNull
+    #Unique: ../*[@type='script-engine']/@lang
+-->
+<!ATTLIST ScriptEngine lang         CDATA #REQUIRED>
+<!--
+    If defined, refers to an included BaseContext to be used as default context 
+    initialized for the given language scripts.
+
+    #NotNull
+    #References: BaseContext/@name
+-->
+<!ATTLIST ScriptEngine default-context CDATA #IMPLIED>
+
+<!--
+    Basic Context Initializer.
 
     #Label: @name
 -->
-<!ELEMENT BasicJSInit (Description?, Script?)>
-<!--
-    Unmodifiable.
-    Used by GreenVulcanoESB factory framework.
--->
-<!ATTLIST BasicJSInit type         CDATA #FIXED "jsinit">
-<!--
-    Unmodifiable.
-    Used by GreenVulcanoESB factory framework.
--->
-<!ATTLIST BasicJSInit class        CDATA #FIXED "it.greenvulcano.js.initializer.BasicJSInit">
-
+<!ELEMENT BaseContext (Description?)>
 <!--
     Initializer name.
 
     #NotNull
-    #Unique: ../*[@type='jsinit']/@name
+    #Unique: ../BaseContext/@name
 -->
-<!ATTLIST BasicJSInit name         CDATA #REQUIRED>
-
+<!ATTLIST BaseContext name         CDATA #REQUIRED>
 <!--
-    This attribute is the name of a file containing the script to parse/execute for initializing the scope.
-    This script is executed before the JavaScript code contained in the element Script.
+    This attribute is the name of a file containing the script to parse/execute
+    for initializing the context.
+    The file path must be relative to $GV_HOME/scripts.
 
     #NotNull
 -->
-<!ATTLIST BasicJSInit   script-file CDATA #IMPLIED>
+<!ATTLIST BaseContext file CDATA #IMPLIED>
 
 <!ELEMENT GVMonitoringConfig (Description?, MonitoredProcesses)>
 <!--
@@ -479,8 +507,12 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the object is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                               the object is added to the context as 'object',
+     - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope',
+                               the object is added to the context as 'object',
+     - ognl{{script}}        : evaluate a OGNL script,
+                               the object is added to the context as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}      : execute a select sql statement sql and return the value of
                                      the first field of the first selected record.
                                      The 'conn' parameter is the JNDI name of a DataSource
@@ -490,8 +522,6 @@
      - sqltable{{conn::statement}} : executes a select sql statement and returns all values of
                                      returned cursor as an XML.
                                      The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the object is added to the context as 'object' (and is also the object on which execute the script)
 
 
     #NotNull

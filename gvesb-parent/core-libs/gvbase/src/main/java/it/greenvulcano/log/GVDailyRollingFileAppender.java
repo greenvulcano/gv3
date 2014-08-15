@@ -218,7 +218,7 @@ public class GVDailyRollingFileAppender extends FileAppender
     public GVDailyRollingFileAppender(Layout layout, String filename, String datePattern) throws IOException,
             PropertiesHandlerException
     {
-        super(layout, PropertiesHandler.expand(filename, null), true);
+        super(layout, PropertiesHandler.expand(filename), true);
         this.datePattern = datePattern;
         activateOptions();
     }
@@ -405,7 +405,7 @@ public class GVDailyRollingFileAppender extends FileAppender
         origFileName = file;
 
         try {
-            origFileName = PropertiesHandler.expand(file, null);
+            origFileName = PropertiesHandler.expand(file);
         }
         catch (PropertiesHandlerException exc) {
             exc.printStackTrace();
@@ -422,7 +422,7 @@ public class GVDailyRollingFileAppender extends FileAppender
         origFileName = file;
 
         try {
-            origFileName = PropertiesHandler.expand(file, null);
+            origFileName = PropertiesHandler.expand(file);
         }
         catch (PropertiesHandlerException exc) {
             exc.printStackTrace();

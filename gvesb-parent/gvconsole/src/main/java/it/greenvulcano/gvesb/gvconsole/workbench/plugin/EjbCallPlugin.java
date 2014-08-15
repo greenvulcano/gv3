@@ -181,9 +181,8 @@ public abstract class EjbCallPlugin implements TestPlugin
         user = XMLConfig.get(jndiCtxNode, "@security-principal");
         password = XMLConfig.getDecrypted(jndiCtxNode, "@security-credentials");
 
-        fileNameOutput = PropertiesHandler.expand(XMLConfig.get(configNode, "@fileNameOutput", "C:/Temp/Output.txt"),
-                null);
-        fileNameInput = PropertiesHandler.expand(XMLConfig.get(configNode, "@fileNameInput", "C:/Temp/Input.txt"), null);
+        fileNameOutput = PropertiesHandler.expand(XMLConfig.get(configNode, "@fileNameOutput", "C:/Temp/Output.txt"));
+        fileNameInput = PropertiesHandler.expand(XMLConfig.get(configNode, "@fileNameInput", "C:/Temp/Input.txt"));
 
         iteratorNumber = "1";
 

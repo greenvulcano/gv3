@@ -134,7 +134,7 @@ public class ConfigStore
         // check for PropertiesHandler metadata
         if (!PropertiesHandler.isExpanded(ret)) {
             try {
-                ret = PropertiesHandler.expand(ret, null);
+                ret = PropertiesHandler.expand(ret);
             }
             catch (PropertiesHandlerException exc) {
                 exc.printStackTrace();

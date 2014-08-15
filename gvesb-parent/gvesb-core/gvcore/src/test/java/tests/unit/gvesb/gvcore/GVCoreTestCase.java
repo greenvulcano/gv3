@@ -28,6 +28,7 @@ import it.greenvulcano.gvesb.virtual.pool.OperationManagerPool;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.util.xml.XMLUtils;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -171,6 +172,46 @@ public class GVCoreTestCase extends TestCase
     {
         String SYSTEM_NAME = "GVESB";
         String SERVICE_NAME = "TOUPPER_OGNL";
+        String TEST_BUFFER = "test test test test";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        assertEquals("PLUTO", gvBufferout.getProperty("PIPPO"));
+        assertEquals("PIPPO", gvBufferout.getProperty("PLUTO"));
+    }
+    
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreScriptOGNLService() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TOUPPER_SCRIPT_OGNL";
+        String TEST_BUFFER = "test test test test";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        assertEquals("PLUTO", gvBufferout.getProperty("PIPPO"));
+        assertEquals("PIPPO", gvBufferout.getProperty("PLUTO"));
+    }
+    
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreScriptJSService() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TOUPPER_SCRIPT_JS";
         String TEST_BUFFER = "test test test test";
         Id id = new Id();
         GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
