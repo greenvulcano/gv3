@@ -29,32 +29,32 @@
         <Channel id-channel="TEST_CHANNEL">
           <filemanager-call class="it.greenvulcano.gvesb.virtual.file.FileManagerCall" name="test_check_file" type="call">
             <FileCommands>
-                <FileSearchCommand sourcePath="${{user.dir}}/target/test-classes" filePattern="ognl{{property[&apos;fileMask&apos;]}}"
+                <FileSearchCommand sourcePath="${{user.dir}}/target/test-classes" filePattern="@{{fileMask}}"
                                    isCritical="true" type="file-command" class="it.greenvulcano.gvesb.virtual.file.command.GVSearch"/>
             </FileCommands>
           </filemanager-call>
           <filemanager-call class="it.greenvulcano.gvesb.virtual.file.FileManagerCall" name="test_copy_file" type="call">
             <FileCommands>
                 <FileMoveCommand sourcePath="${{user.dir}}/target/test-classes" targetPath="${{java.io.tmpdir}}/TestFileManager"
-                                 filePattern="ognl{{property[&apos;filename&apos;]}}" isCritical="true" type="file-command"
+                                 filePattern="ognl{{#object.property[&apos;filename&apos;]}}" isCritical="true" type="file-command"
                                  class="it.greenvulcano.gvesb.virtual.file.command.GVMove"/>
                 <FileCopyCommand sourcePath="${{java.io.tmpdir}}/TestFileManager" targetPath="${{user.dir}}/target/test-classes"
                                  filePattern="@{{filename}}" isCritical="true" type="file-command"
                                  class="it.greenvulcano.gvesb.virtual.file.command.GVCopy"/>
-                <FileMoveCommand sourcePath="${{java.io.tmpdir}}/TestFileManager/ognl{{property[&apos;filename&apos;]}}"
+                <FileMoveCommand sourcePath="${{java.io.tmpdir}}/TestFileManager/ognl{{#object.property[&apos;filename&apos;]}}"
                                  targetPath="${{java.io.tmpdir}}/TestFileManager/@{{renamedFilename}}"
                                  isCritical="true" type="file-command" class="it.greenvulcano.gvesb.virtual.file.command.GVMove"/>
-                <FileDeleteCommand targetPath="${{java.io.tmpdir}}/TestFileManager" filePattern="ognl{{property[&apos;renamedFilename&apos;]}}"
+                <FileDeleteCommand targetPath="${{java.io.tmpdir}}/TestFileManager" filePattern="ognl{{#object.property[&apos;renamedFilename&apos;]}}"
                                    isCritical="true" type="file-command" class="it.greenvulcano.gvesb.virtual.file.command.GVDelete"/>
             </FileCommands>
           </filemanager-call>
           <filemanager-call class="it.greenvulcano.gvesb.virtual.file.FileManagerCall" name="test_zip_file" type="call">
             <FileCommands>
                 <FileZipCommand sourcePath="${{user.dir}}/target/test-classes" targetPath="${{java.io.tmpdir}}/TestFileManager"
-                                filePattern="ognl{{property[&apos;filename&apos;]}}" zipFileName="@{{zippedFilename}}"
+                                filePattern="ognl{{#object.property[&apos;filename&apos;]}}" zipFileName="@{{zippedFilename}}"
                                 isCritical="true" type="file-command" class="it.greenvulcano.gvesb.virtual.file.command.GVZip"/>
                 <FileUnZipCommand sourcePath="${{java.io.tmpdir}}/TestFileManager" targetPath="${{java.io.tmpdir}}/TestFileManager"
-                                  zipFileName="ognl{{property[&apos;zippedFilename&apos;]}}" isCritical="true" type="file-command"
+                                  zipFileName="ognl{{#object.property[&apos;zippedFilename&apos;]}}" isCritical="true" type="file-command"
                                   class="it.greenvulcano.gvesb.virtual.file.command.GVUnZip"/>
             </FileCommands>
           </filemanager-call>
@@ -125,7 +125,7 @@
             <FTPManager hostname="localhost" port="13021" password="{3DES}pl1YKFjWlqMfdTIbxY17Mg==" username="test_user" hostType="UNIX"
                         autoConnect="false" type="remote-manager" class="it.greenvulcano.util.remotefs.ftp.FTPManager"/>
             <RemoteCommands>
-                <RemoteDownloadCommand remotePath="." remoteFilePattern="ognl{{property[&apos;fileMask&apos;]}}"
+                <RemoteDownloadCommand remotePath="." remoteFilePattern="@{{fileMask}}"
                                        toGVBufferExpression="setObject(new java.lang.String(#input))" isCritical="true" type="remote-command"
                                        class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"/>
             </RemoteCommands>
@@ -134,7 +134,7 @@
             <FTPManager hostname="@{{HOST}}" port="13021" password="@{{PASSWORD}}" username="@{{USER}}" hostType="UNIX"
                         autoConnect="false" type="remote-manager" class="it.greenvulcano.util.remotefs.ftp.FTPManager"/>
             <RemoteCommands>
-                <RemoteDownloadCommand remotePath="." remoteFilePattern="ognl{{property[&apos;fileMask&apos;]}}"
+                <RemoteDownloadCommand remotePath="." remoteFilePattern="@{{fileMask}}"
                                        toGVBufferExpression="setObject(new java.lang.String(#input))" isCritical="true" type="remote-command"
                                        class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"/>
             </RemoteCommands>
@@ -146,7 +146,7 @@
                 <RemoteUploadCommand remotePath="." sourceFilePattern="@{{fileMask}}"
                                      sourcePath="${{user.dir}}/target/test-classes" isCritical="true" type="remote-command"
                                      class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"/>
-                <RemoteSearchCommand sourcePath="." filePattern="ognl{{property[&apos;fileMask&apos;]}}"
+                <RemoteSearchCommand sourcePath="." filePattern="@{{fileMask}}"
                                      isCritical="true" type="remote-command"
                                      class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"/>
             </RemoteCommands>
@@ -158,7 +158,7 @@
                 <RemoteUploadCommand remotePath="." sourceFilePattern="@{{fileMask}}"
                                      sourcePath="${{user.dir}}/target/test-classes" isCritical="true" type="remote-command"
                                      class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"/>
-                <RemoteSearchCommand sourcePath="." filePattern="ognl{{property[&apos;fileMask&apos;]}}"
+                <RemoteSearchCommand sourcePath="." filePattern="@{{fileMask}}"
                                      isCritical="true" type="remote-command"
                                      class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"/>
             </RemoteCommands>
@@ -167,7 +167,7 @@
             <FTPManager hostname="localhost" port="13021" password="{3DES}pl1YKFjWlqMfdTIbxY17Mg==" username="test_user" hostType="UNIX"
                         autoConnect="false" type="remote-manager" class="it.greenvulcano.util.remotefs.ftp.FTPManager"/>
             <RemoteCommands>
-                <RemoteUploadCommand remotePath="." sourceFilePattern="ognl{{property[&apos;fileMask&apos;]}}"
+                <RemoteUploadCommand remotePath="." sourceFilePattern="@{{fileMask}}"
                                      fromGVBufferExpression="getObject().getBytes()" isCritical="true" type="remote-command"
                                      class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"/>
                 <RemoteSearchCommand sourcePath="." filePattern="@{{fileMask}}"
@@ -179,7 +179,7 @@
             <FTPManager hostname="@{{HOST}}" port="13021" password="@{{PASSWORD}}" username="@{{USER}}" hostType="UNIX"
                         autoConnect="false" type="remote-manager" class="it.greenvulcano.util.remotefs.ftp.FTPManager"/>
             <RemoteCommands>
-                <RemoteUploadCommand remotePath="." sourceFilePattern="ognl{{property[&apos;fileMask&apos;]}}"
+                <RemoteUploadCommand remotePath="." sourceFilePattern="@{{fileMask}}"
                                      fromGVBufferExpression="getObject().getBytes()" isCritical="true" type="remote-command"
                                      class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"/>
                 <RemoteSearchCommand sourcePath="." filePattern="@{{fileMask}}"
@@ -191,11 +191,11 @@
             <FTPManager hostname="localhost" port="13021" password="{3DES}pl1YKFjWlqMfdTIbxY17Mg==" username="test_user" hostType="UNIX"
                         autoConnect="false" type="remote-manager" class="it.greenvulcano.util.remotefs.ftp.FTPManager"/>
             <RemoteCommands>
-                <RemoteMoveCommand targetPath="." oldName="ognl{{property[&apos;fileMask&apos;]}}"
+                <RemoteMoveCommand targetPath="." oldName="@{{fileMask}}"
                                    newName="@{{fileMask}}"
                                    isCritical="true" type="remote-command"
                                    class="it.greenvulcano.gvesb.virtual.file.remote.command.GVMove"/>
-                <RemoteSearchCommand sourcePath="." filePattern="ognl{{property[&apos;fileMask&apos;]}}"
+                <RemoteSearchCommand sourcePath="." filePattern="@{{fileMask}}"
                                      isCritical="true" type="remote-command"
                                      class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"/>
             </RemoteCommands>

@@ -46,7 +46,7 @@ public class GVCatalog extends Catalog
     {
         if (!PropertiesHandler.isExpanded(fileName)) {
             try {
-                fileName = PropertiesHandler.expand(fileName, null);
+                fileName = PropertiesHandler.expand(fileName);
             }
             catch (PropertiesHandlerException exc) {
                 exc.printStackTrace();

@@ -54,25 +54,30 @@ public class ExceptionCondition implements GVCondition
     /**
      * @see it.greenvulcano.gvesb.internal.condition.GVCondition#init(org.w3c.dom.Node)
      */
-    public void init(Node node) throws XMLConfigException
+    public void init(Node node) throws GVConditionException
     {
-        condition = XMLConfig.get(node, "@condition", "");
-        logger.debug("Initializing ExceptionCondition: " + condition);
-        throwException = XMLConfig.getBoolean(node, "@throw-exception", false);
-        NodeList nl = XMLConfig.getNodeList(node, "ExceptionDef");
-
-        if ((nl == null) || (nl.getLength() == 0)) {
-            ExceptionDef exception = new ExceptionDef();
-            logger.debug("Adding Exception: " + exception);
-            exceptionVector.add(exception);
-            return;
+        try {
+            condition = XMLConfig.get(node, "@condition", "");
+            logger.debug("Initializing ExceptionCondition: " + condition);
+            throwException = XMLConfig.getBoolean(node, "@throw-exception", false);
+            NodeList nl = XMLConfig.getNodeList(node, "ExceptionDef");
+    
+            if ((nl == null) || (nl.getLength() == 0)) {
+                ExceptionDef exception = new ExceptionDef();
+                logger.debug("Adding Exception: " + exception);
+                exceptionVector.add(exception);
+                return;
+            }
+    
+            for (int i = 0; i < nl.getLength(); i++) {
+                ExceptionDef exception = new ExceptionDef();
+                exception.init(nl.item(i));
+                logger.debug("Adding Exception: " + exception);
+                exceptionVector.add(exception);
+            }
         }
-
-        for (int i = 0; i < nl.getLength(); i++) {
-            ExceptionDef exception = new ExceptionDef();
-            exception.init(nl.item(i));
-            logger.debug("Adding Exception: " + exception);
-            exceptionVector.add(exception);
+        catch (Exception exc) {
+            throw new GVConditionException("Error initializing ExceptionCondition", exc);
         }
     }
 

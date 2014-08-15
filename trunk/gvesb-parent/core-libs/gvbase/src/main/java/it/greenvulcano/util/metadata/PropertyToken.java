@@ -22,8 +22,6 @@ package it.greenvulcano.util.metadata;
 import java.util.Map;
 import java.util.Vector;
 
-import org.mozilla.javascript.Scriptable;
-
 /**
  * PropertyToken class
  *
@@ -85,23 +83,22 @@ public class PropertyToken
     /**
      * @param inProperties
      * @param obj
-     * @param scope
      * @param extra
      * @return Returns the value.
      * @throws PropertiesHandlerException
      */
-    public String getValue(Map<String, Object> inProperties, Object obj, Scriptable scope, Object extra)
+    public String getValue(Map<String, Object> inProperties, Object obj, Object extra)
             throws PropertiesHandlerException
     {
         String retVal = value;
         if (subTokens != null) {
             for (int i = 0; i < subTokens.size(); i++) {
                 PropertyToken subToken = subTokens.elementAt(i);
-                retVal += subToken.getValue(inProperties, obj, scope, extra);
+                retVal += subToken.getValue(inProperties, obj, extra);
             }
         }
         if (!type.equals("")) {
-            retVal = PropertiesHandler.expandInternal(type, retVal, inProperties, obj, scope, extra);
+            retVal = PropertiesHandler.expandInternal(type, retVal, inProperties, obj, extra);
         }
         return retVal;
     }

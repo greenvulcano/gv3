@@ -31,7 +31,7 @@
                     name="TestJMXInvoke" object-name="GreenVulcano:Component=XMLConfig,Group=configuration,Name=XMLConfig,Type=it.greenvulcano.configuration.XMLConfig,*">
             <invoke-method type="method" class="it.greenvulcano.gvesb.virtual.jmx.methods.JMXInvokeOperation"
                            method="load">
-              <invoke-parameter value="ognl{{object}}" type="String"/>
+              <invoke-parameter value="ognl{{#object.object}}" type="String"/>
             </invoke-method>
           </jmx-call>
           <jmx-call type="call" class="it.greenvulcano.gvesb.virtual.jmx.JMXCallOperation"

@@ -21,16 +21,11 @@ package it.greenvulcano.util.metadata;
 
 import java.util.Map;
 
-import org.mozilla.javascript.Scriptable;
-
 /**
  * Helper interface for metadata substitution in strings.
  *
- *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- *
- *
  */
 public interface PropertyHandler
 {
@@ -60,8 +55,6 @@ public interface PropertyHandler
      *        the hashTable containing the properties
      * @param object
      *        the object to work with
-     * @param scope
-     *        the JavaScript scope
      * @param extra
      *        a extra object
      * @return the expanded string
@@ -70,7 +63,7 @@ public interface PropertyHandler
      *         if error occurs and the flag THROWS_EXCEPTION is set for the
      *         current thread
      */
-    public String expand(String type, String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    public String expand(String type, String str, Map<String, Object> inProperties, Object object, 
             Object extra) throws PropertiesHandlerException;
 
 }

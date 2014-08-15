@@ -80,7 +80,6 @@
     <version.openejb>4.5.2</version.openejb>
     <version.openspcoop>1.4.1</version.openspcoop>
     <version.quartz>1.8.5</version.quartz>
-    <version.rhino.js>1.7R2</version.rhino.js>
     <version.rmiio>2.0.2</version.rmiio>
     <version.sandesha2>1.4</version.sandesha2>
     <version.saxon>9.1.0.8</version.saxon>
@@ -368,13 +367,6 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz-oracle</artifactId>
             <version>${version.quartz}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>rhino</groupId>
-            <artifactId>js</artifactId>
-            <version>${version.rhino.js}</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

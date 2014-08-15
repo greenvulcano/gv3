@@ -36,7 +36,6 @@ import java.sql.Types;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.mozilla.javascript.Scriptable;
 
 /**
  * @version 3.0.0 10/giu/2010
@@ -102,26 +101,25 @@ public class GVESBPropertyHandler implements PropertyHandler
      * @param str
      * @param inProperties
      * @param object
-     * @param scope
      * @param extra
      */
     @Override
-    public String expand(String type, String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    public String expand(String type, String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         if (type.startsWith("sqllist")) {
-            return expandSQLListProperties(str, inProperties, object, scope, extra);
+            return expandSQLListProperties(str, inProperties, object, extra);
         }
         else if (type.startsWith("sqltable")) {
-            return expandSQLTableProperties(str, inProperties, object, scope, extra);
+            return expandSQLTableProperties(str, inProperties, object, extra);
         }
         else if (type.startsWith("sql")) {
-            return expandSQLProperties(str, inProperties, object, scope, extra);
+            return expandSQLProperties(str, inProperties, object, extra);
         }
         return str;
     }
 
-    private String expandSQLProperties(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private String expandSQLProperties(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         PreparedStatement ps = null;
@@ -132,7 +130,7 @@ public class GVESBPropertyHandler implements PropertyHandler
         boolean intConn = false;
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
             int pIdx = str.indexOf("::");
             if (pIdx != -1) {
@@ -219,7 +217,7 @@ public class GVESBPropertyHandler implements PropertyHandler
     }
 
     private String expandSQLListProperties(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Object extra) throws PropertiesHandlerException
     {
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -230,7 +228,7 @@ public class GVESBPropertyHandler implements PropertyHandler
         boolean intConn = false;
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
             int pIdx = str.indexOf("::");
             if (pIdx != -1) {
@@ -326,7 +324,7 @@ public class GVESBPropertyHandler implements PropertyHandler
     }
 
     private String expandSQLTableProperties(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Object extra) throws PropertiesHandlerException
     {
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -336,7 +334,7 @@ public class GVESBPropertyHandler implements PropertyHandler
         boolean intConn = false;
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
             int pIdx = str.indexOf("::");
             if (pIdx != -1) {

@@ -21,17 +21,13 @@ package it.greenvulcano.gvesb.internal.data;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.expression.ExpressionEvaluator;
 import it.greenvulcano.expression.ExpressionEvaluatorException;
-import it.greenvulcano.expression.ExpressionEvaluatorHelper;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.internal.GVInternalException;
-import it.greenvulcano.js.initializer.JSInit;
-import it.greenvulcano.js.initializer.JSInitManager;
-import it.greenvulcano.js.util.JavaScriptHelper;
-import it.greenvulcano.js.util.ScriptCache;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.script.ScriptExecutor;
+import it.greenvulcano.script.ScriptExecutorFactory;
 import it.greenvulcano.util.crypto.CryptoHelper;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
@@ -45,9 +41,6 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -97,10 +90,6 @@ public class ChangeGVBuffer
      * define the base64 operation "decode".
      */
     public static final String      BASE64_OP_DECODE          = "decode";
-    /**
-     * define the default script name.
-     */
-    private static final String     INTERNAL_SCRIPT           = "internal";
 
     /**
      * if true the GVBuffer body is canceled.
@@ -163,25 +152,13 @@ public class ChangeGVBuffer
      */
     private boolean                 base64OpEncode            = false;
     /**
-     * if true is configured a JavaScript operation.
+     * if true is configured a Script operation.
      */
-    private boolean                 javascriptOn              = false;
+    private boolean                 scriptOn                  = false;
     /**
-     * The execution scope for the script.
+     * The script executor instance.
      */
-    private String                  scopeName                 = "";
-    /**
-     * The script file name.
-     */
-    private String                  scriptName                = "";
-    /**
-     * The script.
-     */
-    private String                  script                    = "";
-    /**
-     * The execution context.
-     */
-    private Context                 cx                        = null;
+    private ScriptExecutor          script                    = null;
     /**
      * The GVBuffer body builder.
      */
@@ -199,7 +176,6 @@ public class ChangeGVBuffer
      * field is true the body is emptied
      */
     private String                  overwriteBodyWithProperty = "";
-    private String                  ognlScript;
 
     /**
      * guard for an undefined field value.
@@ -220,7 +196,6 @@ public class ChangeGVBuffer
             clearData = XMLConfig.getBoolean(node, "@clear-data", false);
             system = XMLConfig.get(node, "@system", "");
             service = XMLConfig.get(node, "@service", "");
-            ognlScript = XMLConfig.get(node, "OGNLScript");
 
             int operations = 0;
 
@@ -261,18 +236,10 @@ public class ChangeGVBuffer
                 base64OpEncode = base64Op.equals(BASE64_OP_ENCODE);
             }
 
-            scopeName = XMLConfig.get(node, "@scope-name", "");
-            if (!scopeName.equals("")) {
-                scriptName = XMLConfig.get(node, "@script-file", INTERNAL_SCRIPT);
-                if (scriptName.equals(INTERNAL_SCRIPT)) {
-                    script = XMLConfig.get(node, "Script", "");
-                    if (script.equals("")) {
-                        throw new XMLConfigException(
-                                "Must be defined at least the @script-file attribute or the Script element. Node: "
-                                        + XPathFinder.buildXPath(node));
-                    }
-                }
-                javascriptOn = true;
+            Node scriptNode = XMLConfig.getNode(node, "Script");
+            if (scriptNode != null) {
+                script = ScriptExecutorFactory.createSE(scriptNode);
+                scriptOn = true;
                 operations++;
             }
 
@@ -383,11 +350,7 @@ public class ChangeGVBuffer
         if (clearData) {
             gvBuffer.setObject(null);
         }
-
-        if ((ognlScript != null) && (ognlScript.length() > 0)) {
-            handleOgnlScript(gvBuffer, environment);
-        }
-        if (!clearData) {
+        else {
             if (bodyBuilderOn) {
                 gvBuffer.setObject(bodyBuilder.getBuffer(gvBuffer));
             }
@@ -400,34 +363,12 @@ public class ChangeGVBuffer
             else if (base64On) {
                 handleBase64(gvBuffer);
             }
-            else if (javascriptOn) {
-                handleJavaScript(gvBuffer, environment);
+            else if (scriptOn) {
+                handleScript(gvBuffer, environment);
             }
         }
 
         return gvBuffer;
-    }
-
-    /**
-     * @param gvBuffer
-     * @param environment
-     */
-    private void handleOgnlScript(GVBuffer gvBuffer, Map<String, Object> environment)
-            throws ExpressionEvaluatorException, InterruptedException
-    {
-        ExpressionEvaluatorHelper.startEvaluation();
-        try {
-            ExpressionEvaluatorHelper.addToContext("environment", environment);
-            ExpressionEvaluator expressionEvaluator = ExpressionEvaluatorHelper.getExpressionEvaluator(ExpressionEvaluatorHelper.OGNL_EXPRESSION_LANGUAGE);
-            expressionEvaluator.getValue(ognlScript, gvBuffer);
-        }
-        catch (ExpressionEvaluatorException exc) {
-            ThreadUtils.checkInterrupted(exc);
-            throw exc;
-        }
-        finally {
-            ExpressionEvaluatorHelper.endEvaluation();
-        }
     }
 
     /**
@@ -502,30 +443,18 @@ public class ChangeGVBuffer
      * @throws GVInternalException
      *         if error occurs
      */
-    private void handleJavaScript(GVBuffer gvBuffer, Map<String, Object> environment) throws GVInternalException, InterruptedException
+    private void handleScript(GVBuffer gvBuffer, Map<String, Object> environment) throws GVInternalException, InterruptedException
     {
-        cx = ContextFactory.getGlobal().enterContext();
-        Scriptable scope = null;
         try {
-            scope = JSInitManager.instance().getJSInit(scopeName).getScope();
-            scope = JSInit.setProperty(scope, "environment", environment);
-            scope = JSInit.setProperty(scope, "data", gvBuffer);
-            scope = JSInit.setProperty(scope, "logger", logger);
-            if (!scriptName.equals(INTERNAL_SCRIPT)) {
-                script = ScriptCache.instance().getScript(scriptName);
-            }
-            String localScript = script;
-            if (!PropertiesHandler.isExpanded(script)) {
-                Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
-                localScript = PropertiesHandler.expand(script, params, gvBuffer);
-                logger.debug("Executing JavaScript:\n" + localScript);
-            }
-            JavaScriptHelper.executeScript(localScript, scriptName, scope, cx);
+            script.putProperty("environment", environment);
+            script.putProperty("data", gvBuffer);
+            script.putProperty("logger", logger);
+            script.execute(GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true), gvBuffer);
         }
         catch (Exception exc) {
             ThreadUtils.checkInterrupted(exc);
-            throw new GVInternalException("JAVASCRIPT_ERROR", new String[][]{{"scope", scopeName},
-                    {"script", scriptName}, {"message", exc.toString()}}, exc);
+            throw new GVInternalException("SCRIPT_ERROR", new String[][]{{"engine", script.getEngineName()},
+                    {"script", script.getScriptName()}, {"message", exc.toString()}}, exc);
         }
     }
 
@@ -533,14 +462,23 @@ public class ChangeGVBuffer
      * Perform cleanup operations.
      * 
      */
-    public final void cleanUp()
+    public void cleanUp()
     {
         if (bodyBuilder != null) {
             bodyBuilder.cleanUp();
         }
-        if (cx != null) {
-            cx = null;
-            Context.exit();
+        if (script != null) {
+            script.cleanUp();
         }
     }
+    
+    public void destroy()
+    {
+        if (script != null) {
+            script.destroy();
+        }
+        script = null;
+        bodyBuilder = null;
+    }
+    
 }

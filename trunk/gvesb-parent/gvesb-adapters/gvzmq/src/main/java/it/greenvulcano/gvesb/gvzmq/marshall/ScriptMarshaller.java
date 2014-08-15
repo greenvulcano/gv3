@@ -22,13 +22,9 @@ package it.greenvulcano.gvesb.gvzmq.marshall;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.gvzmq.ZMQAdapterException;
-import it.greenvulcano.js.initializer.JSInit;
-import it.greenvulcano.js.initializer.JSInitManager;
-import it.greenvulcano.js.util.JavaScriptHelper;
+import it.greenvulcano.script.ScriptExecutor;
+import it.greenvulcano.script.ScriptExecutorFactory;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Node;
 import org.zeromq.ZMsg;
 
@@ -36,16 +32,14 @@ import org.zeromq.ZMsg;
  * @version 3.2.0 21/mar/2012
  * @author GreenVulcano Developer Team
  */
-public class JSMarshaller implements Decoder, Encoder
+public class ScriptMarshaller implements Decoder, Encoder
 {
-
-    private String script    = null;
-    private String scopeName = null;
+    private ScriptExecutor scriptEx = null;
 
     /**
      * 
      */
-    public JSMarshaller()
+    public ScriptMarshaller()
     {
         // TODO Auto-generated constructor stub
     }
@@ -57,14 +51,7 @@ public class JSMarshaller implements Decoder, Encoder
     public void init(Node node) throws ZMQAdapterException
     {
         try {
-            scopeName = XMLConfig.get(node, "@scope-name", "gvesb");
-            script = XMLConfig.get(node, "Script", "");
-            if ("".equals(script)) {
-                throw new ZMQAdapterException("Invalid Script content for JSMarshaller");
-            }
-        }
-        catch (ZMQAdapterException exc) {
-            throw exc;
+            scriptEx = ScriptExecutorFactory.createSE(XMLConfig.getNode(node, "Script"));
         }
         catch (Exception exc) {
             throw new ZMQAdapterException("GVZMQ_JSMARSHALLER_INIT_ERROR", exc);
@@ -78,23 +65,16 @@ public class JSMarshaller implements Decoder, Encoder
     @Override
     public ZMsg encode(GVBuffer gvbIn, ZMsg msgIn) throws ZMQAdapterException
     {
-        Context cx = ContextFactory.getGlobal().enterContext();
-        Scriptable scope = null;
         ZMsg msgOut = new ZMsg();
         try {
-            String scopeName = "gvesb";
-            scope = JSInitManager.instance().getJSInit(scopeName).getScope();
-            scope = JSInit.setProperty(scope, "msgIn", msgIn);
-            scope = JSInit.setProperty(scope, "gvbIn", gvbIn);
-            scope = JSInit.setProperty(scope, "msgOut", msgOut);
-            JavaScriptHelper.executeScript(script, "encode", scope, cx);
+            scriptEx.putProperty("msgIn", msgIn);
+            scriptEx.putProperty("gvbIn", gvbIn);
+            scriptEx.putProperty("msgOut", msgOut);
+            scriptEx.execute(null);
             return msgOut;
         }
         catch (Exception exc) {
             throw new ZMQAdapterException("GVZMQ_ENCODE_ERROR", exc);
-        }
-        finally {
-            Context.exit();
         }
 
         /*ZMsg msgOut = new ZMsg();
@@ -117,23 +97,16 @@ public class JSMarshaller implements Decoder, Encoder
     @Override
     public GVBuffer decode(ZMsg msgIn, GVBuffer gvbIn) throws ZMQAdapterException
     {
-        Context cx = ContextFactory.getGlobal().enterContext();
-        Scriptable scope = null;
         GVBuffer gvbOut = new GVBuffer(gvbIn);
         try {
-            String scopeName = "gvesb";
-            scope = JSInitManager.instance().getJSInit(scopeName).getScope();
-            scope = JSInit.setProperty(scope, "msgIn", msgIn);
-            scope = JSInit.setProperty(scope, "gvbIn", gvbIn);
-            scope = JSInit.setProperty(scope, "gvbOut", gvbOut);
-            JavaScriptHelper.executeScript(script, "decode", scope, cx);
+            scriptEx.putProperty("msgIn", msgIn);
+            scriptEx.putProperty("gvbIn", gvbIn);
+            scriptEx.putProperty("gvbOut", gvbOut);
+            scriptEx.execute(null);
             return gvbOut;
         }
         catch (Exception exc) {
             throw new ZMQAdapterException("GVZMQ_DECODE_ERROR", exc);
-        }
-        finally {
-            Context.exit();
         }
 
         /*try {

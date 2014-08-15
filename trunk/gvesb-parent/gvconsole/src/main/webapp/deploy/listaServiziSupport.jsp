@@ -20,13 +20,14 @@
     <li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active"><a>Deploy Support Parameter</a></li>
 </ul> 
   <html:form action="/deploySupport" method="post" enctype="multipart/form-data"> 
-   <input type="hidden" name="support"/>
+   <input type="hidden" name="servizio" value=''/>
    <input type="hidden" name="file" value='GVSupport'>
+   <input type="hidden" name="tipoOggetto" value=''>  
    <table cellpadding="4" cellspacing="0">
     <%int numRighe=0;%>
-   <c:forEach items="${listaSupport}" var="servizi">
+   <c:forEach items="${listaSupport}" var="parametro">
    	<tr>   		 
-   		 <td><a href="javascript:invocaDeploy('<c:out value='${servizi}'/>');"><c:out value='${servizi}'/></a></td>
+   		 <td><a href="javascript:invocaDeploy('<c:out value='${parametro}'/>');"><c:out value='${parametro}'/></a></td>
 		</tr>
 		<%numRighe++;%>
 	 </c:forEach>
@@ -37,8 +38,9 @@
   </html:form>
 </div>
   <script> 
-   function invocaDeploy(support){
-    document.forms[0].support.value=support;
+   function invocaDeploy(parametro){
+	document.forms[0].servizio.value='';
+	document.forms[0].tipoOggetto.value=parametro;
     document.forms[0].submit();
    } 
   </script>

@@ -123,7 +123,7 @@ public class FileSystemDocProxy implements DocumentProxy
 
             if (!PropertiesHandler.isExpanded(file)) {
                 try {
-                    file = PropertiesHandler.expand(file, null);
+                    file = PropertiesHandler.expand(file);
                 }
                 catch (PropertiesHandlerException exc) {
                     exc.printStackTrace();

@@ -19,18 +19,20 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Category: Custom
 -->
-<!ELEMENT zmq-call (Description?, ServiceAlias?, JSDecoder?, JSEncoder?)>
+<!ELEMENT zmq-call (Description?, ServiceAlias?, ScriptDecoder?, ScriptEncoder?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -81,18 +83,20 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                               the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Category: Custom
 -->
-<!ELEMENT zmq-publish (Description?, ServiceAlias?, JSEncoder?)>
+<!ELEMENT zmq-publish (Description?, ServiceAlias?, ScriptEncoder?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -129,48 +133,34 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT JSDecoder (Description?, Script)>
+<!ELEMENT ScriptDecoder (Description?, Script)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
-<!ATTLIST JSDecoder type CDATA #FIXED "zmq-decoder">
+<!ATTLIST ScriptDecoder type CDATA #FIXED "zmq-decoder">
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
-<!ATTLIST JSDecoder class CDATA #FIXED "it.greenvulcano.gvesb.gvzmq.marshall.JSMarshaller">
-<!--
-    If it is defined, represent the 'scope' to be used for script execution.
-    Default to 'gvesb'.
-
-    #References: gvesb:document('GVSupport')/GVSupport/GVJavaScriptConfig/JavaScriptInitializers/*[@type='jsinit']/@name
--->
-<!ATTLIST JSDecoder scope-name CDATA #IMPLIED>
+<!ATTLIST ScriptDecoder class CDATA #FIXED "it.greenvulcano.gvesb.gvzmq.marshall.ScriptMarshaller">
 
 <!--
     Encode a GVBuffer instance to a 0MQ message.
 
     #SelectOnInsert
 -->
-<!ELEMENT JSEncoder (Description?, Script)>
+<!ELEMENT ScriptEncoder (Description?, Script)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
-<!ATTLIST JSEncoder type CDATA #FIXED "zmq-encoder">
+<!ATTLIST ScriptEncoder type CDATA #FIXED "zmq-encoder">
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
-<!ATTLIST JSEncoder class CDATA #FIXED "it.greenvulcano.gvesb.gvzmq.marshall.JSMarshaller">
-<!--
-    If it is defined, represent the 'scope' to be used for script execution.
-    Default to 'gvesb'.
-
-    #References: gvesb:document('GVSupport')/GVSupport/GVJavaScriptConfig/JavaScriptInitializers/*[@type='jsinit']/@name
--->
-<!ATTLIST JSEncoder scope-name CDATA #IMPLIED>
+<!ATTLIST ScriptEncoder class CDATA #FIXED "it.greenvulcano.gvesb.gvzmq.marshall.ScriptMarshaller">
 
 
 <!--
@@ -259,7 +249,7 @@
 
     #Label: @name
 -->
-<!ELEMENT GVCoreInvoker (Description?, JSDecoder?, JSEncoder?)>
+<!ELEMENT GVCoreInvoker (Description?, ScriptDecoder?, ScriptEncoder?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.

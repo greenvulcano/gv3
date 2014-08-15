@@ -14,7 +14,6 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.xml.XMLUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,10 +30,6 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -203,8 +198,7 @@ public class GVBpelEngineServer implements ConfigurationListener, ShutdownEventL
                     logger.info("Bpel engine starting");
                     logger.info("***********************************************");
                     logger.info("bpelNode=" + bpelNode.toString());
-                    deployUnitProcess = PropertiesHandler.expand(XMLConfig.get(bpelNode, "@deployMentUnitProcess"),
-                            null);
+                    deployUnitProcess = PropertiesHandler.expand(XMLConfig.get(bpelNode, "@deployMentUnitProcess"));
                     transactionTimeout = XMLConfig.getInteger(bpelNode, "@transactionTimeout", 30);
                     Collection<Node> listProp = XMLConfig.getNodeListCollection(bpelNode, "EngineProperties");
                     for (Node property : listProp) {

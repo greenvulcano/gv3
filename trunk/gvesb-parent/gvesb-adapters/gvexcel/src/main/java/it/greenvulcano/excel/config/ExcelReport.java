@@ -255,7 +255,7 @@ public class ExcelReport
                     for (int k = 0; k < pStatements.size(); k++) {
                         String pStatement = pStatements.get(k);
                         if (props != null) {
-                            pStatement = PropertiesHandler.expand(pStatement, props, connection);
+                            pStatement = PropertiesHandler.expand(pStatement, props, null, connection);
                         }
                         logger.debug("Executing preparation statement: " + pStatement);
                         statement = connection.createStatement();

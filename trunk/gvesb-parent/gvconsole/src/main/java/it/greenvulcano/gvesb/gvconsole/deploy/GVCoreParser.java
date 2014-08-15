@@ -1043,7 +1043,7 @@ public class GVCoreParser
 
     private Node getGVTask(Document xml) throws XMLUtilsException
     {
-        Node gvTaskConfiguration = XMLUtils.selectSingleNode_S(xml, "/GVCore/GVTaskManagerConfiguration");;
+        Node gvTaskConfiguration = XMLUtils.selectSingleNode_S(xml, "/GVCore/GVTaskManagerConfiguration");
         return gvTaskConfiguration;
     }
 
@@ -2155,6 +2155,9 @@ public class GVCoreParser
 	                    logger.debug("aggiornaGVTask - Copied all TaskGroup[" + name + "] data");
 	                    continue;
 	                }
+	                String enabled = parser.get(groupListZip.item(i), "@enabled", "true");
+                    ((Element) groupServer).setAttribute("enabled", enabled);
+
 	                NodeList taskZip = parser.selectNodeList(groupListZip.item(i), "*[@type='task']");
 	                for (int k = 0; k < taskZip.getLength(); k++) {
 	                    Node taskZipK = taskZip.item(k);
@@ -2361,7 +2364,7 @@ public class GVCoreParser
                 logger.error("File [" + fileOrigine + "] not found");
                 return;
             }
-            File fop = new File(PropertiesHandler.expand(fileDestinazione, null));
+            File fop = new File(PropertiesHandler.expand(fileDestinazione));
             FileUtils.forceMkdir(fop.getParentFile());
             out = new FileOutputStream(fop);
             IOUtils.copy(in, out);
@@ -2387,7 +2390,7 @@ public class GVCoreParser
             logger.error("Directory [" + dirOrigine + "] not found");
             return;
         }
-        destDir = new File(PropertiesHandler.expand(dirDestinazione, null));
+        destDir = new File(PropertiesHandler.expand(dirDestinazione));
         FileUtils.copyDirectoryToDirectory(srcDir, destDir);
     }
 
@@ -2486,7 +2489,7 @@ public class GVCoreParser
             String nomeDataSourceSet = "Default";
             String pathServer = parser.get(serverXml, "/GVCore/GVDataTransformation/DataSourceSets/DataSourceSet[@name='"
                     + nomeDataSourceSet + "']/LocalFSDataSource[@formatHandled='bin']/@repositoryHome");
-            output = PropertiesHandler.expand(pathServer, null);
+            output = PropertiesHandler.expand(pathServer);
             FileManager.cp(input, output, ".*");
         }
 
@@ -2504,7 +2507,7 @@ public class GVCoreParser
     {
         logger.debug("dirName  = " + dirName);
         String outputDir = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "xmlconfig" + File.separator
-                + "BpelProcess", null);
+                + "BpelProcess");
         File nomeProcessDir = new File(outputDir, dirName);
         nomeProcessDir.mkdirs();
         String strPath = java.lang.System.getProperty("java.io.tmpdir");
@@ -2524,7 +2527,7 @@ public class GVCoreParser
     {
         logger.debug("pathProcess  = " + pathProcess);
         logger.debug("dirName  = " + dirName);
-        String outputDir = PropertiesHandler.expand(pathProcess, null);
+        String outputDir = PropertiesHandler.expand(pathProcess);
         File nomeProcessDir = new File(outputDir, dirName);
         nomeProcessDir.mkdirs();
         String strPath = java.lang.System.getProperty("java.io.tmpdir");
@@ -2549,7 +2552,7 @@ public class GVCoreParser
         File fin = new File(inputFile);
         if (fin.exists()) {
             String outputFile = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "xmlconfig"
-                    + File.separator + "wsdl" + File.separator + nomeFile, null);
+                    + File.separator + "wsdl" + File.separator + nomeFile);
             logger.debug("inputFile  = " + nomeFile);
             logger.debug("outputFile = " + outputFile);
             copiaFile(inputFile, outputFile);
@@ -2565,7 +2568,7 @@ public class GVCoreParser
         File fin = new File(inputDir);
         if (fin.exists()) {
             String outputDir = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "xmlconfig"
-                    + File.separator + "wsdl", null);
+                    + File.separator + "wsdl");
             logger.debug("inputDir  = " + inputDir);
             logger.debug("outputDir = " + outputDir);
             copiaDir(inputDir, outputDir);

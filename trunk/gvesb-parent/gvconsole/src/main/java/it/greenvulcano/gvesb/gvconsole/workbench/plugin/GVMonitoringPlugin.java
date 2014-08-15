@@ -1007,7 +1007,7 @@ public class GVMonitoringPlugin implements TestPlugin
         //
         throughputUrl = XMLConfig.get(configNode, "Throughput/@throughputUrl", "");
         jmxNotFilter = XMLConfig.get(configNode, "@objectName", "");
-        jmxNotFilter = PropertiesHandler.expand(jmxNotFilter, null);
+        jmxNotFilter = PropertiesHandler.expand(jmxNotFilter);
 
         // Add GVMonitoringPlugin as listener for notification
         //

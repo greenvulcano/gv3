@@ -63,11 +63,11 @@ public class PropertiesHandlerTestCase extends TestCase
     {
         String match = System.getProperty("java.runtime.name");
         String src = "${{java.runtime.name}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
 
         src = "sp{{java.runtime.name}}";
-        dest = PropertiesHandler.expand(src, null);
+        dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
 
@@ -78,8 +78,56 @@ public class PropertiesHandlerTestCase extends TestCase
     public void testExpand3() throws Exception
     {
         String match = "10";
-        String src = "js{{basic:: var i=5; i*2}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String src = "js{{basic:: var i=5; var r = new Number(i*2); r.toFixed(0);}}";
+        String dest = PropertiesHandler.expand(src);
+        assertEquals(match, dest);
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void testExpand3a() throws Exception
+    {
+        String match = "10";
+        String src = "script{{js::basic:: var i=5; var r = new Number(i*2); r.toFixed(0);}}";
+        String dest = PropertiesHandler.expand(src);
+        assertEquals(match, dest);
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void testExpand3b() throws Exception
+    {
+        String match = "10";
+        String src = "script{{js:: var i=5; var r = new Number(i*2); r.toFixed(0);}}";
+        String dest = PropertiesHandler.expand(src);
+        assertEquals(match, dest);
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void testExpand3c() throws Exception
+    {
+        String match = "10";
+        String src = "script{{ognl:: #i=5, #i*2}}";
+        String dest = PropertiesHandler.expand(src);
+        assertEquals(match, dest);
+    }
+    
+    /**
+     *
+     */
+    @Test
+    public void testExpand3d() throws Exception
+    {
+        String match = "10";
+        String src = "script{{jruby:: i=5; i*2}}";
+        String dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
 
@@ -106,7 +154,7 @@ public class PropertiesHandlerTestCase extends TestCase
     {
         String match = "pippo";
         String src = "xpath{{file://fileManager_test.xml:://element}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
 
@@ -135,7 +183,7 @@ public class PropertiesHandlerTestCase extends TestCase
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
         String match = df.format(new Date());
         String src = "timestamp{{yyyyMMddHHmm}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
 
@@ -149,7 +197,7 @@ public class PropertiesHandlerTestCase extends TestCase
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
         String match = df.format(new Date());
         String src = "timestamp{{yyyyMMddHHmm::GMT}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
 
@@ -161,7 +209,7 @@ public class PropertiesHandlerTestCase extends TestCase
     {
         String match = "15/01/2010 12:30";
         String src = "dateformat{{201001151230::yyyyMMddHHmm::dd/MM/yyyy HH:mm}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
 
@@ -173,7 +221,7 @@ public class PropertiesHandlerTestCase extends TestCase
     {
         String match = "15/01/2010 13:30";
         String src = "dateformat{{201001151230::yyyyMMddHHmm::dd/MM/yyyy HH:mm::GMT::Europe/Rome}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
 
@@ -185,7 +233,7 @@ public class PropertiesHandlerTestCase extends TestCase
     {
         String match = "15/04/2010 14:30";
         String src = "dateformat{{201004151230::yyyyMMddHHmm::dd/MM/yyyy HH:mm::GMT::Europe/Rome}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
 
@@ -266,7 +314,7 @@ public class PropertiesHandlerTestCase extends TestCase
     public void testExpand12() throws Exception
     {
         String src = "escJS{{aaa\" \n... 'vv'}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals("aaa\\\" \\n... \\'vv\\'", dest);
     }
 
@@ -277,7 +325,7 @@ public class PropertiesHandlerTestCase extends TestCase
     public void testExpand13() throws Exception
     {
         String src = "escSQL{{aaa. 'vv'}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals("aaa. ''vv''", dest);
     }
 
@@ -288,7 +336,7 @@ public class PropertiesHandlerTestCase extends TestCase
     public void testExpand14() throws Exception
     {
         String src = "escXML{{aaa< > ' \"..&}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals("aaa&lt; &gt; &apos; &quot;..&amp;", dest);
     }
 
@@ -299,7 +347,7 @@ public class PropertiesHandlerTestCase extends TestCase
     public void testExpand15() throws Exception
     {
         String src = "replace{{aaaBBB 'BBB'..BBB::BBB::C_C}}";
-        String dest = PropertiesHandler.expand(src, null);
+        String dest = PropertiesHandler.expand(src);
         assertEquals("aaaC_C 'C_C'..C_C", dest);
     }
 
@@ -312,13 +360,13 @@ public class PropertiesHandlerTestCase extends TestCase
        String match = System.getenv("PATH");
        System.out.println("----- PATH env: " + match);
        String src = "env{{PATH}}";
-       String dest = PropertiesHandler.expand(src, null);
+       String dest = PropertiesHandler.expand(src);
        assertEquals(match, dest);
 
        match = System.getenv("HOME");
        System.out.println("----- HOME env: " + match);
        src = "env{{HOME}}";
-       dest = PropertiesHandler.expand(src, null);
+       dest = PropertiesHandler.expand(src);
        assertEquals(match, dest);
    }
 
@@ -329,7 +377,7 @@ public class PropertiesHandlerTestCase extends TestCase
    public void testExpand17() throws Exception
    {
        String src = "urlEnc{{aa bb&c/.=}}";
-       String dest = PropertiesHandler.expand(src, null);
+       String dest = PropertiesHandler.expand(src);
        assertEquals("aa+bb%26c%2F.%3D", dest);
    }
 
@@ -340,7 +388,7 @@ public class PropertiesHandlerTestCase extends TestCase
   public void testExpand18() throws Exception
   {
       String src = "urlDec{{aa+bb%26c%2F.%3D}}";
-      String dest = PropertiesHandler.expand(src, null);
+      String dest = PropertiesHandler.expand(src);
       assertEquals("aa bb&c/.=", dest);
   }
   

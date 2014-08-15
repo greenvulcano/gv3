@@ -84,7 +84,7 @@ public class OGNLExpressionEvaluator implements ExpressionEvaluator
     @Override
     public void setValue(String expression, Object value, Object object) throws ExpressionEvaluatorException
     {
-        Object tree = expressions.get(expression);
+        /*Object tree = expressions.get(expression);
         if (tree == null) {
             try {
                 tree = Ognl.parseExpression(expression);
@@ -101,7 +101,7 @@ public class OGNLExpressionEvaluator implements ExpressionEvaluator
         catch (OgnlException e) {
             logger.error("Error evaluating the expression " + expression, e);
             throw new ExpressionEvaluatorException("Error evaluating the expression " + expression, e);
-        }
+        }*/
     }
 
     /**

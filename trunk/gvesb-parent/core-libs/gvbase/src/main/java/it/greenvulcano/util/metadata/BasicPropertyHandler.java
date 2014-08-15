@@ -20,9 +20,7 @@
 package it.greenvulcano.util.metadata;
 
 import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.expression.ognl.OGNLExpressionEvaluator;
-import it.greenvulcano.js.initializer.JSInitManager;
-import it.greenvulcano.js.util.JavaScriptHelper;
+import it.greenvulcano.script.ScriptExecutor;
 import it.greenvulcano.util.txt.DateUtils;
 import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
@@ -30,14 +28,12 @@ import it.greenvulcano.util.xml.XMLUtils;
 import java.io.StringReader;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -64,6 +60,7 @@ public class BasicPropertyHandler implements PropertyHandler
         PropertiesHandler.registerHandler("dateformat", handler);
         PropertiesHandler.registerHandler("decode", handler);
         PropertiesHandler.registerHandler("decodeL", handler);
+        PropertiesHandler.registerHandler("script", handler);
         PropertiesHandler.registerHandler("js", handler);
         PropertiesHandler.registerHandler("ognl", handler);
         PropertiesHandler.registerHandler("escJS", handler);
@@ -104,13 +101,17 @@ public class BasicPropertyHandler implements PropertyHandler
      * - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
      *                          is equivalent to 'decode', with the difference that 'condX'
      *                          can be a list of values separated by 'sep'
-     * - js{{[scope::]script}} : evaluate a JavaScript script, using the scope 'scope',
-     *                           the inProperties map is added to the scope as 'inProperties',
-     *                           the object is added to the scope as 'object',
-     *                           the extra is added to the scope as 'extra'
+     * - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+     *                           the inProperties map is added to the context as 'inProperties',
+     *                           the object is added to the context as 'object',
+     *                           the extra is added to the context as 'extra'
+     * - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope',
+     *                           the inProperties map is added to the context as 'inProperties',
+     *                           the object is added to the context as 'object',
+     *                           the extra is added to the context as 'extra'
      * - ognl{{script}} : evaluate a OGNL script,
      *                    the inProperties map is added to the context as 'inProperties',
-     *                    the object is added to the context as 'object' (and is also the object on which execute the script),
+     *                    the object is added to the context as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      *                    the extra is added to the context as 'extra'
      * - escJS{{string}}    : escapes invalid JavaScript characters from 'string' (ex. ' -> \')
      * - escSQL{{string}}   : escapes invalid SQL characters from 'string' (ex. ' -> '')
@@ -128,66 +129,67 @@ public class BasicPropertyHandler implements PropertyHandler
      *        the hashTable containing the properties
      * @param object
      *        the object to work with
-     * @param scope
-     *        the JavaScript scope
      * @param extra
      * @return the expanded string
      * @throws PropertiesHandlerException
      */
     @Override
-    public String expand(String type, String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    public String expand(String type, String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         if (type.startsWith("%")) {
-            return expandClassProperties(str, inProperties, object, scope, extra);
+            return expandClassProperties(str, inProperties, object, extra);
         }
         else if (type.startsWith("$") || type.startsWith("sp")) {
-            return expandSystemProperties(str, inProperties, object, scope, extra);
+            return expandSystemProperties(str, inProperties, object, extra);
         }
         else if (type.startsWith("@")) {
-            return expandInProperties(str, inProperties, object, scope, extra);
+            return expandInProperties(str, inProperties, object, extra);
         }
         else if (type.startsWith("env")) {
-            return expandEnvVariable(str, inProperties, object, scope, extra);
+            return expandEnvVariable(str, inProperties, object, extra);
         }
         else if (type.startsWith("xpath")) {
-            return expandXPathProperties(str, inProperties, object, scope, extra);
+            return expandXPathProperties(str, inProperties, object, extra);
         }
         else if (type.startsWith("timestamp")) {
-            return expandTimestamp(str, inProperties, object, scope, extra);
+            return expandTimestamp(str, inProperties, object, extra);
         }
         else if (type.startsWith("dateformat")) {
-            return expandDateFormat(str, inProperties, object, scope, extra);
+            return expandDateFormat(str, inProperties, object, extra);
         }
         else if (type.startsWith("decodeL")) {
-            return expandDecodeL(str, inProperties, object, scope, extra);
+            return expandDecodeL(str, inProperties, object, extra);
         }
         else if (type.startsWith("decode")) {
-            return expandDecode(str, inProperties, object, scope, extra);
+            return expandDecode(str, inProperties, object, extra);
+        }
+        else if (type.startsWith("script")) {
+            return expandScript(str, inProperties, object, extra);
         }
         else if (type.startsWith("js")) {
-            return expandJavaScript(str, inProperties, object, scope, extra);
+            return expandJavaScript(str, inProperties, object, extra);
         }
         else if (type.startsWith("ognl")) {
-            return expandOGNLProperties(str, inProperties, object, scope, extra);
+            return expandOGNL(str, inProperties, object, extra);
         }
         else if (type.startsWith("escJS")) {
-            return expandEscJS(str, inProperties, object, scope, extra);
+            return expandEscJS(str, inProperties, object, extra);
         }
         else if (type.startsWith("escSQL")) {
-            return expandEscSQL(str, inProperties, object, scope, extra);
+            return expandEscSQL(str, inProperties, object, extra);
         }
         else if (type.startsWith("escXML")) {
-            return expandEscXML(str, inProperties, object, scope, extra);
+            return expandEscXML(str, inProperties, object, extra);
         }
         else if (type.startsWith("replace")) {
-            return expandReplace(str, inProperties, object, scope, extra);
+            return expandReplace(str, inProperties, object, extra);
         }
         else if (type.startsWith("urlEnc")) {
-            return expandUrlEnc(str, inProperties, object, scope, extra);
+            return expandUrlEnc(str, inProperties, object, extra);
         }
         else if (type.startsWith("urlDec")) {
-            return expandUrlDec(str, inProperties, object, scope, extra);
+            return expandUrlDec(str, inProperties, object, extra);
         }
         else if (type.startsWith("xmlp")) {
             // DUMMY replacement - Must be handled by XMLConfig
@@ -202,15 +204,15 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandSystemProperties(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Object extra) throws PropertiesHandlerException
     {
         String propName = str;
         if (!PropertiesHandler.isExpanded(propName)) {
-            propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
+            propName = PropertiesHandler.expand(propName, inProperties, object, extra);
         }
         String paramValue = System.getProperty(propName, "");
         if (!PropertiesHandler.isExpanded(paramValue)) {
-            paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
+            paramValue = PropertiesHandler.expand(paramValue, inProperties, object, extra);
         }
         str = paramValue;
         return str;
@@ -222,18 +224,18 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandEnvVariable(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Object extra) throws PropertiesHandlerException
     {
         String propName = str;
         if (!PropertiesHandler.isExpanded(propName)) {
-            propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
+            propName = PropertiesHandler.expand(propName, inProperties, object, extra);
         }
         String paramValue = System.getenv(propName);
         if (paramValue == null) {
             paramValue = "";
         }
         if (!PropertiesHandler.isExpanded(paramValue)) {
-            paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
+            paramValue = PropertiesHandler.expand(paramValue, inProperties, object, extra);
         }
         str = paramValue;
         return str;
@@ -247,11 +249,11 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandInProperties(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Object extra) throws PropertiesHandlerException
     {
         String propName = str;
         if (!PropertiesHandler.isExpanded(propName)) {
-            propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
+            propName = PropertiesHandler.expand(propName, inProperties, object, extra);
         }
         String paramValue = null;
         if (inProperties == null) {
@@ -262,7 +264,7 @@ public class BasicPropertyHandler implements PropertyHandler
             return "@" + PROP_START + str + PROP_END;
         }
         if (!PropertiesHandler.isExpanded(paramValue)) {
-            paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
+            paramValue = PropertiesHandler.expand(paramValue, inProperties, object, extra);
         }
         return paramValue;
     }
@@ -275,7 +277,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandClassProperties(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Object extra) throws PropertiesHandlerException
     {
         String propName = str;
         String paramValue = "";
@@ -283,7 +285,7 @@ public class BasicPropertyHandler implements PropertyHandler
             return "%" + PROP_START + str + PROP_END;
         }
         if (!PropertiesHandler.isExpanded(propName)) {
-            propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
+            propName = PropertiesHandler.expand(propName, inProperties, object, extra);
         }
         if (propName.equals("fqclass")) {
             paramValue = object.getClass().getName();
@@ -302,7 +304,7 @@ public class BasicPropertyHandler implements PropertyHandler
     }
 
 
-    private String expandXPathProperties(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private String expandXPathProperties(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         XMLUtils parser = null;
@@ -310,7 +312,7 @@ public class BasicPropertyHandler implements PropertyHandler
         String paramValue = null;
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
             int pIdx = str.indexOf("::");
             paramName = str.substring(0, pIdx);
@@ -350,12 +352,12 @@ public class BasicPropertyHandler implements PropertyHandler
         }
     }
 
-    private String expandTimestamp(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private String expandTimestamp(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
             String pattern = str;
             int pIdx = str.indexOf("::");
@@ -384,12 +386,12 @@ public class BasicPropertyHandler implements PropertyHandler
         }
     }
 
-    private String expandDateFormat(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private String expandDateFormat(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
             List<String> parts = TextUtils.splitByStringSeparator(str, "::");
             String sourceTZone = DateUtils.getDefaultTimeZone().getID();
@@ -421,12 +423,12 @@ public class BasicPropertyHandler implements PropertyHandler
         }
     }
 
-    private String expandDecode(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private String expandDecode(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
             String sep = "::";
             int sepLen = sep.length();
@@ -464,12 +466,12 @@ public class BasicPropertyHandler implements PropertyHandler
         }
     }
 
-    private String expandDecodeL(String str, Map<String, Object> inProperties, Object obj, Scriptable scope,
+    private String expandDecodeL(String str, Map<String, Object> inProperties, Object obj,
             Object extra) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, obj, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, obj, extra);
             }
             String sep = "::";
             int sepLen = sep.length();
@@ -516,40 +518,26 @@ public class BasicPropertyHandler implements PropertyHandler
         }
     }
 
-    private String expandJavaScript(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private String expandJavaScript(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
-        Context cx = Context.enter();
         String lStr = str;
         String scopeName = "basic";
         String script = "";
-        boolean intScope = false;
         try {
             if (!PropertiesHandler.isExpanded(lStr)) {
-                lStr = PropertiesHandler.expand(lStr, inProperties, object, scope, extra);
+                lStr = PropertiesHandler.expand(lStr, inProperties, object, extra);
             }
             int pIdx = lStr.indexOf("::");
             if (pIdx != -1) {
                 scopeName = lStr.substring(0, pIdx);
                 script = lStr.substring(pIdx + 2);
-                intScope = true;
             }
             else {
                 script = lStr;
             }
-            if (intScope) {
-                scope = JSInitManager.instance().getJSInit(scopeName).getScope();
-            }
-            if (scope == null) {
-                throw new PropertiesHandlerException("Error handling 'js' metadata '" + str + "', Scope undefined.");
-            }
-            ScriptableObject.putProperty(scope, "inProperties", inProperties);
-            ScriptableObject.putProperty(scope, "object", object);
-            ScriptableObject.putProperty(scope, "extra", extra);
-            Object result = JavaScriptHelper.executeScript(script, "expandJavaScript", scope, cx);
-            String paramValue = JavaScriptHelper.resultToString(result);
-
-            return paramValue;
+            
+            return execScript("js", scopeName, script, inProperties, object, extra);
         }
         catch (Exception exc) {
             System.out.println("Error handling 'js' metadata '" + script + "': " + exc);
@@ -562,33 +550,17 @@ public class BasicPropertyHandler implements PropertyHandler
             }
             return "js" + PROP_START + str + PROP_END;
         }
-        finally {
-            if (cx != null) {
-                try {
-                    Context.exit();
-                }
-                catch (Exception exc) {
-                    // do nothing
-                }
-            }
-        }
     }
 
-    private String expandOGNLProperties(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private String expandOGNL(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
 
-            OGNLExpressionEvaluator ognl = new OGNLExpressionEvaluator();
-            ognl.addToContext("inProperties", inProperties);
-            ognl.addToContext("object", object);
-            ognl.addToContext("extra", extra);
-            Object obj = ognl.getValue(str, object);
-            String result = (obj == null) ? "" : obj.toString();
-            return result;
+            return execScript("ognl", null, str, inProperties, object, extra);
         }
         catch (Exception exc) {
             System.out.println("Error handling 'ognl' metadata '" + str + "': " + exc);
@@ -602,18 +574,68 @@ public class BasicPropertyHandler implements PropertyHandler
             return "ognl" + PROP_START + str + PROP_END;
         }
     }
+    
+    private String expandScript(String str, Map<String, Object> inProperties, Object object,
+            Object extra) throws PropertiesHandlerException
+    {
+        String lStr = str;
+        String script = "";
+        String lang = null;
+        try {
+            if (!PropertiesHandler.isExpanded(lStr)) {
+                lStr = PropertiesHandler.expand(lStr, inProperties, object, extra);
+            }
+            String bcName = null;
+            List<String> parts = TextUtils.splitByStringSeparator(lStr, "::");
+            lang = parts.get(0);
+            if (parts.size() > 2) {
+                bcName = parts.get(1);
+                script = parts.get(2);
+            }
+            else {
+                script = parts.get(1);
+            }
+            
+            return execScript(lang, bcName, script, inProperties, object, extra);
+        }
+        catch (Exception exc) {
+            System.out.println("Error handling 'script[" + lang + "]' metadata '" + script + "': " + exc);
+            exc.printStackTrace();
+            if (PropertiesHandler.isExceptionOnErrors()) {
+                if (exc instanceof PropertiesHandlerException) {
+                    throw (PropertiesHandlerException) exc;
+                }
+                throw new PropertiesHandlerException("Error handling 'script' metadata '" + str + "'", exc);
+            }
+            return "script" + PROP_START + str + PROP_END;
+        }
+    }
+    
+    private String execScript(String lang, String  bcName, String script, Map<String, Object> inProperties,
+            Object object, Object extra) throws Exception
+    {
+        Map<String, Object> bindings = new HashMap<String, Object>();
+        bindings.put("inProperties", inProperties);
+        bindings.put("object", object);
+        bindings.put("extra", extra);
+
+        Object obj = ScriptExecutor.execute(lang, script, bindings, bcName);
+        String paramValue = (obj == null) ? "" : obj.toString();
+        
+        return paramValue;
+    }
 
     /**
      * @param str
      *        the string to valorize
      * @return the expanded string
      */
-    private static String expandEscJS(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private static String expandEscJS(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         String string = str;
         if (!PropertiesHandler.isExpanded(string)) {
-            string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+            string = PropertiesHandler.expand(string, inProperties, object, extra);
         }
         String escaped = TextUtils.replaceJSInvalidChars(string);
         return escaped;
@@ -624,12 +646,12 @@ public class BasicPropertyHandler implements PropertyHandler
      *        the string to valorize
      * @return the expanded string
      */
-    private static String expandEscSQL(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private static String expandEscSQL(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         String string = str;
         if (!PropertiesHandler.isExpanded(string)) {
-            string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+            string = PropertiesHandler.expand(string, inProperties, object, extra);
         }
         String escaped = TextUtils.replaceSQLInvalidChars(string);
         return escaped;
@@ -640,23 +662,23 @@ public class BasicPropertyHandler implements PropertyHandler
      *        the string to valorize
      * @return the expanded string
      */
-    private static String expandEscXML(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private static String expandEscXML(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         String string = str;
         if (!PropertiesHandler.isExpanded(string)) {
-            string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+            string = PropertiesHandler.expand(string, inProperties, object, extra);
         }
         String escaped = XMLUtils.replaceXMLInvalidChars(string);
         return escaped;
     }
 
-    private String expandReplace(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private String expandReplace(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
-                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+                str = PropertiesHandler.expand(str, inProperties, object, extra);
             }
             int pIdx = str.indexOf("::");
             String string = str.substring(0, pIdx);
@@ -684,13 +706,13 @@ public class BasicPropertyHandler implements PropertyHandler
      *        the string to valorize
      * @return the expanded string
      */
-    private static String expandUrlEnc(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private static String expandUrlEnc(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
     	try {
     		String string = str;
     		if (!PropertiesHandler.isExpanded(string)) {
-    			string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+    			string = PropertiesHandler.expand(string, inProperties, object, extra);
     		}
     		if (!PropertiesHandler.isExpanded(string)) {
     			return "urlEnc" + PROP_START + str + PROP_END;
@@ -716,13 +738,13 @@ public class BasicPropertyHandler implements PropertyHandler
      *        the string to valorize
      * @return the expanded string
      */
-    private static String expandUrlDec(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    private static String expandUrlDec(String str, Map<String, Object> inProperties, Object object,
             Object extra) throws PropertiesHandlerException
     {
     	try {
     		String string = str;
     		if (!PropertiesHandler.isExpanded(string)) {
-    			string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+    			string = PropertiesHandler.expand(string, inProperties, object, extra);
     		}
     		if (!PropertiesHandler.isExpanded(string)) {
     			return "urlDec" + PROP_START + str + PROP_END;

@@ -24,6 +24,7 @@ import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.scheduler.Task;
 import it.greenvulcano.scheduler.TaskException;
+import it.greenvulcano.util.MapUtils;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.shell.StreamPumper;
 
@@ -169,12 +170,13 @@ public class ShellTask extends Task
         boolean success = false;
         try {
             logger.debug("Executing the task: (" + getFullName() + ") - (" + name + ")");
+            Map<String, Object> props = MapUtils.convertToHMStringObject(locProperties);
             String[] realCommand = null;
             String[] realProps = null;
             File realDirectory = null;
 
             if (baseDirectory != null) {
-                realDirectory = new File(PropertiesHandler.expand(baseDirectory, null));
+                realDirectory = new File(PropertiesHandler.expand(baseDirectory, props));
             }
 
             if (realDirectory != null) {
@@ -190,13 +192,13 @@ public class ShellTask extends Task
 
             realCommand = new String[commandList.length];
             for (int i = 0; i < commandList.length; i++) {
-                realCommand[i] = PropertiesHandler.expand(commandList[i], null);
+                realCommand[i] = PropertiesHandler.expand(commandList[i], props);
             }
 
             if (propsList != null) {
                 realProps = new String[propsList.length];
                 for (int i = 0; i < propsList.length; i++) {
-                    realProps[i] = PropertiesHandler.expand(propsList[i], null);
+                    realProps[i] = PropertiesHandler.expand(propsList[i], props);
                 }
             }
 

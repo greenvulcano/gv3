@@ -164,7 +164,7 @@ public class GVInOnlyMessageReceiver extends AbstractInMessageReceiver
                         try {
                             currentGVBuffer = cGVBuffer.execute(currentGVBuffer, new HashMap<String, Object>());
                         }
-                        catch (Exception exc) {
+                        finally {
                             cGVBuffer.cleanUp();
                         }
                     }

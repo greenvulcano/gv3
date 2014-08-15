@@ -207,7 +207,9 @@ public class GVEndNode extends GVFlowNode
     @Override
     public void cleanUp() throws GVCoreException
     {
-        // do nothing
+        if (endOpCGVBuffer != null) {
+            endOpCGVBuffer.cleanUp();
+        }
     }
 
     /**
@@ -217,6 +219,8 @@ public class GVEndNode extends GVFlowNode
     @Override
     public void destroy() throws GVCoreException
     {
-        // do nothing
+        if (endOpCGVBuffer != null) {
+            endOpCGVBuffer.destroy();
+        }
     }
 }

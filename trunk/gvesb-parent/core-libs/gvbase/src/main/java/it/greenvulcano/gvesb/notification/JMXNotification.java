@@ -116,7 +116,7 @@ public class JMXNotification implements GVNotification
 
         objectName = XMLConfig.get(notifyNode, "@objectName", "");
         try {
-            objectName = PropertiesHandler.expand(objectName, null);
+            objectName = PropertiesHandler.expand(objectName);
         }
         catch (PropertiesHandlerException exc) {
             // do nothing

@@ -393,7 +393,7 @@ public abstract class WSDLGenerator
         if (xsd != null && xsd.length() > 0) {
             if (!PropertiesHandler.isExpanded(xsd)) {
                 try {
-                    xsd = PropertiesHandler.expand(xsd, null);
+                    xsd = PropertiesHandler.expand(xsd);
                 }
                 catch (PropertiesHandlerException exc) {
                     logger.warn("Cannot expand XSD path name" + xsd, exc);
@@ -403,7 +403,7 @@ public abstract class WSDLGenerator
             if (!xsdFile.isAbsolute()) {
                 try {
                     xsd = PropertiesHandler.expand("${{gv.app.home}}" + File.separatorChar +"xmlconfig"+ File.separatorChar +"xsds"
-                            + File.separatorChar + xsd, null);
+                            + File.separatorChar + xsd);
                     xsdFile = new File(xsd);
                 }
                 catch (PropertiesHandlerException exc) {

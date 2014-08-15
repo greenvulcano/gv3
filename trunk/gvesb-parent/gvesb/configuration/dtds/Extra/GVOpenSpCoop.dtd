@@ -128,7 +128,9 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope'
+     - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope'
+     - ognl{{script}}        : evaluate a OGNL script
      - sql{{conn::statement}}            : execute a select sql statement sql and return the value of
                                            the first field of the first selected record.
                                            The 'conn' parameter is the JNDI name of a DataSource
@@ -136,7 +138,6 @@
                                            the first field of all selected records as a 'sep' separated list.
                                            The 'conn' parameter is the JNDI name of a DataSource
                                            The 'sep' parameter defaults to comma
-     - ognl{{script}} : evaluate a OGNL script
 
     If this attribute is not present, the command is executed
     within the current working directory.
@@ -174,7 +175,9 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope'
+     - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope'
+     - ognl{{script}}        : evaluate a OGNL script
      - sql{{conn::statement}}            : execute a select sql statement sql and return the value of
                                            the first field of the first selected record.
                                            The 'conn' parameter is the JNDI name of a DataSource
@@ -182,7 +185,6 @@
                                            the first field of all selected records as a 'sep' separated list.
                                            The 'conn' parameter is the JNDI name of a DataSource
                                            The 'sep' parameter defaults to comma
-     - ognl{{script}} : evaluate a OGNL script
 
     If this attribute is not present, the command is executed
     within the current working directory.

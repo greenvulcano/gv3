@@ -26,9 +26,11 @@ import it.greenvulcano.gvesb.rsh.client.RSHServiceClient;
 import it.greenvulcano.gvesb.rsh.client.RSHServiceClientManager;
 import it.greenvulcano.gvesb.rsh.server.cmd.helper.ShellCommandDef;
 import it.greenvulcano.gvesb.rsh.server.cmd.helper.ShellCommandResult;
+import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.scheduler.Task;
 import it.greenvulcano.scheduler.TaskException;
+import it.greenvulcano.util.MapUtils;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 
 import java.io.IOException;
@@ -176,12 +178,13 @@ public class RSHTask extends Task
         boolean success = false;
         try {
             logger.debug("Executing the RSH task: (" + getFullName() + ") - (" + name + ")");
+            Map<String, Object> props = MapUtils.convertToHMStringObject(locProperties);
             List<String> realCommand = new ArrayList<String>();
             Map<String, String> realProps = null;
             String realDirectory = null;
 
             for (int i = 0; i < commandList.size(); i++) {
-                realCommand.add(PropertiesHandler.expand(commandList.get(i), null));
+                realCommand.add(PropertiesHandler.expand(commandList.get(i), props));
             }
 
             if (propsList != null) {
@@ -190,12 +193,12 @@ public class RSHTask extends Task
                 while (it.hasNext()) {
                     String n = it.next();
                     String v = propsList.get(n);
-                    realProps.put(n, PropertiesHandler.expand(v, null));
+                    realProps.put(n, PropertiesHandler.expand(v, props));
                 }
             }
 
             if (baseDirectory != null) {
-                realDirectory = PropertiesHandler.expand(baseDirectory, null);
+                realDirectory = PropertiesHandler.expand(baseDirectory, props);
             }
 
             if (logger.isInfoEnabled()) {

@@ -166,7 +166,7 @@ public class DBOFlatSelect extends AbstractDBO
 
             if (statement != null) {
                 ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
-                String expandedSQL = PropertiesHandler.expand(statement, localProps, conn, null);
+                String expandedSQL = PropertiesHandler.expand(statement, localProps, null, conn);
                 Statement sqlStatement = null;
                 try {
                     sqlStatement = getInternalConn(conn).createStatement();

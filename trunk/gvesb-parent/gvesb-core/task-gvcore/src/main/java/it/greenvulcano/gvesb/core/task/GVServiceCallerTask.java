@@ -225,7 +225,6 @@ public class GVServiceCallerTask extends Task
                         if (outputDirectory != null) {
                             saveOutput((GVBuffer) output);
                         }
-
                     }
                     catch (Exception exc) {
                         output = exc;
@@ -233,10 +232,12 @@ public class GVServiceCallerTask extends Task
                     finally {
                         try {
                             greenVulcanoPool.releaseGreenVulcano(greenVulcano);
-
                         }
                         catch (Exception exc) {
                             // do nothing
+                        }
+                        if (cGVBuffer != null) {
+                            cGVBuffer.cleanUp();
                         }
 
                         NMDC.pop();
@@ -316,6 +317,7 @@ public class GVServiceCallerTask extends Task
         return success;
     }
 
+
     /**
      * Destroys the task, performing all the required cleanup.
      * 
@@ -328,6 +330,9 @@ public class GVServiceCallerTask extends Task
         greenVulcanoPool = null;
         if (actionHandlers != null) {
             actionHandlers.clear();
+        }
+        if (cGVBuffer != null) {
+            cGVBuffer.destroy();
         }
     }
 

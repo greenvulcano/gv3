@@ -250,9 +250,9 @@ public class AuthSSLProtocolSocketFactory implements ProtocolSocketFactory
             throws PropertiesHandlerException
     {
         super();
-        this.keystoreID = PropertiesHandler.expand(keystoreID, null);
+        this.keystoreID = PropertiesHandler.expand(keystoreID);
         this.keyPassword = keyPassword;
-        this.truststoreID = PropertiesHandler.expand(truststoreID, null);
+        this.truststoreID = PropertiesHandler.expand(truststoreID);
     }
 
     private static KeyStore createKeyStore(final String ksID) throws CryptoHelperException, KeyStoreUtilsException

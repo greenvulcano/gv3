@@ -414,17 +414,22 @@
             </logger>
         </log4j:configuration>
     </GVLog4JConfiguration>
-    <GVJavaScriptConfig name="JAVASCRIPT" type="module">
-        <JavaScriptInitializers>
-            <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="basic"
-                         type="jsinit"/>
-            <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="gvesb"
-                         script-file="js/initscope.js" type="jsinit"/>
-            <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit"
-                         name="JavaScriptRetriever" script-file="js/initscope.js"
-                         type="jsinit"/>
-        </JavaScriptInitializers>
-    </GVJavaScriptConfig>
+    <GVScriptConfig name="SCRIPT" type="module">
+        <ScriptCache base-path="sp{{gv.app.home}}/scripts"/>
+        <ScriptEngines>
+            <ScriptEngine lang="js" default-context="gvesb" type="script-engine">
+                <BaseContext name="basic"/>
+                <BaseContext name="gvesb" file="js/initscope.js"/>
+                <BaseContext name="JavaScriptRetriever" file="js/initscope.js"/>
+            </ScriptEngine>
+            <ScriptEngine lang="ognl" type="script-engine" />
+            <ScriptEngine lang="groovy" type="script-engine" />
+            <ScriptEngine lang="jruby" default-context="gvesb" type="script-engine">
+                <BaseContext name="basic"/>
+                <BaseContext name="gvesb" file="jruby/initscope.rb"/>
+            </ScriptEngine>
+        </ScriptEngines>
+    </GVScriptConfig>
     <GVDateUtils name="DATE_UTILS" type="module">
         <Description>DateUtils configuration</Description>
         <Locale country="IT" lang="it" timezone="Europe/Rome">

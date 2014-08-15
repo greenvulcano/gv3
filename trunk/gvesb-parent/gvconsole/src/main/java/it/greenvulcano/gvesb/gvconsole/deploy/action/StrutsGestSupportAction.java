@@ -60,21 +60,37 @@ public class StrutsGestSupportAction extends Action
         try {
             GVParser parser = (GVParser) sessione.getAttribute("parser");
             StrutsGestFileForm formServizio = (StrutsGestFileForm) form;
-            String servizio = formServizio.getSupport();
+            String nomeServizio = formServizio.getSupport();
             GVSupportParser gvSupportParser = parser.getGVSupportParser();
             DatiServizio datiServizio = new DatiServizio();
-            datiServizio.setEquals(gvSupportParser.getEqual(servizio));
-            datiServizio.setExist(gvSupportParser.getExist(servizio));
-            String sZip = gvSupportParser.getGvSupportZip(servizio);
-            if (sZip != null) {
-                datiServizio.setNodoNew(sZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
+            String tipoOggetto = request.getParameter("tipoOggetto");
+            if (tipoOggetto.equals("SCRIPT")) {
+                datiServizio.setEquals(gvSupportParser.getEqual(tipoOggetto));
+                datiServizio.setExist(gvSupportParser.getExist(tipoOggetto));
+                String sZip = gvSupportParser.getGvSupportZip(tipoOggetto);
+                if (sZip != null) {
+                    datiServizio.setNodoNew(sZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
+                }
+                String sServer = gvSupportParser.getGvSupportServer(tipoOggetto);
+                if (sServer != null) {
+                    datiServizio.setNodoServer(sServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
+                }
             }
-            String sServer = gvSupportParser.getGvSupportServer(servizio);
-            if (sServer != null) {
-                datiServizio.setNodoServer(sServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
+            else {
+                datiServizio.setEquals(gvSupportParser.getEqual(tipoOggetto));
+                datiServizio.setExist(gvSupportParser.getExist(tipoOggetto));
+                String sZip = gvSupportParser.getGvSupportZip(tipoOggetto);
+                if (sZip != null) {
+                    datiServizio.setNodoNew(sZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
+                }
+                String sServer = gvSupportParser.getGvSupportServer(tipoOggetto);
+                if (sServer != null) {
+                    datiServizio.setNodoServer(sServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
+                }
             }
             sessione.setAttribute("datiServizio", datiServizio);
-            sessione.setAttribute("support", servizio);
+            sessione.setAttribute("servizio", nomeServizio);
+            sessione.setAttribute("tipoOggetto", tipoOggetto);
             sessione.setAttribute("file", "GVSupport");
             logger.debug("End StrutsGestSupportAction");
             return mapping.findForward("success");

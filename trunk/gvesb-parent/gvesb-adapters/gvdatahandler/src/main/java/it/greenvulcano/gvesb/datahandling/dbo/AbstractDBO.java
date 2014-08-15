@@ -547,7 +547,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                 if (sqlStatementInfo != null) {
                     sqlStatementInfo.close();
                 }
-                String expandedSQL = PropertiesHandler.expand(statements.get(id), currentProps, internalConn, null);
+                String expandedSQL = PropertiesHandler.expand(statements.get(id), currentProps, null, internalConn);
                 logger.debug("expandedSQL stmt: " + expandedSQL);
                 Statement statement = internalConn.prepareStatement(expandedSQL);
                 sqlStatementInfo = new StatementInfo(id, expandedSQL, statement);

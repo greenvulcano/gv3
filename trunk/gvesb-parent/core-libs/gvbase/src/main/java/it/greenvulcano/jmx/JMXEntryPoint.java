@@ -307,7 +307,7 @@ public class JMXEntryPoint implements ConfigurationListener
                        PropertiesHandlerException {
         String className = XMLConfig.get(node, "@class");
         if (className != null) {
-            String sName = PropertiesHandler.expand(XMLConfig.get(node, "@target", ""), null);
+            String sName = PropertiesHandler.expand(XMLConfig.get(node, "@target", ""));
             if ((sName.length() == 0) || (sName.indexOf(serverName) != -1)) {
                 try {
                     Class<?> cls = Class.forName(className);

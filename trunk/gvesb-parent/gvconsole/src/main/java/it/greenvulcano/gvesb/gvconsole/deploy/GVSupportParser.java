@@ -22,6 +22,7 @@ package it.greenvulcano.gvesb.gvconsole.deploy;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
@@ -34,8 +35,10 @@ import java.net.URL;
 
 import max.xml.DOMWriter;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -151,30 +154,127 @@ public class GVSupportParser
     	}
     }
 
-    public void aggiorna(String nomeServizio) throws XMLUtilsException
+    public void aggiorna(String tipoOggetto, String nomeServizio) throws Exception
     {
-    	XMLUtils parser = null;
+        if (tipoOggetto.equals("SCRIPT")) {
+	        aggiornaScript(nomeServizio);
+        }
+        else {
+            aggiornaTipoOggetto(tipoOggetto);
+        }
+    }
+
+    public void aggiornaTipoOggetto(String tipoOggetto) throws Exception
+    {
+        XMLUtils parser = null;
         try {
-        	parser = XMLUtils.getParserInstance();
-            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVSupport/*[@name='" + nomeServizio + "']");
-            Node resultsZip = parser.selectSingleNode(newXml, "/GVSupport/*[@name='" + nomeServizio + "']");
+            parser = XMLUtils.getParserInstance();
+            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVSupport/*[@name='" + tipoOggetto + "']");
+            Node resultsZip = parser.selectSingleNode(newXml, "/GVSupport/*[@name='" + tipoOggetto + "']");
             Node parentServer =  parser.selectSingleNode(serverXml, "/GVSupport");
-	        if (resultsZip != null) {
-		        if (resultsServer == null) {
-	                Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
-	                parentServer.appendChild(importedNode);
-	                logger.debug("GVSupport[" + nomeServizio + "] non esistente, inserimento");
-	            }
-		        else {
-		            Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
-		            parentServer.replaceChild(importedNode, resultsServer);
-		            logger.debug("GVSupport[" + nomeServizio + "] esistente, aggiornamento");
-		        }
-	        }
-    	}
-		finally {
-			XMLUtils.releaseParserInstance(parser);
-		}
+            if (resultsZip != null) {
+                if (resultsServer == null) {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.appendChild(importedNode);
+                    logger.debug("GVSupport[" + tipoOggetto + "] non esistente, inserimento");
+                }
+                else {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.replaceChild(importedNode, resultsServer);
+                    logger.debug("GVSupport[" + tipoOggetto + "] esistente, aggiornamento");
+                }
+            }
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+
+    public void aggiornaScript(String nomeServizio) throws Exception
+    {
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVSupport/*[@name='SCRIPT']");
+            Node resultsZip = parser.selectSingleNode(newXml, "/GVSupport/*[@name='SCRIPT']");
+            Node parentServer =  parser.selectSingleNode(serverXml, "/GVSupport");
+            if (resultsZip != null) {
+                Node engsZip = parser.selectSingleNode(resultsZip, "ScriptEngines");
+                if (resultsServer == null) {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.appendChild(importedNode);
+                    logger.debug("GVSupport[SCRIPT] not exists, insert all data");
+                }
+                else {
+                    Node engsServer = parser.selectSingleNode(resultsServer, "ScriptEngines");
+                    if (engsServer == null) {
+                        Node importedNode = resultsServer.getOwnerDocument().importNode(engsZip, true);
+                        resultsServer.appendChild(importedNode);
+                        logger.debug("aggiornaScript - Copied all ScriptEngines data");
+                    }
+                    else {
+                        NodeList engListZip = parser.selectNodeList(engsZip, "ScriptEngine");
+                        for (int i = 0; i < engListZip.getLength(); i++) {
+                            String lang = parser.get(engListZip.item(i), "@lang");
+                            Node engServer = parser.selectSingleNode(engsServer, "ScriptEngine[@lang='" + lang + "']");
+                            logger.debug("Processing ScriptEngine[" + lang + "]");
+                            if (engServer == null) {
+                                Node importedNode = engsServer.getOwnerDocument().importNode(engListZip.item(i), true);
+                                engsServer.appendChild(importedNode);
+                                logger.debug("aggiornaScript - Copied all ScriptEngine[" + lang + "] data");
+                                continue;
+                            }
+                            String defBC = parser.get(engListZip.item(i), "@default-context", "NULL");
+                            if ("NULL".equals(defBC)) {
+                                ((Element) engServer).removeAttribute("default-context");
+                            }
+                            else {
+                                ((Element) engServer).setAttribute("default-context", defBC);
+                            }
+                            NodeList bcZip = parser.selectNodeList(engListZip.item(i), "BaseContext");
+                            for (int k = 0; k < bcZip.getLength(); k++) {
+                                Node bcZipK = bcZip.item(k);
+                                String name = parser.get(bcZipK, "@name");
+                                logger.debug("taskZip[" + k + "]=" + name + "\n" + parser.serializeDOM(bcZipK));
+                                Node bcServer = parser.selectSingleNode(engServer, "*[@name='" + name + "']");
+                                if (bcServer != null) {
+                                    Node importedNode = engServer.getOwnerDocument().importNode(bcZipK, true);
+                                    engServer.replaceChild(importedNode, bcServer);
+                                    logger.debug("Nodo BaseContext[" + lang + "/" + name + "] esistente, aggiornamento");
+                                }
+                                else {
+                                    Node importedNode = engServer.getOwnerDocument().importNode(bcZipK, true);
+                                    engServer.appendChild(importedNode);
+                                    logger.debug("Nodo BaseContext[" + lang + "/" + name + "] non esistente, inserimento");
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                NodeList engListZip = parser.selectNodeList(engsZip, "ScriptEngine");
+                for (int i = 0; i < engListZip.getLength(); i++) {
+                    String lang = parser.get(engListZip.item(i), "@lang");
+                    copyScriptDir(lang);
+                }
+            }
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+    
+    private void copyScriptDir(String lang) throws Exception
+    {
+        File destDir = null;
+        logger.debug("copyScriptDir = " + lang);
+        String path = java.lang.System.getProperty("java.io.tmpdir");
+        File srcDir = new File(path + File.separator + "conf" + File.separator + "scripts" + File.separator + lang);
+        if (srcDir.exists()) {
+            String outputDir = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "scripts");
+            destDir = new File(PropertiesHandler.expand(outputDir));
+            FileUtils.copyDirectoryToDirectory(srcDir, destDir);
+        }
     }
 
     private Document getXmlZip() throws XMLUtilsException, IOException

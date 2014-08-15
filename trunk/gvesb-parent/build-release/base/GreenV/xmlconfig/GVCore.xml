@@ -103,14 +103,14 @@
                                          operation-name="toupper_WSS" output="output"
                                          point-x="266" point-y="145" type="flow-node">
                             <OutputServices>
-                                <ognl-script-service critical="yes" internal="yes"
-                                                     type="service">
-                                    <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
-                                                      name="serializeDOM" type="call">
-                                        <OGNLScript><![CDATA[#document=@it.greenvulcano.util.xml.XMLUtils@parseObject_S(object,false,true),
-setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:resultUp"))]]></OGNLScript>
-                                    </ognl-script-call>
-                                </ognl-script-service>
+                                <script-service critical="yes" internal="yes"
+                                                type="service">
+                                    <script-call class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
+                                                 name="serializeDOM" type="call">
+                                        <Script lang="ognl"><![CDATA[#document=@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#data.object,false,true),
+#data.setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:resultUp"))]]></Script>
+                                    </script-call>
+                                </script-service>
                             </OutputServices>
                         </GVOperationNode>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
@@ -130,14 +130,14 @@ setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:resultUp
                                          operation-name="toupper_call" output="output"
                                          point-x="159" point-y="144" type="flow-node">
                             <InputServices>
-                                <ognl-script-service critical="yes" internal="yes"
-                                                     type="service">
-                                    <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
-                                                      name="serializeDOM" type="call">
-                                        <OGNLScript><![CDATA[#document=@it.greenvulcano.util.xml.XMLUtils@parseObject_S(object,false,true),
-setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:str"))]]></OGNLScript>
-                                    </ognl-script-call>
-                                </ognl-script-service>
+                                <script-service critical="yes" internal="yes"
+                                                type="service">
+                                    <script-call class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
+                                                 name="serializeDOM" type="call">
+                                        <Script lang="ognl"><![CDATA[#document=@it.greenvulcano.util.xml.XMLUtils@parseObject_S(#data.object,false,true),
+#data.setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:str"))]]></Script>
+                                    </script-call>
+                                </script-service>
                             </InputServices>
                         </GVOperationNode>
                         <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
@@ -238,10 +238,10 @@ setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:str"))]]
                                              value="[sqllist{{ds.gv_test::|::select name from city order by 1}}]"/>
                                 <PropertyDef name="TIMESTAMP"
                                              value="timestamp{{yyyyMMdd HH:mm:ss}}"/>
-                                <PropertyDef name="OGNL"
-                                             value="Service: ognl{{#object.getService()}}"/>
-                                <PropertyDef name="JAVASCRIPT"
-                                             value="System: js{{gvesb::object.getSystem()}}"/>
+                                <PropertyDef name="JRUBY"
+                                             value="Service: script{{jruby::$object.service}}"/>
+                                <PropertyDef name="GROOVY"
+                                             value="System: script{{groovy::object.system}}"/>
                                 <PropertyDef name="SYSTEM"
                                              value="Server Name: ${{jboss.server.name}}"/>
                                 <PropertyDef name="CLASS" value="%{{fqclass}}"/>
@@ -322,7 +322,7 @@ setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:str"))]]
                                             op-type="change GVBuffer" output="input"
                                             point-x="-25" point-y="163" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript><![CDATA[property["FILE_NAME"]=@it.greenvulcano.util.xml.XMLUtils@get_S(object,"@name")]]></OGNLScript>
+                                <Script lang="ognl"><![CDATA[#data.property["FILE_NAME"]=@it.greenvulcano.util.xml.XMLUtils@get_S(#data.object,"@name")]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -352,7 +352,7 @@ setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:str"))]]
                                             op-type="change GVBuffer" output="input"
                                             point-x="393" point-y="24" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript><![CDATA[property["TARGET"]="validated"]]></OGNLScript>
+                                <Script lang="ognl"><![CDATA[#data.property["TARGET"]="validated"]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -366,8 +366,8 @@ setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(#document,"//gvesbws:str"))]]
                                             op-type="change GVBuffer" output="input"
                                             point-x="380" point-y="294" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript><![CDATA[property["TARGET"]="discarded",
-setObject("" + #environment.get("payload"))]]></OGNLScript>
+                                <Script lang="ognl"><![CDATA[#data.property["TARGET"]="discarded",
+#data.setObject("" + #environment.get("payload"))]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -442,7 +442,7 @@ setObject("" + #environment.get("payload"))]]></OGNLScript>
                                             op-type="change GVBuffer" output="input"
                                             point-x="-15" point-y="160" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript><![CDATA[property["FILE_NAME"]=@it.greenvulcano.util.xml.XMLUtils@get_S(object,"@name")]]></OGNLScript>
+                                <Script lang="jruby"><![CDATA[$data.setProperty("FILE_NAME", XMLUtils.get_S($data.getObject(),"@name"))]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -472,7 +472,7 @@ setObject("" + #environment.get("payload"))]]></OGNLScript>
                                             op-type="change GVBuffer" output="input"
                                             point-x="405" point-y="21" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript><![CDATA[property["TARGET"]="validated"]]></OGNLScript>
+                                <Script lang="jruby"><![CDATA[$data.setProperty("TARGET", "validated")]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -486,8 +486,8 @@ setObject("" + #environment.get("payload"))]]></OGNLScript>
                                             op-type="change GVBuffer" output="input"
                                             point-x="395" point-y="276" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript><![CDATA[property["TARGET"]="discarded",
-setObject("" + #environment.get("payload"))]]></OGNLScript>
+                                <Script lang="jruby"><![CDATA[$data.setProperty("TARGET", "discarded")
+$data.setObject("" + $environment.get("payload"))]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -581,7 +581,7 @@ setObject("" + #environment.get("payload"))]]></OGNLScript>
                                             point-y="137" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
                                 <PropertyDef name="FILE_EXT"
-                                             value="decode{{ognl{{property[&apos;BIRT_REPORT_TYPE&apos;]}}::excel::xls::pdf}}"/>
+                                             value="decode{{ognl{{#object.property[&apos;BIRT_REPORT_TYPE&apos;]}}::excel::xls::pdf}}"/>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -604,22 +604,22 @@ setObject("" + #environment.get("payload"))]]></OGNLScript>
                     <Participant id-channel="CHANNEL_CREDIT_MAIL" id-system="CREDIT"/>
                     <Flow first-node="prepare" point-x="24" point-y="56">
                         <Conditions>
-                            <JavaScriptCondition class="it.greenvulcano.gvesb.internal.condition.JavaScriptCondition"
-                                                 condition="CheckServiceName"
-                                                 scope-name="gvesb" type="condition">
-                                <Script><![CDATA[var services = {"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"};
+                            <ScriptCondition class="it.greenvulcano.gvesb.internal.condition.ScriptCondition"
+                                             condition="CheckServiceName"
+                                             type="condition">
+                                <Script lang="js"><![CDATA[var services = {"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"};
 var data = environment.get(dataName);
 var svc = data.getProperty("SVC");
 ("1" == services[svc]);]]></Script>
-                            </JavaScriptCondition>
+                            </ScriptCondition>
                         </Conditions>
                         <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
                                             dump-in-out="true" id="prepare" input="input"
                                             next-node-id="write_email"
                                             op-type="change GVBuffer" output="prepared"
                                             point-x="25" point-y="136" type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
 data.setObject(doc);
 
 var subject = XMLUtils.get_S(doc,"/Message/Subject", "NULL");
@@ -656,13 +656,13 @@ data.setProperty("EMAIL_FILE_NAME", fileName);]]></Script>
                                          operation-name="WriteEmailFile" output="file"
                                          point-x="115" point-y="136" type="flow-node">
                             <InputServices>
-                                <ognl-script-service critical="yes" internal="yes"
-                                                     type="service">
-                                    <ognl-script-call class="it.greenvulcano.gvesb.virtual.internal.OGNLCallOperation"
-                                                      name="getEML" type="call">
-                                        <OGNLScript><![CDATA[setObject(@it.greenvulcano.util.xml.XMLUtils@get_S(object, "/Message/EML"))]]></OGNLScript>
-                                    </ognl-script-call>
-                                </ognl-script-service>
+                                <script-service critical="yes" internal="yes"
+                                                type="service">
+                                    <script-call class="it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation"
+                                                 name="getEML" type="call">
+                                        <Script lang="js"><![CDATA[data.setObject(XMLUtils.get_S(data.getObject(), "/Message/EML"))]]></Script>
+                                    </script-call>
+                                </script-service>
                                 <gvdte-service critical="yes" internal="yes"
                                                remove-fields="yes" type="service">
                                     <map-name-param name="map-name" type="param"
@@ -825,7 +825,7 @@ data.setProperty("EMAIL_FILE_NAME", fileName);]]></Script>
                                             op-type="change GVBuffer" output="files"
                                             point-x="225" point-y="302" type="flow-node">
                             <ChangeGVBuffer clear-data="false">
-                                <OGNLScript><![CDATA[property["GV_SMTP_ATTACHMENTS"] = property["GVFM_FOUND_FILES_LIST"]]]></OGNLScript>
+                                <Script lang="ognl"><![CDATA[#data.property["GV_SMTP_ATTACHMENTS"] = #data.property["GVFM_FOUND_FILES_LIST"]]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
                         <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
@@ -1192,8 +1192,8 @@ data.setProperty("EMAIL_FILE_NAME", fileName);]]></Script>
                                             next-node-id="search_person"
                                             op-type="change GVBuffer" output="prepared"
                                             point-x="7" point-y="166" type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
 data.setProperty("PERSON_NAME", XMLUtils.get_S(doc,"/PersonData/Name"));
 data.setProperty("CITY_NAME", XMLUtils.get_S(doc,"/PersonData/City"));
 data.setProperty("BIRTHDATE", XMLUtils.get_S(doc,"/PersonData/BirthDate"));
@@ -1214,8 +1214,8 @@ data.setProperty("ACTIVE", XMLUtils.get_S(doc,"/PersonData/CardsData/CardData/Ac
                                             next-node-id="check_search_person"
                                             op-type="change GVBuffer" output="output"
                                             point-x="300" point-y="31" type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
 data.setProperty("ID_PERSON", XMLUtils.get_S(doc,"//col", "NULL"));]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
@@ -1245,8 +1245,8 @@ data.setProperty("ID_PERSON", XMLUtils.get_S(doc,"//col", "NULL"));]]></Script>
                                             next-node-id="check_search_ccard"
                                             op-type="change GVBuffer" output="output"
                                             point-x="220" point-y="445" type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
 data.setProperty("ID_CARD", XMLUtils.get_S(doc,"//col", "NULL"));]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
@@ -1275,8 +1275,8 @@ data.setProperty("ID_CARD", XMLUtils.get_S(doc,"//col", "NULL"));]]></Script>
                                             input="output" next-node-id="insert_person"
                                             op-type="change GVBuffer" output="output"
                                             point-x="849" point-y="111" type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[var doc=XMLUtils.parseObject_S(data.getObject(),false,true);
 data.setProperty("ID_PERSON", XMLUtils.get_S(doc,"//col", "NULL"));]]></Script>
                             </ChangeGVBuffer>
                         </ChangeGVBufferNode>
@@ -1703,8 +1703,8 @@ data.setProperty("ID_PERSON", XMLUtils.get_S(doc,"//col", "NULL"));]]></Script>
                                             next-node-id="list_file"
                                             op-type="change GVBuffer" point-x="171"
                                             point-y="150" type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[var doc = XMLUtils.parseObject_S(data.getObject(), false, true);
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[var doc = XMLUtils.parseObject_S(data.getObject(), false, true);
 
 var filter = XMLUtils.get_S(doc, "/gvesbws:listFile/gvesbws:fileNameFilter", "");
 
@@ -1728,8 +1728,8 @@ data.setProperty("FILE_NAME_FILTER", filter);]]></Script>
                                             next-node-id="zipFile"
                                             op-type="change GVBuffer" point-x="111"
                                             point-y="150" type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[var doc = XMLUtils.parseObject_S(data.getObject(), false, true);
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[var doc = XMLUtils.parseObject_S(data.getObject(), false, true);
 
 var file = XMLUtils.get_S(doc, "/gvesbws:getFile/gvesbws:fileName");
 data.setProperty("FILE_NAME", file);]]></Script>
@@ -1787,8 +1787,8 @@ data.setProperty("FILE_NAME", file);]]></Script>
                                             next-node-id="writeZipFile"
                                             op-type="change GVBuffer" output="zip"
                                             point-x="111" point-y="150" type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[data.setProperty("FILE_NAME", "appo_file.zip");
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[data.setProperty("FILE_NAME", "appo_file.zip");
 
 var attachments = data.getObject().getAttachmentMap();
 // can't use the first contentId because it points to the SOAP envelope
@@ -1834,8 +1834,8 @@ data.setObject(baos.toByteArray());]]></Script>
                                             next-node-id="end" op-type="change GVBuffer"
                                             output="output" point-x="731" point-y="79"
                                             type="flow-node">
-                            <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                                <Script><![CDATA[data.setObject("<doc/>");]]></Script>
+                            <ChangeGVBuffer clear-data="false">
+                                <Script lang="js"><![CDATA[data.setObject("<doc/>");]]></Script>
                             </ChangeGVBuffer>
                             <OutputServices>
                                 <gvdte-service critical="yes" internal="yes"
@@ -2094,7 +2094,7 @@ data.setObject(baos.toByteArray());]]></Script>
                                                type="flow-node">
                             <ResultProcessor fail-on-error="true"
                                              processor-input="only-gvbuffer">
-                                <JavaScript><![CDATA[var str = "";
+                                <Script lang="js"><![CDATA[var str = "";
 for (var i=0; i<results.size(); i++)
 {
     var inV = results.get(i).getInput().getObject();
@@ -2102,7 +2102,7 @@ for (var i=0; i<results.size(); i++)
     str += ";[" + inV + " -> " + outV + "]";
 }
 
-data.setObject(str.substring(1));]]></JavaScript>
+data.setObject(str.substring(1));]]></Script>
                             </ResultProcessor>
                         </GVSubFlowSplittedNode>
                     </Flow>
@@ -2183,14 +2183,14 @@ data.setObject(str.substring(1));]]></JavaScript>
                             </FlowDefs>
                             <ResultProcessor fail-on-error="true"
                                              processor-input="only-gvbuffer">
-                                <OGNLScript><![CDATA[#str = "",
+                                <Script lang="ognl"><![CDATA[#str = "",
 #iter = #results.iterator,
 #loop = :[#this != null &&
                 ((#str = #str + ";[" + #this.input.object + " -> " + #this.output.object + "]"),
                   #loop(#iter.hasNext ? #iter.next : null))
          ],
 #loop(#iter.hasNext ? #iter.next : null),
-#data.setObject(#str.substring(1))]]></OGNLScript>
+#data.setObject(#str.substring(1))]]></Script>
                             </ResultProcessor>
                         </GVSubFlowParallelNode>
                     </Flow>
@@ -2453,7 +2453,7 @@ data.setObject(str.substring(1));]]></JavaScript>
                                       reportName="Sales Invoice" reportType="excel"
                                       type="call"/>
                     <filewriter-call class="it.greenvulcano.gvesb.virtual.file.writer.FileWriter"
-                                     fileName="Report.decode{{ognl{{property[&apos;BIRT_REPORT_TYPE&apos;]}}::excel::xls::ognl{{property[&apos;BIRT_REPORT_TYPE&apos;]}}}}"
+                                     fileName="Report.decode{{@{{BIRT_REPORT_TYPE}}::excel::xls::@{{BIRT_REPORT_TYPE}}}}"
                                      name="WriteReportFile"
                                      targetPath="${{gv.app.home}}/log" type="call"/>
                     <dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation"
@@ -2774,8 +2774,8 @@ data.setObject(str.substring(1));]]></JavaScript>
                     <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall"
                                        name="change_wait_call" service="toupper"
                                        type="call">
-                        <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                            <Script><![CDATA[var str=data.getObject();
+                        <ChangeGVBuffer clear-data="false">
+                            <Script lang="js"><![CDATA[var str=data.getObject();
 if (str == "gianfranco" || str == "GiAnFrAnCo") {
 	Thread.sleep(2000);
 	data.setProperty("PIPPO", null);
@@ -2796,8 +2796,8 @@ if (str == "nunzio" || str == "NuNzIo") {
                     <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall"
                                        name="change_error_call" service="toupper"
                                        type="call">
-                        <ChangeGVBuffer clear-data="false" scope-name="gvesb">
-                            <Script><![CDATA[var str=data.getObject();
+                        <ChangeGVBuffer clear-data="false">
+                            <Script lang="js"><![CDATA[var str=data.getObject();
 if (str == "gianfranco" || str == "GiAnFrAnCo") {
 	Thread.sleep(5000);
 	data.setProperty("PIPPO", null);
@@ -3043,7 +3043,7 @@ and CREDIT >= ?]]></statement>
                     <rest-call class="it.greenvulcano.gvesb.virtual.ws.rest.RestCallOperation"
                                name="query_cnumber" type="call">
                         <RestServiceInvoker class="it.greenvulcano.gvesb.virtual.ws.rest.RestServiceInvoker"
-                                            endpoint="http://localhost:8080/gvaxis2/secure/services/CreditService/Query?cnumber=ognl{{object}}"
+                                            endpoint="http://localhost:8080/gvaxis2/secure/services/CreditService/Query?cnumber=ognl{{#object.object}}"
                                             method="GET"
                                             ref-dp="generic_RestDataProvider"
                                             responseMode="OUT_IN"

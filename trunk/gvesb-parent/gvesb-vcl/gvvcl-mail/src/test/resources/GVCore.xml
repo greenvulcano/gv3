@@ -37,7 +37,7 @@
                 </to>
               </destinations>
               <message-body gvBuffer-dump="false">
-                <message-text>ognl{{object}}</message-text>
+                <message-text>ognl{{#object.object}}</message-text>
               </message-body>
             </mail-message>
           </smtp-call>

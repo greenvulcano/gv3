@@ -271,17 +271,22 @@ public class GVBufferCondition implements GVCondition
      * @see it.greenvulcano.gvesb.internal.condition.GVCondition#init(org.w3c.dom.Node)
      */
     @Override
-    public void init(Node node) throws XMLConfigException
+    public void init(Node node) throws GVConditionException
     {
-        condition = XMLConfig.get(node, "@condition", "");
-        logger.debug("Initializing GVBufferCondition: " + condition);
-
-        throwException = XMLConfig.getBoolean(node, "@throw-exception", false);
-        system = XMLConfig.get(node, "@system", "");
-        service = XMLConfig.get(node, "@service", "");
-
-        setRetCodeVector(node);
-        setProperty(node);
+        try {
+            condition = XMLConfig.get(node, "@condition", "");
+            logger.debug("Initializing GVBufferCondition: " + condition);
+    
+            throwException = XMLConfig.getBoolean(node, "@throw-exception", false);
+            system = XMLConfig.get(node, "@system", "");
+            service = XMLConfig.get(node, "@service", "");
+    
+            setRetCodeVector(node);
+            setProperty(node);
+        }
+        catch (Exception exc) {
+            throw new GVConditionException("Error initializing GVBufferCondition", exc);
+        }
     }
 
     @Override
@@ -294,10 +299,10 @@ public class GVBufferCondition implements GVCondition
      * 
      * @param node
      *        The root Node from which read the configuration data
-     * @throws XMLConfigException
+     * @throws Exception
      *         If some configuration error occurs
      */
-    private void setRetCodeVector(Node node) throws XMLConfigException
+    private void setRetCodeVector(Node node) throws Exception
     {
         Node retCode = null;
         try {
@@ -330,10 +335,10 @@ public class GVBufferCondition implements GVCondition
      * 
      * @param node
      *        The root Node from which read the configuration data
-     * @throws XMLConfigException
+     * @throws Exception
      *         If some configuration error occurs
      */
-    private void setProperty(Node node) throws XMLConfigException
+    private void setProperty(Node node) throws Exception
     {
         NodeList nl = XMLConfig.getNodeList(node, "Property");
 

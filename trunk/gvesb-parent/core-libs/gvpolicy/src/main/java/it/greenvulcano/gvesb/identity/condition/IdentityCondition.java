@@ -20,11 +20,9 @@
 package it.greenvulcano.gvesb.identity.condition;
 
 import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.internal.condition.GVCondition;
 import it.greenvulcano.gvesb.internal.condition.GVConditionException;
-import it.greenvulcano.gvesb.internal.condition.JavaScriptCondition;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
 
@@ -42,7 +40,7 @@ import org.w3c.dom.NodeList;
  */
 public class IdentityCondition implements GVCondition
 {
-    private static final Logger logger    = GVLogger.getLogger(JavaScriptCondition.class);
+    private static final Logger logger    = GVLogger.getLogger(IdentityCondition.class);
 
     /**
      * The Condition name.
@@ -55,19 +53,24 @@ public class IdentityCondition implements GVCondition
      * @see it.greenvulcano.gvesb.internal.condition.GVCondition#init(org.w3c.dom.Node)
      */
     @Override
-    public void init(Node node) throws XMLConfigException
+    public void init(Node node) throws GVConditionException
     {
-        condition = XMLConfig.get(node, "@condition", "");
-        logger.debug("Initializing IdentityCondition: " + condition);
-
-        NodeList nl = XMLConfig.getNodeList(node, "ACL/RoleRef");
-        for (int i = 0; i < nl.getLength(); i++) {
-            Node n = nl.item(i);
-            roles.add(XMLConfig.get(n, "@name"));
+        try {
+            condition = XMLConfig.get(node, "@condition", "");
+            logger.debug("Initializing IdentityCondition: " + condition);
+    
+            NodeList nl = XMLConfig.getNodeList(node, "ACL/RoleRef");
+            for (int i = 0; i < nl.getLength(); i++) {
+                Node n = nl.item(i);
+                roles.add(XMLConfig.get(n, "@name"));
+            }
+        }
+        catch (Exception exc) {
+            throw new GVConditionException("Error initializing IdentityCondition", exc);
         }
 
         if (roles.size() == 0) {
-            throw new XMLConfigException("Must be defined at least one RoleRef element. Node: "
+            throw new GVConditionException("Must be defined at least one RoleRef element. Node: "
                     + XPathFinder.buildXPath(node));
         }
     }

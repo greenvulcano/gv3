@@ -196,43 +196,36 @@
 <!ELEMENT LDAPFilter (#PCDATA)>
 
 <!--
-    The content defines a JavaScript script.
+    The element defines a Script execution parameters.
+    If defined the 'file' attribute overrides the contained script.
 
-    #NotNull
+    #Label: @lang
     #Icon: default.png
     #SelectOnInsert
 -->
 <!ELEMENT Script (#PCDATA)>
-
 <!--
-    The content defines a JavaScript script.
+    The script engine to use.
+
+    #References: gvesb:document('GVSupport')/GVSupport/GVScriptConfig/ScriptEngines/*[@type='script-engine']/@lang
+-->
+<!ATTLIST Script  lang CDATA #REQUIRED>
+<!--
+    This attribute defines the 'context' to be used for script execution.
+    If not set, the default context is inherited from the specific 'lang'
+    configuration.
+
+    #References: gvesb:document('GVSupport')/GVSupport/GVScriptConfig/ScriptEngines/*[@type='script-engine' and @lang=current()/@lang]/BaseContext/@name
+-->
+<!ATTLIST Script  base-context CDATA #IMPLIED>
+<!--
+    This attribute is the name of a file containing the script to execute.
+    The file path must be relative to $GV_HOME/scripts.
 
     #NotNull
-    #Icon: default.png
-    #SelectOnInsert
 -->
-<!ELEMENT JavaScript (#PCDATA)>
-<!--
-    This attribute defines the 'scope' to be used for script execution.
-    If not set the default is 'gvesb'.
+<!ATTLIST Script  file CDATA #IMPLIED>
 
-    #References: gvesb:document('GVSupport')/GVSupport/GVJavaScriptConfig/JavaScriptInitializers/*[@type='jsinit']/@name
--->
-<!ATTLIST JavaScript  scope-name CDATA #IMPLIED>
-
-<!--
-    The content defines a OGNL script.
-    This script is applied to the current GVBuffer object.
-     Within a node ChangeGVBuffer is "injected" into the variable
-     'Environment', the current environment, ie a map containing all
-      the GVBuffer / exceptions specified in the various parameters of input / output nodes
-     of flow in execution.
-
-    #NotNull
-    #Icon: default.png
-    #SelectOnInsert
--->
-<!ELEMENT OGNLScript (#PCDATA)>
 
 <!--
     The custom protocol handler configuration.
@@ -604,7 +597,9 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope'
+     - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope'
+     - ognl{{script}} : evaluate a OGNL script
      - sql{{[conn::]statement}}     : execute a select sql statement sql and return the value of
                                       the first field of the first selected record.
                                       The 'conn' parameter is the JNDI name of a DataSource,
@@ -616,7 +611,6 @@
      - sqltable{{conn::statement}}  : executes a select sql statement and returns all values of
                                       returned cursor as an XML.
                                       The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script
 
     #CompositeLabel: || @id | / | @type
 -->
@@ -927,11 +921,14 @@
     buffer with configurable values, or perform some transformation
     on the body.
 
+    If used for script execution, execution environment map is added 
+    to the script context as 'environment' property and the current 
+    input object is added as 'data' property.
+
     You can also completely remove the body field. This option is
     useful to return an acknowledgment to the client without overhead
     to transfer the response data.
 
-    #Warn: {{../ChangeGVBuffer[@scope-name and @script-file and (Script)]}} The '@script-file' attribute and the 'Script' element can't be defined together
     #Icon: default.png
     #Table: | Properties | PropertyDef | Field | @name | Value | @value | Overwrite Body | @overwrite-body | Description | Description
     #Template:
@@ -957,12 +954,10 @@
             </xsl:for-each>
         </xsl:template>
 -->
-<!ELEMENT ChangeGVBuffer (Description?, (%body-builders;)?, Script?, OGNLScript?, PropertyDef*)>
+<!ELEMENT ChangeGVBuffer (Description?, (%body-builders;)?, Script?, PropertyDef*)>
 <!--
     This attribute can be set to:
-
     - true: reset the body field of the buffer
-
     - false: do not alter the body field of the buffer
 
     This option is useful to return an acknowledgment to the client
@@ -990,13 +985,11 @@
 <!--
     This attribute defines whether or not to use encryption and if
     you encrypt or decrypt the body field.
-    Can not be defined with 'compress-op', 'scope-name', 'base64-op'
-    and 'clear-data'.
+    Can not be defined with 'compress-op', 'base64-op' and 'clear-data'.
 
     #Warn: {{../ChangeGVBuffer[not(@crypto-op='none') and (@clear-data='true')]}} The attribute 'crypto-op' must be defined only if the attribute 'clear-data' is false
     #Warn: {{../ChangeGVBuffer[not(@crypto-op='none') and @compress-op and not(@compress-op='none')]}} The attribute 'crypto-op' must be defined only if the attribute 'compress-op'='none'
     #Warn: {{../ChangeGVBuffer[not(@crypto-op='none') and @base64-op and not(@base64-op='none')]}} The attribute 'crypto-op' must be defined only if the attribute 'base64-op'='none'
-    #Warn: {{../ChangeGVBuffer[not(@crypto-op='none') and @scope-name]}} The attribute 'crypto-op' must be defined only if the attribute 'scope-name' isn't defined
 -->
 <!ATTLIST ChangeGVBuffer    crypto-op (none|encrypt|decrypt) #IMPLIED>
 <!--
@@ -1009,13 +1002,11 @@
 <!--
     This attribute defines whether to use compression and if you compress
     or decompress the body field.
-    Can not be defined with 'crypto-op', 'scope-name', 'base64-op'
-    and 'clear-data'.
+    Can not be defined with 'crypto-op', 'base64-op' and 'clear-data'.
 
     #Warn: {{../ChangeGVBuffer[not(@compress-op='none') and (@clear-data='true')]}} The attribute 'compress-op' must be defined only if the attribute 'clear-data' is false
     #Warn: {{../ChangeGVBuffer[not(@compress-op='none') and @crypto-op and not(@crypto-op='none')]}} The attribute 'compress-op' must be defined only if the attribute 'crypto-op'='none'
     #Warn: {{../ChangeGVBuffer[not(@compress-op='none') and @base64-op and not(@base64-op='none')]}} The attribute 'compress-op' must be defined only if the attribute 'base64-op'='none'
-    #Warn: {{../ChangeGVBuffer[not(@compress-op='none') and @scope-name]}} The attribute 'compress-op' must be defined only if the attribute 'scope-name' isn't defined
 -->
 <!ATTLIST ChangeGVBuffer    compress-op (none|compress|uncompress) #IMPLIED>
 <!--
@@ -1027,37 +1018,14 @@
 <!--
     This attribute defines whether to use Base64 encoding and if
     you encode or decode the body field.
-    Can not be defined with 'compress-op', 'crypto-op', 'scope-name'
-    and 'clear-data'.
+    Can not be defined with 'compress-op', 'crypto-op' and 'clear-data'.
 
     #Warn: {{../ChangeGVBuffer[not(@base64-op='none') and (@clear-data='true')]}} The attribute 'base64-op' must be defined only if the attribute 'clear-data' is false
     #Warn: {{../ChangeGVBuffer[not(@base64-op='none') and @compress-op and not(@compress-op='none')]}} The attribute 'base64-op' must be defined only if the attribute 'compress-op'='none'
     #Warn: {{../ChangeGVBuffer[not(@base64-op='none') and @crypto-op and not(@crypto-op='none')]}} The attribute 'base64-op' must be defined only if the attribute 'crypto-op'='none'
-    #Warn: {{../ChangeGVBuffer[not(@base64-op='none') and @scope-name]}} The attribute 'base64-op' must be defined only if the attribute 'scope-name' isn't defined
 -->
 <!ATTLIST ChangeGVBuffer    base64-op (none|encode|decode) #IMPLIED>
 
-<!--
-    This attribute defines whether to use a JavaScript.
-    If it is defined, represent the 'scope' to be used for script execution.
-    The execution environment map is added to the scope as 'environment',
-    the current input object is added to the scope as 'data'.
-    Can not be defined with 'compress-op', 'crypto-op', 'base64-op'
-    and 'clear-data'.
-
-    #Warn: {{../ChangeGVBuffer[@scope-name and (@clear-data='true')]}} The attribute 'scope-name' must be defined only if the attribute 'clear-data' is false
-    #Warn: {{../ChangeGVBuffer[@scope-name and @compress-op and not(@compress-op='none')]}} The attribute 'scope-name' must be defined only if the attribute 'compress-op'='none'
-    #Warn: {{../ChangeGVBuffer[@scope-name and @crypto-op and not(@crypto-op='none')]}} The attribute 'scope-name' must be defined only if the attribute 'crypto-op'='none'
-    #Warn: {{../ChangeGVBuffer[@scope-name and @base64-op and not(@base64-op='none')]}} The attribute 'scope-name' must be defined only if the attribute 'base64-op'='none'
-    #References: gvesb:document('GVSupport')/GVSupport/GVJavaScriptConfig/JavaScriptInitializers/*[@type='jsinit']/@name
--->
-<!ATTLIST ChangeGVBuffer    scope-name CDATA #IMPLIED>
-<!--
-    This attribute is the name of the file containing the script to run.
-
-    #NotNull
--->
-<!ATTLIST ChangeGVBuffer    script-file CDATA #IMPLIED>
 <!--
     This element allows you to set the GVBuffer body.
 
@@ -1153,8 +1121,12 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
                                the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope',
+                               the GVBuffer is added to the scope as 'object'
+     - ognl{{script}} : evaluate a OGNL script,
+                               the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}            : execute a select sql statement sql and return the value of
                                            the first field of the first selected record.
                                            The 'conn' parameter is the JNDI name of a DataSource
@@ -1165,9 +1137,6 @@
      - sqltable{{conn::statement}}       : executes a select sql statement and returns all values of
                                            returned cursor as an XML.
                                            The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
-
 -->
 <!ATTLIST PropertyDef   value CDATA #REQUIRED>
 <!--

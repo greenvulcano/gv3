@@ -89,9 +89,10 @@ public class StrutsDeployAction extends Action
                 builder.storeInSession(sessione);
             }
             else if (file.equals("GVSupport")) {
-                String servizio = (String) sessione.getAttribute("support");
+                String servizio = (String) sessione.getAttribute("servizio");
+                String tipoOggetto = (String) sessione.getAttribute("tipoOggetto");
                 GVSupportParser supportParser = parser.getGVSupportParser();
-                supportParser.aggiorna(servizio);
+                supportParser.aggiorna(tipoOggetto, servizio);
                 supportParser.scriviFile();
                 DocumentRepository registry = DocumentRepository.instance();
                 XMLBuilder builder = registry.editDocument("GVSupport", servlet.getServletContext(), false);

@@ -135,7 +135,7 @@ public class JBPMSessionManager implements ShutdownEventListener, ConfigurationL
       return ksession;
     }
     private  KnowledgeBase readKnowledgeBase() throws Exception {
-    	String localDirFileBpmn = PropertiesHandler.expand(dirFileBpmn, null);
+    	String localDirFileBpmn = PropertiesHandler.expand(dirFileBpmn);
     	File file = new File(localDirFileBpmn);
 		if (!file.exists()) {
 			throw new IllegalArgumentException("Could not find " + localDirFileBpmn);

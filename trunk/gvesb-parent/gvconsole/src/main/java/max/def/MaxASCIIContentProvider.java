@@ -190,7 +190,7 @@ public class MaxASCIIContentProvider implements ContentProvider
 
         if (!PropertiesHandler.isExpanded(rootDirStr)) {
             try {
-                rootDirStr = PropertiesHandler.expand(rootDirStr, null);
+                rootDirStr = PropertiesHandler.expand(rootDirStr);
             }
             catch (PropertiesHandlerException exc) {
                 exc.printStackTrace();

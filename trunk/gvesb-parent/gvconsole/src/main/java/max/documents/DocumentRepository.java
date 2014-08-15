@@ -579,7 +579,7 @@ public class DocumentRepository
     	DocumentProxy proxy = getDocumentProxy(name);
     	InputStream inputStream = vm.getDocument(name, version);
     	
-    	String gvDir = PropertiesHandler.expand("${{gv.app.home}}", null);
+    	String gvDir = PropertiesHandler.expand("${{gv.app.home}}");
     	
     	ZipInputStream zipFile = new ZipInputStream(inputStream);
         ZipEntry zipEntry = null;

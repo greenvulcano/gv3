@@ -21,13 +21,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: tweet.png
@@ -95,13 +97,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: tweet.png
@@ -191,13 +195,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: tweet.png
@@ -301,13 +307,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: retweet.png
@@ -373,13 +381,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: follow.png
@@ -445,13 +455,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: unfollow.png
@@ -517,13 +529,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: follower.png
@@ -596,13 +610,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: follower.png
@@ -668,13 +684,15 @@
      - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
                                is equivalent to 'decode', with the difference that 'condX'
                                can be a list of values separated by 'sep'
-     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
-                             the GVBuffer is added to the scope as 'object'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}}   : evaluate a JavaScript script, using the context 'scope',
+                                 the GVBuffer is added to the scope as 'object'
+     - ognl{{script}}          : evaluate a OGNL script,
+                                 the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
      - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
                                  the first field of the first selected record.
                                  The 'conn' parameter is the JNDI name of a DataSource
-     - ognl{{script}} : evaluate a OGNL script,
-                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
 
     #Label: @name
     #Icon: message.png

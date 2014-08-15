@@ -94,7 +94,7 @@ public class BusinessWebServicesBean
         wsdlDirectory = XMLConfig.get(nodeConfig, "@wsdl-directory", "");
         if (!PropertiesHandler.isExpanded(wsdlDirectory)) {
             try {
-                wsdlDirectory = PropertiesHandler.expand(wsdlDirectory, null);
+                wsdlDirectory = PropertiesHandler.expand(wsdlDirectory);
             }
             catch (PropertiesHandlerException exc) {
                 exc.printStackTrace();
@@ -103,7 +103,7 @@ public class BusinessWebServicesBean
         servicesDirectory = XMLConfig.get(nodeConfig, "@services-directory", "");
         if (!PropertiesHandler.isExpanded(servicesDirectory)) {
             try {
-                servicesDirectory = PropertiesHandler.expand(servicesDirectory, null);
+                servicesDirectory = PropertiesHandler.expand(servicesDirectory);
             }
             catch (PropertiesHandlerException exc) {
                 exc.printStackTrace();

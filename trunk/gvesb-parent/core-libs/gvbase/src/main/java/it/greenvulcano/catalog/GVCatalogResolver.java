@@ -47,7 +47,7 @@ public class GVCatalogResolver extends CatalogResolver
         String decodedResolvedEntity = decodeFileName(resolvedEntity);
         if (decodedResolvedEntity != null && !PropertiesHandler.isExpanded(decodedResolvedEntity)) {
             try {
-                resolvedEntity = PropertiesHandler.expand(decodedResolvedEntity, null);
+                resolvedEntity = PropertiesHandler.expand(decodedResolvedEntity);
             }
             catch (PropertiesHandlerException exc) {
                 exc.printStackTrace();

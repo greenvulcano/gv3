@@ -243,6 +243,9 @@ public class TestServiceCall implements CallOperation
      */
     public void destroy()
     {
+        if (cGVBuffer != null) {
+            cGVBuffer.destroy();
+        }
         cGVBuffer = null;
     }
 

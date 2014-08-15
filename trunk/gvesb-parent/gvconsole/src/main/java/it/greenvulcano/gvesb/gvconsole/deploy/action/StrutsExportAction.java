@@ -20,7 +20,6 @@
 package it.greenvulcano.gvesb.gvconsole.deploy.action;
 
 import it.greenvulcano.jmx.JMXEntryPoint;
-import it.greenvulcano.jmx.JMXUtils;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.file.FileManager;
 import it.greenvulcano.util.metadata.PropertiesHandler;
@@ -94,15 +93,16 @@ public class StrutsExportAction extends Action
         String appoDir = null;
         String gvDir = null;
         try {
-            tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}", null);
+            tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}");
             appoDir = tmpDir + File.separator + "conf";
-            gvDir = PropertiesHandler.expand("${{gv.app.home}}", null);
+            gvDir = PropertiesHandler.expand("${{gv.app.home}}");
             String xmlDir = gvDir + File.separator + "xmlconfig";
             String defDTEDir = gvDir + File.separator + "gvdte";//+File.separator+"datasource";
             String dtdsDir = gvDir + File.separator + "dtds";
             String birtDir = gvDir + File.separator + "BIRTReportEngine";
             String bipelDir = gvDir + File.separator + "BpelProcess";
             String rulesDir = gvDir + File.separator + "Rules";
+            String scriptDir = gvDir + File.separator + "scripts";
 
             FileUtils.deleteDirectory(new File(appoDir));
             FileUtils.forceMkdir(new File(appoDir));
@@ -122,6 +122,7 @@ public class StrutsExportAction extends Action
                     + File.separator + "services", ".*\\.aar");
             FileManager.cp(birtDir + File.separator + "reports", appoDir + File.separator + "reports", ".*");
             FileManager.cp(gvDir + File.separator + "keystores", appoDir + File.separator + "keystores", ".*");
+            FileManager.cp(scriptDir, appoDir + File.separator + "scripts", ".*");
             if ((new File(bipelDir)).exists()) {
             	FileManager.cp(bipelDir, appoDir + File.separator + "BpelProcess", ".*");
             }

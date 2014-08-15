@@ -13,8 +13,8 @@
                 <GVCoreInvoker class="it.greenvulcano.gvesb.gvzmq.listener.invoker.GVCoreInvoker" 
                                name="TestApplication" send-reply="true" debug="true" type="zmq-invoker"
                                gv-operation="RequestReply" gv-service="TestZMQ_Listener" gv-system="GVESB">
-                    <JSDecoder class="it.greenvulcano.gvesb.gvzmq.marshall.JSMarshaller" type="zmq-decoder" scope-name="gvesb">
-                        <Script>var sb = new StringBuffer();
+                    <ScriptDecoder class="it.greenvulcano.gvesb.gvzmq.marshall.ScriptMarshaller" type="zmq-decoder" scope-name="gvesb">
+                        <Script lang="js">var sb = new StringBuffer();
                             var it = msgIn.iterator();
                             while (it.hasNext()) {
                                 var zf = it.next();
@@ -25,9 +25,9 @@
                             }
                             gvbOut.setObject(sb.toString());
                         </Script>
-                    </JSDecoder>
-                    <JSEncoder class="it.greenvulcano.gvesb.gvzmq.marshall.JSMarshaller" type="zmq-encoder" scope-name="gvesb">
-                        <Script>var obj = gvbIn.getObject();
+                    </ScriptDecoder>
+                    <ScriptEncoder class="it.greenvulcano.gvesb.gvzmq.marshall.ScriptMarshaller" type="zmq-encoder" scope-name="gvesb">
+                        <Script lang="js">var obj = gvbIn.getObject();
                             if (instanceOf(obj, ZMsg)) {
                                 msgOut = obj;
                             }
@@ -38,7 +38,7 @@
                                 msgOut.add("" + obj);
                             }
                         </Script>
-                    </JSEncoder>
+                    </ScriptEncoder>
                 </GVCoreInvoker>
             </ZMQListener>
         </ZMQListeners>

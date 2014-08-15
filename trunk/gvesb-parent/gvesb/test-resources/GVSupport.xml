@@ -335,6 +335,20 @@
       <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="cfgdeploy" script-file="js/deploy/main.js" type="jsinit" />
     </JavaScriptInitializers>
   </GVJavaScriptConfig>
+  <GVScriptConfig name="SCRIPT" type="module">
+    <ScriptCache base-path="target/test-classes/scripts"/>
+    <ScriptEngines>
+        <ScriptEngine lang="js" default-context="gvesb" type="script-engine">
+            <BaseContext name="basic"/>
+            <BaseContext name="gvesb" file="js/initscope.js"/>
+            <BaseContext name="JavaScriptRetriever" file="js/initscope.js"/>
+            <!--BaseContext name="cfgdeploy" file="js/deploy/main.js"/-->
+        </ScriptEngine>
+        <ScriptEngine lang="ognl" type="script-engine" />
+        <ScriptEngine lang="groovy" type="script-engine" />
+        <ScriptEngine lang="jruby" type="script-engine" />
+    </ScriptEngines>
+  </GVScriptConfig>
   <GVDateUtils name="DATE_UTILS" type="module">
     <Description>Configurazione di DateUtils.</Description>
     <Locale lang="it" country="IT" timezone="Europe/Rome">

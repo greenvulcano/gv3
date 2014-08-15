@@ -42,7 +42,7 @@ public class ZipDerived implements DerivedDocumentProxy {
             String pathStr = XMLConfig.get(node, "@path");
             if (!PropertiesHandler.isExpanded(pathStr)) {
                 try {
-                    pathStr = PropertiesHandler.expand(pathStr, null);
+                    pathStr = PropertiesHandler.expand(pathStr);
                 }
                 catch (PropertiesHandlerException exc) {
                     exc.printStackTrace();

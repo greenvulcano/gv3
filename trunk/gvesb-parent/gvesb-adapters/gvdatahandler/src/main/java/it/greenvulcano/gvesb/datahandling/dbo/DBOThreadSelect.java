@@ -109,7 +109,7 @@ public class DBOThreadSelect extends AbstractDBO
 
                 if (stmt != null) {
                     conn = getConnection();
-                    String expandedSQL = PropertiesHandler.expand(stmt, props, conn, null);
+                    String expandedSQL = PropertiesHandler.expand(stmt, props, null, conn);
                     sqlStatement = conn.createStatement();
                     logger.debug("Executing select statement: " + expandedSQL + ".");
                     rs = sqlStatement.executeQuery(expandedSQL);

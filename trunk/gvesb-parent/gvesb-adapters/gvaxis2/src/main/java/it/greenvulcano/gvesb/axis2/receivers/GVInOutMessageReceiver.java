@@ -170,7 +170,7 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
                         try {
                             currentGVBuffer = cGVBuffer.execute(currentGVBuffer, new HashMap<String, Object>());
                         }
-                        catch (Exception exc) {
+                        finally {
                             cGVBuffer.cleanUp();
                         }
                     }

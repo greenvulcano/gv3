@@ -40,14 +40,14 @@ public class GVESBPropertyHandlerTestCase extends TestCase
     public final void testGVBuffer() throws Exception
     {
         GVBuffer gvBuffer = new GVBuffer();
-        String inputA = "ognl{{property['prop1']}}_ognl{{property['prop2']}}_ognl{{property['prop3']}}";
+        String inputA = "ognl{{#object.property['prop1']}}_ognl{{#object.property['prop2']}}_ognl{{#object.property['prop3']}}";
 
         gvBuffer.setProperty("prop1", "hello");
         gvBuffer.setProperty("prop2", "world");
         gvBuffer.setProperty("prop3", "expander");
         assertEquals(EXPECTED_RESULT, PropertiesHandler.expand(inputA, null, gvBuffer));
 
-        String inputB = "ognl{{#appo=property['prop1'],property['prop1']=property['prop3'],property['prop3']=#appo}}";
+        String inputB = "ognl{{#appo=#object.property['prop1'],#object.property['prop1']=#object.property['prop3'],#object.property['prop3']=#appo}}";
         PropertiesHandler.expand(inputB, null, gvBuffer);
         assertEquals(EXPECTED_RESULT_REVERSE, PropertiesHandler.expand(inputA, null, gvBuffer));
     }
@@ -65,9 +65,9 @@ public class GVESBPropertyHandlerTestCase extends TestCase
         gvBuffer2.setProperty("prop1", "SRV2_value1");
         gvBuffer2.setProperty("prop2", "SRV2_value2");
 
-        String input = "ognl{{property['prop1']=#extra.property['prop1'],property['prop2']=#extra.property['prop2']}}";
+        String input = "ognl{{#object.property['prop1']=#extra.property['prop1'],#object.property['prop2']=#extra.property['prop2']}}";
 
-        PropertiesHandler.expand(input, null, gvBuffer1, null, gvBuffer2);
+        PropertiesHandler.expand(input, null, gvBuffer1, gvBuffer2);
 
         System.out.println("testGVBuffer2: " + gvBuffer1);
         System.out.println("testGVBuffer2: " + gvBuffer2);
