@@ -28,11 +28,11 @@
       <System id-system="GVESB" system-activation="on">
         <Channel id-channel="TEST_CHANNEL">
           <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_head">
-            <endpoint host="localhost" port="8888" secure="false"></endpoint>
+            <endpoint host="localhost" port="9999" secure="false"></endpoint>
             <method request-uri="/index.html" name="HEAD"/>
           </http-call>
           <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get">
-            <endpoint host="localhost" port="8888" secure="false"></endpoint>
+            <endpoint host="localhost" port="9999" secure="false"></endpoint>
             <method request-uri="/index.html" name="GET"/>
           </http-call>
           <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_dynamic">
@@ -40,20 +40,20 @@
             <method request-uri="/index.html" name="GET"/>
           </http-call>
           <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_post">
-            <endpoint host="localhost" port="8888" secure="false"></endpoint>
+            <endpoint host="localhost" port="9999" secure="false"></endpoint>
             <method request-uri="/index.html" name="POST" ref-dp="testHTTPMethodDP"/>
           </http-call>
           <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_simple_post">
-            <endpoint host="localhost" port="8888" secure="false"></endpoint>
+            <endpoint host="localhost" port="9999" secure="false"></endpoint>
             <method request-uri="/index.html" name="POST" ref-dp="testHTTPMethodSimpleDP"/>
           </http-call>
 
           <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_res_timeout">
-            <endpoint host="localhost" port="8888" secure="false" conn-timeout="5000" so-timeout="10000"></endpoint>
+            <endpoint host="localhost" port="9999" secure="false" conn-timeout="5000" so-timeout="10000"></endpoint>
             <method request-uri="/timeout.html" name="GET"/>
           </http-call>
           <http-call type="call" class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="test_http_get_res_timeout2">
-            <endpoint host="localhost" port="8888" secure="false" conn-timeout="2000" so-timeout="5000"></endpoint>
+            <endpoint host="localhost" port="9999" secure="false" conn-timeout="2000" so-timeout="5000"></endpoint>
             <method request-uri="/timeout.html" name="GET"/>
           </http-call>
 

@@ -36,7 +36,7 @@ import org.w3c.dom.Node;
 public class HttpCallTestCase extends TestCase
 {
     static {
-        new HttpServer(8888);
+        new HttpServer(9999);
     }
 
     /**
@@ -87,7 +87,7 @@ public class HttpCallTestCase extends TestCase
         httpCall.init(node);
         GVBuffer gvBuffer = new GVBuffer("TEST", "HTTP-GET-CALL");
         gvBuffer.setProperty("HOST", "localhost");
-        gvBuffer.setProperty("PORT", "8888");
+        gvBuffer.setProperty("PORT", "9999");
         GVBuffer result = httpCall.perform(gvBuffer);
         System.out.println(new GVBufferDump(result).toString());
         assertNotNull(result);
