@@ -10,7 +10,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvbase</artifactId>
-    <version>3.4.0.1-Final</version>
+    <version>3.4.0.2-Final</version>
     <packaging>jar</packaging>
     <name>GreenVulcano ESB Base Library</name>
 
@@ -87,6 +87,10 @@
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
             <artifactId>axiom-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.juddi.scout</groupId>
