@@ -1033,6 +1033,13 @@
 
 <!--
     Defines a XML/JSON trasformation.
+    Convert the input XML to a JSON string.
+    JSON does not distinguish between elements and attributes.
+    Sequences of similar elements (or elements which local-name are in ForceElementsArray)
+    are represented as JSONArrays.
+    Try to convert string values into a number, boolean, or null.
+    If an element have attributes, content text/cdata may be placed in a "contentText" member.
+    Comments and namespaces are ignored.
 
     #Label: @name
     #Icon: GVXSLFopTransformation.png
@@ -1116,9 +1123,18 @@
     #NotNull
 -->
 <!ATTLIST XML2JSONTransformation TransformerFactory CDATA #IMPLIED>
+<!--
+    A comma-separated list of element's local-name to be forced as JSONArray also if in single instance
+
+    #NotNull
+-->
+<!ATTLIST XML2JSONTransformation ForceElementsArray CDATA #IMPLIED>
 
 <!--
     Defines a JSON/XML trasformation.
+    Keys values are set as sub-elements, but keys whith name in ForceAttributes are set as XML attributes.
+    Value of 'contentText' key, idf present, value is set as #text element.
+    If a key has a null value then in the XML is set the 'null' string.
 
     #Label: @name
     #Icon: GVXSLFopTransformation.png
@@ -1202,6 +1218,12 @@
     #NotNull
 -->
 <!ATTLIST JSON2XMLTransformation TransformerFactory CDATA #IMPLIED>
+<!--
+    A comma-separated list of keys name to be set as XML attributes
+
+    #NotNull
+-->
+<!ATTLIST JSON2XMLTransformation ForceAttributes CDATA #IMPLIED>
 
 <!--
     Defines a Binary to XML trasformation.
