@@ -26,21 +26,23 @@ import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
 import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
 import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
 import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
-import it.greenvulcano.gvesb.gvdte.util.UtilsException;
 import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
 import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
 import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.json.JSONUtils;
+import it.greenvulcano.util.json.JSONUtilsException;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -49,12 +51,11 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
-import org.json.XML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -87,6 +88,8 @@ public class JSON2XMLTransformer implements DTETransformer {
     private Map<String, Templates> templHashMap = null;
 
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
+    
+    private Set<String>             forceAttributes = new HashSet<String>();
 
     public JSON2XMLTransformer() {
         // do nothing
@@ -131,8 +134,14 @@ public class JSON2XMLTransformer implements DTETransformer {
                 }
             }
 
+            String fAttrs = XMLConfig.get(nodo, "@ForceAttributes", "");
+            for (String attr : fAttrs.split(",")) {
+                forceAttributes.add(attr.trim());
+            }
+            
             logger.debug("Loaded parameters: outputXslMapName = " + xslMapName + " - DataSourceSet: "
-                    + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory);
+                    + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory
+                    + " - forceAttributes = " + forceAttributes);
 
             initTemplMap();
 
@@ -213,17 +222,16 @@ public class JSON2XMLTransformer implements DTETransformer {
     }
 
     /**
-     * The <code>input</code> parameter may be a Document, an XML string, a byte
-     * array containing an XML, or an <tt>InputStream</tt> from which an
-     * XML can be read. The <code>buffer</code> parameter is not used.
-     * The return value is a String containing the JSON representing
+     * The <code>input</code> parameter may be a JSON as string or byte
+     * array. The <code>buffer</code> parameter is not used.
+     * The return value is a Document containing the XML representing
      * the result of the transformation.
      *
      * @param input
      *            the input data of the transformation.
      * @param buffer
      *            the intermediate result of the transformation (if needed).
-     * @return a String representing the result of the JSON transformation.
+     * @return a Document representing the result of the XML transformation.
      * @throws DTETransfException
      *             if any transformation error occurs.
      */
@@ -232,13 +240,11 @@ public class JSON2XMLTransformer implements DTETransformer {
         logger.debug("Transform start");
         Transformer transformer = null;
         try {
-            String docJSON = convertInputFormatToString(input);
-            JSONObject json = new JSONObject(docJSON);
-            String docXML = XML.toString(json);
+            Document docXML= (Document) JSONUtils.jsonToXml(input, forceAttributes);
             if (xslMapName != null) {
                 transformer = getTransformer(mapParam);
                 setParams(transformer, mapParam);
-                Source theSource = new StreamSource(new StringReader(docXML));
+                Source theSource = new DOMSource(docXML);
                 String outputType = transformer.getOutputProperty(OutputKeys.METHOD);
                 if (outputType == null) {
                     outputType = "xml";
@@ -269,7 +275,7 @@ public class JSON2XMLTransformer implements DTETransformer {
         catch (DTETransfException exc) {
             throw exc;
         }
-        catch (UtilsException exc) {
+        catch (JSONUtilsException exc) {
             logger.error("Error while converting input object", exc);
             throw new DTETransfException("GVDTE_CONVERSION_ERROR",
                     new String[][] { { "msg", "converting input object" } }, exc);
@@ -335,29 +341,6 @@ public class JSON2XMLTransformer implements DTETransformer {
         return transformer;
     }
 
-
-    private String convertInputFormatToString(Object input) throws UtilsException {
-        String inputStr = null;
-        try {
-            if (input instanceof String) {
-                inputStr = (String) input;
-            }
-            else if (input instanceof byte[]) {
-                inputStr = new String((byte[]) input);
-            }
-            else {
-                throw new UtilsException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Invalid input type: " + input.getClass() } });
-            }
-            return inputStr;
-        }
-        catch (UtilsException exc) {
-            throw exc;
-        }
-        catch (Throwable exc) {
-            logger.error("Unexpected error", exc);
-            throw new UtilsException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Unexpected error." } }, exc);
-        }
-    }
 
     /**
      * Execute the document validation
