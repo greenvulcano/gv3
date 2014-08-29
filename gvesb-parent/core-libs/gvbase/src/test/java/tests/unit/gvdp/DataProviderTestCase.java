@@ -39,6 +39,7 @@ import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.StAXUtils;
+import org.junit.Ignore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -47,6 +48,7 @@ import org.w3c.dom.Node;
  * @author GreenVulcano Developer Team
  * 
  */
+@Ignore
 public class DataProviderTestCase extends TestCase
 {
     private static final String TEST_SYSTEM          = "TEST_SYSTEM";
