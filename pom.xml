@@ -278,14 +278,14 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvbase</artifactId>
-            <version>3.4.0.1-Final</version>
+            <version>3.4.0.2-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdte</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -454,7 +454,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-openspcoop</artifactId>
-    		<version>3.4.0.1-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -548,7 +548,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp</artifactId>
-    		<version>3.4.0.3-Final</version>
+    		<version>3.4.0.4-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
