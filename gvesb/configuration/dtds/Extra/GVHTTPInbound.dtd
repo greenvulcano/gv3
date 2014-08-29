@@ -46,6 +46,7 @@
     Input GVBuffer:
     - HTTP_ACTION
     - HTTP_PATH
+    - HTTP_QUERY
     - HTTP_METHOD
     - HTTP_REMOTE_ADDR
 
@@ -142,6 +143,7 @@
     Input GVBuffer:
     - HTTP_ACTION
     - HTTP_PATH
+    - HTTP_QUERY
     - HTTP_METHOD
     - HTTP_REMOTE_ADDR
     - HTTP_REQ_CONTENT_TYPE

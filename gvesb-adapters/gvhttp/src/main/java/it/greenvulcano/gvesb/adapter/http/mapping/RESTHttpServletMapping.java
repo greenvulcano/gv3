@@ -264,6 +264,11 @@ public class RESTHttpServletMapping implements HttpServletMapping
                 path = "/";
             }
 
+            String query = req.getQueryString();
+            if (query == null) {
+                query = "";
+            }
+            
             GVBuffer request = new GVBuffer();
             String operationType = null;
             PatternResolver pr = null;
@@ -289,6 +294,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
 
             request.setProperty("HTTP_ACTION", action);
             request.setProperty("HTTP_PATH", path);
+            request.setProperty("HTTP_QUERY", query);
             request.setProperty("HTTP_METHOD", methodName);
             // get remote transport address...
             String remAddr = req.getRemoteAddr();
@@ -375,10 +381,10 @@ public class RESTHttpServletMapping implements HttpServletMapping
             String acc = req.getHeader("Accept");
             request.setProperty("HTTP_REQ_ACCEPT", (acc != null) ? acc : "NULL");
             if (methodName.equals("POST") || methodName.equals("PUT")) {
-                if (!ct.equals(AdapterHttpConstants.URLENCODED_MIMETYPE_NAME)) {
+                if (!ct.startsWith(AdapterHttpConstants.URLENCODED_MIMETYPE_NAME)) {
                     Object requestContent = IOUtils.toByteArray(req.getInputStream());
-                    if (ct.equals(AdapterHttpConstants.APPXML_MIMETYPE_NAME) ||
-                        ct.equals(AdapterHttpConstants.APPJSON_MIMETYPE_NAME) ||
+                    if (ct.startsWith(AdapterHttpConstants.APPXML_MIMETYPE_NAME) ||
+                        ct.startsWith(AdapterHttpConstants.APPJSON_MIMETYPE_NAME) ||
                         ct.startsWith("text/")) {
                         /* GESTIRE ENCODING!!! */
                         requestContent = new String((byte[]) requestContent);
@@ -386,7 +392,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     request.setObject(requestContent);
                 }
             }
-            
+
             if (pr.isExtractHdr()) {
                 XMLUtils parser = null;
                 try {
