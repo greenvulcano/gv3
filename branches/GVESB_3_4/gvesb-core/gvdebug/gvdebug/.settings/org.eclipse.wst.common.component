@@ -17,7 +17,7 @@
         <dependent-module archiveName="gvpolicy-3.4.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvpolicy/gvpolicy">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gvdte-3.4.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdte/gvdte">
+        <dependent-module archiveName="gvdte-3.4.0.1-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdte/gvdte">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="context-root" value="gvdebug"/>
