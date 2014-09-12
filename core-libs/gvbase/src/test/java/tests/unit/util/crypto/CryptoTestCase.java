@@ -162,5 +162,27 @@ public class CryptoTestCase
                 Base64.decodeBase64(TEST_STRING_CYPHER_3DES_L), true);
         assertArrayEquals("Decrypt Failed", TEST_STRING_CLEAR.getBytes("ISO-8859-1"), result);
     }
+    
+    /**
+     * Test method for
+     * {@link it.greenvulcano.util.crypto.CryptoHelper#decrypt(java.lang.String, byte[], boolean)}
+     * .
+     */
+    @Test
+    public void testDecrypt5() throws Exception
+    {
+        String result = CryptoHelper.decrypt(CryptoHelper.DEFAULT_KEY_ID, "Y", true);
+        assertEquals("Decrypt Failed", "Y", result);
+    }
 
+    /**
+     * Test method for encrypt/decrypt.
+     */
+    @Test
+    public void testDecrypt6() throws Exception
+    {
+    	String resultE = CryptoHelper.encrypt(CryptoHelper.DEFAULT_KEY_ID, "", true);
+        String resultD = CryptoHelper.decrypt(CryptoHelper.DEFAULT_KEY_ID, resultE, true);
+        assertEquals("Decrypt Failed", "", resultD);
+    }
 }
