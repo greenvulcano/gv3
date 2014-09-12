@@ -479,9 +479,14 @@ public final class CryptoUtils
                 type = getTypeI(type);
             }
 
-            input = removeType(input);
+            String lInput = removeType(input);
+            byte[] bInput = Base64.decodeBase64(lInput.getBytes(inputEnc));
+            if (canBeClear && (bInput.length == 0)) {
+            	return input;
+            }
+
             byte[] result = cypher(type, Cipher.DECRYPT_MODE, key, params,
-                    Base64.decodeBase64(input.getBytes(inputEnc)), null);
+                    Base64.decodeBase64(lInput.getBytes(inputEnc)), null);
 
             return new String(result, inputEnc);
         }
