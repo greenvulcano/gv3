@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.Enumeration;
 
 import javax.jms.BytesMessage;
+import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
@@ -167,6 +168,24 @@ public class JMSMessageDump
                 }
                 finally {
                     bytesMessage.reset();
+                }
+            }
+            else if (message instanceof MapMessage) {
+            	MapMessage mapMessage = (MapMessage) message;
+            	StringBuilder sbuffer = new StringBuilder();
+                try {
+                	@SuppressWarnings("unchecked")
+                    Enumeration<String> names = mapMessage.getMapNames();
+                	while(names.hasMoreElements()) {
+                		String name = names.nextElement();
+                        Object value = mapMessage.getObject(name);
+                        sbuffer.append(format(name, ": ")).append("'").append(value).append("'").append(
+                                value == null ? "" : " (" + value.getClass().getName() + ")").append("\n");
+					}
+                	return sbuffer.toString();
+                }
+                finally {
+                	//
                 }
             }
             else {
