@@ -536,7 +536,8 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     resp.setStatus(Integer.parseInt(respStatusCode));
                 }
                 else {
-                    resp.sendError(Integer.parseInt(respStatusCode), respStatusMsg);
+                    //resp.sendError(Integer.parseInt(respStatusCode), respStatusMsg);
+                    resp.setStatus(Integer.parseInt(respStatusCode), respStatusMsg);
                 }
             }
 
