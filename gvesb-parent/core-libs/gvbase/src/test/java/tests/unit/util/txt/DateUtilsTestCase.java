@@ -197,6 +197,50 @@ public class DateUtilsTestCase extends TestCase
      * .
      */
     @Test
+    public void testConvertISO8601StringDateFormatTimeZone()
+    {
+    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 00:00:00",
+    			DateUtils.convertString("2014-09-01T00:00:00+02:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 01:00:00",
+    			DateUtils.convertString("2014-09-01T01:00:00+02:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 02:00:00",
+    			DateUtils.convertString("2014-09-01T02:00:00+02:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 00:00:00",
+    			DateUtils.convertString("2014-11-01T00:00:00.000+01:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 01:00:00",
+    			DateUtils.convertString("2014-11-01T01:00:00.000+01:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 02:00:00",
+    			DateUtils.convertString("2014-11-01T02:00:00.000+01:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+    }
+    
+    /**
+     * Test method for
+     * {@link it.greenvulcano.util.txt.DateUtils#convertString(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
+     * .
+     */
+    @Test
+    public void testConvertISO8601StringDateFormatTimeZone2()
+    {
+    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01T00:00:00+02:00",
+    			DateUtils.convertString("2014-09-01 00:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01T01:00:00+02:00",
+    			DateUtils.convertString("2014-09-01 01:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01T02:00:00+02:00",
+    			DateUtils.convertString("2014-09-01 02:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01T00:00:00+01:00",
+    			DateUtils.convertString("2014-11-01 00:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01T01:00:00+01:00",
+    			DateUtils.convertString("2014-11-01 01:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
+    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01T02:00:00+01:00",
+    			DateUtils.convertString("2014-11-01 02:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
+    }
+
+    /**
+     * Test method for
+     * {@link it.greenvulcano.util.txt.DateUtils#convertString(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
+     * .
+     */
+    @Test
     public void testConvertStringDateFormatTimeZoneLang()
     {
         String str1 = "2010-Gen-12 12:35";
