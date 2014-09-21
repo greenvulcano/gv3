@@ -605,9 +605,16 @@ public class DBOCallSP extends AbstractDBO
                     ResultSet resultSet = null;
 
                     if (javaType.equalsIgnoreCase(ParameterType.JAVA_RESULTSET)) {
-                        Object obj = namedParameterMode ? callStmt.getObject(paramName) : callStmt.getObject(iPos);
+                        Object obj = null;
+                        try {
+                        	obj = namedParameterMode ? callStmt.getObject(paramName) : callStmt.getObject(iPos);
+                        }
+                        catch (SQLException exc) {
+							// closed cursor?
+                        	logger.warn("Error reading Cursor output parameter... Closed cursor?", exc);
+						}
                         value = null;
-                        if (obj instanceof ResultSet) {
+                        if ((obj != null) && (obj instanceof ResultSet)) {
                             resultSet = (ResultSet) obj;
                         }
                     }
