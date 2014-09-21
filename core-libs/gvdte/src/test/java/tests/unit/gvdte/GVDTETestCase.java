@@ -243,7 +243,7 @@ public class GVDTETestCase extends XMLTestCase
         Object output = controller.transform("TestXQuery", TextUtils.readFileFromCP("bib.xml"), null);
         String dom = XMLUtils.serializeDOM_S((Node) output);
         String outXML = TextUtils.readFileFromCP("bib_filter.out");
-        //System.out.println("TestXQuery: " + dom);
+        //System.out.println("\nTestXQuery: " + dom);
         assertXMLEqual("testXQ failed", outXML, dom);
     }
     
@@ -257,7 +257,7 @@ public class GVDTETestCase extends XMLTestCase
         Object output = controller.transform("TestXml2Json", TextUtils.readFileFromCP("bib.xj"), null);
         String json = (String) output;
         String outJSON = TextUtils.readFileFromCP("bib.json");
-        //System.out.println("TestXml2Json: " + json);
+        //System.out.println("\nTestXml2Json: " + json);
         JSONAssert.assertEquals(outJSON, json, true);
     }
 
@@ -269,11 +269,24 @@ public class GVDTETestCase extends XMLTestCase
     public void testJSON2XML() throws Exception
     {
         Object output = controller.transform("TestJson2Xml", TextUtils.readFileFromCP("bib.json"), null);
-        //String dom = XMLUtils.serializeDOM_S((Node) output);
-        String dom = (String) output;
+        String dom = XMLUtils.serializeDOM_S((Node) output);
         String outXML = TextUtils.readFileFromCP("bib.xj");
         //System.out.println("TestJson2Xml: " + dom);
         assertXMLEqual("TestJson2Xml failed", outXML, dom);
+    }
+
+    /**
+     * Test the JSON2XMLTransformer.
+     * 
+     * @throws Exception
+     */
+    public void testJSON2XML_attr() throws Exception
+    {
+        Object output = controller.transform("TestJson2Xml_attr", TextUtils.readFileFromCP("bib.json"), null);
+        String dom = XMLUtils.serializeDOM_S((Node) output);
+        String outXML = TextUtils.readFileFromCP("bib_attr.xml");
+        //System.out.println("\nTestJson2Xml_attr: " + dom);
+        assertXMLEqual("TestJson2Xml_attr failed", outXML, dom);
     }
 
     /**
@@ -286,7 +299,7 @@ public class GVDTETestCase extends XMLTestCase
         Object output = controller.transform("TestXml2Json_Xsl", TextUtils.readFileFromCP("bib.xj"), null);
         String json = (String) output;
         String outJSON = TextUtils.readFileFromCP("bib.json");
-        //System.out.println("TestXml2Json_Xsl: " + json);
+        //System.out.println("\nTestXml2Json_Xsl: " + json);
         JSONAssert.assertEquals(outJSON, json, true);
     }
 
@@ -300,7 +313,7 @@ public class GVDTETestCase extends XMLTestCase
         Object output = controller.transform("TestJson2Xml_Xsl", TextUtils.readFileFromCP("bib.json"), null);
         String dom = XMLUtils.serializeDOM_S((Node) output);
         String outXML = TextUtils.readFileFromCP("bib.xj");
-        //System.out.println("TestJson2Xml_Xsl: " + dom);
+        //System.out.println("\nTestJson2Xml_Xsl: " + dom);
         assertXMLEqual("TestJson2Xml_Xsl failed", outXML, dom);
     }
 
