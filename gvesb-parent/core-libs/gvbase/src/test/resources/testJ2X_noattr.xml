@@ -3,12 +3,14 @@
     <elem>
         <id>A</id>
         <int>12345</int>
+        <intStr>12345</intStr>
         <string>some &amp; value</string>
         <float>123.456</float>
     </elem>
     <elem>
         <id>B</id>
         <int>67890</int>
+        <intStr>67890</intStr>
         <string>some other &lt;value&gt;</string>
         <float>456.123</float>text child
 second row</elem>
@@ -25,11 +27,13 @@ second row</elem>
             <boolean>false</boolean>text child
 second row</elem>
         <int>12345</int>
+        <intStr>12345</intStr>
         <string>some &amp; ' " value</string>
     </elemB>
     <elemC>
         <id>E</id>
         <int>12345</int>
+        <intStr>12345</intStr>
         <nullVal>null</nullVal>
         <float>123.456</float>
     </elemC>
