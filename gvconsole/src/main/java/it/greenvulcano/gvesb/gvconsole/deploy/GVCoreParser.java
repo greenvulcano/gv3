@@ -1043,7 +1043,7 @@ public class GVCoreParser
 
     private Node getGVTask(Document xml) throws XMLUtilsException
     {
-        Node gvTaskConfiguration = XMLUtils.selectSingleNode_S(xml, "/GVCore/GVTaskManagerConfiguration");;
+        Node gvTaskConfiguration = XMLUtils.selectSingleNode_S(xml, "/GVCore/GVTaskManagerConfiguration");
         return gvTaskConfiguration;
     }
 
@@ -1456,6 +1456,10 @@ public class GVCoreParser
         Node resultsValidation = parser.selectSingleNode(zipService, ".//xml-validation-service");
         if (resultsValidation != null) {
             copiaFileXSD(parser);
+        }
+        resultsValidation = parser.selectSingleNode(zipService, ".//json-validation-service");
+        if (resultsValidation != null) {
+            copiaFileJSD(parser);
         }
     }
 
@@ -2497,6 +2501,19 @@ public class GVCoreParser
         if (fin.exists()) {
             output = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "xmlconfig" + File.separator
                     + "xsds", null);
+            FileManager.cp(input, output, ".*");
+        }
+    }
+    
+    private void copiaFileJSD(XMLUtils parser) throws Exception
+    {
+        logger.debug("Prepare JSD for validation only");
+        String path = java.lang.System.getProperty("java.io.tmpdir");
+        String input = path + File.separator + "conf" + File.separator + "jsds";
+        File fin = new File(input);
+        if (fin.exists()) {
+            String output = PropertiesHandler.expand("${{gv.app.home}}" + File.separator + "xmlconfig" + File.separator
+                    + "jsds", null);
             FileManager.cp(input, output, ".*");
         }
     }
