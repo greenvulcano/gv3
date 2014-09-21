@@ -88,6 +88,10 @@
             <artifactId>axiom-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.juddi.scout</groupId>
             <artifactId>scout</artifactId>
             <scope>test</scope>

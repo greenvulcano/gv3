@@ -31,6 +31,7 @@ import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
 import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
 import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.json.JSONUtils;
 import it.greenvulcano.util.xml.ErrHandler;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
@@ -40,8 +41,10 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -55,7 +58,6 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
-import org.json.XML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -88,6 +90,9 @@ public class XML2JSONTransformer implements DTETransformer {
     private Map<String, Templates> templHashMap = null;
 
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
+    
+    private Set<String>             forceElementsArray = new HashSet<String>();
+    private Set<String>             forceStringValue   = new HashSet<String>();
 
     public XML2JSONTransformer() {
         // do nothing
@@ -132,8 +137,19 @@ public class XML2JSONTransformer implements DTETransformer {
                 }
             }
 
+            String fElem = XMLConfig.get(nodo, "@ForceElementsArray", "");
+            for (String el : fElem.split(",")) {
+                forceElementsArray.add(el.trim());
+            }
+            String fStr = XMLConfig.get(nodo, "@ForceStringValue", "");
+            for (String str : fStr.split(",")) {
+            	forceStringValue.add(str.trim());
+            }
+
             logger.debug("Loaded parameters: inputXslMapName = " + xslMapName + " - DataSourceSet: "
-                    + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory);
+                    + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory
+                    + " - forceElementsArray = " + forceElementsArray
+                    + " - forceStringValue = " + forceStringValue);
 
             initTemplMap();
 
@@ -227,7 +243,7 @@ public class XML2JSONTransformer implements DTETransformer {
         logger.debug("Transform start");
         Transformer transformer = null;
         try {
-            String docXML = null;
+            Node docXML = null;
             if (xslMapName != null) {
                 transformer = getTransformer(mapParam);
                 setParams(transformer, mapParam);
@@ -238,14 +254,15 @@ public class XML2JSONTransformer implements DTETransformer {
                 }
                 DOMResult theDOMResult = new DOMResult();
                 transformer.transform(theSource, theDOMResult);
-                docXML = XMLUtils.serializeDOM_S(theDOMResult.getNode());
+                docXML = theDOMResult.getNode();
             }
             else {
-                docXML = convertInputFormatToString(input);
+                docXML = XMLUtils.parseObject_S(input, false, true);
             }
-            JSONObject json = XML.toJSONObject(docXML);
+            JSONObject json = JSONUtils.xmlToJson(docXML, forceElementsArray, forceStringValue);
             logger.debug("Transform stop");
-            return json.toString(2);
+            //return json.toString(2);
+            return json.toString();
         }
         catch (DTETransfException exc) {
             throw exc;
@@ -414,36 +431,6 @@ public class XML2JSONTransformer implements DTETransformer {
         }
     }
 
-    private String convertInputFormatToString(Object input) throws UtilsException {
-        String inputStr = null;
-        try {
-            if (input instanceof Node) {
-                inputStr = XMLUtils.serializeDOM_S((Node) input);
-            }
-            else if (input instanceof String) {
-                inputStr = (String) input;
-            }
-            else if (input instanceof byte[]) {
-                inputStr = new String((byte[]) input);
-            }
-            else {
-                throw new UtilsException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Invalid input type: " + input.getClass() } });
-            }
-            return inputStr;
-        }
-        catch (XMLUtilsException exc) {
-            logger.error("Error while performing XML conversion", exc);
-            throw new UtilsException("GVDTE_XSLT_ERROR",
-                    new String[][] { { "cause", "while performing XML conversion." } }, exc);
-        }
-        catch (UtilsException exc) {
-            throw exc;
-        }
-        catch (Throwable exc) {
-            logger.error("Unexpected error", exc);
-            throw new UtilsException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Unexpected error." } }, exc);
-        }
-    }
 
     /**
      * Set the 'params' key:value pair as 'transformer' params

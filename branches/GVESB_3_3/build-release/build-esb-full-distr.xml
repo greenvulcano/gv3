@@ -189,7 +189,7 @@
                 <exclude name="org.mozilla.javascript.jar"/>
             </fileset>
             <fileset dir="${commons.beanutils.lib}">
-                <include name="*.jar"/>
+                <include name="commons-beanutils.jar"/>
             </fileset>
             <fileset dir="${commons.cli.lib}">
                 <include name="*.jar"/>
