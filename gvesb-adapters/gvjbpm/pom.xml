@@ -22,6 +22,10 @@
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.jbpm</groupId>

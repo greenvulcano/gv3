@@ -61,5 +61,9 @@
 			<groupId>org.apache.openejb</groupId>
 			<artifactId>openejb-cxf-rs</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
 	</dependencies>
 </project>
