@@ -32,12 +32,16 @@ import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -69,6 +73,8 @@ public final class DateUtils
     public static final String                                    FORMAT_ISO_TIMESTAMP_L   = "yyyy-MM-dd HH:mm:ss.SSS";
 
     public static final String                                    FORMAT_ISO_DATETIME_UTC  = "yyyy-MM-dd'T'HH:mm:ssZ";
+    
+    public static final String                                    FORMAT_ISO8601_DATETIME  = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     public static final String                                    FORMAT_IETF_DATETIME     = "EEE, d MMM yyyy HH:mm:ss z";
 
@@ -1795,6 +1801,23 @@ public final class DateUtils
     }
 
     /**
+     * Convert a long representing a ms duration into a string in the format HH:mm:ss.SSS.
+     *
+     * @param millis
+     * @return
+     */
+    public static String durationToString(long millis)
+    {
+        long h = TimeUnit.MILLISECONDS.toHours(millis);
+        millis -= TimeUnit.HOURS.toMillis(h);
+        long m = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis -= TimeUnit.MINUTES.toMillis(m);
+        long s = TimeUnit.MILLISECONDS.toSeconds(millis);
+        millis -= TimeUnit.SECONDS.toMillis(s);
+        return String.format("%d:%02d:%02d.%03d", h, m, s, millis);
+    }
+
+    /**
      * Returns type of day: 1 = Feriale; 2 = Prefestivo; 4 = Festivo;
      * 
      * @param today
@@ -2051,6 +2074,48 @@ public final class DateUtils
     }
 
     /**
+     * @version 3.4.0.4 Sep 2, 2014
+     * @author GreenVulcano Developer Team
+     * 
+     * DateFormat to handle FORMAT_ISO8601_DATETIME,
+     * TO BE REMOVED for Java version >= 7
+     */
+    private static class ISO8601DateFormat extends DateFormat
+    {
+        private static final long serialVersionUID = -5064344567714693323L;
+
+        /**
+         *
+         */
+        public ISO8601DateFormat()
+        {
+            setCalendar(DateUtils.createCalendar());
+        }
+
+        /* (non-Javadoc)
+         * @see java.text.DateFormat#format(java.util.Date, java.lang.StringBuffer, java.text.FieldPosition)
+         */
+        @Override
+        public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition)
+        {
+        	Calendar cal = new GregorianCalendar();
+        	cal.setTime(date);
+            return toAppendTo.append(DatatypeConverter.printDateTime(cal));
+        }
+
+        /* (non-Javadoc)
+         * @see java.text.DateFormat#parse(java.lang.String, java.text.ParsePosition)
+         */
+        @Override
+        public Date parse(String source, ParsePosition pos)
+        {
+            pos.setIndex(source.length());
+            Calendar cal = DatatypeConverter.parseDateTime(source);
+            return cal.getTime();
+        }
+    }
+
+    /**
      * Return a DateFormat capable of handling the given conversion
      * pattern for the <b>tZone</b> timezone.
      * 
@@ -2071,6 +2136,9 @@ public final class DateUtils
         if (sdf == null) {
             if (format.equals(FORMAT_SYSTEM_TIME)) {
                 sdf = new SystemTimeDateFormat();
+            }
+            else if (format.equals(FORMAT_ISO8601_DATETIME)) {
+                sdf = new ISO8601DateFormat();
             }
             else {
                 sdf = new SimpleDateFormat(format, locale);
