@@ -150,8 +150,14 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
                 path = "/";
             }
 
+            String query = req.getQueryString();
+            if (query == null) {
+                query = "";
+            }
+
             request.setProperty("HTTP_ACTION", action);
             request.setProperty("HTTP_PATH", path);
+            request.setProperty("HTTP_QUERY", query);
             request.setProperty("HTTP_METHOD", methodName);
             // get remote transport address...
             String remAddr = req.getRemoteAddr();
