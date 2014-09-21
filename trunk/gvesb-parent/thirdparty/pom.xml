@@ -323,6 +323,33 @@
                             </mapping>
                         </dependency>
                         <dependency>
+                            <groupId>com.github.fge</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>fge</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>fge</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.google.guava</groupId>
+                            <artifactId>guava</artifactId>
+                            <mapping>
+                                <componentId>fge</componentId>
+                            </mapping>
+                        </dependency><dependency>
+                            <groupId>com.googlecode.libphonenumber</groupId>
+                            <artifactId>libphonenumber</artifactId>
+                            <mapping>
+                                <componentId>fge</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
                             <groupId>org.codehaus.groovy</groupId>
                             <artifactId>groovy-all</artifactId>
                             <mapping>
@@ -474,6 +501,10 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz-oracle</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>rhino</groupId>
+            <artifactId>js</artifactId>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>

@@ -70,6 +70,7 @@
     <version.jruby>1.7.13</version.jruby>
     <version.jsch>0.1.51</version.jsch>
     <version.json>20131018</version.json>
+    <version.json.schema>2.2.5</version.json.schema>
     <version.junit>4.11</version.junit>
     <version.log4j>1.2.15</version.log4j>
     <version.lucene>2.0.0</version.lucene>
@@ -80,6 +81,7 @@
     <version.openejb>4.5.2</version.openejb>
     <version.openspcoop>1.4.1</version.openspcoop>
     <version.quartz>1.8.5</version.quartz>
+    <version.rhino.js>1.7R2</version.rhino.js>
     <version.rmiio>2.0.2</version.rmiio>
     <version.sandesha2>1.4</version.sandesha2>
     <version.saxon>9.1.0.8</version.saxon>
@@ -385,6 +387,13 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>rhino</groupId>
+            <artifactId>js</artifactId>
+            <version>${version.rhino.js}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>jcifs</groupId>
             <artifactId>jcifs</artifactId>
             <version>${version.jcifs}</version>
@@ -509,6 +518,72 @@
             <version>${version.json}</version>
             <type>jar</type>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fge</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${version.json.schema}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.fge</groupId>
+            <artifactId>json-schema-core</artifactId>
+            <version>1.2.4</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mozilla</groupId>
+                    <artifactId>rhino</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fge</groupId>
+            <artifactId>uri-template</artifactId>
+            <version>0.9</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fge</groupId>
+            <artifactId>msg-simple</artifactId>
+            <version>1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fge</groupId>
+            <artifactId>jackson-coreutils</artifactId>
+            <version>1.8</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>16.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>6.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.2.3</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.2.3</version>
         </dependency>
 
         <dependency>
