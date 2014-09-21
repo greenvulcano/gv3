@@ -323,6 +323,33 @@
                             </mapping>
                         </dependency>
                         <dependency>
+                            <groupId>com.github.fge</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>fge</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>fge</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.google.guava</groupId>
+                            <artifactId>guava</artifactId>
+                            <mapping>
+                                <componentId>fge</componentId>
+                            </mapping>
+                        </dependency><dependency>
+                            <groupId>com.googlecode.libphonenumber</groupId>
+                            <artifactId>libphonenumber</artifactId>
+                            <mapping>
+                                <componentId>fge</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
                             <groupId>org.apache.woden</groupId>
                             <artifactId>*</artifactId>
                             <mapping>

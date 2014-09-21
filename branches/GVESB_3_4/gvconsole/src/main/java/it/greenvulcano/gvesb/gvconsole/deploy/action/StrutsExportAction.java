@@ -112,6 +112,7 @@ public class StrutsExportAction extends Action
 
             FileManager.cp(dtdsDir, appoDir + File.separator + "dtds", ".*");
             FileManager.cp(xmlDir + File.separator + "xsds", appoDir + File.separator + "xsds", ".*");
+            FileManager.cp(xmlDir + File.separator + "jsds", appoDir + File.separator + "jsds", ".*");
             FileManager.cp(defDTEDir, appoDir + File.separator + "gvdte", ".*");
             //FileManager.cp(PropertiesHandler.expand(XMLConfig.get("GVCore.xml", "//DataSourceSet[@name='Default']/*[@formatHandled='xsl']/@repositoryHome", defDTEDir+File.separator+"xsl"), null), appoDir+File.separator+"gvdte"+File.separator+"xsl", ".*");
             //FileManager.cp(PropertiesHandler.expand(XMLConfig.get("GVCore.xml", "//DataSourceSet[@name='Default']/*[@formatHandled='xsd']/@repositoryHome", defDTEDir+File.separator+"xsd"), null), appoDir+File.separator+"gvdte"+File.separator+"xsd", ".*");

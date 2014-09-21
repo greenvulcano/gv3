@@ -11,7 +11,7 @@
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvconsole</artifactId>
     <packaging>war</packaging>
-    <version>3.4.0.2-Final</version>
+    <version>3.4.0.3-Final</version>
     <name>GreenVulcano ESB Administration Console</name>
 
     <build>
@@ -71,6 +71,11 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvpolicy</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvthroughput</artifactId>
             <scope>provided</scope>
         </dependency>
 

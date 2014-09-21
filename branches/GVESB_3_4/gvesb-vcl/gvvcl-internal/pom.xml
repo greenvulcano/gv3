@@ -9,6 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvvcl-internal</artifactId>
+    <version>3.4.0.1-Final</version>
     <name>GreenVulcano VCL Internal Plugin</name>
 
     <dependencies>
@@ -23,6 +24,10 @@
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fge</groupId>
+            <artifactId>json-schema-validator</artifactId>
         </dependency>
     </dependencies>
 </project>
