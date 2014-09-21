@@ -16,7 +16,7 @@
 <!ENTITY % properties "Property|PropertyCompare">
 <!ENTITY % notification-nodes "Log4JNotification|JMXNotification">
 <!ENTITY % conditions "GVBufferCondition|ExceptionCondition|JavaScriptCondition|IdentityCondition">
-<!ENTITY % internal-services "gvdte-service|xml-validation-service|script-service">
+<!ENTITY % internal-services "gvdte-service|xml-validation-service|json-validation-service|ognl-script-service|java-script-service">
 <!ENTITY % ShellCommands       "(cmd|cmd-array-elem+), env-property*">
 <!ENTITY % connections "DataSourceConnection|JdbcConnection">
 <!ENTITY % Resolver            "(XPathParamResolver|GVBufferParamResolver)">
@@ -1129,6 +1129,12 @@
     #NotNull
 -->
 <!ATTLIST XML2JSONTransformation ForceElementsArray CDATA #IMPLIED>
+<!--
+    A comma-separated list of element's local-name to be forced as String values, ignoring automatic type conversion
+
+    #NotNull
+-->
+<!ATTLIST XML2JSONTransformation ForceStringValue CDATA #IMPLIED>
 
 <!--
     Defines a JSON/XML trasformation.
@@ -8785,6 +8791,7 @@
 <!ATTLIST xml-validation-call name CDATA #REQUIRED>
 <!--
     Default XSD.
+    The file must be into xsds folder.
 
     #NotNull
     #Warn: {{../xml-validation-call[@default-xsd and not(@xsd-policy)]}} Specify the policy to use the default schema.
@@ -8807,6 +8814,67 @@
     Default is 'false'.
 -->
 <!ATTLIST xml-validation-call return-dom (false | true) #IMPLIED>
+
+<!--
+    Invokes the JSON validation engine.
+
+    #Template:
+
+        <xsl:template match="json-validation-service">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT json-validation-service (Description?, json-validation-call)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST json-validation-service type CDATA #FIXED "service">
+<!--
+    Unmodifiable.
+-->
+<!ATTLIST json-validation-service internal CDATA #FIXED "yes">
+
+<!--
+    Communication parameters to interact with JSON validation engine.
+
+    #Label: @name
+    #Template:
+
+        <xsl:template match="json-validation-call">
+            <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT json-validation-call (Description?, ServiceAlias?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST json-validation-call  type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST json-validation-call  class CDATA #FIXED "it.greenvulcano.gvesb.virtual.internal.json.JSONValidationCallOperation">
+<!--
+    ID used for diagnostics.
+    Is printed on the log files.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST json-validation-call name CDATA #REQUIRED>
+<!--
+    File name of a JSON Schema.
+    The file must be into jsds folder.
+
+    #NotNull
+-->
+<!ATTLIST json-validation-call  jsd-name CDATA #REQUIRED>
 
 <!--
     Internal service useful to execute scripts on GVBuffer instances.
