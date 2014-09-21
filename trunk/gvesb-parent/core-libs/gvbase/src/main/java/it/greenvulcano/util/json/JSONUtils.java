@@ -55,7 +55,7 @@ public class JSONUtils
      * @throws JSONUtilsException
      */
     public static JSONObject xmlToJson(Object xml) throws JSONUtilsException {
-        return xmlToJson(xml, new HashSet<String>());
+        return xmlToJson(xml, new HashSet<String>(), new HashSet<String>());
     }
 
     /**
@@ -70,10 +70,12 @@ public class JSONUtils
      *        the document to convert
      * @param forceElementsArray
      *        a set containing element's local-name to be forced as JSONArray also if in single instance
+     * @param forceStringValue
+     *        a set containing element's local-name to be forced as String values, ignoring type conversions
      * @return
      * @throws JSONUtilsException
      */
-    public static JSONObject xmlToJson(Object xml, Set<String> forceElementsArray) throws JSONUtilsException {
+    public static JSONObject xmlToJson(Object xml, Set<String> forceElementsArray, Set<String> forceStringValue) throws JSONUtilsException {
         XMLUtils parser = null;
         JSONObject result = new JSONObject();
         try {
@@ -91,10 +93,10 @@ public class JSONUtils
             String name = el.getLocalName();
             
             if (forceElementsArray.contains(name)) {
-                result.append(name, processElement(parser, el, forceElementsArray));
+                result.append(name, processElement(parser, el, forceElementsArray, forceStringValue));
             }
             else {
-                result.put(name, processElement(parser, el, forceElementsArray));
+                result.put(name, processElement(parser, el, forceElementsArray, forceStringValue));
             }
             
             return result;
@@ -110,7 +112,7 @@ public class JSONUtils
         }
     }
 
-    private static Object processElement(XMLUtils parser, Element el, Set<String> forceElementsArray) throws JSONUtilsException {
+    private static Object processElement(XMLUtils parser, Element el, Set<String> forceElementsArray, Set<String> forceStringValue) throws JSONUtilsException {
         try {
             if (el.hasAttributes() || el.hasChildNodes()) {
                 JSONObject current = new JSONObject();
@@ -122,7 +124,12 @@ public class JSONUtils
                         Node att = attrs.item(i);
                         String name = att.getLocalName();
                         String value = parser.getNodeContent(att);
-                        current.put(name, stringToValue(value));
+                        if (forceStringValue.contains(name)) {
+                        	current.put(name, value);
+                        }
+                        else {
+                        	current.put(name, stringToValue(value));
+                        }
                     }
                 }
                 if (el.hasChildNodes()) {
@@ -137,10 +144,10 @@ public class JSONUtils
                             case Node.ELEMENT_NODE :
                                 hasElementChild = true;
                                 if (forceElementsArray.contains(name)) {
-                                    current.append(name, processElement(parser, (Element) n, forceElementsArray));
+                                    current.append(name, processElement(parser, (Element) n, forceElementsArray, forceStringValue));
                                 }
                                 else {
-                                    current.accumulate(name, processElement(parser, (Element) n, forceElementsArray));
+                                    current.accumulate(name, processElement(parser, (Element) n, forceElementsArray, forceStringValue));
                                 }
                                 break;
                             case Node.CDATA_SECTION_NODE :
@@ -149,7 +156,11 @@ public class JSONUtils
                                     break;
                                 }
                                 if (!"".equals(n.getTextContent().trim())) {
-                                    Object value = stringToValue(parser.getNodeContent(el));
+                                	String valStr = parser.getNodeContent(el);
+                                    Object value = valStr; 
+                                    if (!forceStringValue.contains(el.getLocalName())) {
+                                    	value = stringToValue(valStr);
+                                    }
                                     if (hasAttributes) {
                                         current.put("contentText", value);
                                         return current;
