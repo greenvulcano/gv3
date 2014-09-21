@@ -92,6 +92,7 @@ public class XML2JSONTransformer implements DTETransformer {
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
     
     private Set<String>             forceElementsArray = new HashSet<String>();
+    private Set<String>             forceStringValue   = new HashSet<String>();
 
     public XML2JSONTransformer() {
         // do nothing
@@ -140,10 +141,15 @@ public class XML2JSONTransformer implements DTETransformer {
             for (String el : fElem.split(",")) {
                 forceElementsArray.add(el.trim());
             }
+            String fStr = XMLConfig.get(nodo, "@ForceStringValue", "");
+            for (String str : fStr.split(",")) {
+            	forceStringValue.add(str.trim());
+            }
 
             logger.debug("Loaded parameters: inputXslMapName = " + xslMapName + " - DataSourceSet: "
                     + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory
-                    + " - forceElementsArray = " + forceElementsArray);
+                    + " - forceElementsArray = " + forceElementsArray
+                    + " - forceStringValue = " + forceStringValue);
 
             initTemplMap();
 
@@ -259,7 +265,7 @@ public class XML2JSONTransformer implements DTETransformer {
             else {
                 docXML = XMLUtils.parseObject_S(input, false, true);
             }
-            JSONObject json = JSONUtils.xmlToJson(docXML, forceElementsArray);
+            JSONObject json = JSONUtils.xmlToJson(docXML, forceElementsArray, forceStringValue);
             logger.debug("Transform stop");
             //return json.toString(2);
             return json.toString();

@@ -66,8 +66,10 @@ public class JSONUtilsTestCase extends XMLTestCase
         Set<String> forceElementsArray = new HashSet<String>();
         forceElementsArray.add("elemC");
         forceElementsArray.add("elemD");
+        Set<String> forceStringValue = new HashSet<String>();
+        forceStringValue.add("intStr");
         
-        JSONObject json= JSONUtils.xmlToJson(TextUtils.readFileFromCP("testX2J.xml"), forceElementsArray);
+        JSONObject json= JSONUtils.xmlToJson(TextUtils.readFileFromCP("testX2J.xml"), forceElementsArray, forceStringValue);
         //System.out.println("\nTestXml2Json: " + json);
         String outJSON = TextUtils.readFileFromCP("testJ2X.json");
         JSONAssert.assertEquals(outJSON, json, true);
@@ -98,6 +100,7 @@ public class JSONUtilsTestCase extends XMLTestCase
         forceAttributes.add("id");
         forceAttributes.add("string");
         forceAttributes.add("int");
+        forceAttributes.add("intStr");
         forceAttributes.add("float");
         forceAttributes.add("boolean");
         forceAttributes.add("nullVal");
