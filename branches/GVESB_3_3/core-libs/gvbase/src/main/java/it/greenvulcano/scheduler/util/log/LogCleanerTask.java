@@ -58,7 +58,7 @@ public class LogCleanerTask extends Task
     private static final String MODE_GZIP         = "gz";
     private static final String MODE_ZIP          = "zip";
     private static final String FILTER_ZIP        = "(.*\\.log$)|(.*\\.log\\.\\d*$)|(.*\\.log\\.\\d{4}-\\d{2}-\\d{2}$)";
-    private static final String FILTER_DELETE     = "(.*\\.log$)|(.*\\.log\\.\\d*$)|(.*\\.log\\..*\\.zip$)|(.*\\.log\\..*\\.gz$)";
+    private static final String FILTER_DELETE     = "(.*\\.log$)|(.*\\.log\\.\\d*$)|(.*\\.log.*\\.zip$)|(.*\\.log.*\\.gz$)";
     private static final int    OLDER_THAN_ZIP    = 7;
     private static final int    OLDER_THAN_DELETE = 14;
 
