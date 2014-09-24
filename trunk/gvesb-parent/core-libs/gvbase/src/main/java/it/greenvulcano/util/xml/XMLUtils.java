@@ -2041,9 +2041,7 @@ public class XMLUtils
         }
         else {
             newElem = doc.createElementNS(namespace, name);
-        }
-        if (newElem.getPrefix() == null) {
-            String prefix = parent.getPrefix();
+            String prefix = parent.lookupPrefix(namespace);
             if (prefix != null) {
                 newElem.setPrefix(prefix);
             }
