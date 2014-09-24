@@ -21,6 +21,7 @@ package it.greenvulcano.gvesb.gvdte.transformers.json;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.gvdte.DTEException;
 import it.greenvulcano.gvesb.gvdte.config.DataSource;
 import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
 import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
@@ -73,7 +74,35 @@ import org.w3c.dom.NodeList;
  */
 public class XML2JSONTransformer implements DTETransformer {
     private static Logger          logger    = GVLogger.getLogger(XML2JSONTransformer.class);
+    
+    public enum ConversionPolicy {
+        // simple conversion policy
+        SIMPLE("simple"), 
+        // BadgerFish conversion policy
+        BADGERFISH("badgerfish"); 
 
+        private String desc;
+
+        private ConversionPolicy(String desc) {
+            this.desc = desc;
+        }
+
+        @Override
+        public String toString() {
+            return desc;
+        }
+
+        public static ConversionPolicy fromString(String name) throws DTEException {
+            if ("simple".equals(name)) {
+                return SIMPLE;
+            }
+            if ("badgerfish".equals(name)) {
+                return BADGERFISH;
+            }
+            throw new DTEException("Invalid conversion policy [" + name + "]");
+        }
+    }
+    
     private String                 name;
     private String                 validationType;
 
@@ -91,6 +120,7 @@ public class XML2JSONTransformer implements DTETransformer {
 
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
     
+    private ConversionPolicy        policy             = ConversionPolicy.SIMPLE;
     private Set<String>             forceElementsArray = new HashSet<String>();
     private Set<String>             forceStringValue   = new HashSet<String>();
 
@@ -137,17 +167,21 @@ public class XML2JSONTransformer implements DTETransformer {
                 }
             }
 
-            String fElem = XMLConfig.get(nodo, "@ForceElementsArray", "");
-            for (String el : fElem.split(",")) {
-                forceElementsArray.add(el.trim());
-            }
-            String fStr = XMLConfig.get(nodo, "@ForceStringValue", "");
-            for (String str : fStr.split(",")) {
-            	forceStringValue.add(str.trim());
+            policy = ConversionPolicy.fromString(XMLConfig.get(nodo, "@ConversionPolicy", ConversionPolicy.SIMPLE.toString()));
+            if (policy == ConversionPolicy.SIMPLE) {
+                String fElem = XMLConfig.get(nodo, "@ForceElementsArray", "");
+                for (String el : fElem.split(",")) {
+                    forceElementsArray.add(el.trim());
+                }
+                String fStr = XMLConfig.get(nodo, "@ForceStringValue", "");
+                for (String str : fStr.split(",")) {
+                    forceStringValue.add(str.trim());
+                }
             }
 
             logger.debug("Loaded parameters: inputXslMapName = " + xslMapName + " - DataSourceSet: "
                     + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory
+                    + " - conversionPolicy = " + policy
                     + " - forceElementsArray = " + forceElementsArray
                     + " - forceStringValue = " + forceStringValue);
 
@@ -265,7 +299,13 @@ public class XML2JSONTransformer implements DTETransformer {
             else {
                 docXML = XMLUtils.parseObject_S(input, false, true);
             }
-            JSONObject json = JSONUtils.xmlToJson(docXML, forceElementsArray, forceStringValue);
+            JSONObject json = null;
+            if (policy == ConversionPolicy.SIMPLE) {
+                json = JSONUtils.xmlToJson(docXML, forceElementsArray, forceStringValue);
+            }
+            else {
+                json = JSONUtils.xmlToJson_BadgerFish(docXML);
+            }
             logger.debug("Transform stop");
             //return json.toString(2);
             return json.toString();

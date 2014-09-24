@@ -1034,12 +1034,16 @@
 <!--
     Defines a XML/JSON trasformation.
     Convert the input XML to a JSON string.
-    JSON does not distinguish between elements and attributes.
-    Sequences of similar elements (or elements which local-name are in ForceElementsArray)
-    are represented as JSONArrays.
-    Try to convert string values into a number, boolean, or null.
-    If an element have attributes, content text/cdata may be placed in a "contentText" member.
-    Comments and namespaces are ignored.
+    Can be applied two conversion policies:
+    - simple (default)
+        JSON does not distinguish between elements and attributes.
+        Sequences of similar elements (or elements which local-name are in ForceElementsArray)
+        are represented as JSONArrays.
+        Try to convert string values into a number, boolean, or null.
+        If an element have attributes, content text/cdata may be placed in a "contentText" member.
+        Comments and namespaces are ignored.
+    - badgerfish
+        - see <a href="http://badgerfish.ning.com">http://badgerfish.ning.com</a>
 
     #Label: @name
     #Icon: GVXSLFopTransformation.png
@@ -1124,6 +1128,14 @@
 -->
 <!ATTLIST XML2JSONTransformation TransformerFactory CDATA #IMPLIED>
 <!--
+    The conversion policy to apply.
+    Default to simple.
+    If set as badgerfish then @ForceElementsArray and @ForceStringValue are ignored.
+
+    #NotNull
+-->
+<!ATTLIST XML2JSONTransformation ConversionPolicy (simple|badgerfish) #IMPLIED>
+<!--
     A comma-separated list of element's local-name to be forced as JSONArray also if in single instance
 
     #NotNull
@@ -1138,9 +1150,13 @@
 
 <!--
     Defines a JSON/XML trasformation.
-    Keys values are set as sub-elements, but keys whith name in ForceAttributes are set as XML attributes.
-    Value of 'contentText' key, idf present, value is set as #text element.
-    If a key has a null value then in the XML is set the 'null' string.
+    Can be applied two conversion policies:
+    - simple (default)
+        Keys values are set as sub-elements, but keys whith name in ForceAttributes are set as XML attributes.
+        Value of 'contentText' key, idf present, value is set as #text element.
+        If a key has a null value then in the XML is set the 'null' string.
+    - badgerfish
+        - see <a href="http://badgerfish.ning.com">http://badgerfish.ning.com</a>
 
     #Label: @name
     #Icon: GVXSLFopTransformation.png
@@ -1224,6 +1240,14 @@
     #NotNull
 -->
 <!ATTLIST JSON2XMLTransformation TransformerFactory CDATA #IMPLIED>
+<!--
+    The conversion policy to apply.
+    Default to simple.
+    If set as badgerfish then @ForceAttributes is ignored.
+
+    #NotNull
+-->
+<!ATTLIST JSON2XMLTransformation ConversionPolicy (simple|badgerfish) #IMPLIED>
 <!--
     A comma-separated list of keys name to be set as XML attributes
 

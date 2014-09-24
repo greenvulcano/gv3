@@ -76,6 +76,46 @@ public class JSONUtilsTestCase extends XMLTestCase
     }
 
     /**
+     * Test the XML2JSON_BadgerFish.
+     * 
+     * @throws Exception
+     */
+    public void testXML2JSON_BadgerFish() throws Exception
+    {
+        JSONObject json= JSONUtils.xmlToJson_BadgerFish(TextUtils.readFileFromCP("testX2J_xmlns.xml"));
+        //System.out.println("\nTestXml2Json_BadgerFish: " + json);
+        String outJSON = TextUtils.readFileFromCP("testJ2X_BadgerFish.json");
+        JSONAssert.assertEquals(outJSON, json, true);
+    }
+    
+    /**
+     * Test the JSON2XML_BadgerFish.
+     * 
+     * @throws Exception
+     */
+    public void testJSON2XML_BadgerFish() throws Exception
+    {
+        Node xml= JSONUtils.jsonToXml_BadgerFish(TextUtils.readFileFromCP("testJ2X_BadgerFish.json"));
+        String dom = XMLUtils.serializeDOM_S((Node) xml);
+        //System.out.println("\nTestJson2Xml_BadgerFishr: " + dom);
+        String outXML = TextUtils.readFileFromCP("testX2J_xmlns.xml");
+        assertXMLEqual("TestJson2Xml_BadgerFishr failed", outXML, dom);
+    }
+
+    /**
+     * Test the XML2JSON with namespaces.
+     * 
+     * @throws Exception
+     */
+    public void testXML2JSON_xmlns() throws Exception
+    {
+        JSONObject json= JSONUtils.xmlToJson(TextUtils.readFileFromCP("testX2J_xmlns.xml"));
+        //System.out.println("\nTestXml2Json_xmlns: " + json);
+        String outJSON = TextUtils.readFileFromCP("testJ2X_xmlns.json");
+        JSONAssert.assertEquals(outJSON, json, true);
+    }
+
+    /**
      * Test the JSON2XMLTransformer.
      * 
      * @throws Exception

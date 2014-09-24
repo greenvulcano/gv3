@@ -19,6 +19,9 @@
     ],
     "elemA": "",
     "elemB": {
+      "int": 12345,
+      "intStr": "12345",
+      "string": "some & ' \" value",
       "elem": [
         {
           "id": "C",
@@ -31,10 +34,7 @@
           "boolean": false,
           "contentText": "text child\nsecond row"
         }
-      ],
-      "int": 12345,
-      "intStr": "12345",
-      "string": "some & ' \" value"
+      ]
     },
     "elemC": [
       {
@@ -49,6 +49,11 @@
       {
         "id": "F"
       }
+    ],
+    "elemL": [
+      "text 1",
+      "text 2",
+      "text 3"
     ]
   }
 }

@@ -25,6 +25,7 @@ import it.greenvulcano.gvesb.gvdte.config.DataSource;
 import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
 import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
 import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
+import it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer.ConversionPolicy;
 import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
 import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
 import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
@@ -89,6 +90,8 @@ public class JSON2XMLTransformer implements DTETransformer {
 
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
     
+    private ConversionPolicy        policy          = ConversionPolicy.SIMPLE;
+    
     private Set<String>             forceAttributes = new HashSet<String>();
 
     public JSON2XMLTransformer() {
@@ -134,13 +137,17 @@ public class JSON2XMLTransformer implements DTETransformer {
                 }
             }
 
-            String fAttrs = XMLConfig.get(nodo, "@ForceAttributes", "");
-            for (String attr : fAttrs.split(",")) {
-                forceAttributes.add(attr.trim());
+            policy = ConversionPolicy.fromString(XMLConfig.get(nodo, "@ConversionPolicy", ConversionPolicy.SIMPLE.toString()));
+            if (policy == ConversionPolicy.SIMPLE) {
+                String fAttrs = XMLConfig.get(nodo, "@ForceAttributes", "");
+                for (String attr : fAttrs.split(",")) {
+                    forceAttributes.add(attr.trim());
+                }
             }
             
             logger.debug("Loaded parameters: outputXslMapName = " + xslMapName + " - DataSourceSet: "
                     + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory
+                    + " - conversionPolicy = " + policy
                     + " - forceAttributes = " + forceAttributes);
 
             initTemplMap();
@@ -240,7 +247,13 @@ public class JSON2XMLTransformer implements DTETransformer {
         logger.debug("Transform start");
         Transformer transformer = null;
         try {
-            Document docXML= (Document) JSONUtils.jsonToXml(input, forceAttributes);
+            Document docXML = null; 
+            if (policy == ConversionPolicy.SIMPLE) {
+                docXML = (Document) JSONUtils.jsonToXml(input, forceAttributes);
+            }
+            else {
+                docXML = (Document) JSONUtils.jsonToXml_BadgerFish(input);
+            }
             if (xslMapName != null) {
                 transformer = getTransformer(mapParam);
                 setParams(transformer, mapParam);
