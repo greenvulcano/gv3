@@ -1042,6 +1042,7 @@
         Try to convert string values into a number, boolean, or null.
         If an element have attributes, content text/cdata may be placed in a "contentText" member.
         Comments and namespaces are ignored.
+        If the root element is 'DEFAULT_ROOT' then isn't included into JSON output.
     - badgerfish
         - see <a href="http://badgerfish.ning.com">http://badgerfish.ning.com</a>
 
@@ -1155,6 +1156,8 @@
         Keys values are set as sub-elements, but keys whith name in ForceAttributes are set as XML attributes.
         Value of 'contentText' key, idf present, value is set as #text element.
         If a key has a null value then in the XML is set the 'null' string.
+        If the JSON to be converted doesn't have a single root element 
+        then is automatically created a 'DEFAULT_ROOT' root element.
     - badgerfish
         - see <a href="http://badgerfish.ning.com">http://badgerfish.ning.com</a>
 

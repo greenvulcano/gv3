@@ -20,7 +20,6 @@
 package it.greenvulcano.util.json;
 
 import it.greenvulcano.util.xml.XMLUtils;
-import it.greenvulcano.util.xml.XMLUtilsException;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,6 +48,7 @@ public class JSONUtils
      * Sequences of similar elements are represented as JSONArrays.
      * If an element have attributes, content text/cdata may be placed in a "contentText" member.
      * Comments and namespaces are ignored.
+     * If the root element is 'DEFAULT_ROOT' then isn't included into JSON output.
      * 
      * @param xml
      *        the document to convert
@@ -66,6 +66,7 @@ public class JSONUtils
      * are represented as JSONArrays. 
      * If an element have attributes, content text/cdata may be placed in a "contentText" member.
      * Comments and namespaces are ignored.
+     * If the root element is 'DEFAULT_ROOT' then isn't included into JSON output.
      *
      * @param xml
      *        the document to convert
@@ -100,6 +101,9 @@ public class JSONUtils
                 result.put(name, processElement(parser, el, forceElementsArray, forceStringValue));
             }
 
+            if (result.has("DEFAULT_ROOT")) {
+                result = result.getJSONObject("DEFAULT_ROOT");
+            }
             return result;
         }
         catch (JSONUtilsException exc) {
@@ -195,6 +199,8 @@ public class JSONUtils
     
     /**
      * Convert a JSONObject into an XML structure.
+     * If the JSON to be converted doesn't have a single root element 
+     * then is automatically created a 'DEFAULT_ROOT' root element.
      * 
      * @param json 
      *        a JSONObject
@@ -207,6 +213,8 @@ public class JSONUtils
 
     /**
      * Convert a JSONObject into an XML structure.
+     * If the JSON to be converted doesn't have a single root element 
+     * then is automatically created a 'DEFAULT_ROOT' root element.
      * 
      * @param json 
      *        a JSONObject
@@ -223,6 +231,9 @@ public class JSONUtils
 
     /**
      * Convert a JSONObject into Node structure.
+     * If not specified a rootName and the JSON to be converted doesn't have
+     * a single root element then is automatically created a 'DEFAULT_ROOT' root element.
+     * 
      * @param json
      *        a JSONObject
      * @param rootName
@@ -236,6 +247,9 @@ public class JSONUtils
 
     /**
      * Convert a JSONObject into Node structure.
+     * If not specified a rootName and the JSON to be converted doesn't have
+     * a single root element then is automatically created a 'DEFAULT_ROOT' root element.
+     * 
      * @param json
      *        a JSONObject
      * @param rootName
@@ -257,6 +271,10 @@ public class JSONUtils
             else if (json instanceof byte[]) {
                 json = new JSONObject(new String((byte[]) json));
             }
+            if ((rootName == null) && (json.getClass().isArray() || ((json instanceof JSONObject) && ((JSONObject) json).length() != 1))) {
+                rootName = "DEFAULT_ROOT";
+            }
+
             if (rootName != null) {
                 doc = parser.newDocument(rootName);
                 jsonToXml(parser, doc, json, null, doc.getDocumentElement(), forceAttributes);
