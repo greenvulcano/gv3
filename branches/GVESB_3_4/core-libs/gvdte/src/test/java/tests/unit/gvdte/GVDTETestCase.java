@@ -285,7 +285,7 @@ public class GVDTETestCase extends XMLTestCase
         Object output = controller.transform("TestXml2Json_BadgerFish", TextUtils.readFileFromCP("bib.xj"), null);
         String json = (String) output;
         String outJSON = TextUtils.readFileFromCP("bib_BadgerFish.json");
-        System.out.println("\nTestXml2Json_BadgerFish: " + json);
+        //System.out.println("\nTestXml2Json_BadgerFish: " + json);
         JSONAssert.assertEquals(outJSON, json, true);
     }
 
@@ -299,7 +299,7 @@ public class GVDTETestCase extends XMLTestCase
         Object output = controller.transform("TestJson2Xml_BadgerFish", TextUtils.readFileFromCP("bib_BadgerFish.json"), null);
         String dom = XMLUtils.serializeDOM_S((Node) output);
         String outXML = TextUtils.readFileFromCP("bib.xj");
-        System.out.println("TestJson2Xml_BadgerFish: " + dom);
+        //System.out.println("TestJson2Xml_BadgerFish: " + dom);
         assertXMLEqual("TestJson2Xml_BadgerFish failed", outXML, dom);
     }
 

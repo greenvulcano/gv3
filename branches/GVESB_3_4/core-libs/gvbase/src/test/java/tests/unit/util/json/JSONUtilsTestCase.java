@@ -76,7 +76,7 @@ public class JSONUtilsTestCase extends XMLTestCase
     }
 
     /**
-     * Test the XML2JSON_BadgerFish.
+     * Test the XML2JSON BadgerFish.
      * 
      * @throws Exception
      */
@@ -89,7 +89,7 @@ public class JSONUtilsTestCase extends XMLTestCase
     }
     
     /**
-     * Test the JSON2XML_BadgerFish.
+     * Test the JSON2XML BadgerFish.
      * 
      * @throws Exception
      */
@@ -116,7 +116,7 @@ public class JSONUtilsTestCase extends XMLTestCase
     }
 
     /**
-     * Test the JSON2XMLTransformer.
+     * Test the JSON2XML no attributes.
      * 
      * @throws Exception
      */
@@ -130,7 +130,7 @@ public class JSONUtilsTestCase extends XMLTestCase
     }
     
     /**
-     * Test the JSON2XMLTransformer.
+     * Test the JSON2XML force attributes.
      * 
      * @throws Exception
      */
@@ -153,7 +153,7 @@ public class JSONUtilsTestCase extends XMLTestCase
     }
     
     /**
-     * Test the JSON2XMLTransformer.
+     * Test the JSON2XML array.
      * 
      * @throws Exception
      */
@@ -175,5 +175,59 @@ public class JSONUtilsTestCase extends XMLTestCase
         //System.out.println("\nTestJson_arr2Xml: " + dom);
         String outXML = TextUtils.readFileFromCP("testJ2X_arr.xml");
         assertXMLEqual("TestJson_arr2Xml failed", outXML, dom);
+    }
+    
+    /**
+     * Test the JSON2XML no root.
+     * 
+     * @throws Exception
+     */
+    public void testJSON_noroot2XML() throws Exception
+    {
+        JSONObject json = new JSONObject();
+        JSONObject obj = new JSONObject();
+        obj.put("id", 0);
+        obj.put("string", "000");
+        json.put("objA", obj);
+        
+        obj = new JSONObject();
+        obj.put("id", 1);
+        obj.put("string", "001");
+        obj.append("value", "aaa");
+        obj.append("value", "bbb");
+        obj.append("value", "ccc");
+        json.put("objB", obj);
+        
+        Node xml= JSONUtils.jsonToXml(json);
+        String dom = XMLUtils.serializeDOM_S((Node) xml);
+        //System.out.println("\nTestJson_noroot2Xml: " + dom);
+        String outXML = TextUtils.readFileFromCP("testJ2X_noroot.xml");
+        assertXMLEqual("TestJson_noroot2Xml failed", outXML, dom);
+    }
+    
+    /**
+     * Test the XML2JSON no root.
+     * 
+     * @throws Exception
+     */
+    public void testXML2JSON_noroot() throws Exception
+    {
+        JSONObject outJSON = new JSONObject();
+        JSONObject obj = new JSONObject();
+        obj.put("id", 0);
+        obj.put("string", "000");
+        outJSON.put("objA", obj);
+        
+        obj = new JSONObject();
+        obj.put("id", 1);
+        obj.put("string", "001");
+        obj.append("value", "aaa");
+        obj.append("value", "bbb");
+        obj.append("value", "ccc");
+        outJSON.put("objB", obj);
+        
+        JSONObject json= JSONUtils.xmlToJson(TextUtils.readFileFromCP("testJ2X_noroot.xml"));
+        //System.out.println("\ntestXML2JSON_noroot: " + json);
+        JSONAssert.assertEquals(outJSON.toString(), json, true);
     }
 }
