@@ -16,6 +16,9 @@
 second row</elem>
     <elemA/>
     <elemB>
+        <int>12345</int>
+        <intStr>12345</intStr>
+        <string>some &amp; ' " value</string>
         <elem>
             <id>C</id>
             <string>some &amp; child value</string>
@@ -26,9 +29,6 @@ second row</elem>
             <string>some other &lt;child value&gt;</string>
             <boolean>false</boolean>text child
 second row</elem>
-        <int>12345</int>
-        <intStr>12345</intStr>
-        <string>some &amp; ' " value</string>
     </elemB>
     <elemC>
         <id>E</id>
@@ -40,4 +40,7 @@ second row</elem>
     <elemD>
         <id>F</id>
     </elemD>
+    <elemL>text 1</elemL>
+    <elemL>text 2</elemL>
+    <elemL>text 3</elemL>
 </root>
