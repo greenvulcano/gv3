@@ -398,7 +398,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-http</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
