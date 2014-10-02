@@ -41,12 +41,16 @@ import java.io.Reader;
 import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.xml.namespace.QName;
@@ -162,6 +166,14 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      * Unique identifiers cache.
      */
     protected Map<String, String> uuids;
+
+    protected static final String GENERATED_KEY_ID        = "GV_GENERATED_KEY_"; 
+    protected boolean             autogenerateKeys        = false;
+    protected boolean             readGeneratedKey        = false;
+    protected String              generatedKeyID          = "0";
+    protected String              resetGeneratedKeyID     = "";
+    //protected Set<String>         autogenerateKeyColumns;
+    protected Map<String, Object> generatedKeys;
 
     /**
      * Internal connection to DB to prepare the correct statement.
@@ -522,6 +534,15 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
             }
 
             xr = XMLReaderFactory.createXMLReader();
+            
+            autogenerateKeys = XMLConfig.getBoolean(config, "@autogenerate-keys", false);
+            /*if (autogenerateKeys) {
+                autogenerateKeyColumns = new HashSet<String>();
+                String keyColums = XMLConfig.get(config, "@key-columns");
+                for (String col : keyColums.split(",")) {
+                    autogenerateKeyColumns.add(col.trim());
+                }
+            }*/
         }
         catch (XMLConfigException exc) {
             logger.error("Error reading configuration of [" + dboclass + "]", exc);
@@ -814,6 +835,9 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
         internalConn = null;
         dhr.reset();
         resetRowCounter();
+        if (autogenerateKeys) {
+            generatedKeys = new HashMap<String, Object>();
+        }
     }
 
     /**
@@ -958,6 +982,31 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                 }
                 else {
                     actualOk = ((PreparedStatement) sqlStatement).executeUpdate();
+                    if (readGeneratedKey) {
+                        ResultSet rs = sqlStatement.getGeneratedKeys();
+                        if (rs.next()) {
+                            /*ResultSetMetaData rsm = rs.getMetaData();
+
+                            for (int i = 1; i <= rsm.getColumnCount(); i++) {
+                                String cName = rsm.getColumnName(i);
+                                generatedKeys.put(cName, rs.getObject(cName));
+                            }*/
+
+                            // handle only one key field
+                            generatedKeys.put(GENERATED_KEY_ID + generatedKeyID, rs.getObject(1));
+                            logger.debug("Key generated on row " + rowCounter + ": " + generatedKeys);
+                        }
+                        /*
+                        if (rs.next()) {
+                            for (String col : autogenerateKeyColumns) {
+                                generatedKeys.put(col, rs.getObject(col));
+                            }
+                            logger.debug("Key generated on row " + rowCounter + ": " + generatedKeys);
+                        }*/
+                    }
+                    if (resetGeneratedKeyID != null) {
+                        generatedKeys.remove(GENERATED_KEY_ID + resetGeneratedKeyID);
+                    }
                 }
             }
             // check the chance to force the insert when it's a DBOUpdate.

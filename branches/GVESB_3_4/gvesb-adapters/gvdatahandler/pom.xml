@@ -9,7 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvdatahandler</artifactId>
-    <version>3.4.0.2-Final</version>
+    <version>3.4.0.3-Final</version>
     <packaging>jar</packaging>
     <name>GreenVulcano Data Handler Engine</name>
 
