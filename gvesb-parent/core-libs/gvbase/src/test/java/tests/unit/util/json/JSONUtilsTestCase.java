@@ -230,4 +230,21 @@ public class JSONUtilsTestCase extends XMLTestCase
         //System.out.println("\ntestXML2JSON_noroot: " + json);
         JSONAssert.assertEquals(outJSON.toString(), json, true);
     }
+    
+    /**
+     * Test the XML2JSON with empty array.
+     * 
+     * @throws Exception
+     */
+    public void testXML2JSON_emptyArr() throws Exception
+    {
+    	Set<String> forceElementsArray = new HashSet<String>();
+    	forceElementsArray.add("policyScores");
+    	
+        JSONObject json= JSONUtils.xmlToJson(TextUtils.readFileFromCP("testX2J_emptyArr.xml"), forceElementsArray, new HashSet<String>());
+        System.out.println("\nTestXml2Json_emptyArr: " + json);
+        String outJSON = TextUtils.readFileFromCP("testJ2X_emptyArr.json");
+        JSONAssert.assertEquals(outJSON, json, true);
+    }
+
 }

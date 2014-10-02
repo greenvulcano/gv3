@@ -1,5 +1,3 @@
-
-
 <bib>
     <book year="1994">
         <title>TCP/IP Illustrated</title>
@@ -33,6 +31,4 @@
         <publisher>Kluwer Academic Publishers</publisher>
         <price>129.95</price>
     </book>
- 
 </bib>
-
