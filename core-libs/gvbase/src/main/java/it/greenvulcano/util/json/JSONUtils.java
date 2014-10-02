@@ -153,13 +153,18 @@ public class JSONUtils
                         short nodeType = n.getNodeType();
                         switch (nodeType) {
                             case Node.ELEMENT_NODE :
-                                hasElementChild = true;
                                 if (forceElementsArray.contains(name)) {
-                                    current.append(name, processElement(parser, (Element) n, forceElementsArray, forceStringValue));
+                                	if (n.hasChildNodes() || hasElementChild) {
+                                		current.append(name, processElement(parser, (Element) n, forceElementsArray, forceStringValue));
+                                	}
+                                	else {
+                                		current.putOnce(name,  new JSONArray());
+                                	}
                                 }
                                 else {
                                     current.accumulate(name, processElement(parser, (Element) n, forceElementsArray, forceStringValue));
                                 }
+                                hasElementChild = true;
                                 break;
                             case Node.CDATA_SECTION_NODE :
                             case Node.TEXT_NODE :
