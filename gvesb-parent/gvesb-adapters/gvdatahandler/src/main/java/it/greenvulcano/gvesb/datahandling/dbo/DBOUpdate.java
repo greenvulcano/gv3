@@ -138,6 +138,9 @@ public class DBOUpdate extends AbstractDBO
             getStatement(id);
             currentXSLMessage = attributes.getValue(uri, XSL_MSG_NAME);
             currCriticalError = "true".equalsIgnoreCase(attributes.getValue(uri, CRITICAL_ERROR));
+            generatedKeyID = attributes.getValue(uri, "generate-key");
+            resetGeneratedKeyID = attributes.getValue(uri, "reset-generate-key");
+            readGeneratedKey = autogenerateKeys && (generatedKeyID != null);
         }
         else if (COL_NAME.equals(localName)) {
             currType = attributes.getValue(uri, TYPE_NAME);
@@ -206,98 +209,109 @@ public class DBOUpdate extends AbstractDBO
             PreparedStatement ps = (PreparedStatement) sqlStatementInfo.getStatement();
             try {
                 colDataExpecting = false;
+                boolean autoKeySet = false;
                 String text = textBuffer.toString();
-                if (TIMESTAMP_TYPE.equals(currType)) {
-                    if (text.equals("")) {
-                        ps.setNull(colIdx, Types.TIMESTAMP);
-                        currentRowFields.add(null);
-                    }
-                    else {
-                        dateFormatter.applyPattern(currDateFormat);
-                        Date formattedDate = dateFormatter.parse(text);
-                        Timestamp ts = new Timestamp(formattedDate.getTime());
-                        ps.setTimestamp(colIdx, ts);
-                        currentRowFields.add(ts);
+                if (autogenerateKeys) {
+                    if (text.startsWith(GENERATED_KEY_ID)) {
+                        Object key = generatedKeys.get(text);
+                        ps.setObject(colIdx, key);
+                        currentRowFields.add(key);
+                        autoKeySet = true;
                     }
                 }
-                else if (NUMERIC_TYPE.equals(currType)) {
-                    if (text.equals("")) {
-                        ps.setNull(colIdx, Types.NUMERIC);
-                        currentRowFields.add(null);
-                    }
-                    else {
-                        ps.setInt(colIdx, Integer.parseInt(text));
-                        currentRowFields.add(Integer.valueOf(text));
-                    }
-                }
-                else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
-                    if (text.equals("")) {
-                        ps.setNull(colIdx, Types.NUMERIC);
-                        currentRowFields.add(null);
-                    }
-                    else {
-                        DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
-                        dfs.setDecimalSeparator(currDecSeparator.charAt(0));
-                        dfs.setGroupingSeparator(currGroupSeparator.charAt(0));
-                        numberFormatter.setDecimalFormatSymbols(dfs);
-                        numberFormatter.applyPattern(currNumberFormat);
-                        boolean isBigDecimal = numberFormatter.isParseBigDecimal();
-                        try {
-                            numberFormatter.setParseBigDecimal(true);
-                            BigDecimal formattedNumber = (BigDecimal) numberFormatter.parse(text);
-                            ps.setBigDecimal(colIdx, formattedNumber);
-                            currentRowFields.add(formattedNumber);
+                if (!autoKeySet) {
+                    if (TIMESTAMP_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.TIMESTAMP);
+                            currentRowFields.add(null);
                         }
-                        finally {
-                            numberFormatter.setParseBigDecimal(isBigDecimal);
+                        else {
+                            dateFormatter.applyPattern(currDateFormat);
+                            Date formattedDate = dateFormatter.parse(text);
+                            Timestamp ts = new Timestamp(formattedDate.getTime());
+                            ps.setTimestamp(colIdx, ts);
+                            currentRowFields.add(ts);
                         }
                     }
-                }
-                else if (LONG_STRING_TYPE.equals(currType)) {
-                    if (text.equals("")) {
-                        ps.setNull(colIdx, Types.CLOB);
-                        currentRowFields.add(null);
+                    else if (NUMERIC_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.NUMERIC);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            ps.setInt(colIdx, Integer.parseInt(text));
+                            currentRowFields.add(Integer.valueOf(text));
+                        }
+                    }
+                    else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.NUMERIC);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
+                            dfs.setDecimalSeparator(currDecSeparator.charAt(0));
+                            dfs.setGroupingSeparator(currGroupSeparator.charAt(0));
+                            numberFormatter.setDecimalFormatSymbols(dfs);
+                            numberFormatter.applyPattern(currNumberFormat);
+                            boolean isBigDecimal = numberFormatter.isParseBigDecimal();
+                            try {
+                                numberFormatter.setParseBigDecimal(true);
+                                BigDecimal formattedNumber = (BigDecimal) numberFormatter.parse(text);
+                                ps.setBigDecimal(colIdx, formattedNumber);
+                                currentRowFields.add(formattedNumber);
+                            }
+                            finally {
+                                numberFormatter.setParseBigDecimal(isBigDecimal);
+                            }
+                        }
+                    }
+                    else if (LONG_STRING_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.CLOB);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            byte[] data = text.getBytes();
+                            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+                            ps.setAsciiStream(colIdx, bais, data.length);
+                            currentRowFields.add(text);
+                        }
+                    }
+                    else if (BASE64_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.BLOB);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            byte[] data = text.getBytes();
+                            data = Base64.decodeBase64(data);
+                            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+                            ps.setBinaryStream(colIdx, bais, data.length);
+                            currentRowFields.add(text);
+                        }
+                    }
+                    else if (BINARY_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.BLOB);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            byte[] data = text.getBytes();
+                            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+                            ps.setBinaryStream(colIdx, bais, data.length);
+                            currentRowFields.add(text);
+                        }
                     }
                     else {
-                        byte[] data = text.getBytes();
-                        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                        ps.setAsciiStream(colIdx, bais, data.length);
-                        currentRowFields.add(text);
-                    }
-                }
-                else if (BASE64_TYPE.equals(currType)) {
-                    if (text.equals("")) {
-                        ps.setNull(colIdx, Types.BLOB);
-                        currentRowFields.add(null);
-                    }
-                    else {
-                        byte[] data = text.getBytes();
-                        data = Base64.decodeBase64(data);
-                        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                        ps.setBinaryStream(colIdx, bais, data.length);
-                        currentRowFields.add(text);
-                    }
-                }
-                else if (BINARY_TYPE.equals(currType)) {
-                    if (text.equals("")) {
-                        ps.setNull(colIdx, Types.BLOB);
-                        currentRowFields.add(null);
-                    }
-                    else {
-                        byte[] data = text.getBytes();
-                        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                        ps.setBinaryStream(colIdx, bais, data.length);
-                        currentRowFields.add(text);
-                    }
-                }
-                else {
-                    if (text.equals("")) {
-                        ps.setNull(colIdx, Types.VARCHAR);
-                        currentRowFields.add(null);
-                    }
-                    else {
-                        ps.setString(colIdx, text);
-                        currentRowFields.add(text);
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.VARCHAR);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            ps.setString(colIdx, text);
+                            currentRowFields.add(text);
+                        }
                     }
                 }
             }

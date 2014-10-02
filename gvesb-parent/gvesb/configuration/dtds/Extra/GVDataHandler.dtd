@@ -427,6 +427,12 @@
     #NotNull
 -->
 <!ATTLIST DBOInsert output-data CDATA #IMPLIED>
+<!--
+    Tell the engine to handle auto generated keys at runtime (ex. autoincrement primary key fields).
+    Default to false.
+
+-->
+<!ATTLIST DBOInsert autogenerate-keys (true|false) #IMPLIED>
 
 <!--
     DBO running the insert, and in case of collision, the corresponding update.
@@ -634,6 +640,12 @@
     #NotNull
 -->
 <!ATTLIST DBOUpdate output-data CDATA #IMPLIED>
+<!--
+    Tell the engine to handle auto generated keys at runtime (ex. autoincrement primary key fields).
+    Default to false.
+
+-->
+<!ATTLIST DBOUpdate autogenerate-keys (true|false) #IMPLIED>
 
 
 <!--
