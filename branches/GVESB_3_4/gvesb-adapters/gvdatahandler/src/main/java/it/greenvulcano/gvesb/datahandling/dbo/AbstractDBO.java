@@ -170,8 +170,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     protected static final String GENERATED_KEY_ID        = "GV_GENERATED_KEY_"; 
     protected boolean             autogenerateKeys        = false;
     protected boolean             readGeneratedKey        = false;
-    protected String              generatedKeyID          = "0";
-    protected String              resetGeneratedKeyID     = "";
+    protected String              generatedKeyID          = "";
+    protected String              resetGeneratedKeyID     = null;
     //protected Set<String>         autogenerateKeyColumns;
     protected Map<String, Object> generatedKeys;
 
