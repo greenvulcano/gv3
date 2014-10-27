@@ -376,45 +376,57 @@ public class ZipHelper
                     + ") NOT found on local filesystem.");
         }
 
-        ZipFile zipFile = new ZipFile(srcZipFile);
-        Enumeration<? extends ZipEntry> entries = zipFile.entries();
-        while (entries.hasMoreElements()) {
-            ZipEntry currEntry = entries.nextElement();
-            if (currEntry.isDirectory()) {
-                String targetSubdirPathname = currEntry.getName();
-                File dir = new File(targetDirectory, targetSubdirPathname);
-                FileUtils.forceMkdir(dir);
-                dir.setLastModified(currEntry.getTime());
-            }
-            else {
-                InputStream is = null;
-                OutputStream os = null;
-                File file = null;
-                try {
-                    is = zipFile.getInputStream(currEntry);
-                    FileUtils.forceMkdir(new File(targetDirectory, currEntry.getName()).getParentFile());
-                    file = new File(targetDirectory, currEntry.getName());
-                    os = new FileOutputStream(file);
-                    IOUtils.copy(is, os);
+        ZipFile zipFile = null;
+        try {
+            zipFile = new ZipFile(srcZipFile);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry currEntry = entries.nextElement();
+                if (currEntry.isDirectory()) {
+                    String targetSubdirPathname = currEntry.getName();
+                    File dir = new File(targetDirectory, targetSubdirPathname);
+                    FileUtils.forceMkdir(dir);
+                    dir.setLastModified(currEntry.getTime());
                 }
-                finally {
+                else {
+                    InputStream is = null;
+                    OutputStream os = null;
+                    File file = null;
                     try {
-                        if (is != null) {
-                            is.close();
-                        }
-
-                        if (os != null) {
-                            os.close();
-                        }
+                        is = zipFile.getInputStream(currEntry);
+                        FileUtils.forceMkdir(new File(targetDirectory, currEntry.getName()).getParentFile());
+                        file = new File(targetDirectory, currEntry.getName());
+                        os = new FileOutputStream(file);
+                        IOUtils.copy(is, os);
                     }
-                    catch (IOException exc) {
-                        // Do nothing
-                    }
-                    
-                    if (file != null) {
-                        file.setLastModified(currEntry.getTime());
+                    finally {
+                        try {
+                            if (is != null) {
+                                is.close();
+                            }
+    
+                            if (os != null) {
+                                os.close();
+                            }
+                        }
+                        catch (IOException exc) {
+                            // Do nothing
+                        }
+                        
+                        if (file != null) {
+                            file.setLastModified(currEntry.getTime());
+                        }
                     }
                 }
+            }
+        }
+        finally {
+            try {
+                if (zipFile != null) {
+                    zipFile.close();
+                }
+            } catch (Exception exc) {
+                // do nothing
             }
         }
     }
