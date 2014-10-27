@@ -91,8 +91,6 @@ public class DBOBuilder implements IDBOBuilder
         }
     }
 
-    private static int                concurrentCount    = 0;
-
     private Vector<IDBO>              dboList            = null;
     private Map<String, IDBO>         dboOutputMap       = null;
 
@@ -250,8 +248,6 @@ public class DBOBuilder implements IDBOBuilder
         Connection conn = null;
         String intConnName = null;
         try {
-            concurrentCount++;
-
             logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
@@ -354,7 +350,6 @@ public class DBOBuilder implements IDBOBuilder
             catch (Exception exc) {
                 // do nothing
             }
-            concurrentCount--;
             logger.debug("End executing XML2DB [" + operation + "]. Execution time: " + getPartialTime(start));
             NMDC.pop();
         }
@@ -378,8 +373,6 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayInputStream in = null;
         String intConnName = null;
         try {
-            concurrentCount++;
-
             logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
@@ -557,7 +550,6 @@ public class DBOBuilder implements IDBOBuilder
             catch (Exception exc) {
                 // do nothing
             }
-            concurrentCount--;
             logger.debug("End executing DB2XML [" + operation + "]. Execution time: " + getPartialTime(start));
             NMDC.pop();
         }
@@ -589,8 +581,6 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayInputStream in = null;
         String intConnName = null;
         try {
-            concurrentCount++;
-
             logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
@@ -719,7 +709,6 @@ public class DBOBuilder implements IDBOBuilder
             catch (Exception exc) {
                 // do nothing
             }
-            concurrentCount--;
             logger.debug("End executing CALL [" + operation + "]. Execution time: " + getPartialTime(start));
             NMDC.pop();
         }
@@ -763,8 +752,6 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayOutputStream out = null;
         String intConnName = null;
         try {
-            concurrentCount++;
-
             logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
@@ -1060,7 +1047,6 @@ public class DBOBuilder implements IDBOBuilder
             catch (Exception exc) {
                 // do nothing
             }
-            concurrentCount--;
             logger.debug("End executing EXECUTE [" + operation + "]. Execution time: " + getPartialTime(start));
             NMDC.pop();
         }

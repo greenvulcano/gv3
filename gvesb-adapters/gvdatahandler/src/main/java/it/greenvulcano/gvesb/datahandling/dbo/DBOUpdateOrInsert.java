@@ -30,6 +30,7 @@ import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -480,10 +481,18 @@ public class DBOUpdateOrInsert extends AbstractDBO
                         localCurrentRowFields.add(null);
                     }
                     else {
-                        byte[] data = text.getBytes();
-                        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                        stmt.setAsciiStream(idx, bais, data.length);
+                    	stmt.setCharacterStream(colIdx, new StringReader(text));
                         localCurrentRowFields.add(text);
+                    }
+                }
+                else if (LONG_NSTRING_TYPE.equals(currType)) {
+                    if (text.equals("")) {
+                    	stmt.setNull(colIdx, Types.NCLOB);
+                        currentRowFields.add(null);
+                    }
+                    else {
+                    	stmt.setCharacterStream(colIdx, new StringReader(text));
+                        currentRowFields.add(text);
                     }
                 }
                 else if (BASE64_TYPE.equals(currType)) {
@@ -509,6 +518,16 @@ public class DBOUpdateOrInsert extends AbstractDBO
                         ByteArrayInputStream bais = new ByteArrayInputStream(data);
                         stmt.setBinaryStream(idx, bais, data.length);
                         localCurrentRowFields.add(text);
+                    }
+                }
+                else if (NSTRING_TYPE.equals(currType)) {
+                    if (text.equals("")) {
+                    	stmt.setNull(colIdx, Types.NVARCHAR);
+                        currentRowFields.add(null);
+                    }
+                    else {
+                    	stmt.setNString(colIdx, text);
+                        currentRowFields.add(text);
                     }
                 }
                 else {

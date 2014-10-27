@@ -26,7 +26,6 @@ import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptio
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
-import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -180,7 +179,6 @@ public class DBOMultiFlatSelect extends AbstractDBO
     @Override
     public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException
     {
-        XMLUtils xml = null;
         try {
             prepare();
             rowCounter = 0;
@@ -259,6 +257,17 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                                 }
                                             }
                                                 break;
+                                            case Types.NCHAR :
+                                            case Types.NVARCHAR :{
+                                                String val = rs.getNString(j);
+                                                if (val == null) {
+                                                    textVal = fF.formatField("");
+                                                }
+                                                else {
+                                                    textVal = fF.formatField(val);
+                                                }
+                                            }
+                                                break;
                                             case Types.CHAR :
                                             case Types.VARCHAR :{
                                                 String val = rs.getString(j);
@@ -268,6 +277,10 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                                 else {
                                                     textVal = fF.formatField(val);
                                                 }
+                                            }
+                                                break;
+                                            case Types.NCLOB :{
+                                                textVal = "";
                                             }
                                                 break;
                                             case Types.CLOB :{

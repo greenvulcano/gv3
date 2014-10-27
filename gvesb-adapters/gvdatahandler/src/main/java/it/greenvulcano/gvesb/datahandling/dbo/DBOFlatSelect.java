@@ -224,6 +224,17 @@ public class DBOFlatSelect extends AbstractDBO
                                             }
                                         }
                                             break;
+                                        case Types.NCHAR :
+                                        case Types.NVARCHAR :{
+                                            String val = rs.getNString(j);
+                                            if (val == null) {
+                                                textVal = fF.formatField("");
+                                            }
+                                            else {
+                                                textVal = fF.formatField(val);
+                                            }
+                                        }
+                                            break;
                                         case Types.CHAR :
                                         case Types.VARCHAR :{
                                             String val = rs.getString(j);
@@ -233,6 +244,10 @@ public class DBOFlatSelect extends AbstractDBO
                                             else {
                                                 textVal = fF.formatField(val);
                                             }
+                                        }
+                                            break;
+                                        case Types.NCLOB :{
+                                            textVal = "";
                                         }
                                             break;
                                         case Types.CLOB :{

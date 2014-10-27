@@ -27,6 +27,7 @@ import it.greenvulcano.log.GVLogger;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -276,9 +277,17 @@ public class DBOInsert extends AbstractDBO
                             currentRowFields.add(null);
                         }
                         else {
-                            byte[] data = text.getBytes();
-                            ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                            ps.setAsciiStream(colIdx, bais, data.length);
+                            ps.setCharacterStream(colIdx, new StringReader(text));
+                            currentRowFields.add(text);
+                        }
+                    }
+                    else if (LONG_NSTRING_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.NCLOB);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            ps.setCharacterStream(colIdx, new StringReader(text));
                             currentRowFields.add(text);
                         }
                     }
@@ -304,6 +313,16 @@ public class DBOInsert extends AbstractDBO
                             byte[] data = text.getBytes();
                             ByteArrayInputStream bais = new ByteArrayInputStream(data);
                             ps.setBinaryStream(colIdx, bais, data.length);
+                            currentRowFields.add(text);
+                        }
+                    }
+                    else if (NSTRING_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            ps.setNull(colIdx, Types.NVARCHAR);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            ps.setNString(colIdx, text);
                             currentRowFields.add(text);
                         }
                     }

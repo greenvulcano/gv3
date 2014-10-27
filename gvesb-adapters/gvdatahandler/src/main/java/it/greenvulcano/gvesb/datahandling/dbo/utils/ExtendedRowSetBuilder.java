@@ -26,9 +26,12 @@ import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLFeatureNotSupportedException;
@@ -204,6 +207,17 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
                         }
                     }
                         break;
+                    case Types.NCHAR :
+                    case Types.NVARCHAR : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NSTRING_TYPE);
+                        textVal = rs.getNString(j);
+                        isNull = textVal == null;
+                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+                        if (isNull) {
+                            textVal = "";
+                        }
+                    }
+                        break;
                     case Types.CHAR :
                     case Types.VARCHAR : {
                         parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.STRING_TYPE);
@@ -212,6 +226,24 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
                         parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             textVal = "";
+                        }
+                    }
+                        break;
+                    case Types.NCLOB : {
+                    	parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.LONG_NSTRING_TYPE);
+                        NClob clob = rs.getNClob(j);
+                        isNull = clob == null;
+                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+                        if (isNull) {
+                            textVal = "";
+                        }
+                        else {
+                            Reader is = clob.getCharacterStream();
+                            StringWriter str = new StringWriter();
+
+                            IOUtils.copy(is, str);
+                            is.close();
+                            textVal = str.toString();
                         }
                     }
                         break;
@@ -224,16 +256,12 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
                             textVal = "";
                         }
                         else {
-                            InputStream is = clob.getAsciiStream();
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            IOUtils.copy(is, baos);
+                        	Reader is = clob.getCharacterStream();
+                            StringWriter str = new StringWriter();
+
+                            IOUtils.copy(is, str);
                             is.close();
-                            try {
-                                textVal = new String(baos.toByteArray(), 0, (int) clob.length());
-                            }
-                            catch (SQLFeatureNotSupportedException exc) {
-                                textVal = baos.toString();
-                            }
+                            textVal = str.toString();
                         }
                     }
                         break;
