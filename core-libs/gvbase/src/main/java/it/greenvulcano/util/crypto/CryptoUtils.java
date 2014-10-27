@@ -485,8 +485,7 @@ public final class CryptoUtils
             	return input;
             }
 
-            byte[] result = cypher(type, Cipher.DECRYPT_MODE, key, params,
-                    Base64.decodeBase64(lInput.getBytes(inputEnc)), null);
+            byte[] result = cypher(type, Cipher.DECRYPT_MODE, key, params, bInput, null);
 
             return new String(result, inputEnc);
         }
