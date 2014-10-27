@@ -42,15 +42,12 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import javax.xml.namespace.QName;
@@ -371,9 +368,19 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     public static final String STRING_TYPE                = "string";
 
     /**
+    *
+    */
+   public static final String NSTRING_TYPE               = "nstring";
+
+    /**
      *
      */
     public static final String LONG_STRING_TYPE           = "long-string";
+
+    /**
+    *
+    */
+   public static final String LONG_NSTRING_TYPE          = "long-nstring";
 
     /**
      *

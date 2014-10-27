@@ -22,7 +22,6 @@ package it.greenvulcano.gvesb.datahandling.dbo.utils;
 import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
 import it.greenvulcano.util.xml.XMLUtils;
 
-import java.security.InvalidParameterException;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
