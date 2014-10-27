@@ -3,7 +3,7 @@
 <!ENTITY % statement_type   "select|insert|update|callsp">
 
 <!--
-    Trasformer Helper useful to invoke DataHandler Retriever in stand-alone XSL Transformations.
+    Transformer Helper useful to invoke DataHandler Retriever in stand-alone XSL Transformations.
 
     #Label: @dh-call-name
 -->
@@ -26,6 +26,7 @@
 <!ATTLIST DHExternalRetrieverHelper dh-call-name CDATA #REQUIRED>
 <!--
     DataBase connection name.
+    Is overridden by the DBO_JDBC_CONNECTION_NAME property value, if set.
 
     #NotNull
 -->
@@ -331,7 +332,8 @@
 -->
 <!ATTLIST DBOBuilder name CDATA #REQUIRED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
+    Is overridden by the DBO_JDBC_CONNECTION_NAME property value, if set.
 
     #NotNull
 -->
@@ -401,7 +403,7 @@
 -->
 <!ATTLIST DBOInsert force-mode (caller|xml2db) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull
@@ -479,7 +481,7 @@
 -->
 <!ATTLIST DBOInsertOrUpdate force-mode (caller|xml2db) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull
@@ -546,7 +548,7 @@
 -->
 <!ATTLIST DBOUpdateOrInsert force-mode (caller|xml2db) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull
@@ -614,7 +616,7 @@
 -->
 <!ATTLIST DBOUpdate force-mode (caller|xml2db) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull
@@ -692,7 +694,7 @@
 -->
 <!ATTLIST DBOSelect ignore-input (true|false) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull
@@ -757,7 +759,7 @@
 -->
 <!ATTLIST DBOThreadSelect ignore-input (true|false) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull
@@ -807,7 +809,7 @@
 -->
 <!ATTLIST DBOFlatSelect ignore-input (true|false) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull
@@ -857,7 +859,7 @@
 -->
 <!ATTLIST DBOMultiFlatSelect ignore-input (true|false) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull
@@ -916,7 +918,7 @@
 -->
 <!ATTLIST DBOCallSP execute-query (true|false) #IMPLIED>
 <!--
-    DataSource JNDI name.
+    DataBase connection name.
     Override connection defined in DBOBuilder.
 
     #NotNull

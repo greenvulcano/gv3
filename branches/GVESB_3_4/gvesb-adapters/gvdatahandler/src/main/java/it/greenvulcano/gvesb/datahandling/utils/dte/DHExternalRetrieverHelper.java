@@ -20,6 +20,7 @@
 package it.greenvulcano.gvesb.datahandling.utils.dte;
 
 import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder;
 import it.greenvulcano.gvesb.datahandling.utils.AbstractRetriever;
 import it.greenvulcano.gvesb.gvdte.DTEException;
 import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
@@ -28,6 +29,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
 
 import java.sql.Connection;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -42,6 +44,7 @@ public class DHExternalRetrieverHelper implements TransformerHelper
     private static final Logger logger = GVLogger.getLogger(DHExternalRetrieverHelper.class);
     private String              dhCallName;
     private String              jdbcConnectionName;
+    private String              intConnName = null;
     private Node                dhNode;
     private Connection          conn   = null;
 
@@ -69,17 +72,24 @@ public class DHExternalRetrieverHelper implements TransformerHelper
      * @see it.greenvulcano.gvesb.gvdte.util.TransformerHelper#register()
      */
     @Override
-    public void register() throws DTEException
+    public void register(Map<String, Object> params) throws DTEException
     {
         try {
-            conn = JDBCConnectionBuilder.getConnection(jdbcConnectionName);
+            intConnName = (String) params.get(DBOBuilder.DBO_JDBC_CONNECTION_NAME);
+            if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
+                logger.debug("Overwriting default Connection with: " + intConnName);
+            }
+            else {
+                intConnName = jdbcConnectionName;
+            }
+            conn = JDBCConnectionBuilder.getConnection(intConnName);
             // Static utility classes initialization
             AbstractRetriever.setAllConnection(conn, dhNode);
         }
         catch (Exception exc) {
             if (conn != null) {
                 try {
-                    JDBCConnectionBuilder.releaseConnection(jdbcConnectionName, conn);
+                    JDBCConnectionBuilder.releaseConnection(intConnName, conn);
                 }
                 catch (Exception exc2) {
                     // TODO: handle exception
@@ -95,12 +105,12 @@ public class DHExternalRetrieverHelper implements TransformerHelper
      * @see it.greenvulcano.gvesb.gvdte.util.TransformerHelper#unregister()
      */
     @Override
-    public void unregister() throws DTEException
+    public void unregister(Map<String, Object> params) throws DTEException
     {
         AbstractRetriever.cleanupAll();
         if (conn != null) {
             try {
-                JDBCConnectionBuilder.releaseConnection(jdbcConnectionName, conn);
+                JDBCConnectionBuilder.releaseConnection(intConnName, conn);
             }
             catch (Exception exc2) {
                 // TODO: handle exception
