@@ -12,7 +12,6 @@
 
 <html:html lang="true">
   <head>
-   <html:base />
    <title>Deploy</title>
 	<meta http-equiv="pragma" content="no-cache">
 	<meta http-equiv="cache-control" content="no-cache">
