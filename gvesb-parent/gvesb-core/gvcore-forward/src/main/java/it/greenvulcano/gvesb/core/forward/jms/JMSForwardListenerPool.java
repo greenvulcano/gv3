@@ -170,7 +170,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
         if (!isShutdown()) {
             synchronized (data) {
                 int working = data.getWorkingCount();
-                if ((working == executor.getActiveCount()) && (working < executor.getMaximumPoolSize())) {
+                if ((working < data.getInitialSize()) || ((working == executor.getActiveCount()) && (working < executor.getMaximumPoolSize()))) {
                     try {
                         JMSForwardListener jmsFwd = createJMSForwardListener();
                         executor.execute(jmsFwd);
