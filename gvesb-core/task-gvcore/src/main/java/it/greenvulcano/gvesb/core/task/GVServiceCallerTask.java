@@ -30,6 +30,7 @@ import it.greenvulcano.gvesb.core.pool.GreenVulcanoPoolManager;
 import it.greenvulcano.gvesb.core.task.GVTaskAction.ActionType;
 import it.greenvulcano.gvesb.internal.data.ChangeGVBuffer;
 import it.greenvulcano.gvesb.j2ee.JNDIHelper;
+import it.greenvulcano.gvesb.j2ee.XAHelper;
 import it.greenvulcano.gvesb.log.GVBufferMDC;
 import it.greenvulcano.gvesb.utils.MessageFormatter;
 import it.greenvulcano.jmx.JMXEntryPoint;
@@ -49,7 +50,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
-import javax.transaction.UserTransaction;
+import javax.transaction.Transaction;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
@@ -86,7 +87,7 @@ public class GVServiceCallerTask extends Task
     private GreenVulcanoPool     greenVulcanoPool  = null;
 
     private JNDIHelper           initialContext    = null;
-    private UserTransaction      transaction       = null;
+    private XAHelper             xaHelper          = null;
     private int                  txTimeout         = 30;
 
     private Vector<GVTaskAction> actionHandlers    = null;
@@ -147,6 +148,21 @@ public class GVServiceCallerTask extends Task
             operation = XMLConfig.get(node, "@operation");
             transacted = XMLConfig.getBoolean(node, "@transacted", false);
             txTimeout = XMLConfig.getInteger(node, "@timeout", 30);
+
+            Node xaHNode = null;
+            try {
+                xaHNode = XMLConfig.getNode(node, "XAHelper");
+            }
+            catch (Exception exc) {
+                xaHNode = null;
+            }
+            try {
+                xaHelper = new XAHelper(xaHNode);
+            }
+            catch (Exception exc) {
+                throw new TaskException("Error initializing XAHelper", exc);
+            }
+            
             maxCalls = XMLConfig.getInteger(node, "@max-calls-sequence", 1);
 
             // Configure post-call actions
@@ -386,17 +402,12 @@ public class GVServiceCallerTask extends Task
             return;
         }
 
-        if (intransaction) {
-            throw new TaskException("GVServiceCallerTask(" + getFullName()
-                    + ") - Error in start: already in transaction");
-        }
-
         try {
-            getUserTransaction().begin();
-            getUserTransaction().setTransactionTimeout(txTimeout);
-            intransaction = true;
+            xaHelper.setTransactionTimeout(txTimeout);
+            xaHelper.begin();
         }
         catch (Exception exc) {
+        	logger.error("GVServiceCallerTask(" + getFullName() + ") - Error in startTx", exc);
             throw new TaskException("GVServiceCallerTask(" + getFullName() + ") - Error in startTx", exc);
         }
     }
@@ -410,20 +421,21 @@ public class GVServiceCallerTask extends Task
      */
     private void commit() throws TaskException
     {
-        if (!intransaction) {
+        if (!transacted) {
             return;
         }
 
+        Transaction tx = null;
         try {
-            getUserTransaction().commit();
-
+            if (xaHelper.isTransactionActive()) {
+                tx = xaHelper.getTransaction();
+                xaHelper.commit();
+            }
         }
         catch (Exception exc) {
+            logger.error("GVServiceCallerTask(" + getFullName() + ") - Error in commitTx"
+                    + ((tx != null) ? ": " + tx : ""), exc);
             throw new TaskException("GVServiceCallerTask(" + getFullName() + ") - Error in commitTx", exc);
-
-        }
-        finally {
-            intransaction = false;
         }
     }
 
@@ -436,51 +448,22 @@ public class GVServiceCallerTask extends Task
      */
     private void rollback() throws TaskException
     {
-        if (!intransaction) {
+        if (!transacted) {
             return;
         }
+        Transaction tx = null;
         try {
-            getUserTransaction().rollback();
-
+            if (xaHelper.isTransactionActive()) {
+                tx = xaHelper.getTransaction();
+                xaHelper.rollback();
+            }
         }
         catch (Exception exc) {
-            throw new TaskException("GVServiceCallerTask(" + getFullName() + ") - Error in rollbackTx", exc);
-
-        }
-        finally {
-            intransaction = false;
+        	logger.error("GVServiceCallerTask(" + getFullName() + ") - Error in rollbackTx"
+                    + ((tx != null) ? ": " + tx : ""), exc);
         }
     }
 
-    /**
-     * Retrieves from the JNDI tree the
-     * <code>javax.transaction.UserTransaction</code> object encapsulating the
-     * user's transaction.<br>
-     * Does nothing if the scheduled service call is not required to be
-     * transactional.
-     * 
-     * @return the <code>javax.transaction.UserTransaction</code> object
-     *         encapsulating the user's transaction.
-     * @throws Exception
-     *         if any error occurs
-     */
-    private UserTransaction getUserTransaction() throws Exception
-    {
-        if (transaction == null) {
-            try {
-                transaction = (UserTransaction) initialContext.lookup("javax.transaction.UserTransaction");
-            }
-            catch (Exception exc) {
-                transaction = null;
-                throw exc;
-            }
-            finally {
-                initialContext.close();
-            }
-        }
-
-        return transaction;
-    }
 
     /**
      * @param node
