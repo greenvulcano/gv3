@@ -19,6 +19,8 @@
  */
 package it.greenvulcano.gvesb.gvdte.util;
 
+import java.util.Map;
+
 import it.greenvulcano.gvesb.gvdte.DTEException;
 
 import org.w3c.dom.Node;
@@ -32,7 +34,7 @@ public interface TransformerHelper
 {
     public void init(Node node) throws DTEException;
 
-    public void register() throws DTEException;
+    public void register(Map<String, Object> params) throws DTEException;
 
-    public void unregister() throws DTEException;
+    public void unregister(Map<String, Object> params) throws DTEException;
 }
