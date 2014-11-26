@@ -150,7 +150,7 @@ public class DTEController implements ConfigurationListener
             }
 
             helpers = theTransformer.getHelpers();
-            registerHelpers(helpers);
+            registerHelpers(helpers, mapParam);
 
             Object output = theTransformer.transform(input, null, mapParam);
 
@@ -198,7 +198,7 @@ public class DTEController implements ConfigurationListener
             if (theTransformer != null) {
                 theTransformer.clean();
             }
-            unregisterHelpers(helpers);
+            unregisterHelpers(helpers, mapParam);
             MDC.remove("MAP-NAME");
         }
     }
@@ -335,13 +335,13 @@ public class DTEController implements ConfigurationListener
      * @param helpers
      * @throws DTEException
      */
-    private void registerHelpers(List<TransformerHelper> helpers) throws DTEException
+    private void registerHelpers(List<TransformerHelper> helpers, Map<String, Object> mapParam) throws DTEException
     {
         if (helpers == null) {
             return;
         }
         for (TransformerHelper helper: helpers) {
-            helper.register();
+            helper.register(mapParam);
         }
     }
 
@@ -349,14 +349,14 @@ public class DTEController implements ConfigurationListener
      * @param helpers
      * @throws DTEException
      */
-    private void unregisterHelpers(List<TransformerHelper> helpers)
+    private void unregisterHelpers(List<TransformerHelper> helpers, Map<String, Object> mapParam)
     {
         if (helpers == null) {
             return;
         }
         for (TransformerHelper helper: helpers) {
             try {
-                helper.unregister();
+                helper.unregister(mapParam);
             }
             catch (Exception exc) {
                 // do nothing
