@@ -140,7 +140,7 @@ public class HttpCallTestCase extends TestCase
         assertEquals(200, Integer.parseInt(result.getProperty("GVHTTP_RESPONSE_STATUS")));
         assertNotNull(result.getObject());
     }
-    
+
     /**
      * @throws Exception
      *
@@ -158,7 +158,7 @@ public class HttpCallTestCase extends TestCase
         assertEquals(200, Integer.parseInt(result.getProperty("GVHTTP_RESPONSE_STATUS")));
         assertNotNull(result.getObject());
     }
-    
+
     /**
      * @throws Exception
      *
@@ -181,7 +181,7 @@ public class HttpCallTestCase extends TestCase
             assertTrue("Wrong timeout", Math.abs(delta - 5000) < 50);
         }
     }
-    
+
     /**
      * @throws Exception
      *
@@ -199,7 +199,7 @@ public class HttpCallTestCase extends TestCase
             fail();
         }
         catch (Exception exc) {
-            if (exc.toString().indexOf("Network is unreachable") == -1) {
+            if ((exc.toString().indexOf("Network is unreachable") == -1) && (exc.toString().indexOf("Broken pipe") == -1)) {
                 long delta = System.currentTimeMillis() - start;
                 //assertTrue("Wrong error cause", exc.toString().indexOf("connect timed out") != -1);
                 assertTrue("Wrong error cause", exc.toString().indexOf("The host did not accept the connection within timeout of 2000 ms") != -1);
