@@ -211,6 +211,46 @@ public class DataHandlerTestCase extends TestCase
         assertEquals(0, result.getRead());
         assertEquals("", result.getDiscardCauseListAsString());
 
+        operation = "GVESB::TestInsertNP";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createInsertNPMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(2, result.getTotal());
+        assertEquals(2, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        operation = "GVESB::TestUpdateNP";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createUpdateNPMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(2, result.getUpdate());
+        assertEquals(2, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        operation = "GVESB::TestInsertMixNP";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createInsertMixNPMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(4, result.getTotal());
+        assertEquals(4, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        operation = "GVESB::TestUpdateMixNP";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createUpdateMixNPMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(4, result.getUpdate());
+        assertEquals(4, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
         operation = "GVESB::TestInsertOrUpdate";
         dboBuilder = dhFactory.getDBOBuilder(operation);
         result = dboBuilder.EXECUTE(operation, Commons.createInsertOrUpdateMessage(), null);

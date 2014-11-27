@@ -245,8 +245,11 @@ public class DBOInsertOrUpdate extends AbstractDBO
     {
         if (ROW_NAME.equals(localName)) {
             currentRowFields.clear();
+            currentRowFields.add(null);
             currentInsertRowFields.clear();
+            currentInsertRowFields.add(null);
             currentUpdateRowFields.clear();
+            currentUpdateRowFields.add(null);
             colDataExpecting = false;
             colIdx = 0;
             colUpdIdx = 0;
@@ -566,8 +569,8 @@ public class DBOInsertOrUpdate extends AbstractDBO
     protected String dumpCurrentRowFields()
     {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < localCurrentRowFields.size(); i++) {
-            sb.append("Field(").append(i + 1).append(") value: [").append(localCurrentRowFields.elementAt(i)).append(
+        for (int i = 1; i < localCurrentRowFields.size(); i++) {
+            sb.append("Field(").append(i).append(") value: [").append(localCurrentRowFields.elementAt(i)).append(
                     "]\n");
         }
         sb.append("XSL Message: ").append(currentXSLMessage).append("\n\n");

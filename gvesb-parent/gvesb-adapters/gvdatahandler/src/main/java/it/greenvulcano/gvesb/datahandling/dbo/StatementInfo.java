@@ -22,6 +22,10 @@ package it.greenvulcano.gvesb.datahandling.dbo;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @version 3.0.0 Dec 14, 2010
@@ -34,6 +38,8 @@ public class StatementInfo
     private String    id;
     private String    sqlStatement;
     private Statement statement;
+    private Map<String, List<Integer>> sqlStatementParams;
+    private int       sqlStatementParamCount = 0;
 
     /**
      * @param id
@@ -46,6 +52,24 @@ public class StatementInfo
         this.id = id;
         this.sqlStatement = sqlStatement;
         this.statement = statement;
+        this.sqlStatementParams = Collections.unmodifiableMap(new HashMap<String, List<Integer>>());
+    }
+    
+    /**
+     * @param id
+     * @param sqlStatement
+     * @param statement
+     * @param sqlStatementParams
+     */
+    public StatementInfo(String id, String sqlStatement, Statement statement, 
+           Map<String, List<Integer>> sqlStatementParams, int sqlStatementParamCount)
+    {
+        super();
+        this.id = id;
+        this.sqlStatement = sqlStatement;
+        this.statement = statement;
+        this.sqlStatementParams = Collections.unmodifiableMap(sqlStatementParams);
+        this.sqlStatementParamCount = sqlStatementParamCount;
     }
 
     /**
@@ -73,6 +97,22 @@ public class StatementInfo
     }
 
     /**
+     * @return the statement's named parameters
+     */
+    public Map<String, List<Integer>> getSqlStatementParams()
+    {
+        return sqlStatementParams;
+    }
+    
+    public int getSqlStatementParamCount() {
+        return this.sqlStatementParamCount;
+    }
+    
+    public boolean usesNamedParams() {
+        return !sqlStatementParams.isEmpty();
+    }
+
+    /**
      * @throws SQLException
      *
      */
@@ -89,6 +129,7 @@ public class StatementInfo
     @Override
     public String toString()
     {
-        return "StatementInfo [id=" + id + ", sqlStatement=" + sqlStatement + ", statement=" + statement + "]";
+        return "StatementInfo [id=" + id + ", sqlStatement=" + sqlStatement + (sqlStatementParams.isEmpty() ? "" : 
+            ", sqlStatementParams=" + sqlStatementParams) + ", statement=" + statement + "]";
     }
 }

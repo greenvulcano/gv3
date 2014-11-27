@@ -54,6 +54,32 @@
       </DBOInsert>
     </DBOBuilder>
     <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestInsertNP">
+      <DBOInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOInsert" name="TestInsertNP-insert">
+        <statement type="insert">insert into testtable (id, field1, field2, field3) values (:id, :field1, :field2, :field3)</statement>
+      </DBOInsert>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestUpdateNP">
+      <DBOInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOUpdate" name="TestUpdateNP-update">
+        <statement type="update">update testtable set field1=:field1, field2=:field2, field3=:field3 where id=:id</statement>
+      </DBOInsert>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestInsertMixNP">
+      <DBOInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOInsert" name="TestInsertMixNP-insert">
+        <statement id="0" type="insert">insert into testtable (id, field1, field2, field3) values (?, ?, ?, ?)</statement>
+        <statement id="1" type="insert">insert into testtable (id, field1, field2, field3) values (:id, :field1, :field2, :field3)</statement>
+      </DBOInsert>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestUpdateMixNP">
+      <DBOInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOUpdate" name="TestUpdateMixNP-update">
+        <statement id="0" type="update">update testtable set field1=?, field2=?, field3=? where id=?</statement>
+        <statement id="1" type="update">update testtable set field1=:field1, field2=:field2, field3=:field3 where id=:id</statement>
+      </DBOInsert>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
       class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestInsertOrUpdate">
       <DBOInsertOrUpdate type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOInsertOrUpdate"
         duplicate-insert-code="-104" name="TestInsertOrUpdate-insertupdate">

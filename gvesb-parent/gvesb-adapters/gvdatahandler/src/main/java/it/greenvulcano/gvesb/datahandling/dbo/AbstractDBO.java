@@ -46,9 +46,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
@@ -127,6 +133,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      *
      */
     protected StatementInfo       sqlStatementInfo;
+    
+    protected Set<String>         sqlStatementsParams     = new HashSet<String>();
 
     /**
      *
@@ -189,6 +197,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     private Map<String, Object>   baseProps;
 
     private String                currentId               = "0";
+    
+    protected Pattern             namedParPattern         = Pattern.compile("(\\:[a-zA-Z][a-zA-Z0-9_]*)");
 
     // true if this oracle error class is blocking for IDBO
     private boolean               blockPlatformError;
@@ -576,9 +586,29 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                     sqlStatementInfo.close();
                 }
                 String expandedSQL = PropertiesHandler.expand(statements.get(id), currentProps, null, internalConn);
-                logger.debug("expandedSQL stmt: " + expandedSQL);
+                logger.debug("SQL Statement Expanded: " + expandedSQL);
+                Map<String, List<Integer>> sqlStatementParams = new HashMap<String, List<Integer>>();
+                int idx = 1;
+                Matcher m = namedParPattern.matcher(expandedSQL);
+                while (m.find()) {
+                    String par = m.group().substring(1);
+                    List<Integer> pos = sqlStatementParams.get(par);
+                    if (pos == null) {
+                        pos = new ArrayList<Integer>();
+                        sqlStatementParams.put(par, pos);
+                    }
+                    pos.add(idx);
+                    idx++;
+                }
+                int sqlStatementParamCount = --idx;
+                m.reset();
+                expandedSQL = m.replaceAll("?");
+                if (sqlStatementParamCount > 0) {
+                    logger.debug("SQL Statement Named Params: " + sqlStatementParams);
+                    sqlStatementsParams.addAll(sqlStatementParams.keySet());
+                }
                 Statement statement = internalConn.prepareStatement(expandedSQL);
-                sqlStatementInfo = new StatementInfo(id, expandedSQL, statement);
+                sqlStatementInfo = new StatementInfo(id, expandedSQL, statement, sqlStatementParams, sqlStatementParamCount);
                 setCurrentId(id);
             }
             catch (SQLException exc) {
@@ -955,8 +985,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     protected String dumpCurrentRowFields()
     {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < currentRowFields.size(); i++) {
-            sb.append("Field(").append(i + 1).append(") value: [").append(currentRowFields.elementAt(i)).append("]\n");
+        for (int i = 1; i < currentRowFields.size(); i++) {
+            sb.append("Field(").append(i).append(") value: [").append(currentRowFields.elementAt(i)).append("]\n");
         }
         sb.append("XSL Message: ").append(currentXSLMessage).append("\n\n");
         return sb.toString();
@@ -1038,7 +1068,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
                 if (onlyXSLErrorMsgInTrans && (currentXSLMessage != null)) {
                     logger.error("SQLException configured as blocking error for the IDBO '" + serviceName + "' on row "
-                            + Long.toString(rowCounter) + ".", exc);
+                            + rowCounter + ".", exc);
                     throw new SAXException(new DBOException(currentXSLMessage));
                 }
                 throw new SAXException(new DBOException("SQLException error on row " + rowCounter + ": "
@@ -1051,7 +1081,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                 logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
                 logger.error("SQLException configured as blocking error for the IDBO '" + serviceName + "' on row "
-                        + Long.toString(rowCounter) + ".", exc);
+                        + rowCounter + ".", exc);
                 throw new SAXException(new DBOException("SQLException configured as blocking error class on row "
                         + rowCounter + ": " + exc.getMessage(), exc));
             }
@@ -1208,7 +1238,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
         String elementLocalPart = getLocalName(element);
         String elementNS = getNamespaceURI(element);
         if (ROW_NAME.equals(elementLocalPart) || COL_NAME.equals(elementLocalPart)
-                || COL_UPDATE_NAME.equals(elementLocalPart)) {
+                || COL_UPDATE_NAME.equals(elementLocalPart)
+                || sqlStatementsParams.contains(elementLocalPart)) {
             QName qName = new QName(elementNS, elementLocalPart);
             AttributesImpl attrs = new AttributesImpl();
             NamedNodeMap attributes = element.getAttributes();

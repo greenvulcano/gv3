@@ -544,7 +544,7 @@ public class DBOCallSP extends AbstractDBO
                                 props.put(propName, value);
                             }
                             if (outp.isReturnInUUID()) {
-                                Object uuid = currentRowFields.get(iPos - 1);
+                                Object uuid = currentRowFields.get(iPos);
                                 if (uuid != null) {
                                     String uuidStr = uuid.toString();
                                     logger.debug("Setting out parameter " + propName + " = " + value + " in UUID "
@@ -1099,6 +1099,7 @@ public class DBOCallSP extends AbstractDBO
     {
         if (ROW_NAME.equals(localName)) {
             currentRowFields.clear();
+            currentRowFields.add(null);
             colDataExpecting = false;
             colIdx = 0;
             String id = attributes.getValue(uri, ID_NAME);
