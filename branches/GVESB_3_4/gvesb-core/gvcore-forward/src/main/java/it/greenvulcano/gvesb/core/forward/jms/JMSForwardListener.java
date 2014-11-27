@@ -76,6 +76,8 @@ import org.w3c.dom.Node;
 public class JMSForwardListener implements Runnable
 {
     private static final Logger logger          = GVLogger.getLogger(JMSForwardListener.class);
+    
+    private static final int    MAX_NOT_READ    = 100;
 
     private JMSForwardData      data            = null;
 
@@ -110,6 +112,7 @@ public class JMSForwardListener implements Runnable
     private boolean             run             = false;
     private boolean             connected       = false;
     private int                 readCount       = 0;
+    private int                 notReadCount    = 0;
 
 
     public JMSForwardListener()
@@ -210,7 +213,7 @@ public class JMSForwardListener implements Runnable
             logger.debug("Started Forward [" + name + "/" + forwardName + "] instance");
         }
         try {
-            while (isActive() && ((data.getReadBlockCount() < 0) || (readCount < data.getReadBlockCount()))) {
+            while (isActive() && (((data.getReadBlockCount() < 0) && (notReadCount < MAX_NOT_READ)) || (readCount < data.getReadBlockCount()))) {
                 try {
                     if (data.isDebug()) {
                         logger.debug("Begin receiving message...");
@@ -273,6 +276,7 @@ public class JMSForwardListener implements Runnable
                                     Message msg = messageConsumer.receive(data.getReceiveTimeout());
                                     readCount++;
                                     if ((msg != null) && !data.isShutdown()) {
+                                        notReadCount = 0;
                                         NMDC.push();
                                         try {
                                             data.beginWork();
@@ -282,6 +286,9 @@ public class JMSForwardListener implements Runnable
                                             NMDC.pop();
                                             data.endWork();
                                         }
+                                    }
+                                    else {
+                                        notReadCount++;
                                     }
                                 }
                                 finally {

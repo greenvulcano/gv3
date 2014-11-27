@@ -26,6 +26,7 @@
             <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml"/>
             <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano"
                             prefix="gvesbws"/>
+            <XPathNamespace namespace="http://www.greenvulcano.com/database" prefix="db"/>
             <XPathNamespace namespace="http://www.eaisoftware.it/jarad" prefix="jarad"/>
             <XPathNamespace namespace="http://www.credit.com/services" prefix="cred"/>
             <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc"/>
@@ -75,7 +76,7 @@
             <Description>This section contains a list of all services provided by GreenVulcano ESB</Description>
             <Service group-name="DEFAULT_GRP" id-service="TOUPPER"
                      service-activation="on" statistics="off">
-                <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id"  
+                <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id"
                            type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
                     <Participant id-channel="TEST_CHANNEL" id-system="GVESB"/>
                     <Flow first-node="call_server" point-x="20" point-y="150">
@@ -93,7 +94,7 @@
             </Service>
             <Service group-name="DEFAULT_GRP" id-service="TOUPPER#WS"
                      service-activation="on" statistics="off">
-                <Operation name="RequestReply" operation-activation="on" out-check-type="none"  
+                <Operation name="RequestReply" operation-activation="on" out-check-type="none"
                            type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
                     <Participant id-channel="TEST_CHANNEL_WS" id-system="GVESB_WS"/>
                     <Flow first-node="call_ws" point-x="20" point-y="150">
@@ -1659,7 +1660,7 @@ data.setProperty("ID_PERSON", XMLUtils.get_S(doc,"//col", "NULL"));]]></Script>
                     </Flow>
                 </Operation>
             </Service>
-            
+
             <Service group-name="DEFAULT_GRP" id-service="FileManagerService"
                      service-activation="on" statistics="off">
                 <Description>The service provides basic file management capability, to be exposed as webservices, working on the folder ${{gv.app.home}}/TEST/TESTFS/TestFM/files.</Description>
@@ -3321,7 +3322,7 @@ where ID=?</StatementValue>
                     </ws-call>
                 </Channel>
             </System>
-            
+
             <System id-system="FILE_MANAGER" system-activation="on">
                 <Channel id-channel="CH_FILE">
                     <filemanager-call class="it.greenvulcano.gvesb.virtual.file.FileManagerCall"
