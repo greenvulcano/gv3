@@ -9,6 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>task-gvcore</artifactId>
+    <version>3.4.0.1-Final</version>
     <name>GreenVulcano Core Service Caller Task</name>
 
     <dependencies>
