@@ -79,7 +79,7 @@ public class Commons
         Element col3 = doc.createElement("col");
         col3.setAttribute("type", "timestamp");
         col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col3.appendChild(doc.createTextNode("2010/12/31 23:59:59"));
+        col3.appendChild(doc.createTextNode("31/12/2010 23:59:59"));
         row.appendChild(col3);
         Element col4 = doc.createElement("col");
         col4.setAttribute("type", "float");
@@ -102,7 +102,7 @@ public class Commons
         col3 = doc.createElement("col");
         col3.setAttribute("type", "timestamp");
         col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col3.appendChild(doc.createTextNode("2011/01/10 00:00:00"));
+        col3.appendChild(doc.createTextNode("10/01/2011 00:00:00"));
         row.appendChild(col3);
         col4 = doc.createElement("col");
         col4.setAttribute("type", "float");
@@ -111,6 +111,340 @@ public class Commons
         col4.setAttribute("number-format", "#0.00");
         col4.appendChild(doc.createTextNode("5.12"));
         row.appendChild(col4);
+        return doc;
+    }
+
+    public static Document createInsertNPMessage() throws Exception
+    {
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = documentFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+        Element root = doc.createElement("RowSet");
+        doc.appendChild(root);
+        Element data = doc.createElement("data");
+        root.appendChild(data);
+
+        Element row = doc.createElement("row");
+        data.appendChild(row);
+        Element id = doc.createElement("id");
+        id.setAttribute("type", "numeric");
+        id.appendChild(doc.createTextNode("6"));
+        row.appendChild(id);
+        Element field1 = doc.createElement("field1");
+        field1.setAttribute("type", "string");
+        field1.appendChild(doc.createTextNode("testvalue6"));
+        row.appendChild(field1);
+        Element field2 = doc.createElement("field2");
+        field2.setAttribute("type", "timestamp");
+        field2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        field2.appendChild(doc.createTextNode("31/12/2010 23:59:59"));
+        row.appendChild(field2);
+        Element field3 = doc.createElement("field3");
+        field3.setAttribute("type", "float");
+        field3.setAttribute("decimal-separator", ",");
+        field3.setAttribute("grouping-separator", ".");
+        field3.setAttribute("number-format", "#,##0.000");
+        field3.appendChild(doc.createTextNode("12.345,123"));
+        row.appendChild(field3);
+
+        row = doc.createElement("row");
+        data.appendChild(row);
+        id = doc.createElement("id");
+        id.setAttribute("type", "numeric");
+        id.appendChild(doc.createTextNode("7"));
+        row.appendChild(id);
+        field1 = doc.createElement("field1");
+        field1.setAttribute("type", "string");
+        field1.appendChild(doc.createTextNode("testvalue7"));
+        row.appendChild(field1);
+        field2 = doc.createElement("field2");
+        field2.setAttribute("type", "timestamp");
+        field2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        field2.appendChild(doc.createTextNode("10/01/2011 00:00:00"));
+        row.appendChild(field2);
+        field3 = doc.createElement("field3");
+        field3.setAttribute("type", "float");
+        field3.setAttribute("decimal-separator", ".");
+        field3.setAttribute("grouping-separator", ",");
+        field3.setAttribute("number-format", "#0.00");
+        field3.appendChild(doc.createTextNode("5.12"));
+        row.appendChild(field3);
+        return doc;
+    }
+
+    public static Document createUpdateNPMessage() throws Exception
+    {
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = documentFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+        Element root = doc.createElement("RowSet");
+        doc.appendChild(root);
+        Element data = doc.createElement("data");
+        root.appendChild(data);
+
+        Element row = doc.createElement("row");
+        data.appendChild(row);
+        Element id = doc.createElement("id");
+        id.setAttribute("type", "numeric");
+        id.appendChild(doc.createTextNode("6"));
+        row.appendChild(id);
+        Element field1 = doc.createElement("field1");
+        field1.setAttribute("type", "string");
+        field1.appendChild(doc.createTextNode("testvalue6b"));
+        row.appendChild(field1);
+        Element field2 = doc.createElement("field2");
+        field2.setAttribute("type", "timestamp");
+        field2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        field2.appendChild(doc.createTextNode("31/11/2010 23:59:59"));
+        row.appendChild(field2);
+        Element field3 = doc.createElement("field3");
+        field3.setAttribute("type", "float");
+        field3.setAttribute("decimal-separator", ",");
+        field3.setAttribute("grouping-separator", ".");
+        field3.setAttribute("number-format", "#,##0.000");
+        field3.appendChild(doc.createTextNode("12.345,123"));
+        row.appendChild(field3);
+
+        row = doc.createElement("row");
+        data.appendChild(row);
+        id = doc.createElement("id");
+        id.setAttribute("type", "numeric");
+        id.appendChild(doc.createTextNode("7"));
+        row.appendChild(id);
+        field1 = doc.createElement("field1");
+        field1.setAttribute("type", "string");
+        field1.appendChild(doc.createTextNode("testvalue7b"));
+        row.appendChild(field1);
+        field2 = doc.createElement("field2");
+        field2.setAttribute("type", "timestamp");
+        field2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        field2.appendChild(doc.createTextNode("10/02/2011 00:00:00"));
+        row.appendChild(field2);
+        field3 = doc.createElement("field3");
+        field3.setAttribute("type", "float");
+        field3.setAttribute("decimal-separator", ".");
+        field3.setAttribute("grouping-separator", ",");
+        field3.setAttribute("number-format", "#0.00");
+        field3.appendChild(doc.createTextNode("5.12"));
+        row.appendChild(field3);
+        return doc;
+    }
+
+    public static Document createInsertMixNPMessage() throws Exception
+    {
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = documentFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+        Element root = doc.createElement("RowSet");
+        doc.appendChild(root);
+        Element data = doc.createElement("data");
+        root.appendChild(data);
+
+        Element row = doc.createElement("row");
+        row.setAttribute("id", "1");
+        data.appendChild(row);
+        Element id = doc.createElement("id");
+        id.setAttribute("type", "numeric");
+        id.appendChild(doc.createTextNode("8"));
+        row.appendChild(id);
+        Element field1 = doc.createElement("field1");
+        field1.setAttribute("type", "string");
+        field1.appendChild(doc.createTextNode("testvalue8"));
+        row.appendChild(field1);
+        Element field2 = doc.createElement("field2");
+        field2.setAttribute("type", "timestamp");
+        field2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        field2.appendChild(doc.createTextNode("31/12/2010 23:59:59"));
+        row.appendChild(field2);
+        Element field3 = doc.createElement("field3");
+        field3.setAttribute("type", "float");
+        field3.setAttribute("decimal-separator", ",");
+        field3.setAttribute("grouping-separator", ".");
+        field3.setAttribute("number-format", "#,##0.000");
+        field3.appendChild(doc.createTextNode("12.345,123"));
+        row.appendChild(field3);
+        
+        row = doc.createElement("row");
+        row.setAttribute("id", "0");
+        data.appendChild(row);
+        Element col1 = doc.createElement("col");
+        col1.setAttribute("type", "numeric");
+        col1.appendChild(doc.createTextNode("9"));
+        row.appendChild(col1);
+        Element col2 = doc.createElement("col");
+        col2.setAttribute("type", "string");
+        col2.appendChild(doc.createTextNode("testvalue9"));
+        row.appendChild(col2);
+        Element col3 = doc.createElement("col");
+        col3.setAttribute("type", "timestamp");
+        col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        col3.appendChild(doc.createTextNode("31/12/2010 23:59:59"));
+        row.appendChild(col3);
+        Element col4 = doc.createElement("col");
+        col4.setAttribute("type", "float");
+        col4.setAttribute("decimal-separator", ",");
+        col4.setAttribute("grouping-separator", ".");
+        col4.setAttribute("number-format", "#,##0.000");
+        col4.appendChild(doc.createTextNode("12.345,123"));
+        row.appendChild(col4);
+
+        row = doc.createElement("row");
+        row.setAttribute("id", "1");
+        data.appendChild(row);
+        id = doc.createElement("id");
+        id.setAttribute("type", "numeric");
+        id.appendChild(doc.createTextNode("10"));
+        row.appendChild(id);
+        field1 = doc.createElement("field1");
+        field1.setAttribute("type", "string");
+        field1.appendChild(doc.createTextNode("testvalue10"));
+        row.appendChild(field1);
+        field2 = doc.createElement("field2");
+        field2.setAttribute("type", "timestamp");
+        field2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        field2.appendChild(doc.createTextNode("10/01/2011 00:00:00"));
+        row.appendChild(field2);
+        field3 = doc.createElement("field3");
+        field3.setAttribute("type", "float");
+        field3.setAttribute("decimal-separator", ".");
+        field3.setAttribute("grouping-separator", ",");
+        field3.setAttribute("number-format", "#0.00");
+        field3.appendChild(doc.createTextNode("5.12"));
+        row.appendChild(field3);
+        
+        row = doc.createElement("row");
+        row.setAttribute("id", "0");
+        data.appendChild(row);
+        col1 = doc.createElement("col");
+        col1.setAttribute("type", "numeric");
+        col1.appendChild(doc.createTextNode("11"));
+        row.appendChild(col1);
+        col2 = doc.createElement("col");
+        col2.setAttribute("type", "string");
+        col2.appendChild(doc.createTextNode("testvalue11"));
+        row.appendChild(col2);
+        col3 = doc.createElement("col");
+        col3.setAttribute("type", "timestamp");
+        col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        col3.appendChild(doc.createTextNode("31/12/2010 23:59:59"));
+        row.appendChild(col3);
+        col4 = doc.createElement("col");
+        col4.setAttribute("type", "float");
+        col4.setAttribute("decimal-separator", ",");
+        col4.setAttribute("grouping-separator", ".");
+        col4.setAttribute("number-format", "#,##0.000");
+        col4.appendChild(doc.createTextNode("12.345,123"));
+        row.appendChild(col4);
+
+        return doc;
+    }
+
+    public static Document createUpdateMixNPMessage() throws Exception
+    {
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = documentFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+        Element root = doc.createElement("RowSet");
+        doc.appendChild(root);
+        Element data = doc.createElement("data");
+        root.appendChild(data);
+
+        Element row = doc.createElement("row");
+        row.setAttribute("id", "1");
+        data.appendChild(row);
+        Element id = doc.createElement("id");
+        id.setAttribute("type", "numeric");
+        id.appendChild(doc.createTextNode("8"));
+        row.appendChild(id);
+        Element field1 = doc.createElement("field1");
+        field1.setAttribute("type", "string");
+        field1.appendChild(doc.createTextNode("testvalue8b"));
+        row.appendChild(field1);
+        Element field2 = doc.createElement("field2");
+        field2.setAttribute("type", "timestamp");
+        field2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        field2.appendChild(doc.createTextNode("31/11/2010 23:59:59"));
+        row.appendChild(field2);
+        Element field3 = doc.createElement("field3");
+        field3.setAttribute("type", "float");
+        field3.setAttribute("decimal-separator", ",");
+        field3.setAttribute("grouping-separator", ".");
+        field3.setAttribute("number-format", "#,##0.000");
+        field3.appendChild(doc.createTextNode("12.345,123"));
+        row.appendChild(field3);
+        
+        row = doc.createElement("row");
+        row.setAttribute("id", "0");
+        data.appendChild(row);
+        Element col1 = doc.createElement("col");
+        col1.setAttribute("type", "string");
+        col1.appendChild(doc.createTextNode("testvalue9b"));
+        row.appendChild(col1);
+        Element col2 = doc.createElement("col");
+        col2.setAttribute("type", "timestamp");
+        col2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        col2.appendChild(doc.createTextNode("31/11/2010 23:59:59"));
+        row.appendChild(col2);
+        Element col3 = doc.createElement("col");
+        col3.setAttribute("type", "float");
+        col3.setAttribute("decimal-separator", ",");
+        col3.setAttribute("grouping-separator", ".");
+        col3.setAttribute("number-format", "#,##0.000");
+        col3.appendChild(doc.createTextNode("12.345,123"));
+        row.appendChild(col3);
+        Element col4 = doc.createElement("col");
+        col4.setAttribute("type", "numeric");
+        col4.appendChild(doc.createTextNode("9"));
+        row.appendChild(col4);
+
+        row = doc.createElement("row");
+        row.setAttribute("id", "1");
+        data.appendChild(row);
+        id = doc.createElement("id");
+        id.setAttribute("type", "numeric");
+        id.appendChild(doc.createTextNode("10"));
+        row.appendChild(id);
+        field1 = doc.createElement("field1");
+        field1.setAttribute("type", "string");
+        field1.appendChild(doc.createTextNode("testvalue10b"));
+        row.appendChild(field1);
+        field2 = doc.createElement("field2");
+        field2.setAttribute("type", "timestamp");
+        field2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        field2.appendChild(doc.createTextNode("10/02/2011 00:00:00"));
+        row.appendChild(field2);
+        field3 = doc.createElement("field3");
+        field3.setAttribute("type", "float");
+        field3.setAttribute("decimal-separator", ".");
+        field3.setAttribute("grouping-separator", ",");
+        field3.setAttribute("number-format", "#0.00");
+        field3.appendChild(doc.createTextNode("5.12"));
+        row.appendChild(field3);
+        
+        row = doc.createElement("row");
+        row.setAttribute("id", "0");
+        data.appendChild(row);
+        col1 = doc.createElement("col");
+        col1.setAttribute("type", "string");
+        col1.appendChild(doc.createTextNode("testvalue11b"));
+        row.appendChild(col1);
+        col2 = doc.createElement("col");
+        col2.setAttribute("type", "timestamp");
+        col2.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
+        col2.appendChild(doc.createTextNode("31/11/2010 23:59:59"));
+        row.appendChild(col2);
+        col3 = doc.createElement("col");
+        col3.setAttribute("type", "float");
+        col3.setAttribute("decimal-separator", ",");
+        col3.setAttribute("grouping-separator", ".");
+        col3.setAttribute("number-format", "#,##0.000");
+        col3.appendChild(doc.createTextNode("12.345,123"));
+        row.appendChild(col3);
+        col4 = doc.createElement("col");
+        col4.setAttribute("type", "numeric");
+        col4.appendChild(doc.createTextNode("11"));
+        row.appendChild(col4);
+
         return doc;
     }
 
@@ -140,7 +474,7 @@ public class Commons
         Element col3 = doc.createElement("col");
         col3.setAttribute("type", "timestamp");
         col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col3.appendChild(doc.createTextNode("2010/12/31 15:00:00"));
+        col3.appendChild(doc.createTextNode("31/12/2010 15:00:00"));
         row.appendChild(col3);
         Element col4 = doc.createElement("col");
         col4.setAttribute("type", "float");
@@ -158,7 +492,7 @@ public class Commons
         Element col_update3 = doc.createElement("col-update");
         col_update3.setAttribute("type", "timestamp");
         col_update3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col_update3.appendChild(doc.createTextNode("2010/12/31 15:00:00"));
+        col_update3.appendChild(doc.createTextNode("31/12/2010 15:00:00"));
         row.appendChild(col_update3);
         Element col_update4 = doc.createElement("col-update");
         col_update4.setAttribute("type", "float");
@@ -188,7 +522,7 @@ public class Commons
         col3 = doc.createElement("col");
         col3.setAttribute("type", "timestamp");
         col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col3.appendChild(doc.createTextNode("2010/10/20 16:00:00"));
+        col3.appendChild(doc.createTextNode("20/10/2010 16:00:00"));
         row.appendChild(col3);
         col4 = doc.createElement("col");
         col4.setAttribute("type", "float");
@@ -206,7 +540,7 @@ public class Commons
         col_update3 = doc.createElement("col-update");
         col_update3.setAttribute("type", "timestamp");
         col_update3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col_update3.appendChild(doc.createTextNode("2010/10/20 16:00:00"));
+        col_update3.appendChild(doc.createTextNode("20/10/2010 16:00:00"));
         row.appendChild(col_update3);
         col_update4 = doc.createElement("col-update");
         col_update4.setAttribute("type", "float");

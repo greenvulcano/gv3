@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2014 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  *
  * This file is part of GreenVulcano ESB.
@@ -36,7 +36,9 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
@@ -49,6 +51,7 @@ import org.xml.sax.SAXException;
 /**
  * IDBO Class specialized to parse the input RowSet document and in
  * inserting data to DB.
+ * Updated to use named parameters in statement.
  *
  * @version 3.0.0 Mar 30, 2010
  * @author GreenVulcano Developer Team
@@ -81,6 +84,7 @@ public class DBOInsert extends AbstractDBO
                     statements.put(id, XMLConfig.getNodeValue(stmt));
                 }
             }
+
             if (statements.isEmpty()) {
                 throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
             }
@@ -108,6 +112,8 @@ public class DBOInsert extends AbstractDBO
     }
 
     private int          colIdx = 0;
+    
+    private List<Integer> colIdxs = new ArrayList<Integer>(1);
 
     private String       currType;
 
@@ -124,47 +130,59 @@ public class DBOInsert extends AbstractDBO
     private boolean      colDataExpecting;
 
     /**
-     *
-     * @see org.xml.sax.ContentHandler#startElement(java.lang.String,
+     * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
      *      java.lang.String, java.lang.String, org.xml.sax.Attributes)
      */
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
     {
+        boolean processParams = false;
+
         if (ROW_NAME.equals(localName)) {
             currentRowFields.clear();
             colDataExpecting = false;
             colIdx = 0;
-            String id = attributes.getValue(uri, ID_NAME);
+            String id = attributes.getValue(ID_NAME);
             getStatement(id);
-            currentXSLMessage = attributes.getValue(uri, XSL_MSG_NAME);
-            String statsOn = attributes.getValue(uri, STATS_ON_NAME);
-            statsOnInsert = !(STATS_UPD_MODE.equals(statsOn));
-            String incrDisc = attributes.getValue(uri, INCR_DISC_NAME);
-            incrDiscIfUpdKO = !(INCR_DISC_N_MODE.equals(incrDisc));
-            currCriticalError = "true".equalsIgnoreCase(attributes.getValue(uri, CRITICAL_ERROR));
-            generatedKeyID = attributes.getValue(uri, "generate-key");
-            resetGeneratedKeyID = attributes.getValue(uri, "reset-generate-key");
+            if (sqlStatementInfo.usesNamedParams()) {
+                currentRowFields.setSize(sqlStatementInfo.getSqlStatementParamCount()+1);
+            }
+            else {
+                colIdxs.clear();
+                colIdxs.add(-1);
+                currentRowFields.add(null);
+            }
+            currentXSLMessage = attributes.getValue(XSL_MSG_NAME);
+            currCriticalError = "true".equalsIgnoreCase(attributes.getValue(CRITICAL_ERROR));
+            generatedKeyID = attributes.getValue("generate-key");
+            resetGeneratedKeyID = attributes.getValue("reset-generate-key");
             readGeneratedKey = autogenerateKeys && (generatedKeyID != null);
         }
-        else if (COL_NAME.equals(localName)) {
-            currType = attributes.getValue(uri, TYPE_NAME);
+        else if (sqlStatementInfo.usesNamedParams()) {
+            processParams = sqlStatementInfo.getSqlStatementParams().containsKey(localName);
+        }
+        else {
+            processParams = COL_NAME.equals(localName);
+        } 
+            
+        if (processParams) {
+            currType = attributes.getValue(TYPE_NAME);
             if (TIMESTAMP_TYPE.equals(currType)) {
-                currDateFormat = attributes.getValue(uri, FORMAT_NAME);
+                currDateFormat = attributes.getValue(FORMAT_NAME);
                 if (currDateFormat == null) {
                     currDateFormat = DEFAULT_DATE_FORMAT;
                 }
             }
-            else if (FLOAT_TYPE.equals(currType)) {
-                currNumberFormat = attributes.getValue(uri, FORMAT_NAME);
+            else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+                currNumberFormat = attributes.getValue(FORMAT_NAME);
                 if (currNumberFormat == null) {
                     currNumberFormat = call_DEFAULT_NUMBER_FORMAT;
                 }
-                currGroupSeparator = attributes.getValue(uri, GRP_SEPARATOR_NAME);
+                currGroupSeparator = attributes.getValue(GRP_SEPARATOR_NAME);
                 if (currGroupSeparator == null) {
                     currGroupSeparator = call_DEFAULT_GRP_SEPARATOR;
                 }
-                currDecSeparator = attributes.getValue(uri, DEC_SEPARATOR_NAME);
+                currDecSeparator = attributes.getValue(DEC_SEPARATOR_NAME);
                 if (currDecSeparator == null) {
                     currDecSeparator = call_DEFAULT_DEC_SEPARATOR;
                 }
@@ -172,11 +190,14 @@ public class DBOInsert extends AbstractDBO
             colDataExpecting = true;
             colIdx++;
             textBuffer = new StringBuffer();
+            if (!sqlStatementInfo.usesNamedParams()) {
+                currentRowFields.add(null);
+            }
         }
     }
 
     /**
-     * @see org.xml.sax.ContentHandler#characters(char[], int, int)
+     * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
      */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
@@ -187,12 +208,14 @@ public class DBOInsert extends AbstractDBO
     }
 
     /**
-     * @see org.xml.sax.ContentHandler#endElement(java.lang.String,
+     * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
      *      java.lang.String, java.lang.String)
      */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
+        boolean processParams = false;
+
         if (ROW_NAME.equals(localName)) {
             if (!currCriticalError) {
                 executeStatement();
@@ -205,53 +228,79 @@ public class DBOInsert extends AbstractDBO
                 dhr.addDiscardCause(new DiscardCause(rowCounter, msg));
 
                 resultMessage.append("Data error on row ").append(rowCounter).append(": ").append(msg);
-                resultMessage.append("SQL Statement Informations:\n").append(sqlStatementInfo);
-                resultMessage.append("Record parameters:\n").append(dumpCurrentRowFields());
+                resultMessage.append(" SQL Statement Informations:\n").append(sqlStatementInfo);
+                resultMessage.append(" Record parameters:\n").append(dumpCurrentRowFields());
                 resultStatus = STATUS_PARTIAL;
             }
         }
-        else if (COL_NAME.equals(localName)) {
+        else if (sqlStatementInfo.usesNamedParams()) {
+            processParams = sqlStatementInfo.getSqlStatementParams().containsKey(localName);
+        }
+        else {
+            processParams = COL_NAME.equals(localName);
+        }
+        
+        if (processParams) {
             PreparedStatement ps = (PreparedStatement) sqlStatementInfo.getStatement();
+
             try {
+                if (sqlStatementInfo.usesNamedParams()) {
+                    colIdxs = sqlStatementInfo.getSqlStatementParams().get(localName);
+                }
+                else {
+                    colIdxs.set(0, colIdx);
+                }
                 colDataExpecting = false;
                 boolean autoKeySet = false;
                 String text = textBuffer.toString();
                 if (autogenerateKeys) {
                     if (text.startsWith(GENERATED_KEY_ID)) {
                         Object key = generatedKeys.get(text);
-                        ps.setObject(colIdx, key);
-                        currentRowFields.add(key);
+                        for (Integer idx : colIdxs) {
+                            ps.setObject(idx, key);
+                            currentRowFields.set(idx, key);
+                        }
                         autoKeySet = true;
                     }
                 }
                 if (!autoKeySet) {
                     if (TIMESTAMP_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.TIMESTAMP);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.TIMESTAMP);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
                             dateFormatter.applyPattern(currDateFormat);
                             Date formattedDate = dateFormatter.parse(text);
                             Timestamp ts = new Timestamp(formattedDate.getTime());
-                            ps.setTimestamp(colIdx, ts);
-                            currentRowFields.add(ts);
+                            for (Integer idx : colIdxs) {
+                                ps.setTimestamp(idx, ts);
+                                currentRowFields.set(idx, ts);
+                            }
                         }
                     }
                     else if (NUMERIC_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.NUMERIC);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.NUMERIC);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
-                            ps.setInt(colIdx, Integer.parseInt(text));
-                            currentRowFields.add(Integer.valueOf(text));
+                            for (Integer idx : colIdxs) {
+                                ps.setInt(idx, Integer.parseInt(text));
+                                currentRowFields.set(idx, text);
+                            }
                         }
                     }
                     else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.NUMERIC);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.NUMERIC);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
                             DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
@@ -263,8 +312,10 @@ public class DBOInsert extends AbstractDBO
                             try {
                                 numberFormatter.setParseBigDecimal(true);
                                 BigDecimal formattedNumber = (BigDecimal) numberFormatter.parse(text);
-                                ps.setBigDecimal(colIdx, formattedNumber);
-                                currentRowFields.add(formattedNumber);
+                                for (Integer idx : colIdxs) {
+                                    ps.setBigDecimal(idx, formattedNumber);
+                                    currentRowFields.set(idx, formattedNumber);
+                                }
                             }
                             finally {
                                 numberFormatter.setParseBigDecimal(isBigDecimal);
@@ -273,67 +324,91 @@ public class DBOInsert extends AbstractDBO
                     }
                     else if (LONG_STRING_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.CLOB);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.CLOB);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
-                            ps.setCharacterStream(colIdx, new StringReader(text));
-                            currentRowFields.add(text);
+                            for (Integer idx : colIdxs) {
+                                ps.setCharacterStream(idx, new StringReader(text));
+                                currentRowFields.set(idx, text);
+                            }
                         }
                     }
                     else if (LONG_NSTRING_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.NCLOB);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.NCLOB);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
-                            ps.setCharacterStream(colIdx, new StringReader(text));
-                            currentRowFields.add(text);
+                            for (Integer idx : colIdxs) {
+                                ps.setCharacterStream(idx, new StringReader(text));
+                                currentRowFields.set(idx, text);
+                            }
                         }
                     }
                     else if (BASE64_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.BLOB);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.BLOB);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
                             byte[] data = text.getBytes();
                             data = Base64.decodeBase64(data);
                             ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                            ps.setBinaryStream(colIdx, bais, data.length);
-                            currentRowFields.add(text);
+                            for (Integer idx : colIdxs) {
+                                ps.setBinaryStream(idx, bais, data.length);
+                                currentRowFields.set(idx, text);
+                            }
                         }
                     }
                     else if (BINARY_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.BLOB);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.BLOB);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
                             byte[] data = text.getBytes();
                             ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                            ps.setBinaryStream(colIdx, bais, data.length);
-                            currentRowFields.add(text);
+                            for (Integer idx : colIdxs) {
+                                ps.setBinaryStream(idx, bais, data.length);
+                                currentRowFields.set(idx, text);
+                            }
                         }
                     }
                     else if (NSTRING_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.NVARCHAR);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.NVARCHAR);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
-                            ps.setNString(colIdx, text);
-                            currentRowFields.add(text);
+                            for (Integer idx : colIdxs) {
+                                ps.setNString(idx, text);
+                                currentRowFields.set(idx, text);
+                            }
                         }
                     }
                     else {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.VARCHAR);
-                            currentRowFields.add(null);
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.VARCHAR);
+                                currentRowFields.set(idx, null);
+                            }
                         }
                         else {
-                            ps.setString(colIdx, text);
-                            currentRowFields.add(text);
+                            for (Integer idx : colIdxs) {
+                                ps.setString(idx, text);
+                                currentRowFields.set(idx, text);
+                            }
                         }
                     }
                 }
