@@ -1,0 +1,14 @@
+<td align="left">
+    <select name="charEncoding">
+        <option value="<%= currentEncoding %>" selected > <%= currentEncoding %></option>
+        <%
+            for(int i = 0; i < charEncodings.length; i++) {
+                if(!charEncodings[i].equals(currentEncoding)) {
+        %>
+        <option value="<%= charEncodings[i] %>"> <%= charEncodings[i] %></option>
+        <%
+                }
+            }
+        %>
+    </select>
+</td>

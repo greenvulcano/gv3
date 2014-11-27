@@ -1,0 +1,204 @@
+<%@ page import="it.greenvulcano.gvesb.gvconsole.workbench.plugin.*"%>
+<%
+    TestPluginWrapper testPluginWrapper = testManager.getWrapper();
+			String fileName = (String) testManager.get("fileNameOutput");
+			String fileNameI = (String) testManager.get("fileNameInput");
+			String currentEncoding = (String) testManager.get("charEncoding");
+
+			String[] charEncodings = new String[]{"Binary", "US-ASCII",
+					"ISO-8859-1", "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16"};
+			int iteratorNumber = 0;
+			Integer integer = new Integer((String) (testManager.get(
+					"iteratorNumber", false)));
+
+			if (integer != null) {
+				iteratorNumber = integer.intValue();
+			}
+%>
+<script>
+    function viewOutput()
+    {
+        var fileName = document.gvBufferInput.fileName.value;
+    	window.open("viewOutput.jsp?fileName=" + fileName, "Output", "left=50,top=50,width=540,height=460,resizable, scrollbars");
+    }
+    /*START fix submit FF*/
+    jQuery.Hashtable  = function(){ 
+    	this.items=new Array();
+    	this.itemsCount=0;
+    	this.add=function(key,value){if(!this.containsKey(key)){this.items[key]=value;this.itemsCount++;}else{throw "key '"+key+"' already exists."}}
+    	this.get=function(key){if(this.containsKey(key)){return this.items[key];}else{return null;}}
+    	this.remove = function(key){if(this.containsKey(key)){delete this.items[key];this.itemsCount--;}else{throw "key '"+key+"' does not exists."}}
+    	this.containsKey= function(key){return typeof(this.items[key])!="undefined";}
+    	this.containsValue = function containsValue(value){for (var item in this.items){if(this.items[item]==value)return true;}return false;}
+    	this.contains = function(keyOrValue){return this.containsKey(keyOrValue) || this.containsValue(keyOrValue);}
+    	this.clear = function(){this.items=new Array();itemsCount=0;}
+    	this.size = function(){return this.itemsCount;}
+    	this.isEmpty = function(){return this.size()==0;}
+    };
+
+	$(document).ready(function(){
+		
+	var properties = new jQuery.Hashtable();
+	var keyProperties = new Array();    
+	function submitForm(){
+    	if (!$.browser.msie) {
+	    	var dataForm = $('#gvBufferInput').serialize();
+	    	var prop, propValue,s,s2;
+	    	var y = 0;
+	    	for(var i=0; i < keyProperties.length;i++){
+	        	prop = keyProperties[i].substring(0, s.length-1);
+	        	if(properties.containsKey(s)){
+	        		propValue = properties.get(s).substring(0, s2.length-1);
+	    			dataForm = dataForm + "&"+prop+"="+$('[name='+s+']').val()+"&"+propValue+"="+$('[name='+s2+']').val();
+	    			y++;
+	        	}
+	    	}
+	       	document.location =  $("#gvBufferInput").attr('action')+'?'+ dataForm;
+		}else{ $('#gvBufferInput').submit(); }
+    }
+	/*END fix submit FF*/
+	/*START Gestione combo servizi sistemi**/
+	var loadServicesAction = "loadServices.action",
+		loadSystemsAction = "loadSystems.action";
+	var systemCombo = $('#systemSelect');
+	var serviceCombo = $('#serviceSelect');
+	/*serviceCombo.change(function () {
+		// load system
+		loadCombo(systemCombo,loadSystemsAction,"service="+serviceCombo.val());
+	});*/
+
+	//initialize combo service and system
+	initCombo();
+	function initCombo(){
+		var oldValue = serviceCombo.val();
+		/*
+		//load services
+		loadCombo(serviceCombo,loadServicesAction,"",oldValue,function(){
+			// load system
+			loadCombo(systemCombo,loadSystemsAction,"service="+serviceCombo.val(),systemCombo.val());
+		});*/
+		
+		loadCombo(serviceCombo,loadServicesAction,"",oldValue)
+		loadCombo(systemCombo,loadSystemsAction,"",systemCombo.val());
+	}
+	
+	function loadCombo(combo, action, urlData, oldValue, fn){
+		$.ajax({type: "GET", url: action, data: urlData, dataType: "json",complete: fn, success: function(msg) {
+			combo.html("");
+			for ( var i = 0; i < msg.length; i++) {
+				var selected = false;
+				if(msg[i] == oldValue) {
+					selected = true;
+				}
+				$("<option value='"+msg[i]+"'"+(selected?" selected>":">")+msg[i]+"</option>").appendTo(combo);
+			}
+		}
+	});
+	}
+	/*END Gestione combo servizi sistemi*/
+	});
+</script>
+<table cellSpacing="0" cellPadding="2" border="0" align="left">
+	<tr>
+		<td>
+		<form method="post" name="gvBufferInput" id="gvBufferInput"
+			action="<%=contextRoot%>/GVTesterManager"><input type="hidden"
+			name="method" />
+		<table class="ui-widget-header ui-corner-all"
+			style="margin-top: 20px; width: 1000px;">
+			<tr>
+				<td colspan="2">
+				<table style="width: 940px">
+					<tr valign="top">
+						<td align="left"><nobr>Output File Name</nobr></td>
+						<td align="left"><input type="text" name="fileName"
+							class="input120" value="<%=fileName%>" /></td>
+						<td align="left"><nobr>Append&nbsp; <%
+     if (testPluginWrapper.getAppend()) {
+ %> <input type="checkbox" name="append" checked /> <%
+     } else {
+ %> <input type="checkbox" name="append" /> <%
+     }
+ %> </nobr></td>
+						<td align="left" colspan="11"><input type="button"
+							class="button buttonTesting" name="view" value="View File"
+							onclick="viewOutput()" /></td>
+					</tr>
+					<tr valign="top">
+						<td align="left"><nobr>Input File Name</nobr></td>
+						<td align="left"><input type="text" name="fileNameI"
+							class="input120" value="<%=fileNameI%>" /></td>
+						<td align="left"><nobr>Save Input&nbsp; <%
+     if (testPluginWrapper.getSaveData()) {
+ %> <input type="checkbox" name="saveData" checked /> <%
+     } else {
+ %> <input type="checkbox" name="saveData" /> <%
+     }
+ %> </nobr></td>
+					</tr>
+					<tr>
+						<td align="left">Iterator number</td>
+						<td align="left"><input type="text" name="iteratorNumber"
+							class="input30" value="<%=iteratorNumber%>" /></td>
+					</tr>
+				</table>
+				</td>
+			</tr>
+			<tr valign="top">
+				<td>
+				<table style="width: 940px">
+					<%@ include file="gvBufferInput.jspf"%>
+					<tr>
+						<td align="left" colspan="2">Forward Name <input type="text"
+							name="forwardName" class="input120"
+							value="<%=testManager.get("forwardName")%>" /> <input
+							type="submit" class="button buttonTesting" value="forward"
+							onclick="method.value='forward'" /></td>
+					</tr>
+					<tr>
+						<td align="center" colspan="4"><%@ include
+							file="buttons.jspf"%></td>
+					</tr>
+					<tr>
+						<td height='20'></td>
+					</tr>
+					<tr>
+						<td><input type="submit" class="button"
+							value="Set JNDI Parameters"
+							onclick="method.value='setJNDIParamenters'" /></td>
+					</tr>
+				</table>
+				</td>
+				<%
+				    Throwable throwable = testPluginWrapper.getThrowable();
+							if (iteratorNumber > 1) {
+				%>
+				<td valign="top"><%@ include file="result.jspf"%>
+				</td>
+			</tr>
+			<%
+			    } else {
+							if (throwable != null) {
+			%>
+			</tr>
+			<tr>
+				<td valign="top" align="left"><%@ include file="exception.jspf"%>
+				</td>
+			</tr>
+			<%
+			    } else {
+								if (testPluginWrapper.getShowsResult()) {
+			%>
+			<td valign="top"><%@ include file="gvBufferOutput.jspf"%>
+			</td>
+			</tr>
+			<%
+			    }
+							}
+						}
+			%>
+		</table>
+		</form>
+		</td>
+	</tr>
+</table>

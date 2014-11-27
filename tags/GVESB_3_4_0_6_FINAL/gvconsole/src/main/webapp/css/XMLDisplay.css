@@ -1,0 +1,9 @@
+@charset "utf-8";
+/* CSS Document */
+.Utility {color: black;}	
+.NodeName {color: #800080;}
+.AttributeName {color: black;}
+.AttributeValue{color:blue;}
+.NodeValue{color: black;}
+.Clickable {color: #800080;cursor:pointer;}
+.Clickable2 {color: red;cursor:pointer;}

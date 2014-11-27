@@ -1,0 +1,32 @@
+Definizioni:
+GV_HOME: percorso che indica la home in cui si trova GreenVulcano (esempio:/home/user/GvServer-3.3.0.Trunk/GreenV)
+JBOSS_HOME: percorso che indica la home in cui si trova JBoss (esempio:/home/user/GvServer-3.3.0.Trunk/jboss-5.1.0.GA)
+ADAPTER_HOME: Adapter_ODE/GvServer-3.3.0.Trunk
+
+Istruzioni di installazione:
+- Copiare nella directory GV_HOME/application/deploy il file .xml presente nella directory ADAPTER_HOME/GreenV/application/deploy
+- Copiare nella directory GV_HOME/application/deploy/gvesb-javaee5.ear/lib le librerie .jar presenti nella directory ADAPTER_HOME/GreenV/application/deploy/gvesb-javaee5.ear/lib
+- Copiare nella directory GV_HOME l'intera directory ADAPTER_HOME/GreenV/BpelProcess
+- Copiare nella directory GV_HOME l'intera directory ADAPTER_HOME/GreenV/hsqldb
+- Copiare nella directory GV_HOME/webservices/services il file .aar presente nella directory ADAPTER_HOME/GreenV/webservices/services
+- Accedere alla directory GV_HOME/dtds/Extra
+    - Copiare nella directory corrente il file ADAPTER_HOME/GreenV/dtds/Extra/GVHL7.dtd
+    - Modificare il file Extra.dtd inserendo il codice presente in ADAPTER_HOME/GreenV/dtds/Extra/Extra_frag.dtd
+- Accedere alla directory GV_HOME/xmlconfig
+    - Modificare il file GVCore.xml                inserendo opportunamente gli elementi presenti in ADAPTER_HOME/GreenV/xmlconfig/GVCore_frag.xml
+    - Modificare il file gvesb-catalog.xml         inserendo opportunamente gli elementi presenti in ADAPTER_HOME/GreenV/xmlconfig/gvesb-catalog_frag.xml
+    - Modificare il file gv-jmx.xml                inserendo opportunamente gli elementi presenti in ADAPTER_HOME/GreenV/xmlconfig/gv-jmx_frag.xml
+- Copiare nella directory JBOSS_HOME/server/GreenV/conf il contenuto della directory ADAPTER_HOME/jboss-5.1.0.GA/server/GreenV/conf
+
+
+Test:
+E' stato definito un servizio GV per testare l'Adapter ODE:
+- callOde:
+    richiede in ingresso un documento XML come di seguito riportato;
+        <HelloWorldRequest xmlns="http://helloWorld">
+            <input>xxx</input>
+        </HelloWorldRequest>
+    affinché si possa considerare il test riuscito, effettuando la RequestReply si dovrà ottenere un output identico al documento riportato di seguito:
+        <HelloWorldResponse xmlns="http://helloWorld">
+            <result>xxx</result>
+        </HelloWorldResponse>

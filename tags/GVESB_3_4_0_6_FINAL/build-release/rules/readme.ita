@@ -1,0 +1,29 @@
+Definizioni:
+GV_HOME: percorso che indica la home in cui si trova GreenVulcano (esempio:/home/user/@base.dir@/GreenV)
+ADAPTER_HOME: Adapter_Rules/GreenV
+
+Istruzioni di installazione:
+- Copiare nella directory GV_HOME/application/deploy/gvesb-javaee5.ear/lib le librerie .jar presenti nella directory ADAPTER_HOME/application/deploy/gvesb-javaee5.ear/lib
+- Copiare in GV_HOME l'intera directory ADAPTER_HOME/Rules
+
+- Accedere alla directory GV_HOME/dtds/Extra
+    - Copiare nella directory corrente il file ADAPTER_HOME/dtds/Extra/GVRules.dtd
+    - Modificare il file Extra.dtd inserendo il codice presente in ADAPTER_HOME/dtds/Extra/Extra_frag.dtd
+- Accedere alla directory GV_HOME/xmlconfig
+    - Modificare il file GVAdapters.xml            inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/GVAdapters_frag.xml
+    - Modificare il file GVCore.xml                inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/GVCore_frag.xml
+    - Modificare il file gvesb-catalog.xml         inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/gvesb-catalog_frag.xml
+    - Modificare il file XMLConfigSplit.properties inserendo opportunamente gli elementi presenti in ADAPTER_HOME/xmlconfig/XMLConfigSplit_frag.properties
+
+Test:
+Sono stati improntati tre servizi GV per effettuare i test:
+- FigureFilter
+- FigureFilterOut
+- FigureFilterOutColl:
+    tutti i servizi creano una collezione di oggetti Figure di colori diversi:
+    Triangle('red') Square('red')
+    Triangle('green') Circle('green')
+    Circle('yellow') 
+    e richiedono in ingresso una property COLOR con valore red, green, yellow;
+    dopo l'esecuzione del servizio in output si dovrà avere una collezione delle 
+    sole Figure del colore indicato.
