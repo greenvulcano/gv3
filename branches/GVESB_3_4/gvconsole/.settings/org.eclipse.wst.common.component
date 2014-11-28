@@ -19,7 +19,7 @@
         <dependent-module archiveName="gvhttp_commons-3.4.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvhttp_commons/gvhttp_commons">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gvdatahandler-3.4.0.3-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdatahandler/gvdatahandler">
+        <dependent-module archiveName="gvdatahandler-3.4.0.4-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdatahandler/gvdatahandler">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="context-root" value="gvconsole"/>
