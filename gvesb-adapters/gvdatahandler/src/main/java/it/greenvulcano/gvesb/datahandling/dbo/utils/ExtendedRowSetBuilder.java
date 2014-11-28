@@ -414,7 +414,10 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
         colNames = new String[rsm.getColumnCount() + 1];
 
         for (int i = 1; i < fFormatters.length; i++) {
-            String cName = rsm.getColumnName(i);
+        	String cName = rsm.getColumnLabel(i);
+        	if (cName == null) {
+        		cName = rsm.getColumnName(i);
+        	}
             colNames[i] = adaptName(cName);
             FieldFormatter fF = fieldNameToFormatter.get(cName);
             if (fF == null) {
