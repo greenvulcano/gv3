@@ -128,9 +128,9 @@ public class GreenVulcanoPool implements ShutdownEventListener
             GVPublicException
     {
         init(initialSize, maximumSize, maximumCreation, subsystem);
-        logger.debug("Initialized GreenVulcanoPool instance: initialSize=" + initialSize + ", maximumSize="
-                + maximumSize + ", maximumCreation=" + maximumCreation + ", subsystem=" + subsystem
-                + ", defaultTimeout=" + defaultTimeout + ", shrinkDelayTime=" + shrinkDelayTime);
+        logger.debug("Initialized GreenVulcanoPool instance: subsystem= " + subsystem + ", initialSize= " + initialSize 
+                + ", maximumSize= " + maximumSize + ", maximumCreation= " + maximumCreation + ", defaultTimeout= " 
+                + defaultTimeout + ", shrinkDelayTime= " + shrinkDelayTime);
         ShutdownEventLauncher.addEventListener(this);
     }
 
@@ -155,13 +155,24 @@ public class GreenVulcanoPool implements ShutdownEventListener
         int maximumSizeL = XMLConfig.getInteger(config, "@maximum-size", DEFAULT_MAXIMUM_SIZE);
         int maximumCreationL = XMLConfig.getInteger(config, "@maximum-creation", DEFAULT_MAXIMUM_CREATION);
         String subsystemL = XMLConfig.get(config, "@subsystem", "GreenVulcano");
+
+        synchronized (this) {
+            logger.debug("Subsystem= " + subsystem + " - Begin destroying instances");
+            while (pool.size() > 0) {
+                GreenVulcano GreenVulcano = pool.removeFirst();
+                destroyGreenVulcano(GreenVulcano, false);
+            }
+            logger.debug("subsystem= " + subsystem + " - End destroying instances");
+            assignedGV.clear();
+        }
+        
         init(initialSizeL, maximumSizeL, maximumCreationL, subsystemL);
         setDefaultTimeout(XMLConfig.getLong(config, "@default-timeout", DEFAULT_TIMEOUT));
         setShrinkDelayTime(XMLConfig.getLong(config, "@shrink-timeout", DEFAULT_SHRINK_DELAY_TIME));
         nextShrinkTime = System.currentTimeMillis() + shrinkDelayTime;
-        logger.debug("Initialized GreenVulcanoPool instance: initialSize=" + initialSize + ", maximumSize="
-                + maximumSize + ", maximumCreation=" + maximumCreation + ", subsystem=" + subsystem
-                + ", defaultTimeout=" + defaultTimeout + ", shrinkDelayTime=" + shrinkDelayTime);
+        logger.debug("Initialized GreenVulcanoPool instance: subsystem= " + subsystem + ", initialSize= " + initialSize 
+                + ", maximumSize= " + maximumSize + ", maximumCreation= " + maximumCreation + ", defaultTimeout= " 
+                + defaultTimeout + ", shrinkDelayTime= " + shrinkDelayTime);
         ShutdownEventLauncher.addEventListener(this);
     }
 
@@ -420,13 +431,13 @@ public class GreenVulcanoPool implements ShutdownEventListener
 
         if (shutdownFlag) {
             logger.debug("subsystem=" + subsystem + " - ShutdownEvent received, destroying instance");
-            gvesb.destroy();
+            gvesb.destroy(true);
             return;
         }
         synchronized (this) {
             try {
                 if (assignedGV.remove(gvesb)) {
-                    if ((maximumSize == -1) || ((pool != null) && (pool.size() < maximumSize))) {
+                    if (gvesb.isValid() && ((maximumSize == -1) || ((pool != null) && (pool.size() < maximumSize)))) {
                         pool.addFirst(gvesb);
 
                         long now = System.currentTimeMillis();
@@ -436,13 +447,13 @@ public class GreenVulcanoPool implements ShutdownEventListener
                         logger.debug("subsystem=" + subsystem + " - shrink time elapsed");
                         gvesb = pool.removeLast();
                     }
-                    destroyGreenVulcano(gvesb);
+                    destroyGreenVulcano(gvesb, true);
                     logger.debug("subsystem=" + subsystem + " - destroying instance(" + pool.size() + "/" + created
                             + "/" + maximumCreation + ")");
                 }
                 else {
                     logger.debug("subsystem=" + subsystem + " - instance not created by this pool, destroing it");
-                    gvesb.destroy();
+                    gvesb.destroy(true);
                 }
             }
             finally {
@@ -454,7 +465,7 @@ public class GreenVulcanoPool implements ShutdownEventListener
     /**
      *
      */
-    public synchronized void destroy()
+    public synchronized void destroy(boolean force)
     {
         if (pool == null) {
             return;
@@ -462,7 +473,7 @@ public class GreenVulcanoPool implements ShutdownEventListener
         logger.debug("subsystem=" + subsystem + " - Begin destroying instances");
         while (pool.size() > 0) {
             GreenVulcano GreenVulcano = pool.removeFirst();
-            destroyGreenVulcano(GreenVulcano);
+            destroyGreenVulcano(GreenVulcano, force);
         }
         logger.debug("subsystem=" + subsystem + " - End destroying instances");
         assignedGV.clear();
@@ -477,7 +488,7 @@ public class GreenVulcanoPool implements ShutdownEventListener
     protected void finalize() throws Throwable
     {
         super.finalize();
-        destroy();
+        destroy(true);
     }
 
     /**
@@ -657,7 +668,7 @@ public class GreenVulcanoPool implements ShutdownEventListener
     public void shutdownStarted(ShutdownEvent event)
     {
         shutdownFlag = true;
-        destroy();
+        destroy(true);
     }
 
     private GreenVulcano createGreenVulcano() throws GVCoreException, GVPublicException
@@ -671,9 +682,9 @@ public class GreenVulcanoPool implements ShutdownEventListener
         return greenVulcano;
     }
 
-    private void destroyGreenVulcano(GreenVulcano gv)
+    private void destroyGreenVulcano(GreenVulcano gv, boolean force)
     {
-        gv.destroy();
+        gv.destroy(force);
         nextShrinkTime = System.currentTimeMillis() + shrinkDelayTime;
         if (created > 0) {
             --created;
@@ -697,6 +708,7 @@ public class GreenVulcanoPool implements ShutdownEventListener
             throw new IllegalArgumentException("maximumSize(" + maximumSize + ") > maximumCreation(" + maximumCreation
                     + "), subsystem=" + subsystem);
         }
+        this.created = 0;
         this.initialSize = initialSize;
         this.maximumSize = maximumSize;
         this.maximumCreation = maximumCreation;
