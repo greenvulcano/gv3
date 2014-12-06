@@ -201,10 +201,11 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
     @Override
     public synchronized void configurationChanged(ConfigurationEvent event)
     {
-        if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(cfgFileName)) {
+        if (!confChangedFlag && (event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(cfgFileName)) {
             confChangedFlag = true;
             // destroy now
             killTasks();
+
             // initialize after a delay
             Runnable rr = new Runnable() {
                 @Override
@@ -220,9 +221,9 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
                 }
             };
 
-            BaseThread bt = new BaseThread(rr, "Config reloader for: " + managerName);
-            bt.setDaemon(true);
-            bt.start();
+            BaseThread btr = new BaseThread(rr, "Config reloader for: " + managerName);
+            btr.setDaemon(true);
+            btr.start();
         }
     }
 
