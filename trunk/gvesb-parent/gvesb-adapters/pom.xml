@@ -43,6 +43,7 @@
         <module>gvsocial</module>
         <module>gvzmq</module>
         <module>gvadam</module>
+        <module>gvpdf</module>
         <!--<module>gvnet</module>-->
     </modules>
 </project>

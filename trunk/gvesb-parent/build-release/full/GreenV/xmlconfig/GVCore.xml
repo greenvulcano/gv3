@@ -26,6 +26,7 @@
             <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml"/>
             <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano"
                             prefix="gvesbws"/>
+            <XPathNamespace namespace="http://www.greenvulcano.com/database" prefix="db"/>
             <XPathNamespace namespace="http://www.eaisoftware.it/jarad" prefix="jarad"/>
             <XPathNamespace namespace="http://www.credit.com/services" prefix="cred"/>
             <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc"/>

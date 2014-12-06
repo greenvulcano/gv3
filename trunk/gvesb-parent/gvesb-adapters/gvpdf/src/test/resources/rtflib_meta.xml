@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pdf>
+    <metadata>
+        <page-count>5</page-count>
+        <title>FOP Development: RTFLib (jfor)</title>
+        <author/>
+        <subject>Apache FOP</subject>
+        <keywords/>
+        <creator/>
+        <producer>Apache FOP Version 0.94</producer>
+        <creation-date>2008-07-31T16:06:16+02:00</creation-date>
+        <modification-date/>
+        <trapped/>
+        <extra>
+            <x:xmpmeta xmlns:x="adobe:ns:meta/">
+                <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+                    <rdf:Description xmlns:pdf="http://ns.adobe.com/pdf/1.3/" rdf:about="">
+                        <pdf:PDFVersion>1.4</pdf:PDFVersion>
+                        <pdf:Producer>Apache FOP Version 0.94</pdf:Producer>
+                        <pdf:Creator>Apache Forrest - http://forrest.apache.org/</pdf:Creator>
+                    </rdf:Description>
+                    <rdf:Description xmlns:xmp="http://ns.adobe.com/xap/1.0/" rdf:about="">
+                        <xmp:MetadataDate>2008-07-31T15:06:16+01:00</xmp:MetadataDate>
+                        <xmp:CreateDate>2008-07-31T15:06:16+01:00</xmp:CreateDate>
+                    </rdf:Description>
+                    <rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/" rdf:about="">
+                        <dc:date>2008-07-31T15:06:16+01:00</dc:date>
+                        <dc:title>FOP Development: RTFLib (jfor)</dc:title>
+                        <dc:description>Apache FOP</dc:description>
+                    </rdf:Description>
+                </rdf:RDF>
+            </x:xmpmeta>
+        </extra>
+    </metadata>
+</pdf>

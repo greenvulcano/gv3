@@ -7,6 +7,9 @@
 <!ENTITY % gvexcel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVExcel.dtd">
 %gvexcel;
 
+<!ENTITY % gvpdf SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVPdf.dtd">
+%gvpdf;
+
 <!ENTITY % gvhttp SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHTTPInbound.dtd">
 %gvhttp;
 
@@ -35,7 +38,7 @@
 <!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
-<!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call">
+<!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call|pdfreader-call">
 
 <!ENTITY % extra-enqueue "">
 <!ENTITY % extra-dequeue "">
@@ -46,7 +49,7 @@
 <!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
 
 <!ENTITY % extra-core "">
-<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager"> 
+<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager">
 <!ENTITY % extra-support "">
 
 <!ENTITY % extra-input-services "|dh-selector-service">
