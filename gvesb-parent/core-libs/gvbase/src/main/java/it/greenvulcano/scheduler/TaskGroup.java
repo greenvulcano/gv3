@@ -21,6 +21,7 @@ package it.greenvulcano.scheduler;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.BaseThread;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -110,22 +111,45 @@ public class TaskGroup
         }
     }
 
+    class TaskKiller implements Runnable {
+    	private String taskName;
+    	
+    	public TaskKiller(String taskN) {
+			this.taskName = taskN;
+		}
+    	
+        @Override
+        public void run()
+        {
+            try {
+                Thread.sleep(1000);
+            }
+            catch (InterruptedException exc) {
+                // do nothing
+            }
+            try {
+                Task task = tasks.remove(taskName);
+                task.destroy();
+                manager.unregisterTask(task);
+            }
+            catch (Exception exc) {
+                logger.error("TaskManager[" + manager.getName() + "] - Error unregistering Task[" + name + "." + taskName
+                        + "]", exc);
+            }
+        }
+    }
+
     public void killTasks()
     {
         Iterator<String> i = tasks.keySet().iterator();
         while (i.hasNext()) {
             String taskN = i.next();
-            try {
-                Task task = tasks.get(taskN);
-                task.destroy();
-                manager.unregisterTask(task);
-            }
-            catch (Exception exc) {
-                logger.error("TaskManager[" + manager.getName() + "] - Error unregistering Task[" + name + "." + taskN
-                        + "]", exc);
-            }
+
+            Runnable rd = new TaskKiller(taskN);
+            BaseThread btd = new BaseThread(rd, "Task destroyer for: " + taskN);
+            btd.setDaemon(true);
+            btd.start();
         }
-        tasks.clear();
     }
 
     public void destroy()
