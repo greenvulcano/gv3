@@ -36,11 +36,14 @@ import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
@@ -78,6 +81,7 @@ public class GVPdfReaderCallOperation implements CallOperation
     * time.
     */
     private String              pageEnd     = null;
+    private boolean             embedPDF    = false;
    
     @Override
     public void init(Node node) throws InitializationException
@@ -86,6 +90,7 @@ public class GVPdfReaderCallOperation implements CallOperation
             filename = XMLConfig.get(node, "@fileName", "");
             pageStart = XMLConfig.get(node, "@pageStart", "-1");
             pageEnd = XMLConfig.get(node, "@pageEnd", "-1");
+            embedPDF = XMLConfig.getBoolean(node, "@embedPDF", false);
         }
         catch (Exception exc) {
             throw new InitializationException("GV_INIT_SERVICE_ERROR", new String[][]{{"message", exc.getMessage()}},
@@ -97,18 +102,25 @@ public class GVPdfReaderCallOperation implements CallOperation
     public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException, 
             InterruptedException {
         InputStream in = null;
+        InputStream inToB64 = null;
         PDDocument pdfDocument = null;
         XMLUtils parser = null;
         try {
             PropertiesHandler.enableExceptionOnErrors();
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
             if ("".equals(filename)) {
-                in = new ByteArrayInputStream((byte[]) gvBuffer.getObject());                
+                in = new ByteArrayInputStream((byte[]) gvBuffer.getObject());
+                if (embedPDF) {
+                    inToB64 = new ByteArrayInputStream((byte[]) gvBuffer.getObject());
+                }
             }
             else {
                 String pdfFile = PropertiesHandler.expand(filename, params, gvBuffer);
                 logger.debug("Reading Pdf file: " + pdfFile);
                 in = new BufferedInputStream(new FileInputStream(pdfFile));
+                if (embedPDF) {
+                    inToB64 = new BufferedInputStream(new FileInputStream(pdfFile));
+                }
             }
             pdfDocument = PDDocument.load(in, true);
             parser = XMLUtils.getParserInstance();
@@ -145,8 +157,16 @@ public class GVPdfReaderCallOperation implements CallOperation
                     parser.insertText(page, text);
                 }
             }
+            
+            if (embedPDF) {
+                Base64InputStream in64 = new Base64InputStream(inToB64, true);
+                //Base64InputStream in64 = new Base64InputStream(inToB64, true, -1, null);
+                ByteArrayOutputStream out64 = new ByteArrayOutputStream();
+                IOUtils.copy(in64, out64);
+                Element base64pdf = parser.insertElement(root, "base64pdf");
+                parser.insertText(base64pdf, out64.toString());
+            }
 
-            //gvBuffer.setObject(parser.serializeDOM(doc));
             gvBuffer.setObject(doc);
         }
         catch (Exception exc) {
@@ -170,6 +190,14 @@ public class GVPdfReaderCallOperation implements CallOperation
             if (in != null) {
                 try {
                     in.close();
+                }
+                catch (Exception exc) {
+                    // do nothing
+                }
+            }
+            if (inToB64 != null) {
+                try {
+                    inToB64.close();
                 }
                 catch (Exception exc) {
                     // do nothing

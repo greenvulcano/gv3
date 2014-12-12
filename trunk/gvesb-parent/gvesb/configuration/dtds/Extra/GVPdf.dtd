@@ -14,7 +14,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT pdfreader-call (Description?, (ToXMLReader | ToCSVReader)?)>
+<!ELEMENT pdfreader-call (Description?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -54,3 +54,10 @@
     #NotNull
 -->
 <!ATTLIST pdfreader-call pageEnd CDATA #IMPLIED>
+<!--
+    If true the input pdf file is embedded as base64 data into the output XML.
+    Default to false.
+
+    #NotNull
+-->
+<!ATTLIST pdfreader-call embedPDF (true | false) #IMPLIED>
