@@ -5,6 +5,7 @@
       <xs:sequence>
         <xs:element ref="metadata"/>
         <xs:element ref="pages"  minOccurs="0"/>
+        <xs:element ref="base64pdf"  minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -50,4 +51,6 @@
       <xs:attribute name="start" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
+  
+  <xs:element name="base64pdf" type="xs:base64Binary"/>
 </xs:schema>
