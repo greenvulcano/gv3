@@ -15,8 +15,8 @@
 <!ENTITY % proxy_ops "proxy-call|proxy-enqueue"> <!--|proxy-dequeue">-->
 <!ENTITY % properties "Property|PropertyCompare">
 <!ENTITY % notification-nodes "Log4JNotification|JMXNotification">
-<!ENTITY % conditions "GVBufferCondition|ExceptionCondition|JavaScriptCondition|IdentityCondition">
-<!ENTITY % internal-services "gvdte-service|xml-validation-service|json-validation-service|ognl-script-service|java-script-service">
+<!ENTITY % conditions "GVBufferCondition|ExceptionCondition|ScriptCondition|IdentityCondition">
+<!ENTITY % internal-services "gvdte-service|xml-validation-service|json-validation-service|script-service">
 <!ENTITY % ShellCommands       "(cmd|cmd-array-elem+), env-property*">
 <!ENTITY % connections "DataSourceConnection|JdbcConnection">
 <!ENTITY % Resolver            "(XPathParamResolver|GVBufferParamResolver)">
@@ -87,7 +87,7 @@
 <!ATTLIST KeyStoreID key-store-prv (SUN|SunJCE|BC) #IMPLIED>
 <!--
     The keystore name.
- 
+
     #NotNull
 -->
 <!ATTLIST KeyStoreID key-store-name CDATA #REQUIRED>
@@ -1156,7 +1156,7 @@
         Keys values are set as sub-elements, but keys whith name in ForceAttributes are set as XML attributes.
         Value of 'contentText' key, idf present, value is set as #text element.
         If a key has a null value then in the XML is set the 'null' string.
-        If the JSON to be converted doesn't have a single root element 
+        If the JSON to be converted doesn't have a single root element
         then is automatically created a 'DEFAULT_ROOT' root element.
     - badgerfish
         - see <a href="http://badgerfish.ning.com">http://badgerfish.ning.com</a>
@@ -2786,20 +2786,20 @@
 <!ELEMENT IDFilter (Description)?>
 <!--
     IDFilter type.
-    
+
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST IDFilter     type CDATA #FIXED "filter">
 <!--
     IDFilter name.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST IDFilter     name CDATA #FIXED "IDFilter">
 <!--
     Always uses the input GVBuffer.id.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST IDFilter     use-input CDATA #FIXED "yes">
@@ -2826,20 +2826,20 @@
 <!ELEMENT RetCodeFilter (Description)?>
 <!--
     RetCodeFilter type.
-    
+
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST RetCodeFilter type        CDATA #FIXED "filter">
 <!--
     RetCodeFilter name.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST RetCodeFilter name        CDATA #FIXED "RetCodeFilter">
 <!--
     Never uses the input GVBuffer.retCode.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST RetCodeFilter use-input   CDATA #FIXED "no">
@@ -2969,14 +2969,14 @@
 <!ELEMENT PropertyFilter (Description)?>
 <!--
     PropertyFilter type.
-    
+
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST PropertyFilter type CDATA #FIXED "filter">
 <!--
     PropertyFilter name.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST PropertyFilter name CDATA #FIXED "PropertyFilter">
@@ -5058,7 +5058,7 @@
     Defines SubFlows output aggregation policy:
     - none          : return a java.util.List containig the SubFlows output
     - XMLAggregate  : aggregate the SubFlow output as XML
-    - Script        : use the defined Script to process a java.util.List 
+    - Script        : use the defined Script to process a java.util.List
                       containig the SubFlows output
 
     If isn't defined a processor the SubFlows output is intended as GVBuffer.output
@@ -8586,9 +8586,9 @@
 -->
 <!ATTLIST FileUnZipCommand isCritical (true|false) #IMPLIED>
 
-<!-- 
+<!--
     This element can be used for authomatic enlist and delist of XA resource in a distributed transaction.
-    
+
     #Icon: default.png
 -->
 <!ELEMENT XAHelper (Description?, JNDIHelper?)>
@@ -8649,7 +8649,7 @@
     Specifies the name of the transformation that should apply by GVDTE.
     This name must indicate a transformation currently configured in GVDTE.
 
-    This parameter can be optional if the input GVBuffer has a property 
+    This parameter can be optional if the input GVBuffer has a property
     with the name map-name.
 
     #Label: @value
@@ -9751,8 +9751,8 @@
 
 
     The SMTP protocol provider supports the following properties.
-    Note that if you're using the "pop3s" protocol to access POP3 over SSL, 
-    all the properties would be named "mail.pop3s.*". 
+    Note that if you're using the "pop3s" protocol to access POP3 over SSL,
+    all the properties would be named "mail.pop3s.*".
 
     Name                                Type        Description
     **********************************************************************************************************************************
@@ -9789,7 +9789,7 @@
     mail.pop3.filecache.enable          boolean     If set to true, the POP3 provider will cache message data in a temporary file rather than in memory. Messages are only added to the cache when accessing the message content. Message headers are always cached in memory (on demand). The file cache is removed when the folder is closed or the JVM terminates. Defaults to false.
     mail.pop3.filecache.dir             String      If the file cache is enabled, this property can be used to override the default directory used by the JDK for temporary files.
     mail.pop3.cachewriteto              boolean     Controls the behavior of the writeTo method on a POP3 message object. If set to true, and the message content hasn't yet been cached, and ignoreList is null, the message is cached before being written. Otherwise, the message is streamed directly to the output stream without being cached. Defaults to false.
-    mail.pop3.keepmessagecontent        boolean     The content of a message is cached when it is first fetched. Normally this cache uses a SoftReference to refer to the cached content. This allows the cached content to be purged if memory is low, in which case the content will be fetched again if it's needed. If this property is set to true, a hard reference to the cached content will be kept, preventing the memory from being reused until the folder is closed or the cached content is explicitly invalidated (using the invalidate method). (This was the behavior in previous versions of JavaMail.) Defaults to false. 
+    mail.pop3.keepmessagecontent        boolean     The content of a message is cached when it is first fetched. Normally this cache uses a SoftReference to refer to the cached content. This allows the cached content to be purged if memory is low, in which case the content will be fetched again if it's needed. If this property is set to true, a hard reference to the cached content will be kept, preventing the memory from being reused until the folder is closed or the cached content is explicitly invalidated (using the invalidate method). (This was the behavior in previous versions of JavaMail.) Defaults to false.
 -->
 <!ELEMENT mail-properties (mail-property+)>
 <!--
@@ -9861,7 +9861,7 @@
         - for properties:
             - ${property['PROP_NAME']}
     ]
-    
+
 
     #NotNull
 -->
@@ -14487,7 +14487,7 @@
 -->
 <!ATTLIST LogCleanerTask delete-filter         CDATA #IMPLIED>
 
-        
+
 <!--
     Defines an group of Timer Tasks.
 
@@ -14583,19 +14583,19 @@
 
     Misfire policy:
     - fire-now : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be fired now.
-    - reschedule-now-existing-repeat-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants 
-                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now') 
+    - reschedule-now-existing-repeat-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants
+                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now')
                                               with the repeat count left as-is.
-    - reschedule-now-remaining-repeat-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants 
-                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now') with 
+    - reschedule-now-remaining-repeat-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants
+                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now') with
                                               the repeat count set to what it would be, if it had not missed any firings.
-    - reschedule-next-existing-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be 
-                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated 
+    - reschedule-next-existing-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be
+                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated
                                         Calendar, and with the repeat count left unchanged.
-    - reschedule-next-remaining-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be 
-                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated 
-                                        Calendar, and with the repeat count set to what it would be, if it had not missed any 
-                                        firings. WARNING: using this mode with a trigger that has a non-null end-time may cause 
+    - reschedule-next-remaining-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be
+                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated
+                                        Calendar, and with the repeat count set to what it would be, if it had not missed any
+                                        firings. WARNING: using this mode with a trigger that has a non-null end-time may cause
                                         the trigger to never fire again if the end-time arrived during the misfire time span.
 
     If the misfire instruction is set to smart-policy, then the following scheme will be used:
@@ -14683,8 +14683,8 @@
 
     Misfire policy:
     - fire-once-now : instructs the Scheduler that upon a mis-fire situation, the DateIntervalTrigger wants to be fired now.
-    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the DateIntervalTrigger wants to have 
-                      it's next-fire-time updated to the next time in the schedule after the current time (taking into 
+    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the DateIntervalTrigger wants to have
+                      it's next-fire-time updated to the next time in the schedule after the current time (taking into
                       account any associated Calendar), but it does not want to be fired now.
 
     If the misfire instruction is set to smart-policy, then the following scheme will be used:
@@ -14764,8 +14764,8 @@
 
     Misfire policy:
     - fire-once-now : instructs the Scheduler that upon a mis-fire situation, the CronTrigger wants to be fired now.
-    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the CronTrigger wants to have 
-                      it's next-fire-time updated to the next time in the schedule after the current time (taking into 
+    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the CronTrigger wants to have
+                      it's next-fire-time updated to the next time in the schedule after the current time (taking into
                       account any associated Calendar), but it does not want to be fired now.
 
     If the misfire instruction is set to smart-policy, then the following scheme will be used:
