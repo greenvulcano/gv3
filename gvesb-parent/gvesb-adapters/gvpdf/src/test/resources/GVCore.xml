@@ -30,9 +30,10 @@
           <pdfreader-call class="it.greenvulcano.gvesb.virtual.pdf.reader.GVPdfReaderCallOperation" type="call"
                           name="read_pdf_file_meta" fileName="${{user.dir}}/target/test-classes/rtflib.pdf"/>
           <pdfreader-call class="it.greenvulcano.gvesb.virtual.pdf.reader.GVPdfReaderCallOperation" type="call"
-                          name="read_pdf_file_full" pageStart="1" fileName="${{user.dir}}/target/test-classes/rtflib.pdf"/>
+                          name="read_pdf_file_full" pageStart="1" embedPDF="true"
+                          fileName="${{user.dir}}/target/test-classes/rtflib.pdf"/>
           <pdfreader-call class="it.greenvulcano.gvesb.virtual.pdf.reader.GVPdfReaderCallOperation" type="call"
-                          name="read_pdf_bytes_full" pageStart="1"/>
+                          name="read_pdf_bytes_full" pageStart="1" embedPDF="true"/>
           <pdfreader-call class="it.greenvulcano.gvesb.virtual.pdf.reader.GVPdfReaderCallOperation" type="call"
                           name="read_pdf_file_page" pageStart="1" pageEnd="1" fileName="${{user.dir}}/target/test-classes/ReadData.pdf"/>
         </Channel>
