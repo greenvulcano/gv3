@@ -26,6 +26,8 @@ import it.greenvulcano.util.file.RegExFileFilter;
 import it.greenvulcano.util.remotefs.RemoteManager;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -47,6 +49,7 @@ public class RemoteTestCase extends TestCase
 
     private FakeFtpServer       fakeFtpServer;
     private RemoteManager       ra                       = null;
+    private Map<String, String> optProperties            = new HashMap<String, String>();
 
     /**
      * @see junit.framework.TestCase#setUp()
@@ -90,7 +93,7 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", ".*", null, RegExFileFilter.ALL);
+            Set<FileProperties> files = ra.ls(".", ".*", null, RegExFileFilter.ALL, optProperties);
             System.out.println("testExistFile : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 5));
         }
@@ -106,7 +109,7 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", ".*\\.xml", null, RegExFileFilter.ALL);
+            Set<FileProperties> files = ra.ls(".", ".*\\.xml", null, RegExFileFilter.ALL, optProperties);
             System.out.println("testExistXMLFile : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 2));
         }
@@ -122,7 +125,7 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", ".*", null, RegExFileFilter.DIRECTORIES_ONLY);
+            Set<FileProperties> files = ra.ls(".", ".*", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
             System.out.println("testExistDir : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 1));
         }
@@ -138,7 +141,7 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            ra.get(".", "Test0.txt", TEST_FILE_DEST_RESOURCES, "Test0.txt");
+            ra.get(".", "Test0.txt", TEST_FILE_DEST_RESOURCES, "Test0.txt", optProperties);
             assertTrue("Resource Test0.txt not found in " + TEST_FILE_DEST_RESOURCES, new File(TEST_FILE_DEST_RESOURCES
                     + File.separator + "Test0.txt").exists());
         }
@@ -154,7 +157,7 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            ra.getDir("dir0", TEST_FILE_DEST_RESOURCES, "dirX");
+            ra.getDir("dir0", TEST_FILE_DEST_RESOURCES, "dirX", optProperties);
             assertTrue("Resource dirX not found in " + TEST_FILE_DEST_RESOURCES, new File(TEST_FILE_DEST_RESOURCES
                     + File.separator + "dirX").exists());
             assertTrue("Resource dirX/Test1.txt not found in " + TEST_FILE_DEST_RESOURCES, new File(
@@ -171,7 +174,7 @@ public class RemoteTestCase extends TestCase
     public void testDownloadDirectoryAutoConn() throws Exception
     {
         ra.setAutoconnect(true);
-        ra.getDir("dir0", TEST_FILE_DEST_RESOURCES, "dirX");
+        ra.getDir("dir0", TEST_FILE_DEST_RESOURCES, "dirX", optProperties);
         assertTrue("Resource dirX not found in " + TEST_FILE_DEST_RESOURCES, new File(TEST_FILE_DEST_RESOURCES
                 + File.separator + "dirX").exists());
         assertTrue("Resource dirX/Test1.txt not found in " + TEST_FILE_DEST_RESOURCES, new File(
@@ -185,11 +188,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls("dir0", "Test2.txt", null, RegExFileFilter.FILES_ONLY);
+            Set<FileProperties> files = ra.ls("dir0", "Test2.txt", null, RegExFileFilter.FILES_ONLY, optProperties);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
 
-            ra.put(TEST_FILE_DEST_RESOURCES, "TestX.txt", ".", "Test2.txt");
-            files = ra.ls(".", "Test2.txt", null, RegExFileFilter.FILES_ONLY);
+            ra.put(TEST_FILE_DEST_RESOURCES, "TestX.txt", ".", "Test2.txt", optProperties);
+            files = ra.ls(".", "Test2.txt", null, RegExFileFilter.FILES_ONLY, optProperties);
             System.out.println("testUploadFile : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 1));
         }
@@ -205,11 +208,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", "dir2", null, RegExFileFilter.FILES_ONLY);
+            Set<FileProperties> files = ra.ls(".", "dir2", null, RegExFileFilter.FILES_ONLY, optProperties);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
 
-            ra.putDir(TEST_FILE_DEST_RESOURCES, ".", "dir2");
-            files = ra.ls("dir2", ".*", null, RegExFileFilter.FILES_ONLY);
+            ra.putDir(TEST_FILE_DEST_RESOURCES, ".", "dir2", optProperties);
+            files = ra.ls("dir2", ".*", null, RegExFileFilter.FILES_ONLY, optProperties);
             System.out.println("testUploadDirectory : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 1));
         }
@@ -224,11 +227,11 @@ public class RemoteTestCase extends TestCase
     public void testUploadDirectoryAutoConn() throws Exception
     {
         ra.setAutoconnect(true);
-        Set<FileProperties> files = ra.ls(".", "dir2", null, RegExFileFilter.FILES_ONLY);
+        Set<FileProperties> files = ra.ls(".", "dir2", null, RegExFileFilter.FILES_ONLY, optProperties);
         assertTrue("Resource found", (files != null) && (files.size() == 0));
 
-        ra.putDir(TEST_FILE_DEST_RESOURCES, ".", "dir2");
-        files = ra.ls("dir2", ".*", null, RegExFileFilter.FILES_ONLY);
+        ra.putDir(TEST_FILE_DEST_RESOURCES, ".", "dir2", optProperties);
+        files = ra.ls("dir2", ".*", null, RegExFileFilter.FILES_ONLY, optProperties);
         System.out.println("testUploadDirectoryAutoConn : " + files);
         assertTrue("Resource not found", (files != null) && (files.size() == 1));
     }
@@ -240,11 +243,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", ".*\\.xml", null, RegExFileFilter.FILES_ONLY);
+            Set<FileProperties> files = ra.ls(".", ".*\\.xml", null, RegExFileFilter.FILES_ONLY, optProperties);
             assertTrue("Resource not found", (files != null) && (files.size() == 2));
 
-            ra.rm(".", ".*\\.xml");
-            files = ra.ls(".", ".*\\.xml", null, RegExFileFilter.FILES_ONLY);
+            ra.rm(".", ".*\\.xml", optProperties);
+            files = ra.ls(".", ".*\\.xml", null, RegExFileFilter.FILES_ONLY, optProperties);
             System.out.println("testDeleteFile : " + files);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
         }
@@ -260,11 +263,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", "dir0", null, RegExFileFilter.DIRECTORIES_ONLY);
+            Set<FileProperties> files = ra.ls(".", "dir0", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
             assertTrue("Resource not found", (files != null) && (files.size() == 1));
 
-            ra.rm(".", "dir0");
-            files = ra.ls(".", "dir0", null, RegExFileFilter.DIRECTORIES_ONLY);
+            ra.rm(".", "dir0", optProperties);
+            files = ra.ls(".", "dir0", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
             System.out.println("testDeleteDir : " + files);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
         }
@@ -279,11 +282,11 @@ public class RemoteTestCase extends TestCase
     public void testDeleteDirAutoConn() throws Exception
     {
         ra.setAutoconnect(true);
-        Set<FileProperties> files = ra.ls(".", "dir0", null, RegExFileFilter.DIRECTORIES_ONLY);
+        Set<FileProperties> files = ra.ls(".", "dir0", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
         assertTrue("Resource not found", (files != null) && (files.size() == 1));
 
-        ra.rm(".", "dir0");
-        files = ra.ls(".", "dir0", null, RegExFileFilter.DIRECTORIES_ONLY);
+        ra.rm(".", "dir0", optProperties);
+        files = ra.ls(".", "dir0", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
         System.out.println("testDeleteDirAutoConn : " + files);
         assertTrue("Resource found", (files != null) && (files.size() == 0));
     }
@@ -295,11 +298,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", ".*", null, RegExFileFilter.ALL);
+            Set<FileProperties> files = ra.ls(".", ".*", null, RegExFileFilter.ALL, optProperties);
             assertTrue("Resource not found", (files != null) && (files.size() == 5));
 
-            ra.rm(".", ".*");
-            files = ra.ls(".", ".*", null, RegExFileFilter.ALL);
+            ra.rm(".", ".*", optProperties);
+            files = ra.ls(".", ".*", null, RegExFileFilter.ALL, optProperties);
             System.out.println("testDeleteAll : " + files);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
         }
@@ -315,11 +318,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", "TestC.xml", null, RegExFileFilter.FILES_ONLY);
+            Set<FileProperties> files = ra.ls(".", "TestC.xml", null, RegExFileFilter.FILES_ONLY, optProperties);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
 
-            ra.mv(".", "TestA.xml", "TestC.xml");
-            files = ra.ls(".", "TestC.xml", null, RegExFileFilter.FILES_ONLY);
+            ra.mv(".", "TestA.xml", "TestC.xml", optProperties);
+            files = ra.ls(".", "TestC.xml", null, RegExFileFilter.FILES_ONLY, optProperties);
             System.out.println("testRenameFile : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 1));
         }
@@ -335,11 +338,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", "TestC.xml", null, RegExFileFilter.FILES_ONLY);
+            Set<FileProperties> files = ra.ls(".", "TestC.xml", null, RegExFileFilter.FILES_ONLY, optProperties);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
 
-            ra.mv(".", "TestA.xml", "dir0/TestA.xml");
-            files = ra.ls("dir0", "TestA.xml", null, RegExFileFilter.FILES_ONLY);
+            ra.mv(".", "TestA.xml", "dir0/TestA.xml", optProperties);
+            files = ra.ls("dir0", "TestA.xml", null, RegExFileFilter.FILES_ONLY, optProperties);
             System.out.println("testMoveFile : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 1));
         }
@@ -355,11 +358,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY);
+            Set<FileProperties> files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
 
-            ra.mv(".", "dir0", "dirX");
-            files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY);
+            ra.mv(".", "dir0", "dirX", optProperties);
+            files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
             System.out.println("testRenameDir : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 1));
         }
@@ -375,11 +378,11 @@ public class RemoteTestCase extends TestCase
     {
         try {
             ra.connect();
-            Set<FileProperties> files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY);
+            Set<FileProperties> files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
             assertTrue("Resource found", (files != null) && (files.size() == 0));
 
-            ra.mkdir(".", "dirX");
-            files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY);
+            ra.mkdir(".", "dirX", optProperties);
+            files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
             System.out.println("testCreateDir : " + files);
             assertTrue("Resource not found", (files != null) && (files.size() == 1));
         }
@@ -394,11 +397,11 @@ public class RemoteTestCase extends TestCase
     public void testCreateDirAutoConn() throws Exception
     {
         ra.setAutoconnect(true);
-        Set<FileProperties> files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY);
+        Set<FileProperties> files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
         assertTrue("Resource found", (files != null) && (files.size() == 0));
 
-        ra.mkdir(".", "dirX");
-        files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY);
+        ra.mkdir(".", "dirX", optProperties);
+        files = ra.ls(".", "dirX", null, RegExFileFilter.DIRECTORIES_ONLY, optProperties);
         System.out.println("testCreateDirAutoConn : " + files);
         assertTrue("Resource not found", (files != null) && (files.size() == 1));
     }
