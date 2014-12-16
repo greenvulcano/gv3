@@ -98,10 +98,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#mkdir(java.lang.String,
-     *      java.lang.String)
+     *      java.lang.String, java.util.Map)
      */
     @Override
-    public boolean mkdir(String remoteParentDirectory, String remoteDirectory) throws RemoteManagerException
+    public boolean mkdir(String remoteParentDirectory, String remoteDirectory, Map<String, String> optProperties) 
+            throws RemoteManagerException
     {
         checkConnected();
 
@@ -129,12 +130,12 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#getDir(java.lang.String,
-     *      java.lang.String, java.lang.String)
+     *      java.lang.String, java.lang.String, java.util.Map)
      */
     @SuppressWarnings("unchecked")
     @Override
-    public boolean getDir(String remoteDirectory, String localParentDirectory, String localDirectory)
-            throws RemoteManagerException
+    public boolean getDir(String remoteDirectory, String localParentDirectory, String localDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -180,11 +181,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#get(java.lang.String,
-     *      java.lang.String, java.io.OutputStream)
+     *      java.lang.String, java.io.OutputStream, java.util.Map)
      */
     @Override
-    public boolean get(String remoteDirectory, String remoteFile, OutputStream outputStream)
-            throws RemoteManagerException
+    public boolean get(String remoteDirectory, String remoteFile, OutputStream outputStream,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -216,11 +217,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#get(java.lang.String,
-     *      java.lang.String, java.lang.String, java.lang.String)
+     *      java.lang.String, java.lang.String, java.lang.String, java.util.Map)
      */
     @Override
-    public boolean get(String remoteDirectory, String remoteFile, String localDirectory, String localFile)
-            throws RemoteManagerException
+    public boolean get(String remoteDirectory, String remoteFile, String localDirectory, String localFile,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -261,11 +262,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#get(String, String,
-     *      String)
+     *      String, java.util.Map)
      */
     @Override
-    public boolean get(String remoteDirectory, String remoteFilePattern, String localDirectory)
-            throws RemoteManagerException
+    public boolean get(String remoteDirectory, String remoteFilePattern, String localDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -295,11 +296,11 @@ public class SFTPManager extends SSHManager
                             boolean partialResult = true;
                             if (currFTPFile.getAttrs().isDir()) {
                                 partialResult = getDir(currFTPFile.getFilename(), localDirectoryObj.getAbsolutePath(),
-                                        null);
+                                        null, optProperties);
                             }
                             else {
                                 partialResult = get(null, currFTPFile.getFilename(),
-                                        localDirectoryObj.getAbsolutePath(), null);
+                                        localDirectoryObj.getAbsolutePath(), null, optProperties);
                             }
                             if (!partialResult) {
                                 break;
@@ -330,12 +331,12 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#listMatchingFiles(java.lang.String,
-     *      java.lang.String, java.util.Date, int)
+     *      java.lang.String, java.util.Date, int, java.util.Map)
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Set<FileProperties> ls(String remoteDirectory, String fileNamePattern, Date modifiedSince, int fileTypeFilter)
-            throws RemoteManagerException
+    public Set<FileProperties> ls(String remoteDirectory, String fileNamePattern, Date modifiedSince, int fileTypeFilter,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -379,10 +380,11 @@ public class SFTPManager extends SSHManager
     }
 
     /**
-     * @see it.greenvulcano.util.remotefs.RemoteManager#rm(String, String)
+     * @see it.greenvulcano.util.remotefs.RemoteManager#rm(String, String, java.util.Map)
      */
     @Override
-    public boolean rm(String remoteDirectory, String entryNamePattern) throws RemoteManagerException
+    public boolean rm(String remoteDirectory, String entryNamePattern,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -431,11 +433,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#mv(java.lang.String,
-     *      java.lang.String, java.lang.String)
+     *      java.lang.String, java.lang.String, java.util.Map)
      */
     @Override
-    public boolean mv(String remoteParentDirectory, String oldEntryName, String newEntryName)
-            throws RemoteManagerException
+    public boolean mv(String remoteParentDirectory, String oldEntryName, String newEntryName,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -464,11 +466,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#putDir(java.lang.String,
-     *      java.lang.String, java.lang.String)
+     *      java.lang.String, java.lang.String, java.util.Map)
      */
     @Override
-    public boolean putDir(String localDirectory, String remoteParentDirectory, String remoteDirectory)
-            throws RemoteManagerException
+    public boolean putDir(String localDirectory, String remoteParentDirectory, String remoteDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -501,11 +503,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#put(java.lang.String,
-     *      java.lang.String, java.lang.String, java.lang.String)
+     *      java.lang.String, java.lang.String, java.lang.String, java.util.Map)
      */
     @Override
-    public boolean put(String localDirectory, String localFile, String remoteDirectory, String remoteFile)
-            throws RemoteManagerException
+    public boolean put(String localDirectory, String localFile, String remoteDirectory, String remoteFile,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -547,11 +549,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#put(String, String,
-     *      String)
+     *      String, java.util.Map)
      */
     @Override
-    public boolean put(String localDirectory, String localFilePattern, String remoteDirectory)
-            throws RemoteManagerException
+    public boolean put(String localDirectory, String localFilePattern, String remoteDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -568,10 +570,11 @@ public class SFTPManager extends SSHManager
             for (File currLocalFile : localFiles) {
                 boolean partialResult = true;
                 if (currLocalFile.isDirectory()) {
-                    partialResult = putDir(currLocalFile.getAbsolutePath(), null, null);
+                    partialResult = putDir(currLocalFile.getAbsolutePath(), null, null, optProperties);
                 }
                 else {
-                    partialResult = put(localDirectoryObj.getAbsolutePath(), currLocalFile.getName(), null, null);
+                    partialResult = put(localDirectoryObj.getAbsolutePath(), currLocalFile.getName(), null, null,
+                            optProperties);
                 }
 
                 if (!partialResult) {
@@ -593,11 +596,11 @@ public class SFTPManager extends SSHManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#put(java.io.InputStream,
-     *      java.lang.String, java.lang.String)
+     *      java.lang.String, java.lang.String, java.util.Map)
      */
     @Override
-    public boolean put(InputStream inputDataStream, String remoteDirectory, String remoteFile)
-            throws RemoteManagerException
+    public boolean put(InputStream inputDataStream, String remoteDirectory, String remoteFile,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 

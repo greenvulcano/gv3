@@ -7656,7 +7656,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteSearchCommand (Description?)>
+<!ELEMENT RemoteSearchCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -7737,7 +7737,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteMoveCommand (Description?)>
+<!ELEMENT RemoteMoveCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -7822,7 +7822,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteDeleteCommand (Description?)>
+<!ELEMENT RemoteDeleteCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -7896,7 +7896,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteDownloadCommand (Description?)>
+<!ELEMENT RemoteDownloadCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -7988,7 +7988,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteUploadCommand (Description?)>
+<!ELEMENT RemoteUploadCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -8954,7 +8954,7 @@
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
-<!ATTLIST script-call  class CDATA #FIXED "it.greenvulcano.gvesb.virtual.internal.ScripCallOperation">
+<!ATTLIST script-call  class CDATA #FIXED "it.greenvulcano.gvesb.virtual.internal.ScriptCallOperation">
 <!--
     Operation identifier.
 
