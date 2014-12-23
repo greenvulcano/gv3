@@ -45,5 +45,6 @@
         <module>gvadam</module>
         <module>gvpdf</module>
         <!--<module>gvnet</module>-->
+        <module>gvhadoop</module>
     </modules>
 </project>

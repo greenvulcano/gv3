@@ -58,8 +58,11 @@
                 <exclude name="jboss-5.1.0.GA.zip"/>
             </fileset>
         </copy>
+
         <unzip src="${basedir}/base/jboss-5.1.0.GA.zip"
                dest="${release.root}"/>
+        <delete file="${release.jboss}/common/lib/commons-collections.jar"/>
+
         <copy todir="${release.dtds}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/../gvesb/configuration/dtds">
@@ -82,6 +85,7 @@
                 <include name="Extra/GVSocial.dtd"/>
                 <include name="Extra/GVBpel.dtd"/>
                 <include name="Extra/GVSAP.dtd"/>
+                <include name="Extra/GVHDFSFileSystem.dtd"/>
             </fileset>
         </copy>
 
@@ -156,6 +160,7 @@
                 <exclude name="gvsocial.jar"/>
                 <exclude name="gvzmq.jar"/>
                 <exclude name="gvvcl-openspcoop.jar"/>
+                <exclude name="gvhadoop.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
@@ -553,6 +558,28 @@
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/ode/GreenV/application/deploy">
                 <include name="*.xml"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy Hadoop HDFS lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvhadoop.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${hadoop.hadoop.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${com.google.protobuf.lib}">
+                <include name="protobuf-java.jar"/>
             </fileset>
         </copy>
     </target>

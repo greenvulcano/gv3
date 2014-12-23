@@ -32,3 +32,5 @@
 <!ENTITY % extra-output-services "">
 
 <!ENTITY % extra-pre-fwd-validators "">
+
+<!ENTITY % extra-remote-manager "">

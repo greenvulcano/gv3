@@ -315,6 +315,13 @@
                                 <componentId>pdfbox</componentId>
                             </mapping>
                         </dependency>
+                        <dependency>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>hadoop</componentId>
+                            </mapping>
+                        </dependency>
 
                         <dependency>
                             <groupId>org.springframework</groupId>
@@ -982,6 +989,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
@@ -1237,6 +1249,10 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvrsh_client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvhadoop</artifactId>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>

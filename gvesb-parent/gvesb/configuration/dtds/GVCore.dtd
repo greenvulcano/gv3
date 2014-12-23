@@ -28,7 +28,7 @@
 <!ENTITY % CallSPBaseFormatter "(CallSPSimpleBaseFormatter)">
 <!ENTITY % JavaType            "(string|int|long|byte_array)">
 <!ENTITY % statement_type "select|insert|update|callsp">
-<!ENTITY % remote_managers "FTPManager|FTPSManager|SFTPManager">
+<!ENTITY % remote_managers "FTPManager|FTPSManager|SFTPManager %extra-remote-manager;">
 <!ENTITY % fs-monitor "LocalFileSystemMonitor|RemoteFileSystemMonitor">
 <!ENTITY % fs-monitor-status "InMemoryMonitorStatus|FileMonitorStatus">
 <!ENTITY % file-commands "FileSearchCommand|FileMoveCommand|FileDeleteCommand|FileCopyCommand|FileZipCommand|FileUnZipCommand">

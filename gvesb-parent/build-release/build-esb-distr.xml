@@ -48,8 +48,11 @@
                 <exclude name="jboss-5.1.0.GA.zip"/>
             </fileset>
         </copy>
+
         <unzip src="${basedir}/base/jboss-5.1.0.GA.zip"
                dest="${release.root}"/>
+        <delete file="${release.jboss}/common/lib/commons-collections.jar"/>
+
         <copy todir="${release.dtds}" filtering="false"
               preservelastmodified="true" overwrite="true">
             <fileset dir="${basedir}/../gvesb/configuration/dtds">
@@ -124,6 +127,7 @@
                 <exclude name="gvsocial.jar"/>
                 <exclude name="gvzmq.jar"/>
                 <exclude name="gvvcl-openspcoop.jar"/>
+                <exclude name="gvhadoop.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
