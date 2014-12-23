@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<GVCore version="1.0">
+  <GVCryptoHelper name="CRYPTO_HELPER" type="module"/>
+  <GVXPath name="XPATH" type="module">
+    <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
+      <Description>Funzioni estese e namespaces per l&apos;XPath.</Description>
+      <XPathExtension class="it.greenvulcano.util.xpath.search.extension.ExternalDocumentXPathFunction"
+                      function-name="document">
+            <Description>Accede ad un documento esterno. Uso: gvf:document('xml file path')</Description>
+      </XPathExtension>
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema-instance" prefix="xsi" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/soap/" prefix="soap" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl" />
+      <XPathNamespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j" />
+      <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano" prefix="gvesbws"/>
+      <XPathNamespace namespace="http://www.greenvulcano.it/jca/xml" prefix="jca" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc" />
+      <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
+    </XPath>
+  </GVXPath>
+  <GVSystems name="SYSTEMS" type="module">
+    <Systems>
+      <System id-system="GVESB" system-activation="on">
+        <Channel id-channel="TEST_CHANNEL">
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="testConnectOnly" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="testConnectOnlyProps" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_check_file_remote_permission"
+                                type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_check_file_remote" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="@{{HDFS_URL}}" password="@{{PASSWORD}}" type="remote-manager"
+                                    username="@{{USER}}" />
+                <RemoteCommands>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_check_file_remote_props" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true" sourcePath="."
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_download_file_remote" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteDownloadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"
+                                            isCritical="true"
+                                            remoteFilePattern="@{{fileMask}}"
+                                            remotePath="/user/myhduser/test_output/"
+                                            targetPath="${{java.io.tmpdir}}/TestHDFS"
+                                            type="remote-command">
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.raw-local-filesystem" value="false"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                    </RemoteDownloadCommand>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_download_file_remote_props" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteDownloadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"
+                                            isCritical="true"
+                                            remoteFilePattern="@{{fileMask}}"
+                                            remotePath="/user/myhduser/test_output/"
+                                            targetPath="${{java.io.tmpdir}}/TestHDFS"
+                                            type="remote-command">
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.raw-local-filesystem" value="false"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                    </RemoteDownloadCommand>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_download_dir_remote" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteDownloadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"
+                                            isCritical="true"
+                                            remoteFilePattern="dir0"
+                                            remotePath="/user/myhduser/test_output/"
+                                            targetPath="${{java.io.tmpdir}}/TestFTP"
+                                            type="remote-command">
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.raw-local-filesystem" value="false"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                    </RemoteDownloadCommand>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_download_dir_remote_props" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteDownloadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"
+                                            isCritical="true"
+                                            remoteFilePattern="dir0"
+                                            remotePath="/user/myhduser/test_output/"
+                                            targetPath="${{java.io.tmpdir}}/TestFTP"
+                                            type="remote-command">
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.raw-local-filesystem" value="false"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                    </RemoteDownloadCommand>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_download_file_gvbuffer_remote"
+                                type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteDownloadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"
+                                            isCritical="true"
+                                            remoteFilePattern="@{{fileMask}}"
+                                            remotePath="/user/myhduser/test_output/"
+                                            toGVBufferExpression="setObject(new java.lang.String(#input))"
+                                            type="remote-command">
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.raw-local-filesystem" value="false"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                    </RemoteDownloadCommand>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_download_file_gvbuffer_remote_props"
+                                type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteDownloadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDownload"
+                                            isCritical="true"
+                                            remoteFilePattern="@{{fileMask}}"
+                                            remotePath="."
+                                            toGVBufferExpression="setObject(new java.lang.String(#input))"
+                                            type="remote-command">
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.raw-local-filesystem" value="false"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                    </RemoteDownloadCommand>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_upload_file_remote" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteUploadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"
+                                            isCritical="true"
+                                            remotePath="/user/myhduser/test_output/"
+                                            sourceFilePattern="@{{fileMask}}"
+                                            sourcePath="${{user.dir}}/src/test/resources/"
+                                            type="remote-command" >
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.overwrite" value="true"/>
+                        <PropertyDef name="dfs.permissions.path" value="777"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                        <PropertyDef name="dfs.replication" value="1"/>
+                        <PropertyDef name="dfs.blocksize" value="1048576"/>
+                        <PropertyDef name="dfs.permissions.user" value="hduser"/>
+                        <PropertyDef name="dfs.permissions.group" value="hadoop"/>
+                    </RemoteUploadCommand>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_upload_directory_remote" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteUploadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"
+                                            isCritical="true"
+                                            remotePath="/user/myhduser/test_output/test_delete_folder/"
+                                            sourceFilePattern="@{{fileMask}}"
+                                            sourcePath="${{user.dir}}/src/test/resources/test_delete_folder/"
+                                            type="remote-command" >
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.overwrite" value="true"/>
+                        <PropertyDef name="dfs.permissions.path" value="777"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                        <PropertyDef name="dfs.replication" value="1"/>
+                        <PropertyDef name="dfs.blocksize" value="1048576"/>
+                        <PropertyDef name="dfs.permissions.user" value="hduser"/>
+                        <PropertyDef name="dfs.permissions.group" value="hadoop"/>
+                    </RemoteUploadCommand>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{dirMask}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/test_delete_folder/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_upload_file_remote_props" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteUploadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"
+                                            isCritical="true" remotePath="."
+                                            sourceFilePattern="@{{fileMask}}"
+                                            sourcePath="${{user.dir}}/target/test-classes"
+                                            type="remote-command">
+                        <PropertyDef name="dfs.file.delete-source" value="false"/>
+                        <PropertyDef name="dfs.file.overwrite" value="false"/>
+                        <PropertyDef name="dfs.permissions.path" value="777"/>
+                        <PropertyDef name="dfs.stream-buffer-size" value="8192"/>
+                        <PropertyDef name="dfs.replication" value="1"/>
+                        <PropertyDef name="dfs.blocksize" value="1048576"/>
+                    </RemoteUploadCommand>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true" sourcePath="."
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_upload_file_gvbuffer_remote"
+                                type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteUploadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"
+                                            fromGVBufferExpression="getObject().getBytes()"
+                                            isCritical="true"
+                                            remotePath="/user/myhduser/test_output/"
+                                            sourceFilePattern="@{{fileMask}}"
+                                            type="remote-command" >
+                           <PropertyDef name="dfs.file.overwrite" value="true"/>
+                    </RemoteUploadCommand>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_upload_file_gvbuffer_remote_props"
+                                type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteUploadCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVUpload"
+                                            fromGVBufferExpression="getObject().getBytes()"
+                                            isCritical="true" remotePath="."
+                                            sourceFilePattern="@{{fileMask}}"
+                                            type="remote-command"/>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true" sourcePath="."
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <!-- TEST USER PERMISSION -->
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_search_uploaded_file" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_move_check_file_remote" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteMoveCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVMove"
+                                        isCritical="true"
+                                        newName="@{{fileMask_NEW}}"
+                                        oldName="@{{fileMask}}"
+                                        targetPath="/user/myhduser/test_output/"
+                                        type="remote-command"/>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask_NEW}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_delete_check_file_remote" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteDeleteCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDelete"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true"
+                                            targetPath="/user/myhduser/test_output/"
+                                            type="remote-command"/>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+            <remotemanager-call class="it.greenvulcano.gvesb.virtual.file.remote.RemoteManagerCall"
+                                name="test_delete_folder_remote" type="call">
+                <HDFSRemoteManager autoConnect="false"
+                                    class="it.greenvulcano.util.remotefs.hdfs.HDFSRemoteManager"
+                                    connectionURL="hdfs://hadoop-hdfs:54310"
+                                    password="{3DES}PDZ8kUexPv0="
+                                    type="remote-manager" username="hduser"/>
+                <RemoteCommands>
+                    <RemoteDeleteCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVDelete"
+                                            filePattern="" isCritical="true"
+                                            targetPath="/user/myhduser/test_output/test_delete_folder/"
+                                            type="remote-command"/>
+                    <RemoteSearchCommand class="it.greenvulcano.gvesb.virtual.file.remote.command.GVSearch"
+                                            filePattern="@{{fileMask}}"
+                                            isCritical="true"
+                                            sourcePath="/user/myhduser/test_output/test_delete_folder/"
+                                            type="remote-command"/>
+                </RemoteCommands>
+            </remotemanager-call>
+        </Channel>
+      </System>
+    </Systems>
+  </GVSystems>
+</GVCore>

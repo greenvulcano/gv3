@@ -34,6 +34,9 @@
 <!ENTITY % gvsap SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSAP.dtd">
 %gvsap;
 
+<!ENTITY % gvhadoop SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHDFSFileSystem.dtd">
+%gvhadoop;
+
 <!ENTITY % extra-j2ee-calls "">
 <!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call">
 <!ENTITY % extra-file-calls "">
@@ -56,3 +59,5 @@
 <!ENTITY % extra-output-services "">
 
 <!ENTITY % extra-pre-fwd-validators "|HL7ConnectionValidator">
+
+<!ENTITY % extra-remote-manager "|HDFSRemoteManager">
