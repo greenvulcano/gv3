@@ -724,12 +724,12 @@ public final class JMXServiceManager implements ConfigurationListener
                         GreenVulcanoConfig.getSystemsConfigFileName()))) {
             logger.debug("JMXServiceManager - Operation (configurationChanged)");
             confChangedFlag = true;
-            try {
+            /*try {
                 clearMap();
             }
             catch (Exception exc) {
                 // do nothing
-            }
+            }*/
         }
     }
 

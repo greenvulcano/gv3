@@ -62,6 +62,7 @@ public class HttpServletMappingManager implements ConfigurationListener
     public HttpServletMappingManager() throws AdapterHttpConfigurationException
     {
         init();
+        XMLConfig.addConfigurationListener(this, AdapterHttpConstants.CFG_FILE);
     }
 
     /**
@@ -74,7 +75,6 @@ public class HttpServletMappingManager implements ConfigurationListener
             transactionManager = new HttpServletTransactionManager();
             initMappings();
             configurationChanged = false;
-            XMLConfig.addConfigurationListener(this, AdapterHttpConstants.CFG_FILE);
         }
         catch (Exception exc) {
             logger.error("HttpServletMappingManager - Initialization error: ", exc);
@@ -90,7 +90,7 @@ public class HttpServletMappingManager implements ConfigurationListener
     public HttpServletMapping getMapping(String action) throws AdapterHttpConfigurationException
     {
         if (configurationChanged) {
-            init();
+            reinit();
         }
         HttpServletMapping smapping = mappings.get(action);
 
@@ -131,6 +131,41 @@ public class HttpServletMappingManager implements ConfigurationListener
             formatterMgr = null;
         }
     }
+    
+    private synchronized void reinit() throws AdapterHttpConfigurationException
+    {
+        try {
+            if (!configurationChanged) {
+                return;
+            }
+
+            for (HttpServletMapping mapping : mappings.values()) {
+                mapping.destroy();
+            }
+            mappings.clear();
+            for (HttpServletMapping mapping : mappingsWildCards.values()) {
+                mapping.destroy();
+            }
+            mappingsWildCards.clear();
+            if (transactionManager != null) {
+                transactionManager.destroy();
+                transactionManager = null;
+            }
+            if (formatterMgr != null) {
+                formatterMgr.destroy();
+                formatterMgr = null;
+            }
+
+            formatterMgr = new FormatterManager();
+            transactionManager = new HttpServletTransactionManager();
+            initMappings();
+            configurationChanged = false;
+        }
+        catch (Exception exc) {
+            logger.error("HttpServletMappingManager - Initialization error: ", exc);
+            throw new AdapterHttpConfigurationException("HttpServletMappingManager - Initialization error", exc);
+        }
+    }
 
     /**
      * @see it.greenvulcano.configuration.ConfigurationListener#configurationChanged(it.greenvulcano.configuration.ConfigurationEvent)
@@ -140,10 +175,9 @@ public class HttpServletMappingManager implements ConfigurationListener
     {
         if ((evt.getCode() == ConfigurationEvent.EVT_FILE_REMOVED)
                 && evt.getFile().equals(AdapterHttpConstants.CFG_FILE)) {
-            configurationChanged = true;
-            destroy();
             logger.info("HttpServletMappingManager: Configuration Event received for file: "
                     + AdapterHttpConstants.CFG_FILE);
+            configurationChanged = true;
         }
     }
 

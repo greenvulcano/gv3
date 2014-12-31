@@ -5,6 +5,7 @@ import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.http.ProtocolFactory;
+import it.greenvulcano.util.thread.BaseThread;
 
 import java.util.Vector;
 
@@ -72,7 +73,25 @@ public class HttpClientProtocolProxy implements ConfigurationListener
     public void configurationChanged(ConfigurationEvent evt)
     {
         if ((evt.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && evt.getFile().equals(GVSUPPORT_CONF)) {
-            init();
+            release();
+
+            Runnable rr = new Runnable() {
+                @Override
+                public void run()
+                {
+                    try {
+                        Thread.sleep(10000);
+                    }
+                    catch (InterruptedException exc) {
+                        // do nothing
+                    }
+                    init();
+                }
+            };
+
+            BaseThread bt = new BaseThread(rr, "Config reloader for HttpClientProtocolProxy");
+            bt.setDaemon(true);
+            bt.start();
         }
     }
 
