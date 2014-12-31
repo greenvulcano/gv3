@@ -28,6 +28,7 @@ import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.script.GVScriptException;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.BaseThread;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -263,12 +264,29 @@ public class BaseContextManager implements ConfigurationListener, ShutdownEventL
             initialized = false;
             engineCtxMap.clear();
             cache.clearCache();
-            try {
-                init();
-            }
-            catch (GVScriptException exc) {
-                logger.error("Error reloading configuration", exc);
-            }
+            // initialize after a delay
+            Runnable rr = new Runnable() {
+                @Override
+                public void run()
+                {
+                    try {
+                        Thread.sleep(2000);
+                    }
+                    catch (InterruptedException exc) {
+                        // do nothing
+                    }
+                    try {
+                        init();
+                    }
+                    catch (GVScriptException exc) {
+                        logger.error("Error reloading configuration", exc);
+                    }
+                }
+            };
+
+            BaseThread bt = new BaseThread(rr, "Config reloader for BaseContextManager");
+            bt.setDaemon(true);
+            bt.start();
         }
     }
 

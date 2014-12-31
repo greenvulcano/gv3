@@ -36,6 +36,7 @@ public class ACLManager implements ConfigurationListener
     public static final String CFG_FILE_NAME = "GVPolicy.xml";
     private static Logger      logger        = GVLogger.getLogger(ACLManager.class);
     private static ACLManager  instance      = null;
+    private static boolean     configChanged = false;
     private ACL                acl           = null;
 
     public static boolean canAccess(ResourceKey key) throws ACLException
@@ -54,6 +55,15 @@ public class ACLManager implements ConfigurationListener
 
     private static ACLManager instance() throws ACLException
     {
+        if ((instance != null) && configChanged) {
+            synchronized (ACLManager.class) {
+                if (configChanged) {
+                    instance.destroy();
+                    instance = null;
+                }
+                configChanged = false;
+            }
+        }
         if (instance == null) {
             synchronized (ACLManager.class) {
                 if (instance == null) {
@@ -104,7 +114,8 @@ public class ACLManager implements ConfigurationListener
     public void configurationChanged(ConfigurationEvent evt)
     {
         if ((evt.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && (evt.getFile().equals(CFG_FILE_NAME))) {
-            destroy();
+            //destroy();
+            configChanged = true;
         }
     }
 }

@@ -162,7 +162,7 @@ public abstract class Task
         return this.triggers;
     }
 
-    public synchronized void handleTask(JobExecutionContext context)
+    public void handleTask(JobExecutionContext context)
     {
         if (mustDestroy || suspended) {
             return;
@@ -198,7 +198,7 @@ public abstract class Task
         }
     }
 
-    public synchronized void recoveryTask(String evName, Date fireTime)
+    public void recoveryTask(String evName, Date fireTime)
     {
         if (mustDestroy || suspended) {
             return;
@@ -238,7 +238,7 @@ public abstract class Task
     /**
      * Invoked before removing the task, perform cleanup operations.
      */
-    public synchronized void destroy()
+    public void destroy()
     {
         mustDestroy = true;
         if (!running) {
@@ -254,6 +254,11 @@ public abstract class Task
 
     public void run(String evName, Date fireTime, Map<String, String> locProperties)
     {
+        if (running) {
+            logger.warn("Task [" + getFullName() + "] already scheduled!");
+            return;
+        }
+
         NMDC.push();
         int id = -1;
         long startT = System.currentTimeMillis();

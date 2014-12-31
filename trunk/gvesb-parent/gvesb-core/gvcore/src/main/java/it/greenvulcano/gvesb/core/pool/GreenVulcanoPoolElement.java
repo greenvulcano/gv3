@@ -152,8 +152,8 @@ public class GreenVulcanoPoolElement extends GreenVulcano implements Configurati
     public void configurationChanged(ConfigurationEvent event)
     {
         if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED)
-                && (event.getFile().equals(GreenVulcanoConfig.getSystemsConfigFileName()) || event.getFile().equals(
-                        GreenVulcanoConfig.getServicesConfigFileName()))) {
+                && (event.getFile().equals(GreenVulcanoConfig.getSystemsConfigFileName())
+                 || event.getFile().equals(GreenVulcanoConfig.getServicesConfigFileName()))) {
             execServices.clear();
             setValid(false);
         }

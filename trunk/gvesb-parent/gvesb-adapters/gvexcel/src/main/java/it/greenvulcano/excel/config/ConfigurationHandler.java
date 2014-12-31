@@ -26,6 +26,7 @@ import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.excel.exception.ExcelException;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.BaseThread;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -264,8 +265,38 @@ public class ConfigurationHandler implements ConfigurationListener
     {
         if ((event.getFile().equals(EF_CONFIG_FILE) || event.getFile().equals(ER_CONFIG_FILE))
                 && (event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED)) {
-            XMLConfig.removeConfigurationListener(instance);
-            instance = null;
+            //XMLConfig.removeConfigurationListener(instance);
+            //instance = null;
+            
+            excelReportGroups.clear();
+            excelReportGroups = null;
+            wbConfiguration.clear();
+            wbConfiguration = null;
+            defaultWBConfName = null;
+            // initialize after a delay
+            Runnable rr = new Runnable() {
+                @Override
+                public void run()
+                {
+                    try {
+                        Thread.sleep(5000);
+                    }
+                    catch (InterruptedException exc) {
+                        // do nothing
+                    }
+                    try {
+                        init();
+                    }
+                    catch (ExcelException exc) {
+                        // TODO Auto-generated catch block
+                        exc.printStackTrace();
+                    }
+                }
+            };
+
+            BaseThread bt = new BaseThread(rr, "Config reloader for Excel ConfigurationHandler");
+            bt.setDaemon(true);
+            bt.start();
         }
     }
 

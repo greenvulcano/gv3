@@ -252,7 +252,7 @@ public final class EventListenerHandler {
      *
      * @return a copy of the listener map
      */
-    public static Map<EventListener, EventListenerData> getEventListeners() {
+    public static synchronized Map<EventListener, EventListenerData> getEventListeners() {
         return new HashMap<EventListener, EventListenerData>(listenersData);
     }
 
@@ -265,7 +265,7 @@ public final class EventListenerHandler {
      *            if true the InterfaceData can be create
      * @return the configured EventListenerData
      */
-    private static EventListenerData getEventListenerData(EventListener listener, boolean create) {
+    private static synchronized EventListenerData getEventListenerData(EventListener listener, boolean create) {
         EventListenerData elData = listenersData.get(listener);
         if ((elData == null) && create) {
             elData = new EventListenerData(listener);
