@@ -19,9 +19,18 @@
  */
 package tests.unit.util.bin;
 
+import it.greenvulcano.util.bin.BinaryUtils;
 import it.greenvulcano.util.bin.Dump;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.util.Arrays;
+
+import org.apache.commons.io.FileUtils;
 
 import junit.framework.TestCase;
 
@@ -46,5 +55,45 @@ public class DumpTestCase extends TestCase
         dump.dump(actualDump);
         actualDump.close();
         assertEquals(EXPECTED_DUMP, actualDump.toString());
+    }
+    
+    /**
+     * @throws Exception
+     */
+    public void testDumpRec() throws Exception
+    {
+        File tmp = new File(System.getProperty("java.io.tmpdir"), "TestDump.dump");
+        try {
+            FileUtils.deleteQuietly(tmp);
+
+            byte[] dataFile = BinaryUtils.readFileAsBytesFromCP("start.png");
+            Dump dump = new Dump(dataFile, Dump.UNBOUNDED);
+            OutputStream out = new FileOutputStream(tmp);
+            try {
+                dump.dump(out);
+            }
+            finally {
+                out.flush();
+                out.close();
+            }
+            dump = new Dump(new FileReader(tmp));
+            byte[] dataRec = null;
+            try {
+                dataRec = dump.recoverToBytes();
+            }
+            finally {
+                out.close();
+            }
+            
+            MessageDigest md = MessageDigest.getInstance("SHA");
+            byte[] dFile = md.digest(dataFile);
+            byte[] dRec  = md.digest(dataRec);
+            boolean result = MessageDigest.isEqual(dFile, dRec);
+            System.out.println("Binary Dump conversion succesfull: " + result);
+            assertTrue("Binary Dump conversion failed", result);
+        }
+        finally {
+            FileUtils.deleteQuietly(tmp);
+        }
     }
 }
