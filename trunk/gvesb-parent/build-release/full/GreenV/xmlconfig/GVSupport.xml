@@ -54,6 +54,8 @@
             </appender>
             <appender class="it.greenvulcano.log.db.JDBCAppender"
                       name="DB_LOGGER_FOR_GVCORE">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
                 <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
                 <param name="username" value="gv_log"/>
@@ -76,6 +78,8 @@
             </appender>
             <appender class="it.greenvulcano.log.db.JDBCAppender"
                       name="DB_LOGGER_FOR_GVADP">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
                 <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
                 <param name="username" value="gv_log"/>
@@ -202,6 +206,8 @@
             </appender>
             <appender class="it.greenvulcano.log.db.JDBCAppender"
                       name="DB_LOGGER_FOR_GVHL7_MSG">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
                 <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
                 <param name="username" value="gv_log"/>

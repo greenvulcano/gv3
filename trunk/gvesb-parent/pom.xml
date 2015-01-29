@@ -811,6 +811,17 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>github.release.repo</id>
+            <name>GitHub Repo</name>
+            <url>https://raw.github.com/bulldog2011/bulldog-repo/master/repo/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <pluginRepositories>

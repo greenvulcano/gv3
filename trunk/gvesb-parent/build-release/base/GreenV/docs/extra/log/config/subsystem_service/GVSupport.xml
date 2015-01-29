@@ -67,6 +67,8 @@
                 </layout>
             </appender>
             <appender name="DB_LOGGER_FOR_GVVCL" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
                 <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
                 <param name="username" value="gv_log"/>
@@ -88,6 +90,8 @@
                 <param name="column" value="throwable#THROWABLE"/>
             </appender>
             <appender name="DB_LOGGER_FOR_GVCORE" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
                 <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
                 <param name="username" value="gv_log"/>
@@ -109,6 +113,8 @@
                 <param name="column" value="throwable#THROWABLE"/>
             </appender>
             <appender name="DB_LOGGER_FOR_GVADP" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
                 <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
                 <param name="username" value="gv_log"/>
@@ -130,6 +136,8 @@
                 <param name="column" value="throwable#THROWABLE"/>
             </appender>
             <appender name="DB_LOGGER_FOR_GVDTE" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
                 <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
                 <param name="username" value="gv_log"/>

@@ -28,6 +28,7 @@
     <version.axis>1.4</version.axis>
     <version.axis2>1.6.2</version.axis2>
     <version.axiom>1.2.13</version.axiom>
+    <version.bigqueue>0.7.0</version.bigqueue>
     <version.birt>3.7.2.v20120214-1408</version.birt>
     <version.bouncycastle>1.45</version.bouncycastle>
     <version.castor>1.3.3</version.castor>
@@ -1661,6 +1662,12 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>jempbox</artifactId>
             <version>${version.pdfbox}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.leansoft</groupId>
+            <artifactId>bigqueue</artifactId>
+            <version>${version.bigqueue}</version>
         </dependency>
 
 

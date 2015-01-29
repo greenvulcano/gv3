@@ -7,6 +7,8 @@
         <log4j:configuration debug="false" threshold="all"
                              xmlns:log4j="http://jakarta.apache.org/log4j/">
             <appender name="DB_LOGGER_FOR_GVVCL" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:oracle:thin:@localhost:1525:XE"/>
                 <param name="dbclass" value="oracle.jdbc.driver.OracleDriver"/>
                 <param name="username" value="gv_log"/>
@@ -28,6 +30,8 @@
                 <param name="column" value="throwable#THROWABLE"/>
             </appender>
             <appender name="DB_LOGGER_FOR_GVCORE" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:oracle:thin:@localhost:1525:XE"/>
                 <param name="dbclass" value="oracle.jdbc.driver.OracleDriver"/>
                 <param name="username" value="gv_log"/>
@@ -49,6 +53,8 @@
                 <param name="column" value="throwable#THROWABLE"/>
             </appender>
             <appender name="DB_LOGGER_FOR_GVADP" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:oracle:thin:@localhost:1525:XE"/>
                 <param name="dbclass" value="oracle.jdbc.driver.OracleDriver"/>
                 <param name="username" value="gv_log"/>
@@ -70,6 +76,8 @@
                 <param name="column" value="throwable#THROWABLE"/>
             </appender>
             <appender name="DB_LOGGER_FOR_GVDTE" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:oracle:thin:@localhost:1525:XE"/>
                 <param name="dbclass" value="oracle.jdbc.driver.OracleDriver"/>
                 <param name="username" value="gv_log"/>
