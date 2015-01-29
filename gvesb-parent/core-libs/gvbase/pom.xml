@@ -100,6 +100,10 @@
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.leansoft</groupId>
+            <artifactId>bigqueue</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.juddi.scout</groupId>
             <artifactId>scout</artifactId>
             <scope>test</scope>

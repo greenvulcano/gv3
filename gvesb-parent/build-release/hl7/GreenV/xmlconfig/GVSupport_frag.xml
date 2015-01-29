@@ -20,7 +20,7 @@
                            value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t][%c] - %m %n"/>
                 </layout>
             </appender>
-            
+
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
                       name="LOGGER_FOR_GVHL7_MSG">
                 <param name="Append" value="true"/>
@@ -35,6 +35,8 @@
                 </layout>
             </appender>
             <appender name="DB_LOGGER_FOR_GVHL7_MSG" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
                 <param name="dbclass" value="org.hsqldb.jdbcDriver"/>
                 <param name="username" value="gv_log"/>
@@ -66,7 +68,7 @@
                 <appender-ref ref="LOGGER_FOR_GVHL7"/>
                 <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
             </logger>
-            
+
             <logger additivity="false" name="it.greenvulcano.gvesb.gvhl7.dumpOutboundInMsg">
                 <level value="INFO"/>
                 <appender-ref ref="LOGGER_FOR_GVHL7_MSG"/>

@@ -275,6 +275,9 @@
             <fileset dir="${com.jcraft.lib}">
                 <include name="*.jar"/>
             </fileset>
+            <fileset dir="${com.leansoft.lib}">
+                <include name="*.jar"/>
+            </fileset>
             <fileset dir="${juddi.juddi.lib}">
                 <include name="juddi.jar"/>
                 <include name="uddi-ws.jar"/>

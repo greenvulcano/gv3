@@ -8,6 +8,8 @@
                              xmlns:log4j="http://jakarta.apache.org/log4j/">
             <appender class="it.greenvulcano.log.db.JDBCAppender"
                       name="DB_LOGGER_FOR_GVVCL">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:mysql://localhost:3306/GV_LOG"/>
                 <param name="dbclass" value="com.mysql.jdbc.Driver"/>
                 <param name="username" value="root"/>
@@ -29,6 +31,8 @@
             </appender>
             <appender class="it.greenvulcano.log.db.JDBCAppender"
                       name="DB_LOGGER_FOR_GVCORE">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:mysql://localhost:3306/GV_LOG"/>
                 <param name="dbclass" value="com.mysql.jdbc.Driver"/>
                 <param name="username" value="root"/>
@@ -50,6 +54,8 @@
             </appender>
             <appender class="it.greenvulcano.log.db.JDBCAppender"
                       name="DB_LOGGER_FOR_GVADP">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:mysql://localhost:3306/GV_LOG"/>
                 <param name="dbclass" value="com.mysql.jdbc.Driver"/>
                 <param name="username" value="root"/>
@@ -71,6 +77,8 @@
             </appender>
             <appender class="it.greenvulcano.log.db.JDBCAppender"
                       name="DB_LOGGER_FOR_GVDTE">
+                <param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+                <param name="qthreads" value="10"/>
                 <param name="url" value="jdbc:mysql://localhost:3306/GV_LOG"/>
                 <param name="dbclass" value="com.mysql.jdbc.Driver"/>
                 <param name="username" value="root"/>

@@ -22,11 +22,13 @@ package it.greenvulcano.log.db;
 import it.greenvulcano.event.util.shutdown.ShutdownEvent;
 import it.greenvulcano.event.util.shutdown.ShutdownEventLauncher;
 import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
+import it.greenvulcano.util.clazz.BigQueueObject;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -48,11 +50,6 @@ import org.apache.log4j.spi.LoggingEvent;
  * configuration-file.
  * </p>
  * 
- * <p>
- * Here is a another code-example ( <a href="../../../../../src/org/apache/log4j/jdbcplus/examples/test/SourceConfigOracleTest.java"
- * >SourceConfigOracleTest.java </a>) to configure the JDBCAppender without a
- * configuration-file.
- * </p>
  * 
  * <p>
  * <b>Configuration parameters </b>
@@ -85,7 +82,7 @@ import org.apache.log4j.spi.LoggingEvent;
  * procedure name parameter instead of table name.
  * </p>
  * 
- * </p> The class ColumnType provides you several possibilities to describe a
+ * <p> The class ColumnType provides you several possibilities to describe a
  * columns logtype/wildcard : </p>
  * 
  * <p>
@@ -112,6 +109,35 @@ import org.apache.log4j.spi.LoggingEvent;
  * given key.</li>
  * <li>EMPTY - The column will be ignored.</li>
  * </ul>
+ * </p>
+ * 
+ * <p>
+ * <pre>
+ *   &lt;appender class="it.greenvulcano.log.db.JDBCAppender"
+ *             name="DB_LOGGER_FOR_GVCORE">
+ *       &lt;param name="qstorage" value="sp{{gv.app.home}}/log/storage"/>
+ *       &lt;param name="qthreads" value="10"/>
+ *       &lt;param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
+ *       &lt;param name="dbclass" value="org.hsqldb.jdbcDriver"/>
+ *       &lt;param name="username" value="gv_log"/>
+ *       &lt;param name="password" value="gv_log"/>
+ *       &lt;param name="table" value="log_core"/>
+ *       &lt;param name="column" value="id_msg#SEQUENCE#log_seq.nextval"/>
+ *       &lt;param name="column" value="tstamp#TIMESTAMP"/>
+ *       &lt;param name="column" value="prio#PRIO"/>
+ *       &lt;param name="column" value="iprio#IPRIO"/>
+ *       &lt;param name="column" value="cat#CAT"/>
+ *       &lt;param name="column" value="thread#THREAD"/>
+ *       &lt;param name="column" value="server#MDC#SERVER"/>
+ *       &lt;param name="column" value="id#MDC#ID"/>
+ *       &lt;param name="column" value="system_n#MDC#SYSTEM"/>
+ *       &lt;param name="column" value="service#MDC#SERVICE"/>
+ *       &lt;param name="column" value="operation_n#MDC#OPERATION"/>
+ *       &lt;param name="column" value="msg_size#MSG_SIZE"/>
+ *       &lt;param name="column" value="msg#MSG"/>
+ *       &lt;param name="column" value="throwable#THROWABLE"/>
+ *   &lt;/appender>
+ * </pre>
  * </p>
  * 
  * @version 3.1.0 24/gen/2011
@@ -168,6 +194,11 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
     private List<Column>             columns    = new ArrayList<Column>();
 
     /**
+     * The Queue storage folder name
+     */
+    private String                   queueStorage = null;
+    
+    /**
      * This class encapsulate the logic necessary to log into a table
      */
     private JDBCWriter               logWriter  = new JDBCWriter();
@@ -183,7 +214,7 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
     private boolean                  isReady    = false;
 
 
-    private LinkedList<LoggingEvent> queue      = new LinkedList<LoggingEvent>();
+    private BigQueueObject<LoggingEvent> queue  = null;
 
     private Set<Thread>              qHandler   = new HashSet<Thread>();
     
@@ -237,6 +268,14 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
                                 errorHandler.error(errorMsg, exc, 0);
                             }
                         }
+                        else {
+                            try {
+                                Thread.sleep(10000);
+                            }
+                            catch (InterruptedException exc) {
+                                // do nothing
+                            }
+                        }
                         event = dequeue();
                     }
                     while ((event != null) && !mustStop);
@@ -269,32 +308,15 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
      * queue.addAll(events); queue.notifyAll(); } }
      */
 
-    private void enqueue(LoggingEvent event)
+    private void enqueue(LoggingEvent event) throws IOException
     {
-        synchronized (queue) {
-            queue.addLast(event);
-            queue.notifyAll();
-        }
+        queue.writeObject(event);
+        //queue.flush();
     }
 
-    private LoggingEvent dequeue()
+    private LoggingEvent dequeue() throws IOException
     {
-        synchronized (queue) {
-            if (queue.isEmpty()) {
-                try {
-                    queue.wait(10000);
-                }
-                catch (InterruptedException exc) {
-                    exc.printStackTrace();
-                }
-            }
-        }
-        LoggingEvent event = null;
-        synchronized (queue) {
-            if (!queue.isEmpty()) {
-                event = queue.removeFirst();
-            }
-        }
+        LoggingEvent event = queue.readObject();
         return event;
     }
 
@@ -306,12 +328,6 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
             qHThr.setDaemon(false);
             qHThr.start();
             qHandler.add(qHThr);
-            /*qHandler = new Thread[qHandlerThreadNum];
-            for (int i = 0; i < qHandler.length; i++) {
-                qHandler[i] = new Thread(new QueueHandler(logWriter, i), getName() + "_" + i);
-                qHandler[i].setDaemon(false);
-                qHandler[i].start();
-            }*/
         }
     }
 
@@ -612,9 +628,17 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
     /**
      * @param qHandlerThreadNum the qHandlerThreadNum to set
      */
-    public void setqHandlerThreadNum(int qHandlerThreadNum)
+    public void setqthreads(int qHandlerThreadNum)
     {
         this.qHandlerThreadNum = qHandlerThreadNum;
+    }
+    
+    /**
+     * @param queueStorage the QueueStorage folder name to set
+     */
+    public void setQstorage(String queueStorage)
+    {
+        this.queueStorage = queueStorage;
     }
     
     /**
@@ -680,9 +704,17 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
     /**
      * @return the qHandlerThreadNum
      */
-    public int getqHandlerThreadNum()
+    public int getqthreads()
     {
         return this.qHandlerThreadNum;
+    }
+    
+    /**
+     * @return the QueueStorage folder name
+     */
+    public String getQstorage()
+    {
+        return this.queueStorage;
     }
     
     /**
@@ -731,14 +763,7 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
                         errorHandler.error(errorMsg, e, 0);
                     }
                 }
-                synchronized (queue) {
-                    if (!queue.isEmpty()) {
-                        event = queue.removeFirst();
-                    }
-                    else {
-                        event = null;
-                    }
-                }
+                event = queue.readObject();
             }
             while (event != null);
         }
@@ -753,6 +778,14 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
             }
             catch (Exception exc) {
                 // do nothing
+            }
+            try {
+                if (this.queue != null) {
+                    this.queue.close();
+                }
+            }
+            catch (Exception exc) {
+                // do nothign
             }
         }
 
@@ -780,9 +813,6 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
                 }
             }
 
-            // buffer.add(event);
-
-            // if (bufferSize > 1) {
             // Set the NDC and thread name for the calling thread as these
             // LoggingEvent fields were not set at event creation time.
             event.getNDC();
@@ -791,13 +821,9 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
             event.getMDCCopy();
             // make sure to also remember locationinfo in the event
             event.getLocationInformation();
-            // }
 
             enqueue(event);
             createQHandler();
-            /*
-             * if (buffer.size() >= bufferSize) { flushBuffer(); }
-             */
         }
         catch (Exception exc) {
             logState("JDBCAppender[" + getName() + "]::append(), Not ready to append!");
@@ -821,7 +847,6 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
 
         logState("JDBCAppender[" + getName() + "]::flushBuffer_1 buffer : " + buffer.size());
 
-        // enqueue(buffer);
         buffer.clear();
         logState("JDBCAppender[" + getName() + "]::flushBuffer_2 buffer : " + buffer.size());
 
@@ -872,6 +897,10 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
                 return true;
             }
 
+            if (qHandlerThreadNum < 1) {
+                throw new Exception("JDBCAppender[" + getName() + "]::configure(), QTHREADS incorrect value.");
+            }
+
             if (this.getDbclass() != null) {
                 Class.forName(this.getDbclass());
             }
@@ -905,6 +934,11 @@ public class JDBCAppender extends AppenderSkeleton implements ShutdownEventListe
             }
 
             logWriter.setLogColumns(columns);
+
+            if (queueStorage == null) {
+                throw new Exception("JDBCAppender[" + getName() + "]::configure(), No QSTORAGE defined.");
+            }
+            this.queue = new BigQueueObject<LoggingEvent>(PropertiesHandler.expand(queueStorage), getName());
         }
         catch (Exception e) {
             String errorMsg = "JDBCAppender[" + getName() + "]::configure()";
