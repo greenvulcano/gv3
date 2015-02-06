@@ -1408,7 +1408,8 @@ public class GVCoreParser
 	            aggiornaGVDataTransformationForService(nomeServizio, parser);
 	            aggiornaGVDataProviderService(nomeServizio, parser);
 	            aggiornaGVKnowledgeBaseConfigService(nomeServizio, parser);
-	            aggiornaGVPolicyService(nomeServizio, parser);        	}
+                aggiornaGVPolicyService(nomeServizio, parser);
+        	}
         	finally {
         		XMLUtils.releaseParserInstance(parser);
         	}
@@ -2052,19 +2053,30 @@ public class GVCoreParser
     private void aggiornaSingleTransformation(String name, Node gvDataTransformationZip, Node baseDT, XMLUtils parser)
             throws Exception
     {
-        Node gvDTZip = parser.selectSingleNode(gvDataTransformationZip, "Transformations/*[@type='transformation' and @name='" + name + "']");
+        Node gvDTZip = parser.selectSingleNode(gvDataTransformationZip, "Transformations/*[@type='transformation' and @name='" + name + "' or TransformationAlias/@name='" + name + "']");
         if (gvDTZip != null) {
-        	Node gvDTServer = parser.selectSingleNode(baseDT, "*[@type='transformation' and @name='" + name + "']");
+        	String realNameZip = parser.get(gvDTZip, "@name");
+        	Node gvDTServer = parser.selectSingleNode(baseDT, "*[@type='transformation' and @name='" + name + "' or TransformationAlias/@name='" + name + "']");
             String dtType = gvDTZip.getLocalName();
+            Node importedNode = baseDT.getOwnerDocument().importNode(gvDTZip, true);
         	if (gvDTServer == null) {
-                Node importedNode = baseDT.getOwnerDocument().importNode(gvDTZip, true);
                 baseDT.appendChild(importedNode);
                 logger.debug("Nodo " + dtType + "[" + name + "] non esistente inserimento");
             }
             else {
-                Node importedNode = baseDT.getOwnerDocument().importNode(gvDTZip, true);
-                baseDT.replaceChild(importedNode, gvDTServer);
-                logger.debug("Nodo " + dtType + "[" +  name + "] gia esistente aggiornamento");
+        		String realNameServer = parser.get(gvDTServer, "@name");
+        		if (realNameServer.equals(realNameZip)) {
+        			baseDT.replaceChild(importedNode, gvDTServer);
+        			logger.debug("Nodo " + dtType + "[" + realNameZip + "/" + name + "] gia esistente aggiornamento");
+        		}
+        		else {
+        			Node aliasServer = parser.selectSingleNode(gvDTServer, "TransformationAlias[@name='" + name + "']");
+        			logger.debug("Nodo " + dtType + "[" + realNameServer + "] rimozione alias [" + name + "]");
+        			gvDTServer.removeChild(aliasServer);
+
+                    baseDT.appendChild(importedNode);
+                    logger.debug("Nodo " + dtType + "[" + realNameZip + "/" + name + "] non esistente inserimento");
+                }
             }
             if ("XSLTransformation".equals(dtType) ||
             	"XSLFOPTransformation".equals(dtType) ||
@@ -2102,6 +2114,29 @@ public class GVCoreParser
             	// do nothing
             }
             //aggiornaXSDTransformations(gvDataTransformationZip, nomeTrasformazione);
+            aggiornaToPreload(gvDTZip, baseDT, parser);
+        }
+    }
+
+    private void aggiornaToPreload(Node gvDTZip, Node baseDT, XMLUtils parser) throws Exception {
+    	String realNameZip = parser.get(gvDTZip, "@name");
+        NodeList gvAliasZip = parser.selectNodeList(gvDTZip, "TransformationAlias");
+        if (gvAliasZip.getLength() > 0) {
+        	Node startupServer = parser.selectSingleNode(baseDT, "../Startup");
+        	if (startupServer == null) {
+        		startupServer = parser.createElement(baseDT.getOwnerDocument(), "Startup");
+        		baseDT.getParentNode().insertBefore(startupServer, baseDT);
+        	}
+        	Node toPreloadServer = parser.selectSingleNode(startupServer, "ToPreload");
+        	if (toPreloadServer == null) {
+        		toPreloadServer = parser.insertElement((Element) startupServer, "ToPreload");
+        	}
+        	Node gvAliasServer = parser.selectSingleNode(toPreloadServer, "Preload[@Tranformation = '" + realNameZip + "']");
+        	if (gvAliasServer == null) {
+        		gvAliasServer = parser.insertElement((Element) toPreloadServer, "Preload");
+        		parser.setAttribute((Element) gvAliasServer, "Transformation", realNameZip);
+        		logger.debug("ToPreaload for [" + realNameZip + "] non esistente inserimento");
+        	}
         }
     }
 

@@ -747,6 +747,7 @@
 <!--
     Define a transformation to preload.
 
+    #Label: @Transformation
     #Template:
 
         <xsl:template match="Preload">
@@ -764,7 +765,7 @@
 -->
 <!ELEMENT Preload (Description?)>
 <!--
-    Name of the trasformation to preload.
+    Name of the transformation to preload.
 
     #References: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
 -->
@@ -8689,6 +8690,7 @@
 
     #Label: @value
     #References: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST map-name-param value CDATA #REQUIRED>
 

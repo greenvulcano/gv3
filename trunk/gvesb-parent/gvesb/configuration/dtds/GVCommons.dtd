@@ -807,6 +807,7 @@
     #Label: @name
     #Unique: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #Unique: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #Warn: {{self::TransformationAlias[not(../@name = /GVCore/GVDataTransformation/Startup/ToPreload/Preload/@Transformation)]}} An aliased Transformation must be defined in ToPreload DTE section
     #NotNull
 -->
 <!ATTLIST TransformationAlias name CDATA #REQUIRED>
