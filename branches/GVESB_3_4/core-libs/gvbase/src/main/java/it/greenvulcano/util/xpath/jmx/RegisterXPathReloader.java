@@ -23,6 +23,7 @@ import it.greenvulcano.configuration.ConfigurationEvent;
 import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.jmx.MBeanServerInitializer;
+import it.greenvulcano.util.thread.BaseThread;
 import it.greenvulcano.util.xpath.search.XPathAPI;
 
 import javax.management.MBeanServer;
@@ -69,7 +70,7 @@ public class RegisterXPathReloader implements MBeanServerInitializer, Configurat
     public final void initializeMBeanServer(MBeanServer server) throws Exception
     {
         XMLConfig.addConfigurationListener(this, XPATH_CONF);
-        XMLConfig.load(XPATH_CONF);
+        init();
     }
 
     /**
@@ -78,29 +79,57 @@ public class RegisterXPathReloader implements MBeanServerInitializer, Configurat
     public void configurationChanged(ConfigurationEvent evt)
     {
         if ((evt.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && evt.getFile().equals(XPATH_CONF)) {
-            try {
-                NodeList xpathNamespaces = XMLConfig.getNodeList(XPATH_CONF, "//XPathNamespace");
-                for (int i = 0; i < xpathNamespaces.getLength(); ++i) {
-                    Node node = xpathNamespaces.item(i);
-                    String prefix = XMLConfig.get(node, "@prefix");
-                    String namespace = XMLConfig.get(node, "@namespace");
-                    if (namespace == null) {
-                        namespace = "";
-                    }
+            // initialize after a delay
+            Runnable rr = new Runnable() {
+                @Override
+                public void run()
+                {
                     try {
-                        XPathAPI.installNamespace(prefix, namespace);
-                        System.out.println("### XPath namespace installed...: " + prefix + " -> " + namespace);
+                        Thread.sleep(1000);
                     }
-                    catch (Exception e) {
-                        System.out.println("ERROR: cannot install namespace: " + prefix + "->" + namespace);
-                        e.printStackTrace();
+                    catch (InterruptedException exc) {
+                        // do nothing
                     }
+                    init();
+                }
+            };
+
+            BaseThread bt = new BaseThread(rr, "Config reloader for XPath Framework");
+            bt.setDaemon(true);
+            bt.start();
+        }
+    }
+
+    /**
+     * 
+     */
+    private void init() {
+        try {
+            NodeList xpathNamespaces = XMLConfig.getNodeList(XPATH_CONF, "//XPathNamespace");
+            for (int i = 0; i < xpathNamespaces.getLength(); ++i) {
+                Node node = xpathNamespaces.item(i);
+                String prefix = XMLConfig.get(node, "@prefix");
+                String namespace = XMLConfig.get(node, "@namespace");
+                if ((prefix == null) || "".equals(prefix)) {
+                    System.out.println("### XPath namespace NOT installed... prefix empty: " + prefix + " -> " + namespace);
+                    continue;
+                }
+                if (namespace == null) {
+                    namespace = "";
+                }
+                try {
+                    XPathAPI.installNamespace(prefix, namespace);
+                    System.out.println("### XPath namespace installed...: " + prefix + " -> " + namespace);
+                }
+                catch (Exception e) {
+                    System.out.println("ERROR: cannot install namespace: " + prefix + "->" + namespace);
+                    e.printStackTrace();
                 }
             }
-            catch (Exception exc) {
-                System.out.println("Error reloading XPath namespaces definitions: " + exc);
-                exc.printStackTrace();
-            }
+        }
+        catch (Exception exc) {
+            System.out.println("Error reloading XPath namespaces definitions: " + exc);
+            exc.printStackTrace();
         }
     }
 }

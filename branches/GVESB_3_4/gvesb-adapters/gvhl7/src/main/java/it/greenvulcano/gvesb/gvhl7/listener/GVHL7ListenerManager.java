@@ -31,6 +31,7 @@ import it.greenvulcano.gvesb.core.pool.GreenVulcanoPoolManager;
 import it.greenvulcano.gvesb.gvhl7.listener.jmx.HL7ListenerInfo;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.BaseThread;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -172,12 +173,29 @@ public class GVHL7ListenerManager implements ConfigurationListener, ShutdownEven
         logger.debug("BEGIN - Operation(reload Configuration)");
         if ((evt.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && evt.getFile().equals(DEFAULT_CONF_FILE_NAME)) {
             destroy();
-            try {
-                init();
-            }
-            catch (Exception exc) {
-                logger.error("Error initializing GVHL7ListenerManager", exc);
-            }
+            // initialize after a delay
+            Runnable rr = new Runnable() {
+                @Override
+                public void run()
+                {
+                    try {
+                        Thread.sleep(10000);
+                    }
+                    catch (InterruptedException exc) {
+                        // do nothing
+                    }
+                    try {
+                        init();
+                    }
+                    catch (Exception exc) {
+                        logger.error("Error initializing GVHL7ListenerManager", exc);
+                    }
+                }
+            };
+
+            BaseThread bt = new BaseThread(rr, "Config reloader for GVHL7ListenerManager");
+            bt.setDaemon(true);
+            bt.start();
         }
         logger.debug("END - Operation(reload Configuration)");
 

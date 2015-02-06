@@ -23,6 +23,7 @@ import it.greenvulcano.configuration.ConfigurationEvent;
 import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.BaseThread;
 
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
@@ -133,7 +134,6 @@ public final class DateUtils
      */
     private static class ConfigEventHandler implements ConfigurationListener
     {
-
         /**
          * @see it.greenvulcano.configuration.ConfigurationListener#configurationChanged(ConfigurationEvent)
          */
@@ -142,7 +142,24 @@ public final class DateUtils
         {
             if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(CFG_FILE)) {
                 initialized = false;
-                init();
+                // initialize after a delay
+                Runnable rr = new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        try {
+                            Thread.sleep(5000);
+                        }
+                        catch (InterruptedException exc) {
+                            // do nothing
+                        }
+                        init();
+                    }
+                };
+
+                BaseThread bt = new BaseThread(rr, "Config reloader for DateUtils");
+                bt.setDaemon(true);
+                bt.start();
             }
         }
 
@@ -2072,7 +2089,7 @@ public final class DateUtils
             return new Date(Long.parseLong(source));
         }
     }
-    
+
     /**
      * @version 3.4.0.4 Sep 2, 2014
      * @author GreenVulcano Developer Team

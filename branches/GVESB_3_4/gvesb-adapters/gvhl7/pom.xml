@@ -10,7 +10,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvhl7</artifactId>
-    <version>3.4.0.1-Final</version>
+    <version>3.4.0.2-Final</version>
     <packaging>jar</packaging>
     <name>GreenVulcano ESB HL7 Adapter</name>
 
