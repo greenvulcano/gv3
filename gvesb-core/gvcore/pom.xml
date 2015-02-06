@@ -9,7 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvcore</artifactId>
-    <version>3.4.0.1-Final</version>
+    <version>3.4.0.2-Final</version>
     <packaging>jar</packaging>
     <name>GreenVulcano ESB Core</name>
 

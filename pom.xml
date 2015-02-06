@@ -278,7 +278,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvbase</artifactId>
-            <version>3.4.0.5-Final</version>
+            <version>3.4.0.6-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -292,7 +292,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp_commons</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
             <exclusions>
@@ -312,7 +312,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvpolicy</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -477,7 +477,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore</artifactId>
-            <version>3.4.0.1-Final</version>
+            <version>3.4.0.2-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -541,14 +541,14 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvexcel</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp</artifactId>
-            <version>3.4.0.4-Final</version>
+            <version>3.4.0.5-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
@@ -583,7 +583,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhl7</artifactId>
-            <version>3.4.0.1-Final</version>
+            <version>3.4.0.2-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

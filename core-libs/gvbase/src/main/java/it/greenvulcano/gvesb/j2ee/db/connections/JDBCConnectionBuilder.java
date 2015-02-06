@@ -30,6 +30,7 @@ import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 import it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder;
 import it.greenvulcano.gvesb.j2ee.db.connections.impl.DataSourceConnectionBuilder;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.BaseThread;
 import it.greenvulcano.util.thread.ThreadMap;
 
 import java.sql.Connection;
@@ -158,17 +159,30 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
     public synchronized void configurationChanged(ConfigurationEvent event)
     {
         if (event.getFile().equals(CONFIGURATION_FILE) && (event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED)) {
-            for (Iterator<ConnectionBuilder> iterator = connBuilders.values().iterator(); iterator.hasNext();) {
-                ConnectionBuilder cBuilder = iterator.next();
-                cBuilder.destroy();
-            }
-            connBuilders.clear();
-            try {
-                init();
-            }
-            catch (Exception exc) {
-                // do nothing
-            }
+            destroy();
+            // initialize after a delay
+            Runnable rr = new Runnable() {
+                @Override
+                public void run()
+                {
+                    try {
+                        Thread.sleep(2000);
+                    }
+                    catch (InterruptedException exc) {
+                        // do nothing
+                    }
+                    try {
+                        init();
+                    }
+                    catch (Exception exc) {
+                        // do nothing
+                    }
+                }
+            };
+
+            BaseThread bt = new BaseThread(rr, "Config reloader for JDBCConnectionBuilder");
+            bt.setDaemon(true);
+            bt.start();
         }
     }
 
@@ -178,6 +192,13 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
     @Override
     public synchronized void shutdownStarted(ShutdownEvent event)
     {
+        destroy();
+    }
+
+    /**
+     * 
+     */
+    private void destroy() {
         for (Iterator<ConnectionBuilder> iterator = connBuilders.values().iterator(); iterator.hasNext();) {
             ConnectionBuilder cBuilder = iterator.next();
             cBuilder.destroy();

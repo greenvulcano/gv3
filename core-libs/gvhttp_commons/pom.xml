@@ -9,6 +9,8 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvhttp_commons</artifactId>
+    <version>3.4.0.1-Final</version>
+    <packaging>jar</packaging>
     <name>GreenVulcano HTTP Commons</name>
 
     <dependencies>
