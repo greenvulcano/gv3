@@ -392,7 +392,9 @@
     Transformation to be applied on the input data to obtain the internal XML commands.
 
     #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOInsert}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOInsert}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOInsert}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOInsert}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST DBOInsert transformation CDATA #IMPLIED>
 <!--
@@ -464,7 +466,9 @@
     Transformation to be applied on the input data to obtain the internal XML commands.
 
     #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOInsertOrUpdate}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOInsertOrUpdate}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOInsertOrUpdate}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOInsertOrUpdate}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST DBOInsertOrUpdate transformation CDATA #IMPLIED>
 <!--
@@ -537,7 +541,9 @@
     Transformation to be applied on the input data to obtain the internal XML commands.
 
     #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOUpdateOrInsert}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOUpdateOrInsert}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOUpdateOrInsert}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOUpdateOrInsert}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST DBOUpdateOrInsert transformation CDATA #IMPLIED>
 <!--
@@ -604,7 +610,9 @@
     Transformation to be applied on the input data to obtain the internal XML commands.
 
     #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOUpdate}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOUpdate}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOUpdate}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOUpdate}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST DBOUpdate transformation CDATA #IMPLIED>
 
@@ -678,7 +686,9 @@
     Transformation to be used for converting internal rowset representation in user desired XML document.
 
     #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOSelect}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOSelect}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOSelect}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOSelect}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST DBOSelect transformation CDATA #IMPLIED>
 <!--
@@ -743,7 +753,9 @@
     Transformation to be used for converting internal rowset representation in user desired XML document.
 
     #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOThreadSelect}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOThreadSelect}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOThreadSelect}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOThreadSelect}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST DBOThreadSelect transformation CDATA #IMPLIED>
 <!--
@@ -902,7 +914,9 @@
     Transformation to be applied on the input data to obtain the internal XML commands.
 
     #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOCallSP}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOCallSP}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOCallSP}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOCallSP}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST DBOCallSP transformation CDATA #IMPLIED>
 <!--

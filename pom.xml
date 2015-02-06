@@ -649,7 +649,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvconsole</artifactId>
-            <version>3.4.0.4-Final</version>
+            <version>3.4.0.5-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
