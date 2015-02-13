@@ -24,13 +24,18 @@ import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
+import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -51,26 +56,26 @@ public class ResultSetUtils
     /**
      * Returns all values from the ResultSet as an XML.
      * For instance, if the ResultSet has 3 values, the returned XML will have following fields:
-     *                                <RowSet>
-     *                                  <data>
-     *                                    <row>
-     *                                      <col>value1</col>
-     *                                      <col>value2</col>
-     *                                      <col>value3</col>
-     *                                    </row>
-     *                                    <row>
-     *                                      <col>value4</col>
-     *                                      <col>value5</col>
-     *                                      <col>value6</col>
-     *                                    </row>
-     *                                  ..
-     *                                    <row>
-     *                                      <col>valuex</col>
-     *                                      <col>valuey</col>
-     *                                      <col>valuez</col>
-     *                                    </row>
-     *                                  </data>
-     *                                </RowSet>
+     *  <RowSet>
+     *    <data>
+     *      <row>
+     *        <col>value1</col>
+     *        <col>value2</col>
+     *        <col>value3</col>
+     *      </row>
+     *      <row>
+     *        <col>value4</col>
+     *        <col>value5</col>
+     *        <col>value6</col>
+     *      </row>
+     *    ..
+     *      <row>
+     *        <col>valuex</col>
+     *        <col>valuey</col>
+     *        <col>valuez</col>
+     *      </row>
+     *    </data>
+     *  </RowSet>
      * @param rs
      * @return
      * @throws Exception
@@ -99,15 +104,12 @@ public class ResultSetUtils
                                 case Types.CLOB :{
                                     Clob clob = rs.getClob(j);
                                     if (clob != null) {
-                                        InputStream is = clob.getAsciiStream();
-                                        byte[] buffer = new byte[2048];
-                                        ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-                                        int size;
-                                        while ((size = is.read(buffer)) != -1) {
-                                            baos.write(buffer, 0, size);
-                                        }
+                	                    Reader is = clob.getCharacterStream();
+                                        StringWriter strW = new StringWriter();
+
+                                        IOUtils.copy(is, strW);
                                         is.close();
-                                        textVal = baos.toString();
+                                        textVal = strW.toString();
                                     }
                                     else {
                                         textVal = "";
@@ -118,14 +120,16 @@ public class ResultSetUtils
                                     Blob blob = rs.getBlob(j);
                                     if (blob != null) {
                                         InputStream is = blob.getBinaryStream();
-                                        byte[] buffer = new byte[2048];
-                                        ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-                                        int size;
-                                        while ((size = is.read(buffer)) != -1) {
-                                            baos.write(buffer, 0, size);
-                                        }
+                                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                        IOUtils.copy(is, baos);
                                         is.close();
-                                        textVal = new String(Base64.encodeBase64(baos.toByteArray()));
+                                        try {
+                                            byte[] buffer = Arrays.copyOf(baos.toByteArray(), (int) blob.length());
+                                            textVal = new String(Base64.encodeBase64(buffer));
+                                        }
+                                        catch (SQLFeatureNotSupportedException exc) {
+                                            textVal = new String(Base64.encodeBase64(baos.toByteArray()));
+                                        }
                                     }
                                     else {
                                         textVal = "";
