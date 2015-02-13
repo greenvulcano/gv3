@@ -1,0 +1,94 @@
+<%@ page import="java.util.*" %>
+<%@ page import="java.security.Principal" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<%
+    String contextRoot=request.getContextPath();
+%>
+
+<html>
+<head>
+    <title>Console GreenVulcano</title>
+    <link type="image/x-icon" rel="shortcut icon" href="<%=contextRoot%>/images/favicon.ico" />
+    
+    <link rel="StyleSheet" type="text/css" href="<%=contextRoot%>/css/dtree.css"/>
+    <link rel="StyleSheet" type="text/css" href="<%=contextRoot%>/css/dmenu.css"/>
+    <link rel="StyleSheet" type="text/css" href="<%=contextRoot%>/js/jquery-ui-1.8.custom.css"/>
+    <link rel="StyleSheet" type="text/css" href="<%=contextRoot%>/js/pop/pop.css"/>
+    <link rel="StyleSheet" type="text/css" href="<%=contextRoot%>/js/apycom/globalMenu/menu.css"/>
+    <link rel="StyleSheet" type="text/css" href="<%=contextRoot%>/css/styles.css"/>
+    <link rel="stylesheet" type="text/css" href="<%=contextRoot%>/js/dyndatetime/css/calendar-win2k-cold-1.css"/>
+    <!--[if gte IE 7]><link rel="StyleSheet" type="text/css" href="<%=contextRoot%>/css/fix_ie.css"/><![endif]-->
+    
+    <script type="text/javascript" src="<%=contextRoot%>/js/dtree.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/dmenu.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/jquery-ui-1.8.custom.min.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/pop/jquery.pop.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/date.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/dyndatetime/jquery.dynDateTime.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/dyndatetime/lang/calendar-it.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/jbind/jquery.jbind-1.5.8.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/css-helper/jquery.csshelper.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/tablescroll/jquery.tablescroll.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/jquery.timers-1.2.js"></script>
+    
+    <script type="text/javascript" src="<%=contextRoot%>/js/apycom/globalMenu/menu.js"></script>
+    <script type="text/javascript" src="<%=contextRoot%>/js/utils.js"></script>
+    
+    <link rel="stylesheet" href="<%=contextRoot%>/js/tipsy/stylesheets/tipsy.css" type="text/css" />
+    <script type="text/javascript" src="<%=contextRoot%>/js/tipsy/javascripts/jquery.tipsy.js"></script>
+
+    <script type="text/javascript">
+        $(function(){$("#menuxml").buttonset();$("#buttonsSingleTest").buttonset();$(".buttonTesting").button();$("#buttonMultiTesting").buttonset();});
+        $(document).ready(
+            function(){jQuery.fn.center=function(){this.css("left",($(window).width()-this.width())/2+$(window).scrollLeft()+"px");
+                return this;
+            }
+            $('#menu').center();
+        });
+    </script>
+    <%
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "-1");
+        String currentMenu = "";
+        if(session != null) {
+            currentMenu = (String) session.getAttribute("currentMenu");
+            if(currentMenu == null) {currentMenu = "";}
+        }
+
+        Principal p = request.getUserPrincipal();
+        String user = (p != null ? p.getName() : "no user");
+    %>
+</head>
+<body id="page_bg" >
+<script type="text/javascript">dMenu.init();</script>
+    <div id="container">
+        <div id="title">
+            <a href="<%=contextRoot%>" title="GreenVulcano ESB Administration Console" id="header-photo">GreenVulcano ESB Administration Console</a>
+        </div>
+        <div id="manu_bar">
+	        <div id="menu">
+	            <ul  class="menu">
+	                <li<%=currentMenu.equals("deploy")?" class='current'":""%>><a href="<%=contextRoot%>/deploy/fileUpload.jsp" class="parent"><span>Deploy New Services</span></a></li>
+	                <li<%=currentMenu.equals("modParamConf")?" class='current'":""%>><a href="<%=contextRoot%>/documents/selectGroup?group=gvesb_core"><span>Parameter</span></a></li>
+	                <li<%=currentMenu.equals("webservice")?" class='current'":""%>><a href="<%=contextRoot%>/webservice/general.jsp"><span>Web Service</span></a></li>
+	                <li<%=currentMenu.equals("utility")?" class='current'":""%>><a href="<%=contextRoot%>/def/admin/index.jsp"><span>Utility</span></a></li>
+	                <li<%=currentMenu.equals("testing")?" class='current'":""%>><a href="<%=contextRoot%>/testing/index.jsp"><span>Testing</span></a></li>
+	                <li<%=currentMenu.equals("log")?" class='current'":""%>><a href="<%=contextRoot%>/logMain.do"><span>Log</span></a></li>
+	                <li<%=currentMenu.equals("report")?" class='current'":""%>><a href="<%=contextRoot%>/reportMain.do"><span>Report</span></a></li>
+	                <li<%=currentMenu.equals("savepoint")?" class='current'":""%>><a href="<%=contextRoot%>/savepointMain.do"><span>SavePoint</span></a></li>
+	                <li<%=currentMenu.equals("monitoring")?" class='current last'":" class='last'"%>><a href="<%=contextRoot%>/monitoring/index.jsp"><span>Monitoring</span></a></li>
+	            </ul>
+	        </div>      
+	        <div id="user">
+	            <span>User:&nbsp;<%=user%>&nbsp;&nbsp;</span><a href="<%=contextRoot%>/logout.jsp" title="logout" id="logout">logout</a>
+	        </div>
+        </div>
+    </div>
+<a href="http://apycom.com/"></a>
+
+<%
+    try {
+%>

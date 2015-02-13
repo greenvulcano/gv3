@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<gvxdt:gvxdt xmlns:tmodel="http://www.greenvulcano.it/xsd/gvxdt/tmodel.xsd" xmlns:graphic="http://www.greenvulcano.it/xsd/gvxdt/graphic.xsd" xmlns:gvxdt="http://www.greenvulcano.it/xsd/gvxdt/gvxdt.xsd">
+    <tmodel:tmodel>
+        <tmodel:schemas>
+            <tmodel:schema direction="source" id="schema-15" name="DataHandler.xsd"
+                           rootname="RowSet"/>
+            <tmodel:schema direction="target" id="schema-16" name="CreditService_out.xsd"
+                           rootname="QueryResponse"/>
+        </tmodel:schemas>
+        <tmodel:functions>
+            <tmodel:function id="func-2" name="logic">
+                <tmodel:property name="b" value="&apos;Y&apos;"/>
+                <tmodel:property name="operator" value="="/>
+            </tmodel:function>
+            <tmodel:function id="func-3" name="choose">
+                <tmodel:property name="numarg" value="1"/>
+                <tmodel:property name="otherwise" value="&apos;false&apos;"/>
+                <tmodel:property name="param_0" value="&apos;true&apos;"/>
+            </tmodel:function>
+        </tmodel:functions>
+        <tmodel:links>
+            <tmodel:link condition="" end="xsd:schema-16:/int:QueryResponse/int:cnumber"
+                         mode="" priority="" start="xsd:schema-15:/RowSet/data/row/col[2]"
+                         type="template"/>
+            <tmodel:link condition="" end="xsd:schema-16:/int:QueryResponse" mode=""
+                         priority="" start="xsd:schema-15:/RowSet/data/row"
+                         type="template"/>
+            <tmodel:link condition="" end="xsd:schema-16:/int:QueryResponse/int:credit"
+                         mode="" priority="" start="xsd:schema-15:/RowSet/data/row/col[3]"
+                         type="template"/>
+            <tmodel:link condition="" end="fid:func-2,a" mode="" priority=""
+                         start="xsd:schema-15:/RowSet/data/row/col[4]" type="template"/>
+            <tmodel:link condition="" end="fid:func-3,cond_0" mode="" priority=""
+                         start="fid:func-2" type="template"/>
+            <tmodel:link condition="" end="xsd:schema-16:/int:QueryResponse/int:active"
+                         mode="" priority="" start="fid:func-3" type="template"/>
+            <tmodel:link condition="" end="xsd:schema-16:/int:QueryResponse/int:name"
+                         mode="" priority="" start="xsd:schema-15:/RowSet/data/row/col[1]"
+                         type="template"/>
+        </tmodel:links>
+        <tmodel:xsl filename=""/>
+    </tmodel:tmodel>
+    <graphic:graphic>
+        <graphic:box h="50" modelid="schema-15" w="50" x="50" y="50"/>
+        <graphic:box h="50" modelid="schema-16" w="50" x="501" y="671"/>
+        <graphic:box h="50" modelid="func-2" w="50" x="424" y="889"/>
+        <graphic:box h="50" modelid="func-3" w="50" x="618" y="895"/>
+    </graphic:graphic>
+</gvxdt:gvxdt>
