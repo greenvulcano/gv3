@@ -50,7 +50,7 @@ public class RegisterHttpClientProtocolManager implements MBeanServerInitializer
      * The MBean descriptor.
      */
     private String                  descriptorName;
-    private HttpClientProtocolProxy proxy      = null;
+    private static HttpClientProtocolProxy proxy      = null;
 
     /**
      * Initialize the <code>MBeanServerInitializer</code>.
