@@ -27,6 +27,8 @@ import it.greenvulcano.util.metadata.PropertyHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,6 +37,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.Types;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -161,15 +164,14 @@ public class GVESBPropertyHandler implements PropertyHandler
                 ResultSetMetaData rsmeta = rs.getMetaData();
                 if (rsmeta.getColumnType(1) == Types.CLOB) {
                     Clob clob = rs.getClob(1);
-                    InputStream is = clob.getAsciiStream();
-                    byte[] buffer = new byte[1024];
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-                    int size;
-                    while ((size = is.read(buffer)) != -1) {
-                        baos.write(buffer, 0, size);
+                    if (clob != null) {
+	                    Reader is = clob.getCharacterStream();
+                        StringWriter strW = new StringWriter();
+
+                        IOUtils.copy(is, strW);
+                        is.close();
+                        paramValue = strW.toString();
                     }
-                    is.close();
-                    paramValue = baos.toString();
                 }
                 else {
                     paramValue = rs.getString(1);
@@ -264,15 +266,17 @@ public class GVESBPropertyHandler implements PropertyHandler
             while (rs.next()) {
                 if (type == Types.CLOB) {
                     Clob clob = rs.getClob(1);
-                    InputStream is = clob.getAsciiStream();
-                    byte[] buffer = new byte[1024];
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-                    int size;
-                    while ((size = is.read(buffer)) != -1) {
-                        baos.write(buffer, 0, size);
+                    if (clob != null) {
+                        Reader is = clob.getCharacterStream();
+                        StringWriter strW = new StringWriter();
+
+                        IOUtils.copy(is, strW);
+                        is.close();
+                        paramValue += separator + strW.toString();
                     }
-                    is.close();
-                    paramValue += separator + baos.toString();
+                    else {
+                    	paramValue += separator + "null";
+                    }
                 }
                 else {
                     paramValue += separator + rs.getString(1);
