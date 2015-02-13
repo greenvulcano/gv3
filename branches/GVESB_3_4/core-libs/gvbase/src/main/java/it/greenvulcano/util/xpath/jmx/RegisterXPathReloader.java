@@ -70,7 +70,7 @@ public class RegisterXPathReloader implements MBeanServerInitializer, Configurat
     public final void initializeMBeanServer(MBeanServer server) throws Exception
     {
         XMLConfig.addConfigurationListener(this, XPATH_CONF);
-        init();
+        //init();
     }
 
     /**
@@ -111,7 +111,7 @@ public class RegisterXPathReloader implements MBeanServerInitializer, Configurat
                 String prefix = XMLConfig.get(node, "@prefix");
                 String namespace = XMLConfig.get(node, "@namespace");
                 if ((prefix == null) || "".equals(prefix)) {
-                    System.out.println("### XPath namespace NOT installed... prefix empty: " + prefix + " -> " + namespace);
+                    System.out.println("### XPath namespace NOT re-installed... prefix empty: " + prefix + " -> " + namespace);
                     continue;
                 }
                 if (namespace == null) {
@@ -119,10 +119,10 @@ public class RegisterXPathReloader implements MBeanServerInitializer, Configurat
                 }
                 try {
                     XPathAPI.installNamespace(prefix, namespace);
-                    System.out.println("### XPath namespace installed...: " + prefix + " -> " + namespace);
+                    System.out.println("### XPath namespace re-installed...: " + prefix + " -> " + namespace);
                 }
                 catch (Exception e) {
-                    System.out.println("ERROR: cannot install namespace: " + prefix + "->" + namespace);
+                    System.out.println("ERROR: cannot re-install namespace: " + prefix + "->" + namespace);
                     e.printStackTrace();
                 }
             }
