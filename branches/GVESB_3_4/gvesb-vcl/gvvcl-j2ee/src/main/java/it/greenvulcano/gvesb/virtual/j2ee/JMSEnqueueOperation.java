@@ -92,11 +92,14 @@ public class JMSEnqueueOperation extends J2EEOperation implements EnqueueOperati
 
     private XAHelper            xaHelper    = null;
 
-
     /**
      * If true the produced message is dumped on log.
      */
     private boolean             dumpMessage = false;
+    /**
+     * If true the message is enriched with GVBuffer properties.
+     */
+    private boolean             decorateMessage = true; 
 
     /**
      * @see it.greenvulcano.gvesb.virtual.j2ee.J2EEOperation#j2eeInit(org.w3c.dom.Node)
@@ -180,6 +183,8 @@ public class JMSEnqueueOperation extends J2EEOperation implements EnqueueOperati
         }
 
         dumpMessage = XMLConfig.getBoolean(node, "@dump-message", false);
+        decorateMessage = XMLConfig.getBoolean(node, "@decorate-message", true);
+        logger.debug("Decorate Message.......: " + decorateMessage);
     }
 
     /**
@@ -272,7 +277,9 @@ public class JMSEnqueueOperation extends J2EEOperation implements EnqueueOperati
                                         "Don't know how to create message to send/publish. Data provider is not set and gvBuffer#object is not a JMS message."}});
                     }
                 }
-                JMSMessageDecorator.decorateMessage(message, gvBuffer);
+                if (decorateMessage) {
+                	JMSMessageDecorator.decorateMessage(message, gvBuffer);
+                }
             }
             catch (InvalidDataException exc) {
                 throw exc;
