@@ -178,11 +178,12 @@ public class JMXEntryPoint implements ConfigurationListener
                 // Modeler configuration
                 Node modelerConf = XMLConfig.getNode(CONFIGURATION_FILE, "/jmx/mbeans-descriptors");
                 initModeler(modelerConf);
-        
+
+                // in order to re-enter init() during initializers run...
+                initialized = true;
+
                 // Modeler configuration
                 invokeInitializers();
-                
-                initialized = true;
             }
             finally {
                 initializing = false;
