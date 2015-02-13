@@ -6602,6 +6602,11 @@
     Default: false.
 -->
 <!ATTLIST jms-enqueue dump-message (true|false) #IMPLIED>
+<!--
+    If true the message to be enqueued is enriched with input GVBuffer properties value.
+    Default: true.
+-->
+<!ATTLIST jms-enqueue decorate-message (true|false) #IMPLIED>
 
 <!--
     Used to make a routing mechanism at the level of communication channel,
@@ -6887,6 +6892,11 @@
     Default false.
 -->
 <!ATTLIST jms-dequeue dump-message (true|false) #IMPLIED>
+<!--
+    If true the output GVBuffer is enriched with the received message properties value.
+    Default: true.
+-->
+<!ATTLIST jms-enqueue decorate-gvbuffer (true|false) #IMPLIED>
 
 <!--
     Allows you to specify a selector for receiving messages.
