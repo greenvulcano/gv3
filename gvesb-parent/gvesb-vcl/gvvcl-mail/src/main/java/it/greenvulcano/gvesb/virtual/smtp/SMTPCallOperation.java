@@ -457,7 +457,7 @@ public class SMTPCallOperation implements CallOperation
                     msg.addHeader("X-Priority", "1");
                 }
                 msg.setFrom(new InternetAddress(localSession.getProperties().getProperty("mail.from"), 
-                		PropertiesHandler.expand(senderDisplayName, params, gvBuffer)));
+                        PropertiesHandler.expand(senderDisplayName, params, gvBuffer)));
         
                 String appoTO = gvBuffer.getProperty("GV_SMTP_TO");
                 if ((appoTO == null) || "".equals(appoTO)) {
