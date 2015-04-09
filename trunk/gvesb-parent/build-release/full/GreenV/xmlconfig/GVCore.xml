@@ -2735,11 +2735,11 @@ data.setObject(fb);]]></Script>
                     <fsmonitor-call class="it.greenvulcano.gvesb.virtual.file.reader.AnalyzeDirCall"
                                     name="dirScan" type="call">
                         <LocalFileSystemMonitor class="it.greenvulcano.util.file.monitor.LocalFileSystemMonitor"
-                                                path="${{java.io.tmpdir}}/TESTFS/TestSearch"
+                                                path="${{gv.app.home}}/TEST/TESTFS/TestSearch"
                                                 type="fs-monitor">
                             <FileMonitorStatus class="it.greenvulcano.util.file.monitor.status.FileMonitorStatus"
                                                errorOnInvalidFile="true"
-                                               statusFilePath="${{java.io.tmpdir}}/TESTFS/dirScan.state"
+                                               statusFilePath="${{gv.app.home}}/TEST/TESTFS/dirScan.state"
                                                type="fs-monitor-status"/>
                             <FileFilter file-mask="[\w].*" file-type="all"/>
                             <ResultFilter created="true" deleted="true" existing="true"
