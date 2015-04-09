@@ -400,6 +400,7 @@ public class GreenVulcano
     }
 
     protected void setValid(boolean valid) {
+        logger.debug("Invalidating GreenVulcano instance " + this);
         this.valid = valid;
     }
 
@@ -408,11 +409,11 @@ public class GreenVulcano
      */
     public void destroy(boolean force)
     {
-        valid = false;
+        setValid(false);
         if (running && !force) {
             return;
         }
-        logger.debug("Destroing GreenVulcano instance");
+        logger.debug("Destroing GreenVulcano instance " + this);
         if (gvContext != null) {
             gvContext.destroy();
             gvContext = null;
