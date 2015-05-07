@@ -924,4 +924,8 @@ order by 1]]></statement>
             </TwitterSocialAdapter>
         </SocialAdapters>
     </GVSocialAdapterManager>
+    <GVDicomAdapterConfiguration name="GV_DICOM" type="module" version="1.0">
+        <Local applicationEntity="GVDICOM" listenerPort="11112" dicomStoreDirectory="sp{{gv.app.home}}/DICOM/store"/>
+        <AssociationList />
+    </GVDicomAdapterConfiguration>
 </GVAdapters>

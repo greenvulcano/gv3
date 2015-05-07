@@ -86,6 +86,7 @@
                 <include name="Extra/GVBpel.dtd"/>
                 <include name="Extra/GVSAP.dtd"/>
                 <include name="Extra/GVHDFSFileSystem.dtd"/>
+                <include name="Extra/GVDICOM.dtd"/>
             </fileset>
         </copy>
 
@@ -161,6 +162,7 @@
                 <exclude name="gvzmq.jar"/>
                 <exclude name="gvvcl-openspcoop.jar"/>
                 <exclude name="gvhadoop.jar"/>
+                <exclude name="gvdicom.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
@@ -508,6 +510,43 @@
               preservelastmodified="true" overwrite="true">
             <fileset dir="${org.twitter4j.lib}">
                 <include name="twitter4j-core.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy DICOM lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvdicom.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${org.dicom4j.lib}">
+                <include name="*.jar"/>
+            </fileset>
+        	 <fileset dir="${backport.util.concurrent.lib}">
+        	     <include name="*.jar"/>
+        	 </fileset>
+            <fileset dir="${org.dolmen.lib}">
+        	     <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.apache.excalibur.lib}">
+               <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.apache.mina.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${java3d.java3d.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.jdom.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${com.thoughtworks.xstream.lib}">
+                <include name="*.jar"/>
             </fileset>
         </copy>
 

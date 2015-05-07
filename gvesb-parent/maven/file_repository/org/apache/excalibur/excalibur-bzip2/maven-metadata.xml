@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.apache.excalibur</groupId>
+  <artifactId>excalibur-bzip2</artifactId>
+  <version>1.0</version>
+  <versioning>
+    <versions>
+      <version>1.0</version>
+    </versions>
+    <lastUpdated>20150205135724</lastUpdated>
+  </versioning>
+</metadata>
