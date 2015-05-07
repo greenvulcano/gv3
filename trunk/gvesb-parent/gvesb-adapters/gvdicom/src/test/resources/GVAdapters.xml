@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+    
+    <GVDicomAdapterConfiguration name="GV_DICOM" type="module" version="1.0">
+      <Local applicationEntity="DRAGO" listenerPort="11112" dicomStoreDirectory="/home/mirko/GreenVulcanoOS/store"/>
+      <AssociationList>
+      	<Association name="Local" host="127.0.0.1" port="5678"/>
+      	<Association name="MedConnections" host="213.165.94.158" port="104"/>
+      </AssociationList>    
+    </GVDicomAdapterConfiguration>
+</GVAdapters>

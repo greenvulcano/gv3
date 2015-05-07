@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.dicom4j</groupId>
+  <artifactId>dicom4j</artifactId>
+  <version>0.0.9a</version>
+  <versioning>
+    <versions>
+      <version>0.0.9a</version>
+    </versions>
+    <lastUpdated>20150204092529</lastUpdated>
+  </versioning>
+</metadata>

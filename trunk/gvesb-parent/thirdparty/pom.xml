@@ -998,6 +998,41 @@
             <artifactId>bigqueue</artifactId>
         </dependency>
 
+        <!-- DICOM -->
+        <dependency>
+            <groupId>org.dicom4j</groupId>
+            <artifactId>dicom4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>backport-util-concurrent</groupId>
+            <artifactId>backport-util-concurrent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.dolmen</groupId>
+            <artifactId>dolmen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.excalibur</groupId>
+            <artifactId>excalibur-bzip2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.mina</groupId>
+            <artifactId>mina-core</artifactId>
+            <version>1.1.7</version> <!-- Forced for DICOM Adapter -->
+        </dependency>
+        <dependency>
+            <groupId>java3d</groupId>
+            <artifactId>vecmath</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -1259,6 +1294,11 @@
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhadoop</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvdicom</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>jboss51-utils</artifactId>

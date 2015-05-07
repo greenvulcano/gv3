@@ -37,8 +37,11 @@
 <!ENTITY % gvhadoop SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHDFSFileSystem.dtd">
 %gvhadoop;
 
+<!ENTITY % gvdicom SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVDICOM.dtd">
+%gvdicom;
+
 <!ENTITY % extra-j2ee-calls "">
-<!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call">
+<!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call|%dicom-calls;">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
 <!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call|pdfreader-call">
@@ -52,7 +55,7 @@
 <!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
 
 <!ENTITY % extra-core "">
-<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager">
+<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager,GVDicomAdapterConfiguration">
 <!ENTITY % extra-support "">
 
 <!ENTITY % extra-input-services "|dh-selector-service">

@@ -96,6 +96,8 @@
                                      target="${{jboss.server.name}}" type="initializer" delayed-init="15"/>
             <TimerTask-initializer class="it.greenvulcano.scheduler.util.RegisterTaskManagerFactory"
                                    target="${{jboss.server.name}}" type="initializer" delayed-init="25"/>
+            <generic-initializer class="it.greenvulcano.gvesb.gvdicom.jmx.RegisterDicomManager"
+                                 target="${{jboss.server.name}}" type="initializer" delayed-init="25"/>
         </Initializers>
     </entry-point>
     <mbeans-descriptors>

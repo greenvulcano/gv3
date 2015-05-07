@@ -235,6 +235,20 @@
                            value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t][%c] - %m %n"/>
                 </layout>
             </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVDICOM">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVDICOM.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t][%c] - %m %n"/>
+                </layout>
+            </appender>
+            
             <logger additivity="false" name="it.greenvulcano.gvesb.virtual">
                 <level value="DEBUG"/>
                 <appender-ref ref="LOGGER_FOR_GVCORE"/>
@@ -418,6 +432,17 @@
                 <appender-ref ref="LOGGER_FOR_GVSOCIAL"/>
                 <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
             </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvdicom.support">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvdicom.listener">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVDICOM"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+            
         </log4j:configuration>
     </GVLog4JConfiguration>
     <GVScriptConfig name="SCRIPT" type="module">
