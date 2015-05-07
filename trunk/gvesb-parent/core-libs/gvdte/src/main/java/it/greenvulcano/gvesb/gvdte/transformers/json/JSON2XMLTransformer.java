@@ -144,7 +144,7 @@ public class JSON2XMLTransformer implements DTETransformer {
                     forceAttributes.add(attr.trim());
                 }
             }
-            
+
             logger.debug("Loaded parameters: outputXslMapName = " + xslMapName + " - DataSourceSet: "
                     + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory
                     + " - conversionPolicy = " + policy
