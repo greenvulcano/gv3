@@ -139,7 +139,7 @@ public class DBOBuilder implements IDBOBuilder
         NMDC.push();
         try {
             NMDC.put("DH_SERVICE", "");
-            logger.debug("DBOBuilder initialized with node [" + builder.toString() + "].");
+            logger.debug("DBOBuilder initialized with node\n[" + XMLUtils.serializeDOM_S(builder) + "].");
             String sDump = XMLConfig.get(builder, "@make-dump", "text");
             if (sDump.equals("none")) {
                 makeDump = DUMP_NONE;

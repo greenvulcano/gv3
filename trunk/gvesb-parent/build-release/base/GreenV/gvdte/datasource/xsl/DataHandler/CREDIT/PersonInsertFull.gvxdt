@@ -75,7 +75,7 @@
                 <tmodel:property name="namespace" value="http://xml.apache.org/xalan/java"/>
             </tmodel:function>
             <tmodel:function id="func-30" name="constant">
-                <tmodel:property name="value" value="float"/>
+                <tmodel:property name="value" value="numeric"/>
             </tmodel:function>
             <tmodel:function id="func-33" name="constant">
                 <tmodel:property name="value" value="1"/>

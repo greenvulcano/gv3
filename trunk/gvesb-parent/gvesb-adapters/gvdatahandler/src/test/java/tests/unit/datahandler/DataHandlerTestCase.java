@@ -113,7 +113,42 @@ public class DataHandlerTestCase extends TestCase
         String field1 = cols.item(1).getTextContent();
         assertEquals("testvalue", field1);
         String field2 = cols.item(2).getTextContent();
-        assertEquals("20000101 12:30:45", field2);
+        assertEquals("2000-01-01 12:30:45", field2);
+        String field3 = cols.item(3).getTextContent();
+        assertEquals("123,45", field3);
+    }
+
+    /**
+     * @throws Exception
+     * 
+     */
+    public void testDHCallSelectMulti() throws Exception
+    {
+        String operation = "GVESB::TestSelectMulti";
+        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        DHResult result = dboBuilder.EXECUTE(operation, null, null);
+        assertNotNull(result);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(0, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(1, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+        Document output = (Document) result.getData();
+        assertNotNull(output);
+        assertTrue(output.getDocumentElement().hasChildNodes());
+        Node data = output.getDocumentElement().getChildNodes().item(0);
+        assertTrue(data.hasChildNodes());
+        Node row = data.getChildNodes().item(0);
+        assertTrue(row.hasChildNodes());
+        NodeList cols = row.getChildNodes();
+        assertEquals(11, cols.getLength());
+        String id = cols.item(0).getTextContent();
+        assertEquals("1", id);
+        String field1 = cols.item(1).getTextContent();
+        assertEquals("testvalue", field1);
+        String field2 = cols.item(2).getTextContent();
+        assertEquals("2000-01-01 12:30:45", field2);
         String field3 = cols.item(3).getTextContent();
         assertEquals("123,45", field3);
     }
@@ -162,7 +197,7 @@ public class DataHandlerTestCase extends TestCase
         String field1 = cols.item(1).getTextContent();
         assertEquals("testvalue", field1);
         String field2 = cols.item(2).getTextContent();
-        assertEquals("20000101 12:30:45", field2);
+        assertEquals("2000-01-01 12:30:45", field2);
         String field3 = cols.item(3).getTextContent();
         assertEquals("123,45", field3);
     }
@@ -180,7 +215,7 @@ public class DataHandlerTestCase extends TestCase
         String field1 = cols.item(2).getTextContent();
         assertEquals("testvalue", field1);
         String field2 = cols.item(3).getTextContent();
-        assertEquals("20000101 12:30:45", field2);
+        assertEquals("2000-01-01 12:30:45", field2);
     }
     /**
      * @throws Exception
@@ -254,6 +289,72 @@ public class DataHandlerTestCase extends TestCase
         operation = "GVESB::TestInsertOrUpdate";
         dboBuilder = dhFactory.getDBOBuilder(operation);
         result = dboBuilder.EXECUTE(operation, Commons.createInsertOrUpdateMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(1, result.getUpdate());
+        assertEquals(2, result.getTotal());
+        assertEquals(1, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+    }
+    
+    /**
+     * @throws Exception
+     */
+    public final void testDHCallMultiInsertOrUpdate() throws Exception
+    {
+        String operation = "GVESB::TestInsertMulti";
+        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        DHResult result = dboBuilder.EXECUTE(operation, Commons.createInsertMultiMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(2, result.getTotal());
+        assertEquals(2, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        operation = "GVESB::TestInsertMultiNP";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createInsertMultiNPMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(2, result.getTotal());
+        assertEquals(2, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        operation = "GVESB::TestUpdateMultiNP";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createUpdateMultiNPMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(2, result.getUpdate());
+        assertEquals(2, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        operation = "GVESB::TestInsertMultiMixNP";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createInsertMultiMixNPMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(4, result.getTotal());
+        assertEquals(4, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        operation = "GVESB::TestUpdateMultiMixNP";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createUpdateMultiMixNPMessage(), null);
+        assertEquals(0, result.getDiscard());
+        assertEquals(4, result.getUpdate());
+        assertEquals(4, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(0, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        operation = "GVESB::TestInsertOrUpdateMulti";
+        dboBuilder = dhFactory.getDBOBuilder(operation);
+        result = dboBuilder.EXECUTE(operation, Commons.createInsertOrUpdateMultiMessage(), null);
         assertEquals(0, result.getDiscard());
         assertEquals(1, result.getUpdate());
         assertEquals(2, result.getTotal());

@@ -20,6 +20,7 @@
 package it.greenvulcano.util.txt;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
@@ -894,7 +896,22 @@ public class TextUtils
             throw new NullPointerException(message);
         }
     }
-    
+
+    /**
+     * @param throwable
+     * @return riturn the stack-trace
+     */
+    public static String getStackTrace(Throwable throwable)
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream pstream = new PrintStream(baos);
+        String stack = null;
+        throwable.printStackTrace(pstream);
+        pstream.flush();
+        stack = baos.toString();
+        return stack;
+    }
+
     /**
      * @param filename
      * @return
@@ -907,6 +924,21 @@ public class TextUtils
             filename = filename.replace("/", File.separator);
         }
         return filename;
+    }
+
+
+    /**
+     * Parse the following string (case insensitive) into boolean values:
+     * boolean true : 'true', 'yes', 'si', 'on', 'ok', '1'
+     * boolean false: all other values, empty or null
+     * 
+     * @param s
+     * @return boolean value
+     */
+    public static boolean parseBoolean(String s) {
+        if (s == null) return false;
+        return (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("si")
+                || s.equalsIgnoreCase("on") || s.equalsIgnoreCase("ok") || s.equalsIgnoreCase("1"));
     }
 
 }

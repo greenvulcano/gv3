@@ -218,7 +218,7 @@ public class FieldFormatter
      * @return the formatted number
      * @throws Exception
      */
-    public String formatNumber(float number) throws Exception
+    public String formatNumber(double number) throws Exception
     {
         return formatField(formatNumber(number, null, null, null));
     }
@@ -260,7 +260,7 @@ public class FieldFormatter
      * @return the formatted number
      * @throws Exception
      */
-    public String formatNumber(float number, String currNumberFormat, String currGroupSeparator, String currDecSeparator)
+    public String formatNumber(double number, String currNumberFormat, String currGroupSeparator, String currDecSeparator)
             throws Exception
     {
         currNumberFormat = (currNumberFormat != null) ? currNumberFormat : numberFormat;

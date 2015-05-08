@@ -77,7 +77,7 @@
               <xsl:element name="row">
                   <xsl:attribute name="id">3</xsl:attribute>
                   <xsl:element name="col">
-                      <xsl:attribute name="type">float</xsl:attribute>
+                      <xsl:attribute name="type">numeric</xsl:attribute>
                       <xsl:value-of select="Credit"/>
                   </xsl:element>
                   <xsl:element name="col">
@@ -104,7 +104,7 @@
                       <xsl:value-of select="Number"/>
                   </xsl:element>
                   <xsl:element name="col">
-                      <xsl:attribute name="type">float</xsl:attribute>
+                      <xsl:attribute name="type">numeric</xsl:attribute>
                       <xsl:value-of select="Credit"/>
                   </xsl:element>
                   <xsl:element name="col">

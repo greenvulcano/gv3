@@ -380,7 +380,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
     *
     */
-   public static final String NSTRING_TYPE               = "nstring";
+    public static final String NSTRING_TYPE               = "nstring";
 
     /**
      *
@@ -390,7 +390,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
     *
     */
-   public static final String LONG_NSTRING_TYPE          = "long-nstring";
+    public static final String LONG_NSTRING_TYPE          = "long-nstring";
 
     /**
      *
@@ -415,17 +415,57 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
      *
      */
+    public static final String DATE_TYPE                  = "date";
+
+    /**
+    *
+    */
+   public static final String TIME_TYPE                   = "time";
+
+    /**
+    *
+    */
+    public static final String BOOLEAN_TYPE               = "boolean";
+
+    /**
+    *
+    */
+    public static final String SMALLINT_TYPE              = "small-int";
+    
+    /**
+    *
+    */
+    public static final String INTEGER_TYPE               = "integer";
+    
+    /**
+    *
+    */
+    public static final String BIGINT_TYPE                = "big-int";
+    
+    /**
+     *
+     */
     public static final String NUMERIC_TYPE               = "numeric";
 
     /**
      *
      */
     public static final String FLOAT_TYPE                 = "float";
+    
+    /**
+     *
+     */
+    public static final String DOUBLE_TYPE                = "double";
 
     /**
     *
     */
     public static final String DECIMAL_TYPE               = "decimal";
+    
+    /**
+    *
+    */
+    public static final String XML_TYPE                   = "xml";
    
     /**
      *
@@ -445,7 +485,12 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
      *
      */
-    public static final String DEFAULT_DATE_FORMAT        = "yyyyMMdd HH:mm:ss";
+    public static final String DEFAULT_DATE_FORMAT        = "yyyy-MM-dd HH:mm:ss";
+
+    /**
+    *
+    */
+    public static final String DEFAULT_TIME_FORMAT        = "HH:mm:ss";
 
     /**
      *
@@ -495,6 +540,11 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
      *
      */
+    protected SimpleDateFormat    timeFormatter           = null;
+
+    /**
+     *
+     */
     protected DecimalFormat       numberFormatter         = new DecimalFormat();
 
     private XMLReader             xr;
@@ -508,6 +558,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
         dboclass = this.getClass().getName();
         dboclass = dboclass.substring(dboclass.lastIndexOf('.') + 1);
         dateFormatter = new SimpleDateFormat(DEFAULT_DATE_FORMAT, DateUtils.getDefaultLocale());
+        timeFormatter = new SimpleDateFormat(DEFAULT_TIME_FORMAT, DateUtils.getDefaultLocale());
         currentRowFields = new Vector<Object>(10);
         statements = new HashMap<String, String>();
         uuids = new HashMap<String, String>();

@@ -46,6 +46,8 @@ public interface RowSetBuilder
     public void setXMLUtils(XMLUtils parser);
 
     public void setDateFormatter(SimpleDateFormat dateFormatter);
+    
+    public void setTimeFormatter(SimpleDateFormat timeFormatter);
 
     public void setNumberFormatter(DecimalFormat numberFormatter);
 

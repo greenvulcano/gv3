@@ -35,11 +35,14 @@ import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLXML;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -67,6 +70,7 @@ public class StandardRowSetBuilder implements RowSetBuilder
     private String           decSeparator;
     private XMLUtils         parser;
     private SimpleDateFormat dateFormatter;
+    private SimpleDateFormat timeFormatter;
     private DecimalFormat    numberFormatter;
 
     public Document createDocument(XMLUtils parser) throws NullPointerException {
@@ -93,7 +97,7 @@ public class StandardRowSetBuilder implements RowSetBuilder
 
         boolean noKey = ((keyField == null) || keyField.isEmpty());
 
-        boolean isNull = false;
+        //boolean isNull = false;
         Element data = null;
         Element row = null;
         Element col = null;
@@ -112,63 +116,70 @@ public class StandardRowSetBuilder implements RowSetBuilder
             for (int j = 1; j <= metadata.getColumnCount(); j++) {
                 FieldFormatter fF = fFormatters[j];
 
-                isNull = false;
+                //isNull = false;
                 col = parser.createElement(doc, AbstractDBO.COL_NAME);
                 switch (metadata.getColumnType(j)) {
-                    case Types.DATE :
-                    case Types.TIME :
+                    case Types.DATE : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.DATE_TYPE);
+                        java.sql.Date dateVal = rs.getDate(j);
+                        textVal = processDateTime(col, fF, dateVal, AbstractDBO.DEFAULT_DATE_FORMAT);
+                    }
+                        break;
+                    case Types.TIME : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.TIME_TYPE);
+                        java.sql.Time dateVal = rs.getTime(j);
+                        textVal = processDateTime(col, fF, dateVal, AbstractDBO.DEFAULT_TIME_FORMAT);
+                    }
+                        break;
                     case Types.TIMESTAMP : {
                         parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.TIMESTAMP_TYPE);
                         Timestamp dateVal = rs.getTimestamp(j);
-                        isNull = dateVal == null;
-                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
-                        if (isNull) {
-                            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, AbstractDBO.DEFAULT_DATE_FORMAT);
-                            textVal = "";
-                        }
-                        else {
-                            if (fF != null) {
-                                parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getDateFormat());
-                                textVal = fF.formatDate(dateVal);
-                            }
-                            else {
-                                parser.setAttribute(col, AbstractDBO.FORMAT_NAME, AbstractDBO.DEFAULT_DATE_FORMAT);
-                                textVal = dateFormatter.format(dateVal);
-                            }
-                        }
+                        textVal = processDateTime(col, fF, dateVal, AbstractDBO.DEFAULT_DATE_FORMAT);
                     }
                         break;
-                    case Types.DOUBLE :
+                    case Types.DOUBLE : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
+                        double numVal = rs.getDouble(j);
+                        textVal = processDouble(col, fF, numVal);
+                    }
+                        break;
                     case Types.FLOAT :
                     case Types.REAL : {
                         parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
                         float numVal = rs.getFloat(j);
-                        parser.setAttribute(col, AbstractDBO.NULL_NAME, "false");
-                        if (fF != null) {
-                            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getNumberFormat());
-                            parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, fF.getGroupSeparator());
-                            parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, fF.getDecSeparator());
-                            textVal = fF.formatNumber(numVal);
-                        }
-                        else {
-                            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, numberFormat);
-                            parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, groupSeparator);
-                            parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, decSeparator);
-                            textVal = numberFormatter.format(numVal);
-                        }
+                        textVal = processDouble(col, fF, numVal);
                     }
                         break;
-                    case Types.BIGINT :
-                    case Types.INTEGER :
-                    case Types.NUMERIC :
+                    case Types.BIGINT : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.BIGINT_TYPE);
+                        long numVal = rs.getLong(j);
+                        parser.setAttribute(col, AbstractDBO.NULL_NAME, "false");
+                        textVal = String.valueOf(numVal);
+                    }
+                        break;
+                    case Types.INTEGER : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.INTEGER_TYPE);
+                        int numVal = rs.getInt(j);
+                        parser.setAttribute(col, AbstractDBO.NULL_NAME, "false");
+                        textVal = String.valueOf(numVal);
+                    }
+                        break;
                     case Types.SMALLINT :
                     case Types.TINYINT : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.SMALLINT_TYPE);
+                        short numVal = rs.getShort(j);
+                        parser.setAttribute(col, AbstractDBO.NULL_NAME, "false");
+                        textVal = String.valueOf(numVal);
+                    }
+                        break; 
+                    case Types.NUMERIC :
+                    case Types.DECIMAL : {
                         BigDecimal bigdecimal = rs.getBigDecimal(j);
-                        isNull = bigdecimal == null;
+                        boolean isNull = bigdecimal == null;
                         parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             if (metadata.getScale(j) > 0) {
-                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
+                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.DECIMAL_TYPE);
                             }
                             else {
                                 parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NUMERIC_TYPE);
@@ -177,14 +188,14 @@ public class StandardRowSetBuilder implements RowSetBuilder
                         }
                         else {
                             if (fF != null) {
-                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
+                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.DECIMAL_TYPE);
                                 parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getNumberFormat());
                                 parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, fF.getGroupSeparator());
                                 parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, fF.getDecSeparator());
                                 textVal = fF.formatNumber(bigdecimal);
                             }
                             else if (metadata.getScale(j) > 0) {
-                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
+                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.DECIMAL_TYPE);
                                 parser.setAttribute(col, AbstractDBO.FORMAT_NAME, numberFormat);
                                 parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, groupSeparator);
                                 parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, decSeparator);
@@ -194,6 +205,26 @@ public class StandardRowSetBuilder implements RowSetBuilder
                                 parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NUMERIC_TYPE);
                                 textVal = bigdecimal.toString();
                             }
+                        }
+                    }
+                        break;
+                    case Types.BOOLEAN : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.BOOLEAN_TYPE);
+                        boolean bVal = rs.getBoolean(j);
+                        parser.setAttribute(col, AbstractDBO.NULL_NAME, "false");
+                        textVal = String.valueOf(bVal);
+                    }
+                        break;
+                    case Types.SQLXML : {
+                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.XML_TYPE);
+                        SQLXML xml = rs.getSQLXML(j);
+                        boolean isNull = xml == null;
+                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+                        if (isNull) {
+                            textVal = ""; 
+                        }
+                        else {
+                            textVal = xml.getString();
                         }
                     }
                         break;
@@ -210,7 +241,7 @@ public class StandardRowSetBuilder implements RowSetBuilder
                     case Types.VARCHAR : {
                         parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.STRING_TYPE);
                         textVal = rs.getString(j);
-                        isNull = textVal == null;
+                        boolean isNull = textVal == null;
                         parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             textVal = "";
@@ -252,7 +283,7 @@ public class StandardRowSetBuilder implements RowSetBuilder
                     case Types.BLOB : {
                         parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.BASE64_TYPE);
                         Blob blob = rs.getBlob(j);
-                        isNull = blob == null;
+                        boolean isNull = blob == null;
                         parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             textVal = "";
@@ -275,7 +306,7 @@ public class StandardRowSetBuilder implements RowSetBuilder
                     default : {
                         parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.DEFAULT_TYPE);
                         textVal = rs.getString(j);
-                        isNull = textVal == null;
+                        boolean isNull = textVal == null;
                         parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             textVal = "";
@@ -330,12 +361,73 @@ public class StandardRowSetBuilder implements RowSetBuilder
         return rowCounter;
     }
 
+    /**
+     * @param col
+     * @param fF
+     * @param numVal
+     * @return
+     * @throws NullPointerException
+     * @throws Exception
+     */
+    private String processDouble(Element col, FieldFormatter fF, double numVal) throws NullPointerException, Exception {
+        String textVal;
+        parser.setAttribute(col, AbstractDBO.NULL_NAME, "false");
+        if (fF != null) {
+            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getNumberFormat());
+            parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, fF.getGroupSeparator());
+            parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, fF.getDecSeparator());
+            textVal = fF.formatNumber(numVal);
+        }
+        else {
+            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, numberFormat);
+            parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, groupSeparator);
+            parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, decSeparator);
+            textVal = numberFormatter.format(numVal);
+        }
+        return textVal;
+    }
+
+    /**
+     * @param col
+     * @param fF
+     * @param dateVal
+     * @return
+     * @throws Exception
+     */
+    private String processDateTime(Element col, FieldFormatter fF, Date dateVal, String format)
+            throws Exception {
+        String textVal;
+        boolean isNull = dateVal == null;
+        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+        if (isNull) {
+            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, format);
+            textVal = "";
+        }
+        else {
+            if (fF != null) {
+                parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getDateFormat());
+                textVal = fF.formatDate(dateVal);
+            }
+            else {
+                parser.setAttribute(col, AbstractDBO.FORMAT_NAME, format);
+                if (dateVal instanceof Time) {
+                    textVal = timeFormatter.format(dateVal);
+                }
+                else {
+                    textVal = dateFormatter.format(dateVal);
+                }
+            }
+        }
+        return textVal;
+    }
+
     public void cleanup() {
         numberFormat = null;
         groupSeparator = null;
         decSeparator = null;
         parser = null;
         dateFormatter = null;
+        timeFormatter = null;
         numberFormatter = null;
     }
 
@@ -349,6 +441,10 @@ public class StandardRowSetBuilder implements RowSetBuilder
 
     public void setDateFormatter(SimpleDateFormat dateFormatter) {
         this.dateFormatter = dateFormatter;
+    }
+    
+    public void setTimeFormatter(SimpleDateFormat timeFormatter) {
+        this.timeFormatter = timeFormatter;
     }
 
     public void setNumberFormatter(DecimalFormat numberFormatter) {

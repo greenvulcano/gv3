@@ -24,6 +24,7 @@ import it.greenvulcano.gvesb.datahandling.DBOException;
 import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.txt.TextUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
@@ -32,6 +33,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DecimalFormatSymbols;
@@ -167,13 +169,13 @@ public class DBOUpdate extends AbstractDBO
             
         if (processParams) {
             currType = attributes.getValue(TYPE_NAME);
-            if (TIMESTAMP_TYPE.equals(currType)) {
+            if (TIMESTAMP_TYPE.equals(currType) || DATE_TYPE.equals(currType) || TIME_TYPE.equals(currType)) {
                 currDateFormat = attributes.getValue(FORMAT_NAME);
                 if (currDateFormat == null) {
                     currDateFormat = DEFAULT_DATE_FORMAT;
                 }
             }
-            else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+            else if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType) || FLOAT_TYPE.equals(currType) || DOUBLE_TYPE.equals(currType)) {
                 currNumberFormat = attributes.getValue(FORMAT_NAME);
                 if (currNumberFormat == null) {
                     currNumberFormat = call_DEFAULT_NUMBER_FORMAT;
@@ -264,41 +266,65 @@ public class DBOUpdate extends AbstractDBO
                     }
                 }
                 if (!autoKeySet) {
-                    if (TIMESTAMP_TYPE.equals(currType)) {
+                    if (TIMESTAMP_TYPE.equals(currType) || DATE_TYPE.equals(currType) || TIME_TYPE.equals(currType)) {
                         if (text.equals("")) {
                             for (Integer idx : colIdxs) {
-                                ps.setNull(idx, Types.TIMESTAMP);
+                                if (TIMESTAMP_TYPE.equals(currType)) ps.setNull(idx, Types.TIMESTAMP);
+                                else if (DATE_TYPE.equals(currType)) ps.setNull(idx, Types.DATE);
+                                else ps.setNull(idx, Types.TIME);
                                 currentRowFields.set(idx, null);
                             }
                         }
                         else {
                             dateFormatter.applyPattern(currDateFormat);
                             Date formattedDate = dateFormatter.parse(text);
-                            Timestamp ts = new Timestamp(formattedDate.getTime());
-                            for (Integer idx : colIdxs) {
-                                ps.setTimestamp(idx, ts);
-                                currentRowFields.set(idx, ts);
+                            if (TIMESTAMP_TYPE.equals(currType)) {
+                                Timestamp ts = new Timestamp(formattedDate.getTime());
+                                for (Integer idx : colIdxs) {
+                                    ps.setTimestamp(idx, ts);
+                                    currentRowFields.set(idx, ts);
+                                }
                             }
+                            else if (DATE_TYPE.equals(currType)) {
+                                java.sql.Date d = new java.sql.Date(formattedDate.getTime());
+                                for (Integer idx : colIdxs) {
+                                    ps.setDate(idx, d);
+                                    currentRowFields.set(idx, d);
+                                }
+                            }
+                            else {
+                                java.sql.Time t = new java.sql.Time(formattedDate.getTime());
+                                for (Integer idx : colIdxs) {
+                                    ps.setTime(idx, t);
+                                    currentRowFields.set(idx, t);
+                                }
+                            } 
                         }
                     }
-                    else if (NUMERIC_TYPE.equals(currType)) {
+                    else if (INTEGER_TYPE.equals(currType) || SMALLINT_TYPE.equals(currType) || BIGINT_TYPE.equals(currType)) {
                         if (text.equals("")) {
                             for (Integer idx : colIdxs) {
-                                ps.setNull(idx, Types.NUMERIC);
+                                if (INTEGER_TYPE.equals(currType)) ps.setNull(idx, Types.INTEGER); 
+                                else if (SMALLINT_TYPE.equals(currType)) ps.setNull(idx, Types.SMALLINT);
+                                else ps.setNull(idx, Types.BIGINT);
                                 currentRowFields.set(idx, null);
                             }
                         }
                         else {
                             for (Integer idx : colIdxs) {
-                                ps.setInt(idx, Integer.parseInt(text));
+                                if (INTEGER_TYPE.equals(currType)) ps.setInt(idx, Integer.parseInt(text, 10)); 
+                                else if (SMALLINT_TYPE.equals(currType)) ps.setShort(idx, Short.parseShort(text, 10));
+                                else ps.setLong(idx, Long.parseLong(text, 10));
                                 currentRowFields.set(idx, text);
                             }
                         }
                     }
-                    else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+                    else if (FLOAT_TYPE.equals(currType) || DOUBLE_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) {
                         if (text.equals("")) {
                             for (Integer idx : colIdxs) {
-                                ps.setNull(idx, Types.NUMERIC);
+                                if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) ps.setNull(idx, Types.NUMERIC);
+                                else if (FLOAT_TYPE.equals(currType)) ps.setNull(idx, Types.FLOAT);
+                                else ps.setNull(idx, Types.DOUBLE);
                                 currentRowFields.set(idx, null);
                             }
                         }
@@ -313,8 +339,18 @@ public class DBOUpdate extends AbstractDBO
                                 numberFormatter.setParseBigDecimal(true);
                                 BigDecimal formattedNumber = (BigDecimal) numberFormatter.parse(text);
                                 for (Integer idx : colIdxs) {
-                                    ps.setBigDecimal(idx, formattedNumber);
-                                    currentRowFields.set(idx, formattedNumber);
+                                    if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) {
+                                        ps.setBigDecimal(idx, formattedNumber);
+                                        currentRowFields.set(idx, formattedNumber);
+                                    }
+                                    else if (FLOAT_TYPE.equals(currType)) {
+                                        ps.setFloat(idx, formattedNumber.floatValue());
+                                        currentRowFields.set(idx, formattedNumber.floatValue());
+                                    }
+                                    else {
+                                        ps.setDouble(idx, formattedNumber.doubleValue());
+                                        currentRowFields.set(idx, formattedNumber.doubleValue());
+                                    }
                                 }
                             }
                             finally {
@@ -322,31 +358,24 @@ public class DBOUpdate extends AbstractDBO
                             }
                         }
                     }
-                    else if (LONG_STRING_TYPE.equals(currType)) {
+                    else if (LONG_STRING_TYPE.equals(currType) || LONG_NSTRING_TYPE.equals(currType)) {
                         if (text.equals("")) {
                             for (Integer idx : colIdxs) {
-                                ps.setNull(idx, Types.CLOB);
+                                if (LONG_STRING_TYPE.equals(currType)) ps.setNull(idx, Types.CLOB);
+                                else ps.setNull(idx, Types.NCLOB);
                                 currentRowFields.set(idx, null);
                             }
                         }
                         else {
                             for (Integer idx : colIdxs) {
-                                ps.setCharacterStream(idx, new StringReader(text));
-                                currentRowFields.set(idx, text);
-                            }
-                        }
-                    }
-                    else if (LONG_NSTRING_TYPE.equals(currType)) {
-                        if (text.equals("")) {
-                            for (Integer idx : colIdxs) {
-                                ps.setNull(idx, Types.NCLOB);
-                                currentRowFields.set(idx, null);
-                            }
-                        }
-                        else {
-                            for (Integer idx : colIdxs) {
-                                ps.setCharacterStream(idx, new StringReader(text));
-                                currentRowFields.set(idx, text);
+                                if (LONG_STRING_TYPE.equals(currType)) {
+                                    ps.setCharacterStream(idx, new StringReader(text));
+                                    currentRowFields.set(idx, text);
+                                }
+                                else {
+                                    ps.setNCharacterStream(idx, new StringReader(text));
+                                    currentRowFields.set(idx, text);
+                                }
                             }
                         }
                     }
@@ -379,6 +408,36 @@ public class DBOUpdate extends AbstractDBO
                             ByteArrayInputStream bais = new ByteArrayInputStream(data);
                             for (Integer idx : colIdxs) {
                                 ps.setBinaryStream(idx, bais, data.length);
+                                currentRowFields.set(idx, text);
+                            }
+                        }
+                    }
+                    else if (BOOLEAN_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.BOOLEAN);
+                                currentRowFields.set(idx, null);
+                            }
+                        }
+                        else {
+                            for (Integer idx : colIdxs) {
+                                ps.setBoolean(idx, TextUtils.parseBoolean(text));
+                                currentRowFields.set(idx, text);
+                            }
+                        }
+                    }
+                    else if (XML_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            for (Integer idx : colIdxs) {
+                                ps.setNull(idx, Types.SQLXML);
+                                currentRowFields.set(idx, null);
+                            }
+                        }
+                        else {
+                            SQLXML xml = ps.getConnection().createSQLXML();
+                            xml.setString(text);
+                            for (Integer idx : colIdxs) {
+                                ps.setSQLXML(idx, xml);
                                 currentRowFields.set(idx, text);
                             }
                         }

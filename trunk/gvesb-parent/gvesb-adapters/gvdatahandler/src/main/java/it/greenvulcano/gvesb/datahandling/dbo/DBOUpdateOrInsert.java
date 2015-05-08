@@ -27,6 +27,7 @@ import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptio
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
+import it.greenvulcano.util.txt.TextUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
@@ -35,6 +36,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -258,13 +260,14 @@ public class DBOUpdateOrInsert extends AbstractDBO
         }
         else if (COL_NAME.equals(localName) || COL_UPDATE_NAME.equals(localName)) {
             currType = attributes.getValue(uri, TYPE_NAME);
-            if (TIMESTAMP_TYPE.equals(currType)) {
+            if (TIMESTAMP_TYPE.equals(currType) || DATE_TYPE.equals(currType) || TIME_TYPE.equals(currType)) {
                 currDateFormat = attributes.getValue(uri, FORMAT_NAME);
                 if (currDateFormat == null) {
                     currDateFormat = DEFAULT_DATE_FORMAT;
                 }
             }
-            else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+            else if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType) || FLOAT_TYPE.equals(currType)
+                    || DOUBLE_TYPE.equals(currType)) {
                 currNumberFormat = attributes.getValue(uri, FORMAT_NAME);
                 if (currNumberFormat == null) {
                     currNumberFormat = call_DEFAULT_NUMBER_FORMAT;
@@ -432,32 +435,52 @@ public class DBOUpdateOrInsert extends AbstractDBO
             try {
                 colDataExpecting = false;
                 String text = textBuffer.toString();
-                if (TIMESTAMP_TYPE.equals(currType)) {
+                if (TIMESTAMP_TYPE.equals(currType) || DATE_TYPE.equals(currType) || TIME_TYPE.equals(currType)) {
                     if (text.equals("")) {
-                        stmt.setNull(idx, Types.TIMESTAMP);
+                        if (TIMESTAMP_TYPE.equals(currType)) stmt.setNull(idx, Types.TIMESTAMP);
+                        else if (DATE_TYPE.equals(currType)) stmt.setNull(idx, Types.DATE);
+                        else stmt.setNull(idx, Types.TIME);
                         localCurrentRowFields.add(null);
                     }
                     else {
                         dateFormatter.applyPattern(currDateFormat);
                         Date formattedDate = dateFormatter.parse(text);
-                        Timestamp ts = new Timestamp(formattedDate.getTime());
-                        stmt.setTimestamp(idx, ts);
-                        localCurrentRowFields.add(ts);
+                        if (TIMESTAMP_TYPE.equals(currType)) {
+                            Timestamp ts = new Timestamp(formattedDate.getTime());
+                            stmt.setTimestamp(idx, ts);
+                            localCurrentRowFields.add(ts);
+                        }
+                        else if (DATE_TYPE.equals(currType)) {
+                            java.sql.Date d = new java.sql.Date(formattedDate.getTime());
+                            stmt.setDate(idx, d);
+                            localCurrentRowFields.add(d);
+                        }
+                        else {
+                            java.sql.Time t = new java.sql.Time(formattedDate.getTime());
+                            stmt.setTime(idx, t);
+                            localCurrentRowFields.add(t);
+                        } 
                     }
                 }
-                else if (NUMERIC_TYPE.equals(currType)) {
+                else if (INTEGER_TYPE.equals(currType) || SMALLINT_TYPE.equals(currType) || BIGINT_TYPE.equals(currType)) {
                     if (text.equals("")) {
-                        stmt.setNull(idx, Types.NUMERIC);
+                        if (INTEGER_TYPE.equals(currType)) stmt.setNull(idx, Types.INTEGER); 
+                        else if (SMALLINT_TYPE.equals(currType)) stmt.setNull(idx, Types.SMALLINT);
+                        else stmt.setNull(idx, Types.BIGINT);
                         localCurrentRowFields.add(null);
                     }
                     else {
-                        stmt.setInt(idx, Integer.parseInt(text));
-                        localCurrentRowFields.add(Integer.valueOf(text));
+                        if (INTEGER_TYPE.equals(currType)) stmt.setInt(idx, Integer.parseInt(text, 10)); 
+                        else if (SMALLINT_TYPE.equals(currType)) stmt.setShort(idx, Short.parseShort(text, 10));
+                        else stmt.setLong(idx, Long.parseLong(text, 10));
+                        localCurrentRowFields.add(text);
                     }
                 }
-                else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+                else if (FLOAT_TYPE.equals(currType) || DOUBLE_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) {
                     if (text.equals("")) {
-                        stmt.setNull(idx, Types.NUMERIC);
+                        if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) stmt.setNull(idx, Types.NUMERIC);
+                        else if (FLOAT_TYPE.equals(currType)) stmt.setNull(idx, Types.FLOAT);
+                        else stmt.setNull(idx, Types.DOUBLE);
                         localCurrentRowFields.add(null);
                     }
                     else {
@@ -470,32 +493,38 @@ public class DBOUpdateOrInsert extends AbstractDBO
                         try {
                             numberFormatter.setParseBigDecimal(true);
                             BigDecimal formattedNumber = (BigDecimal) numberFormatter.parse(text);
-                            stmt.setBigDecimal(idx, formattedNumber);
-                            localCurrentRowFields.add(formattedNumber);
+                            if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) {
+                                stmt.setBigDecimal(idx, formattedNumber);
+                                localCurrentRowFields.add(formattedNumber);
+                            }
+                            else if (FLOAT_TYPE.equals(currType)) {
+                                stmt.setFloat(idx, formattedNumber.floatValue());
+                                localCurrentRowFields.add(formattedNumber.floatValue());
+                            }
+                            else {
+                                stmt.setDouble(idx, formattedNumber.doubleValue());
+                                localCurrentRowFields.add(formattedNumber.doubleValue());
+                            }
                         }
                         finally {
                             numberFormatter.setParseBigDecimal(isBigDecimal);
                         }
                     }
                 }
-                else if (LONG_STRING_TYPE.equals(currType)) {
+                else if (LONG_STRING_TYPE.equals(currType) || LONG_NSTRING_TYPE.equals(currType)) {
                     if (text.equals("")) {
-                        stmt.setNull(idx, Types.CLOB);
+                        if (LONG_STRING_TYPE.equals(currType)) stmt.setNull(idx, Types.CLOB);
+                        else stmt.setNull(idx, Types.NCLOB);
                         localCurrentRowFields.add(null);
                     }
                     else {
-                    	stmt.setCharacterStream(colIdx, new StringReader(text));
+                        if (LONG_STRING_TYPE.equals(currType)) {
+                            stmt.setCharacterStream(idx, new StringReader(text));
+                        }
+                        else {
+                            stmt.setNCharacterStream(idx, new StringReader(text));
+                        }
                         localCurrentRowFields.add(text);
-                    }
-                }
-                else if (LONG_NSTRING_TYPE.equals(currType)) {
-                    if (text.equals("")) {
-                    	stmt.setNull(colIdx, Types.NCLOB);
-                        currentRowFields.add(null);
-                    }
-                    else {
-                    	stmt.setCharacterStream(colIdx, new StringReader(text));
-                        currentRowFields.add(text);
                     }
                 }
                 else if (BASE64_TYPE.equals(currType)) {
@@ -523,14 +552,36 @@ public class DBOUpdateOrInsert extends AbstractDBO
                         localCurrentRowFields.add(text);
                     }
                 }
+                else if (BOOLEAN_TYPE.equals(currType)) {
+                    if (text.equals("")) {
+                        stmt.setNull(idx, Types.BOOLEAN);
+                        localCurrentRowFields.add(null);
+                    }
+                    else {
+                        stmt.setBoolean(idx, TextUtils.parseBoolean(text));
+                        localCurrentRowFields.add(text);
+                    }
+                }
+                else if (XML_TYPE.equals(currType)) {
+                    if (text.equals("")) {
+                        stmt.setNull(idx, Types.SQLXML);
+                        localCurrentRowFields.add(null);
+                    }
+                    else {
+                        SQLXML xml = stmt.getConnection().createSQLXML();
+                        xml.setString(text);
+                        stmt.setSQLXML(idx, xml);
+                        localCurrentRowFields.add(text);
+                    }
+                }
                 else if (NSTRING_TYPE.equals(currType)) {
                     if (text.equals("")) {
                     	stmt.setNull(colIdx, Types.NVARCHAR);
-                        currentRowFields.add(null);
+                    	localCurrentRowFields.add(null);
                     }
                     else {
                     	stmt.setNString(colIdx, text);
-                        currentRowFields.add(text);
+                    	localCurrentRowFields.add(text);
                     }
                 }
                 else {
