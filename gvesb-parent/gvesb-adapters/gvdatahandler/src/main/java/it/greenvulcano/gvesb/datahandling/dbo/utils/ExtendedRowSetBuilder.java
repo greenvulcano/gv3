@@ -69,6 +69,7 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
     private String           decSeparator;
     private XMLUtils         parser;
     private SimpleDateFormat dateFormatter;
+    private SimpleDateFormat timeFormatter;
     private DecimalFormat    numberFormatter;
     private FieldFormatter[] fFormatters; 
     private String[]         colNames; 
@@ -369,6 +370,10 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
 
     public void setDateFormatter(SimpleDateFormat dateFormatter) {
         this.dateFormatter = dateFormatter;
+    }
+
+    public void setTimeFormatter(SimpleDateFormat timeFormatter) {
+        this.timeFormatter = timeFormatter;
     }
 
     public void setNumberFormatter(DecimalFormat numberFormatter) {

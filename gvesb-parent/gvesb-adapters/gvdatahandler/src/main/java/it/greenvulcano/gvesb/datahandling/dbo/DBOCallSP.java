@@ -29,6 +29,7 @@ import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptio
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.txt.DateUtils;
+import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
@@ -37,6 +38,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
+import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
@@ -45,7 +48,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLXML;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DecimalFormatSymbols;
@@ -1119,13 +1124,14 @@ public class DBOCallSP extends AbstractDBO
             String outOnlyStr = attributes.getValue(uri, OUTONLY_ATTR);
             outOnly = outOnlyStr != null ? outOnlyStr.equalsIgnoreCase("true") : false;
             if (!outOnly) {
-                if (TIMESTAMP_TYPE.equals(currType)) {
+                if (TIMESTAMP_TYPE.equals(currType) || DATE_TYPE.equals(currType) || TIME_TYPE.equals(currType)) {
                     currDateFormat = attributes.getValue(uri, FORMAT_NAME);
                     if (currDateFormat == null) {
                         currDateFormat = DEFAULT_DATE_FORMAT;
                     }
                 }
-                else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+                else if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType) || FLOAT_TYPE.equals(currType)
+                        || DOUBLE_TYPE.equals(currType)) {
                     currNumberFormat = attributes.getValue(uri, FORMAT_NAME);
                     if (currNumberFormat == null) {
                         currNumberFormat = call_DEFAULT_NUMBER_FORMAT;
@@ -1193,32 +1199,52 @@ public class DBOCallSP extends AbstractDBO
                             text = currentUUID;
                         }
                     }
-                    if (TIMESTAMP_TYPE.equals(currType)) {
+                    if (TIMESTAMP_TYPE.equals(currType) || DATE_TYPE.equals(currType) || TIME_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            setNull(cs, Types.TIMESTAMP);
+                            if (TIMESTAMP_TYPE.equals(currType)) setNull(cs, Types.TIMESTAMP);
+                            else if (DATE_TYPE.equals(currType)) setNull(cs, Types.DATE);
+                            else setNull(cs, Types.TIME);
                             currentRowFields.add(null);
                         }
                         else {
                             dateFormatter.applyPattern(currDateFormat);
                             Date formattedDate = dateFormatter.parse(text);
-                            Timestamp ts = new Timestamp(formattedDate.getTime());
-                            setTimestamp(cs, ts);
-                            currentRowFields.add(ts);
+                            if (TIMESTAMP_TYPE.equals(currType)) {
+                                Timestamp ts = new Timestamp(formattedDate.getTime());
+                                setTimestamp(cs, ts);
+                                currentRowFields.add(ts);
+                            }
+                            else if (DATE_TYPE.equals(currType)) {
+                                java.sql.Date d = new java.sql.Date(formattedDate.getTime());
+                                setDate(cs, d);
+                                currentRowFields.add(d);
+                            }
+                            else {
+                                java.sql.Time t = new java.sql.Time(formattedDate.getTime());
+                                setTime(cs, t);
+                                currentRowFields.add(t);
+                            } 
                         }
                     }
-                    else if (NUMERIC_TYPE.equals(currType)) {
+                    else if (INTEGER_TYPE.equals(currType) || SMALLINT_TYPE.equals(currType) || BIGINT_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            setNull(cs, Types.NUMERIC);
+                            if (INTEGER_TYPE.equals(currType)) setNull(cs, Types.INTEGER); 
+                            else if (SMALLINT_TYPE.equals(currType)) setNull(cs, Types.SMALLINT);
+                            else setNull(cs, Types.BIGINT);
                             currentRowFields.add(null);
                         }
                         else {
-                            setInt(cs, Integer.parseInt(text));
-                            currentRowFields.add(Integer.valueOf(text));
+                            if (INTEGER_TYPE.equals(currType)) setInt(cs, Integer.parseInt(text, 10)); 
+                            else if (SMALLINT_TYPE.equals(currType)) setShort(cs, Short.parseShort(text, 10));
+                            else setLong(cs, Long.parseLong(text, 10));
+                            currentRowFields.add(text);
                         }
                     }
-                    else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+                    else if (FLOAT_TYPE.equals(currType) || DOUBLE_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            setNull(cs, Types.NUMERIC);
+                            if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) setNull(cs, Types.NUMERIC);
+                            else if (FLOAT_TYPE.equals(currType)) setNull(cs, Types.FLOAT);
+                            else setNull(cs, Types.DOUBLE);
                             currentRowFields.add(null);
                         }
                         else {
@@ -1227,21 +1253,43 @@ public class DBOCallSP extends AbstractDBO
                             dfs.setGroupingSeparator(currGroupSeparator.charAt(0));
                             numberFormatter.setDecimalFormatSymbols(dfs);
                             numberFormatter.applyPattern(currNumberFormat);
-                            Number formattedNumber = numberFormatter.parse(text);
-                            setFloat(cs, formattedNumber.floatValue());
-                            currentRowFields.add(new Float(formattedNumber.floatValue()));
+                            boolean isBigDecimal = numberFormatter.isParseBigDecimal();
+                            try {
+                                numberFormatter.setParseBigDecimal(true);
+                                BigDecimal formattedNumber = (BigDecimal) numberFormatter.parse(text);
+                                if (DECIMAL_TYPE.equals(currType) || NUMERIC_TYPE.equals(currType)) {
+                                    setBigDecimal(cs, formattedNumber);
+                                    currentRowFields.add(formattedNumber);
+                                }
+                                else if (FLOAT_TYPE.equals(currType)) {
+                                    setFloat(cs, formattedNumber.floatValue());
+                                    currentRowFields.add(formattedNumber.floatValue());
+                                }
+                                else {
+                                    setDouble(cs, formattedNumber.doubleValue());
+                                    currentRowFields.add(formattedNumber.doubleValue());
+                                }
+                            }
+                            finally {
+                                numberFormatter.setParseBigDecimal(isBigDecimal);
+                            }
                         }
                     }
-                    else if (LONG_STRING_TYPE.equals(currType)) {
+                    else if (LONG_STRING_TYPE.equals(currType) || LONG_NSTRING_TYPE.equals(currType)) {
                         if (text.equals("")) {
-                            setNull(cs, Types.CLOB);
+                            if (LONG_STRING_TYPE.equals(currType)) setNull(cs, Types.CLOB);
+                            else setNull(cs, Types.NCLOB);
                             currentRowFields.add(null);
                         }
                         else {
-                            byte[] data = text.getBytes();
-                            ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                            setAsciiStream(cs, bais, data.length);
-                            currentRowFields.add(text);
+                            if (LONG_STRING_TYPE.equals(currType)) {
+                                setCharacterStream(cs, new StringReader(text));
+                                currentRowFields.add(text);
+                            }
+                            else {
+                                setNCharacterStream(cs, new StringReader(text));
+                                currentRowFields.add(text);
+                            }
                         }
                     }
                     else if (BASE64_TYPE.equals(currType)) {
@@ -1266,6 +1314,38 @@ public class DBOCallSP extends AbstractDBO
                             byte[] data = text.getBytes();
                             ByteArrayInputStream bais = new ByteArrayInputStream(data);
                             setBinaryStream(cs, bais, data.length);
+                            currentRowFields.add(text);
+                        }
+                    }
+                    else if (BOOLEAN_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            setNull(cs, Types.BOOLEAN);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            setBoolean(cs, TextUtils.parseBoolean(text));
+                            currentRowFields.add(text);
+                        }
+                    }
+                    else if (XML_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            setNull(cs, Types.SQLXML);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            SQLXML xml = cs.getConnection().createSQLXML();
+                            xml.setString(text);
+                            setSQLXML(cs, xml);
+                            currentRowFields.add(text);
+                        }
+                    }
+                    else if (NSTRING_TYPE.equals(currType)) {
+                        if (text.equals("")) {
+                            setNull(cs, Types.NVARCHAR);
+                            currentRowFields.add(null);
+                        }
+                        else {
+                            setNString(cs, text);
                             currentRowFields.add(text);
                         }
                     }
@@ -1294,18 +1374,103 @@ public class DBOCallSP extends AbstractDBO
         }
     }
 
+
     /**
      * @param cs
-     * @param text
+     * @param ts
      * @throws SQLException
      */
-    private void setString(CallableStatement cs, String text) throws SQLException
+    private void setTimestamp(CallableStatement cs, Timestamp ts) throws SQLException
     {
         if (useName) {
-            cs.setString(currName, text);
+            cs.setTimestamp(currName, ts);
         }
         else {
-            cs.setString(colIdx, text);
+            cs.setTimestamp(colIdx, ts);
+        }
+    }
+
+    private void setTime(CallableStatement cs, Time t) throws SQLException {
+        if (useName) {
+            cs.setTime(currName, t);
+        }
+        else {
+            cs.setTime(colIdx, t);
+        }
+    }
+
+    private void setDate(CallableStatement cs, java.sql.Date d) throws SQLException {
+        if (useName) {
+            cs.setDate(currName, d);
+        }
+        else {
+            cs.setDate(colIdx, d);
+        }
+    }
+
+    /**
+     * @param cs
+     * @param num
+     * @throws SQLException
+     */
+    private void setInt(CallableStatement cs, int num) throws SQLException
+    {
+        if (useName) {
+            cs.setInt(currName, num);
+        }
+        else {
+            cs.setInt(colIdx, num);
+        }
+    }
+
+    private void setLong(CallableStatement cs, long num) throws SQLException {
+        if (useName) {
+            cs.setLong(currName, num);
+        }
+        else {
+            cs.setLong(colIdx, num);
+        }
+    }
+
+    private void setShort(CallableStatement cs, short num) throws SQLException {
+        if (useName) {
+            cs.setShort(currName, num);
+        }
+        else {
+            cs.setShort(colIdx, num);
+        }
+    }
+
+    /**
+     * @param cs
+     * @param num
+     * @throws SQLException
+     */
+    private void setFloat(CallableStatement cs, float num) throws SQLException
+    {
+        if (useName) {
+            cs.setFloat(currName, num);
+        }
+        else {
+            cs.setFloat(colIdx, num);
+        }
+    }
+
+    private void setDouble(CallableStatement cs, double num) throws SQLException {
+        if (useName) {
+            cs.setDouble(currName, num);
+        }
+        else {
+            cs.setDouble(colIdx, num);
+        }
+    }
+
+    private void setBigDecimal(CallableStatement cs, BigDecimal num) throws SQLException {
+        if (useName) {
+            cs.setBigDecimal(currName, num);
+        }
+        else {
+            cs.setBigDecimal(colIdx, num);
         }
     }
 
@@ -1325,64 +1490,63 @@ public class DBOCallSP extends AbstractDBO
         }
     }
 
-    /**
-     * @param cs
-     * @param bais
-     * @param length
-     * @throws SQLException
-     */
-    private void setAsciiStream(CallableStatement cs, ByteArrayInputStream bais, int length) throws SQLException
-    {
+    private void setNCharacterStream(CallableStatement cs, StringReader sr) throws SQLException {
         if (useName) {
-            cs.setAsciiStream(currName, bais, length);
+            cs.setNCharacterStream(currName, sr);
         }
         else {
-            cs.setAsciiStream(colIdx, bais, length);
+            cs.setNCharacterStream(colIdx, sr);
+        }
+    }
+
+    private void setCharacterStream(CallableStatement cs, StringReader sr) throws SQLException {
+        if (useName) {
+            cs.setCharacterStream(currName, sr);
+        }
+        else {
+            cs.setCharacterStream(colIdx, sr);
+        }
+    }
+
+    private void setSQLXML(CallableStatement cs, SQLXML xml) throws SQLException {
+        if (useName) {
+            cs.setSQLXML(currName, xml);
+        }
+        else {
+            cs.setSQLXML(colIdx, xml);
+        }
+    }
+
+    private void setBoolean(CallableStatement cs, boolean b) throws SQLException {
+        if (useName) {
+            cs.setBoolean(currName, b);
+        }
+        else {
+            cs.setBoolean(colIdx, b);
+        }
+    }
+
+    private void setNString(CallableStatement cs, String text) throws SQLException {
+        if (useName) {
+            cs.setNString(currName, text);
+        }
+        else {
+            cs.setNString(colIdx, text);
         }
     }
 
     /**
      * @param cs
-     * @param num
+     * @param text
      * @throws SQLException
      */
-    private void setFloat(CallableStatement cs, float num) throws SQLException
+    private void setString(CallableStatement cs, String text) throws SQLException
     {
         if (useName) {
-            cs.setFloat(currName, num);
+            cs.setString(currName, text);
         }
         else {
-            cs.setFloat(colIdx, num);
-        }
-    }
-
-    /**
-     * @param cs
-     * @param num
-     * @throws SQLException
-     */
-    private void setInt(CallableStatement cs, int num) throws SQLException
-    {
-        if (useName) {
-            cs.setInt(currName, num);
-        }
-        else {
-            cs.setInt(colIdx, num);
-        }
-    }
-
-    /**
-     * @param cs
-     * @param ts
-     * @throws SQLException
-     */
-    private void setTimestamp(CallableStatement cs, Timestamp ts) throws SQLException
-    {
-        if (useName) {
-            cs.setTimestamp(currName, ts);
-        }
-        else {
-            cs.setTimestamp(colIdx, ts);
+            cs.setString(colIdx, text);
         }
     }
 

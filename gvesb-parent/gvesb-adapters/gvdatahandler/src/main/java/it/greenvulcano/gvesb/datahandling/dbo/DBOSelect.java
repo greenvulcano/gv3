@@ -231,6 +231,7 @@ public class DBOSelect extends AbstractDBO
             
             rowSetBuilder.setXMLUtils(parser);
             rowSetBuilder.setDateFormatter(dateFormatter);
+            rowSetBuilder.setTimeFormatter(timeFormatter);
             rowSetBuilder.setNumberFormatter(numberFormatter);
             rowSetBuilder.setDecSeparator(decSeparator);
             rowSetBuilder.setGroupSeparator(groupSeparator);

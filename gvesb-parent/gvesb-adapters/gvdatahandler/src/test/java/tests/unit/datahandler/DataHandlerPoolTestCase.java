@@ -100,7 +100,7 @@ public class DataHandlerPoolTestCase extends TestCase
         String field1 = cols.item(1).getTextContent();
         assertEquals("testvalue", field1);
         String field2 = cols.item(2).getTextContent();
-        assertEquals("20000101 12:30:45", field2);
+        assertEquals("2000-01-01 12:30:45", field2);
         String field3 = cols.item(3).getTextContent();
         assertEquals("123,45", field3);
     }

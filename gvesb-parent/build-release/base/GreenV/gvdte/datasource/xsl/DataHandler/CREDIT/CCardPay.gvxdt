@@ -11,7 +11,7 @@
         </tmodel:schemas>
         <tmodel:functions>
             <tmodel:function id="func-1" name="constant">
-                <tmodel:property name="value" value="float"/>
+                <tmodel:property name="value" value="numeric"/>
             </tmodel:function>
         </tmodel:functions>
         <tmodel:links>

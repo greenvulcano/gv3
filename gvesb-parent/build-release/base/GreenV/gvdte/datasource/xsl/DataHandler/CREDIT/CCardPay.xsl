@@ -16,7 +16,7 @@
             <xsl:element name="row">
                 <xsl:element name="col">
                     <xsl:attribute name="type">
-                        <xsl:value-of select="string(&apos;float&apos;)"/>
+                        <xsl:value-of select="string(&apos;numeric&apos;)"/>
                     </xsl:attribute>
                     <xsl:value-of select="int:amount"/>
                 </xsl:element>
@@ -25,7 +25,7 @@
                 </xsl:element>
                 <xsl:element name="col">
                     <xsl:attribute name="type">
-                        <xsl:value-of select="string(&apos;float&apos;)"/>
+                        <xsl:value-of select="string(&apos;numeric&apos;)"/>
                     </xsl:attribute>
                     <xsl:value-of select="int:amount"/>
                 </xsl:element>

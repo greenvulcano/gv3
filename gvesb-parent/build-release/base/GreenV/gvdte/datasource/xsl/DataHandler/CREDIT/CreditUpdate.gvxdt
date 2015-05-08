@@ -25,7 +25,7 @@
                 <tmodel:property name="param_1" value="&apos;,&apos;"/>
             </tmodel:function>
             <tmodel:function id="func-42" name="constant">
-                <tmodel:property name="value" value="float"/>
+                <tmodel:property name="value" value="numeric"/>
             </tmodel:function>
         </tmodel:functions>
         <tmodel:links>

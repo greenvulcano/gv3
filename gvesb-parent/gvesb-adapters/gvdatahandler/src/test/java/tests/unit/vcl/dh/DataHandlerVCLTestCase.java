@@ -181,7 +181,7 @@ public class DataHandlerVCLTestCase extends TestCase
         Element row = doc.createElement("row");
         data.appendChild(row);
         Element col1 = doc.createElement("col");
-        col1.setAttribute("type", "numeric");
+        col1.setAttribute("type", "integer");
         col1.appendChild(doc.createTextNode("2"));
         row.appendChild(col1);
         Element col2 = doc.createElement("col");
@@ -191,7 +191,7 @@ public class DataHandlerVCLTestCase extends TestCase
         row = doc.createElement("row");
         data.appendChild(row);
         col1 = doc.createElement("col");
-        col1.setAttribute("type", "numeric");
+        col1.setAttribute("type", "integer");
         col1.appendChild(doc.createTextNode("3"));
         row.appendChild(col1);
         col2 = doc.createElement("col");
@@ -217,7 +217,7 @@ public class DataHandlerVCLTestCase extends TestCase
 
         // column
         Element col1 = doc.createElement("col");
-        col1.setAttribute("type", "numeric");
+        col1.setAttribute("type", "integer");
         col1.appendChild(doc.createTextNode("2"));
         row.appendChild(col1);
         Element col2 = doc.createElement("col");
@@ -231,7 +231,7 @@ public class DataHandlerVCLTestCase extends TestCase
         col_update2.appendChild(doc.createTextNode("testvalue2-new"));
         row.appendChild(col_update2);
         Element col_update1 = doc.createElement("col-update");
-        col_update1.setAttribute("type", "numeric");
+        col_update1.setAttribute("type", "integer");
         col_update1.appendChild(doc.createTextNode("2"));
         row.appendChild(col_update1);
 
@@ -241,7 +241,7 @@ public class DataHandlerVCLTestCase extends TestCase
 
         // column
         col1 = doc.createElement("col");
-        col1.setAttribute("type", "numeric");
+        col1.setAttribute("type", "integer");
         col1.appendChild(doc.createTextNode("4"));
         row.appendChild(col1);
         col2 = doc.createElement("col");
@@ -255,7 +255,7 @@ public class DataHandlerVCLTestCase extends TestCase
         col_update2.appendChild(doc.createTextNode("testvalue4"));
         row.appendChild(col_update2);
         col_update1 = doc.createElement("col-update");
-        col_update1.setAttribute("type", "numeric");
+        col_update1.setAttribute("type", "integer");
         col_update1.appendChild(doc.createTextNode("4"));
         row.appendChild(col_update1);
 
