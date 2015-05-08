@@ -23,7 +23,9 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.internal.data.ChangeGVBuffer;
+import it.greenvulcano.log.GVLogger;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
 /**
@@ -33,7 +35,8 @@ import org.w3c.dom.Node;
  */
 public class Binding
 {
-
+	private static Logger  logger     = GVLogger.getLogger(Binding.class);
+	
     private String         gvService;
     private String         gvSystem;
     private String         inputType;
@@ -58,7 +61,14 @@ public class Binding
         Node cGVBufferNode = XMLConfig.getNode(bindingConf, "ChangeGVBuffer");
         if (cGVBufferNode != null) {
             cGVBuffer = new ChangeGVBuffer();
-            cGVBuffer.init(cGVBufferNode);
+            cGVBuffer.setLogger(logger);
+            try {
+                cGVBuffer.init(cGVBufferNode);
+            }
+            catch (XMLConfigException exc) {
+                logger.error("Error initializing ChangeGVBuffer", exc);
+                throw exc;
+            }
         }
     }
 

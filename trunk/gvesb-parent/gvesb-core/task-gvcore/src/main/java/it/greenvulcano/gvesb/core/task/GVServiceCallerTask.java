@@ -172,7 +172,14 @@ public class GVServiceCallerTask extends Task
             Node cGVBufferNode = XMLConfig.getNode(node, "ChangeGVBuffer");
             if (cGVBufferNode != null) {
                 cGVBuffer = new ChangeGVBuffer();
-                cGVBuffer.init(cGVBufferNode);
+                cGVBuffer.setLogger(logger);
+                try {
+                    cGVBuffer.init(cGVBufferNode);
+                }
+                catch (XMLConfigException exc) {
+                    logger.error("Error initializing ChangeGVBuffer", exc);
+                    throw new TaskException("Error initializing ChangeGVBuffer", exc);
+                }
             }
 
             // Configure output formatter
