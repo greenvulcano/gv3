@@ -79,6 +79,7 @@ public class TestServiceCall implements CallOperation
             Node cGVBufferNode = XMLConfig.getNode(node, "ChangeGVBuffer");
             if (cGVBufferNode != null) {
                 cGVBuffer = new ChangeGVBuffer();
+                cGVBuffer.setLogger(logger);
                 cGVBuffer.init(cGVBufferNode);
             }
             if (sleepOnInit > 0) {

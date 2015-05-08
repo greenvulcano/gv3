@@ -87,10 +87,12 @@ public class GVEndNode extends GVFlowNode
         if (endOp != null) {
             if (endOp.getNodeName().equals("ChangeGVBuffer")) {
                 endOpCGVBuffer = new ChangeGVBuffer();
+                endOpCGVBuffer.setLogger(logger);
                 try {
                     endOpCGVBuffer.init(endOp);
                 }
                 catch (XMLConfigException exc) {
+                    logger.error("Error initializing ChangeGVBuffer", exc);
                     throw new GVCoreConfException("GVCORE_END_OPERATION_INIT_ERROR", new String[][]{{"id", getId()},
                             {"type", "ChangeGVBuffer"}, {"node", XPathFinder.buildXPath(endOp)}}, exc);
                 }

@@ -96,10 +96,12 @@ public class ChangeGVBufferNode extends GVFlowNode
 
         if (cGVBufferNode != null) {
             cGVBuffer = new ChangeGVBuffer();
+            cGVBuffer.setLogger(logger);
             try {
                 cGVBuffer.init(cGVBufferNode);
             }
             catch (XMLConfigException exc) {
+                logger.error("Error initializing ChangeGVBuffer", exc);
                 throw new GVCoreConfException("GVCORE_CGVBUFFER_NODE_INIT_ERROR", new String[][]{{"id", getId()},
                         {"node", XPathFinder.buildXPath(cGVBufferNode)}}, exc);
             }

@@ -53,7 +53,7 @@ import org.w3c.dom.NodeList;
  */
 public class ChangeGVBuffer
 {
-    private static Logger           logger                    = GVLogger.getLogger(ChangeGVBuffer.class);
+    private Logger                  logger                    = GVLogger.getLogger(ChangeGVBuffer.class);
     /**
      * define the crypto operation "none".
      */
@@ -293,6 +293,10 @@ public class ChangeGVBuffer
         catch (Exception exc) {
             throw new XMLConfigException("Error occurred initializing ChangeGVBuffer: " + exc.getMessage(), exc);
         }
+    }
+    
+    public void setLogger(Logger logger) {
+        this.logger = logger;
     }
 
     /**
