@@ -742,7 +742,7 @@
             </table>
         </xsl:template>
 -->
-<!ELEMENT ToPreload (Description?,Preload+)>
+<!ELEMENT ToPreload (Description?,Preload*)>
 
 <!--
     Define a transformation to preload.
@@ -5908,7 +5908,7 @@
     The current version of GreenVulcanoESB provides the following services:
     - Data Transformation
     - XML Validation
-    - cripting
+    - Scripting
 
     #Icon: default.png
     #Template:
