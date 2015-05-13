@@ -98,6 +98,8 @@
                                    target="${{jboss.server.name}}" type="initializer" delayed-init="25"/>
             <generic-initializer class="it.greenvulcano.gvesb.gvdicom.jmx.RegisterDicomManager"
                                  target="${{jboss.server.name}}" type="initializer" delayed-init="25"/>
+            <generic-initializer class="it.greenvulcano.gvesb.gvnet.jmx.RegisterNetManager"
+                                 target="${{jboss.server.name}}" type="initializer" delayed-init="20"/>
         </Initializers>
     </entry-point>
     <mbeans-descriptors>
@@ -795,6 +797,26 @@
 
             <operation description="Start the Listener." name="start" />
             <operation description="Stop the Listener." name="stop" />
+        </mbean>
+
+        <mbean description="Show Net Receiver status"
+           domain="GreenVulcano" group="management" name="NetReceiverInfo"
+           type="it.greenvulcano.gvesb.gvnet.listener.jmx.NetReceiverInfo">
+            <attribute description="The receiver name."
+                    displayName="Receiver" name="name" readable="true"
+                    type="java.lang.String" writeable="false"/>
+            <attribute description="The remote host."
+                    displayName="Host" name="host" readable="true"
+                    type="java.lang.String" writeable="false"/>
+            <attribute description="The remote port."
+                    displayName="Port" name="port" readable="true"
+                    type="java.lang.Integer" writeable="false"/>
+            <attribute description="The receiver status."
+                    displayName="Active" name="active" readable="true"
+                    type="boolean" writeable="false"/>
+
+            <operation description="Start the Receiver." name="start" />
+            <operation description="Stop the Receiver." name="stop" />
         </mbean>
     </mbeans-descriptors>
 </jmx>
