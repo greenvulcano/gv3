@@ -114,6 +114,9 @@ public class GVAdapterParser
         else if (nomeAdapter.equals("HTTP_ADAPTER")) {
             ret = getExistGVHTTP(nomeServizio);
         }
+        else if (nomeAdapter.equals("GV_NET")) {
+            ret = getExistGVNET(nomeServizio);
+        }
         else {
             ret = getExistObject("/GVAdapters/*[@name='" + nomeAdapter + "']");
         }
@@ -154,6 +157,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("HTTP_ADAPTER")) {
             ret = getEqualGVHTTP(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_NET")) {
+            ret = getEqualGVNET(nomeServizio);
         }
         else {
             ret = getEqualObject("/GVAdapters/*[@name='" + nomeAdapter + "']");
@@ -205,6 +211,12 @@ public class GVAdapterParser
         return getExistObject("/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping' and @Action='"
                 + action + "']");
     }
+    
+    private boolean getExistGVNET(String listener) throws XMLUtilsException
+    {
+        return getExistObject("/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='"
+                + listener + "']");
+    }
 
     private boolean getEqualGVExcelWorkbook(String excelWorkbook) throws XMLUtilsException
     {
@@ -239,6 +251,11 @@ public class GVAdapterParser
     {
         return getEqualObject("/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping' "
         		+ "and @Action='" + action + "']");
+    }
+
+    private boolean getEqualGVNET(String listener) throws XMLUtilsException
+    {
+        return getEqualObject("/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='" + listener + "']");
     }
 
     /**
@@ -455,6 +472,11 @@ public class GVAdapterParser
     {
         return getListaGVHTTP(newXml);
     }
+    
+    public String[] getListaGVNETZip() throws Exception
+    {
+        return getListaGVNET(newXml);
+    }
 
     public String[] getListaGVBirtRepoZip() throws Exception
     {
@@ -497,6 +519,9 @@ public class GVAdapterParser
         else if (nomeAdapter.equals("RULES_CFG")) {
             ret = getGvKnowledgeBaseConfigZip(nomeServizio);
         }
+        else if (nomeAdapter.equals("GV_NET")) {
+            ret = getGVNETZip(nomeServizio);
+        }
         else {
             ret = getGvAdapter(newXml, nomeAdapter);
         }
@@ -537,6 +562,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("RULES_CFG")) {
             ret = getGvKnowledgeBaseConfigServer(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_NET")) {
+            ret = getGVNETServer(nomeServizio);
         }
         else {
             ret = getGvAdapter(serverXml, nomeAdapter);
@@ -877,6 +905,42 @@ public class GVAdapterParser
             XMLUtils.releaseParserInstance(parser);
         }
     }
+    
+    private String getGVNETZip(String servizio) throws XMLUtilsException
+    {
+        return getGVNET(newXml, servizio);
+    }
+
+    private String getGVNETServer(String servizio) throws XMLUtilsException
+    {
+        return getGVNET(serverXml, servizio);
+    }
+
+    private String getGVNET(Document xml, String servizio) throws XMLUtilsException
+    {
+        logger.debug("getGVNET servizio =" + servizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            Node localXml = parser.selectSingleNode(xml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' "
+                    + "and @name='" + servizio + "']");
+            Document localXmlGVAdapters = parser.newDocument("GVAdapters");
+            if (localXml != null) {
+                Node base = localXmlGVAdapters.getDocumentElement().appendChild(parser.createElement(localXmlGVAdapters, "GVNetConfiguration"));
+                Node listeners = base.appendChild(parser.createElement(localXmlGVAdapters, "NetListeners"));
+                parser.setAttribute((Element) base, "version", "1.0");
+                parser.setAttribute((Element) base, "type", "module");
+                parser.setAttribute((Element) base, "name", "GV_NET");
+
+                Node importedNode = localXmlGVAdapters.importNode(localXml, true);
+                listeners.appendChild(importedNode);
+            }
+            return parser.serializeDOM(localXmlGVAdapters, false, true);
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
 
     private String getGvAdapter(Document xml, String nomeAdapter) throws XMLUtilsException
     {
@@ -929,6 +993,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("HTTP_ADAPTER")) {
             aggiornaGVHTTP(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_NET")) {
+            aggiornaGVNET(nomeServizio);
         }
         else {
             XMLUtils parser = null;
@@ -1283,6 +1350,38 @@ public class GVAdapterParser
         }
     }
     
+    public void aggiornaGVNET(String nomeServizio) throws Exception
+    {
+        logger.debug("init aggiornaGVNET");
+        logger.debug("action=" + nomeServizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            
+            // handle ActionMapping deployment
+            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='" + nomeServizio + "']");
+            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver'and @name='" + nomeServizio + "']");
+            Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVNetConfiguration/NetListeners");
+            if (resultsZip != null) {
+                if (resultsServer == null) {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.appendChild(importedNode);
+                    logger.debug("NetReceiver[" + nomeServizio + "] non esistente, inserimento");
+                }
+                else {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.replaceChild(importedNode, resultsServer);
+                    logger.debug("NetReceiver[" + nomeServizio + "] esistente, aggiornamento");
+                }
+            }
+            
+            logger.debug("end aggiornaGVNET");
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+    
     public void aggiornaGreenVulcanoWebServices(String servizio,String[] operazioni) throws Exception
     {
         logger.debug("init aggiornaGreenVulcanoWebServices");
@@ -1503,6 +1602,11 @@ public class GVAdapterParser
     private String[] getListaGVHTTP(Document xml) throws Exception
     {
         return getListaObject(xml, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/*[@type='action-mapping']/@Action");
+    }
+    
+    private String[] getListaGVNET(Document xml) throws Exception
+    {
+        return getListaObject(xml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver']/@name");
     }
 
     private String[] getListaGVBirtRepo(Document xml) throws Exception

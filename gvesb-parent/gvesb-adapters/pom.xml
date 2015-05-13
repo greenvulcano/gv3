@@ -44,7 +44,7 @@
         <module>gvzmq</module>
         <module>gvadam</module>
         <module>gvpdf</module>
-        <!--<module>gvnet</module>-->
+        <module>gvnet</module>
         <module>gvhadoop</module>
         <module>gvdicom</module>
     </modules>

@@ -928,4 +928,7 @@ order by 1]]></statement>
         <Local applicationEntity="GVDICOM" listenerPort="11112" dicomStoreDirectory="sp{{gv.app.home}}/DICOM/store"/>
         <AssociationList />
     </GVDicomAdapterConfiguration>
+    <GVNetConfiguration name="GV_NET" type="module" version="1.0">
+        <NetListeners />
+    </GVNetConfiguration>
 </GVAdapters>

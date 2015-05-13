@@ -1298,6 +1298,10 @@
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdicom</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvnet</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>

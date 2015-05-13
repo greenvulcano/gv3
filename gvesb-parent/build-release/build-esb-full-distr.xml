@@ -87,6 +87,7 @@
                 <include name="Extra/GVSAP.dtd"/>
                 <include name="Extra/GVHDFSFileSystem.dtd"/>
                 <include name="Extra/GVDICOM.dtd"/>
+                <include name="Extra/GVNet.dtd"/>
             </fileset>
         </copy>
 
@@ -163,6 +164,7 @@
                 <exclude name="gvvcl-openspcoop.jar"/>
                 <exclude name="gvhadoop.jar"/>
                 <exclude name="gvdicom.jar"/>
+                <!--<exclude name="gvnet.jar"/>-->
             </fileset>
         </copy>
         <!-- Copy EAR lib -->

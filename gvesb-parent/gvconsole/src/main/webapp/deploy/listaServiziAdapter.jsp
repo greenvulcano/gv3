@@ -117,12 +117,22 @@
         </tr>
         <%numRighe++;%>
      </c:forEach>
+    <tr>
+    <td><font color="red" size="4">Net Adapter:</font></td>
+   </tr>
+   <%numRighe=0;%>
+   <c:forEach items="${listaGVNET}" var="listaGVNET">
+    <tr>         
+         <td><a href="javascript:invocaDeploy('<c:out value='${listaGVNET}'/>','GV_NET');"><c:out value='${listaGVNET}'/></a></td>
+        </tr>
+        <%numRighe++;%>
+     </c:forEach>
    <tr>	
    	<td><font color="red" size="4">ADAPTERS:</font></td>
    </tr>
    <%numRighe=0;%>
    <c:forEach items="${listaAdapter}" var="adapter">
-   	     <c:if test="${adapter!='WEB_SERVICES' && adapter!='EXCEL_WORK' && adapter!='EXCEL_REPO' && adapter!='GVDP' && adapter!='BIRT_REPO' && adapter!='DH_ENGINE'}"> 
+   	     <c:if test="${adapter!='WEB_SERVICES' && adapter!='EXCEL_WORK' && adapter!='EXCEL_REPO' && adapter!='GVDP' && adapter!='BIRT_REPO' && adapter!='DH_ENGINE' && adapter!='GV_NET'}"> 
                 <tr>   		 
    		 <td><a href="javascript:invocaDeploy('<c:out value='${adapter}'/>','<c:out value='${adapter}'/>');"><c:out value='${adapter}'/></a></td>
 		</tr>
