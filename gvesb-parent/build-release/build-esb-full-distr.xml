@@ -88,6 +88,7 @@
                 <include name="Extra/GVHDFSFileSystem.dtd"/>
                 <include name="Extra/GVDICOM.dtd"/>
                 <include name="Extra/GVNet.dtd"/>
+                <include name="Extra/GVPushNotification.dtd"/>
             </fileset>
         </copy>
 
@@ -165,6 +166,7 @@
                 <exclude name="gvhadoop.jar"/>
                 <exclude name="gvdicom.jar"/>
                 <!--<exclude name="gvnet.jar"/>-->
+                <exclude name="gvpushnot.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
@@ -549,6 +551,28 @@
             </fileset>
             <fileset dir="${com.thoughtworks.xstream.lib}">
                 <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy PushNotif lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvpushnot.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${com.ganyo.lib}">
+                <include name="*.jar"/>
+            </fileset>
+             <fileset dir="${com.googlecode.json.simple.lib}">
+                 <include name="*.jar"/>
+             </fileset>
+            <fileset dir="${javapns.javapns.lib}">
+                 <include name="*.jar"/>
             </fileset>
         </copy>
 

@@ -59,6 +59,7 @@
     <version.excalibur>1.0</version.excalibur>
     <version.flute>1.2</version.flute>
     <version.fop>0.95</version.fop>
+    <version.gcm>1.0.2.gv</version.gcm>
     <version.groovy>2.3.6</version.groovy>
     <version.hadoop>2.4.1</version.hadoop>
     <version.hapi>1.2</version.hapi>
@@ -67,6 +68,7 @@
     <version.javassist>3.8.0.GA</version.javassist>
     <version.javax.mail>1.4.7</version.javax.mail>
     <version.geronimo-javamail_1.4_mail>1.8.2</version.geronimo-javamail_1.4_mail>
+    <version.javapns>2.3b3.gv</version.javapns>
     <version.jaxen>1.1.1</version.jaxen>
     <version.jbpm>5.0.0</version.jbpm>
     <version.jdom>2.0.5</version.jdom>
@@ -77,6 +79,7 @@
     <version.jruby>1.7.13</version.jruby>
     <version.jsch>0.1.51</version.jsch>
     <version.json>20150218.gv</version.json>
+    <version.json-simple>1.1</version.json-simple>
     <version.json.schema>2.2.5</version.json.schema>
     <version.junit>4.11</version.junit>
     <version.log4j>1.2.15</version.log4j>
@@ -1735,6 +1738,28 @@
             <version>${version.xstream}</version>
             <scope>compile</scope>
             <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ganyo</groupId>
+            <artifactId>gcm-server</artifactId>
+            <version>${version.gcm}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>${version.json-simple}</version>
+        </dependency>
+        <dependency>
+            <groupId>javapns</groupId>
+            <artifactId>JavaPNS</artifactId>
+            <version>${version.javapns}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>${version.paho}</version>
         </dependency>
 
         <dependency>

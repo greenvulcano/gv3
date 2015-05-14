@@ -100,6 +100,8 @@
                                  target="${{jboss.server.name}}" type="initializer" delayed-init="25"/>
             <generic-initializer class="it.greenvulcano.gvesb.gvnet.jmx.RegisterNetManager"
                                  target="${{jboss.server.name}}" type="initializer" delayed-init="20"/>
+            <generic-initializer class="it.greenvulcano.gvesb.gvpushnot.publisher.jmx.RegisterPushNotificationManager"
+                                 target="${{jboss.server.name}}" type="initializer" delayed-init="10"/>
         </Initializers>
     </entry-point>
     <mbeans-descriptors>

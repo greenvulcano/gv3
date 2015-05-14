@@ -931,4 +931,7 @@ order by 1]]></statement>
     <GVNetConfiguration name="GV_NET" type="module" version="1.0">
         <NetListeners />
     </GVNetConfiguration>
+    <GVPushNotificationManager name="PUSH_NOTIFICATION" type="module" version="1.0">
+        <NotificationEngines />
+    </GVPushNotificationManager>
 </GVAdapters>

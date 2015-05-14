@@ -95,6 +95,7 @@ public class StrutsUploadAction extends Action
             sessione.setAttribute("listaGVHL7", parserAdapter.getListaGVHL7Zip());
             sessione.setAttribute("listaGVHTTP", parserAdapter.getListaGVHTTPZip());
             sessione.setAttribute("listaGVNET", parserAdapter.getListaGVNETZip());
+            sessione.setAttribute("listaPUSHNOT", parserAdapter.getListaPUSHNOTZip());
             sessione.setAttribute("listaGVBirtRepo", parserAdapter.getListaGVBirtRepoZip());
             sessione.setAttribute("listaSupport", parserSupport.getListaSupportZip());
             sessione.setAttribute("listaCoreParametri", parserService.getListParameterZip());

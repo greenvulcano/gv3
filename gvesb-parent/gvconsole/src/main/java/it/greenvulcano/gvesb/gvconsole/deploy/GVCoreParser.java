@@ -1499,22 +1499,44 @@ public class GVCoreParser
                 	gvCryptoHelperServer.replaceChild(importedNode, resultsKeyServer);
                 	logger.debug("Nodo KeyID[" + id + "] gia esistente aggiornamento");
                 }
-                
-                String ksid = parser.get(keyIDZip.item(i), "@key-store-id");
-                NodeList gvKeyStoreIDZip = parser.selectNodeList(gvCryptoHelperZip, "KeyStoreID[@id='" + ksid + "']");
-                Node resultsKeyStoServer = parser.selectSingleNode(gvCryptoHelperServer, "KeyStoreID[@id='" + ksid + "']");
-                if (resultsKeyStoServer == null) {
-                    Node importedNode = gvCryptoHelperServer.getOwnerDocument().importNode(gvKeyStoreIDZip.item(i), true);
-                    gvCryptoHelperServer.appendChild(importedNode);
-                    logger.debug("Nodo KeyStoreID[" + ksid + "] non esistente inserimento");
+            }
+            
+            NodeList keyStIDZip = parser.selectNodeList(gvCryptoHelperZip, "KeyStoreID");
+            for (int i = 0; i < keyStIDZip.getLength(); i++) {
+                String id = parser.get(keyStIDZip.item(i), "@id");
+                Node resultsKeyStServer = parser.selectSingleNode(serverXml, "/GVCore/GVCryptoHelper/KeyStoreID[@id='" + id + "']");
+                if (resultsKeyStServer == null) {
+                	Node importedNode = gvCryptoHelperServer.getOwnerDocument().importNode(keyStIDZip.item(i), true);
+                	gvCryptoHelperServer.appendChild(importedNode);
+                	logger.debug("Nodo KeyStoreID[" + id + "] non esistente inserimento");
                 }
                 else {
-                    Node importedNode = gvCryptoHelperServer.getOwnerDocument().importNode(gvKeyStoreIDZip.item(i), true);
-                    gvCryptoHelperServer.replaceChild(importedNode, resultsKeyStoServer);
-                    logger.debug("Nodo KeyStoreID[" + ksid + "] gia esistente aggiornamento");
+                	Node importedNode = gvCryptoHelperServer.getOwnerDocument().importNode(keyStIDZip.item(i), true);
+                	gvCryptoHelperServer.replaceChild(importedNode, resultsKeyStServer);
+                	logger.debug("Nodo KeyStoreID[" + id + "] gia esistente aggiornamento");
                 }
-                copiaFileKeyStore(gvKeyStoreIDZip.item(i));
+                copiaFileKeyStore(keyStIDZip.item(i));
             }
+        }
+    }
+    
+    public void aggiornaGVCryptoKeyStore(String ksid, XMLUtils parser) throws Exception
+    {
+    	Node gvKeyStoreIDZip = parser.selectSingleNode(newXml, "/GVCore/GVCryptoHelper/KeyStoreID[@id='" + ksid + "']");
+        Node gvCryptoHelperServer = parser.selectSingleNode(serverXml, "/GVCore/GVCryptoHelper");
+        if (gvKeyStoreIDZip != null) {
+            Node resultsKeyStoServer = parser.selectSingleNode(gvCryptoHelperServer, "KeyStoreID[@id='" + ksid + "']");
+            if (resultsKeyStoServer == null) {
+                Node importedNode = gvCryptoHelperServer.getOwnerDocument().importNode(gvKeyStoreIDZip, true);
+                gvCryptoHelperServer.appendChild(importedNode);
+                logger.debug("Nodo KeyStoreID[" + ksid + "] non esistente inserimento");
+            }
+            else {
+                Node importedNode = gvCryptoHelperServer.getOwnerDocument().importNode(gvKeyStoreIDZip, true);
+                gvCryptoHelperServer.replaceChild(importedNode, resultsKeyStoServer);
+                logger.debug("Nodo KeyStoreID[" + ksid + "] gia esistente aggiornamento");
+            }
+            copiaFileKeyStore(gvKeyStoreIDZip);
         }
     }
 

@@ -665,6 +665,13 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvpushnot</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>

@@ -107,7 +107,7 @@
         </tr>
         <%numRighe++;%>
      </c:forEach>
-    <tr>
+   <tr>
     <td><font color="red" size="4">HTTP INBOUND:</font></td>
    </tr>
    <%numRighe=0;%>
@@ -117,7 +117,7 @@
         </tr>
         <%numRighe++;%>
      </c:forEach>
-    <tr>
+   <tr>
     <td><font color="red" size="4">Net Adapter:</font></td>
    </tr>
    <%numRighe=0;%>
@@ -127,12 +127,22 @@
         </tr>
         <%numRighe++;%>
      </c:forEach>
+   <tr>
+    <td><font color="red" size="4">Push Notification:</font></td>
+   </tr>
+   <%numRighe=0;%>
+   <c:forEach items="${listaPUSHNOT}" var="listaPUSHNOT">
+    <tr>         
+         <td><a href="javascript:invocaDeploy('<c:out value='${listaPUSHNOT}'/>','PUSH_NOTIFICATION');"><c:out value='${listaPUSHNOT}'/></a></td>
+        </tr>
+        <%numRighe++;%>
+     </c:forEach>
    <tr>	
    	<td><font color="red" size="4">ADAPTERS:</font></td>
    </tr>
    <%numRighe=0;%>
    <c:forEach items="${listaAdapter}" var="adapter">
-   	     <c:if test="${adapter!='WEB_SERVICES' && adapter!='EXCEL_WORK' && adapter!='EXCEL_REPO' && adapter!='GVDP' && adapter!='BIRT_REPO' && adapter!='DH_ENGINE' && adapter!='GV_NET'}"> 
+   	     <c:if test="${adapter!='WEB_SERVICES' && adapter!='EXCEL_WORK' && adapter!='EXCEL_REPO' && adapter!='GVDP' && adapter!='BIRT_REPO' && adapter!='DH_ENGINE' && adapter!='GV_NET' && adapter!='PUSH_NOTIFICATION'}"> 
                 <tr>   		 
    		 <td><a href="javascript:invocaDeploy('<c:out value='${adapter}'/>','<c:out value='${adapter}'/>');"><c:out value='${adapter}'/></a></td>
 		</tr>
