@@ -102,7 +102,7 @@ public class ScriptExecutorImpl extends ScriptExecutor
 
             if (engine instanceof Compilable) {
                 if (PropertiesHandler.isExpanded(script)) {
-                    logger.debug("Static script, can be compiled for performance");
+                    logger.debug("Static script[" + lang + "], can be compiled for performance");
                     compScript = ((Compilable) engine).compile(script);
                 }
             }
@@ -170,7 +170,7 @@ public class ScriptExecutorImpl extends ScriptExecutor
 
             if (!externalScript && (engine instanceof Compilable)) {
                 if (PropertiesHandler.isExpanded(script)) {
-                    logger.debug("Static script, can be compiled for performance");
+                    logger.debug("Static script[" + lang + "], can be compiled for performance");
                     compScript = ((Compilable) engine).compile(this.script);
                 }
             }
@@ -256,7 +256,14 @@ public class ScriptExecutorImpl extends ScriptExecutor
         String localScript = script;
         try {
             if (compScript != null) {
-                return compScript.eval(bindings);
+                //return compScript.eval(bindings);
+                Object res = compScript.eval(bindings);
+                logger.debug("Engine[" + lang +"] script result: " + res);
+                if (res == null) {
+                    res = bindings.get("RESULT");
+                    logger.debug("Engine[" + lang +"] script RESULT: " + res);
+                }
+                return res;
             }
             if (!PropertiesHandler.isExpanded(localScript)) {
                 try {
@@ -268,7 +275,14 @@ public class ScriptExecutorImpl extends ScriptExecutor
                     PropertiesHandler.disableExceptionOnErrors();
                 }
             }
-            return engine.eval(localScript, bindings);
+            //return engine.eval(localScript, bindings);
+            Object res = engine.eval(localScript, bindings);
+            logger.debug("Engine[" + lang +"] script result: " + res);
+            if (res == null) {
+                res = bindings.get("RESULT");
+                logger.debug("Engine[" + lang +"] script RESULT: " + res);
+            }
+            return res;
         }
         catch (Exception exc) {
             logger.error("Error executing script[" + lang + "]:\n" + localScript, exc);
@@ -295,7 +309,14 @@ public class ScriptExecutorImpl extends ScriptExecutor
         String localScript = script;
         try {
             if (compScript != null) {
-                return compScript.eval(bindings);
+                //return compScript.eval(bindings);
+                Object res = compScript.eval(bindings);
+                logger.debug("Engine[" + lang +"] script result: " + res);
+                if (res == null) {
+                    res = bindings.get("RESULT");
+                    logger.debug("Engine[" + lang +"] script RESULT: " + res);
+                }
+                return res;
             }
             if (!PropertiesHandler.isExpanded(localScript)) {
                 try {
@@ -307,7 +328,14 @@ public class ScriptExecutorImpl extends ScriptExecutor
                     PropertiesHandler.disableExceptionOnErrors();
                 }
             }
-            return engine.eval(localScript, bindings);
+            //return engine.eval(localScript, bindings);
+            Object res = engine.eval(localScript, bindings);
+            logger.debug("Engine[" + lang +"] script result: " + res);
+            if (res == null) {
+                res = bindings.get("RESULT");
+                logger.debug("Engine[" + lang +"] script RESULT: " + res);
+            }
+            return res;
         }
         catch (Exception exc) {
             logger.error("Error executing script[" + lang + "]:\n" + localScript, exc);

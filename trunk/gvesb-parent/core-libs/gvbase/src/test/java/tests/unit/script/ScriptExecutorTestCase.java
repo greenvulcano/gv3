@@ -25,11 +25,16 @@ import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.script.ScriptExecutor;
 import it.greenvulcano.script.ScriptExecutorFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
+
 import junit.framework.TestCase;
 
+import org.junit.Ignore;
 import org.w3c.dom.Node;
 
 /**
@@ -46,6 +51,27 @@ public class ScriptExecutorTestCase extends TestCase
     protected void setUp() throws Exception {
         //do nothing
     }
+    
+    public final void testFactories() {
+        ScriptEngineManager mgr = new ScriptEngineManager();
+        List<ScriptEngineFactory> factories = mgr.getEngineFactories();
+        for (ScriptEngineFactory factory: factories) {
+          System.out.println("ScriptEngineFactory Info");
+          String engName = factory.getEngineName();
+          String engVersion = factory.getEngineVersion();
+          String langName = factory.getLanguageName();
+          String langVersion = factory.getLanguageVersion();
+          String threading = (String) factory.getParameter("THREADING");
+          System.out.printf("\tScript Engine: %s (%s)\n", engName, engVersion);
+          List<String> engNames = factory.getNames();
+          for(String name: engNames) {
+            System.out.printf("\tEngine Alias: %s\n", name);
+          }
+          System.out.printf("\tLanguage: %s (%s)\n", langName, langVersion);
+          System.out.printf("\tThreading: %s\n", threading);
+        }    
+    }
+    
 
     /**
      * @throws Exception
@@ -198,6 +224,28 @@ public class ScriptExecutorTestCase extends TestCase
             assertEquals("testSimpleJRuby: Failed iteration " + j, out, (j % 2 == 0));            
         }
     }
+    
+    /**
+     * @throws Exception
+     */
+    @Ignore
+    public final void testSimpleJython() throws Exception
+    {
+        Node n = XMLConfig.getNode("GVCore.xml", "//Service[@id-service='TestScript']//ChangeGVBufferNode[@id='testJython']/ChangeGVBuffer/Script");
+        ScriptExecutor se = ScriptExecutorFactory.createSE(n);
+
+        GVBuffer gvb = new GVBuffer();
+
+        for (int j = 0; j < 10; j++) {
+            gvb.setProperty("SVC", svc[j % 2]);
+            se.putProperty("data", gvb);
+            Object out = se.execute(GVBufferPropertiesHelper.getPropertiesMapSO(gvb, true), gvb);
+            se.cleanUp();
+            System.out.println("testSimpleJython[" + j + "]: " + out.getClass() + " -> " + out);
+
+            assertEquals("testSimpleJython: Failed iteration " + j, out, (j % 2 == 0));            
+        }
+    }
 
     /**
      * @throws Exception
@@ -280,6 +328,28 @@ public class ScriptExecutorTestCase extends TestCase
             System.out.println("testSimpleJRuby_props[" + j + "]: " + out.getClass() + " -> " + out);
 
             assertEquals("testSimpleJRuby_props: Failed iteration " + j, out, (j % 2 == 0));            
+        }
+    }
+    
+    /**
+     * @throws Exception
+     */
+    @Ignore
+    public final void testSimpleJython_props() throws Exception
+    {
+        Node n = XMLConfig.getNode("GVCore.xml", "//Service[@id-service='TestScript']//ChangeGVBufferNode[@id='testJython_props']/ChangeGVBuffer/Script");
+        ScriptExecutor se = ScriptExecutorFactory.createSE(n);
+
+        GVBuffer gvb = new GVBuffer();
+
+        for (int j = 0; j < 10; j++) {
+            gvb.setProperty("SVC", svc[j % 2]);
+            se.putProperty("data", gvb);
+            Object out = se.execute(GVBufferPropertiesHelper.getPropertiesMapSO(gvb, true), gvb);
+            se.cleanUp();
+            System.out.println("testSimpleJython_props[" + j + "]: " + out.getClass() + " -> " + out);
+
+            assertEquals("testSimpleJython_props: Failed iteration " + j, out, (j % 2 == 0));            
         }
     }
 
@@ -366,6 +436,28 @@ public class ScriptExecutorTestCase extends TestCase
             assertEquals("testSimpleJRuby_file: Failed iteration " + j, out, (j % 2 == 0));            
         }
     }
+    
+    /**
+     * @throws Exception
+     */
+    @Ignore
+    public final void testSimpleJython_file() throws Exception
+    {
+        Node n = XMLConfig.getNode("GVCore.xml", "//Service[@id-service='TestScript']//ChangeGVBufferNode[@id='testJython_file']/ChangeGVBuffer/Script");
+        ScriptExecutor se = ScriptExecutorFactory.createSE(n);
+
+        GVBuffer gvb = new GVBuffer();
+
+        for (int j = 0; j < 10; j++) {
+            gvb.setProperty("SVC", svc[j % 2]);
+            se.putProperty("data", gvb);
+            Object out = se.execute(GVBufferPropertiesHelper.getPropertiesMapSO(gvb, true), gvb);
+            se.cleanUp();
+            System.out.println("testSimpleJython_file[" + j + "]: " + out.getClass() + " -> " + out);
+
+            assertEquals("testSimpleJython_file: Failed iteration " + j, out, (j % 2 == 0));            
+        }
+    }
 
     /**
      * @throws Exception
@@ -448,6 +540,28 @@ public class ScriptExecutorTestCase extends TestCase
             System.out.println("testSimpleJRuby_inc_file[" + j + "]: " + out.getClass() + " -> " + out);
 
             assertEquals("testSimpleJRuby_inc_file: Failed iteration " + j, out, (j % 2 == 0));            
+        }
+    }
+    
+    /**
+     * @throws Exception
+     */
+    @Ignore
+    public final void testSimpleJython_inc_file() throws Exception
+    {
+        Node n = XMLConfig.getNode("GVCore.xml", "//Service[@id-service='TestScript']//ChangeGVBufferNode[@id='testJython_inc_file']/ChangeGVBuffer/Script");
+        ScriptExecutor se = ScriptExecutorFactory.createSE(n);
+
+        GVBuffer gvb = new GVBuffer();
+
+        for (int j = 0; j < 10; j++) {
+            gvb.setProperty("SVC", svc[j % 2]);
+            se.putProperty("data", gvb);
+            Object out = se.execute(GVBufferPropertiesHelper.getPropertiesMapSO(gvb, true), gvb);
+            se.cleanUp();
+            System.out.println("testSimpleJython_inc_file[" + j + "]: " + out.getClass() + " -> " + out);
+
+            assertEquals("testSimpleJython_inc_file: Failed iteration " + j, out, (j % 2 == 0));            
         }
     }
 

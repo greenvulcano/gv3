@@ -91,6 +91,17 @@ svc = $data.getProperty("SVC")
 ("1" == services[svc])]]></Script>
               </ChangeGVBuffer>
             </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJython"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="jython"><![CDATA[services = {"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"}
+svc = data.getProperty("SVC")
+RESULT = "1" == services.get(svc,"0")]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
 
             <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
                                 dump-in-out="true" id="testJS_props"
@@ -132,6 +143,16 @@ svc = $data.getProperty("SVC")
 ("1" == services["@{{SVC}}"])]]></Script>
               </ChangeGVBuffer>
             </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJython_props"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="jython"><![CDATA[services = {"LIST_EXCEL":"1", "LIST_PDF":"1", "LIST_BIRT":"1"}
+RESULT = "1" == services.get("@{{SVC}}","0")]]></Script>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
 
             <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
                                 dump-in-out="true" id="testJS_file"
@@ -167,6 +188,15 @@ svc = $data.getProperty("SVC")
                                 point-y="151" type="flow-node">
               <ChangeGVBuffer clear-data="false">
                 <Script lang="jruby" file="test.rb"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJython_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="jython" file="test.py"/>
               </ChangeGVBuffer>
             </ChangeGVBufferNode>
 
@@ -206,6 +236,16 @@ svc = $data.getProperty("SVC")
                 <Script lang="jruby" file="test_inc.rb"/>
               </ChangeGVBuffer>
             </ChangeGVBufferNode>
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode"
+                                dump-in-out="true" id="testJython_inc_file"
+                                input="data" next-node-id="end"
+                                op-type="change GVBuffer" point-x="150"
+                                point-y="151" type="flow-node">
+              <ChangeGVBuffer clear-data="false">
+                <Script lang="jython" file="test_inc.py"/>
+              </ChangeGVBuffer>
+            </ChangeGVBufferNode>
+
             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
                        end-business-process="yes" id="end" op-type="end"
                        output="data" point-x="345" point-y="151"

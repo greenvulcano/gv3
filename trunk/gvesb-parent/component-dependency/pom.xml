@@ -82,6 +82,7 @@
     <version.json-simple>1.1</version.json-simple>
     <version.json.schema>2.2.5</version.json.schema>
     <version.junit>4.11</version.junit>
+    <version.jython>2.5.4-rc1</version.jython>
     <version.log4j>1.2.15</version.log4j>
     <version.lucene>2.0.0</version.lucene>
     <version.mina>2.0.0-RC1</version.mina>
@@ -405,6 +406,13 @@
             <groupId>rhino</groupId>
             <artifactId>js</artifactId>
             <version>${version.rhino.js}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.python</groupId>
+            <artifactId>jython-standalone</artifactId>
+            <version>${version.jython}</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
