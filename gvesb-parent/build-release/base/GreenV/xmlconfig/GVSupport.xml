@@ -330,6 +330,7 @@
             </ScriptEngine>
             <ScriptEngine lang="ognl" type="script-engine" />
             <ScriptEngine lang="groovy" type="script-engine" />
+            <ScriptEngine lang="jython" type="script-engine"/>
             <ScriptEngine lang="jruby" default-context="gvesb" type="script-engine">
                 <BaseContext name="basic"/>
                 <BaseContext name="gvesb" file="jruby/initscope.rb"/>

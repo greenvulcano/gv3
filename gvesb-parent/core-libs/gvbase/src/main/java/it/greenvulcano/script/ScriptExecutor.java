@@ -215,7 +215,14 @@ public abstract class ScriptExecutor
             }
             Bindings b = engine.createBindings();
             b.putAll(bindings);
-            return engine.eval(script, b);
+            //return engine.eval(script, b);
+            Object res = engine.eval(script, b);
+            logger.debug("Engine[" + lang +"] result: " + res);
+            if (res == null) {
+                res = b.get("RESULT");
+                logger.debug("Engine[" + lang +"] RESULT: " + res);
+            }
+            return res;
         }
         catch (Exception exc) {
             logger.error("Error executing script[" + lang + "]:\n" + script, exc);
