@@ -19,9 +19,6 @@
         <dependent-module archiveName="gvdte-3.5.0-Trunk.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdte/gvdte">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="json-20140107.gv.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/org.json/org.json">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <property name="context-root" value="gvdebug"/>
         <property name="java-output-path" value="/gvdebug/target/classes"/>
     </wb-module>

@@ -117,6 +117,9 @@ public class GVAdapterParser
         else if (nomeAdapter.equals("GV_NET")) {
             ret = getExistGVNET(nomeServizio);
         }
+        else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
+            ret = getExistPUSHNOT(nomeServizio);
+        }
         else {
             ret = getExistObject("/GVAdapters/*[@name='" + nomeAdapter + "']");
         }
@@ -160,6 +163,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("GV_NET")) {
             ret = getEqualGVNET(nomeServizio);
+        }
+        else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
+            ret = getEqualPUSHNOT(nomeServizio);
         }
         else {
             ret = getEqualObject("/GVAdapters/*[@name='" + nomeAdapter + "']");
@@ -217,6 +223,12 @@ public class GVAdapterParser
         return getExistObject("/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='"
                 + listener + "']");
     }
+    
+    private boolean getExistPUSHNOT(String engine) throws XMLUtilsException
+    {
+        return getExistObject("/GVAdapters/GVPushNotificationManager/NotificationEngines/*[@type='pushnotif' and @name='"
+                + engine + "']");
+    }
 
     private boolean getEqualGVExcelWorkbook(String excelWorkbook) throws XMLUtilsException
     {
@@ -256,6 +268,11 @@ public class GVAdapterParser
     private boolean getEqualGVNET(String listener) throws XMLUtilsException
     {
         return getEqualObject("/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='" + listener + "']");
+    }
+    
+    private boolean getEqualPUSHNOT(String engine) throws XMLUtilsException
+    {
+        return getEqualObject("/GVAdapters/GVPushNotificationManager/NotificationEngines/*[@type='pushnotif' and @name='" + engine + "']");
     }
 
     /**
@@ -477,6 +494,11 @@ public class GVAdapterParser
     {
         return getListaGVNET(newXml);
     }
+    
+    public String[] getListaPUSHNOTZip() throws Exception
+    {
+        return getListaPUSHNOT(newXml);
+    }
 
     public String[] getListaGVBirtRepoZip() throws Exception
     {
@@ -522,6 +544,9 @@ public class GVAdapterParser
         else if (nomeAdapter.equals("GV_NET")) {
             ret = getGVNETZip(nomeServizio);
         }
+        else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
+            ret = getPUSHNOTZip(nomeServizio);
+        }
         else {
             ret = getGvAdapter(newXml, nomeAdapter);
         }
@@ -565,6 +590,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("GV_NET")) {
             ret = getGVNETServer(nomeServizio);
+        }
+        else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
+            ret = getPUSHNOTServer(nomeServizio);
         }
         else {
             ret = getGvAdapter(serverXml, nomeAdapter);
@@ -941,6 +969,41 @@ public class GVAdapterParser
             XMLUtils.releaseParserInstance(parser);
         }
     }
+    
+    private String getPUSHNOTZip(String servizio) throws XMLUtilsException
+    {
+        return getPUSHNOT(newXml, servizio);
+    }
+
+    private String getPUSHNOTServer(String servizio) throws XMLUtilsException
+    {
+        return getPUSHNOT(serverXml, servizio);
+    }
+
+    private String getPUSHNOT(Document xml, String engine) throws XMLUtilsException
+    {
+        logger.debug("getPUSHNOT servizio =" + engine);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            Node localXml = parser.selectSingleNode(xml, "/GVAdapters/GVPushNotificationManager/NotificationEngines/*[@type='pushnotif' and @name='" + engine + "']");
+            Document localXmlGVAdapters = parser.newDocument("GVAdapters");
+            if (localXml != null) {
+                Node base = localXmlGVAdapters.getDocumentElement().appendChild(parser.createElement(localXmlGVAdapters, "GVPushNotificationManager"));
+                Node engines = base.appendChild(parser.createElement(localXmlGVAdapters, "NotificationEngines"));
+                parser.setAttribute((Element) base, "version", "1.0");
+                parser.setAttribute((Element) base, "type", "module");
+                parser.setAttribute((Element) base, "name", "PUSH_NOTIFICATION");
+
+                Node importedNode = localXmlGVAdapters.importNode(localXml, true);
+                engines.appendChild(importedNode);
+            }
+            return parser.serializeDOM(localXmlGVAdapters, false, true);
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
 
     private String getGvAdapter(Document xml, String nomeAdapter) throws XMLUtilsException
     {
@@ -996,6 +1059,9 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("GV_NET")) {
             aggiornaGVNET(nomeServizio);
+        }
+        else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
+            aggiornaPUSHNOT(nomeServizio);
         }
         else {
             XMLUtils parser = null;
@@ -1358,9 +1424,9 @@ public class GVAdapterParser
         try {
             parser = XMLUtils.getParserInstance();
             
-            // handle ActionMapping deployment
+            // handle Listener deployment
             Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='" + nomeServizio + "']");
-            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver'and @name='" + nomeServizio + "']");
+            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='" + nomeServizio + "']");
             Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVNetConfiguration/NetListeners");
             if (resultsZip != null) {
                 if (resultsServer == null) {
@@ -1376,6 +1442,43 @@ public class GVAdapterParser
             }
             
             logger.debug("end aggiornaGVNET");
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+    
+    public void aggiornaPUSHNOT(String nomeServizio) throws Exception
+    {
+        logger.debug("init aggiornaPUSHNOT");
+        logger.debug("action=" + nomeServizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            
+            // handle PushEngine deployment
+            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVPushNotificationManager/NotificationEngines/*[@type='pushnotif' and  @name='" + nomeServizio + "']");
+            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVPushNotificationManager/NotificationEngines/*[@type='pushnotif' and @name='" + nomeServizio + "']");
+            Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVPushNotificationManager/NotificationEngines");
+            if (resultsZip != null) {
+                if (resultsServer == null) {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.appendChild(importedNode);
+                    logger.debug("PushEngine[" + nomeServizio + "] non esistente, inserimento");
+                }
+                else {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.replaceChild(importedNode, resultsServer);
+                    logger.debug("PushEngine[" + nomeServizio + "] esistente, aggiornamento");
+                }
+                String ksid = parser.get(resultsZip, "@keystoreID", "NULL");
+                if (!ksid.equals("NULL")) {
+                	coreParser.aggiornaGVCryptoKeyStore(ksid, parser);
+                	coreParser.scriviFile();
+                }
+            }
+            
+            logger.debug("end aggiornaPUSHNOT");
         }
         finally {
             XMLUtils.releaseParserInstance(parser);
@@ -1607,6 +1710,11 @@ public class GVAdapterParser
     private String[] getListaGVNET(Document xml) throws Exception
     {
         return getListaObject(xml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver']/@name");
+    }
+    
+    private String[] getListaPUSHNOT(Document xml) throws Exception
+    {
+        return getListaObject(xml, "/GVAdapters/GVPushNotificationManager/NotificationEngines/*[@type='pushnotif']/@name");
     }
 
     private String[] getListaGVBirtRepo(Document xml) throws Exception

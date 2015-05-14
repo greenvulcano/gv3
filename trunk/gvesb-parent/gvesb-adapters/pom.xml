@@ -47,5 +47,6 @@
         <module>gvnet</module>
         <module>gvhadoop</module>
         <module>gvdicom</module>
+        <module>gvpushnot</module>
     </modules>
 </project>
