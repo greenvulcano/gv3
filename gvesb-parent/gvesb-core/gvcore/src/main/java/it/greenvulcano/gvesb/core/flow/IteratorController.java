@@ -122,6 +122,8 @@ public class IteratorController
     private String                 call_dp                     = null;
     private boolean                changeLogContext            = true;
     private boolean                accumulateOutput            = false;
+    private boolean                returnFullIterOutput        = false;
+
     /**
      * Keeps reference to <code>IDataProvider</code> implementation.
      */
@@ -151,6 +153,7 @@ public class IteratorController
             this.id = id;
             defNode = node;
             accumulateOutput = XMLConfig.getBoolean(node, "@accumulate-output", true);
+            returnFullIterOutput = XMLConfig.getBoolean(node, "@full-iteration-output", false);
             collectionDP = XMLConfig.get(node, "@collection-dp", "");
 
             String exitLoopExceptionClassname = XMLConfig.get(node, "exit-loop-condition/exception-event/@value", null);
@@ -298,7 +301,12 @@ public class IteratorController
                         if (currIterOutput instanceof GVBuffer) {
                             if (accumulateOutput) {
                                 GVBuffer currIterData = (GVBuffer) currIterOutput;
-                                output.add(currIterData.getObject());
+                                if (returnFullIterOutput) {
+                                    output.add(currIterData);
+                                }
+                                else {
+                                    output.add(currIterData.getObject());
+                                }
                             }
                         }
                         else if (currIterOutput instanceof Exception) {
@@ -332,6 +340,11 @@ public class IteratorController
                             }
                             logger.warn("Caught exception requires exiting loop...");
                             break;
+                        }
+                        else {
+                            if (accumulateOutput && returnFullIterOutput) {
+                                output.add(caughtExc);
+                            }
                         }
                         logger.warn("Caught exception DOES NOT require exiting loop");
 

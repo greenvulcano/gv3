@@ -3922,10 +3922,17 @@
 -->
 <!ATTLIST GVIteratorOperationNode collection-dp CDATA #IMPLIED>
 <!--
-    If true, output of each iteration is concatenated with the previous iteration's output.
+    If true, GVBuffer.object output of each iteration is added to a List then the List is returned as iterations output.
+    If false, is returned the input GVBuffer.
     Default is true.
 -->
 <!ATTLIST GVIteratorOperationNode accumulate-output (true|false) #IMPLIED>
+<!--
+    If true, the full GVBuffer/Exception output of each iteration is added to a List then the List is returned as iterations output.
+    Work in pair with @accumulate-output.
+    Default is false.
+-->
+<!ATTLIST GVIteratorOperationNode full-iteration-output (true|false) #IMPLIED>
 <!--
     Indicates the next node in the workflow to execute when the operation ends.
 
