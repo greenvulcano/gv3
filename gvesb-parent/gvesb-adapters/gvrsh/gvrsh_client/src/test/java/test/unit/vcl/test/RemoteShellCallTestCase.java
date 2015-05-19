@@ -21,12 +21,9 @@ package test.unit.vcl.test;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
-import it.greenvulcano.gvesb.rsh.server.RSHServer;
 import it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation;
 
 import java.io.File;
-
-import junit.framework.TestCase;
 
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Node;
@@ -35,47 +32,19 @@ import org.w3c.dom.Node;
  * @version 3.2.0 06/10/2011
  * @author GreenVulcano Developer Team
  */
-public class RemoteShellCallTestCase extends TestCase
+public class RemoteShellCallTestCase extends BaseTest
 {
-    private static final String TEST_FILE_RESOURCES      = System.getProperty("user.dir") + File.separator
-                                                                 + "target" + File.separator + "test-classes";
-    private static final String TEST_FILE_DIR            = "TestFileManager";
-    private static final String TEST_FILE_DEST_RESOURCES = System.getProperty("java.io.tmpdir") + File.separator
-                                                                 + TEST_FILE_DIR;
-    private static final String TEST_FILE                = "test_shell.txt";
-	private static final String TEST_FILE_CONTENT        = "Test file for Virtual Communication Layer Shell plugin test cases.";
 
-	private static String       channel                  = File.separator.equals("/") ? "TEST_CHANNEL" : "TEST_CHANNEL_WIN";
-    private static RSHServer    instance                 = null;
-
-    /**
-     * @see junit.framework.TestCase#setUp()
-     */
     @Override
     protected void setUp() throws Exception
     {
         super.setUp();
-        if (instance == null) {
-            instance = new RSHServer(3099);
-            instance.startUp();
-        }
-        FileUtils.deleteQuietly(new File(TEST_FILE_DEST_RESOURCES));
-        FileUtils.forceMkdir(new File(TEST_FILE_DEST_RESOURCES));
         FileUtils.copyFileToDirectory(new File(TEST_FILE_RESOURCES, TEST_FILE), new File(TEST_FILE_DEST_RESOURCES));
-        assertTrue("System property 'it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath' not set.",
-                System.getProperty("it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath") != null);
     }
 
-    /**
-     * @see junit.framework.TestCase#tearDown()
-     */
     @Override
     protected void tearDown() throws Exception
     {
-        /*if (instance != null) {
-            instance.shutDown();
-        }*/
-        FileUtils.deleteQuietly(new File(TEST_FILE_DEST_RESOURCES));
         super.tearDown();
     }
 
