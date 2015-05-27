@@ -42,6 +42,70 @@ import org.w3c.dom.NodeList;
  */
 public class JSONUtils
 {
+	/**
+     * Returns a JSONObject from the given input object.
+     * 
+     * @param object
+     *        input object
+     * @return a JSONObject parsed from the given input object.
+     * @throws JSONUtilsException
+     */
+	public static JSONObject parseObject(Object input) throws JSONUtilsException {
+		JSONObject json = null;
+		if (input == null) {
+			return null;
+		}
+		if (input instanceof String) {
+            json = new JSONObject((String) input);
+        }
+        else if (input instanceof byte[]) {
+            json = new JSONObject(new String((byte[]) input));
+        }
+        else if (input instanceof JSONObject) {
+            json = (JSONObject) input;
+        }
+        else {
+        	throw new JSONUtilsException("Invalid input type: " + input.getClass());
+        }
+		return json;
+	}
+	
+	/**
+     * Serialize a given JSONObject to a string, using default character encoding
+     * UTF-8 and no indentation.
+     * 
+     * @param json
+     *        The input JSONObject
+     * @return the serialized JSON (as a <tt>String</tt> encoded using
+     *         default character encoding UTF-8)
+     * @throws JSONUtilsException
+     *         on errors
+     */
+    public static String serializeJSON(JSONObject json) throws JSONUtilsException
+    {
+        String result = json.toString();
+        return result;
+    }
+
+	/**
+     * Serialize a given JSONObject to a string, using default character encoding
+     * UTF-8 and given indentation.
+     * 
+     * @param json
+     *        The input JSONObject
+     * @param indentFactor
+     *        The formatting indentation to use
+     * @return the serialized JSON (as a <tt>String</tt> encoded using
+     *         default character encoding UTF-8)
+     * @throws JSONUtilsException
+     *         on errors
+     */
+    public static String serializeJSON(JSONObject json, int indentFactor) throws JSONUtilsException
+    {
+        String result = json.toString(indentFactor);
+        return result;
+    }
+
     /**
      * Convert the input XML to a JSONObject.
      * JSON does not distinguish between elements and attributes.
