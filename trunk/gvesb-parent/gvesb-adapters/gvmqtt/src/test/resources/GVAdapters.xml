@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+    <GVMQTTConfiguration name="GV_MQTT" type="module" version="1.0">
+        <Moquette name="Moquette" brokerUrl="tcp://localhost:1883" type="mqtt-server"
+                  class="it.greenvulcano.gvesb.gvmqtt.server.Moquette">
+            <moq-property name="port" value="1883"/>
+            <moq-property name="websocket_port" value="8980"/>
+            <moq-property name="host" value="0.0.0.0"/>
+            <moq-property name="allow_anonymous" value="true"/>
+            <moq-property name="persistent_store" value="sp{{gv.app.home}}/moquette/moquette_store.mapdb"/>
+        </Moquette>          
+        <MQTTSubscribers>
+            <MQTTSubscriber autoStart="true" reconnectTime="30" clientID="MC_MQTTSubscriber_01"
+                            class="it.greenvulcano.gvesb.gvmqtt.subscriber.MQTTSubscriber"
+                            enabled="true" name="MC_MQTTSubscriber" type="mqtt-subscriber">
+                <TopicFilters>
+                    <Filter topic="gvesb/test" qos="0"/>
+                </TopicFilters>
+                <GVMQTTCoreInvoker class="it.greenvulcano.gvesb.gvmqtt.subscriber.invoker.GVCoreInvoker"
+                                   debug="true" gv-operation="RequestReply"
+                                   gv-service="MQTT_Subscriber" gv-system="GVESB"
+                                   name="MQTTApplication" send-reply="false"
+                                   type="mqtt-invoker"/>
+            </MQTTSubscriber>
+        </MQTTSubscribers>
+        <MQTTPublishers>
+            <MQTTPublisher reconnectTime="30" clientID="MQTTPublisher_01" autoStart="true"
+                           class="it.greenvulcano.gvesb.gvmqtt.publisher.MQTTPublisher"
+                           enabled="true" name="MQTTPublisher" type="mqtt-publisher"
+                           topic="gvesb/test_resp" qos="0"/>
+        </MQTTPublishers>
+    </GVMQTTConfiguration>
+</GVAdapters>

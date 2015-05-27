@@ -217,6 +217,17 @@
                      value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{SERVER}] - %m %n"/>
           </layout>
       </appender>
+      <appender class="it.greenvulcano.log.GVDailyRollingFileAppender" name="LOGGER_FOR_MQTT">
+        <param name="Append" value="false" />
+        <param name="ImmediateFlush" value="true" />
+        <param name="BufferedIO" value="false" />
+        <param name="BufferSize" value="4096" />
+        <param name="DatePattern" value="yyyy-MM-dd" />
+        <param name="File" value="sp{{gv.app.home}}/log/GVMQTT.$.log" />
+        <layout class="org.apache.log4j.PatternLayout">
+          <param name="ConversionPattern" value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}] - %m %n" />
+        </layout>
+      </appender>
       <logger additivity="false" name="it.greenvulcano.gvesb.virtual">
         <level value="DEBUG" />
         <appender-ref ref="LOGGER_FOR_GVVCL" />
@@ -324,6 +335,22 @@
       <logger additivity="false" name="test.notification">
         <level value="DEBUG" />
         <appender-ref ref="LOGGER_FOR_NOTIFICATION" />
+      </logger>
+      <logger additivity="false" name="it.greenvulcano.gvesb.gvmqtt">
+        <level value="DEBUG" />
+        <appender-ref ref="LOGGER_FOR_MQTT" />
+      </logger>
+      <logger additivity="false" name="org.eclipse.moquette">
+        <level value="INFO" />
+        <appender-ref ref="LOGGER_FOR_MQTT" />
+      </logger>
+      <logger additivity="false" name="org.eclipse.moquette.spi.impl.ProtocolProcessor">
+        <level value="INFO" />
+        <appender-ref ref="LOGGER_FOR_MQTT" />
+      </logger>
+      <logger additivity="false" name="org.eclipse.moquette.spi.impl.SimpleMessaging">
+        <level value="WARN" />
+        <appender-ref ref="LOGGER_FOR_MQTT" />
       </logger>
     </log4j:configuration>
   </GVLog4JConfiguration>

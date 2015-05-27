@@ -89,6 +89,7 @@
                 <include name="Extra/GVDICOM.dtd"/>
                 <include name="Extra/GVNet.dtd"/>
                 <include name="Extra/GVPushNotification.dtd"/>
+                <include name="Extra/GVMQTT.dtd"/>
             </fileset>
         </copy>
 
@@ -167,6 +168,7 @@
                 <exclude name="gvdicom.jar"/>
                 <!--<exclude name="gvnet.jar"/>-->
                 <exclude name="gvpushnot.jar"/>
+                <exclude name="gvmqtt.jar"/>
             </fileset>
         </copy>
         <!-- Copy EAR lib -->
@@ -575,6 +577,37 @@
                  <include name="*.jar"/>
              </fileset>
             <fileset dir="${javapns.javapns.lib}">
+                 <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy MQTT lib -->
+        <!-- Copy EAR GVESB lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${gvesb.gvesb.lib}">
+                <include name="gvmqtt.jar"/>
+            </fileset>
+        </copy>
+        <!-- Copy EAR lib -->
+        <copy todir="${release.ear.lib}" filtering="false"
+              preservelastmodified="true" overwrite="true">
+            <fileset dir="${org.dna.mqtt.lib}">
+                <include name="*.jar"/>
+            </fileset>
+             <fileset dir="${org.eclipse.paho.lib}">
+                 <include name="*.jar"/>
+             </fileset>
+            <fileset dir="${io.netty.lib}">
+                 <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.mapdb.lib}">
+                 <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${org.hdrhistogram.lib}">
+                 <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${com.lmax.lib}">
                  <include name="*.jar"/>
             </fileset>
         </copy>

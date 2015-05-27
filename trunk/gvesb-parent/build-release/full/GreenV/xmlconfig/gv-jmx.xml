@@ -102,6 +102,8 @@
                                  target="${{jboss.server.name}}" type="initializer" delayed-init="20"/>
             <generic-initializer class="it.greenvulcano.gvesb.gvpushnot.publisher.jmx.RegisterPushNotificationManager"
                                  target="${{jboss.server.name}}" type="initializer" delayed-init="10"/>
+            <generic-initializer class="it.greenvulcano.gvesb.gvmqtt.jmx.RegisterMQTTManager"
+                                 target="${{jboss.server.name}}" type="initializer" delayed-init="10"/>
         </Initializers>
     </entry-point>
     <mbeans-descriptors>
@@ -819,6 +821,39 @@
 
             <operation description="Start the Receiver." name="start" />
             <operation description="Stop the Receiver." name="stop" />
+        </mbean>
+
+        <mbean description="Show MQTT Subscriber status"
+           domain="GreenVulcano" group="management" name="MQTTSubscriberInfo"
+           type="it.greenvulcano.gvesb.gvmqtt.subscriber.jmx.MQTTSubscriberInfo">
+            <attribute description="The subscriber name."
+                    displayName="Subscriber" name="name" readable="true"
+                    type="java.lang.String" writeable="false"/>
+            <attribute description="The broker Url."
+                    displayName="Broker Url" name="brokerUrl" readable="true"
+                    type="java.lang.String" writeable="false"/>
+            <attribute description="The subscriber status."
+                    displayName="Active" name="active" readable="true"
+                    type="boolean" writeable="false"/>
+
+            <operation description="Start the Subscriber." name="start" />
+            <operation description="Stop the Subscriber." name="stop" />
+        </mbean>
+        <mbean description="Show MQTT Publisher status"
+           domain="GreenVulcano" group="management" name="MQTTPublisherInfo"
+           type="it.greenvulcano.gvesb.gvmqtt.publisher.jmx.MQTTPublisherInfo">
+            <attribute description="The publisher name."
+                    displayName="Publisher" name="name" readable="true"
+                    type="java.lang.String" writeable="false"/>
+            <attribute description="The broker Url."
+                    displayName="Broker Url" name="brokerUrl" readable="true"
+                    type="java.lang.String" writeable="false"/>
+            <attribute description="The publisher status."
+                    displayName="Active" name="active" readable="true"
+                    type="boolean" writeable="false"/>
+
+            <operation description="Start the Publisher." name="start" />
+            <operation description="Stop the Publisher." name="stop" />
         </mbean>
     </mbeans-descriptors>
 </jmx>
