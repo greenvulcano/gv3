@@ -154,6 +154,9 @@
                     <version>2.6</version>
                     <configuration>
                         <skip>false</skip>
+                        <excludes>
+					      <exclude>**/ScriptExecutorTestCase.java</exclude>
+					    </excludes>
                     </configuration>
                 </plugin>
             </plugins>
