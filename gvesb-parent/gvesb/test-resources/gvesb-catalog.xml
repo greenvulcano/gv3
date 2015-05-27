@@ -27,4 +27,5 @@
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVDICOM.dtd" uri="file://${{gv.dtds.home}}/Extra/GVDICOM.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVNet.dtd" uri="file://${{gv.dtds.home}}/Extra/GVNet.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVPushNotification.dtd" uri="file://${{gv.dtds.home}}/Extra/GVPushNotification.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVMQTT.dtd" uri="file://${{gv.dtds.home}}/Extra/GVMQTT.dtd" />
 </catalog>

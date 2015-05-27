@@ -46,8 +46,11 @@
 <!ENTITY % gvpush SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVPushNotification.dtd">
 %gvpush;
 
+<!ENTITY % gvmqtt SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVMQTT.dtd">
+%gvmqtt;
+
 <!ENTITY % extra-j2ee-calls "">
-<!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call|%dicom-calls;|net-send-rec|%push-calls;">
+<!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call|%dicom-calls;|net-send-rec|%push-calls;|mqtt-publish-call">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
 <!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call|pdfreader-call">
@@ -61,7 +64,7 @@
 <!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
 
 <!ENTITY % extra-core "">
-<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager,GVDicomAdapterConfiguration,GVNetConfiguration,GVPushNotificationManager">
+<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager,GVDicomAdapterConfiguration,GVNetConfiguration,GVPushNotificationManager,GVMQTTConfiguration">
 <!ENTITY % extra-support "">
 
 <!ENTITY % extra-input-services "|dh-selector-service">

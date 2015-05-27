@@ -1,0 +1,91 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>it.greenvulcano.gvesb</groupId>
+        <artifactId>gvesb.adapters</artifactId>
+        <version>3.5.0-Trunk</version>
+    </parent>
+
+    <groupId>it.greenvulcano.gvesb</groupId>
+    <artifactId>gvmqtt</artifactId>
+    <packaging>jar</packaging>
+    <name>GreenVulcano ESB MQTT Adapter</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvbase</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvcore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvpolicy</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.dna.mqtt</groupId>
+            <artifactId>moquette-broker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.dna.mqtt</groupId>
+            <artifactId>moquette-parser-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.dna.mqtt</groupId>
+            <artifactId>moquette-netty-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-buffer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+        </dependency>
+        
+        
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.0-beta9</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

@@ -48,5 +48,6 @@
         <module>gvhadoop</module>
         <module>gvdicom</module>
         <module>gvpushnot</module>
+        <module>gvmqtt</module>
     </modules>
 </project>

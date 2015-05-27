@@ -636,6 +636,13 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvmqtt</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
@@ -836,6 +843,20 @@
             <id>github.release.repo</id>
             <name>GitHub Repo</name>
             <url>https://raw.github.com/bulldog2011/bulldog-repo/master/repo/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>Eclipse Paho Repo</id>
+            <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+        </repository>
+        <repository>
+            <id>bintray</id>
+            <url>http://dl.bintray.com/andsel/maven/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>

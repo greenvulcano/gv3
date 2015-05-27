@@ -9,7 +9,7 @@
             <appender class="org.apache.log4j.ConsoleAppender" name="CONSOLE">
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{OPERATION}] - %m [%c]%n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{OPERATION}] - %m [%c]%n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -22,7 +22,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GreenVulcano.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m [%c]%n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m [%c]%n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -35,7 +35,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVVCL.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m [%c]%n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m [%c]%n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -48,7 +48,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVCoreForward.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -61,7 +61,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVCore.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
                 </layout>
             </appender>
             <appender name="DB_LOGGER_FOR_GVVCL" class="it.greenvulcano.log.db.JDBCAppender">
@@ -166,7 +166,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVStatistics.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -179,7 +179,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVDTE.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -192,7 +192,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVDH.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%X{DH_DBO}][%t] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%X{DH_DBO}][%t] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -205,7 +205,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVWS.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -218,7 +218,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVHTTPAdapter.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{HTTP_ACTION}][%X{HTTP_METHOD}][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%t] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{HTTP_ACTION}][%X{HTTP_METHOD}][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%t] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -231,7 +231,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVDP.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%X{SUBSYSTEM}][%t] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%X{SUBSYSTEM}][%t] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -244,7 +244,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/Apache.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%t][%c] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%t][%c] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -257,7 +257,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/HTTP.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%t][%c] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%t][%c] - %m %n"/>
                 </layout>
             </appender>
             <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
@@ -270,7 +270,7 @@
                 <param name="File" value="sp{{gv.app.home}}/log/GVHeartBeat.$.log"/>
                 <layout class="org.apache.log4j.PatternLayout">
                     <param name="ConversionPattern"
-                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{SERVER}] - %m %n"/>
+                           value="[%d{yyyy-MM-dd HH:mm:ss,SSS}][%-5.5p][%X{SERVER}] - %m %n"/>
                 </layout>
             </appender>
             <logger additivity="false" name="it.greenvulcano.gvesb.virtual">
