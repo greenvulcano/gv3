@@ -48,7 +48,7 @@ public class MQTTTestCase extends TestCase
 	private static int NUM_MSG_TO_SEND = 5;
 	private static int numMsgRec = 0;
 	private static String marker = TextUtils.generateRandomString(20);
-			
+
     /**
      * @see junit.framework.TestCase#setUp()
      */
@@ -61,9 +61,9 @@ public class MQTTTestCase extends TestCase
         GVLogger.getLogger("dummy");
         File mqHome = new File(PropertiesHandler.expand("sp{{gv.app.home}}"), "moquette");
         FileUtils.deleteQuietly(mqHome);
-        FileUtils.forceMkdir(mqHome); 
+        FileUtils.forceMkdir(mqHome);
         numMsgRec = 0;
-        //GVMQTTManager.instance();
+        GVMQTTManager.instance();
         regListener();
     }
 
@@ -121,12 +121,12 @@ public class MQTTTestCase extends TestCase
             me.printStackTrace();
         }
     }
-    
+
     private void regListener() {
     	String topic        = "gvesb/test_resp";
         String broker       = "tcp://localhost:1883";
         String clientId     = "JavaSample2";
-        
+
         if (listenerClient != null) {
         	return;
         }
@@ -138,7 +138,7 @@ public class MQTTTestCase extends TestCase
             connOpts.setCleanSession(true);
             listenerClient.connect(connOpts);
             listenerClient.setCallback(new MqttCallback() {
-                
+
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     System.out.println("[MQTT Rec] message received from topic[" + topic+"]: " + message);
@@ -150,21 +150,21 @@ public class MQTTTestCase extends TestCase
                     	fail("Bad message received!!!");
                     }
                 }
-                
+
                 @Override
                 public void deliveryComplete(IMqttDeliveryToken arg0) {
                     // TODO Auto-generated method stub
-                    
+
                 }
-                
+
                 @Override
                 public void connectionLost(Throwable arg0) {
                     // TODO Auto-generated method stub
-                    
+
                 }
             });
             listenerClient.subscribe(topic);
-            
+
         } catch(MqttException me) {
             System.out.println("reason "+me.getReasonCode());
             System.out.println("msg "+me.getMessage());
