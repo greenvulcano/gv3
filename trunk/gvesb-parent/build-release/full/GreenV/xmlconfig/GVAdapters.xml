@@ -944,9 +944,9 @@ order by 1]]></statement>
             <moq-property name="persistent_store" value="sp{{gv.app.home}}/moquette/moquette_store.mapdb"/>
         </Moquette>
         <MQTTSubscribers>
-            <MQTTSubscriber autoStart="true" reconnectTime="30" clientID="MC_MQTTSubscriber_01"
+            <MQTTSubscriber autoStart="true" reconnectTime="30" clientID="MQTTSubscriber_01"
                             class="it.greenvulcano.gvesb.gvmqtt.subscriber.MQTTSubscriber"
-                            enabled="true" name="MC_MQTTSubscriber" type="mqtt-subscriber">
+                            enabled="true" name="MQTTSubscriber" type="mqtt-subscriber">
                 <TopicFilters>
                     <Filter topic="gvesb/test" qos="0"/>
                 </TopicFilters>

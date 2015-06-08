@@ -128,6 +128,26 @@
         <%numRighe++;%>
      </c:forEach>
    <tr>
+    <td><font color="red" size="4">MQTT Adapter - Subscribers:</font></td>
+   </tr>
+   <%numRighe=0;%>
+   <c:forEach items="${listaGVMQTT_S}" var="listaGVMQTT_S">
+    <tr>         
+         <td><a href="javascript:invocaDeploy('<c:out value='${listaGVMQTT_S}'/>','GV_MQTT_S');"><c:out value='${listaGVMQTT_S}'/></a></td>
+        </tr>
+        <%numRighe++;%>
+     </c:forEach>
+   <tr>
+    <td><font color="red" size="4">MQTT Adapter - Publishers:</font></td>
+   </tr>
+   <%numRighe=0;%>
+   <c:forEach items="${listaGVMQTT_P}" var="listaGVMQTT_P">
+    <tr>         
+         <td><a href="javascript:invocaDeploy('<c:out value='${listaGVMQTT_P}'/>','GV_MQTT_P');"><c:out value='${listaGVMQTT_P}'/></a></td>
+        </tr>
+        <%numRighe++;%>
+     </c:forEach>
+   <tr>
     <td><font color="red" size="4">Push Notification:</font></td>
    </tr>
    <%numRighe=0;%>
@@ -142,7 +162,7 @@
    </tr>
    <%numRighe=0;%>
    <c:forEach items="${listaAdapter}" var="adapter">
-   	     <c:if test="${adapter!='WEB_SERVICES' && adapter!='EXCEL_WORK' && adapter!='EXCEL_REPO' && adapter!='GVDP' && adapter!='BIRT_REPO' && adapter!='DH_ENGINE' && adapter!='GV_NET' && adapter!='PUSH_NOTIFICATION'}"> 
+   	     <c:if test="${adapter!='WEB_SERVICES' && adapter!='EXCEL_WORK' && adapter!='EXCEL_REPO' && adapter!='GVDP' && adapter!='BIRT_REPO' && adapter!='DH_ENGINE' && adapter!='GV_NET' && adapter!='GV_MQTT' && adapter!='GV_MQTT_S' && adapter!='GV_MQTT_P' && adapter!='PUSH_NOTIFICATION'}"> 
                 <tr>   		 
    		 <td><a href="javascript:invocaDeploy('<c:out value='${adapter}'/>','<c:out value='${adapter}'/>');"><c:out value='${adapter}'/></a></td>
 		</tr>

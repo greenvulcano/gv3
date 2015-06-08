@@ -117,6 +117,12 @@ public class GVAdapterParser
         else if (nomeAdapter.equals("GV_NET")) {
             ret = getExistGVNET(nomeServizio);
         }
+        else if (nomeAdapter.equals("GV_MQTT_S")) {
+            ret = getExistGVMQTT_S(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_MQTT_P")) {
+            ret = getExistGVMQTT_P(nomeServizio);
+        }
         else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
             ret = getExistPUSHNOT(nomeServizio);
         }
@@ -163,6 +169,12 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("GV_NET")) {
             ret = getEqualGVNET(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_MQTT_S")) {
+            ret = getEqualGVMQTT_S(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_MQTT_P")) {
+            ret = getEqualGVMQTT_P(nomeServizio);
         }
         else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
             ret = getEqualPUSHNOT(nomeServizio);
@@ -223,6 +235,16 @@ public class GVAdapterParser
         return getExistObject("/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='"
                 + listener + "']");
     }
+
+    private boolean getExistGVMQTT_S(String listener) throws XMLUtilsException
+    {
+        return getExistObject("/GVAdapters/GVMQTTConfiguration/MQTTSubscribers/*[@type='mqtt-subscriber' and @name='" + listener + "']");
+    }
+
+    private boolean getExistGVMQTT_P(String publisher) throws XMLUtilsException
+    {
+        return getExistObject("/GVAdapters/GVMQTTConfiguration/MQTTPublishers/*[@type='mqtt-publisher' and @name='" + publisher + "']");
+    }
     
     private boolean getExistPUSHNOT(String engine) throws XMLUtilsException
     {
@@ -268,6 +290,16 @@ public class GVAdapterParser
     private boolean getEqualGVNET(String listener) throws XMLUtilsException
     {
         return getEqualObject("/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver' and @name='" + listener + "']");
+    }
+
+    private boolean getEqualGVMQTT_S(String listener) throws XMLUtilsException
+    {
+        return getEqualObject("/GVAdapters/GVMQTTConfiguration/MQTTSubscribers/*[@type='mqtt-subscriber' and @name='" + listener + "']");
+    }
+
+    private boolean getEqualGVMQTT_P(String publisher) throws XMLUtilsException
+    {
+        return getEqualObject("/GVAdapters/GVMQTTConfiguration/MQTTPublishers/*[@type='mqtt-publisher' and @name='" + publisher + "']");
     }
     
     private boolean getEqualPUSHNOT(String engine) throws XMLUtilsException
@@ -494,6 +526,16 @@ public class GVAdapterParser
     {
         return getListaGVNET(newXml);
     }
+
+    public String[] getListaGVMQTT_SZip() throws Exception
+    {
+        return getListaGVMQTT_S(newXml);
+    }
+    
+    public String[] getListaGVMQTT_PZip() throws Exception
+    {
+        return getListaGVMQTT_P(newXml);
+    }
     
     public String[] getListaPUSHNOTZip() throws Exception
     {
@@ -544,6 +586,12 @@ public class GVAdapterParser
         else if (nomeAdapter.equals("GV_NET")) {
             ret = getGVNETZip(nomeServizio);
         }
+        else if (nomeAdapter.equals("GV_MQTT_S")) {
+            ret = getGVMQTT_SZip(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_MQTT_P")) {
+            ret = getGVMQTT_PZip(nomeServizio);
+        }
         else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
             ret = getPUSHNOTZip(nomeServizio);
         }
@@ -590,6 +638,12 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("GV_NET")) {
             ret = getGVNETServer(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_MQTT_S")) {
+            ret = getGVMQTT_SServer(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_MQTT_P")) {
+            ret = getGVMQTT_PServer(nomeServizio);
         }
         else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
             ret = getPUSHNOTServer(nomeServizio);
@@ -970,6 +1024,79 @@ public class GVAdapterParser
         }
     }
     
+    private String getGVMQTT_SZip(String servizio) throws XMLUtilsException
+    {
+        return getGVMQTT_S(newXml, servizio);
+    }
+
+    private String getGVMQTT_SServer(String servizio) throws XMLUtilsException
+    {
+        return getGVMQTT_S(serverXml, servizio);
+    }
+
+    private String getGVMQTT_S(Document xml, String servizio) throws XMLUtilsException
+    {
+        logger.debug("getGVMQTT_S servizio =" + servizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            Node localXml = parser.selectSingleNode(xml, "/GVAdapters/GVMQTTConfiguration/MQTTSubscribers/*[@type='mqtt-subscriber' "
+                    + "and @name='" + servizio + "']");
+            Document localXmlGVAdapters = parser.newDocument("GVAdapters");
+            if (localXml != null) {
+                Node base = localXmlGVAdapters.getDocumentElement().appendChild(parser.createElement(localXmlGVAdapters, "GVMQTTConfiguration"));
+                Node listeners = base.appendChild(parser.createElement(localXmlGVAdapters, "MQTTSubscribers"));
+                parser.setAttribute((Element) base, "version", "1.0");
+                parser.setAttribute((Element) base, "type", "module");
+                parser.setAttribute((Element) base, "name", "GV_NET");
+
+                Node importedNode = localXmlGVAdapters.importNode(localXml, true);
+                listeners.appendChild(importedNode);
+            }
+            return parser.serializeDOM(localXmlGVAdapters, false, true);
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+
+    
+    private String getGVMQTT_PZip(String servizio) throws XMLUtilsException
+    {
+        return getGVMQTT_P(newXml, servizio);
+    }
+
+    private String getGVMQTT_PServer(String servizio) throws XMLUtilsException
+    {
+        return getGVMQTT_P(serverXml, servizio);
+    }
+
+    private String getGVMQTT_P(Document xml, String servizio) throws XMLUtilsException
+    {
+        logger.debug("getGVMQTT_P servizio =" + servizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            Node localXml = parser.selectSingleNode(xml, "/GVAdapters/GVMQTTConfiguration/MQTTPublishers/*[@type='mqtt-publisher' "
+                    + "and @name='" + servizio + "']");
+            Document localXmlGVAdapters = parser.newDocument("GVAdapters");
+            if (localXml != null) {
+                Node base = localXmlGVAdapters.getDocumentElement().appendChild(parser.createElement(localXmlGVAdapters, "GVMQTTConfiguration"));
+                Node listeners = base.appendChild(parser.createElement(localXmlGVAdapters, "MQTTPublishers"));
+                parser.setAttribute((Element) base, "version", "1.0");
+                parser.setAttribute((Element) base, "type", "module");
+                parser.setAttribute((Element) base, "name", "GV_NET");
+
+                Node importedNode = localXmlGVAdapters.importNode(localXml, true);
+                listeners.appendChild(importedNode);
+            }
+            return parser.serializeDOM(localXmlGVAdapters, false, true);
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+    
     private String getPUSHNOTZip(String servizio) throws XMLUtilsException
     {
         return getPUSHNOT(newXml, servizio);
@@ -1059,6 +1186,12 @@ public class GVAdapterParser
         }
         else if (nomeAdapter.equals("GV_NET")) {
             aggiornaGVNET(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_MQTT_S")) {
+            aggiornaGVMQTT_S(nomeServizio);
+        }
+        else if (nomeAdapter.equals("GV_MQTT_P")) {
+            aggiornaGVMQTT_P(nomeServizio);
         }
         else if (nomeAdapter.equals("PUSH_NOTIFICATION")) {
             aggiornaPUSHNOT(nomeServizio);
@@ -1448,6 +1581,70 @@ public class GVAdapterParser
         }
     }
     
+    public void aggiornaGVMQTT_S(String nomeServizio) throws Exception
+    {
+        logger.debug("init aggiornaGVMQTT_S");
+        logger.debug("action=" + nomeServizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            
+            // handle MQTTSubscriber deployment
+            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVMQTTConfiguration/MQTTSubscribers/*[@type='mqtt-subscriber' and @name='" + nomeServizio + "']");
+            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVMQTTConfiguration/MQTTSubscribers/*[@type='mqtt-subscriber' and @name='" + nomeServizio + "']");
+            Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVMQTTConfiguration/MQTTSubscribers");
+            if (resultsZip != null) {
+                if (resultsServer == null) {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.appendChild(importedNode);
+                    logger.debug("MQTTSubscriber[" + nomeServizio + "] non esistente, inserimento");
+                }
+                else {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.replaceChild(importedNode, resultsServer);
+                    logger.debug("MQTTSubscriber[" + nomeServizio + "] esistente, aggiornamento");
+                }
+            }
+            
+            logger.debug("end aggiornaGVMQTT_S");
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+    
+    public void aggiornaGVMQTT_P(String nomeServizio) throws Exception
+    {
+        logger.debug("init aggiornaGVMQTT_P");
+        logger.debug("action=" + nomeServizio);
+        XMLUtils parser = null;
+        try {
+            parser = XMLUtils.getParserInstance();
+            
+            // handle MQTTPublisher deployment
+            Node resultsServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVMQTTConfiguration/MQTTPublishers/*[@type='mqtt-publisher' and @name='" + nomeServizio + "']");
+            Node resultsZip =  parser.selectSingleNode(newXml, "/GVAdapters/GVMQTTConfiguration/MQTTPublishers/*[@type='mqtt-publisher' and @name='" + nomeServizio + "']");
+            Node parentServer =  parser.selectSingleNode(serverXml, "/GVAdapters/GVMQTTConfiguration/MQTTPublishers");
+            if (resultsZip != null) {
+                if (resultsServer == null) {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.appendChild(importedNode);
+                    logger.debug("MQTTPublisher[" + nomeServizio + "] non esistente, inserimento");
+                }
+                else {
+                    Node importedNode = parentServer.getOwnerDocument().importNode(resultsZip, true);
+                    parentServer.replaceChild(importedNode, resultsServer);
+                    logger.debug("MQTTPublisher[" + nomeServizio + "] esistente, aggiornamento");
+                }
+            }
+            
+            logger.debug("end aggiornaGVMQTT_P");
+        }
+        finally {
+            XMLUtils.releaseParserInstance(parser);
+        }
+    }
+    
     public void aggiornaPUSHNOT(String nomeServizio) throws Exception
     {
         logger.debug("init aggiornaPUSHNOT");
@@ -1710,6 +1907,16 @@ public class GVAdapterParser
     private String[] getListaGVNET(Document xml) throws Exception
     {
         return getListaObject(xml, "/GVAdapters/GVNetConfiguration/NetListeners/*[@type='net-receiver']/@name");
+    }
+    
+    private String[] getListaGVMQTT_S(Document xml) throws Exception
+    {
+        return getListaObject(xml, "/GVAdapters/GVMQTTConfiguration/MQTTSubscribers/*[@type='mqtt-subscriber']/@name");
+    }
+    
+    private String[] getListaGVMQTT_P(Document xml) throws Exception
+    {
+        return getListaObject(xml, "/GVAdapters/GVMQTTConfiguration/MQTTPublishers/*[@type='mqtt-publisher']/@name");
     }
     
     private String[] getListaPUSHNOT(Document xml) throws Exception
