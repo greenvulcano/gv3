@@ -369,7 +369,7 @@ public class GreenVulcanoPool implements ShutdownEventListener
                     return null;
                 }
 
-                if (pool.size() > 0) {
+                while (pool.size() > 0) {
                     GreenVulcanoPoolElement gvPoolElement = null;
                     boolean found = false;
                     Iterator<GreenVulcano> i = pool.iterator();
@@ -378,30 +378,41 @@ public class GreenVulcanoPool implements ShutdownEventListener
                         found = gvPoolElement.isServiceExecuted(key);
                     }
                     if (!found) {
-                        logger.debug("subsystem=" + subsystem + " - not found instance in pool for key: " + key);
-                        ++serviceMiss;
-                        statServiceMiss.hint();
                         gvPoolElement = (GreenVulcanoPoolElement) pool.removeFirst();
                     }
                     else {
-                        logger.debug("subsystem=" + subsystem + " - found instance in pool for key: " + key);
                         pool.remove(gvPoolElement);
                     }
-                    logger.debug("subsystem=" + subsystem + " - extracting instance from pool(" + pool.size() + "/"
-                            + created + "/" + maximumCreation + ")");
-                    assignedGV.add(gvPoolElement);
-                    return gvPoolElement;
+                    if (gvPoolElement.isValid()) {
+                        if (!found) {
+                            logger.debug("subsystem=" + subsystem + " - not found instance in pool for key: " + key);
+                            ++serviceMiss;
+                            statServiceMiss.hint();
+                        }
+                        else {
+                            logger.debug("subsystem=" + subsystem + " - found instance in pool for key: " + key);
+                        }
+                        logger.debug("subsystem=" + subsystem + " - extracting instance from pool(" + pool.size() + "/"
+                                + created + "/" + maximumCreation + ")");
+                        assignedGV.add(gvPoolElement);
+                        logger.debug("Using GreenVulcano instance " + gvPoolElement);
+                        return gvPoolElement;
+                    }
+                    else {
+                        releaseGreenVulcano(gvPoolElement);
+                    }
                 }
 
                 if ((maximumCreation == -1) || (created < maximumCreation)) {
-                    GreenVulcano gv = createGreenVulcano();
+                    GreenVulcano gvPoolElement = createGreenVulcano();
                     ++poolMiss;
                     statPoolMiss.hint();
                     logger.debug("subsystem=" + subsystem + " - not found instance in pool for key: " + key);
                     logger.debug("subsystem=" + subsystem + " - creating new instance(" + pool.size() + "/" + created
                             + "/" + maximumCreation + ")");
-                    assignedGV.add(gv);
-                    return gv;
+                    assignedGV.add(gvPoolElement);
+                    logger.debug("Using GreenVulcano instance " + gvPoolElement);
+                    return gvPoolElement;
                 }
 
                 long waitTime = Math.min(timeout, endTime - System.currentTimeMillis());
@@ -426,6 +437,7 @@ public class GreenVulcanoPool implements ShutdownEventListener
             return;
         }
 
+        logger.debug("Releasing GreenVulcano[" + gvesb.isValid() + "] instance " + gvesb);
         logger.debug("subsystem=" + subsystem + " - releasing instance(" + pool.size() + "/" + created + "/"
                 + maximumCreation + ")");
 
