@@ -22,4 +22,5 @@
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVOpenSpCoop.dtd" uri="file://${{gv.dtds.home}}/Extra/GVOpenSpCoop.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd" uri="file://${{gv.dtds.home}}/Extra/GVSocial.dtd" />
   <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVSAP.dtd" uri="file://${{gv.dtds.home}}/Extra/GVSAP.dtd" />
+  <system systemId="http://www.greenvulcano.com/gvesb/dtds/GVPushNotification.dtd" uri="file://${{gv.dtds.home}}/Extra/GVPushNotification.dtd" />
 </catalog>

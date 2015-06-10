@@ -31,8 +31,11 @@
 <!ENTITY % gvsap SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSAP.dtd">
 %gvsap;
 
+<!ENTITY % gvpush SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVPushNotification.dtd">
+%gvpush;
+
 <!ENTITY % extra-j2ee-calls "">
-<!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call">
+<!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call|%push-calls;">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
 <!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call">
@@ -46,7 +49,7 @@
 <!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
 
 <!ENTITY % extra-core "">
-<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager"> 
+<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVZMQConfiguration,GVRulesConfigManager,GVSocialAdapterManager,GVPushNotificationManager"> 
 <!ENTITY % extra-support "">
 
 <!ENTITY % extra-input-services "|dh-selector-service">

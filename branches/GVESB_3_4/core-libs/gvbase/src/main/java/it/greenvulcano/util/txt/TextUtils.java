@@ -888,4 +888,19 @@ public class TextUtils
             throw new NullPointerException(message);
         }
     }
+
+    /**
+     * @param throwable
+     * @return return the stack-trace
+     */
+    public static String getStackTrace(Throwable throwable)
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream pstream = new PrintStream(baos);
+        String stack = null;
+        throwable.printStackTrace(pstream);
+        pstream.flush();
+        stack = baos.toString();
+        return stack;
+    }
 }

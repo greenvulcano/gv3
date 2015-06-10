@@ -20,7 +20,6 @@
 package it.greenvulcano.gvesb.internal.condition;
 
 import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.buffer.GVBuffer;
 
 import java.util.Map;
 
