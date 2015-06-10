@@ -9,6 +9,10 @@
         <servlet-class>it.greenvulcano.gvesb.adapter.http.HttpInboundGateway</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <!--<servlet>
+        <servlet-name>ErrorHandler</servlet-name>
+        <servlet-class>it.greenvulcano.gvesb.adapter.http.utils.ErrorHandler</servlet-class>
+    </servlet>-->
     <servlet-mapping>
         <servlet-name>HttpInboundGateway</servlet-name>
         <url-pattern>/inbound/*</url-pattern>
@@ -17,10 +21,20 @@
         <servlet-name>HttpInboundGateway</servlet-name>
         <url-pattern>/secure/inbound/*</url-pattern>
     </servlet-mapping>
+    <!--<servlet-mapping>
+        <servlet-name>ErrorHandler</servlet-name>
+        <url-pattern>/ErrorHandler</url-pattern>
+    </servlet-mapping>-->
     <session-config>
         <session-timeout>15</session-timeout>
     </session-config>
-    
+
+    <!-- error-code related error pages -->
+    <!--<error-page>
+        <error-code>400</error-code>
+        <location>/ErrorHandler</location>
+    </error-page>-->
+
     <security-constraint>
         <display-name>GVHttp</display-name>
         <web-resource-collection>
