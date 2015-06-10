@@ -742,7 +742,7 @@
             </table>
         </xsl:template>
 -->
-<!ELEMENT ToPreload (Description?,Preload+)>
+<!ELEMENT ToPreload (Description?,Preload*)>
 
 <!--
     Define a transformation to preload.

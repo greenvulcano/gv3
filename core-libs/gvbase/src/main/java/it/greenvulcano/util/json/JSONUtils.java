@@ -422,24 +422,29 @@ public class JSONUtils
             return JSONObject.NULL;
         }
 
-// If it might be a number, try converting it, first as a Long, and then as a
-// Double. If that doesn't work, return the string.
+// If it might be a number, try converting it, as a Double or as a Long.
+// If that doesn't work, return the string.
 
-        try {
-            char initial = string.charAt(0);
-            if (initial == '-' || (initial >= '0' && initial <= '9')) {
-                Long value = new Long(string);
-                if (value.toString().equals(string)) {
-                    return value;
-                }
-            }
-        }  catch (Exception ignore) {
+        char b = string.charAt(0);
+        if ((b >= '0' && b <= '9') || b == '-') {
             try {
-                Double value = new Double(string);
-                if (value.toString().equals(string)) {
-                    return value;
+                if (string.indexOf('.') > -1 || string.indexOf('e') > -1
+                        || string.indexOf('E') > -1) {
+                    Double d = Double.valueOf(string);
+                    if (!d.isInfinite() && !d.isNaN()) {
+                        return d;
+                    }
+                } else {
+                    Long myLong = new Long(string);
+                    if (string.equals(myLong.toString())) {
+                        if (myLong == myLong.intValue()) {
+                            return myLong.intValue();
+                        } else {
+                            return myLong;
+                        }
+                    }
                 }
-            }  catch (Exception ignoreAlso) {
+            } catch (Exception ignore) {
             }
         }
         return string;

@@ -924,4 +924,7 @@ order by 1]]></statement>
             </TwitterSocialAdapter>
         </SocialAdapters>
     </GVSocialAdapterManager>
+    <GVPushNotificationManager name="PUSH_NOTIFICATION" type="module" version="1.0">
+        <NotificationEngines/>
+    </GVPushNotificationManager>
 </GVAdapters>
