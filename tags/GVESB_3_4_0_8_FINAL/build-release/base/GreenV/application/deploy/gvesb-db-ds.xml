@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<datasources>
+    <local-tx-datasource>
+        <jndi-name>ds.gv_test</jndi-name>
+        <use-java-context>false</use-java-context>
+        <connection-url>jdbc:hsqldb:hsql://localhost:9001/gvesb</connection-url>
+        <driver-class>org.hsqldb.jdbc.JDBCDriver</driver-class>
+
+        <user-name>gv_test</user-name>
+        <password>gv_test</password>
+        <!-- The minimum connections in a pool/sub-pool. Pools are lazily constructed on first use -->
+        <min-pool-size>5</min-pool-size>
+        <!-- The maximum connections in a pool/sub-pool -->
+        <max-pool-size>20</max-pool-size>
+        <!-- The time before an unused connection is destroyed -->
+        <!-- NOTE: This is the check period. It will be destroyed somewhere between 1x and 2x this timeout after last use -->
+        <!-- TEMPORARY FIX! - Disable idle connection removal, HSQLDB has a problem with not reaping threads on closed connections -->
+        <idle-timeout-minutes>0</idle-timeout-minutes>
+        <!-- sql to call when connection is created -->
+        <new-connection-sql>select 1 from dual</new-connection-sql>
+        <!-- this will be run before a managed connection is removed from the pool for use by a client-->
+        <check-valid-connection-sql>select 1 from dual</check-valid-connection-sql>
+        <!-- Whether to check all statements are closed when the connection is returned to the pool,
+             this is a debugging feature that should be turned off in production -->
+        <track-statements/>
+        <type-mapping>Hypersonic SQL</type-mapping>
+    </local-tx-datasource>
+</datasources>

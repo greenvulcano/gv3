@@ -1,0 +1,31 @@
+Path definitions:
+GV_HOME: root path for GreenVulcano (example:/home/user/@base.dir@/GreenV)
+JBOSS_HOME: root path for JBoss (example:/home/user/@base.dir@/jboss-5.1.0.GA)
+ADAPTER_HOME: Adapter_ODE/@base.dir@
+
+Installation instructions:
+- Copy into GV_HOME/application/deploy il file .xml presente nella directory ADAPTER_HOME/GreenV/application/deploy
+- Copy into GV_HOME/application/deploy/gvesb-javaee5.ear/lib directory all jar libraries contained in ADAPTER_HOME/GreenV/application/deploy/gvesb-javaee5.ear/lib directory
+- Copy into GV_HOME the entire ADAPTER_HOME/GreenV/BpelProcess directory
+- Copy into GV_HOME/hsqldb the content of ADAPTER_HOME/GreenV/hsqldb directory
+- Copy into GV_HOME/webservices/services the .aar file present into ADAPTER_HOME/GreenV/webservices/services directory
+- Access the GV_HOME/dtds/Extra directory
+    - Copy into the current directory the ADAPTER_HOME/GreenV/dtds/Extra/GVBpel.dtd file;
+    - Modify Extra.dtd file by properly inserting the code in ADAPTER_HOME/GreenV/dtds/Extra/Extra_frag.dtd file.
+- Access the GV_HOME/xmlconfig directory
+    - Modify GVCore.xml                file by properly inserting the code in ADAPTER_HOME/GreenV/xmlconfig/GVCore_frag.xml;
+    - Modify gvesb-catalog.xml         file by properly inserting the code in ADAPTER_HOME/GreenV/xmlconfig/gvesb-catalog_frag.xml;
+    - Modify gv-jmx.xml                file by properly inserting the code in ADAPTER_HOME/GreenV/xmlconfig/gv-jmx_frag.xml;
+- Copy into JBOSS_HOME/server/GreenV/conf the content of ADAPTER_HOME/jboss-5.1.0.GA/server/GreenV/conf directory
+
+Test:
+A GV service have been developed to test the ODE Adapter:
+- callOde:
+    requires in input an XML document like the following one:
+        <HelloWorldRequest xmlns="http://helloWorld">
+            <input>xxx</input>
+        </HelloWorldRequest>
+    to be considered a successful test, performing the RequestReply shall achieve identical output than he following one:
+        <HelloWorldResponse xmlns="http://helloWorld">
+            <result>xxx</result>
+        </HelloWorldResponse>
