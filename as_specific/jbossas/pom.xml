@@ -1,0 +1,18 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>it.greenvulcano.gvesb</groupId>
+        <artifactId>it.greenvulcano.as_specific</artifactId>
+        <version>3.4.0-Final</version>
+    </parent>
+
+    <groupId>it.greenvulcano.gvesb</groupId>
+    <artifactId>it.greenvulcano.as_specific.jbossas</artifactId>
+    <packaging>pom</packaging>
+    <name>GreenVulcano JBoss Application Server specific classes</name>
+
+    <modules>
+        <module>jboss51-utils</module>
+    </modules>
+</project>
