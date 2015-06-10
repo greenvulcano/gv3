@@ -1,4 +1,26 @@
 -------------------------------------------
+ESB version 3.4.0.8
+-------------------------------------------
+
+Commons:
+- Corrected JSON<->XML numeric values conversion.
+
+DTE:
+- Changed cardinality of ToPreload DTE element.
+
+Adapter:
+- Added Push Notification Adapter, with Android and iOS notification engine implementation.
+
+Core:
+- Corrected GVCore pool element clean-up after configuration reload.
+
+Adapter HTTP Inbound:
+- Added management of output GVBuffer property HTTP_RESP_FILE_NAME to RESTHttpServletMapping in order to define the name of the file to be downloaded through an HTTP request.
+
+RSH Handler:
+- Corrected RMI hostname definition in RSH start script.
+
+-------------------------------------------
 ESB version 3.4.0.7
 -------------------------------------------
 

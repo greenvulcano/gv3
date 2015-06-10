@@ -1205,6 +1205,10 @@
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvpushnot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>jboss51-utils</artifactId>
         </dependency>
         <dependency>
