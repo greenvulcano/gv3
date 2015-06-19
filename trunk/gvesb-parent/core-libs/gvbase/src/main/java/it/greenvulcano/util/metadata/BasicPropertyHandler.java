@@ -717,8 +717,7 @@ public class BasicPropertyHandler implements PropertyHandler
     		if (!PropertiesHandler.isExpanded(string)) {
     			return "urlEnc" + PROP_START + str + PROP_END;
     		}
-    		String encoded = URLEncoder.encode(string, "UTF-8");
-    		return encoded;
+    		return TextUtils.urlEncode(string);
     	}
         catch (Exception exc) {
             System.out.println("Error handling 'urlEnc' metadata '" + str + "': " + exc);
@@ -749,8 +748,7 @@ public class BasicPropertyHandler implements PropertyHandler
     		if (!PropertiesHandler.isExpanded(string)) {
     			return "urlDec" + PROP_START + str + PROP_END;
     		}
-    		String decoded = URLDecoder.decode(string, "UTF-8");
-    		return decoded;
+    		return TextUtils.urlDecode(string);
     	}
         catch (Exception exc) {
             System.out.println("Error handling 'urlDec' metadata '" + str + "': " + exc);
