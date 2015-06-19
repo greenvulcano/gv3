@@ -30,7 +30,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -368,6 +371,16 @@ public class TextUtils
             result.append((String) repl);
         }
         return result.toString();
+    }
+    
+    public static String urlEncode(String value) throws UnsupportedEncodingException {
+        String encoded = URLEncoder.encode(value, "UTF-8");
+        return encoded;
+    }
+    
+    public static String urlDecode(String value) throws UnsupportedEncodingException {
+        String encoded = URLDecoder.decode(value, "UTF-8");
+        return encoded;
     }
 
     /**

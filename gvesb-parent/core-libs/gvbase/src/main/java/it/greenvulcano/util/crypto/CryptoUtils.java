@@ -31,15 +31,19 @@ import java.security.AlgorithmParameters;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.spec.KeySpec;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
@@ -154,6 +158,17 @@ public final class CryptoUtils
         // do nothing
     }
 
+    public static String listProviders() throws Exception {
+        StringBuffer sb = new StringBuffer();
+        Provider p[] = Security.getProviders();
+        for (int i = 0; i < p.length; i++) {
+            sb.append(p[i]).append("\n");
+            for (Enumeration<Object> e = p[i].keys(); e.hasMoreElements();)
+                sb.append("\t").append(e.nextElement()).append("\n");
+        }
+        return sb.toString();
+    }
+    
     /**
      * Generate a Secret key.
      * 
@@ -942,6 +957,32 @@ public final class CryptoUtils
         return cert;
     }
 
+    
+    public static byte[] getSignature(byte[] data, String signAlg, byte[] keyBytes, String keyAlg)
+            throws CryptoUtilsException {
+        try {
+            SecretKey key = new SecretKeySpec(keyBytes, keyAlg);
+
+            Mac mac = Mac.getInstance(signAlg);
+            mac.init(key);
+
+            return mac.doFinal(data);
+        }
+        catch (Exception exc) {
+            throw new CryptoUtilsException("Error occurred signing data", exc);
+        }
+    }
+
+    public static String getSignatureBase64(byte[] data, String signAlg, byte[] keyBytes, String keyAlg)
+            throws CryptoUtilsException {
+        try {
+            return new String(Base64.encodeBase64(getSignature(data, signAlg, keyBytes, keyAlg)), "UTF-8");
+        }
+        catch (UnsupportedEncodingException exc) {
+            throw new CryptoUtilsException("Error occurred signing data", exc);
+        }
+    }
+    
     /** **************************************************************** */
 
     /**
