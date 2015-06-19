@@ -41,6 +41,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * GVOperationNode class.
@@ -121,20 +122,34 @@ public class GVOperationNode extends GVFlowNode
                     {"name", "'id-system' or 'operation-name'"}, {"node", XPathFinder.buildXPath(defNode)}});
         }
 
-        String idChannel = XMLConfig.get(defNode, "../../Participant[@id-system='" + idSystem + "']/@id-channel", "");
-        String xPath = "/GVSystems/Systems/System[@id-system='" + idSystem + "']/Channel[@id-channel='" + idChannel
-                + "']/*[@name='" + vmOpName + "']";
         Node vmOpNode = null;
+        String xPath = "";
         try {
-            vmOpNode = XMLConfig.getNode(GreenVulcanoConfig.getSystemsConfigFileName(), xPath);
+            NodeList partecipants = XMLConfig.getNodeList(defNode, "../../Participant[@id-system='" + idSystem + "']");
+            for (int i = 0; i < partecipants.getLength(); i++) {
+                Node partecipant = partecipants.item(i);
+                String idChannel = XMLConfig.get(partecipant, "@id-channel", "");
+                xPath = "/GVSystems/Systems/System[@id-system='" + idSystem + "']/Channel[@id-channel='" + idChannel
+                        + "']/*[@name='" + vmOpName + "']";
+                try {
+                    vmOpNode = XMLConfig.getNode(GreenVulcanoConfig.getSystemsConfigFileName(), xPath);
+                }
+                catch (XMLConfigException exc) {
+                    throw new GVCoreConfException("GVCORE_VCL_OPERATION_SEARCH_ERROR", new String[][]{{"id", getId()},
+                            {"node", XPathFinder.buildXPath(defNode)}, {"xpath", xPath}});
+                }
+                if (vmOpNode != null) {
+                    break;
+                }
+            }
+            if (vmOpNode == null) {
+                throw new GVCoreConfException("GVCORE_VCL_OPERATION_SEARCH_ERROR", new String[][]{{"id", getId()},
+                        {"node", XPathFinder.buildXPath(defNode)}, {"xpath", xPath}});
+            }
         }
         catch (XMLConfigException exc) {
-            throw new GVCoreConfException("GVCORE_VCL_OPERATION_SEARCH_ERROR", new String[][]{{"id", getId()},
-                    {"node", XPathFinder.buildXPath(defNode)}, {"xpath", xPath}});
-        }
-        if (vmOpNode == null) {
-            throw new GVCoreConfException("GVCORE_VCL_OPERATION_SEARCH_ERROR", new String[][]{{"id", getId()},
-                    {"node", XPathFinder.buildXPath(defNode)}, {"xpath", xPath}});
+            throw new GVCoreConfException("GVCORE_VCL_PARTECIPANT_SEARCH_ERROR", new String[][]{{"id", getId()},
+                    {"node", XPathFinder.buildXPath(defNode)}, {"xpath", "../../Participant[@id-system='" + idSystem + "']"}});
         }
         try {
             operationManager = ((InvocationContext) InvocationContext.getInstance()).getOperationManager();

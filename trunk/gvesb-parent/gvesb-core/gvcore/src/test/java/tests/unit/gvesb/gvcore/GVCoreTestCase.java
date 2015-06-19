@@ -145,6 +145,26 @@ public class GVCoreTestCase extends TestCase
         assertEquals(SERVICE_NAME, gvBufferout.getService());
         assertEquals(id, gvBufferout.getId());
     }
+    
+
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreMultiPartecipants() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_PARTECIPANTS";
+        String TEST_BUFFER = "AbCdEfGhIl";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        assertEquals(TEST_BUFFER.toLowerCase(), gvBufferout.getObject());
+    }
 
     /**
      * @throws Exception
