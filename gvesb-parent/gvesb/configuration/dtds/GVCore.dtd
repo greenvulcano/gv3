@@ -3753,7 +3753,7 @@
     as a workflow participant.
 
     #References: /GVCore/GVSystems/Systems/System/@id-system
-    #Unique: ../Participant/@id-system
+    #Warn: {{../Participant[count(../Participant[@id-system=current()/@id-system and @id-channel=current()/@id-channel])>1]}} System and Channel pair must be unique
 -->
 <!ATTLIST Participant id-system CDATA #REQUIRED>
 <!--
@@ -3761,6 +3761,7 @@
     The operations used in the workflow can only be selected by this channel.
 
     #References: /GVCore/GVSystems/Systems/System[@id-system=current()/@id-system]/Channel/@id-channel
+    #Warn: {{../Participant[count(../Participant[@id-system=current()/@id-system and @id-channel=current()/@id-channel])>1]}} System and Channel pair must be unique
 -->
 <!ATTLIST Participant id-channel CDATA #REQUIRED>
 
