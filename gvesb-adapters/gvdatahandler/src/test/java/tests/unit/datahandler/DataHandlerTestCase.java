@@ -23,6 +23,8 @@ package tests.unit.datahandler;
 import it.greenvulcano.gvesb.datahandling.DHResult;
 import it.greenvulcano.gvesb.datahandling.IDBOBuilder;
 import it.greenvulcano.gvesb.datahandling.factory.DHFactory;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.sql.Connection;
@@ -241,7 +243,7 @@ public class DataHandlerTestCase extends TestCase
         Object out = result.getData();
         assertNotNull(out);
         String output = new String((byte[]) out);
-        assertEquals("1@testvalue.....................@20000101 123045@123,45@\n", output);
+        assertEquals("1@testvalue.....................@20000101 183045@123,45@\n", output);
     }
 
     /**
@@ -263,7 +265,51 @@ public class DataHandlerTestCase extends TestCase
         Object out = result.getData();
         assertNotNull(out);
         String output = new String((byte[]) out);
-        assertEquals("1@testvalue.....................@20000101 113045@123,45@\n", output);
+        assertEquals("1@testvalue.....................@20000101 173045@123,45@\n", output);
     }
 
+   /**
+    * @throws Exception
+    * 
+    */
+   public void testDHCallFlatSelectFile() throws Exception
+   {
+       String operation = "GVESB::TestFlatSelectFile";
+       IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+       DHResult result = dboBuilder.EXECUTE(operation, null, null);
+       assertNotNull(result);
+       assertEquals(0, result.getDiscard());
+       assertEquals(0, result.getUpdate());
+       assertEquals(0, result.getTotal());
+       assertEquals(0, result.getInsert());
+       assertEquals(1, result.getRead());
+       assertEquals("", result.getDiscardCauseListAsString());
+       Object out = result.getData();
+       assertNotNull(out);
+       String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestFlatSelectFile.csv"));
+       assertEquals("1@testvalue.....................@20000101 183045@123,45@\n", output);
+   }
+   
+
+   /**
+    * @throws Exception
+    * 
+    */
+   public void testDHCallFlatTZoneSelectFile() throws Exception
+   {
+       String operation = "GVESB::TestFlatTZoneSelectFile";
+       IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+       DHResult result = dboBuilder.EXECUTE(operation, null, null);
+       assertNotNull(result);
+       assertEquals(0, result.getDiscard());
+       assertEquals(0, result.getUpdate());
+       assertEquals(0, result.getTotal());
+       assertEquals(0, result.getInsert());
+       assertEquals(1, result.getRead());
+       assertEquals("", result.getDiscardCauseListAsString());
+       Object out = result.getData();
+       assertNotNull(out);
+       String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestFlatTZoneSelectFile.csv"));
+       assertEquals("1@testvalue.....................@20000101 173045@123,45@\n", output);
+   }
 }
