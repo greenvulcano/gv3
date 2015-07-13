@@ -27,6 +27,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
 
+import java.io.FileWriter;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -73,6 +74,8 @@ public class DBOMultiFlatSelect extends AbstractDBO
 
     private static final Logger                      logger                 = GVLogger.getLogger(DBOMultiFlatSelect.class);
 
+    private String                                   directFilePath         = null;
+
     public DBOMultiFlatSelect()
     {
         super();
@@ -87,6 +90,7 @@ public class DBOMultiFlatSelect extends AbstractDBO
             encoding = XMLConfig.get(config, "@encoding", DEFAULT_ENCODING);
             forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
             isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
+            directFilePath = XMLConfig.get(config, "@direct-file-path", null);
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='select']");
             String id = null;
             Node stmt;
@@ -179,6 +183,7 @@ public class DBOMultiFlatSelect extends AbstractDBO
     @Override
     public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException
     {
+        FileWriter fw = null;
         try {
             prepare();
             rowCounter = 0;
@@ -187,10 +192,14 @@ public class DBOMultiFlatSelect extends AbstractDBO
             Map<String, Object> localProps = buildProps(props);
             logProps(localProps);
 
-            StringBuffer sb = null;
+            String localDirectFilePath = PropertiesHandler.expand(directFilePath, localProps, conn, null);
+            if (localDirectFilePath != null) {
+                fw = new FileWriter(localDirectFilePath);
+            }
+            
+            StringBuilder sb = new StringBuilder(sbRowLength);
 
             Iterator<Integer> itr = statIDs.iterator();
-            sb = new StringBuffer(sbRowLength);
             while (itr.hasNext()) {
                 ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                 String id = itr.next().toString();
@@ -298,7 +307,13 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                         sb.append(textVal);
                                     }
                                     rowCounter++;
-                                    sb.append(endLine);
+                                    if (fw != null) {
+                                        fw.append(sb).append(endLine);
+                                        sb.delete(0, sb.length());
+                                    }
+                                    else {
+                                        sb.append(endLine);
+                                    }
                                 }
                             }
                             finally {
@@ -328,11 +343,13 @@ public class DBOMultiFlatSelect extends AbstractDBO
                     }
                 }
             }
-            Charset cs = Charset.forName(encoding);
-            ByteBuffer bb = cs.encode(CharBuffer.wrap(sb));
-            //dataOut.write(bb.array());
-            dataOut.write(bb.array(), 0, sb.length()); // da verificare!!!
-            dataOut.flush();
+            if (fw == null) {
+                Charset cs = Charset.forName(encoding);
+                ByteBuffer bb = cs.encode(CharBuffer.wrap(sb));
+                //dataOut.write(bb.array());
+                dataOut.write(bb.array(), 0, sb.length()); // da verificare!!!
+                dataOut.flush();
+            }
 
             dhr.setRead(rowCounter);
 
@@ -350,6 +367,15 @@ public class DBOMultiFlatSelect extends AbstractDBO
         }
         finally {
             //cleanup();
+            if (fw != null) {
+                try {
+                    fw.flush();
+                    fw.close();
+                }
+                catch (Exception exc2) {
+                    // do nothing
+                }
+            }
         }
     }
 

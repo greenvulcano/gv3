@@ -27,6 +27,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
 
+import java.io.FileWriter;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -68,6 +69,8 @@ public class DBOFlatSelect extends AbstractDBO
     private String                      statement            = null;
     private String                      stmID                = null;
 
+    private String                      directFilePath       = null;
+
     public DBOFlatSelect()
     {
         super();
@@ -82,6 +85,7 @@ public class DBOFlatSelect extends AbstractDBO
             encoding = XMLConfig.get(config, "@encoding", DEFAULT_ENCODING);
             forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
             isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
+            directFilePath = XMLConfig.get(config, "@direct-file-path", null);
             Node stmt = XMLConfig.getNode(config, "statement[@type='select']");
             if (stmt == null) {
                 throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
@@ -154,6 +158,7 @@ public class DBOFlatSelect extends AbstractDBO
     @Override
     public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
+        FileWriter fw = null;
         try {
             prepare();
             rowCounter = 0;
@@ -162,7 +167,12 @@ public class DBOFlatSelect extends AbstractDBO
             Map<String, Object> localProps = buildProps(props);
             logProps(localProps);
 
-            StringBuffer sb = new StringBuffer(sbRowLength);
+            String localDirectFilePath = PropertiesHandler.expand(directFilePath, localProps, conn, null);
+            if (localDirectFilePath != null) {
+                fw = new FileWriter(localDirectFilePath);
+            }
+            
+            StringBuilder sb = new StringBuilder(sbRowLength);
 
             if (statement != null) {
                 ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
@@ -265,7 +275,13 @@ public class DBOFlatSelect extends AbstractDBO
                                     sb.append(textVal);
                                 }
                                 rowCounter++;
-                                sb.append(endLine);
+                                if (fw != null) {
+                                    fw.append(sb).append(endLine);
+                                    sb.delete(0, sb.length());
+                                }
+                                else {
+                                    sb.append(endLine);
+                                }
                             }
                         }
                         finally {
@@ -295,11 +311,14 @@ public class DBOFlatSelect extends AbstractDBO
             }
             sbRowLength = sb.length();
 
-            Charset cs = Charset.forName(encoding);
-            ByteBuffer bb = cs.encode(CharBuffer.wrap(sb));
-            //dataOut.write(bb.array());
-            dataOut.write(bb.array(), 0, sb.length()); // da verificare!!!
-            dataOut.flush();
+
+            if (fw == null) {
+                Charset cs = Charset.forName(encoding);
+                ByteBuffer bb = cs.encode(CharBuffer.wrap(sb));
+                //dataOut.write(bb.array());
+                dataOut.write(bb.array(), 0, sb.length()); // da verificare!!!
+                dataOut.flush();
+            }
 
             dhr.setRead(rowCounter);
 
@@ -317,6 +336,15 @@ public class DBOFlatSelect extends AbstractDBO
         }
         finally {
             // cleanup();
+            if (fw != null) {
+                try {
+                    fw.flush();
+                    fw.close();
+                }
+                catch (Exception exc2) {
+                    // do nothing
+                }
+            }
         }
     }
 

@@ -105,5 +105,37 @@
         <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
       </DBOFlatSelect>
     </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder" make-dump="text"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestFlatSelectFile">
+      <DBOFlatSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOFlatSelect" name="TestFlatSelectFile-select"
+                     direct-file-path="sp{{gv.app.home}}/log/TestFlatSelectFile.csv">
+        <FieldFormatters id="0">
+           <FieldFormatter decimal-separator="," field-id="1" grouping-separator="." terminator-char="@"
+                           number-format="###0" type="field-formatter"/>
+           <FieldFormatter field-length="30" field-id="2" filler-char="." terminator-char="@"
+                           padding="right" type="field-formatter"/>
+           <FieldFormatter date-format="yyyyMMdd HHmmss" field-id="3" type="field-formatter" terminator-char="@"/>
+           <FieldFormatter decimal-separator="," field-id="4" grouping-separator="." terminator-char="@"
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
+      </DBOFlatSelect>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder" make-dump="text"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestFlatTZoneSelectFile">
+      <DBOFlatSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOFlatSelect" name="TestFlatTZoneSelectFile-select"
+                     direct-file-path="sp{{gv.app.home}}/log/TestFlatTZoneSelectFile.csv">
+        <FieldFormatters id="0">
+           <FieldFormatter decimal-separator="," field-id="1" grouping-separator="." terminator-char="@"
+                           number-format="###0" type="field-formatter"/>
+           <FieldFormatter field-length="30" field-id="2" filler-char="." terminator-char="@"
+                           padding="right" type="field-formatter"/>
+           <FieldFormatter date-format="yyyyMMdd HHmmss::GMT" field-id="3" type="field-formatter" terminator-char="@"/>
+           <FieldFormatter decimal-separator="," field-id="4" grouping-separator="." terminator-char="@"
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
+      </DBOFlatSelect>
+    </DBOBuilder>
   </GVDataHandlerConfiguration>
 </GVAdapters>
