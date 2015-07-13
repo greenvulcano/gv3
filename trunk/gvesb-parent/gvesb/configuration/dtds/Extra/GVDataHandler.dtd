@@ -834,6 +834,13 @@
     #NotNull
 -->
 <!ATTLIST DBOFlatSelect output-data CDATA #IMPLIED>
+<!--
+    If defined, must be a valid pathname on local file system.
+    The output data are written into the indicated file. Can contains placeholders to be resolved at runtime.
+
+    #NotNull
+-->
+<!ATTLIST DBOFlatSelect direct-file-path CDATA #IMPLIED>
 
 <!--
     DBO optimized for select operations and conversion in CSV rows.
@@ -884,6 +891,13 @@
     #NotNull
 -->
 <!ATTLIST DBOMultiFlatSelect output-data CDATA #IMPLIED>
+<!--
+    If defined, must be a valid pathname on local file system.
+    The output data are written into the indicated file. Can contains placeholders to be resolved at runtime.
+
+    #NotNull
+-->
+<!ATTLIST DBOMultiFlatSelect direct-file-path CDATA #IMPLIED>
 
 
 <!--
