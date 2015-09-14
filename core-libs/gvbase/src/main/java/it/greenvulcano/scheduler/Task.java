@@ -63,6 +63,7 @@ public abstract class Task
     private String              name                  = "UNDEFINED";
     private TaskManager         manager               = null;
     private boolean             running               = false;
+    private Thread              currentThread         = null; 
     private Map<String, String> properties            = new HashMap<String, String>();
     //private List<TriggerBuilder> triggerBuilders       = new ArrayList<TriggerBuilder>();
     private List<Trigger>       triggers              = new ArrayList<Trigger>();
@@ -162,7 +163,7 @@ public abstract class Task
         return this.triggers;
     }
 
-    public synchronized void handleTask(JobExecutionContext context)
+    public void handleTask(JobExecutionContext context)
     {
         if (mustDestroy || suspended) {
             return;
@@ -198,7 +199,7 @@ public abstract class Task
         }
     }
 
-    public synchronized void recoveryTask(String evName, Date fireTime)
+    public void recoveryTask(String evName, Date fireTime)
     {
         if (mustDestroy || suspended) {
             return;
@@ -238,7 +239,7 @@ public abstract class Task
     /**
      * Invoked before removing the task, perform cleanup operations.
      */
-    public synchronized void destroy()
+    public void destroy()
     {
         mustDestroy = true;
         if (!running) {
@@ -252,12 +253,22 @@ public abstract class Task
         }
     }
 
+    public Thread getCurrentThread() {
+        return currentThread;
+    }
+
     public void run(String evName, Date fireTime, Map<String, String> locProperties)
     {
+        if (running) {
+            logger.warn("Task [" + getFullName() + "] already scheduled!");
+            return;
+        }
+
         NMDC.push();
         int id = -1;
         long startT = System.currentTimeMillis();
         try {
+            currentThread = Thread.currentThread();
             running = true;
             if (sendHeartBeat()) {
                 id = prepareBeat("TRUE".equals(locProperties.get(TASK_RECOVERY_RUN)) || "TRUE".equals(locProperties.get(TASK_MISFIRE_RUN)));
@@ -272,6 +283,7 @@ public abstract class Task
             logger.error("Error handling Task [" + getFullName() + "]", exc);
         }
         finally {
+            currentThread = null;
             long execT = System.currentTimeMillis() - startT;
             if (mustDestroy) {
                 try {

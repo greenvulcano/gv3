@@ -131,11 +131,20 @@ public class TaskGroup
             }
             try {
                 Task task = tasks.remove(taskName);
+                logger.debug("Start searching for Thread running Task[" + task.getFullName() + "]");
+                Thread thd = task.getCurrentThread();
+                if (thd != null) {
+                    logger.warn("Interrupting Thread[" + thd.getName() + "] running Task[" + task.getFullName() + "]");
+                    thd.interrupt();
+                }
+                else {
+                    logger.debug("Not found a Thread running Task[" + task.getFullName() + "]");
+                }
                 task.destroy();
                 tm.unregisterTask(task);
             }
             catch (Exception exc) {
-                logger.error("TaskManager[" + tm.getName() + "] - Error unregistering Task[" + name + "." + taskName
+                logger.error("TaskManager[" + tm.getName() + "] - Error halting Task[" + name + "." + taskName
                         + "]", exc);
             }
             finally {
