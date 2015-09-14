@@ -141,7 +141,7 @@ public class ReceiveCallOperation implements CallOperation
             exportEML = XMLConfig.getBoolean(node, "@export-EML", false);
 
             String regex = XMLConfig.get(node, "@email-rx-cleaner",
-                    "[A-z][A-z0-9_]*([.][A-z0-9_]+)*[@][A-z0-9_]+([.][A-z0-9_]+)*[.][A-z]{2,4}");
+                    "[A-z][A-z0-9_\\-]*([.][A-z0-9_\\-]+)*[@][A-z0-9_\\-]+([.][A-z0-9_\\-]+)*[.][A-z]{2,4}");
             emailRxPattern = Pattern.compile(regex);
 
             service = new ExchangeService();

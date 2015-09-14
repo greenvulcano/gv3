@@ -419,14 +419,14 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-mail</artifactId>
-            <version>3.4.0.1-Final</version>
+            <version>3.4.0.2-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-msexchange</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
