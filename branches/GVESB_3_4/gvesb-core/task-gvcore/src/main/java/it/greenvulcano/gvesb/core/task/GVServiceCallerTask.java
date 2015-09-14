@@ -254,6 +254,9 @@ public class GVServiceCallerTask extends Task
                         catch (Exception exc) {
                             // do nothing
                         }
+                        if (cGVBuffer != null) {
+                            cGVBuffer.cleanUp();
+                        }
 
                         NMDC.pop();
                     }
