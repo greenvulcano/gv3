@@ -9,6 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvdp-axis2</artifactId>
+    <version>3.4.0.1-Final</version>
     <name>GreenVulcano ESB Axis2 Data Providers</name>
 
     <dependencies>

@@ -44,7 +44,7 @@ public class Axis2MessageContextDataProvider extends AbstractDataProvider
     private static final Logger logger  = GVLogger.getLogger(Axis2MessageContextDataProvider.class);
 
     private Options             options = null;
-    private MessageContext      messageContext;
+    private MessageContext      messageContext = null;
 
     /**
      * <p>
@@ -62,6 +62,8 @@ public class Axis2MessageContextDataProvider extends AbstractDataProvider
     public void setContext(Object object) throws Exception
     {
         super.setContext(object);
+        options = null;
+        messageContext = null;
         if (object instanceof Options) {
             options = (Options) object;
         }
