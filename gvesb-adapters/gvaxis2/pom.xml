@@ -10,7 +10,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvaxis2</artifactId>
-    <version>3.4.0.1-Final</version>
+    <version>3.4.0.2-Final</version>
     <packaging>war</packaging>
     <name>GreenVulcano Axis2 WebServices Adapter</name>
 
