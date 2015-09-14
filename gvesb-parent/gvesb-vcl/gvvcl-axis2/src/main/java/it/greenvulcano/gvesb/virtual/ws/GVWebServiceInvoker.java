@@ -204,9 +204,9 @@ public class GVWebServiceInvoker
                 OperationClient operationClient = invoker.prepareOperationClient();
                 
                 if ((refDP != null) && (refDP.length() > 0)) {
-                    logger.debug("Calling configured Data Provider: " + refDP);
                     DataProviderManager dataProviderManager = DataProviderManager.instance();
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(refDP);
+                    logger.debug("Calling configured Data Provider: " + dataProvider);
                     try {
                         dataProvider.setContext(operationClient.getOptions());
                         dataProvider.setObject(gvBuffer);
