@@ -32,6 +32,7 @@ import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.OutputStreamWriter;
 
@@ -126,9 +127,9 @@ public class TestServiceCall implements CallOperation
             try {
                 Thread.sleep(sleepOnPerform);
             }
-            catch (InterruptedException exc) {
-                Thread.currentThread().interrupt();
-                throw exc;
+            catch (Exception exc) {
+                logger.error("TEST SERVICE TIMEOUT FAILED", exc);
+                ThreadUtils.checkInterrupted(exc);
             }
         }
 
@@ -160,6 +161,7 @@ public class TestServiceCall implements CallOperation
         }
         catch (Exception exc) {
             logger.error("TEST SERVICE FAILED", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new CallException("TEST SERVICE FAILED", exc);
         }
         finally {
