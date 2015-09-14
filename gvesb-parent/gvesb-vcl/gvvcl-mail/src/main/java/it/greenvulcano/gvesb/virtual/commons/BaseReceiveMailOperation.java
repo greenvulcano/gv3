@@ -42,7 +42,7 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
     protected String            loginUser       = null;
     protected String            loginPassword   = null;
     protected String            serverHost      = null;
-    
+
     protected String            mbox            = "INBOX";
     protected boolean           delete_messages = false;
     protected boolean           expunge         = false;
@@ -52,7 +52,7 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
      * The emails cleaner pattern
      */
     protected Pattern           emailRxPattern  = null;
-    
+
     /**
      * Preliminary initialization operations
      */
@@ -60,21 +60,21 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
         try {
             mbox = XMLConfig.get(node, "@folder", "INBOX");
             logger.debug("Messages folder: " + mbox);
-            
+
             delete_messages = XMLConfig.getBoolean(node, "@delete-messages", false);
             expunge = XMLConfig.getBoolean(node, "@expunge", false);
-            
+
             exportEML = XMLConfig.getBoolean(node, "@export-EML", false);
-             
-            String regex = XMLConfig.get(node, "@email-rx-cleaner", "[A-z][A-z0-9_]*([.][A-z0-9_]+)*[@][A-z0-9_]+([.][A-z0-9_]+)*[.][A-z]{2,4}");
+
+            String regex = XMLConfig.get(node, "@email-rx-cleaner", "[A-z][A-z0-9_\\-]*([.][A-z0-9_\\-]+)*[@][A-z0-9_\\-]+([.][A-z0-9_\\-]+)*[.][A-z]{2,4}");
             emailRxPattern = Pattern.compile(regex);
 
             Session session = super.preInit(node);
-            
+
             if (!dynamicServer) {
                 store = session.getStore(getProtocol());
             }
-            
+
             return session;
         }
         catch (Exception exc) {
@@ -83,9 +83,9 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
                     exc);
         }
     }
-    
+
     protected abstract String getProtocol();
-    
+
     /**
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
@@ -100,11 +100,11 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
                             {"id", gvBuffer.getId().toString()}, {"message", exc.getMessage()}}, exc);
         }
     }
-    
+
     protected abstract GVBuffer receiveMails(GVBuffer data) throws Exception;
-    
+
     protected abstract void postStore(Store locStore, GVBuffer data) throws Exception;
-    
+
     protected Store getStore(GVBuffer data) throws Exception {
         loginUser     = null;
         loginPassword = null;
@@ -114,11 +114,11 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
             postStore(store, data);
             return store;
         }
-        
+
         try {
             PropertiesHandler.enableExceptionOnErrors();
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(data, true);
-     
+
             Properties localProps = new Properties();
             for (Iterator iterator = serverProps.keySet().iterator(); iterator.hasNext();) {
                 String name = (String) iterator.next();
@@ -138,17 +138,17 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
                 }
                 localProps.setProperty(name, value);
             }
-            
+
             Session session = Session.getInstance(localProps, null);
 
             if (session == null) {
                 throw new CallException("GVVCL_RCV_MAIL_NO_SESSION", new String[][]{{"properties", "" + localProps}});
             }
-            
+
             Store locStore = session.getStore(getProtocol());
 
             postStore(locStore, data);
-            
+
             return locStore;
         }
         catch (CallException exc) {
@@ -161,7 +161,7 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
             PropertiesHandler.disableExceptionOnErrors();
         }
     }
-    
+
     protected void dumpPart(Part p, Element msg, XMLUtils xml) throws Exception
     {
         if (p instanceof Message) {
