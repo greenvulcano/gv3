@@ -6904,7 +6904,7 @@
     If true the output GVBuffer is enriched with the received message properties value.
     Default: true.
 -->
-<!ATTLIST jms-enqueue decorate-gvbuffer (true|false) #IMPLIED>
+<!ATTLIST jms-dequeue decorate-gvbuffer (true|false) #IMPLIED>
 
 <!--
     Allows you to specify a selector for receiving messages.
