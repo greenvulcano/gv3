@@ -145,7 +145,7 @@ public class GVInOnlyMessageReceiver extends AbstractInMessageReceiver
                     else if (inputType.equals("body-element-om")) {
                         inObj = input.getEnvelope().getBody().getFirstElement();
                     }
-                    else { // returnType.equals("header")
+                    else { // returnType.equals("header-om")
                         inObj = input.getEnvelope().getHeader();
                     }
 

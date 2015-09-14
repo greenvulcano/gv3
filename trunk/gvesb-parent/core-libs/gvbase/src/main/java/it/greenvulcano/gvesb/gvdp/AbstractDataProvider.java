@@ -223,6 +223,6 @@ public abstract class AbstractDataProvider implements IDataProvider
 
     @Override
     public String toString() {
-        return "[" + name + " / " + getClass().getName() + "]";
+        return "[" + name + "/" + getClass().getName() + "@" + Integer.toHexString(hashCode()) + "]";
     }
 }
