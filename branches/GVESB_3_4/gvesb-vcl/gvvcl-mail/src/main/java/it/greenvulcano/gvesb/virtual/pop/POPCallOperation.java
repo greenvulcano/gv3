@@ -202,7 +202,7 @@ public class POPCallOperation implements CallOperation
                 store = session.getStore(protocol);
             }
 
-            String regex = XMLConfig.get(node, "@email-rx-cleaner", "[A-z][A-z0-9_]*([.][A-z0-9_]+)*[@][A-z0-9_]+([.][A-z0-9_]+)*[.][A-z]{2,4}");
+            String regex = XMLConfig.get(node, "@email-rx-cleaner", "[A-z][A-z0-9_\\-]*([.][A-z0-9_\\-]+)*[@][A-z0-9_\\-]+([.][A-z0-9_\\-]+)*[.][A-z]{2,4}");
             emailRxPattern = Pattern.compile(regex);
         }
         catch (Exception exc) {

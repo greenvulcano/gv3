@@ -9,7 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvvcl-mail</artifactId>
-    <version>3.4.0.1-Final</version>
+    <version>3.4.0.2-Final</version>
     <name>GreenVulcano VCL Mail Plugin</name>
 
     <dependencies>
