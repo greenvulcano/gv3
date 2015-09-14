@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -77,11 +77,11 @@ import org.w3c.dom.Node;
 
 /**
  * Read emails from MS Exchange server.
- * 
+ *
  * @version 3.3.0 Oct 6, 2012
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class ReceiveCallOperation implements CallOperation
 {
@@ -120,7 +120,7 @@ public class ReceiveCallOperation implements CallOperation
     /**
      * Invoked from <code>OperationFactory</code> when an <code>Operation</code>
      * needs initialization.<br>
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#init(org.w3c.dom.Node)
      */
     @Override
@@ -141,7 +141,7 @@ public class ReceiveCallOperation implements CallOperation
             exportEML = XMLConfig.getBoolean(node, "@export-EML", false);
 
             String regex = XMLConfig.get(node, "@email-rx-cleaner",
-                    "[A-z][A-z0-9_]*([.][A-z0-9_]+)*[@][A-z0-9_]+([.][A-z0-9_]+)*[.][A-z]{2,4}");
+                    "[A-z][A-z0-9_\\-]*([.][A-z0-9_\\-]+)*[@][A-z0-9_\\-]+([.][A-z0-9_\\-]+)*[.][A-z]{2,4}");
             emailRxPattern = Pattern.compile(regex);
 
             service = new ExchangeService();
@@ -181,7 +181,7 @@ public class ReceiveCallOperation implements CallOperation
 
     /**
      * Receives e-mails.
-     * 
+     *
      * @param data
      *        the input GVBuffer.
      * @return the GVBuffer.
@@ -300,7 +300,7 @@ public class ReceiveCallOperation implements CallOperation
 
     /**
      * Return the alias for the given service
-     * 
+     *
      * @param gvBuffer
      *        the input service data
      * @return the configured alias
