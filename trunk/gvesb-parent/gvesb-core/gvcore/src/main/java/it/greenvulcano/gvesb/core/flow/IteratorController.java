@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -121,6 +122,10 @@ public class IteratorController
     private boolean                isFlowSysSvcOpDynamic       = false;
     private String                 call_dp                     = null;
     private boolean                changeLogContext            = true;
+    /**
+     * If true update the log master service file.
+     */
+    private boolean                changeLogMasterService      = false;
     private boolean                accumulateOutput            = false;
     private boolean                returnFullIterOutput        = false;
 
@@ -179,6 +184,7 @@ public class IteratorController
                 operationType = ITERATOR_OPTYPE_CALLSERVICE;
                 logger.debug("operationType=ITERATOR_CORE_CALL");
                 changeLogContext = XMLConfig.getBoolean(node, "CoreCall/@change-log-context", true);
+                changeLogMasterService = changeLogContext && XMLConfig.getBoolean(defNode, "CoreCall/@change-log-master-service", false);
                 system = XMLConfig.get(node, "CoreCall/@id-system", GVBuffer.DEFAULT_SYS);
                 logger.debug("system=" + system);
                 service = XMLConfig.get(node, "CoreCall/@id-service");
@@ -442,7 +448,7 @@ public class IteratorController
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
                 IDataProvider dataProvider = dataProviderManager.getDataProvider(call_dp);
                 try {
-                    logger.debug("Working on data provider: " + dataProvider.getClass());
+                    logger.debug("Working on data provider: " + dataProvider);
                     dataProvider.setObject(internalGVBuffer);
                     inputCall = dataProvider.getResult();
                     internalGVBuffer.setObject(inputCall);
@@ -460,7 +466,22 @@ public class IteratorController
                     NMDC.put(GVBuffer.Field.SERVICE.toString(), localService);
                     NMDC.put(GVBuffer.Field.SYSTEM.toString(), localSystem);
                 }
-                result = flow.perform(internalGVBuffer, onDebug);
+                Level level = null;
+                String masterService = null;
+                try {
+                    if (changeLogMasterService) {
+                        masterService = GVBufferMDC.changeMasterService(localService);
+                    }
+                    level = GVLogger.setThreadMasterLevel(flow.getLoggerLevel());
+
+                    result = flow.perform(internalGVBuffer, onDebug);
+                }
+                finally {
+                    GVLogger.removeThreadMasterLevel(level);
+                    if (changeLogMasterService) {
+                        GVBufferMDC.changeMasterService(masterService);
+                    }
+                }
             }
             finally {
                 NMDC.pop();
@@ -505,7 +526,7 @@ public class IteratorController
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
                 IDataProvider dataProvider = dataProviderManager.getDataProvider(call_dp);
                 try {
-                    logger.debug("Working on data provider: " + dataProvider.getClass());
+                    logger.debug("Working on data provider: " + dataProvider);
                     dataProvider.setObject(internalGVBuffer);
                     inputCall = dataProvider.getResult();
                     internalGVBuffer.setObject(inputCall);

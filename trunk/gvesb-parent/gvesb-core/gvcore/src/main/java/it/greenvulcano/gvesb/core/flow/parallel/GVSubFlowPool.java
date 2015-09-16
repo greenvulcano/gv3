@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -43,19 +44,23 @@ import org.w3c.dom.Node;
  */
 public class GVSubFlowPool
 {
-   private static final Logger      logger                    = GVLogger.getLogger(GVSubFlowPool.class);
+   private static final Logger      logger    = GVLogger.getLogger(GVSubFlowPool.class);
 
     /**
      * Pool of GVSubFlow instances.
      */
-    private LinkedList<GVSubFlow> pool                      = new LinkedList<GVSubFlow>();
+    private LinkedList<GVSubFlow> pool        = new LinkedList<GVSubFlow>();
     /**
      * Set assigned pool's instances.
      */
-    private Set<GVSubFlow>        assignedSF                = new HashSet<GVSubFlow>();
+    private Set<GVSubFlow>        assignedSF  = new HashSet<GVSubFlow>();
 
-    private String                sfName = null;
-    private Node                  sfNode = null;
+    private String                sfName      = null;
+    private Node                  sfNode      = null;
+    /**
+     * The default logger level.
+     */
+    private Level                 loggerLevel = Level.ALL;
     
     private int initialSize = 1;
     private int maximumSize = 10;
@@ -77,6 +82,7 @@ public class GVSubFlowPool
     public void init(Node node, Node sfNode) throws GVCoreException
     {
         logger.debug("Initializing the GVSubFlow Pool.");
+        loggerLevel = GVLogger.getThreadMasterLevel();
         this.sfNode = sfNode;
         try {
             this.sfName = XMLConfig.get(sfNode, "@name");
@@ -283,6 +289,7 @@ public class GVSubFlowPool
     {
         GVSubFlow subFlow = new GVSubFlow();
         subFlow.init(sfNode, false);
+        subFlow.setLoggerLevel(loggerLevel);
         ++created;
         if (created > maxCreated) {
             maxCreated = created;
