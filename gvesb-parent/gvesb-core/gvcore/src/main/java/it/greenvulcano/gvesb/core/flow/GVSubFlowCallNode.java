@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -189,7 +190,7 @@ public class GVSubFlowCallNode extends GVFlowNode
                 if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
                     try {
-                        logger.debug("Working on Input data provider: " + dataProvider.getClass());
+                        logger.debug("Working on Input data provider: " + dataProvider);
                         dataProvider.setObject(internalData);
                         Object inputCall = dataProvider.getResult();
                         internalData.setObject(inputCall);
@@ -204,7 +205,7 @@ public class GVSubFlowCallNode extends GVFlowNode
                 if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
                     try {
-                        logger.debug("Working on Output data provider: " + dataProvider.getClass());
+                        logger.debug("Working on Output data provider: " + dataProvider);
                         dataProvider.setObject(internalData);
                         Object outputCall = dataProvider.getResult();
                         internalData.setObject(outputCall);
