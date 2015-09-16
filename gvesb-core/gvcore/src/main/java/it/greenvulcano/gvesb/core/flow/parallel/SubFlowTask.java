@@ -114,6 +114,7 @@ public class SubFlowTask implements Callable<Result>
                 if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
                     try {
+                        logger.debug("Working on Input data provider: " + dataProvider);
                         internalData = new GVBuffer(input);
                         dataProvider.setObject(internalData);
                         Object inputCall = dataProvider.getResult();

@@ -44,6 +44,7 @@ import it.greenvulcano.util.xpath.XPathFinder;
 
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -86,6 +87,10 @@ public class GVCoreCallNode extends GVFlowNode
      * If true update the log context.
      */
     private boolean             changeLogContext      = false;
+    /**
+     * If true update the log master service file.
+     */
+    private boolean             changeLogMasterService = false;
     /**
      * GVBuffer instance to be used only for accessing to ServiceConfigManager.
      */
@@ -228,7 +233,22 @@ public class GVCoreCallNode extends GVFlowNode
                     }
                 }
                 internalData = inputServices.perform(internalData);
-                internalData = gvOp.perform(internalData, onDebug);
+            	Level level = null;
+            	String masterService = null;
+                try {
+                	if (changeLogMasterService) {
+                		masterService = GVBufferMDC.changeMasterService(localService);
+                	}
+                    level = GVLogger.setThreadMasterLevel(gvOp.getLoggerLevel());
+
+                    internalData = gvOp.perform(internalData, onDebug);
+                }
+                finally {
+                    GVLogger.removeThreadMasterLevel(level);
+                    if (changeLogMasterService) {
+                		GVBufferMDC.changeMasterService(masterService);
+                	}
+                }
                 internalData = outputServices.perform(internalData);
                 if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
@@ -287,6 +307,7 @@ public class GVCoreCallNode extends GVFlowNode
     private void initNode(Node defNode) throws GVCoreConfException
     {
         changeLogContext = XMLConfig.getBoolean(defNode, "@change-log-context", true);
+        changeLogMasterService = changeLogContext && XMLConfig.getBoolean(defNode, "@change-log-master-service", false);
         try {
             system = XMLConfig.get(defNode, "@id-system", GVBuffer.DEFAULT_SYS);
             logger.debug("system  = " + system);
