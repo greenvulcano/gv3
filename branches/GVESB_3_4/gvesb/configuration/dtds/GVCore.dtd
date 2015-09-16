@@ -4042,6 +4042,12 @@
     Default true.
 -->
 <!ATTLIST CoreCall change-log-context (true|false) #IMPLIED>
+<!--
+    If true change the log master service with the used one (configured or calculated), in order to write log messages into a different log file.
+    Used only if @change-log-context is true.
+    Default false.
+-->
+<!ATTLIST CoreCall change-log-master-service (true|false) #IMPLIED>
 
 <!--
     Defines the parameters to invoke a GreenVulcanoESB Operation's SubFlow.
@@ -4296,7 +4302,13 @@
     If 'true' log context is updated.
     The default is 'true'.
 -->
-<!ATTLIST GVCoreCallNode   change-log-context (true | false) #IMPLIED>
+<!ATTLIST GVCoreCallNode  change-log-context (true | false) #IMPLIED>
+<!--
+    If true change the log master service with the used one (configured or calculated), in order to write log messages into a different log file.
+    Used only if @change-log-context is true.
+    Default false.
+-->
+<!ATTLIST GVCoreCallNode  change-log-master-service (true|false) #IMPLIED>
 <!--
     Specifies the input (from the execution environment) for the operation.
     If the input is an exception, the operation is not performed,

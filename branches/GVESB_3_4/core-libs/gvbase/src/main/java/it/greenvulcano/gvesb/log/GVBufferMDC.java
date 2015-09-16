@@ -50,4 +50,16 @@ public class GVBufferMDC
         NMDC.put(GVBuffer.Field.SYSTEM.toString(), gvBuffer.getSystem());
         NMDC.put(GVBuffer.Field.RETCODE.toString(), "" + gvBuffer.getRetCode());
     }
+    
+    public static String changeMasterService(String newService)
+    {
+    	String service = (String) NMDC.get("MASTER_SERVICE");
+    	if (newService != null) {
+    		NMDC.put("MASTER_SERVICE", newService);
+    	}
+    	else {
+    		NMDC.remove("MASTER_SERVICE");
+    	}
+        return service;
+    }
 }
