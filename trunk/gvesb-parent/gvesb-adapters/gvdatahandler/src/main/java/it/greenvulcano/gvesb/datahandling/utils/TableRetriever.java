@@ -68,6 +68,18 @@ public class TableRetriever extends AbstractRetriever
      */
     public static String getData(String method, String paramList) throws Exception
     {
+        return getData(method, paramList, ",");
+    }
+    
+    /**
+     * @param method
+     * @param paramList
+     * @param paramSep
+     * @return the retrieved data
+     * @throws Exception
+     */
+    public static String getData(String method, String paramList, String paramSep) throws Exception
+    {
         try {
             TableRetriever retr = AbstractRetriever.tableRetrieverInstance();
             Map<String, String> resultsCache = retr.getMethodCache(method);
@@ -81,7 +93,7 @@ public class TableRetriever extends AbstractRetriever
                 }
             }
 
-            PreparedStatement stmt = retr.getInternalStmt(method, TextUtils.splitByStringSeparator(paramList, ","));
+            PreparedStatement stmt = retr.getInternalStmt(method, TextUtils.splitByStringSeparator(paramList, paramSep));
             String result = null;
             if (stmt != null) {
                 ResultSet rs = null;
@@ -105,12 +117,12 @@ public class TableRetriever extends AbstractRetriever
                 resultsCache.put(paramList, result);
             }
 
-            logger.debug("Result Function [" + method + "] calculated: " + result);
+            logger.debug("Result Function TableRetriever[" + method + "] calculated: " + result);
 
             return result;
         }
         catch (Exception exc) {
-            logger.error("Cannot execute method: {" + method + "} with parameters {" + paramList + "}.", exc);
+            logger.error("Cannot execute TableRetriever method: {" + method + "} with parameters(" + paramSep + ") {" + paramList + "}.", exc);
             throw exc;
         }
     }

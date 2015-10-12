@@ -62,42 +62,54 @@ public class JavaScriptRetriever extends AbstractRetriever
      */
     public static String getData(String method, String paramList) throws Exception
     {
-        JavaScriptRetriever retr = AbstractRetriever.javaScriptRetrieverInstance();
-        Map<String, String> resultsCache = retr.getMethodCache(method);
-        boolean cacheable = false;
-        if (resultsCache != null){
-            cacheable = true;
-            if (resultsCache.containsKey(paramList)){
-                String result = resultsCache.get(paramList);
-                logger.debug("Result Function [" + method + "] from cache: " + result);
-                return result;
+        return getData(method, paramList, ",");
+    }
+    
+    /**
+     * @param method
+     * @param paramList
+     * @param paramSep
+     * @return the retrieved data
+     * @throws Exception
+     */
+    public static String getData(String method, String paramList, String paramSep) throws Exception
+    {
+        try {
+            JavaScriptRetriever retr = AbstractRetriever.javaScriptRetrieverInstance();
+            Map<String, String> resultsCache = retr.getMethodCache(method);
+            boolean cacheable = false;
+            if (resultsCache != null){
+                cacheable = true;
+                if (resultsCache.containsKey(paramList)){
+                    String result = resultsCache.get(paramList);
+                    logger.debug("Result Function [" + method + "] from cache: " + result);
+                    return result;
+                }
             }
-        }
-
-        List<String> paramL = TextUtils.splitByStringSeparator(paramList, ",");
-        String jsFunction = retr.getDataRetriever(method, paramL);
-        String result = null;
-        if (jsFunction != null) {
-            try {
+    
+            List<String> paramL = TextUtils.splitByStringSeparator(paramList, paramSep);
+            String jsFunction = retr.getDataRetriever(method, paramL);
+            String result = null;
+            if (jsFunction != null) {
                 ScriptExecutor script = ScriptExecutorFactory.createSE("js",jsFunction, null, jsScope);
                 Map<String, Object> params = retr.getMethodParamMap(method, paramL);
                 handleArguments(script, jsFunction, params);
                 Object obj = script.execute(null);
                 result = (obj == null) ? "" : obj.toString();
             }
-            catch (Exception exc) {
-                throw new Exception("Error executing the javascript function in JavaScriptRetriever '" + method
-                        + "' method.", exc);
+    
+            if (cacheable){
+                resultsCache.put(paramList, result);
             }
+    
+            logger.debug("Result Function JavaScriptRetriever[" + method + "] calculated: " + result);
+    
+            return result;
         }
-
-        if (cacheable){
-            resultsCache.put(paramList, result);
+        catch (Exception exc) {
+            logger.error("Cannot execute JavaScriptRetriever method: {" + method + "} with parameters(" + paramSep + ") {" + paramList + "}.", exc);
+            throw exc;
         }
-
-        logger.debug("Result Function [" + method + "] calculated: " + result);
-
-        return result;
     }
 
     private static void handleArguments(ScriptExecutor script, String jsFunction, Map<String, Object> params)
