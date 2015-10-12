@@ -65,48 +65,62 @@ public class JavaScriptRetriever extends AbstractRetriever
      */
     public static String getData(String method, String paramList) throws Exception
     {
-        JavaScriptRetriever retr = AbstractRetriever.javaScriptRetrieverInstance();
-        Map<String, String> resultsCache = retr.getMethodCache(method);
-        boolean cacheable = false;
-        if (resultsCache != null){
-            cacheable = true;
-            if (resultsCache.containsKey(paramList)){
-                String result = resultsCache.get(paramList);
-                logger.debug("Result Function [" + method + "] from cache: " + result);
-                return result;
-            }
+        return getData(method, paramList, ",");
+    }
+    
+    /**
+     * @param method
+     * @param paramList
+     * @param paramSep
+     * @return the retrieved data
+     * @throws Exception
+     */
+    public static String getData(String method, String paramList, String paramSep) throws Exception
+    {
+        try {
+	        JavaScriptRetriever retr = AbstractRetriever.javaScriptRetrieverInstance();
+	        Map<String, String> resultsCache = retr.getMethodCache(method);
+	        boolean cacheable = false;
+	        if (resultsCache != null){
+	            cacheable = true;
+	            if (resultsCache.containsKey(paramList)){
+	                String result = resultsCache.get(paramList);
+	                logger.debug("Result Function JavaScriptRetriever[" + method + "] from cache: " + result);
+	                return result;
+	            }
+	        }
+	
+	        List<String> paramL = TextUtils.splitByStringSeparator(paramList, paramSep);
+	        String jsFunction = retr.getDataRetriever(method, paramL);
+	        String result = null;
+	        if (jsFunction != null) {
+	            Context ctx = null;
+	            try {
+	                ctx = Context.enter();
+	                Scriptable scope = JSInitManager.instance().getJSInit(jsScope).getScope();
+	                Map<String, Object> params = retr.getMethodParamMap(method, paramL);
+	                handleArguments(scope, jsFunction, params);
+	                result = JavaScriptHelper.resultToString(JavaScriptHelper.executeScript(jsFunction, method, scope, ctx));
+	            }
+	            finally {
+	                if (ctx != null) {
+	                    Context.exit();
+	                }
+	            }
+	        }
+	
+	        if (cacheable){
+	            resultsCache.put(paramList, result);
+	        }
+	
+	        logger.debug("Result Function JavaScriptRetriever[" + method + "] calculated: " + result);
+	
+	        return result;
         }
-
-        List<String> paramL = TextUtils.splitByStringSeparator(paramList, ",");
-        String jsFunction = retr.getDataRetriever(method, paramL);
-        String result = null;
-        if (jsFunction != null) {
-            Context ctx = null;
-            try {
-                ctx = Context.enter();
-                Scriptable scope = JSInitManager.instance().getJSInit(jsScope).getScope();
-                Map<String, Object> params = retr.getMethodParamMap(method, paramL);
-                handleArguments(scope, jsFunction, params);
-                result = JavaScriptHelper.resultToString(JavaScriptHelper.executeScript(jsFunction, method, scope, ctx));
-            }
-            catch (Exception exc) {
-                throw new Exception("Error executing the javascript function in JavaScriptRetriever '" + method
-                        + "' method.", exc);
-            }
-            finally {
-                if (ctx != null) {
-                    Context.exit();
-                }
-            }
+        catch (Exception exc) {
+            logger.error("Cannot execute JavaScriptRetriever method: {" + method + "} with parameters(" + paramSep + ") {" + paramList + "}.", exc);
+            throw exc;
         }
-
-        if (cacheable){
-            resultsCache.put(paramList, result);
-        }
-
-        logger.debug("Result Function [" + method + "] calculated: " + result);
-
-        return result;
     }
 
     private static void handleArguments(Scriptable scope, String jsFunction, Map<String, Object> params)

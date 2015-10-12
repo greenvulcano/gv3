@@ -527,7 +527,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdatahandler</artifactId>
-            <version>3.4.0.5-Final</version>
+            <version>3.4.0.6-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
