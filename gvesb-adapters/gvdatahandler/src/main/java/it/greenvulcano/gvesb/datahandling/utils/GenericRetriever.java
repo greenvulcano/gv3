@@ -67,6 +67,18 @@ public class GenericRetriever extends AbstractRetriever
      */
     public static String getData(String method, String paramList) throws Exception
     {
+        return getData(method, paramList, ",");
+    }
+    
+    /**
+     * @param method
+     * @param paramList
+     * @param paramSep
+     * @return the retrieved data
+     * @throws Exception
+     */
+    public static String getData(String method, String paramList, String paramSep) throws Exception
+    {
         try {
             GenericRetriever retr = AbstractRetriever.genericRetrieverInstance();
             Map<String, String> resultsCache = retr.getMethodCache(method);
@@ -75,12 +87,12 @@ public class GenericRetriever extends AbstractRetriever
                 cacheable = true;
                 if (resultsCache.containsKey(paramList)) {
                     String result = resultsCache.get(paramList);
-                    logger.debug("Result Function [" + method + "] from cache: " + result);
+                    logger.debug("Result Function GenericRetriever[" + method + "] from cache: " + result);
                     return result;
                 }
             }
 
-            PreparedStatement stmt = retr.getInternalStmt(method, TextUtils.splitByStringSeparator(paramList, ","));
+            PreparedStatement stmt = retr.getInternalStmt(method, TextUtils.splitByStringSeparator(paramList, paramSep));
             String result = null;
             if (stmt != null) {
                 ResultSet rs = null;
@@ -106,12 +118,12 @@ public class GenericRetriever extends AbstractRetriever
                 resultsCache.put(paramList, result);
             }
 
-            logger.debug("Result Function [" + method + "] calculated: " + result);
+            logger.debug("Result Function GenericRetriever[" + method + "] calculated: " + result);
 
             return result;
         }
         catch (Exception exc) {
-            logger.error("Cannot execute method: {" + method + "} with parameters {" + paramList + "}.", exc);
+            logger.error("Cannot execute GenericRetriever method: {" + method + "} with parameters(" + paramSep + ") {" + paramList + "}.", exc);
             throw exc;
         }
     }
