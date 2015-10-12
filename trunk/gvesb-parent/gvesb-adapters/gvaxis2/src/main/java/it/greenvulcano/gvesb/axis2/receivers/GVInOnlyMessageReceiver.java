@@ -79,6 +79,12 @@ public class GVInOnlyMessageReceiver extends AbstractInMessageReceiver
             if (logger.isDebugEnabled()) {
             	logger.debug("INPUT Envelope:\n" + input.getEnvelope().toString());
             }
+            else {
+                input.getEnvelope().toString();
+            }
+            String inputNS = input.getEnvelope().getNamespace().getNamespaceURI();
+            logger.debug("Input version URI: " + inputNS);
+
             try {
                 mrConfigurator.checkConfig();
             }
@@ -153,6 +159,7 @@ public class GVInOnlyMessageReceiver extends AbstractInMessageReceiver
 
                     currentGVBuffer.setProperty("WS_SERVICE", serviceName);
                     currentGVBuffer.setProperty("WS_OPERATION", operationName);
+                    currentGVBuffer.setProperty("WS_REQ_SOAP_VERSION", inputNS);
                     currentGVBuffer.setProperty("WS_CONTENT_TYPE",
                             (String) input.getProperty(Constants.Configuration.MESSAGE_TYPE));
                     // get remote transport address...
