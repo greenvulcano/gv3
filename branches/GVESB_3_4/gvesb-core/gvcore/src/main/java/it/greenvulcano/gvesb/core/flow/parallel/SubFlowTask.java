@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 
-import org.apache.avalon.framework.logger.Loggable;
 import org.apache.log4j.Logger;
 
 /**
