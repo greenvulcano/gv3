@@ -33,7 +33,6 @@ import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -2115,7 +2114,7 @@ public final class DateUtils
         @Override
         public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition)
         {
-        	Calendar cal = new GregorianCalendar();
+        	Calendar cal = getCalendar();
         	cal.setTime(date);
             return toAppendTo.append(DatatypeConverter.printDateTime(cal));
         }

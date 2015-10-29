@@ -20,6 +20,7 @@
 package tests.unit.util.txt;
 
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.txt.DateUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -133,6 +134,7 @@ public class PropertiesHandlerTestCase extends TestCase
     public void testExpand7() throws Exception
     {
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
+        df.setTimeZone(DateUtils.getDefaultTimeZone());
         String match = df.format(new Date());
         String src = "timestamp{{yyyyMMddHHmm}}";
         String dest = PropertiesHandler.expand(src, null);
