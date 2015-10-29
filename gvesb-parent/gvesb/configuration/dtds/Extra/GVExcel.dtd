@@ -35,6 +35,13 @@
     #References: gvesb:document('GVAdapters')/GVAdapters/GVExcelWorkbookConfiguration/GVExcelWorkbook/@configName
 -->
 <!ATTLIST GVExcelReport format CDATA #IMPLIED>
+<!--
+    Defines the source of the data to be converted in Excel file:
+    - sql: the data are extracted from a DB though an SQL statement
+    - xml: the data are extracted from an XML document contained into GVBuffer.object field
+    Default to sql.
+-->
+<!ATTLIST GVExcelReport mode (sql|xml) #IMPLIED>
 
 <!--
     Defines the configuration of a sheet of the Report.
@@ -69,6 +76,12 @@
     #NotNull
 -->
 <!ATTLIST Sheet jdbc-connection CDATA #IMPLIED>
+<!--
+    Useful only for XML mode, defines the list of (row) element's attributes (and their order) to be shown in the Excel sheet.
+
+    #NotNull
+-->
+<!ATTLIST Sheet fields CDATA #IMPLIED>
 
 <!--
     Preparation statement for Excel report generation.

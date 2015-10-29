@@ -26,6 +26,7 @@ import it.greenvulcano.excel.exception.ExcelException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,6 +48,7 @@ public class ReportSheet
     private Vector<String>      preSelect        = null;
     private String              connection       = null;
     private List<ParameterDef>  parameters       = new ArrayList<ParameterDef>();
+    private List<String>        fields           = new ArrayList<String>();
 
     private static final String METADATA_REG_EXP = "[@][{][{]\\w*[}][}]";
 
@@ -63,6 +65,12 @@ public class ReportSheet
                 preSelect.add(XMLConfig.get(nl.item(j), "."));
             }
             select = XMLConfig.get(node, "statement", "");
+
+            String fieldList = XMLConfig.get(node, "@fields", "");
+            StringTokenizer st = new StringTokenizer(fieldList, ",");
+            while (st.hasMoreTokens()) {
+                fields.add(st.nextToken());
+            }
 
             initParamList();
         }
@@ -116,6 +124,11 @@ public class ReportSheet
     public List<ParameterDef> getParams()
     {
         return parameters;
+    }
+
+    public List<String> getFields()
+    {
+        return fields;
     }
 
     private void initParamList()
