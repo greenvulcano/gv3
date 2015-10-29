@@ -59,6 +59,8 @@ public class DateUtilsTestCase extends TestCase
     public void testStringToDate()
     {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HHmmss.SSS");
+        sdf.setLenient(false);
+        sdf.setTimeZone(DateUtils.getDefaultTimeZone());
         Date now = new Date();
         String str = sdf.format(now);
 
@@ -111,6 +113,8 @@ public class DateUtilsTestCase extends TestCase
     public void testDateToString()
     {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HHmmss.SSS");
+        sdf.setLenient(false);
+        sdf.setTimeZone(DateUtils.getDefaultTimeZone());
         Date now = new Date();
         String str = sdf.format(now);
 
@@ -167,6 +171,8 @@ public class DateUtilsTestCase extends TestCase
                 DateUtils.convertString("20100112 123527.340", "yyyyMMdd HHmmss.SSS", "dd/MM/yyyy HH:mm:ss.SSS"));
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS");
+        sdf.setLenient(false);
+        sdf.setTimeZone(DateUtils.getDefaultTimeZone());
         Date date = sdf.parse(str);
         assertEquals("Convert String Date Format failed", str,
                 DateUtils.convertString("" + date.getTime(), DateUtils.FORMAT_SYSTEM_TIME, "dd/MM/yyyy HH:mm:ss.SSS"));
@@ -201,16 +207,33 @@ public class DateUtilsTestCase extends TestCase
     {
     	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 00:00:00",
     			DateUtils.convertString("2014-09-01T00:00:00+02:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 01:00:00",
+        assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 00:00:00",
+                DateUtils.convertString("2014-08-31T22:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+
+        assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 01:00:00",
     			DateUtils.convertString("2014-09-01T01:00:00+02:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 02:00:00",
+        assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 01:00:00",
+                DateUtils.convertString("2014-08-31T23:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+    	
+        assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 02:00:00",
     			DateUtils.convertString("2014-09-01T02:00:00+02:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 00:00:00",
+        assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01 02:00:00",
+                DateUtils.convertString("2014-09-01T00:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+
+        assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 00:00:00",
     			DateUtils.convertString("2014-11-01T00:00:00.000+01:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 01:00:00",
+        assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 00:00:00",
+                DateUtils.convertString("2014-10-31T23:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+
+        assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 01:00:00",
     			DateUtils.convertString("2014-11-01T01:00:00.000+01:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 02:00:00",
+        assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 01:00:00",
+                DateUtils.convertString("2014-11-01T00:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+
+        assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 02:00:00",
     			DateUtils.convertString("2014-11-01T02:00:00.000+01:00", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
+        assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01 02:00:00",
+                DateUtils.convertString("2014-11-01T01:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT", "yyyy-MM-dd HH:mm:ss", "Europe/Rome"));
     }
     
     /**
@@ -221,18 +244,23 @@ public class DateUtilsTestCase extends TestCase
     @Test
     public void testConvertISO8601StringDateFormatTimeZone2()
     {
-    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01T00:00:00+02:00",
-    			DateUtils.convertString("2014-09-01 00:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01T01:00:00+02:00",
-    			DateUtils.convertString("2014-09-01 01:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone CEST failed", "2014-09-01T02:00:00+02:00",
-    			DateUtils.convertString("2014-09-01 02:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01T00:00:00+01:00",
-    			DateUtils.convertString("2014-11-01 00:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01T01:00:00+01:00",
-    			DateUtils.convertString("2014-11-01 01:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
-    	assertEquals("Convert ISO8601 String Date Format TimeZone EST failed", "2014-11-01T02:00:00+01:00",
-    			DateUtils.convertString("2014-11-01 02:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"));
+        String dateTime = DateUtils.convertString("2014-09-01 00:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT");
+    	assertTrue("Convert ISO8601 String Date Format TimeZone CEST failed(" + dateTime + ")", dateTime.equals("2014-09-01T00:00:00+02:00") || dateTime.equals("2014-08-31T22:00:00Z"));
+
+    	dateTime = DateUtils.convertString("2014-09-01 01:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT");
+    	assertTrue("Convert ISO8601 String Date Format TimeZone CEST failed(" + dateTime + ")", dateTime.equals("2014-09-01T01:00:00+02:00") || dateTime.equals("2014-08-31T23:00:00Z"));
+
+    	dateTime = DateUtils.convertString("2014-09-01 02:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT");
+    	assertTrue("Convert ISO8601 String Date Format TimeZone CEST failed(" + dateTime + ")", dateTime.equals("2014-09-01T02:00:00+02:00") || dateTime.equals("2014-09-01T00:00:00Z"));
+
+    	dateTime = DateUtils.convertString("2014-11-01 00:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT");
+    	assertTrue("Convert ISO8601 String Date Format TimeZone EST failed(" + dateTime + ")", dateTime.equals("2014-11-01T00:00:00+01:00") || dateTime.equals("2014-10-31T23:00:00Z"));
+
+    	dateTime = DateUtils.convertString("2014-11-01 01:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT");
+    	assertTrue("Convert ISO8601 String Date Format TimeZone EST failed(" + dateTime + ")", dateTime.equals("2014-11-01T01:00:00+01:00") || dateTime.equals("2014-11-01T00:00:00Z"));
+    	
+    	dateTime = DateUtils.convertString("2014-11-01 02:00:00", "yyyy-MM-dd HH:mm:ss", "Europe/Rome", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "GMT"); 
+    	assertTrue("Convert ISO8601 String Date Format TimeZone EST failed(" + dateTime + ")", dateTime.equals("2014-11-01T02:00:00+01:00") || dateTime.equals("2014-11-01T01:00:00Z"));
     }
 
     /**
@@ -282,6 +310,8 @@ public class DateUtilsTestCase extends TestCase
     public void testNowToString()
     {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HHmm");
+        sdf.setLenient(false);
+        sdf.setTimeZone(DateUtils.getDefaultTimeZone());
         Date now = new Date();
         String str = sdf.format(now);
 
@@ -329,7 +359,7 @@ public class DateUtilsTestCase extends TestCase
     @Test
     public void testGetTomorrow()
     {
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(DateUtils.getDefaultTimeZone());
         cal.add(Calendar.DAY_OF_MONTH, 1);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
