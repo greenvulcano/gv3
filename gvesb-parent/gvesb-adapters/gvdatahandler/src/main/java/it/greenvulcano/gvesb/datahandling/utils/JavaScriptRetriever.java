@@ -82,7 +82,7 @@ public class JavaScriptRetriever extends AbstractRetriever
                 cacheable = true;
                 if (resultsCache.containsKey(paramList)){
                     String result = resultsCache.get(paramList);
-                    logger.debug("Result Function [" + method + "] from cache: " + result);
+                    logger.debug("Result Function JavaScriptRetriever[" + method + "] from cache: " + result);
                     return result;
                 }
             }
