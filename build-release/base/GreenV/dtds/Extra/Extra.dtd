@@ -1,0 +1,34 @@
+<!ENTITY % gvcommons SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCommons.dtd">
+%gvcommons;
+
+<!ENTITY % gvdh SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVDataHandler.dtd">
+%gvdh;
+
+<!ENTITY % gvexcel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVExcel.dtd">
+%gvexcel;
+
+<!ENTITY % gvhttp SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHTTPInbound.dtd">
+%gvhttp;
+
+<!ENTITY % extra-j2ee-calls "">
+<!ENTITY % extra-comm-calls "">
+<!ENTITY % extra-file-calls "">
+<!ENTITY % extra-db-calls   "|dh-call">
+<!ENTITY % extra-util-calls "|excel-call|excelreader-call">
+
+<!ENTITY % extra-enqueue "">
+<!ENTITY % extra-dequeue "">
+
+<!ENTITY % extra-dte-transformers "">
+
+<!ENTITY % extra-wf-operations "">
+<!ENTITY % extra-wf-extensions "">
+
+<!ENTITY % extra-core "">
+<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration">
+<!ENTITY % extra-support "">
+
+<!ENTITY % extra-input-services "|dh-selector-service">
+<!ENTITY % extra-output-services "">
+
+<!ENTITY % extra-pre-fwd-validators "">
