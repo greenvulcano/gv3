@@ -1,4 +1,31 @@
 -------------------------------------------
+ESB version 3.4.0.9
+-------------------------------------------
+
+Commons:
+- Added to TaskManager the capability to interrupt running Tasks execution on configuration reloading.
+  Modified TaskManager in order to append to Scheduler's Threads name also the executing TaskGroup.TaskName in order to simplify troubleshooting.
+- Corrected jms-dequeue/@decorate-gvbuffer definition in GVCore.dtd.
+
+Core:
+- Corrected @loggerLevel handling in GVCoreCallNode, GVIteratorOperationNode/CoreCall and parallel nodes
+- Added to GVCoreCallNode and GVIteratorOperationNode/CoreCall a new attibute change-log-master-service.
+  If true change the log master service with the used one (configured or calculated), in order to write log messages into a different log file.
+  Used only if @change-log-context is true.
+- Improved init/run logging of ServiceCallerTask.NextAction status
+
+DataHandler:
+- Provided a new getData method on DH retrievers in order to specify the parameter's actual values separator;
+  useful if the default separator (comma) is present into the parameter's actual values
+
+Adapter/VCL Axis2:
+- Corrected mixed SOAP 1.1/1.2 request/response handling in Axis2MessageContextDataProvider.
+- Added new property WS_REQ_SOAP_VERSION to input GVBuffer.
+
+VCL Mail:
+- Corrected default value for @email-rx-cleaner regular expression in receive email VCL Operations
+
+-------------------------------------------
 ESB version 3.4.0.8
 -------------------------------------------
 
