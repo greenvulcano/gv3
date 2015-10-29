@@ -501,6 +501,16 @@
                 <appender-ref ref="LOGGER_FOR_GVSOCIAL"/>
                 <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
             </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvpushnot">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+            <logger additivity="false" name="javapns.notification">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
         </log4j:configuration>
     </GVLog4JConfiguration>
 
