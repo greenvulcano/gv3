@@ -89,7 +89,7 @@ public class GVExcelCallOperation implements CallOperation
             if (rep == null) {
                 rep = ConfigurationHandler.getInstance().getExcelReport(group, report, new HashSet<String>());
             }
-            byte[] data = rep.getExcelReportAsByteArray(props);
+            byte[] data = rep.getExcelReportAsByteArray(props, gvBuffer.getObject());
             gvBuffer.setObject(data);
         }
         catch (Exception exc) {

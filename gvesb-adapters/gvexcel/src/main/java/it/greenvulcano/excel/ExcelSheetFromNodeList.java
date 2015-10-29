@@ -30,11 +30,13 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Vector;
+import java.util.Map;
 
 import jxl.write.DateTime;
 import jxl.write.Label;
@@ -42,6 +44,7 @@ import jxl.write.WritableCell;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -63,9 +66,10 @@ public class ExcelSheetFromNodeList {
     private String               configName               = null;
     private NumberFormat         nf                       = null;
     private SimpleDateFormat     sdf                      = null;
-    private FormatCache   formatCache          = null;
+    private FormatCache   		 formatCache              = null;
+    private boolean              forceTextFields          = false;
 
-    public ExcelSheetFromNodeList(String confName, Locale locale, String dateFormat, FormatCache formatCache) throws ExcelException
+    public ExcelSheetFromNodeList(String confName, Locale locale, String dateFormat, boolean forceTextFields, FormatCache formatCache) throws ExcelException
     {
         ConfigurationHandler cf = ConfigurationHandler.getInstance();
         WorkbookConfiguration wbCfg = cf.getWBConf(confName);
@@ -75,6 +79,7 @@ public class ExcelSheetFromNodeList {
         titleColumnsFromLeft = wbCfg.getTitleColumnsFromLeft();
         offset = wbCfg.getSheetOffset();
         configName = confName;
+        this.forceTextFields = forceTextFields;
         this.formatCache = formatCache;
         if (locale == null) {
             locale = DAFAULT_NUMBER_LOCALE;
@@ -87,40 +92,37 @@ public class ExcelSheetFromNodeList {
         sdf = new SimpleDateFormat(dateFormat);
     }
 
-    public void fillSheet(NodeList nl, WritableSheet ws, String title, Set<String> exclude) throws ExcelException
+    public void fillSheet(NodeList nl, WritableSheet ws, String title, List<String> fields) throws ExcelException
     {
-        int i = 0;
-        Vector<ColumnFormat> cfVector = new Vector<ColumnFormat>();
-        Vector<Integer> aiVector = new Vector<Integer>();
-        if (exclude == null) {
-            exclude = new TreeSet<String>();
-        }
+        Map<String, ColumnFormat> cfMap = new HashMap<String, ColumnFormat>();
         if (nl == null) {
             throw new ExcelException("The NodeList is null");
         }
         try {
-            Node node = nl.item(0);
+            Element node = (Element) nl.item(0);
             if (!node.hasAttributes()) {
                 throw new ExcelException("The Node has no attributes");
             }
             NamedNodeMap attributes = node.getAttributes();
-            int j = 0;
-            for (int k = 0; k < attributes.getLength(); k++) {
-                Node attNode = attributes.item(k);
-                String attName = attNode.getNodeName();
-                if (!exclude.contains(attName)) {
-                    String attValue = getType(attNode.getNodeValue());
-                    //ColumnFormat cf = new ColumnFormat(attValue, attName, configName);
-                    ColumnFormat cf = formatCache.getColumnFormat(attValue, attName, configName);
-                    Label label = new Label(j, offset, attName, headerFormat.getAsWritableCellFormat());
-                    ws.addCell(label);
-                    cfVector.add(j, cf);
-                    aiVector.add(j, new Integer(k));
-                    j++;
+            if (fields == null) {
+                fields = new ArrayList<String>();
+                for (int k = 0; k < attributes.getLength(); k++) {
+                    Node attNode = attributes.item(k);
+                    fields.add(attNode.getNodeName());
                 }
+                Collections.sort(fields);
             }
 
-            i = j;
+            int j = 0;
+            for (String attName : fields) {
+                String attValue = node.getAttribute(attName);
+                String attType = forceTextFields ? ColumnFormat.VARCHAR : getType(attValue);
+                ColumnFormat cf = formatCache.getColumnFormat(attType, attName, configName);
+                Label label = new Label(j, offset, attName, headerFormat.getAsWritableCellFormat());
+                ws.addCell(label);
+                cfMap.put(attName, cf);
+                j++;
+            }
         }
         catch (WriteException exc) {
             throw new ExcelException(exc);
@@ -129,25 +131,29 @@ public class ExcelSheetFromNodeList {
         int j = offset + 2;
         try {
             for (int k = 0; k < nl.getLength(); k++) {
-                Node node = nl.item(k);
+                Element node = (Element) nl.item(k);
                 if (!node.hasAttributes()) {
                     throw new ExcelException("The Node has no attributes");
                 }
-                NamedNodeMap attributes = node.getAttributes();
-                for (int l = 1; l <= i; l++) {
-                    ColumnFormat cf = cfVector.get(l - 1);
-                    Node attNode = attributes.item(aiVector.get(l - 1).intValue());
-                    WritableCell writablecell = getCell(l, j, attNode, cf);
+                int l = 0;
+                for (String attName : fields) {
+                    String attValue = node.getAttribute(attName);
+                    ColumnFormat cf = cfMap.get(attName);
+                    WritableCell writablecell = getCell(l, j, attValue, cf);
                     if (writablecell != null) {
                         ws.addCell(writablecell);
                     }
+                    l++;
                 }
 
                 j++;
             }
 
-            for (int l = 1; l <= i; l++) {
-                ws.setColumnView(l - 1, cfVector.get(l - 1).getColumnSize());
+            int l = 0;
+            for (String attName : fields) {
+                ColumnFormat cf = cfMap.get(attName);
+                ws.setColumnView(l, cf.getColumnSize());
+                l++;
             }
 
             setTitle(ws, title);
@@ -157,16 +163,15 @@ public class ExcelSheetFromNodeList {
         }
     }
 
-    private WritableCell getCell(int i, int j, Node node, ColumnFormat cf)
+    private WritableCell getCell(int i, int j, String value, ColumnFormat cf)
     {
         Object obj = null;
-        if ((i < 1) || (j < 1)) {
+        if ((i < 0) || (j < 1)) {
             return null;
         }
         int type = cf.getType();
-        String value = node.getNodeValue();
         if (type == CellFormat.STRING) {
-            obj = new Label(i - 1, j - 1, value, cf.getFormat());
+            obj = new Label(i, j - 1, value, cf.getFormat());
         }
         else if (type == CellFormat.DATE) {
             Date date = null;
@@ -177,7 +182,7 @@ public class ExcelSheetFromNodeList {
             catch (ParseException exc) {
                 // do nothing
             }
-            obj = new DateTime(i - 1, j - 1, date, cf.getFormat());
+            obj = new DateTime(i, j - 1, date, cf.getFormat());
         }
         else if (type == CellFormat.NUMBER) {
             BigDecimal bigdecimal = null;
@@ -189,11 +194,11 @@ public class ExcelSheetFromNodeList {
                 // do nothing
             }
             if (bigdecimal != null) {
-                obj = new jxl.write.Number(i - 1, j - 1, bigdecimal.doubleValue(), cf.getFormat());
+                obj = new jxl.write.Number(i, j - 1, bigdecimal.doubleValue(), cf.getFormat());
                 value = cf.applyPattern(bigdecimal);
             }
             else {
-                obj = new Label(i - 1, j - 1, null, cf.getFormat());
+                obj = new Label(i, j - 1, null, cf.getFormat());
             }
         }
         if (value != null) {
