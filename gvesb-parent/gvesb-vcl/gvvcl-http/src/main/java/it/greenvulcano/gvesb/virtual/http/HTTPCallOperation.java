@@ -85,6 +85,7 @@ public class HTTPCallOperation implements CallOperation
     private static final Logger logger                 = GVLogger.getLogger(HTTPCallOperation.class);
     private static final String RESPONSE_PREFIX        = "GVHTTP_RESPONSE_";
     private static final String RESPONSE_STATUS        = RESPONSE_PREFIX + "STATUS";
+    private static final String RESPONSE_MESSAGE       = RESPONSE_PREFIX + "MESSAGE";
     private static final String RESPONSE_HEADER_PREFIX = RESPONSE_PREFIX + "HEADER_";
     public static final int     DEFAULT_CONN_TIMEOUT   = 10000;
     public static final int     DEFAULT_SO_TIMEOUT     = 30000;
@@ -219,6 +220,8 @@ public class HTTPCallOperation implements CallOperation
 
             int status = httpClient.executeMethod(method);
             gvBuffer.setProperty(RESPONSE_STATUS, String.valueOf(status));
+            String statusTxt = method.getStatusText();
+            gvBuffer.setProperty(RESPONSE_MESSAGE, (statusTxt != null ? statusTxt : "NULL"));
             Header[] responseHeaders = method.getResponseHeaders();
             for (Header header : responseHeaders) {
                 String headerName = RESPONSE_HEADER_PREFIX + header.getName();
