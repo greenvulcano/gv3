@@ -11,7 +11,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvexcel</artifactId>
-    <version>3.4.0.1-Final</version>
+    <version>3.4.0.2-Final</version>
     <packaging>jar</packaging>
     <name>GreenVulcano Excel Library</name>
 

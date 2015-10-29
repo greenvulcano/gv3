@@ -541,7 +541,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvexcel</artifactId>
-            <version>3.4.0.1-Final</version>
+            <version>3.4.0.2-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
