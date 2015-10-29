@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVVariables SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVVariables.dtd">
+<GVVariables>
+  <variable name="test" value="TEST_VALUE" type="string">
+    <Description>Descrizione variabile di test</Description>
+  </variable>
+</GVVariables>

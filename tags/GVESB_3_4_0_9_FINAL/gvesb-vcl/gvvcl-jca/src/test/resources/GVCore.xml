@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+
+<GVCore version="1.0">
+  <GVCryptoHelper name="CRYPTO_HELPER" type="module"/>
+  <GVXPath name="XPATH" type="module">
+    <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
+      <Description>Funzioni estese e namespaces per l&apos;XPath.</Description>
+      <XPathExtension class="it.greenvulcano.util.xpath.search.extension.ExternalDocumentXPathFunction"
+                      function-name="document">
+            <Description>Accede ad un documento esterno. Uso: gvf:document('xml file path')</Description>
+      </XPathExtension>
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema-instance" prefix="xsi" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/soap/" prefix="soap" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl" />
+      <XPathNamespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j" />
+      <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano" prefix="gvesbws"/>
+      <XPathNamespace namespace="http://www.greenvulcano.it/jca/xml" prefix="jca" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc" />
+      <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
+    </XPath>
+  </GVXPath>
+  <GVSystems name="SYSTEMS" type="module">
+    <Systems>
+      <System id-system="GVESB" system-activation="on">
+        <Channel id-channel="TEST_CHANNEL">
+          <j2ee-jca-call class="it.greenvulcano.gvesb.virtual.jca.JCACallOperation" exec-type="out_exec_in"
+            jndi-name-eis="openejb:Resource/GVJCATestConnector" name="test_jca_call_write" type="call">
+            <jca-interaction-spec class="tests.unit.vcl.jca.ra.cci.GVJCATestCciInteractionSpec">
+              <spec-property name="operation" value="WRITE" />
+            </jca-interaction-spec>
+          </j2ee-jca-call>
+          <j2ee-jca-call class="it.greenvulcano.gvesb.virtual.jca.JCACallOperation" exec-type="out_exec_in"
+            jndi-name-eis="openejb:Resource/GVJCATestConnector" name="test_jca_call_read" type="call">
+            <jca-interaction-spec class="tests.unit.vcl.jca.ra.cci.GVJCATestCciInteractionSpec">
+              <spec-property name="operation" value="READ" />
+              <spec-property name="numOfLines" value="1" />
+            </jca-interaction-spec>
+          </j2ee-jca-call>
+        </Channel>
+      </System>
+    </Systems>
+  </GVSystems>
+  <!--<GVBufferDump log-dump-size="-1" name="BUFFER_DUMP" type="module" />-->
+</GVCore>

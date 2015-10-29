@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PersonsData>
+    <PersonData>
+        <Name>PINCO PALLINO</Name>
+        <BirthDate>05/05/1983</BirthDate>
+        <City>GENOVA</City>
+        <CardsData>
+            <CardData>
+                <Number>4444223388223388</Number>
+                <Credit>250.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+            <CardData>
+                <Number>5555223388223388</Number>
+                <Credit>500.00</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+</PersonsData>

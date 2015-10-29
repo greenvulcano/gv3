@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT document (label, description, permission, history)>
+<!ATTLIST document
+	name CDATA #REQUIRED
+>
+<!ELEMENT document-list (document*,groups?)>
+<!ELEMENT history (#PCDATA)>
+<!ELEMENT label (#PCDATA)>
+<!ELEMENT permission (#PCDATA)>
+<!--
+    Il primo gruppo è quello correntemente selezionato.
+-->
+<!ELEMENT groups (group*)>
+<!ELEMENT group EMPTY>
+<!ATTLIST group
+    name CDATA #REQUIRED
+    label CDATA #REQUIRED
+>

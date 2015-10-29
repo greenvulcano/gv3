@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" 
+                  xmlns:soapbind="http://schemas.xmlsoap.org/wsdl/soap/" 
+                  xmlns:tns="http://www.greenvulcano.it/greenvulcano" 
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                  name="FileManagerService" targetNamespace="http://www.greenvulcano.it/greenvulcano">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://www.greenvulcano.it/greenvulcano" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+            <xsd:element name="listFile">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="fileNameFilter" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="listFileResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="fileName" minOccurs="0" maxOccurs="unbounded" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="getFile">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="fileName" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getFileResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="fileName" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="putFile">
+            </xsd:element>
+            <xsd:element name="putFileResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="fileName" minOccurs="0" maxOccurs="unbounded" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="listFile_Request">
+        <wsdl:part element="tns:listFile" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="listFile_Response">
+        <wsdl:part element="tns:listFileResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="getFile_Request">
+        <wsdl:part element="tns:getFile" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="getFile_Response">
+        <wsdl:part element="tns:getFileResponse" name="body"/>
+        <wsdl:part name="zipAttachment" type="xsd:hexBinary"/>
+    </wsdl:message>
+    
+    <wsdl:message name="putFile_Request">
+        <wsdl:part element="tns:putFile" name="body"/>
+        <wsdl:part name="zipAttachment" type="xsd:hexBinary"/>
+    </wsdl:message>
+    <wsdl:message name="putFile_Response">
+        <wsdl:part element="tns:putFileResponse" name="body"/>
+    </wsdl:message>
+    
+    <wsdl:portType name="FileManagerService_PT">
+        <wsdl:operation name="listFile">
+            <wsdl:input message="tns:listFile_Request"/>
+            <wsdl:output message="tns:listFile_Response"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="getFile">
+            <wsdl:input message="tns:getFile_Request"/>
+            <wsdl:output message="tns:getFile_Response"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="putFile">
+            <wsdl:input message="tns:putFile_Request"/>
+            <wsdl:output message="tns:putFile_Response"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="FileManagerService_B" type="tns:FileManagerService_PT">
+        <soapbind:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="listFile">
+            <soapbind:operation soapAction="FileManagerService/listFile"/>
+            <wsdl:input>
+                <soapbind:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soapbind:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        
+        <wsdl:operation name="getFile">
+            <soapbind:operation soapAction="FileManagerService/getFile"/>
+            <wsdl:input>
+                <soapbind:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:multipartRelated>
+                    <mime:part>
+                        <soapbind:body parts="body" use="literal"/>
+                    </mime:part>
+                    <mime:part>
+                        <mime:content part="zipAttachment" type="application/zip"/>
+                    </mime:part>
+                </mime:multipartRelated>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="putFile">
+            <soapbind:operation soapAction="FileManagerService/putFile"/>
+            <wsdl:input>
+                <mime:multipartRelated>
+                    <mime:part>
+                        <soapbind:body parts="body" use="literal"/>
+                    </mime:part>
+                    <mime:part>
+                        <mime:content part="zipAttachment" type="application/zip"/>
+                    </mime:part>
+                </mime:multipartRelated>
+            </wsdl:input>
+            <wsdl:output>
+                <soapbind:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="FileManagerService">
+        <wsdl:port binding="tns:FileManagerService_B" name="FileManagerService_P">
+            <soapbind:address location="http://localhost:8080/gvaxis2/services/FileManagerService"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

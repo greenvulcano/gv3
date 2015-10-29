@@ -1,0 +1,14 @@
+// This is a sample policy file that grants the application all permissions.
+// You can configure the security policy of a launched application by manually
+// setting the java.security.policy property.
+//
+// SECURITY NOTE: This security policy is good for development. For deployment
+// you may need a stricter security policy.
+//
+// For more information see:
+//    http://java.sun.com/docs/books/tutorial/rmi/running.html
+//    http://java.sun.com/j2se/1.5.0/docs/guide/security/PolicyFiles.html
+
+grant {
+	permission java.security.AllPermission;
+};

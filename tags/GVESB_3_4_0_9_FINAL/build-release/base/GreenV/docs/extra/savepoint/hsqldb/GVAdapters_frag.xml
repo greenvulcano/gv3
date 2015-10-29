@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+    <GVJDBCConnectionBuilder name="GVJDBC" type="module">
+        <DriverPoolConnectionBuilder class="it.greenvulcano.gvesb.j2ee.db.connections.impl.DriverPoolConnectionBuilder"
+                                     driver-class="org.hsqldb.jdbcDriver"
+                                     name="pool_persistence" password="gv_pers"
+                                     type="jdbc-connection-builder"
+                                     url="jdbc:hsqldb:hsql://localhost:9001/gvesb"
+                                     user="gv_pers">
+            <PoolParameters maxActive="10" maxIdle="5" minEvictableIdleTime="300"
+                            minIdle="1" timeBetweenEvictionRuns="300">
+                <validationQuery>select 1 from dual</validationQuery>
+            </PoolParameters>
+        </DriverPoolConnectionBuilder>
+    </GVJDBCConnectionBuilder>
+
+    <GVDataHandlerConfiguration name="DH_ENGINE" type="module" version="1.0">
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="pool_persistence" name="ListRecoveryPoint"
+                    type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="ListRecoveryPoint" transformation="ListRecoveryPoint"
+                       type="dbo">
+                <statement id="1" type="select"><![CDATA[select rec_id, id, server, system, service, operation, recovery_node, creation_date, update_date, state
+from gv_recovery_point
+where 1=1
+decode{{@{{ID}}::NULL:: ::and id = '@{{ID}}'}}
+decode{{@{{SERVICE}}::NULL:: ::and service = '@{{SERVICE}}'}}
+decode{{@{{DATE}}::NULL:: ::and trunc(update_date) = to_date('@{{DATE}}', 'dd/mm/yyyy')}}
+order by update_date desc]]></statement>
+                <statement id="2" keys="1" type="select">select rec_id, name, value
+                    from gv_recovery_property
+                    order by rec_id, name</statement>
+            </DBOSelect>
+        </DBOBuilder>
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="pool_persistence" name="CheckRecoveryPoint"
+                    type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="CheckRecoveryPoint" type="dbo">
+                <statement id="1" type="select"><![CDATA[select count(1)
+from gv_recovery_point
+where rec_id = @{{REC_ID}}
+and state = 'SAVED']]></statement>
+            </DBOSelect>
+        </DBOBuilder>
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="pool_persistence"
+                    name="ListRecoveryPointServices" type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="ListRecoveryPointServices" type="dbo">
+                <statement id="1" type="select"><![CDATA[select distinct service
+from gv_recovery_point
+decode{{@{{DATE}}::NULL:: ::where trunc(update_date) = to_date('@{{DATE}}', 'dd/mm/yyyy')}}
+order by service]]></statement>
+            </DBOSelect>
+        </DBOBuilder>
+        <DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder"
+                    jdbc-connection-name="pool_persistence" name="ListRecoveryPointIDs"
+                    type="dbobuilder">
+            <DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect"
+                       name="ListRecoveryPointIDs" type="dbo">
+                <statement id="1" type="select"><![CDATA[select distinct id
+from gv_recovery_point
+decode{{@{{DATE}}::NULL:: ::where trunc(update_date) = to_date('@{{DATE}}', 'dd/mm/yyyy')}}
+order by id]]></statement>
+            </DBOSelect>
+        </DBOBuilder>
+    </GVDataHandlerConfiguration>
+</GVAdapters>
