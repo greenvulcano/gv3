@@ -47,6 +47,14 @@
                <cmd-array-elem>cat @{{FILE_NAME}}</cmd-array-elem>
                <cmd-array-elem>exit</cmd-array-elem>
           </rsh-call>
+          <rsh-filewriter-call name="rsh_loc_write" class="it.greenvulcano.gvesb.virtual.rsh.RemoteFileWriterCallOperation"
+                    rsh-client-name="RSHLocal" filePathName="@{{WORK_DIR}}/@{{FILE_NAME}}" type="call"/>
+          <rsh-filewriter-call name="rsh_rem_write" class="it.greenvulcano.gvesb.virtual.rsh.RemoteFileWriterCallOperation"
+                    rsh-client-name="RSHRemote" filePathName="@{{WORK_DIR}}/@{{FILE_NAME}}" type="call"/>
+          <rsh-filereader-call name="rsh_loc_read" class="it.greenvulcano.gvesb.virtual.rsh.RemoteFileReaderCallOperation"
+                    rsh-client-name="RSHLocal" filePathName="@{{WORK_DIR}}/@{{FILE_NAME}}" type="call"/>
+          <rsh-filereader-call name="rsh_rem_read" class="it.greenvulcano.gvesb.virtual.rsh.RemoteFileReaderCallOperation"
+                    rsh-client-name="RSHRemote" filePathName="@{{WORK_DIR}}/@{{FILE_NAME}}" type="call"/>
         </Channel>
         <Channel id-channel="TEST_CHANNEL_WIN">
           <rsh-call name="rsh_rem_single_cmd" class="it.greenvulcano.gvesb.virtual.rsh.RemoteShellCallOperation"
@@ -69,6 +77,14 @@
 			   <cmd-array-elem>type @{{FILE_NAME}}</cmd-array-elem>
 			   <cmd-array-elem>exit</cmd-array-elem>
           </rsh-call>
+          <rsh-filewriter-call name="rsh_loc_write" class="it.greenvulcano.gvesb.virtual.rsh.RemoteFileWriterCallOperation"
+                    rsh-client-name="RSHLocal" filePathName="@{{WORK_DIR}}\@{{FILE_NAME}}" type="call"/>
+          <rsh-filewriter-call name="rsh_rem_write" class="it.greenvulcano.gvesb.virtual.rsh.RemoteFileWriterCallOperation"
+                    rsh-client-name="RSHRemote" filePathName="@{{WORK_DIR}}\@{{FILE_NAME}}" type="call"/>
+          <rsh-filereader-call name="rsh_loc_read" class="it.greenvulcano.gvesb.virtual.rsh.RemoteFileReaderCallOperation"
+                    rsh-client-name="RSHLocal" filePathName="@{{WORK_DIR}}\@{{FILE_NAME}}" type="call"/>
+          <rsh-filereader-call name="rsh_rem_read" class="it.greenvulcano.gvesb.virtual.rsh.RemoteFileReaderCallOperation"
+                    rsh-client-name="RSHRemote" filePathName="@{{WORK_DIR}}\@{{FILE_NAME}}" type="call"/>
         </Channel>
       </System>
     </Systems>
