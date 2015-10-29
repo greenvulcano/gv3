@@ -28,6 +28,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
+import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -63,6 +64,7 @@ public class ExcelReport
     private Vector<ReportSheet> sheets             = null;
     private List<ParameterDef>  parameters         = new ArrayList<ParameterDef>();
     private boolean             discoverParameters = true;
+    private String              mode               = "sql";
 
     public ExcelReport(Node node) throws ExcelException
     {
@@ -70,6 +72,7 @@ public class ExcelReport
             name = XMLConfig.get(node, "@name");
             group = XMLConfig.get(node, "@group", "Generic");
             format = XMLConfig.get(node, "@format", "");
+            mode = XMLConfig.get(node, "@mode", "sql");
 
             String sRoles = XMLConfig.get(node, "@roles", "");
             roles = new HashSet<String>();
@@ -217,14 +220,14 @@ public class ExcelReport
         return false;
     }
 
-    public byte[] getExcelReportAsByteArray(Map<String, Object> props) throws ExcelException, 
+    public byte[] getExcelReportAsByteArray(Map<String, Object> props, Object data) throws ExcelException, 
             InterruptedException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        writeExcelReportOnOS(baos, props);
+        writeExcelReportOnOS(baos, props, data);
         return baos.toByteArray();
     }
 
-    public void writeExcelReportOnOS(OutputStream os, Map<String, Object> props) throws ExcelException, 
+    public void writeExcelReportOnOS(OutputStream os, Map<String, Object> props, Object data) throws ExcelException, 
             InterruptedException {
         NMDC.push();
         ConfigurationHandler.setLogContext();
@@ -242,56 +245,78 @@ public class ExcelReport
                 ResultSet resultset = null;
                 Connection connection = null;
                 try {
-                    String connName = rs.getConnection();
-                    connection = connMap.get(connName);
-                    if (connection == null) {
-                        connection = JDBCConnectionBuilder.getConnection(connName);
-                        logger.debug("Creating JDBC Connection: '" + connName + "'");
-                        connMap.put(connName, connection);
-                    }
-                    connection.setAutoCommit(false);
+                    if ("sql".equals(mode)) {
+                        String connName = rs.getConnection();
+                        connection = connMap.get(connName);
+                        if (connection == null) {
+                            connection = JDBCConnectionBuilder.getConnection(connName);
+                            logger.debug("Creating JDBC Connection: '" + connName + "'");
+                            connMap.put(connName, connection);
+                        }
+                        connection.setAutoCommit(false);
 
-                    Vector<String> pStatements = rs.getPreSelect();
-                    for (int k = 0; k < pStatements.size(); k++) {
-                        String pStatement = pStatements.get(k);
-                        if (props != null) {
-                            pStatement = PropertiesHandler.expand(pStatement, props, null, connection);
-                        }
-                        logger.debug("Executing preparation statement: " + pStatement);
-                        statement = connection.createStatement();
-                        try {
-                            statement.execute(pStatement);
-                        }
-                        finally {
-                            if (statement != null) {
-                                try {
-                                    statement.close();
-                                }
-                                catch (Exception exc) {
-                                    // do nothing
+                        Vector<String> pStatements = rs.getPreSelect();
+                        for (int k = 0; k < pStatements.size(); k++) {
+                            String pStatement = pStatements.get(k);
+                            if (props != null) {
+                                pStatement = PropertiesHandler.expand(pStatement, props, connection);
+                            }
+                            logger.debug("Executing preparation statement: " + pStatement);
+                            statement = connection.createStatement();
+                            try {
+                                statement.execute(pStatement);
+                            }
+                            finally {
+                                if (statement != null) {
+                                    try {
+                                        statement.close();
+                                    }
+                                    catch (Exception exc) {
+                                        // do nothing
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    statement = connection.createStatement();
-                    String select = null;
-                    String name = null;
-                    String title = null;
-                    if (props != null) {
-                        select = PropertiesHandler.expand(rs.getSelect(), props, connection);
-                        name = PropertiesHandler.expand(rs.getName(), props, connection);
-                        title = PropertiesHandler.expand(rs.getTitle(), props, connection);
-                        logger.debug("Query parameters: " + props.toString());
+                        statement = connection.createStatement();
+                        String select = null;
+                        String name = null;
+                        String title = null;
+                        if (props != null) {
+                            select = PropertiesHandler.expand(rs.getSelect(), props, connection);
+                            name = PropertiesHandler.expand(rs.getName(), props, connection);
+                            title = PropertiesHandler.expand(rs.getTitle(), props, connection);
+                            logger.debug("Query parameters: " + props.toString());
+                        }
+                        else {
+                            select = rs.getSelect();
+                            name = rs.getName();
+                            title = rs.getTitle();
+                        }
+                        logger.debug("Executing query: " + select);
+                        resultset = statement.executeQuery(select);
+                        ew.fillWithResultSet(resultset, name, title);
                     }
                     else {
-                        select = rs.getSelect();
-                        name = rs.getName();
-                        title = rs.getTitle();
+                        String xpath = null;
+                        String name = null;
+                        String title = null;
+                        if (props != null) {
+                            xpath = PropertiesHandler.expand(rs.getSelect(), props);
+                            name = PropertiesHandler.expand(rs.getName(), props);
+                            title = PropertiesHandler.expand(rs.getTitle(), props);
+                            logger.debug("XPath parameters: " + props.toString());
+                        }
+                        else {
+                            xpath = rs.getSelect();
+                            name = rs.getName();
+                            title = rs.getTitle();
+                        }
+                        logger.debug("Executing XPath: " + xpath);
+                        Node doc = XMLUtils.parseObject_S(data, false, true);
+                        NodeList list = XMLUtils.selectNodeList_S(doc, xpath);
+                        ew.fillWithNodeList(list, rs.getFields(), name, title, format, null, null, true);
                     }
-                    logger.debug("Executing query: " + select);
-                    resultset = statement.executeQuery(select);
-                    ew.fillWithResultSet(resultset, name, title);
                 }
                 catch (Exception exc) {
                     ThreadUtils.checkInterrupted(exc);

@@ -29,14 +29,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
-import org.w3c.dom.NodeList;
 import org.apache.log4j.Logger;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -129,7 +129,7 @@ public class ExcelWorkBook {
         }
     }
 
-    public void fillWithNodeList(NodeList nodelist, Set<String> set, String name, String title, String confName, Locale locale, String dateFormat)
+    public void fillWithNodeList(NodeList nodelist, List<String> fields, String name, String title, String confName, Locale locale, String dateFormat, boolean forceTextFields)
             throws ExcelException
     {
         NMDC.push();
@@ -140,8 +140,8 @@ public class ExcelWorkBook {
             if (confName == null) {
                 confName = defaultFormatName;
             }
-            ExcelSheetFromNodeList es = new ExcelSheetFromNodeList(confName, locale, dateFormat, formatCache);
-            es.fillSheet(nodelist, writablesheet, title, set);
+            ExcelSheetFromNodeList es = new ExcelSheetFromNodeList(confName, locale, dateFormat, forceTextFields, formatCache);
+            es.fillSheet(nodelist, writablesheet, title, fields);
             logger.debug("Created sheet '" + name + "'");
         }
         catch (ExcelException excelexception) {
