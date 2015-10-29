@@ -19,6 +19,7 @@
  */
 package tests.unit.util.txt;
 
+import it.greenvulcano.util.txt.DateUtils;
 import it.greenvulcano.util.txt.StringPlaceholderExpander;
 
 import java.text.DateFormat;
@@ -49,6 +50,7 @@ public class StringPlaceholderExpanderTestCase extends TestCase
         System.setProperty("my.java.prop.2", "secondProp");
         StringPlaceholderExpander ph = new StringPlaceholderExpander();
         String expanded = ph.expand(input);
+        sdf.setTimeZone(DateUtils.getDefaultTimeZone());
         assertEquals(EXPECTED_EXPANDED + sdf.format(new Date()), expanded);
     }
 }
