@@ -128,4 +128,9 @@ public class GVTaskAction
         }
         return ActionType.NO_ACTION;
     }
+    
+    @Override
+    public String toString() {
+    	return "Action[" + action + "] -> condition: " + condition.getName();
+    }
 }
