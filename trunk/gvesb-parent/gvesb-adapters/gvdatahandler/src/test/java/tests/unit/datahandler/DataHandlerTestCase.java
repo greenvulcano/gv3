@@ -409,7 +409,7 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("1@testvalue.....................@20000101 173045@123,45@\n", output);
     }
 
-   /**
+    /**
     * @throws Exception
     * 
     */
@@ -430,7 +430,28 @@ public class DataHandlerTestCase extends TestCase
        String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestFlatSelectFile.csv"));
        assertEquals("1@testvalue.....................@20000101 183045@123,45@\n", output);
    }
-   
+
+  /**
+    * @throws Exception
+    * 
+    */
+   public void testDHCallMultiFlatSelectFile() throws Exception
+   {
+       String operation = "GVESB::TestMultiFlatSelectFile";
+       IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+       DHResult result = dboBuilder.EXECUTE(operation, null, null);
+       assertNotNull(result);
+       assertEquals(0, result.getDiscard());
+       assertEquals(0, result.getUpdate());
+       assertEquals(0, result.getTotal());
+       assertEquals(0, result.getInsert());
+       assertEquals(2, result.getRead());
+       assertEquals("", result.getDiscardCauseListAsString());
+       Object out = result.getData();
+       assertNotNull(out);
+       String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestMultiFlatSelectFile.csv"));
+       assertEquals("id@field1@field2@field3@\n1@testvalue.....................@20000101 183045@123,45@\n", output);
+   }
 
    /**
     * @throws Exception
