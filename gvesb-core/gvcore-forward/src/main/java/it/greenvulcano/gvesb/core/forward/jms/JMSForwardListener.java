@@ -579,7 +579,7 @@ public class JMSForwardListener implements Runnable
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(refDP);
                     try {
                         if (data.isDebug()) {
-                            logger.debug("Working on data provider[" + refDP + "]: " + dataProvider.getClass());
+                            logger.debug("Working on data provider[" + refDP + "]: " + dataProvider);
                         }
                         dataProvider.setObject(gvBuffer);
                         Object result = dataProvider.getResult();
