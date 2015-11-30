@@ -80,7 +80,7 @@ public abstract class SSHManager extends RemoteManager
             knownHostFilePath = XMLConfig.get(configNode, "@knownHostFilePath");
             if (knownHostFilePath != null) {
                 if (!PropertiesHandler.isExpanded(knownHostFilePath)) {
-                    knownHostFilePath = PropertiesHandler.expand(knownHostFilePath, null);
+                    knownHostFilePath = PropertiesHandler.expand(knownHostFilePath);
                 }
             }
             authMethod = XMLConfig.get(configNode, "@authMethod", "password");

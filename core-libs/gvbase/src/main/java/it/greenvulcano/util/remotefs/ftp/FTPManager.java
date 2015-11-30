@@ -293,11 +293,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#ls(String, String, date,
-     *      int)
+     *      int, java.util.Map)
      */
     @Override
-    public Set<FileProperties> ls(String remoteDirectory, String filenamePattern, Date modifiedSince, int fileTypeFilter)
-            throws RemoteManagerException
+    public Set<FileProperties> ls(String remoteDirectory, String filenamePattern, Date modifiedSince, int fileTypeFilter,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -343,11 +343,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#get(String, String,
-     *      outputDataStream)
+     *      outputDataStream, java.util.Map)
      */
     @Override
-    public boolean get(String remoteDirectory, String remoteFile, OutputStream outputStream)
-            throws RemoteManagerException
+    public boolean get(String remoteDirectory, String remoteFile, OutputStream outputStream,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -392,11 +392,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#get(String, String,
-     *      String, String)
+     *      String, String, java.util.Map)
      */
     @Override
-    public boolean get(String remoteDirectory, String remoteFile, String localDirectory, String localFile)
-            throws RemoteManagerException
+    public boolean get(String remoteDirectory, String remoteFile, String localDirectory, String localFile,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -457,11 +457,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#get(String, String,
-     *      String)
+     *      String, java.util.Map)
      */
     @Override
-    public boolean get(String remoteDirectory, String remoteFilePattern, String localDirectory)
-            throws RemoteManagerException
+    public boolean get(String remoteDirectory, String remoteFilePattern, String localDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -491,11 +491,12 @@ public class FTPManager extends RemoteManager
                         if (fileFilter.accept(currFTPFile)) {
                             boolean partialResult = true;
                             if (currFTPFile.isDirectory()) {
-                                partialResult = getDir(currFTPFile.getName(), localDirectoryObj.getAbsolutePath(), null);
+                                partialResult = getDir(currFTPFile.getName(), localDirectoryObj.getAbsolutePath(), null,
+                                        optProperties);
                             }
                             else {
                                 partialResult = get(null, currFTPFile.getName(), localDirectoryObj.getAbsolutePath(),
-                                        null);
+                                        null, optProperties);
                             }
                             if (!partialResult) {
                                 break;
@@ -539,11 +540,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#getDir(String, String,
-     *      String)
+     *      String, java.util.Map)
      */
     @Override
-    public boolean getDir(String remoteDirectory, String localParentDirectory, String localDirectory)
-            throws RemoteManagerException
+    public boolean getDir(String remoteDirectory, String localParentDirectory, String localDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -575,10 +576,12 @@ public class FTPManager extends RemoteManager
                     if (currFTPFile != null) {
                         boolean partialResult = true;
                         if (currFTPFile.isDirectory()) {
-                            partialResult = getDir(currFTPFile.getName(), localDirectoryObj.getAbsolutePath(), null);
+                            partialResult = getDir(currFTPFile.getName(), localDirectoryObj.getAbsolutePath(), null,
+                                    optProperties);
                         }
                         else {
-                            partialResult = get(null, currFTPFile.getName(), localDirectoryObj.getAbsolutePath(), null);
+                            partialResult = get(null, currFTPFile.getName(), localDirectoryObj.getAbsolutePath(), null,
+                                    optProperties);
                         }
                         if (!partialResult) {
                             break;
@@ -623,11 +626,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#put(String, String,
-     *      String, String)
+     *      String, String, java.util.Map)
      */
     @Override
-    public boolean put(String localDirectory, String localFile, String remoteDirectory, String remoteFile)
-            throws RemoteManagerException
+    public boolean put(String localDirectory, String localFile, String remoteDirectory, String remoteFile,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -690,11 +693,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#put(InputStream, String,
-     *      String)
+     *      String, java.util.Map)
      */
     @Override
-    public boolean put(InputStream inputDataStream, String remoteDirectory, String remoteFile)
-            throws RemoteManagerException
+    public boolean put(InputStream inputDataStream, String remoteDirectory, String remoteFile,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -741,11 +744,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#put(String, String,
-     *      String)
+     *      String, java.util.Map)
      */
     @Override
-    public boolean put(String localDirectory, String localFilePattern, String remoteDirectory)
-            throws RemoteManagerException
+    public boolean put(String localDirectory, String localFilePattern, String remoteDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -762,10 +765,11 @@ public class FTPManager extends RemoteManager
             for (File currLocalFile : localFiles) {
                 boolean partialResult = true;
                 if (currLocalFile.isDirectory()) {
-                    partialResult = putDir(currLocalFile.getAbsolutePath(), null, null);
+                    partialResult = putDir(currLocalFile.getAbsolutePath(), null, null, optProperties);
                 }
                 else {
-                    partialResult = put(localDirectoryObj.getAbsolutePath(), currLocalFile.getName(), null, null);
+                    partialResult = put(localDirectoryObj.getAbsolutePath(), currLocalFile.getName(), null, null,
+                            optProperties);
                 }
 
                 if (!partialResult) {
@@ -797,11 +801,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#putDir(String, String,
-     *      String)
+     *      String, java.util.Map)
      */
     @Override
-    public boolean putDir(String localDirectory, String remoteParentDirectory, String remoteDirectory)
-            throws RemoteManagerException
+    public boolean putDir(String localDirectory, String remoteParentDirectory, String remoteDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -827,10 +831,11 @@ public class FTPManager extends RemoteManager
             for (File currLocalFile : localFiles) {
                 boolean partialResult = true;
                 if (currLocalFile.isDirectory()) {
-                    partialResult = putDir(currLocalFile.getAbsolutePath(), null, null);
+                    partialResult = putDir(currLocalFile.getAbsolutePath(), null, null, optProperties);
                 }
                 else {
-                    partialResult = put(localDirectoryObj.getAbsolutePath(), currLocalFile.getName(), null, null);
+                    partialResult = put(localDirectoryObj.getAbsolutePath(), currLocalFile.getName(), null, null,
+                            optProperties);
                 }
 
                 if (!partialResult) {
@@ -866,10 +871,11 @@ public class FTPManager extends RemoteManager
     }
 
     /**
-     * @see it.greenvulcano.util.remotefs.RemoteManager#rm(String, String)
+     * @see it.greenvulcano.util.remotefs.RemoteManager#rm(String, String, java.util.Map)
      */
     @Override
-    public boolean rm(String remoteDirectory, String entryNamePattern) throws RemoteManagerException
+    public boolean rm(String remoteDirectory, String entryNamePattern, Map<String, String> optProperties)
+            throws RemoteManagerException
     {
         checkConnected();
 
@@ -897,7 +903,7 @@ public class FTPManager extends RemoteManager
                     if (currFTPFile != null) {
                         if (fileFilter.accept(currFTPFile)) {
                             if (currFTPFile.isDirectory()) {
-                                result = rm(currFTPFile.getName(), ".*"); // remove all sub-directory content
+                                result = rm(currFTPFile.getName(), ".*", optProperties); // remove all sub-directory content
                                 ftpClient.changeToParentDirectory();
                                 if (result) {
                                     ftpClient.removeDirectory(currFTPFile.getName());
@@ -951,11 +957,11 @@ public class FTPManager extends RemoteManager
 
     /**
      * @see it.greenvulcano.util.remotefs.RemoteManager#mv(String, String,
-     *      String)
+     *      String, java.util.Map)
      */
     @Override
-    public boolean mv(String remoteParentDirectory, String oldEntryName, String newEntryName)
-            throws RemoteManagerException
+    public boolean mv(String remoteParentDirectory, String oldEntryName, String newEntryName, 
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
@@ -992,10 +998,11 @@ public class FTPManager extends RemoteManager
     }
 
     /**
-     * @see it.greenvulcano.util.remotefs.RemoteManager#mkdir(String, String)
+     * @see it.greenvulcano.util.remotefs.RemoteManager#mkdir(String, String, java.util.Map)
      */
     @Override
-    public boolean mkdir(String remoteParentDirectory, String remoteDirectory) throws RemoteManagerException
+    public boolean mkdir(String remoteParentDirectory, String remoteDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException
     {
         checkConnected();
 
