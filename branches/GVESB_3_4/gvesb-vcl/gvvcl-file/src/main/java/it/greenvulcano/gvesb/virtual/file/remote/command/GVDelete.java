@@ -26,10 +26,12 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.remotefs.RemoteManager;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Delete file/directory on remote file system.
@@ -43,9 +45,10 @@ public class GVDelete implements GVRemoteCommand
 {
     private static Logger logger = GVLogger.getLogger(GVDelete.class);
 
-    private String        targetPath;
-    private String        filePattern;
-    private boolean       isCritical;
+    private String              targetPath;
+    private String              filePattern;
+    private boolean             isCritical;
+    private Map<String, String> optProperties = new HashMap<String, String>();
 
     /**
      *
@@ -65,6 +68,15 @@ public class GVDelete implements GVRemoteCommand
         targetPath = XMLConfig.get(node, "@targetPath");
         filePattern = XMLConfig.get(node, "@filePattern", "");
         isCritical = XMLConfig.getBoolean(node, "@isCritical", true);
+        
+        NodeList nl = XMLConfig.getNodeList(node, "PropertyDef");
+        if (nl != null) {
+            for (int i = 0; i < nl.getLength(); i++) {
+                String name = XMLConfig.get(nl.item(i), "@name");
+                String value = XMLConfig.get(nl.item(i), "@value", "");
+                optProperties.put(name, value);
+            }
+        }
     }
 
     /**
@@ -92,7 +104,12 @@ public class GVDelete implements GVRemoteCommand
             String currTargetPath = PropertiesHandler.expand(targetPath, params, gvBuffer);
             String currFile = PropertiesHandler.expand(filePattern, params, gvBuffer);
 
-            boolean result = manager.rm(currTargetPath, currFile);
+            Map<String, String> localOptProperties = new HashMap<String, String>();
+            for (String prop : optProperties.keySet()) {
+                localOptProperties.put(prop, PropertiesHandler.expand(optProperties.get(prop), params, gvBuffer));
+            }
+            
+            boolean result = manager.rm(currTargetPath, currFile, localOptProperties);
 
             if (result) {
                 if (filePattern.equals("")) {

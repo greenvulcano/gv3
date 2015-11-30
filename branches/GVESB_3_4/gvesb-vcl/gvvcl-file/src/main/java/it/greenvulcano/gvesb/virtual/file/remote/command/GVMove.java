@@ -26,10 +26,12 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.remotefs.RemoteManager;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Move/Rename file/directory in a remote file system.
@@ -47,6 +49,7 @@ public class GVMove implements GVRemoteCommand
     private String              oldName;
     private String              newName;
     private boolean             isCritical;
+    private Map<String, String> optProperties = new HashMap<String, String>();
 
     /**
      *
@@ -63,6 +66,15 @@ public class GVMove implements GVRemoteCommand
         oldName = XMLConfig.get(node, "@oldName");
         newName = XMLConfig.get(node, "@newName");
         isCritical = XMLConfig.getBoolean(node, "@isCritical", true);
+
+        NodeList nl = XMLConfig.getNodeList(node, "PropertyDef");
+        if (nl != null) {
+            for (int i = 0; i < nl.getLength(); i++) {
+                String name = XMLConfig.get(nl.item(i), "@name");
+                String value = XMLConfig.get(nl.item(i), "@value", "");
+                optProperties.put(name, value);
+            }
+        }
     }
 
     /**
@@ -90,7 +102,12 @@ public class GVMove implements GVRemoteCommand
             String currOldName = PropertiesHandler.expand(oldName, params, gvBuffer);
             String currNewName = PropertiesHandler.expand(newName, params, gvBuffer);
 
-            boolean result = manager.mv(currTargetPath, currOldName, currNewName);
+            Map<String, String> localOptProperties = new HashMap<String, String>();
+            for (String prop : optProperties.keySet()) {
+                localOptProperties.put(prop, PropertiesHandler.expand(optProperties.get(prop), params, gvBuffer));
+            }
+            
+            boolean result = manager.mv(currTargetPath, currOldName, currNewName, localOptProperties);
 
             if (result) {
                 logger.debug("Files '" + currOldName + "' successfully moved to  '" + currNewName

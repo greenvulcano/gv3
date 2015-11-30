@@ -151,9 +151,9 @@ public class RemoteFileSystemMonitor extends LocalFileSystemMonitor
                 initMonitorStatus(currAnalysisDir, currFilePattern, optProperties);
 
                 manager.connect(optProperties);
-                currentAnalysisFileSet = manager.ls(currAnalysisDir, currFilePattern, null, fileType);
+                currentAnalysisFileSet = manager.ls(currAnalysisDir, currFilePattern, null, fileType, optProperties);
                 modifiedFileSet = manager.ls(currAnalysisDir, currFilePattern, new Date(lastAnalysisTimestamp),
-                        fileType);
+                        fileType, optProperties);
                 AnalysisReport result = generateReport(new File(currAnalysisDir), currFilePattern + "||" + fileType);
                 lastAnalysisTimestamp = manager.getRemoteTime();
                 lastAnalysisFileSet = currentAnalysisFileSet;
@@ -208,7 +208,7 @@ public class RemoteFileSystemMonitor extends LocalFileSystemMonitor
             try {
                 manager.connect(optProperties);
                 lastAnalysisTimestamp = manager.getRemoteTime();
-                lastAnalysisFileSet = manager.ls(currAnalysisDir, currFilePattern, null, fileType);
+                lastAnalysisFileSet = manager.ls(currAnalysisDir, currFilePattern, null, fileType, optProperties);
             }
             catch (Exception exc) {
                 throw new MonitorException("Error while initializing internal file lists", exc);
