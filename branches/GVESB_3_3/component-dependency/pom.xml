@@ -8,7 +8,7 @@
   <groupId>it.greenvulcano.gvesb</groupId>
   <artifactId>gvesb-component-dependency</artifactId>
   <packaging>pom</packaging>
-  <version>3.3.4-Final</version>
+  <version>3.3.5-Final</version>
   <name>GreenVulcano ESB Component Dependency</name>
 
   <description>
@@ -59,9 +59,9 @@
     <version.jexcelapi>2.6.10</version.jexcelapi>
     <version.jcifs>1.3.17</version.jcifs>
     <version.joda>1.6.2</version.joda>
-    <version.jsch>0.1.42</version.jsch>
-    <version.json>20131018</version.json>
-    <version.junit>4.8.1</version.junit>
+    <version.jsch>0.1.51</version.jsch>
+    <version.json>20150218.gv</version.json>
+    <version.junit>4.11</version.junit>
     <version.log4j>1.2.15</version.log4j>
     <version.mvel>2.1.3.Final</version.mvel>
     <version.ode>1.3.5</version.ode>
@@ -85,7 +85,7 @@
     <version.xmlbeans>2.4.0</version.xmlbeans>
     <version.xmlgraphics-commons>1.3.1</version.xmlgraphics-commons>
     <version.xmlsec>1.4.6</version.xmlsec>
-    <version.xmlunit>1.3</version.xmlunit>
+    <version.xmlunit>1.5</version.xmlunit>
     <version.zmq>2.1.0</version.zmq>
   </properties>
 
@@ -985,6 +985,12 @@
             <version>${version.hapi}</version>
             <scope>runtime</scope>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hapi-base</artifactId>
+                    <groupId>ca.uhn.hapi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
@@ -992,6 +998,12 @@
             <version>${version.hapi}</version>
             <scope>runtime</scope>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hapi-base</artifactId>
+                    <groupId>ca.uhn.hapi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
@@ -999,6 +1011,12 @@
             <version>${version.hapi}</version>
             <scope>runtime</scope>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hapi-base</artifactId>
+                    <groupId>ca.uhn.hapi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi</groupId>
