@@ -4,7 +4,7 @@
     <parent>
         <groupId>it.greenvulcano.gvesb</groupId>
         <artifactId>gvesb.adapters</artifactId>
-        <version>3.3.4-Final</version>
+        <version>3.3.5-Final</version>
     </parent>
 
     <groupId>it.greenvulcano.gvesb</groupId>
@@ -24,6 +24,10 @@
         <dependency>
             <groupId>org.apache.xmlbeans</groupId>
             <artifactId>xmlbeans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
         </dependency>
     </dependencies>
 </project>

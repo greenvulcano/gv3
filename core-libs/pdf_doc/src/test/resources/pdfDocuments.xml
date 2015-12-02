@@ -6,7 +6,7 @@
     <configuration-document class="it.greenvulcano.pdfdoc.xml.XmlDocumentSource"
                             id="GVCoreServices" type="document">
         <cover author="GreenVulcano S.r.l." owner="GreenVulcano S.r.l."
-               title="GreenVulcano ESB Core Services Configuration" version="3.3.3">
+               title="GreenVulcano ESB Core Services Configuration" version="3.3.4">
             <description>GreenVulcano ESB Core Services Configuration</description>
         </cover>
         <stylesheet url="xsl/EBCore.xsl"/>
@@ -16,7 +16,7 @@
     <configuration-guide class="it.greenvulcano.pdfdoc.dtd.DtdDocumentSource"
                          id="GVCoreReference" type="document">
         <cover author="GreenVulcano S.r.l." owner="GreenVulcano S.r.l."
-               title="GreenVulcano ESB Core" version="3.3.3">
+               title="GreenVulcano ESB Core" version="3.3.4">
             <description>GreenVulcano ESB Core Reference Manual</description>
         </cover>
         <dtd-document publicId="" rootElement="GVCore" title="GreenVulcano ESB Core"
@@ -25,7 +25,7 @@
     <configuration-guide class="it.greenvulcano.pdfdoc.dtd.DtdDocumentSource"
                          id="GVAdaptersReference" type="document">
         <cover author="GreenVulcano S.r.l." owner="GreenVulcano S.r.l."
-               title="GreenVulcano ESB Adapters" version="3.3.3">
+               title="GreenVulcano ESB Adapters" version="3.3.4">
             <description>GreenVulcano ESB Adapters Reference Manual</description>
         </cover>
         <dtd-document publicId="" rootElement="GVAdapters" title="GreenVulcano ESB Adapters"
@@ -34,7 +34,7 @@
     <configuration-guide class="it.greenvulcano.pdfdoc.dtd.DtdDocumentSource"
                          id="GVSupportReference" type="document">
         <cover author="GreenVulcano S.r.l." owner="GreenVulcano S.r.l."
-               title="GreenVulcano ESB Support" version="3.3.3">
+               title="GreenVulcano ESB Support" version="3.3.4">
             <description>GreenVulcano ESB Support Reference Manual</description>
         </cover>
         <dtd-document publicId="" rootElement="GVSupport" title="GreenVulcano ESB Support"
@@ -43,7 +43,7 @@
     <configuration-guide class="it.greenvulcano.pdfdoc.dtd.DtdDocumentSource"
                          id="GVVariablesReference" type="document">
         <cover author="GreenVulcano S.r.l." owner="GreenVulcano S.r.l."
-               title="GreenVulcano ESB Variables" version="3.3.3">
+               title="GreenVulcano ESB Variables" version="3.3.4">
             <description>GreenVulcano ESB Variables Reference Manual</description>
         </cover>
         <dtd-document publicId="" rootElement="GVVariables" title="GreenVulcano ESB Variables"
