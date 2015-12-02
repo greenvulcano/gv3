@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE ejb-jar PUBLIC "-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN" "http://java.sun.com/j2ee/dtds/ejb-jar_2_0.dtd">
+
+<ejb-jar>
+    <enterprise-beans>
+        <session>
+            <description>EJB principale per le invocazioni RMI di GreenVulcano ESB.</description>
+            <ejb-name>GreenVulcano_main</ejb-name>
+            <home>it.greenvulcano.gvesb.core.ejb.J2EEGreenVulcanoHome</home>
+            <remote>it.greenvulcano.gvesb.core.ejb.J2EEGreenVulcano</remote>
+            <local-home>it.greenvulcano.gvesb.core.ejb.J2EEGreenVulcanoLocalHome</local-home>
+            <local>it.greenvulcano.gvesb.core.ejb.J2EEGreenVulcanoLocal</local>
+            <ejb-class>it.greenvulcano.gvesb.core.ejb.J2EEGreenVulcanoBean</ejb-class>
+            <session-type>Stateless</session-type>
+            <transaction-type>Container</transaction-type>
+            <env-entry>
+                <description>Property che definisce il nome del server.</description>
+                <env-entry-name>server-name-entry</env-entry-name>
+                <env-entry-type>java.lang.String</env-entry-type>
+                <!-- Per Weblogic: weblogic.Name; per JBoss jboss.server.name -->
+                <env-entry-value>jboss.server.name</env-entry-value>
+            </env-entry>
+            <env-entry>
+                <description>Property che determina se effettuare o meno un rollback della transazione a fronte di una GVPublicException.</description>
+                <env-entry-name>rollback-on-exception</env-entry-name>
+                <env-entry-type>java.lang.String</env-entry-type>
+                <env-entry-value/>
+            </env-entry>
+            <security-identity>
+                <use-caller-identity/>
+            </security-identity>
+        </session>
+    </enterprise-beans>
+    <assembly-descriptor>
+        <security-role>
+            <role-name>guest</role-name>
+        </security-role>
+        <container-transaction>
+            <method>
+                <ejb-name>GreenVulcano_main</ejb-name>
+                <method-intf>Remote</method-intf>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Supports</trans-attribute>
+        </container-transaction>
+        <container-transaction>
+            <method>
+                <ejb-name>GreenVulcano_main</ejb-name>
+                <method-intf>Local</method-intf>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Supports</trans-attribute>
+        </container-transaction>
+    </assembly-descriptor>
+</ejb-jar>

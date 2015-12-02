@@ -1,0 +1,83 @@
+<%@ page import="java.util.Iterator"%>
+
+<script>
+    function openHexDataOutput()
+    {
+        var enc = (document.getElementById('charEncodingOutput')).value;
+        window.open("showHexGVBufferOutput.jsp?encoding=" + enc, "hexGVBufferOutput", "left=50,top=50,width=600,height=460,resizable, scrollbars");
+    }
+
+    function openDataOutput()
+    {
+        var enc = (document.getElementById('charEncodingOutput')).value;
+        window.open("showDataOutput.jsp?encoding=" + enc, "DataOutput", "left=50,top=50,width=600,height=460,resizable, scrollbars");
+    }
+</script>
+<form name="gvBufferOutputForm">
+<table align='left'>
+    <tr>
+    	<td valign='top' class='border' colspan='4'>
+    		<font class="titlesmall">&nbsp;&nbsp;GVBUFFER OUTPUT&nbsp;</FONT>
+    	</td>
+    </tr>
+    <tr>
+        <td colspan='4'><hr></hr></td>
+    </tr>
+    <tr>
+        <td align='left'>System</td>
+    	<td colspan='3'><input type='text' readonly='yes' name='system' class="input120" value="<%= testManager.get("system") %>"></td>
+    </tr>
+    <tr>
+        <td align='left'>Service</td>
+        <td colspan='3'><input type='text' readonly='yes' name='service' class="input120" value="<%= testManager.get("service") %>"></td>
+    </tr>
+    <tr>
+        <td align='left'>Payload</td>
+        <td>
+            <br/><input type="button" class="button ui-button ui-widget ui-state-default ui-corner-all" name="showDataBinaryButton" value="Show binary" onclick="openHexDataOutput()">
+            &nbsp;<input type="button" class="button ui-button ui-widget ui-state-default ui-corner-all" name="showDataButton" value="Show as text" onclick="openDataOutput()">
+        &nbsp;
+				  <input type="hidden" name="testType" value="<%=request.getParameter("testType")%>" >
+        </td>
+    </tr>
+    <tr>
+        <td align="left">Character Encoding</td>
+         <%@ include file="comboEncodingOutput.jspf" %>
+    </tr>
+    <tr>
+        <td align='left'>Id</td>
+        <td colspan='3'><input type='text' readonly='yes' name='id' class="input120" value="<%= testManager.get("Id") %>"></td>
+    </tr>
+    <tr>
+        <td align='left'>ReturnCode</td>
+        <td colspan='3'><input type='text' readonly='yes' name='retCode' class="input120" value="<%= testManager.get("retCode") %>"></td>
+    </tr>
+    <%
+        GVBuffer gvBufferOutput = (GVBuffer)testManager.get("outputGVBuffer", false);
+        if (gvBufferOutput!=null) {
+            Iterator iteratorOutput = gvBufferOutput.getPropertyNamesIterator();
+            while(iteratorOutput.hasNext()) {
+                String field = (String)iteratorOutput.next();
+                String value = gvBufferOutput.getProperty(field);
+                String name = "property_" + field;
+    %>
+         <tr>
+             <td align='left'>
+        	    	    <nobr>
+        	    	        <%= field%>
+        	    	    </nobr>
+        		</td>
+        		<td colspan="3"><%= value%></td>
+         </tr>
+<%
+            }
+        }
+%>
+        <tr>
+            
+      <td colspan="4"> 
+        <hr></hr>
+      </td>
+    </tr>
+</table>
+</form>

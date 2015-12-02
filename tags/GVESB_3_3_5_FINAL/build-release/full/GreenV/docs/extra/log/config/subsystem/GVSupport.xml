@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVSupport SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSupport.dtd">
+
+<GVSupport version="1.0">
+    <GVLog4JConfiguration name="LOG4J" type="module">
+        <log4j:configuration debug="false" threshold="all"
+                             xmlns:log4j="http://jakarta.apache.org/log4j/">
+            <appender class="org.apache.log4j.ConsoleAppender" name="CONSOLE">
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{OPERATION}] - %m [%c]%n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GV">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GreenVulcano.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m [%c]%n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVVCL">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVVCL.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m [%c]%n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVCORE_FWD">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVCoreForward.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVCORE">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVCore.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
+                </layout>
+            </appender>
+            <appender name="DB_LOGGER_FOR_GVVCL" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
+                <param name="dbclass" value="org.hsqldb.jdbcDriver" />
+                <param name="username" value="gv_log" />
+                <param name="password" value="gv_log" />
+                <param name="table" value="log_vcl" />
+                <param name="column" value="id_msg#SEQUENCE#log_seq.nextval" />
+                <param name="column" value="tstamp#TIMESTAMP" />
+                <param name="column" value="prio#PRIO" />
+                <param name="column" value="iprio#IPRIO" />
+                <param name="column" value="cat#CAT" />
+                <param name="column" value="thread#THREAD" />
+                <param name="column" value="server#MDC#SERVER" />
+                <param name="column" value="id#MDC#ID" />
+                <param name="column" value="system_n#MDC#SYSTEM" />
+                <param name="column" value="service#MDC#SERVICE" />
+                <param name="column" value="operation_n#MDC#OPERATION" />
+                <param name="column" value="msg_size#MSG_SIZE" />
+                <param name="column" value="msg#MSG" />
+                <param name="column" value="throwable#THROWABLE" />
+            </appender>
+            <appender name="DB_LOGGER_FOR_GVCORE" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
+                <param name="dbclass" value="org.hsqldb.jdbcDriver" />
+                <param name="username" value="gv_log" />
+                <param name="password" value="gv_log" />
+                <param name="table" value="log_core" />
+                <param name="column" value="id_msg#SEQUENCE#log_seq.nextval" />
+                <param name="column" value="tstamp#TIMESTAMP" />
+                <param name="column" value="prio#PRIO" />
+                <param name="column" value="iprio#IPRIO" />
+                <param name="column" value="cat#CAT" />
+                <param name="column" value="thread#THREAD" />
+                <param name="column" value="server#MDC#SERVER" />
+                <param name="column" value="id#MDC#ID" />
+                <param name="column" value="system_n#MDC#SYSTEM" />
+                <param name="column" value="service#MDC#SERVICE" />
+                <param name="column" value="operation_n#MDC#OPERATION" />
+                <param name="column" value="msg_size#MSG_SIZE" />
+                <param name="column" value="msg#MSG" />
+                <param name="column" value="throwable#THROWABLE" />
+            </appender>
+            <appender name="DB_LOGGER_FOR_GVADP" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
+                <param name="dbclass" value="org.hsqldb.jdbcDriver" />
+                <param name="username" value="gv_log" />
+                <param name="password" value="gv_log" />
+                <param name="table" value="log_adp" />
+                <param name="column" value="id_msg#SEQUENCE#log_seq.nextval" />
+                <param name="column" value="tstamp#TIMESTAMP" />
+                <param name="column" value="prio#PRIO" />
+                <param name="column" value="iprio#IPRIO" />
+                <param name="column" value="cat#CAT" />
+                <param name="column" value="thread#THREAD" />
+                <param name="column" value="server#MDC#SERVER" />
+                <param name="column" value="id#MDC#ID" />
+                <param name="column" value="system_n#MDC#SYSTEM" />
+                <param name="column" value="service#MDC#SERVICE" />
+                <param name="column" value="operation_n#MDC#OPERATION" />
+                <param name="column" value="msg_size#MSG_SIZE" />
+                <param name="column" value="msg#MSG" />
+                <param name="column" value="throwable#THROWABLE" />
+            </appender>
+            <appender name="DB_LOGGER_FOR_GVDTE" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
+                <param name="dbclass" value="org.hsqldb.jdbcDriver" />
+                <param name="username" value="gv_log" />
+                <param name="password" value="gv_log" />
+                <param name="table" value="log_dte" />
+                <param name="column" value="id_msg#SEQUENCE#log_seq.nextval" />
+                <param name="column" value="tstamp#TIMESTAMP" />
+                <param name="column" value="prio#PRIO" />
+                <param name="column" value="iprio#IPRIO" />
+                <param name="column" value="cat#CAT" />
+                <param name="column" value="thread#THREAD" />
+                <param name="column" value="server#MDC#SERVER" />
+                <param name="column" value="id#MDC#ID" />
+                <param name="column" value="system_n#MDC#SYSTEM" />
+                <param name="column" value="service#MDC#SERVICE" />
+                <param name="column" value="operation_n#MDC#OPERATION" />
+                <param name="column" value="msg_size#MSG_SIZE" />
+                <param name="column" value="msg#MSG" />
+                <param name="column" value="throwable#THROWABLE" />
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_STATISTICS">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVStatistics.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVDTE">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVDTE.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVDH">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVDH.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%X{DH_DBO}][%t] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_WS">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVWS.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_HTTP_ADAPTER">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVHTTPAdapter.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{HTTP_ACTION}][%X{HTTP_METHOD}][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%t] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_DATA_PROVIDERS">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVDP.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%X{SUBSYSTEM}][%t] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_APACHE">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/Apache.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%t][%c] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_HTTP">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/HTTP.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%t][%c] - %m %n"/>
+                </layout>
+            </appender>
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_HB">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVHeartBeat.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{SERVER}] - %m %n"/>
+                </layout>
+            </appender>
+
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVHL7">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVHL7.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t][%c] - %m %n"/>
+                </layout>
+            </appender>
+
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVHL7_MSG">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVHL7_Message.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{LISTENER}][%X{DIRECTION}][%X{REMOTE_IP}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t][%c] - %m %n"/>
+                </layout>
+            </appender>
+            <appender name="DB_LOGGER_FOR_GVHL7_MSG" class="it.greenvulcano.log.db.JDBCAppender">
+                <param name="url" value="jdbc:hsqldb:hsql://localhost:9001/gvesb"/>
+                <param name="dbclass" value="org.hsqldb.jdbcDriver" />
+                <param name="username" value="gv_log" />
+                <param name="password" value="gv_log" />
+                <param name="table" value="hl7_msg" />
+                <param name="column" value="id#SEQUENCE#log_seq.nextval" />
+                <param name="column" value="timestamp#TIMESTAMP" />
+                <param name="column" value="thread#THREAD" />
+                <param name="column" value="server#MDC#SERVER" />
+                <param name="column" value="listener#MDC#LISTENER" />
+                <param name="column" value="direction#MDC#DIRECTION" />
+                <param name="column" value="remote_ip#MDC#REMOTE_IP" />
+                <param name="column" value="msg#MSG" />
+            </appender>
+
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVSOCIAL">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVSocial.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t][%c] - %m %n"/>
+                </layout>
+            </appender>
+            
+            <logger additivity="false" name="it.greenvulcano.gvesb.virtual">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVVCL"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVVCL"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvrules">
+                <level value="DEBUG" />
+                <appender-ref ref="LOGGER_FOR_GVVCL" />
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVVCL"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.util.file">
+                <level value="DEBUG" />
+                <appender-ref ref="LOGGER_FOR_GVVCL" />
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVVCL"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.util.ldap">
+                <level value="DEBUG" />
+                <appender-ref ref="LOGGER_FOR_GVVCL" />
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVVCL"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.util.remotefs">
+                <level value="DEBUG" />
+                <appender-ref ref="LOGGER_FOR_GVVCL" />
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVVCL"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.rsh">
+                <level value="DEBUG" />
+                <appender-ref ref="LOGGER_FOR_GVVCL"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVVCL"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.core">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.core.forward">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE_FWD"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.internal">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.notification">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.identity">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.policy">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVCORE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.j2ee.db">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVVCL"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVVCL"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.statistics">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_STATISTICS"/>
+            </logger>
+            <logger additivity="false"
+                    name="it.greenvulcano.gvesb.statistics.plugin.DUMMYStatisticsWriter">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_STATISTICS"/>
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvdte">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_GVDTE"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVDTE"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.datahandling">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVDH"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.axis2">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_WS"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.ws">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_WS"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCADP"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.virtual.ws">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_WS"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVVCL"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvconsole">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GV"/>
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.util.heartbeat">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_HB"/>
+            </logger>
+            <logger additivity="false" name="it.greenvulcano">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GV"/>
+            </logger>
+            <logger additivity="false" name="org.apache">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_APACHE"/>
+            </logger>
+            <logger additivity="false" name="httpclient.wire.header">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_HTTP"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+            <logger additivity="false" name="org.apache.commons.httpclient">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_HTTP"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.adapter.http">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_HTTP_ADAPTER"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvdp">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_DATA_PROVIDERS"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVCORE"/>-->
+            </logger>
+
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvhl7">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVHL7"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+            <logger additivity="false" name="ca.uhn.hl7v2.app">
+                <level value="WARN"/>
+                <appender-ref ref="LOGGER_FOR_GVHL7"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+            <logger additivity="false" name="ca.uhn.hl7v2.llp">
+                <level value="WARN"/>
+                <appender-ref ref="LOGGER_FOR_GVHL7"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvhl7.dumpOutboundInMsg">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_GVHL7_MSG"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVHL7_MSG"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvhl7.dumpOutboundOutMsg">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_GVHL7_MSG"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVHL7_MSG"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvhl7.dumpInboundInMsg">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_GVHL7_MSG"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVHL7_MSG"/>-->
+            </logger>
+            <logger additivity="false" name="it.greenvulcano.gvesb.gvhl7.dumpInboundOutMsg">
+                <level value="INFO"/>
+                <appender-ref ref="LOGGER_FOR_GVHL7_MSG"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVHL7_MSG"/>-->
+            </logger>
+
+            <logger additivity="false" name="it.greenvulcano.gvesb.social">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVSOCIAL"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+        </log4j:configuration>
+    </GVLog4JConfiguration>
+
+    <GVJavaScriptConfig name="JAVASCRIPT" type="module">
+        <JavaScriptInitializers>
+            <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="basic"
+                         type="jsinit"/>
+            <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="gvesb"
+                         script-file="js/initscope.js" type="jsinit"/>
+            <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="JavaScriptRetriever"
+                         script-file="js/initscope.js" type="jsinit"/>
+        </JavaScriptInitializers>
+    </GVJavaScriptConfig>
+
+    <GVDateUtils name="DATE_UTILS" type="module">
+        <Description>DateUtils configuration</Description>
+        <Locale country="IT" lang="it" timezone="Europe/Rome">
+            <DayLightSaving endDay="-1" endDayOfWeek="1" endMonth="10" endTime="02:00"
+                            startDay="-1" startDayOfWeek="1" startMonth="3"
+                            startTime="02:00"/>
+        </Locale>
+        <Holidays have-easter-day="true">
+            <Holiday day="1" month="1">
+                <Description>New Year</Description>
+            </Holiday>
+            <Holiday day="6" month="1">
+                <Description>Epiphany</Description>
+            </Holiday>
+            <Holiday day="25" month="4">
+                <Description>Liberation Day</Description>
+            </Holiday>
+            <Holiday day="1" month="5">
+                <Description>Labor Day</Description>
+            </Holiday>
+            <Holiday day="2" month="6">
+                <Description>Republic Day</Description>
+            </Holiday>
+            <Holiday day="29" month="6">
+                <Description>Holy Peter and Paul</Description>
+            </Holiday>
+            <Holiday day="15" month="8">
+                <Description>Ferragosto</Description>
+            </Holiday>
+            <Holiday day="1" month="11">
+                <Description>All Saints</Description>
+            </Holiday>
+            <Holiday day="8" month="12">
+                <Description>Immaculate Conception</Description>
+            </Holiday>
+            <Holiday day="25" month="12">
+                <Description>Christmas</Description>
+            </Holiday>
+            <Holiday day="26" month="12">
+                <Description>Boxing Day</Description>
+            </Holiday>
+        </Holidays>
+    </GVDateUtils>
+
+    <GVStatisticsConfig name="STATISTICS" type="module">
+        <Writers default="DUMMY_STORE">
+            <JMSStatisticsWriter class="it.greenvulcano.gvesb.statistics.plugin.JMSStatisticsWriter"
+                                 connectionFactory="java:/XAConnectionFactory"
+                                 id="JMSStore" queue="gvesb/jms/queue/Statistics_Queue"
+                                 type="stat-writer"/>
+            <JDBCStatisticsWriter class="it.greenvulcano.gvesb.statistics.plugin.JDBCStatisticsWriter"
+                                  dataSource="ds.Statistics" id="DBStore"
+                                  type="stat-writer"/>
+            <DUMMYStatisticsWriter class="it.greenvulcano.gvesb.statistics.plugin.DUMMYStatisticsWriter"
+                                   id="DUMMY_STORE" type="stat-writer"/>
+        </Writers>
+    </GVStatisticsConfig>
+
+    <GVMonitoringConfig name="MONITORING" type="module">
+        <MonitoredProcesses>
+            <MonitoredProcess name="LocalGV">
+                <Description>Local Server Monitoring</Description>
+            </MonitoredProcess>
+        </MonitoredProcesses>
+    </GVMonitoringConfig>
+
+    <GVWorkbenchConfig name="WORKBENCH" type="module">
+        <EJBTest class="it.greenvulcano.gvesb.gvconsole.workbench.plugin.EjbCorePlugin"
+                 fileNameInput="sp{{gv.app.home}}/log/GVBufferIn.txt"
+                 fileNameOutput="sp{{gv.app.home}}/log/TestOutput.txt" id="Core"
+                 jndiName="gvesb/core/GreenVulcano" type="test">
+            <Description>Parameters to invoke the Core Ejb</Description>
+            <JNDIHelper provider-url="jnp://localhost:1099"/>
+            <Loop className="it.greenvulcano.gvesb.gvconsole.workbench.plugin.TestGVBufferObject"
+                  fileName="sp{{gv.app.home}}/log/Output.txt" id="Core" type="loop">
+                <Test enabled="yes" transaction="NoTransaction">
+                    <Input jndiName="Test">
+                        <GVBuffer service="TOUPPER" system="GVESB">
+                            <Data encoding="UTF-8" value="Test loop 1"/>
+                            <TestFlow method="RequestReply"/>
+                        </GVBuffer>
+                    </Input>
+                </Test>
+            </Loop>
+        </EJBTest>
+        <LogConsole jdbc-connection-name="gv_log">
+            <LogFilter>
+                select  SOURCE, ID_MSG, to_char(TSTAMP, &apos;DD/MM/YYYY HH24:MI:SS.FF&apos;) as TSTAMP,
+                        PRIO, IPRIO, CAT, THREAD, SERVER, ID, SYSTEM_N as "SYSTEM", SERVICE, OPERATION_N as "OPERATION", MSG_SIZE,
+                case when MSG_SIZE &lt; 500
+                    then MSG
+                    else null
+                end as MSG,
+                case when length(THROWABLE) = 0
+                    then 0
+                    else 1
+                end as THROWABLE_PRESENT
+                from VW_GV_LOG
+                where TSTAMP &gt;= to_timestamp(&apos;@{{DATE_FROM}}&apos;, &apos;DD/MM/YYYY HH24:MI&apos;)
+                and TSTAMP &lt;= to_timestamp(&apos;@{{DATE_TO}}&apos;, &apos;DD/MM/YYYY HH24:MI&apos;) + 1 MINUTE
+                decode{{@{{SYSTEM}}::NULL::::and SYSTEM_N = &apos;@{{SYSTEM}}&apos;}}
+                decode{{@{{SERVICE}}::NULL::::and SERVICE like &apos;%@{{SERVICE}}%&apos;}}
+                decode{{@{{OPERATION}}::NULL::::and OPERATION_N like &apos;%@{{OPERATION}}%&apos;}}
+                decode{{@{{ID}}::NULL::::and ID = &apos;@{{ID}}&apos;}}
+                decode{{@{{PRIO}}::NULL::::and PRIO in (decode{{@{{PRIO}}::DEBUG::&apos;DEBUG&apos;,&apos;INFO&apos;,&apos;WARNING&apos;,&apos;ERROR&apos;::INFO::&apos;INFO&apos;,&apos;WARNING&apos;,&apos;ERROR&apos;::WARNING::&apos;WARNING&apos;,&apos;ERROR&apos;::ERROR::&apos;ERROR&apos;::''}})}}
+                order by decode{{@{{ORDER}}::DESC::TSTAMP desc::TSTAMP}}
+            </LogFilter>
+            <Message>select decode{{@{{MSG_FIELD}}::Msg::MSG::Exc::THROWABLE::NONE}} as MESSAGE from VW_GV_LOG where ID_MSG=@{{ID_MSG}}</Message>
+        </LogConsole>
+    </GVWorkbenchConfig>
+
+    <GVHTTPClientProtocolConfig name="HTTP_CLIENT_PROTOCOLS" type="module"></GVHTTPClientProtocolConfig>
+
+    <GVHeartBeatConfig name="HEART_BEAT" type="module">
+        <SimpleHeartBeat class="it.greenvulcano.util.heartbeat.impl.SimpleHeartBeat" type="heartbeat"/>
+    </GVHeartBeatConfig>
+
+    <GVTaskManagerFactory name="TASK_MANAGER_FACTORY" type="module">
+        <TaskManager name="GVTaskManager" type="task-manager" config-file="GVTaskManager-Configuration.xml"
+                     class="it.greenvulcano.scheduler.TaskManager"/>
+    </GVTaskManagerFactory>
+</GVSupport>

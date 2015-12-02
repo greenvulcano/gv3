@@ -1,0 +1,206 @@
+-------------------------------------------
+ESB version 3.3.5
+-------------------------------------------
+
+Commons:
+- Added to TaskManager the capability to interrupt running Tasks execution on configuration reloading.
+  Modified TaskManager in order to append to Scheduler's Threads name also the executing TaskGroup.TaskName in order to simplify troubleshooting.
+- Corrected JSON<->XML numeric values conversion.
+- Removed XPath engine re-initialization during startup.
+- Removed recursive invocation of JMXEntrypoint.init() during Initializers execution.
+- Improved (N)CLOB fields management in sqlX metadata.
+- Improved reload configuration locking in order to avoid dead-lock.
+- Improved JMX entry-point initialization.
+
+Core:
+- Corrected @loggerLevel handling in GVCoreCallNode, GVIteratorOperationNode/CoreCall and parallel nodes
+- Added to GVCoreCallNode and GVIteratorOperationNode/CoreCall a new attibute change-log-master-service.
+  If true change the log master service with the used one (configured or calculated), in order to write log messages into a different log file.
+  Used only if @change-log-context is true.
+- Improved init/run logging of ServiceCallerTask.NextAction status
+- Corrected GVCore pool element clean-up after configuration reload.
+- Moved to INFO level the end trace message of workflow nodes, added execution time in ms.
+- Enabled missing FTPS remote manager in dtds
+- Improved fail-fast capability on XA abort in transacted workflows execution
+- Improved transaction error management in workflow engine
+- Corrected GVSubFlowCallNode @dynamic behavior
+- Modified Core's configuration reload management, in order to better handle already running service instances.
+- Added ACL check to GVCoreCallNode and IteratorController in order to enforce ACL check across flow calls.
+- Added Input/Output services support to GVSubFlow* and GVCoreCallNode nodes.
+- Added JMX interface to subflows (statistics and executing instances status)
+- Added support to interruptible services
+    - Added JMX operations that enables the interruption of Operations and/or SubFlows (by ID and Thread name)
+
+DataHandler:
+- Provided a new getData method on DH retrievers in order to specify the parameter's actual values separator;
+  useful if the default separator (comma) is present into the parameter's actual values
+- Improved handling of NCHAR,NVARCHAR,NCLOB fields in DataHandler.
+- Corrected NullPointerException in DH DBOInsert/DBOUpdate without an input XML.
+
+DTE:
+- Changed cardinality of ToPreload DTE element.
+- Improved empty array management in XML to JSON conversion.
+- Improved management of multi-root JSON document in JSON <-> XML simple conversion policy.
+- Improved namespaces exclusion in JSON <-> XML simple conversion policy and added a BadgerFish conversion policy.
+- Moved to a GV specific version of org.json json library: now the properties creation order is keep in dump and properties listing, in order of better handle conversion to/from XML documents.
+- Improved DTEControlled clean-up on destroy.
+
+Task Scheduler:
+- Improved TaskManager reload configuration locking in order to avoid dead-lock.
+
+Adapter/VCL Axis2:
+- Corrected mixed SOAP 1.1/1.2 request/response handling in Axis2MessageContextDataProvider.
+- Added new property WS_REQ_SOAP_VERSION to input GVBuffer.
+- Added optional attribute to ws-call to avoid to set SOAPAction header in the request
+
+Adapter HTTP Inbound:
+- Added management of output GVBuffer property HTTP_RESP_FILE_NAME to RESTHttpServletMapping in order to define the name of the file to be downloaded through an HTTP request.
+
+VCL File:
+- Added to RemoteManager methods the capability to provide at the real implementations a Map containing implementation-specific properties.
+  Updated the remote commands to reads a list of properties from configuration.
+- Corrected zip file closing on unzip operation.
+
+JMS Listener:
+- Improved listeners instantiation algorithm in JMS listener pool.
+- Improved Dump of JMS's MapMessage.
+- Improved debug logging in JMSForwardListener
+
+VCL HTTP:
+- Corrected RegisterHttpClientProtocolManager initialization, in order to avoid double JMX registration.
+- Added new output property to http-call VCL plug-in: GVHTTP_RESPONSE_MESSAGE containing the response status text.
+- Added to http-call the capability to set a context path before the method URI
+
+VCL J2EE:
+- Added to JMS Enqueue/Dequeue VCL operations the capability to exclude:
+    - GVBuffer -> Message properties enrichment during enqueue
+    - Message -> GVBuffer properties enrichment during dequeue
+- Added a new attribute to jms-dequeue to specifies if the dequeue must keep input GVBuffer properties, not present in the JMS message, in the output GVBuffer.
+
+-------------------------------------------
+ESB version 3.3.4.3
+-------------------------------------------
+
+DTE/DataHandler:
+- Improved dynamic connection naming in DH external retriever helper.
+
+JMS Listener:
+- Improved Listener's instantiation alghoritm on JMS queue load increment.
+
+Core:
+- Modified Core configuration reload management, in order to better handle already running service instances.
+
+Task Scheduler:
+- Improved transaction's timeout management in Service caller timer task.
+- Improved reload configuration locking in order to avoid dead-lock.
+
+-------------------------------------------
+ESB version 3.3.4.2
+-------------------------------------------
+
+Commons :
+- Improved Dump of JMS's MapMessage.
+- Added an utility class (to be used in ODP) to convert a JMS's message to XML document.
+- Corrected default delete filter in LogCleanerTask
+- Improved conversion of ISO8601 date-time in DateUtils.
+
+DataHandler:
+- In DBOCallSP the "Cursor closed" error is intercepted and don't prevent a successful call completation, returning the other procedure output parameters
+
+DTE:
+- Added JSONUtils utility class in order to manage JSON<->XML conversions.
+- The new converter perform better than that implemented in JSON library and:
+  - enable the JSON2XML transformer to specify a list of JSON property names to be set as element attributes in output XML
+  - enable the XML2JSON transformer to specify a list of XML element names to be forcefully set as JSONArray in output JSON
+  - enable the XML2JSON transformer to specify a list of XML element names to be forcefully set as String values in output JSON, ignoring automatic type conversion
+
+Adapter HTTP Inbound:
+- Improved request text payload recognition in Adapter HTTP Inbound.
+- Added HTTP_QUERY property to request GVBuffer.
+- Improved customization of status messages in response header for HTTP Adapter Inbound.
+
+Adapter HL7:
+- Corrected HAPI base library in 3.3.4 branch
+
+-------------------------------------------
+ESB version 3.3.4.1
+-------------------------------------------
+
+Commons/JMSListener :
+- Added capability to define a delayed initialization on JMXEntryPoint initializers.
+  In order to avoid JMSListener/TimerTask dead-lock on startup recovery after a server crash.
+- Added missing json library
+
+Adapter/VCL Axis2:
+- Improved Axis2 HTTP connection pool management in ws-call.
+
+Adapter HTTP Inbound:
+- Added a RESTfull Mapper to HTTP Adapter Inbound, in order to improve publishing of RESTfull services.
+- Added input http headers management in REST servlet mapping.
+- Added new GVCore Http servlet mapping's input property: HTTP_PATH containing request's path info
+- Improved request body handling for POST and PUT HTTP methods in HTTP Inbound Adapter
+- Improved HTTP Inbound dtd documentation.
+
+VCL Mail:
+- Enabled Metadata handling in smtp-call @sender-display-name attribute.
+
+-------------------------------------------
+ESB version 3.3.4
+-------------------------------------------
+
+Commons:
+- Added support to ArrayUtils for generic array to List conversion
+- Improved JMX entry-point initialization.
+
+Core:
+- Moved to INFO level the end trace message of workflow nodes, added execution time in ms.
+- Improved transaction error management in workflow engine
+- Corrected GVSubFlowCallNode @dynamic behavior
+- Solved a bug on debugger when resuming after a breakpoint.
+
+DTE:
+- Added basic json to xml and xml to json DTE transformers
+
+DataHandler:
+- Corrected connection release fake error message when using dynamic connection name definition in DBOBuilder
+
+Adapter HL7:
+- Added a HL7 Forward validator that checks the availability of a list of HL7 servers.
+- Improved concurrent access to HL7ConnectionValidator
+- Updated HAPI libraries to resolve a bug in autogenerated NAK header compilation (missing sender/receiver identification).
+- Added the capability to the HL7 Listener to force Recevinig Application/Facility in autogenerated NAK.
+- Added the following properties in input to GV workflow:
+    - HL7_REMOTE_ADDR      Remote address of the invoking client
+    - HL7_LISTENER         GV Listener's name receiving the client request
+    - HL7_APPLICATION      GV Application's name processing the client request
+    - HL7_REC_APPLICATION  Configured GV Listener @receivingApplication value
+    - HL7_REC_FACILITY     Configured GV Listener @receivingFacility value
+
+Adapter Social:
+- moved to twitter4j v4.0.1
+- implemented getUserTimeline and query operations
+- various bug-fix
+
+Adapter HTTP Inbound:
+- added pluggable URL Mapping interface:
+- standard GVCore call mapping
+- HTTP forward mapping
+- improved the URL mapping behaviour
+- added the capability to forward HTTP request/response to/from a remote server
+- Corrected setting of HTTP_METHOD GVBuffer's property in GVCoreHttpServletMapping.
+
+Adapter/VCL WS:
+- Modified ws-call with a WSDLInfo/@ws-endpoint-url parameter that enable the configuration of WS EPR that overrides the value defined in the WSDL.
+- WS Commons: added utility methods to convert DOM to Axiom Body content
+
+VCL J2EE:
+- Added a new attribute to jms-dequeue to specifies if the dequeue must keep input GVBuffer properties, not present in the JMS message, in the output GVBuffer.
+
+VCL HTTP:
+- added parameters for connection timeout and SO timeout
+
+JMS Forward:
+- Added support in JMS Forward of pre-processor validation framework, that add the capability to check some condition before dequeuing a JMS message from the queue.
+
+GVConsole:
+- Corrected deployment of ServiceDump configuration
