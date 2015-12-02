@@ -26,9 +26,11 @@ import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleError;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -146,8 +148,8 @@ public class DBOInsertOrUpdate extends AbstractDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
+            InterruptedException {
         prepare();
         throw new DBOException("Unsupported method - DBOInsertOrUpdate::execute(OutputStream, Connection, HashMap)");
     }
@@ -204,6 +206,7 @@ public class DBOInsertOrUpdate extends AbstractDBO
         }
         if ((sqlStatementInfo == null) || (sqlStatementInfoUpdate == null) || !getCurrentId().equals(id)) {
             try {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                 if (sqlStatementInfo != null) {
                     sqlStatementInfo.close();
                     sqlStatementInfo = null;
@@ -486,10 +489,18 @@ public class DBOInsertOrUpdate extends AbstractDBO
                         localCurrentRowFields.add(null);
                     }
                     else {
-                        byte[] data = text.getBytes();
-                        ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                        stmt.setAsciiStream(idx, bais, data.length);
+                    	stmt.setCharacterStream(colIdx, new StringReader(text));
                         localCurrentRowFields.add(text);
+                    }
+                }
+                else if (LONG_NSTRING_TYPE.equals(currType)) {
+                    if (text.equals("")) {
+                    	stmt.setNull(colIdx, Types.NCLOB);
+                        currentRowFields.add(null);
+                    }
+                    else {
+                    	stmt.setCharacterStream(colIdx, new StringReader(text));
+                        currentRowFields.add(text);
                     }
                 }
                 else if (BASE64_TYPE.equals(currType)) {
@@ -515,6 +526,16 @@ public class DBOInsertOrUpdate extends AbstractDBO
                         ByteArrayInputStream bais = new ByteArrayInputStream(data);
                         stmt.setBinaryStream(idx, bais, data.length);
                         localCurrentRowFields.add(text);
+                    }
+                }
+                else if (NSTRING_TYPE.equals(currType)) {
+                    if (text.equals("")) {
+                    	stmt.setNull(colIdx, Types.NVARCHAR);
+                        currentRowFields.add(null);
+                    }
+                    else {
+                    	stmt.setNString(colIdx, text);
+                        currentRowFields.add(text);
                     }
                 }
                 else {

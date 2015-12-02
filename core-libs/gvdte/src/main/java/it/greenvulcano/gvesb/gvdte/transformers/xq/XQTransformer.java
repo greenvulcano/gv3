@@ -76,6 +76,7 @@ public class XQTransformer implements DTETransformer
 {
     private static final Logger               logger            = GVLogger.getLogger(XQTransformer.class);
 
+    private String                            name;
     private String                            validationType;
 
     private String                            xqMapName         = null;
@@ -115,6 +116,7 @@ public class XQTransformer implements DTETransformer
         logger.debug("Init start");
         try {
             this.dsf = dsf;
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             xqMapName = XMLConfig.get(node, "@XQMapName");
             outputType = XMLConfig.get(node, "@OutputType", "xml");
             dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
@@ -172,6 +174,11 @@ public class XQTransformer implements DTETransformer
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][]{{"msg", "Unexpected error."}}, exc);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     private void initOutFormat(Node node)
@@ -256,8 +263,8 @@ public class XQTransformer implements DTETransformer
      *         if any transformation error occurs.
      */
     @Override
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         XQPreparedExpression expression = null;
         try {

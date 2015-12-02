@@ -60,7 +60,7 @@ public interface DequeueOperation extends Operation
      * @throws DequeueException
      * @throws InvalidDataException
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, DequeueException, InvalidDataException;
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, DequeueException, InvalidDataException, InterruptedException;
 
     /**
      * This method acknowledge the message identified by the given Id.

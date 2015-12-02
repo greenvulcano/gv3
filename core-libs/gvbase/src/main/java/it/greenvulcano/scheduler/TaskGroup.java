@@ -107,9 +107,11 @@ public class TaskGroup
 
     class TaskKiller implements Runnable {
     	private String taskName;
+    	private TaskManager tm;
     	
-    	public TaskKiller(String taskN) {
+    	public TaskKiller(String taskN, TaskManager tm) {
 			this.taskName = taskN;
+			this.tm = tm;
 		}
     	
         @Override
@@ -123,24 +125,40 @@ public class TaskGroup
             }
             try {
                 Task task = tasks.remove(taskName);
+                logger.debug("Start searching for Thread running Task[" + task.getFullName() + "]");
+                Thread thd = task.getCurrentThread();
+                if (thd != null) {
+                    logger.warn("Interrupting Thread[" + thd.getName() + "] running Task[" + task.getFullName() + "]");
+                    thd.interrupt();
+                }
+                else {
+                    logger.debug("Not found a Thread running Task[" + task.getFullName() + "]");
+                }
                 task.destroy();
-                manager.unregisterTask(task);
+                tm.unregisterTask(task);
             }
             catch (Exception exc) {
-            	exc.printStackTrace();
-                logger.error("TaskManager[" + manager.getName() + "] - Error unregistering Task[" + name + "." + taskName
+                logger.error("TaskManager[" + tm.getName() + "] - Error halting Task[" + name + "." + taskName
                         + "]", exc);
+            }
+            finally {
+                tm = null;
             }
         }
     }
-    
+
     public void killTasks()
+    {
+        killTasks(manager);
+    }
+    
+    private void killTasks(TaskManager tm)
     {
         Iterator<String> i = tasks.keySet().iterator();
         while (i.hasNext()) {
             String taskN = i.next();
 
-            Runnable rd = new TaskKiller(taskN);
+            Runnable rd = new TaskKiller(taskN, tm);
             BaseThread btd = new BaseThread(rd, "Task destroyer for: " + taskN);
             btd.setDaemon(true);
             btd.start();
@@ -149,7 +167,7 @@ public class TaskGroup
 
     public void destroy()
     {
-        killTasks();
+        killTasks(manager);
         manager = null;
     }
 

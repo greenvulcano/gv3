@@ -267,6 +267,32 @@ public final class JMXServiceManager implements ConfigurationListener
     }
 
     /**
+     * Returns the configuration data of the requested SubFlowInfo instance
+     *
+     * @param subflowInfoData
+     *        The requested SubFlowInfo key
+     * @return The requested SubFlowInfo instance data
+     * @throws Exception
+     *         If initialization errors occurs
+     */
+    public Map<String, Object> getSubFlowInfoData(Map<String, Object> subflowInfoData) throws Exception
+    {
+        logger.debug("BEGIN - JMXServiceManager.getSubFlowInfoData()");
+        SubFlowInfo subflowInfo = null;
+
+        if (confChangedFlag) {
+            init();
+        }
+
+        subflowInfo = ServiceOperationInfoManager.instance().getSubFlowInfo(subflowInfoData, true);
+
+        subflowInfoData = subflowInfo.getProperties(subflowInfoData, true);
+
+        logger.debug("END - JMXServiceManager.getSubFlowInfoData()");
+        return subflowInfoData;
+    }
+
+    /**
      * Returns a XML descriptions of the configured Groups
      *
      * @return A XML descriptions of the configured Groups
@@ -644,21 +670,40 @@ public final class JMXServiceManager implements ConfigurationListener
     /**
      * @param service
      *        the service name
-     * @param client
-     *        the client node
+     * @param svcNode
+     *        the service node
      * @throws Exception
      *         if errors occurs
      */
-    private void initOperationList(String service, Node client) throws Exception
+    private void initOperationList(String service, Node svcNode) throws Exception
     {
-        NodeList operations = XMLConfig.getNodeList(client, "Operation");
+        NodeList operations = XMLConfig.getNodeList(svcNode, "Operation");
         int numOp = operations.getLength();
         for (int x = 0; x < numOp; x++) {
             String operation = XMLConfig.get(operations.item(x), "@name");
             if (operation.equals("Forward")) {
                 operation = XMLConfig.get(operations.item(x), "@forward-name");
             }
-            ServiceOperationInfoManager.instance().getOperationInfo(service, operation, true);
+            //ServiceOperationInfoManager.instance().getOperationInfo(service, operation, true);
+            initSubFlowList(service, operation, operations.item(x));
+        }
+    }
+    
+    /**
+     * @param service
+     *        the service name
+     * @param opNode
+     *        the operation node
+     * @throws Exception
+     *         if errors occurs
+     */
+    private void initSubFlowList(String service, String operation, Node opNode) throws Exception
+    {
+        NodeList subflows = XMLConfig.getNodeList(opNode, "SubFlow");
+        int numSf = subflows.getLength();
+        for (int x = 0; x < numSf; x++) {
+            String subflow = XMLConfig.get(subflows.item(x), "@name");
+            ServiceOperationInfoManager.instance().getSubFlowInfo(service, operation, subflow, true);
         }
     }
 
@@ -679,12 +724,12 @@ public final class JMXServiceManager implements ConfigurationListener
                         GreenVulcanoConfig.getSystemsConfigFileName()))) {
             logger.debug("JMXServiceManager - Operation (configurationChanged)");
             confChangedFlag = true;
-            try {
+            /*try {
                 clearMap();
             }
             catch (Exception exc) {
                 // do nothing
-            }
+            }*/
         }
     }
 

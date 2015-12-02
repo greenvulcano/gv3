@@ -21,7 +21,6 @@ package it.greenvulcano.gvesb.virtual.internal.xml;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
-import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.ConnectionException;

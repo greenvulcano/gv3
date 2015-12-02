@@ -24,8 +24,10 @@ import it.greenvulcano.event.interfaces.EventListener;
 import it.greenvulcano.event.interfaces.EventSelector;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * EventListenerHandler class
@@ -222,11 +224,35 @@ public final class EventListenerHandler {
     }
 
     /**
+     * Remove all EventListener listening for changes on a single event type ad source.
+     *
+     * @param elInterface
+     *            the listener interface
+     * @param source
+     *            the event source
+     */
+    public static synchronized void removeAllEventListener(Class<?> elInterface, Object source) {
+        Iterator<Entry<EventListener, EventListenerData>> elEntryIt = listenersData.entrySet().iterator();
+        while (elEntryIt.hasNext()) {
+            Entry<EventListener, EventListenerData> elEntry = elEntryIt.next();
+            EventListenerData elData = elEntry.getValue();
+            if (elData != null) {
+                elData.removeEventListenerInterface(elInterface);
+                elData.removeSource(source);
+                if (elData.canBeDestroyed()) {
+                    elData.destroy();
+                    elEntryIt.remove();
+                }
+            }
+        }
+    }
+
+    /**
      * Make a copy of the map to avoid ConcurrentModificationException.
      *
      * @return a copy of the listener map
      */
-    public static Map<EventListener, EventListenerData> getEventListeners() {
+    public static synchronized Map<EventListener, EventListenerData> getEventListeners() {
         return new HashMap<EventListener, EventListenerData>(listenersData);
     }
 
@@ -239,7 +265,7 @@ public final class EventListenerHandler {
      *            if true the InterfaceData can be create
      * @return the configured EventListenerData
      */
-    private static EventListenerData getEventListenerData(EventListener listener, boolean create) {
+    private static synchronized EventListenerData getEventListenerData(EventListener listener, boolean create) {
         EventListenerData elData = listenersData.get(listener);
         if ((elData == null) && create) {
             elData = new EventListenerData(listener);

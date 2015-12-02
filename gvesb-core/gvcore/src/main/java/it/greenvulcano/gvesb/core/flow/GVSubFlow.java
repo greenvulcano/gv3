@@ -23,16 +23,17 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
+import it.greenvulcano.gvesb.core.config.ServiceConfigManager;
 import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
 import it.greenvulcano.gvesb.core.debug.DebuggingInvocationHandler;
 import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
-import it.greenvulcano.gvesb.core.jmx.OperationInfo;
 import it.greenvulcano.gvesb.core.jmx.ServiceOperationInfoManager;
+import it.greenvulcano.gvesb.core.jmx.SubFlowInfo;
 import it.greenvulcano.gvesb.gvdte.controller.DTEController;
-import it.greenvulcano.gvesb.internal.GVInternalException;
 import it.greenvulcano.gvesb.log.GVFormatLog;
+import it.greenvulcano.gvesb.statistics.StatisticsDataManager;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
 
@@ -68,9 +69,18 @@ public class GVSubFlow
      */
     private String                  flowName       = "";
     /**
-     * the jmx operation info instance
+     * the jmx subflow info instance
      */
-    private OperationInfo           operationInfo  = null;
+    private SubFlowInfo             subflowInfo    = null;
+
+    /**
+     * Used to get an GVServiceConf of a specific service (SYSTEM + SERVICE).
+     */
+    private ServiceConfigManager  gvSvcConfMgr          = null;
+    /**
+     * The Statistics StatisticsDataManager to be used.
+     */
+    private StatisticsDataManager statisticsDataManager = null;
 
     private DTEController           dteController  = null;
 
@@ -123,17 +133,7 @@ public class GVSubFlow
 
         this.isSingleThread = isSingleThread;
 
-        if (!isSingleThread) {
-            String dteConfFileName = "GVDataTransformation.xml";
-            logger.debug("DTE configuration file: " + dteConfFileName + ".");
-            try {
-                dteController = new DTEController(dteConfFileName);
-            }
-            catch (Exception exc) {
-                logger.error("Error initializing DTEController from file: " + dteConfFileName, exc);
-            }
-            gvContext = new InvocationContext();
-        }
+        initInvocationContext();
 
         initFlowNodes(gvsfNode);
 
@@ -151,6 +151,12 @@ public class GVSubFlow
         Level level = null;
         try {
             level = GVLogger.setThreadMasterLevel(loggerLevel);
+            try {
+                setInvocationContext(null);
+            }
+            catch (Exception exc) {
+                logger.error("Error initializing context", exc);
+            }
 
             try {
                 firstNode = XMLConfig.get(instNode, "@first-node");
@@ -187,6 +193,7 @@ public class GVSubFlow
             }
         }
         finally {
+            resetInvocationContext();
             GVLogger.removeThreadMasterLevel(level);
         }
     }
@@ -199,8 +206,10 @@ public class GVSubFlow
      * @return the output data
      * @throws GVCoreException
      *         if errors occurs
+     * @throws InterruptedException
+     *         if the current Thread is interrupted
      */
-    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException
+    public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException, InterruptedException
     {
         onDebug = onDebug || "true".equalsIgnoreCase(gvBuffer.getProperty("GV_FLOW_DEBUG"));
         if (!onDebug) {
@@ -209,32 +218,80 @@ public class GVSubFlow
         }
 
         try {
-            if (!isSingleThread) {
-                InvocationContext mainCtx = (InvocationContext) InvocationContext.getInstance();
-                gvContext.setContext(flowName, gvBuffer);
-                gvContext.setGVServiceConfigManager(mainCtx.getGVServiceConfigManager());
-                gvContext.setStatisticsDataManager(mainCtx.getStatisticsDataManager());
-                // gvContext.setExtraField("DTE_CONTROLLER",
-                // mainCtx.getExtraField("DTE_CONTROLLER"));
-                gvContext.setExtraField("DTE_CONTROLLER", dteController);
-            }
-        }
-        catch (GVInternalException exc) {
-            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}}, exc);
-        }
+            setInvocationContext(gvBuffer);
 
-        try {
-            if (!isSingleThread) {
-                gvContext.push();
-            }
             GVBuffer outData = internalPerform(gvBuffer, onDebug);
             return outData;
         }
         catch (GVCoreException exc) {
             throw exc;
         }
+        catch (InterruptedException exc) {
+            throw exc;
+        }
         finally {
             cleanUp();
+        }
+    }
+
+    public String getFlowName() {
+        return this.flowName;
+    }
+
+    /**
+     * @param gvBuffer
+     * @throws GVCoreException
+     */
+    private void initInvocationContext() throws GVCoreConfException {
+        if (isSingleThread) {
+            return;
+        }
+        statisticsDataManager = new StatisticsDataManager();
+        try {
+            statisticsDataManager.init();
+        }
+        catch (Exception exc) {
+            logger.error("Error initializing Statistics Manager", exc);
+        }
+        String dteConfFileName = "GVDataTransformation.xml";
+        logger.debug("DTE configuration file: " + dteConfFileName + ".");
+        try {
+            dteController = new DTEController(dteConfFileName);
+        }
+        catch (Exception exc) {
+            logger.error("Error initializing DTEController from file: " + dteConfFileName, exc);
+        }
+        gvSvcConfMgr = new ServiceConfigManager();
+        gvSvcConfMgr.setStatisticsDataManager(statisticsDataManager);
+        gvContext = new InvocationContext();
+        gvContext.setGVServiceConfigManager(gvSvcConfMgr);
+        gvContext.setStatisticsDataManager(statisticsDataManager);
+        gvContext.setExtraField("DTE_CONTROLLER", dteController);
+    }
+
+    /**
+     * @param gvBuffer
+     * @throws GVCoreException
+     */
+    private void setInvocationContext(GVBuffer gvBuffer) throws GVCoreException {
+        if (isSingleThread) {
+            return;
+        }
+        if (gvBuffer != null) {
+            gvContext.setContext(flowName, gvBuffer);
+        }
+        gvContext.push();
+    }
+
+    private void resetInvocationContext() {
+        if (!isSingleThread) {
+            try {
+                gvContext.pop();
+                gvContext.cleanup();
+            }
+            catch (Exception exc) {
+                logger.warn("Failed cleanUp() of InvocationContext on GVSubFlow " + this.flowName, exc);
+            }
         }
     }
 
@@ -247,16 +304,18 @@ public class GVSubFlow
      * @throws GVCoreException
      *         if errors occurs
      */
-    public GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException
+    public GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException, InterruptedException
     {
         Level level = null;
+        boolean success = false;
+        String inID = gvBuffer.getId().toString();
         try {
             level = GVLogger.setThreadMasterLevel(loggerLevel);
 
             if (logger.isDebugEnabled()) {
                 logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
             }
-            getGVOperationInfo();
+            getGVSubFlowInfo();
     
             GVFlowNode flowNode = flowNodes.get(firstNode);
             if (flowNode == null) {
@@ -268,16 +327,17 @@ public class GVSubFlow
             Map<String, Object> environment = new HashMap<String, Object>();
             environment.put(flowNode.getInput(), gvBuffer);
             String nextNode = firstNode;
-    
+
             if (onDebug) {
-                String inID = gvBuffer.getId().toString();
                 DebugSynchObject synchObj = DebugSynchObject.getSynchObject(inID, null);
                 ExecutionInfo parent = synchObj.getExecutionInfo();
                 ExecutionInfo info = new ExecutionInfo(parent);
                 info.setSubflow(flowName);
                 synchObj.setExecutionInfo(info);
-                while (!nextNode.equals("")) {
-                    operationInfo.setFlowStatus(inID, flowName, nextNode);
+                while (!nextNode.equals("") && !isInterrupted()) {
+                    if (subflowInfo != null) {
+                        subflowInfo.setFlowStatus(inID, nextNode);
+                    }
                     flowNode = flowNodes.get(nextNode);
                     if (flowNode == null) {
                         logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
@@ -290,11 +350,10 @@ public class GVSubFlow
                 synchObj.terminated();
             }
             else {
-                while (!nextNode.equals("")) {
-                    /*
-                     * if (operationInfo != null) {
-                     * operationInfo.setFlowStatus(inID, nextNode); }
-                     */
+                while (!nextNode.equals("") && !isInterrupted()) {
+                    if (subflowInfo != null) {
+                        subflowInfo.setFlowStatus(inID, nextNode);
+                    }
                     flowNode = flowNodes.get(nextNode);
                     if (flowNode == null) {
                         logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
@@ -305,6 +364,10 @@ public class GVSubFlow
                 }
             }
     
+            if (isInterrupted()) {
+                throw new InterruptedException("Subflow [" + flowName + "] interrupted!");
+            }
+
             Object output = environment.get(flowNode.getOutput());
             if (output instanceof Throwable) {
                 if (output instanceof GVCoreException) {
@@ -317,27 +380,35 @@ public class GVSubFlow
             if (logger.isDebugEnabled()) {
                 logger.debug(GVFormatLog.formatEND(flowName, (GVBuffer) output));
             }
-    
+            success = true;
+
             return (GVBuffer) output;
         }
+        catch (InterruptedException exc) {
+            logger.error("Subflow [" + flowName + "] interrupted!", exc);
+            throw exc;
+        }
         finally {
+            if (subflowInfo != null) {
+                subflowInfo.flowTerminated(inID, success);
+            }
             GVLogger.removeThreadMasterLevel(level);
         }
     }
 
     /**
-     * Initialize the associated OperationInfo instance
+     * Initialize the associated SubFlowInfo instance
      */
-    private void getGVOperationInfo()
+    private void getGVSubFlowInfo()
     {
-        if (operationInfo == null) {
+        if (subflowInfo == null) {
             try {
-                operationInfo = ServiceOperationInfoManager.instance().getOperationInfo(serviceName, operationName,
-                        true);
+                subflowInfo = ServiceOperationInfoManager.instance().getSubFlowInfo(serviceName, operationName, 
+                        flowName, true);
             }
             catch (Exception exc) {
                 logger.warn("Error on MBean registration: " + exc);
-                operationInfo = null;
+                subflowInfo = null;
             }
         }
     }
@@ -346,6 +417,10 @@ public class GVSubFlow
      * @return the actual logger level
      */
     public Level getLoggerLevel() {
+        getGVSubFlowInfo();
+        if (subflowInfo != null) {
+            return subflowInfo.getLoggerLevelj();
+        }
         return this.loggerLevel;
     }
 
@@ -377,15 +452,7 @@ public class GVSubFlow
                     logger.warn("Failed cleanUp() operation on GVFlowNode " + node.getId(), exc);
                 }
             }
-            if (!isSingleThread) {
-                try {
-                    gvContext.pop();
-                    gvContext.cleanup();
-                }
-                catch (Exception exc) {
-                    logger.warn("Failed cleanUp() of InvocationContext on GVSubFlow " + this.flowName, exc);
-                }
-            }
+            resetInvocationContext();
         }
         finally {
             GVLogger.removeThreadMasterLevel(level);
@@ -407,12 +474,31 @@ public class GVSubFlow
         }
         flowNodes.clear();
         if (!isSingleThread) {
-            gvContext.destroy();
-            gvContext = null;
+            if (gvContext != null) {
+                gvContext.destroy();
+                gvContext = null;
+            }
+            if (statisticsDataManager != null) {
+                statisticsDataManager.destroy();
+                statisticsDataManager = null;
+            }
+            if (gvSvcConfMgr != null) {
+                gvSvcConfMgr.destroy();
+                gvSvcConfMgr = null;
+            }
             if (dteController != null) {
                 dteController.destroy();
                 dteController = null;
             }
         }
+    }
+    
+    /**
+     * 
+     * @return
+     *        the current Thread interrupted state
+     */
+    protected boolean isInterrupted() {
+        return Thread.currentThread().isInterrupted();
     }
 }

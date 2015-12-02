@@ -61,7 +61,7 @@ public class RoutedDequeue implements DequeueOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.Operation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, DequeueException, InvalidDataException
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, DequeueException, InvalidDataException, InterruptedException
     {
         DequeueOperation operation = getOperation(gvBuffer);
         try {

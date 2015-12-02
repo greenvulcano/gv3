@@ -29,21 +29,20 @@ public final class DataAccessObject
         // do nothing
     }
 
-    public static byte[] getDataAsBytes(String service, Map<String, String> params) throws DataHandlerException
-    {
+    public static byte[] getDataAsBytes(String service, Map<String, String> params) throws DataHandlerException,
+            InterruptedException {
         return db2xml(service, null, params);
     }
 
     public static XmlObject getDataAsXML(String service, Map<String, String> params) throws DataHandlerException,
-            XmlException
-    {
+            XmlException, InterruptedException {
         byte[] out = db2xml(service, null, params);
         XmlObject xmlObj = XmlObject.Factory.parse(new String(out));
         return xmlObj;
     }
 
-    public static void setData(String service, byte[] input, Map<String, String> params) throws DataHandlerException
-    {
+    public static void setData(String service, byte[] input, Map<String, String> params) throws DataHandlerException,
+            InterruptedException {
         xml2db(service, input, params);
     }
 
@@ -60,8 +59,8 @@ public final class DataAccessObject
      * @throws Exception
      *         If service is invalid or DataHandler exception.
      */
-    public static int getSingleInt(String service, Map<String, String> params) throws DataHandlerException
-    {
+    public static int getSingleInt(String service, Map<String, String> params) throws DataHandlerException,
+            InterruptedException {
         int toReturn = -1;
         byte[] out = getDataAsBytes(service, params);
         if (out != null) {
@@ -84,8 +83,7 @@ public final class DataAccessObject
     }
 
     public static String getSingleString(String service, Map<String, String> params) throws DataHandlerException,
-            XMLUtilsException
-    {
+            XMLUtilsException, InterruptedException {
         byte[] out = getDataAsBytes(service, params);
         String toReturn = "";
         if (out != null) {
@@ -105,8 +103,7 @@ public final class DataAccessObject
     }
 
     public static String[] getStringArray(String service, Map<String, String> params) throws DataHandlerException,
-            XMLUtilsException
-    {
+            XMLUtilsException, InterruptedException {
         byte[] out = getDataAsBytes(service, params);
         String[] toReturn = null;
         if (out != null) {
@@ -131,8 +128,7 @@ public final class DataAccessObject
     }
 
     public static String[] getSingleLineAsStringArray(String service, Map<String, String> params)
-            throws DataHandlerException, XMLUtilsException
-    {
+            throws DataHandlerException, XMLUtilsException, InterruptedException {
         byte[] out = getDataAsBytes(service, params);
         String[] toReturn = null;
         if (out != null) {
@@ -158,8 +154,7 @@ public final class DataAccessObject
 
 
     public static Map<String, String> getStringMap(String service, Map<String, String> params)
-            throws DataHandlerException, XMLUtilsException
-    {
+            throws DataHandlerException, XMLUtilsException, InterruptedException {
         byte[] out = getDataAsBytes(service, params);
         Map<String, String> toReturn = new HashMap<String, String>();
         if (out != null) {
@@ -183,8 +178,7 @@ public final class DataAccessObject
     }
 
     public static Map<String, List<String>> getStringMapArray(String service, Map<String, String> params)
-            throws DataHandlerException, XMLUtilsException
-    {
+            throws DataHandlerException, XMLUtilsException, InterruptedException {
         byte[] out = getDataAsBytes(service, params);
         Map<String, List<String>> toReturn = new HashMap<String, List<String>>();
         if (out != null) {
@@ -213,8 +207,8 @@ public final class DataAccessObject
         return toReturn;
     }
 
-    public static byte[] db2xml(String service, byte[] input, Map<String, String> params) throws DataHandlerException
-    {
+    public static byte[] db2xml(String service, byte[] input, Map<String, String> params) throws DataHandlerException,
+            InterruptedException {
         Map<String, Object> locParams = null;
         if (params == null) {
             locParams = new HashMap<String, Object>();
@@ -235,8 +229,8 @@ public final class DataAccessObject
         return out;
     }
 
-    public static void xml2db(String service, byte[] input, Map<String, String> params) throws DataHandlerException
-    {
+    public static void xml2db(String service, byte[] input, Map<String, String> params) throws DataHandlerException,
+            InterruptedException {
         Map<String, Object> locParams = null;
         if (params == null) {
             locParams = new HashMap<String, Object>();
@@ -256,8 +250,7 @@ public final class DataAccessObject
     }
 
     public static DHResult execute(String service, Object input, Map<String, String> params)
-            throws DataHandlerException
-    {
+            throws DataHandlerException, InterruptedException {
         Map<String, Object> locParams = null;
         if (params == null) {
             locParams = new HashMap<String, Object>();
@@ -278,8 +271,8 @@ public final class DataAccessObject
         return out;
     }
 
-    public static byte[] callsp(String service, byte[] input, Map<String, String> params) throws DataHandlerException
-    {
+    public static byte[] callsp(String service, byte[] input, Map<String, String> params) throws DataHandlerException,
+            InterruptedException {
         Map<String, Object> locParams = null;
         if (params == null) {
             locParams = new HashMap<String, Object>();

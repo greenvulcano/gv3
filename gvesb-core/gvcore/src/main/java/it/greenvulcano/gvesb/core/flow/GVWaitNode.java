@@ -28,6 +28,7 @@ import it.greenvulcano.gvesb.core.exc.GVCoreWrongInterfaceException;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xpath.XPathFinder;
 
 import java.util.Map;
@@ -103,14 +104,15 @@ public class GVWaitNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-    	long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         Object data = null;
         long locTimeout = timeout;
         boolean sleep = (sleepIf == SLEEP_IF_BOTH);
 
         logger.info("Executing GVWaitNode '" + getId() + "'");
+        checkInterrupted("GVWaitNode", logger);
         dumpEnvironment(logger, true, environment);
 
         data = environment.get(getInput());
@@ -140,13 +142,15 @@ public class GVWaitNode extends GVFlowNode
                     try {
                         Thread.sleep(locTimeout);
                     }
-                    catch (Exception exc) {
-                        logger.debug("GVWaitNode '" + getId() + "' sleep interrupted", exc);
+                    catch (InterruptedException exc) {
+                        logger.warn("GVWaitNode '" + getId() + "' sleep interrupted");
+                        throw exc;
                     }
                 }
             }
         }
         catch (Exception exc) {
+            ThreadUtils.checkInterrupted(exc);
             logger.error("Error in GVWaitNode[" + getId() + "]", exc);
             environment.put(getInput(), exc);
         }

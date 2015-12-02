@@ -34,6 +34,7 @@ import it.greenvulcano.js.util.ScriptCache;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.crypto.CryptoHelper;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xpath.XPathFinder;
 import it.greenvulcano.util.zip.ZipHelper;
 
@@ -340,7 +341,7 @@ public class ChangeGVBuffer
      * @throws ExpressionEvaluatorException
      */
     public final GVBuffer execute(GVBuffer gvBuffer, Map<String, Object> environment) throws GVException,
-            ExpressionEvaluatorException
+            ExpressionEvaluatorException, InterruptedException
     {
         if (!system.equals("")) {
             gvBuffer.setSystem(system);
@@ -412,13 +413,17 @@ public class ChangeGVBuffer
      * @param environment
      */
     private void handleOgnlScript(GVBuffer gvBuffer, Map<String, Object> environment)
-            throws ExpressionEvaluatorException
+            throws ExpressionEvaluatorException, InterruptedException
     {
         ExpressionEvaluatorHelper.startEvaluation();
         try {
             ExpressionEvaluatorHelper.addToContext("environment", environment);
             ExpressionEvaluator expressionEvaluator = ExpressionEvaluatorHelper.getExpressionEvaluator(ExpressionEvaluatorHelper.OGNL_EXPRESSION_LANGUAGE);
             expressionEvaluator.getValue(ognlScript, gvBuffer);
+        }
+        catch (ExpressionEvaluatorException exc) {
+            ThreadUtils.checkInterrupted(exc);
+            throw exc;
         }
         finally {
             ExpressionEvaluatorHelper.endEvaluation();
@@ -497,7 +502,7 @@ public class ChangeGVBuffer
      * @throws GVInternalException
      *         if error occurs
      */
-    private void handleJavaScript(GVBuffer gvBuffer, Map<String, Object> environment) throws GVInternalException
+    private void handleJavaScript(GVBuffer gvBuffer, Map<String, Object> environment) throws GVInternalException, InterruptedException
     {
         cx = ContextFactory.getGlobal().enterContext();
         Scriptable scope = null;
@@ -518,6 +523,7 @@ public class ChangeGVBuffer
             JavaScriptHelper.executeScript(localScript, scriptName, scope, cx);
         }
         catch (Exception exc) {
+            ThreadUtils.checkInterrupted(exc);
             throw new GVInternalException("JAVASCRIPT_ERROR", new String[][]{{"scope", scopeName},
                     {"script", scriptName}, {"message", exc.toString()}}, exc);
         }

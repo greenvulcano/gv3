@@ -66,4 +66,38 @@ public class BaseThreadFactory implements ThreadFactory
         return th;
     }
 
+    /**
+     * 
+     * @return
+     *     The current name prefix for newly created Threads
+     */
+    public String getThNamePrefix() {
+        return this.thNamePrefix;
+    }
+
+    /**
+     * Set the name prefix for newly created Threads
+     *
+     * @param thNamePrefix
+     */
+    public void setThNamePrefix(String thNamePrefix) {
+        this.thNamePrefix = thNamePrefix;
+    }
+
+    /**
+     * Set the asDeamon flag for newly created Threads
+     *
+     * @param asDeamon
+     */
+    public void setAsDeamon(boolean asDeamon) {
+        this.asDeamon = asDeamon;
+    }
+
+    /**
+     * @return
+     *    Number of created Threads
+     */
+    public int getCount() {
+        return this.count.get();
+    }
 }

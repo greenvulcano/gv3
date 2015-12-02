@@ -40,6 +40,6 @@ public interface CallOperation extends Operation
      * @throws CallException
      * @throws InvalidDataException
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException;
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException, InterruptedException;
 
 }

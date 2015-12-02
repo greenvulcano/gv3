@@ -31,6 +31,15 @@
                 <ObjectNameProperty name="Name"
                           value="@{{IDService}}#@{{IDOperation}}#Internal"/>
             </ObjectNameBuilder>
+            <ObjectNameBuilder name="SubFlowInfo" type="object-name-builder">
+                <ObjectNameProperty name="Name"
+                                    value="@{{IDService}}#@{{IDOperation}}#@{{IDSubFlow}}" />
+            </ObjectNameBuilder>
+            <ObjectNameBuilder name="SubFlowInfo_Internal" type="object-name-builder">
+                <ObjectNameProperty name="Internal" value="Yes" />
+                <ObjectNameProperty name="Name"
+                                    value="@{{IDService}}#@{{IDOperation}}#@{{IDSubFlow}}#Internal" />
+            </ObjectNameBuilder>
             <ObjectNameBuilder name="ServiceOperationInfoManager_Internal"
                                type="object-name-builder">
                 <ObjectNameProperty name="Internal" value="Yes"/>
@@ -238,6 +247,11 @@
             <operation description="Returns the initial status for a given Operation."
                        name="getOperationInfoData">
                 <parameter description="Filter Data" name="operationInfoData"
+                           type="java.util.Hashtable"/>
+            </operation>
+        <operation description="Returns the initial status for a given Operation/SubFlows."
+                       name="getSubFlowInfoData">
+                <parameter description="Filter Data" name="subflowInfoData"
                            type="java.util.Hashtable"/>
             </operation>
         </mbean>
@@ -456,6 +470,13 @@
             <operation description="Set the Activation flag to &apos;on&apos;." name="on"/>
             <operation description="Set the Activation flag to &apos;off&apos;."
                        name="off"/>
+        <operation description="Interrupt a Flow instance."
+                       name="interruptFlow">
+                <parameter description="Thread name" name="threadName"
+                           type="java.lang.String"/>
+                <parameter description="Flow ID" name="flowId"
+                           type="java.lang.String"/>
+            </operation>
         </mbean>
         <mbean description="Visualizzazione stato operazione per un dato servizio GreenVulcano."
                domain="GreenVulcano" group="management" name="OperationInfo_Internal"
@@ -472,6 +493,58 @@
             <operation description="Set the Activation flag to &apos;on&apos;." name="on"/>
             <operation description="Set the Activation flag to &apos;off&apos;."
                        name="off"/>
+        </mbean>
+        <mbean description="Visualizzazione stato subflow per un dato servizio/operazione GreenVulcano."
+               domain="GreenVulcano" group="management" name="SubFlowInfo"
+               type="it.greenvulcano.gvesb.core.jmx.SubFlowInfo">
+            <attribute description="The SubFlow name" displayName="SubFlow"
+                       name="operation" readable="true" type="java.lang.String"
+                       writeable="false"/>
+            <attribute description="The number of successfully invocation."
+                       displayName="Total success" name="totalSuccess" readable="true"
+                       type="long" writeable="false"/>
+            <attribute description="The number of failed invocation."
+                       displayName="Total failure" name="totalFailure" readable="true"
+                       type="long" writeable="false"/>
+            <attribute description="A snapshot of subflow invocations status."
+                       displayName="Flows status" name="flowsStatus" readable="true"
+                       type="java.util.Map" writeable="false"/>
+            <attribute description="The total of subflow invocations." displayName="Total"
+                       name="total" readable="true" type="long" writeable="false"/>
+            <attribute description="The subflow logger level"
+                       displayName="Logger Level" name="loggerLevel" readable="true"
+                       type="java.lang.String" writeable="true"/>
+            <attribute description="Reads the history Throughput for Nodes."
+                       displayName="historyThroughputNod" name="historyThroughputNod"
+                       readable="true" type="float" writeable="false"/>
+            <attribute description="Reads the Max Throughput for Nodes"
+                       displayName="MaxThroughputNod" name="maxThroughputNod"
+                       readable="true" type="float" writeable="false"/>
+            <attribute description="Reads the Min Throughput for Nodes."
+                       displayName="MinThroughputNod" name="minThroughputNod"
+                       readable="true" type="float" writeable="false"/>
+            <attribute description="Reads the Throughput for Nodes."
+                       displayName="ThroughputNod" name="throughputNod" readable="true"
+                       type="float" writeable="false"/>
+            <attribute description="" displayName="TotalHintsNod" name="totalHintsNod"
+                       readable="true" type="long" writeable="false"/>
+            <operation description="Interrupt a SubFlow instance."
+                       name="interruptFlow">
+                <parameter description="Thread name" name="threadName"
+                           type="java.lang.String"/>
+                <parameter description="Flow ID" name="flowId"
+                           type="java.lang.String"/>
+            </operation>
+        </mbean>
+        <mbean description="Visualizzazione stato subflow per un dato servizio/operazione GreenVulcano."
+               domain="GreenVulcano" group="management" name="SubFlowInfo_Internal"
+               type="it.greenvulcano.gvesb.core.jmx.SubFlowInfo">
+            <attribute description="The SubFlow name" displayName="SubFlow"
+                       name="subflow" readable="true" type="java.lang.String"
+                       writeable="false"/>
+            <attribute description="The operation logger level"
+                       displayName="Logger Level" name="loggerLevelj" readable="true"
+                       type="org.apache.log4j.Level" writeable="true"/>
         </mbean>
         <mbean description="Raccoglie informazioni sul dominio."
                domain="GreenVulcano" group="management" name="DomainInfo_Internal"

@@ -742,11 +742,12 @@
             </table>
         </xsl:template>
 -->
-<!ELEMENT ToPreload (Description?,Preload+)>
+<!ELEMENT ToPreload (Description?,Preload*)>
 
 <!--
     Define a transformation to preload.
 
+    #Label: @Transformation
     #Template:
 
         <xsl:template match="Preload">
@@ -764,7 +765,7 @@
 -->
 <!ELEMENT Preload (Description?)>
 <!--
-    Name of the trasformation to preload.
+    Name of the transformation to preload.
 
     #References: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
 -->
@@ -1034,12 +1035,17 @@
 <!--
     Defines a XML/JSON trasformation.
     Convert the input XML to a JSON string.
-    JSON does not distinguish between elements and attributes.
-    Sequences of similar elements (or elements which local-name are in ForceElementsArray)
-    are represented as JSONArrays.
-    Try to convert string values into a number, boolean, or null.
-    If an element have attributes, content text/cdata may be placed in a "contentText" member.
-    Comments and namespaces are ignored.
+    Can be applied two conversion policies:
+    - simple (default)
+        JSON does not distinguish between elements and attributes.
+        Sequences of similar elements (or elements which local-name are in ForceElementsArray)
+        are represented as JSONArrays.
+        Try to convert string values into a number, boolean, or null.
+        If an element have attributes, content text/cdata may be placed in a "contentText" member.
+        Comments and namespaces are ignored.
+        If the root element is 'DEFAULT_ROOT' then isn't included into JSON output.
+    - badgerfish
+        - see <a href="http://badgerfish.ning.com">http://badgerfish.ning.com</a>
 
     #Label: @name
     #Icon: GVXSLFopTransformation.png
@@ -1124,6 +1130,14 @@
 -->
 <!ATTLIST XML2JSONTransformation TransformerFactory CDATA #IMPLIED>
 <!--
+    The conversion policy to apply.
+    Default to simple.
+    If set as badgerfish then @ForceElementsArray and @ForceStringValue are ignored.
+
+    #NotNull
+-->
+<!ATTLIST XML2JSONTransformation ConversionPolicy (simple|badgerfish) #IMPLIED>
+<!--
     A comma-separated list of element's local-name to be forced as JSONArray also if in single instance
 
     #NotNull
@@ -1138,9 +1152,15 @@
 
 <!--
     Defines a JSON/XML trasformation.
-    Keys values are set as sub-elements, but keys whith name in ForceAttributes are set as XML attributes.
-    Value of 'contentText' key, idf present, value is set as #text element.
-    If a key has a null value then in the XML is set the 'null' string.
+    Can be applied two conversion policies:
+    - simple (default)
+        Keys values are set as sub-elements, but keys whith name in ForceAttributes are set as XML attributes.
+        Value of 'contentText' key, idf present, value is set as #text element.
+        If a key has a null value then in the XML is set the 'null' string.
+        If the JSON to be converted doesn't have a single root element
+        then is automatically created a 'DEFAULT_ROOT' root element.
+    - badgerfish
+        - see <a href="http://badgerfish.ning.com">http://badgerfish.ning.com</a>
 
     #Label: @name
     #Icon: GVXSLFopTransformation.png
@@ -1224,6 +1244,14 @@
     #NotNull
 -->
 <!ATTLIST JSON2XMLTransformation TransformerFactory CDATA #IMPLIED>
+<!--
+    The conversion policy to apply.
+    Default to simple.
+    If set as badgerfish then @ForceAttributes is ignored.
+
+    #NotNull
+-->
+<!ATTLIST JSON2XMLTransformation ConversionPolicy (simple|badgerfish) #IMPLIED>
 <!--
     A comma-separated list of keys name to be set as XML attributes
 
@@ -2739,20 +2767,20 @@
 <!ELEMENT IDFilter (Description)?>
 <!--
     IDFilter type.
-    
+
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST IDFilter     type CDATA #FIXED "filter">
 <!--
     IDFilter name.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST IDFilter     name CDATA #FIXED "IDFilter">
 <!--
     Always uses the input GVBuffer.id.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST IDFilter     use-input CDATA #FIXED "yes">
@@ -2779,20 +2807,20 @@
 <!ELEMENT RetCodeFilter (Description)?>
 <!--
     RetCodeFilter type.
-    
+
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST RetCodeFilter type        CDATA #FIXED "filter">
 <!--
     RetCodeFilter name.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST RetCodeFilter name        CDATA #FIXED "RetCodeFilter">
 <!--
     Never uses the input GVBuffer.retCode.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST RetCodeFilter use-input   CDATA #FIXED "no">
@@ -2922,14 +2950,14 @@
 <!ELEMENT PropertyFilter (Description)?>
 <!--
     PropertyFilter type.
-    
+
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST PropertyFilter type CDATA #FIXED "filter">
 <!--
     PropertyFilter name.
-    
+
     Unmodifiable.
 -->
 <!ATTLIST PropertyFilter name CDATA #FIXED "PropertyFilter">
@@ -3916,6 +3944,12 @@
     Default true.
 -->
 <!ATTLIST CoreCall change-log-context (true|false) #IMPLIED>
+<!--
+    If true change the log master service with the used one (configured or calculated), in order to write log messages into a different log file.
+    Used only if @change-log-context is true.
+    Default false.
+-->
+<!ATTLIST CoreCall change-log-master-service (true|false) #IMPLIED>
 
 <!--
     Defines the parameters to invoke a GreenVulcanoESB Operation's SubFlow.
@@ -4095,7 +4129,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVCoreCallNode (Description?)>
+<!ELEMENT GVCoreCallNode (Description?, InputServices?, OutputServices?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -4119,7 +4153,7 @@
 -->
 <!ATTLIST GVCoreCallNode id CDATA #REQUIRED>
 <!--
-    If 'true' are id-system, id-service and operation attributes cancontains metadata to be resolver at runtime.
+    If 'true', the id-system, id-service and operation attributes can contains metadata to be resolver at runtime.
 -->
 <!ATTLIST GVCoreCallNode  dynamic (true | false) #IMPLIED
 >
@@ -4170,7 +4204,13 @@
     If 'true' log context is updated.
     The default is 'true'.
 -->
-<!ATTLIST GVCoreCallNode   change-log-context (true | false) #IMPLIED>
+<!ATTLIST GVCoreCallNode  change-log-context (true | false) #IMPLIED>
+<!--
+    If true change the log master service with the used one (configured or calculated), in order to write log messages into a different log file.
+    Used only if @change-log-context is true.
+    Default false.
+-->
+<!ATTLIST GVCoreCallNode  change-log-master-service (true|false) #IMPLIED>
 <!--
     Specifies the input (from the execution environment) for the operation.
     If the input is an exception, the operation is not performed,
@@ -4286,7 +4326,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT GVSubFlowCallNode (Description?, GVRouting*)>
+<!ELEMENT GVSubFlowCallNode (Description?, InputServices?, OutputServices?, GVRouting*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -4420,24 +4460,20 @@
     #Label: @id
 -->
 <!ELEMENT GVSavePointNode (Description?, SpProperties?)>
-
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST GVSavePointNode type CDATA #FIXED "flow-node">
-
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST GVSavePointNode class CDATA #FIXED "it.greenvulcano.gvesb.core.flow.GVSavePointNode">
-
 <!--
     Unmodifiable.
 -->
 <!ATTLIST GVSavePointNode       op-type CDATA #FIXED "save">
-
 <!--
     ID of the node.
     Unique within the 'Flow'.
@@ -4446,7 +4482,6 @@
     #Unique: ../*/@id
 -->
 <!ATTLIST GVSavePointNode id CDATA #REQUIRED>
-
 <!--
     Object from the environment to be used as input.
 
@@ -4466,7 +4501,6 @@
     #References: {{../GVSavePointNode[@id!=../@first-node][preceding-sibling::GVOperationNode or following-sibling::GVOperationNode or preceding-sibling::GVNodeCheck or following-sibling::GVNodeCheck or preceding-sibling::ChangeGVBufferNode or following-sibling::ChangeGVBufferNode or preceding-sibling::GVNotificationNode or following-sibling::GVNotificationNode or preceding-sibling::GVIteratorOperationNode or following-sibling::GVIteratorOperationNode or preceding-sibling::GVCoreCallNode or following-sibling::GVCoreCallNode or preceding-sibling::GVSavePointNode or following-sibling::GVSavePointNode or preceding-sibling::GVSubFlowCallNode or following-sibling::GVSubFlowCallNode]}} ../GVSavePointNode/@input
 -->
 <!ATTLIST GVSavePointNode input CDATA #REQUIRED>
-
 <!--
     Indicates the next node in the workflow to execute
     when the operation ends.
@@ -4475,7 +4509,6 @@
     #References: following-sibling::*/@id
 -->
 <!ATTLIST GVSavePointNode next-node-id CDATA #REQUIRED>
-
 <!--
     X position of the node in the VulCon workflows editor.
     Immutable, used by VulCon.
@@ -4484,7 +4517,6 @@
     #Freezed
 -->
 <!ATTLIST GVSavePointNode point-x CDATA #IMPLIED>
-
 <!--
     Y position of the node in the VulCon workflows editor.
     Immutable, used by VulCon.
@@ -4493,13 +4525,11 @@
     #Freezed
 -->
 <!ATTLIST GVSavePointNode point-y CDATA #IMPLIED>
-
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 -->
 <!ATTLIST GVSavePointNode dump-in-out (true|false) #IMPLIED>
-
 <!--
     If true enable the dump of the input/output Execution Environment.
     Default false.
@@ -5863,6 +5893,11 @@
     Default: false.
 -->
 <!ATTLIST jms-enqueue dump-message (true|false) #IMPLIED>
+<!--
+    If true the message to be enqueued is enriched with input GVBuffer properties value.
+    Default: true.
+-->
+<!ATTLIST jms-enqueue decorate-message (true|false) #IMPLIED>
 
 <!--
     Used to make a routing mechanism at the level of communication channel,
@@ -6148,6 +6183,11 @@
     Default false.
 -->
 <!ATTLIST jms-dequeue dump-message (true|false) #IMPLIED>
+<!--
+    If true the output GVBuffer is enriched with the received message properties value.
+    Default: true.
+-->
+<!ATTLIST jms-dequeue decorate-gvbuffer (true|false) #IMPLIED>
 
 <!--
     Allows you to specify a selector for receiving messages.
@@ -6510,17 +6550,17 @@
 -->
 <!ATTLIST AxisWebServiceInvoker  class CDATA #FIXED "it.greenvulcano.gvesb.virtual.ws.GVWebServiceInvoker">
 <!--
-        Service name.
+    Service name.
 -->
 <!ATTLIST AxisWebServiceInvoker service CDATA #IMPLIED>
 <!--
-        Service NameSpace.
+    Service NameSpace.
 -->
 <!ATTLIST AxisWebServiceInvoker serviceNS CDATA #IMPLIED>
 <!--
-        Operation name.
+    Operation name.
 
-        #NotNull
+    #NotNull
 -->
 <!ATTLIST AxisWebServiceInvoker operation CDATA #REQUIRED>
 <!--
@@ -6793,7 +6833,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteSearchCommand (Description?)>
+<!ELEMENT RemoteSearchCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -6872,7 +6912,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteMoveCommand (Description?)>
+<!ELEMENT RemoteMoveCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -6955,7 +6995,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteDeleteCommand (Description?)>
+<!ELEMENT RemoteDeleteCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -7027,7 +7067,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteDownloadCommand (Description?)>
+<!ELEMENT RemoteDownloadCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -7117,7 +7157,7 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT RemoteUploadCommand (Description?)>
+<!ELEMENT RemoteUploadCommand (Description?, PropertyDef*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -7705,9 +7745,9 @@
 -->
 <!ATTLIST FileUnZipCommand isCritical (true|false) #IMPLIED>
 
-<!-- 
+<!--
     This element can be used for authomatic enlist and delist of XA resource in a distributed transaction.
-    
+
     #Icon: default.png
 -->
 <!ELEMENT XAHelper (Description?, JNDIHelper?)>
@@ -7768,7 +7808,7 @@
     Specifies the name of the transformation that should apply by GVDTE.
     This name must indicate a transformation currently configured in GVDTE.
 
-    This parameter can be optional if the input GVBuffer has a property 
+    This parameter can be optional if the input GVBuffer has a property
     with the name map-name.
 
     #Label: @value
@@ -7808,6 +7848,7 @@
 
     #Label: @value
     #References: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
 -->
 <!ATTLIST map-name-param value CDATA #REQUIRED>
 
@@ -8865,8 +8906,8 @@
 
 
     The SMTP protocol provider supports the following properties.
-    Note that if you're using the "pop3s" protocol to access POP3 over SSL, 
-    all the properties would be named "mail.pop3s.*". 
+    Note that if you're using the "pop3s" protocol to access POP3 over SSL,
+    all the properties would be named "mail.pop3s.*".
 
     Name                                Type        Description
     **********************************************************************************************************************************
@@ -8903,7 +8944,7 @@
     mail.pop3.filecache.enable          boolean     If set to true, the POP3 provider will cache message data in a temporary file rather than in memory. Messages are only added to the cache when accessing the message content. Message headers are always cached in memory (on demand). The file cache is removed when the folder is closed or the JVM terminates. Defaults to false.
     mail.pop3.filecache.dir             String      If the file cache is enabled, this property can be used to override the default directory used by the JDK for temporary files.
     mail.pop3.cachewriteto              boolean     Controls the behavior of the writeTo method on a POP3 message object. If set to true, and the message content hasn't yet been cached, and ignoreList is null, the message is cached before being written. Otherwise, the message is streamed directly to the output stream without being cached. Defaults to false.
-    mail.pop3.keepmessagecontent        boolean     The content of a message is cached when it is first fetched. Normally this cache uses a SoftReference to refer to the cached content. This allows the cached content to be purged if memory is low, in which case the content will be fetched again if it's needed. If this property is set to true, a hard reference to the cached content will be kept, preventing the memory from being reused until the folder is closed or the cached content is explicitly invalidated (using the invalidate method). (This was the behavior in previous versions of JavaMail.) Defaults to false. 
+    mail.pop3.keepmessagecontent        boolean     The content of a message is cached when it is first fetched. Normally this cache uses a SoftReference to refer to the cached content. This allows the cached content to be purged if memory is low, in which case the content will be fetched again if it's needed. If this property is set to true, a hard reference to the cached content will be kept, preventing the memory from being reused until the folder is closed or the cached content is explicitly invalidated (using the invalidate method). (This was the behavior in previous versions of JavaMail.) Defaults to false.
 -->
 <!ELEMENT mail-properties (mail-property+)>
 <!--
@@ -8975,7 +9016,6 @@
         - for properties:
             - ${property['PROP_NAME']}
     ]
-    
 
     #NotNull
 -->
@@ -12058,15 +12098,17 @@
 <!ELEMENT endpoint (Description?, CustomProtocol?, Proxy?)>
 <!--
     Host to connect to.
+    Can contain metadata to be resolved at runtime.
 
     #NotNull
 -->
 <!ATTLIST endpoint   host CDATA #REQUIRED>
 <!--
-    Port where the service is exposed. Default port is '80'.
+    Port where the service is exposed.
+    Can contain metadata to be resolved at runtime.
+    Default port is '80'.
 
     #NotNull
-    #Pattern: ! ^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$ ! Insert a number between 0 and 65535
 -->
 <!ATTLIST endpoint   port CDATA #IMPLIED>
 <!--
@@ -12074,7 +12116,8 @@
     otherwise, the default connection protocol will be 'https'.
     The default value is 'false'.
 -->
-<!ATTLIST endpoint   secure (false|true) #IMPLIED><!--
+<!ATTLIST endpoint   secure (false|true) #IMPLIED>
+<!--
     Context path to prepend to remote URI call.
 
     #NotNull
@@ -13173,6 +13216,16 @@
 -->
 <!ATTLIST RSHTask name CDATA #REQUIRED>
 <!--
+    If 'true' Task is automatically registered on the timer.
+    Default to true.
+-->
+<!ATTLIST RSHTask auto-start   (true|false) #IMPLIED>
+<!--
+    Task activation status.
+    Default to true.
+-->
+<!ATTLIST RSHTask enabled      (true|false) #IMPLIED>
+<!--
     RSH client name.
 
     #NotNull
@@ -13248,10 +13301,12 @@
 <!ATTLIST LogCleanerTask name         CDATA #REQUIRED>
 <!--
     If 'true' Task is automatically registered on the timer.
+    Default to true.
 -->
 <!ATTLIST LogCleanerTask auto-start   (true|false) #IMPLIED>
 <!--
     Task activation status.
+    Default to true.
 -->
 <!ATTLIST LogCleanerTask enabled      (true|false) #IMPLIED>
 <!--
@@ -13297,7 +13352,7 @@
 -->
 <!ATTLIST LogCleanerTask delete-filter         CDATA #IMPLIED>
 
-        
+
 <!--
     Defines an group of Timer Tasks.
 
@@ -13388,19 +13443,19 @@
 
     Misfire policy:
     - fire-now : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be fired now.
-    - reschedule-now-existing-repeat-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants 
-                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now') 
+    - reschedule-now-existing-repeat-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants
+                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now')
                                               with the repeat count left as-is.
-    - reschedule-now-remaining-repeat-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants 
-                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now') with 
+    - reschedule-now-remaining-repeat-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants
+                                              to be re-scheduled to 'now' (even if the associated Calendar excludes 'now') with
                                               the repeat count set to what it would be, if it had not missed any firings.
-    - reschedule-next-existing-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be 
-                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated 
+    - reschedule-next-existing-count  : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be
+                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated
                                         Calendar, and with the repeat count left unchanged.
-    - reschedule-next-remaining-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be 
-                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated 
-                                        Calendar, and with the repeat count set to what it would be, if it had not missed any 
-                                        firings. WARNING: using this mode with a trigger that has a non-null end-time may cause 
+    - reschedule-next-remaining-count : instructs the Scheduler that upon a mis-fire situation, the SimpleTrigger wants to be
+                                        re-scheduled to the next scheduled time after 'now' - taking into account any associated
+                                        Calendar, and with the repeat count set to what it would be, if it had not missed any
+                                        firings. WARNING: using this mode with a trigger that has a non-null end-time may cause
                                         the trigger to never fire again if the end-time arrived during the misfire time span.
 
     If the misfire instruction is set to smart-policy, then the following scheme will be used:
@@ -13483,8 +13538,8 @@
 
     Misfire policy:
     - fire-once-now : instructs the Scheduler that upon a mis-fire situation, the DateIntervalTrigger wants to be fired now.
-    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the DateIntervalTrigger wants to have 
-                      it's next-fire-time updated to the next time in the schedule after the current time (taking into 
+    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the DateIntervalTrigger wants to have
+                      it's next-fire-time updated to the next time in the schedule after the current time (taking into
                       account any associated Calendar), but it does not want to be fired now.
 
     If the misfire instruction is set to smart-policy, then the following scheme will be used:
@@ -13559,8 +13614,8 @@
 
     Misfire policy:
     - fire-once-now : instructs the Scheduler that upon a mis-fire situation, the CronTrigger wants to be fired now.
-    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the CronTrigger wants to have 
-                      it's next-fire-time updated to the next time in the schedule after the current time (taking into 
+    - do-nothing    : instructs the Scheduler that upon a mis-fire situation, the CronTrigger wants to have
+                      it's next-fire-time updated to the next time in the schedule after the current time (taking into
                       account any associated Calendar), but it does not want to be fired now.
 
     If the misfire instruction is set to smart-policy, then the following scheme will be used:

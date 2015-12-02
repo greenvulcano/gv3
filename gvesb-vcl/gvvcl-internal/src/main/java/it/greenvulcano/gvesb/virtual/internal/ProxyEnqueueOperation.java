@@ -95,7 +95,7 @@ public class ProxyEnqueueOperation implements EnqueueOperation
      * @see it.greenvulcano.gvesb.virtual.EnqueueOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
     @Override
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, EnqueueException, InvalidDataException
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, EnqueueException, InvalidDataException, InterruptedException
     {
         return operation.perform(gvBuffer);
     }

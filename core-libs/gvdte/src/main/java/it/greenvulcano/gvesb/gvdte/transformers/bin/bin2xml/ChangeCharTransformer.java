@@ -50,6 +50,7 @@ public class ChangeCharTransformer implements DTETransformer
 {
     private static Logger logger      = GVLogger.getLogger(ChangeCharTransformer.class);
 
+    private String        name;
     private Vector<Byte>  vInputChar  = null;
     private Vector<Byte>  vOutputChar = null;
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
@@ -73,6 +74,7 @@ public class ChangeCharTransformer implements DTETransformer
     {
         logger.debug("Init start");
         try {
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             vInputChar = new Vector<Byte>();
             vOutputChar = new Vector<Byte>();
 
@@ -96,6 +98,11 @@ public class ChangeCharTransformer implements DTETransformer
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][]{{"msg", " Unexpected error."}}, exc);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     private void addCharConversion(Node node) throws DTETransfException
@@ -155,8 +162,8 @@ public class ChangeCharTransformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         byte inputChar;
         byte outputChar;

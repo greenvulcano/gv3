@@ -253,6 +253,9 @@ public class GVServiceCallerTask extends Task
                         catch (Exception exc) {
                             // do nothing
                         }
+                        if (cGVBuffer != null) {
+                            cGVBuffer.cleanUp();
+                        }
 
                         NMDC.pop();
                     }
@@ -260,9 +263,11 @@ public class GVServiceCallerTask extends Task
                     // Perform post-call actions
                     ActionType action = ActionType.NO_ACTION;
                     Iterator<GVTaskAction> i = actionHandlers.iterator();
-                    while (i.hasNext() && (action.equals(ActionType.NO_ACTION.toString()))) {
+                    while (i.hasNext() && (action == ActionType.NO_ACTION)) {
                         GVTaskAction a = i.next();
                         action = a.check(output);
+                        logger.debug("GVServiceCallerTask(" + getFullName()
+                                + ") - Checking GVTaskAction[" + a + "]: " + output.getClass().getSimpleName() + " -> '" + action + "'");
                     }
 
                     if (action == ActionType.NO_ACTION) {
@@ -303,6 +308,7 @@ public class GVServiceCallerTask extends Task
                             logger.error("GVServiceCallerTask(" + getFullName() + ") - Invalid GVTaskAction type: "
                                     + action.toString());
                             cont = false;
+                            rollback();
                     }
                 }
                 finally {
@@ -464,7 +470,6 @@ public class GVServiceCallerTask extends Task
         }
     }
 
-
     /**
      * @param node
      * @throws TaskException
@@ -478,6 +483,7 @@ public class GVServiceCallerTask extends Task
                 for (int i = 0; i < nl.getLength(); i++) {
                     GVTaskAction a = new GVTaskAction();
                     a.init(nl.item(i));
+                    logger.debug("GVServiceCallerTask(" + getFullName() + ") - Added GVTaskAction[" + a + "]");
                     actionHandlers.add(a);
                 }
             }

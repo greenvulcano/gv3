@@ -27,10 +27,14 @@ import it.greenvulcano.gvesb.core.config.GVServiceConf;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
 import it.greenvulcano.gvesb.core.config.ServiceConfigManager;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
+import it.greenvulcano.gvesb.core.exc.GVCoreSecurityException;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
+import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
 import it.greenvulcano.gvesb.log.GVBufferMDC;
+import it.greenvulcano.gvesb.policy.ACLManager;
+import it.greenvulcano.gvesb.policy.impl.GVCoreServiceKey;
 import it.greenvulcano.gvesb.virtual.CallException;
 import it.greenvulcano.gvesb.virtual.EnqueueException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
@@ -42,6 +46,7 @@ import it.greenvulcano.gvesb.virtual.VCLOperationKey;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xpath.XPathFinder;
 
 import java.util.ArrayList;
@@ -49,6 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -116,6 +122,10 @@ public class IteratorController
     private boolean                isFlowSysSvcOpDynamic       = false;
     private String                 call_dp                     = null;
     private boolean                changeLogContext            = true;
+    /**
+     * If true update the log master service file.
+     */
+    private boolean                changeLogMasterService      = false;
     private boolean                accumulateOutput            = false;
     /**
      * Keeps reference to <code>IDataProvider</code> implementation.
@@ -171,6 +181,7 @@ public class IteratorController
                 operationType = ITERATOR_OPTYPE_CALLSERVICE;
                 logger.debug("operationType=ITERATOR_CORE_CALL");
                 changeLogContext = XMLConfig.getBoolean(node, "CoreCall/@change-log-context", true);
+                changeLogMasterService = changeLogContext && XMLConfig.getBoolean(defNode, "CoreCall/@change-log-master-service", false);
                 system = XMLConfig.get(node, "CoreCall/@id-system", GVBuffer.DEFAULT_SYS);
                 logger.debug("system=" + system);
                 service = XMLConfig.get(node, "CoreCall/@id-service");
@@ -234,7 +245,7 @@ public class IteratorController
      * @see it.greenvulcano.gvesb.virtual.Operation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
     @SuppressWarnings("unchecked")
-    public GVBuffer doPerform(GVBuffer gvBuffer, boolean onDebug) throws VCLException
+    public GVBuffer doPerform(GVBuffer gvBuffer, boolean onDebug) throws VCLException, InterruptedException
     {
         logger.info("INIT doPerform");
         GVBuffer gvBufferOutput = new GVBuffer(gvBuffer);
@@ -244,7 +255,7 @@ public class IteratorController
             DataProviderManager dataProviderManager = DataProviderManager.instance();
             IDataProvider dataProvider = dataProviderManager.getDataProvider(collectionDP);
             try {
-                logger.debug("Working on data provider: " + dataProvider.getClass());
+                logger.debug("Working on data provider: " + dataProvider);
                 dataProvider.setObject(gvBuffer);
                 input = (Collection<Object>) dataProvider.getResult();
             }
@@ -254,7 +265,7 @@ public class IteratorController
             Object[] nl = input.toArray();
             int iterations = nl.length;
             output = new ArrayList<Object>();
-            for (int i = 0; i < iterations; i++) {
+            for (int i = 0; (i < iterations) && !isInterrupted(); i++) {
                 Object currNode = nl[i];
                 if (logger.isDebugEnabled()) {
                     logger.debug("currNode=" + currNode.toString());
@@ -302,6 +313,10 @@ public class IteratorController
                             throw currIterOutputExc;
                         }
                     }
+                    catch (InterruptedException exc) {
+                        logger.error("Iteration n. " + (i+1) + " interrupted.");
+                        throw exc;
+                    }
                     catch (Exception exc) {
                         logger.warn("Performing iteration n." + (i + 1) + " caused a " + exc.getClass().getName());
                         caughtException = true;
@@ -330,15 +345,22 @@ public class IteratorController
                     }
                 }
             }
+            if (isInterrupted()) {
+                logger.error("IteratorController interrupted.");
+                throw new InterruptedException("IteratorController interrupted.");
+            }
             logger.info("END doPerform");
             if (accumulateOutput) {
                 gvBufferOutput.setObject(output);
             }
             return gvBufferOutput;
         }
+        catch (InterruptedException exc) {
+            throw exc;
+        }
         catch (Exception exc) {
-            logger.error("An error occurred while performing business logic for the " + getClass().getName()
-                    + " plug-in: ", exc);
+            logger.error("An error occurred while performing business logic", exc);
+            ThreadUtils.checkInterrupted(exc);
             if ((operationType == ITERATOR_OPTYPE_CALL) || (operationType == ITERATOR_OPTYPE_CALLSERVICE)) {
                 throw new CallException("GV_CALL_SERVICE_ERROR", new String[][]{
                         {"service", gvBufferOutput.getService()}, {"system", gvBufferOutput.getSystem()},
@@ -375,7 +397,7 @@ public class IteratorController
         }
     }
 
-    private GVBuffer executeCoreCall(GVBuffer internalGVBuffer, boolean onDebug) throws Exception
+    private GVBuffer executeCoreCall(GVBuffer internalGVBuffer, boolean onDebug) throws GVException, InterruptedException
     {
         GVBuffer result = null;
         Object inputCall = null;
@@ -402,12 +424,18 @@ public class IteratorController
 
             ServiceConfigManager svcMgr = gvContext.getGVServiceConfigManager();
             gvsConfig = svcMgr.getGVSConfig(internalGVBuffer);
+            if (!ACLManager.canAccess(new GVCoreServiceKey(gvsConfig.getGroupName(), gvsConfig.getServiceName(),
+                    localFlowOp))) {
+                throw new GVCoreSecurityException("GV_SERVICE_POLICY_ERROR", new String[][]{
+                        {"service", internalGVBuffer.getService()}, {"system", internalGVBuffer.getSystem()},
+                        {"id", internalGVBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
+            }
             GVFlow flow = gvsConfig.getGVOperation(internalGVBuffer, localFlowOp);
             if ((call_dp != null) && (call_dp.length() > 0)) {
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
                 IDataProvider dataProvider = dataProviderManager.getDataProvider(call_dp);
                 try {
-                    logger.debug("Working on data provider: " + dataProvider.getClass());
+                    logger.debug("Working on data provider: " + dataProvider);
                     dataProvider.setObject(internalGVBuffer);
                     inputCall = dataProvider.getResult();
                     internalGVBuffer.setObject(inputCall);
@@ -420,10 +448,27 @@ public class IteratorController
             try {
                 gvContext.push();
                 if (changeLogContext) {
-                    NMDC.setOperation(localFlowOp);
                     GVBufferMDC.put(internalGVBuffer);
+                    NMDC.setOperation(localFlowOp);
+                    NMDC.put(GVBuffer.Field.SERVICE.toString(), localService);
+                    NMDC.put(GVBuffer.Field.SYSTEM.toString(), localSystem);
                 }
-                result = flow.perform(internalGVBuffer, onDebug);
+                Level level = null;
+                String masterService = null;
+                try {
+                	if (changeLogMasterService) {
+                		masterService = GVBufferMDC.changeMasterService(localService);
+                	}
+                    level = GVLogger.setThreadMasterLevel(flow.getLoggerLevel());
+
+                    result = flow.perform(internalGVBuffer, onDebug);
+                }
+                finally {
+                    GVLogger.removeThreadMasterLevel(level);
+                    if (changeLogMasterService) {
+                		GVBufferMDC.changeMasterService(masterService);
+                	}
+                }
             }
             finally {
                 NMDC.pop();
@@ -436,14 +481,15 @@ public class IteratorController
                 }
             }
         }
-        catch (GVException exc) {
+        catch (Exception exc) {
             logger.error("Error performing operation", exc);
-            throw exc;
+            ThreadUtils.checkInterrupted(exc);
+            throw new GVException("Error performing operation: " + exc);
         }
         return result;
     }
 
-    private GVBuffer executeSubFlow(GVBuffer internalGVBuffer, boolean onDebug) throws Exception
+    private GVBuffer executeSubFlow(GVBuffer internalGVBuffer, boolean onDebug) throws GVException, InterruptedException
     {
         GVBuffer result = null;
         Object inputCall = null;
@@ -467,7 +513,7 @@ public class IteratorController
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
                 IDataProvider dataProvider = dataProviderManager.getDataProvider(call_dp);
                 try {
-                    logger.debug("Working on data provider: " + dataProvider.getClass());
+                    logger.debug("Working on data provider: " + dataProvider);
                     dataProvider.setObject(internalGVBuffer);
                     inputCall = dataProvider.getResult();
                     internalGVBuffer.setObject(inputCall);
@@ -496,9 +542,10 @@ public class IteratorController
                 }
             }
         }
-        catch (GVException exc) {
+        catch (Exception exc) {
             logger.error("Error performing operation", exc);
-            throw exc;
+            ThreadUtils.checkInterrupted(exc);
+            throw new GVException("Error performing operation: " + exc);
         }
         return result;
     }
@@ -526,6 +573,15 @@ public class IteratorController
             }
         }
         return subFlow;
+    }
+    
+    /**
+     * 
+     * @return
+     *        the current Thread interrupted state
+     */
+    public boolean isInterrupted() {
+        return Thread.currentThread().isInterrupted();
     }
 
 }

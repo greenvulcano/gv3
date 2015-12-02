@@ -192,7 +192,11 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
      * If true the incoming message is dumped on log.
      */
     private boolean              dumpMessage                  = false;
-
+    /**
+     * If true the GVBuffer is enriched with message properties.
+     */
+    private boolean             decorateGVBuffer              = true;
+    
     /**
      * Completes operation specific initialization.
      */
@@ -309,6 +313,8 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
         }
 
         dumpMessage = XMLConfig.getBoolean(node, "@dump-message", false);
+        decorateGVBuffer = XMLConfig.getBoolean(node, "@decorate-gvbuffer", true);
+        logger.debug("Decorate GVBuffer......: " + decorateGVBuffer);
     }
 
     /**
@@ -381,15 +387,15 @@ public class JMSDequeueOperation extends J2EEOperation implements DequeueOperati
                 if (dumpMessage && logger.isDebugEnabled()) {
                     logger.debug("Dequeue " + name + " Received message :\n"  + new JMSMessageDump(message, null));
                 }
-                outBuffer = new GVBuffer();
                 if (keepInputExtraProperties) {
-                    Iterator<String> i = inputGVBuffer.getPropertyNamesIterator();
-                    while (i.hasNext()) {
-                        String name = i.next();
-                        outBuffer.setProperty(name, inputGVBuffer.getProperty(name));
-                    }
+                    outBuffer = new GVBuffer(inputGVBuffer, false);
                 }
-                JMSMessageDecorator.decorateGVBuffer(message, outBuffer);
+                else {
+                    outBuffer = new GVBuffer();
+                }
+                if (decorateGVBuffer) {
+                	JMSMessageDecorator.decorateGVBuffer(message, outBuffer);
+                }
 
                 outBuffer.setObject(message);
                 if (refDP != null && refDP.length() > 0) {

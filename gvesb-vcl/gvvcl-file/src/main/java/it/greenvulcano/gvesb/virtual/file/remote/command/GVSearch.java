@@ -28,11 +28,13 @@ import it.greenvulcano.util.file.RegExFileFilter;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.remotefs.RemoteManager;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Search for files.
@@ -46,9 +48,10 @@ public class GVSearch implements GVRemoteCommand
 {
     private static Logger logger = GVLogger.getLogger(GVSearch.class);
 
-    private String        sourcePath;
-    private String        filePattern;
-    private boolean       isCritical;
+    private String              sourcePath;
+    private String              filePattern;
+    private boolean             isCritical;
+    private Map<String, String> optProperties = new HashMap<String, String>();
 
     /**
      *
@@ -68,6 +71,15 @@ public class GVSearch implements GVRemoteCommand
         sourcePath = XMLConfig.get(node, "@sourcePath");
         filePattern = XMLConfig.get(node, "@filePattern", "");
         isCritical = XMLConfig.getBoolean(node, "@isCritical", true);
+
+        NodeList nl = XMLConfig.getNodeList(node, "PropertyDef");
+        if (nl != null) {
+            for (int i = 0; i < nl.getLength(); i++) {
+                String name = XMLConfig.get(nl.item(i), "@name");
+                String value = XMLConfig.get(nl.item(i), "@value", "");
+                optProperties.put(name, value);
+            }
+        }
     }
 
     /**
@@ -93,7 +105,13 @@ public class GVSearch implements GVRemoteCommand
             String currSourcePath = PropertiesHandler.expand(sourcePath, params, gvBuffer);
             String currFile = PropertiesHandler.expand(filePattern, params, gvBuffer);
 
-            Set<FileProperties> results = ftpAccess.ls(currSourcePath, currFile, null, RegExFileFilter.FILES_ONLY);
+            Map<String, String> localOptProperties = new HashMap<String, String>();
+            for (String prop : optProperties.keySet()) {
+                localOptProperties.put(prop, PropertiesHandler.expand(optProperties.get(prop), params, gvBuffer));
+            }
+            
+            Set<FileProperties> results = ftpAccess.ls(currSourcePath, currFile, null, RegExFileFilter.FILES_ONLY,
+                    localOptProperties);
 
             int resultsSize = results.size();
 

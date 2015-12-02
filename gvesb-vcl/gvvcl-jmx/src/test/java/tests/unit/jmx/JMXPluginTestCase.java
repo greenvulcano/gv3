@@ -41,8 +41,6 @@ import org.w3c.dom.Node;
  */
 public class JMXPluginTestCase extends TestCase
 {
-    private static final String  CONFIGURATION_FILE = "gv-jmx.xml";
-
     private static JMXEntryPoint jmx                = null;
 
     /**
@@ -52,7 +50,6 @@ public class JMXPluginTestCase extends TestCase
     protected void setUp() throws Exception
     {
         if (jmx == null) {
-            //JMXEntryPoint.setConfigurationFile(CONFIGURATION_FILE);
             jmx = JMXEntryPoint.instance();
             MBeanServer server = jmx.getServer();
 

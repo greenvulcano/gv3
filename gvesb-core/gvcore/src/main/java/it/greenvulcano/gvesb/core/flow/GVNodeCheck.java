@@ -110,10 +110,11 @@ public class GVNodeCheck extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-    	long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         logger.debug("BEGIN - Execute GVNodeCheck '" + getId() + "'");
+        checkInterrupted("GVNodeCheck", logger);
         dumpEnvironment(logger, true, environment);
 
         String input = getInput();
@@ -134,12 +135,16 @@ public class GVNodeCheck extends GVFlowNode
         }
 
         try {
-            while ((i < routingVector.size()) && nextNodeId.equals("")) {
+            while ((i < routingVector.size()) && nextNodeId.equals("") && !isInterrupted()) {
                 GVRouting routing = routingVector.elementAt(i);
                 nextNodeId = routing.getNodeId(input, environment);
                 conditionName = routing.getConditionName();
                 i++;
             }
+            checkInterrupted("GVNodeCheck", logger);
+        }
+        catch (InterruptedException exc) {
+            throw exc;
         }
         catch (Exception exc) {
             logger.error("Exception caught while checking routing condition - GVNodeCheck '" + getId()

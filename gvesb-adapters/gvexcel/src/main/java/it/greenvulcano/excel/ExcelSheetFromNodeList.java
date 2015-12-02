@@ -99,6 +99,9 @@ public class ExcelSheetFromNodeList {
             throw new ExcelException("The NodeList is null");
         }
         try {
+        	if (nl.getLength() == 0) {
+        		return;
+        	}
             Node node = nl.item(0);
             if (!node.hasAttributes()) {
                 throw new ExcelException("The Node has no attributes");

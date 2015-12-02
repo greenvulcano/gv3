@@ -29,10 +29,12 @@ import it.greenvulcano.util.remotefs.RemoteManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Upload a local file/directory, or the GVBuffer body, on a remote file system.
@@ -52,6 +54,7 @@ public class GVUpload implements GVRemoteCommand
     private String              remotePath;
     private String              fromGVBufferExpression;
     private boolean             isCritical;
+    private Map<String, String> optProperties = new HashMap<String, String>();
 
 
     /**
@@ -74,6 +77,15 @@ public class GVUpload implements GVRemoteCommand
         remotePath = XMLConfig.get(node, "@remotePath");
         fromGVBufferExpression = XMLConfig.get(node, "@fromGVBufferExpression");
         isCritical = XMLConfig.getBoolean(node, "@isCritical", true);
+
+        NodeList nl = XMLConfig.getNodeList(node, "PropertyDef");
+        if (nl != null) {
+            for (int i = 0; i < nl.getLength(); i++) {
+                String name = XMLConfig.get(nl.item(i), "@name");
+                String value = XMLConfig.get(nl.item(i), "@value", "");
+                optProperties.put(name, value);
+            }
+        }
     }
 
     /**
@@ -105,16 +117,21 @@ public class GVUpload implements GVRemoteCommand
             String currSourceFile = PropertiesHandler.expand(sourceFilePattern, params, gvBuffer);
             String currRemotePath = PropertiesHandler.expand(remotePath, params, gvBuffer);
 
+            Map<String, String> localOptProperties = new HashMap<String, String>();
+            for (String prop : optProperties.keySet()) {
+                localOptProperties.put(prop, PropertiesHandler.expand(optProperties.get(prop), params, gvBuffer));
+            }
+            
             boolean result = false;
             if ((fromGVBufferExpression != null) && (fromGVBufferExpression.length() > 0)) {
                 OGNLExpressionEvaluator ognl = new OGNLExpressionEvaluator();
                 ognl.addToContext("gvbuffer", gvBuffer);
                 Object obj = ognl.getValue(fromGVBufferExpression, gvBuffer);
                 InputStream is = new ByteArrayInputStream((byte[]) obj);
-                result = manager.put(is, currRemotePath, currSourceFile);
+                result = manager.put(is, currRemotePath, currSourceFile, localOptProperties);
             }
             else {
-                result = manager.put(currSourcePath, currSourceFile, currRemotePath);
+                result = manager.put(currSourcePath, currSourceFile, currRemotePath, localOptProperties);
             }
             if (result) {
                 logger.debug("File(s) " + currSourceFile + " successfully uploaded from local directory "

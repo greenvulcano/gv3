@@ -23,6 +23,7 @@ import it.greenvulcano.configuration.ConfigurationEvent;
 import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.BaseThread;
 
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
@@ -32,7 +33,6 @@ import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -133,7 +133,6 @@ public final class DateUtils
      */
     private static class ConfigEventHandler implements ConfigurationListener
     {
-
         /**
          * @see it.greenvulcano.configuration.ConfigurationListener#configurationChanged(ConfigurationEvent)
          */
@@ -142,7 +141,24 @@ public final class DateUtils
         {
             if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(CFG_FILE)) {
                 initialized = false;
-                init();
+                // initialize after a delay
+                Runnable rr = new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        try {
+                            Thread.sleep(5000);
+                        }
+                        catch (InterruptedException exc) {
+                            // do nothing
+                        }
+                        init();
+                    }
+                };
+
+                BaseThread bt = new BaseThread(rr, "Config reloader for DateUtils");
+                bt.setDaemon(true);
+                bt.start();
             }
         }
 
@@ -2098,7 +2114,7 @@ public final class DateUtils
         @Override
         public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition)
         {
-        	Calendar cal = new GregorianCalendar();
+        	Calendar cal = getCalendar();
         	cal.setTime(date);
             return toAppendTo.append(DatatypeConverter.printDateTime(cal));
         }

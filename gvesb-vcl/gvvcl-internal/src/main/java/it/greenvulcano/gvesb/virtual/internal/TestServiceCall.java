@@ -32,6 +32,7 @@ import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.OutputStreamWriter;
 
@@ -86,7 +87,7 @@ public class TestServiceCall implements CallOperation
                     Thread.sleep(sleepOnInit);
                 }
                 catch (InterruptedException exc) {
-                    // do nothing
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -100,23 +101,9 @@ public class TestServiceCall implements CallOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws CallException
+    public GVBuffer perform(GVBuffer gvBuffer) throws CallException, InterruptedException
     {
-        if (sleepOnPerform > 0) {
-            try {
-                Thread.sleep(sleepOnPerform);
-            }
-            catch (InterruptedException exc) {
-                // do nothing
-            }
-        }
-
         GVBuffer localData = gvBuffer;
-
-        if (!exceptionMessage.equals("")) {
-            logger.debug(" TEST SERVICE: thrown exception");
-            throw new CallException(exceptionMessage);
-        }
 
         if (localData == null) {
             return null;
@@ -134,6 +121,21 @@ public class TestServiceCall implements CallOperation
         logger.debug(" removeProperties.: " + removeProperties);
         logger.debug("---------------------------------------------------------------");
         logger.debug(new GVDump(localData));
+
+        if (sleepOnPerform > 0) {
+            try {
+                Thread.sleep(sleepOnPerform);
+            }
+            catch (Exception exc) {
+                logger.error("TEST SERVICE TIMEOUT FAILED", exc);
+                ThreadUtils.checkInterrupted(exc);
+            }
+        }
+
+        if (!exceptionMessage.equals("")) {
+            logger.debug(" TEST SERVICE: thrown exception");
+            throw new CallException(exceptionMessage);
+        }
 
         try {
             if (removeProperties) {
@@ -157,9 +159,9 @@ public class TestServiceCall implements CallOperation
             }
         }
         catch (Exception exc) {
-            logger.error(" TEST SERVICE FAILED", exc);
-            localData.setRetCode(-1);
-            return localData;
+            logger.error("TEST SERVICE FAILED", exc);
+            ThreadUtils.checkInterrupted(exc);
+            throw new CallException("TEST SERVICE FAILED", exc);
         }
         finally {
             logger.debug("---------------------------------------------------------------");

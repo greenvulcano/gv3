@@ -205,6 +205,22 @@
 <!ELEMENT Script (#PCDATA)>
 
 <!--
+    The content defines a JavaScript script.
+
+    #NotNull
+    #Icon: default.png
+    #SelectOnInsert
+-->
+<!ELEMENT JavaScript (#PCDATA)>
+<!--
+    This attribute defines the 'scope' to be used for script execution.
+    If not set the default is 'gvesb'.
+
+    #References: gvesb:document('GVSupport')/GVSupport/GVJavaScriptConfig/JavaScriptInitializers/*[@type='jsinit']/@name
+-->
+<!ATTLIST JavaScript  scope-name CDATA #IMPLIED>
+
+<!--
     The content defines a OGNL script.
     This script is applied to the current GVBuffer object.
      Within a node ChangeGVBuffer is "injected" into the variable
@@ -726,6 +742,7 @@
     #Label: @name
     #Unique: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
     #Unique: /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #Warn: {{self::TransformationAlias[not(../@name = /GVCore/GVDataTransformation/Startup/ToPreload/Preload/@Transformation)]}} An aliased Transformation must be defined in ToPreload DTE section
     #NotNull
 -->
 <!ATTLIST TransformationAlias name CDATA #REQUIRED>

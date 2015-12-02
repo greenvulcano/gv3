@@ -276,7 +276,7 @@ public class JMSForwardListener implements Runnable
                                     Message msg = messageConsumer.receive(data.getReceiveTimeout());
                                     readCount++;
                                     if ((msg != null) && !data.isShutdown()) {
-                                    	notReadCount = 0;
+                                        notReadCount = 0;
                                         NMDC.push();
                                         try {
                                             data.beginWork();
@@ -288,7 +288,7 @@ public class JMSForwardListener implements Runnable
                                         }
                                     }
                                     else {
-                                    	notReadCount++;
+                                        notReadCount++;
                                     }
                                 }
                                 finally {
@@ -579,7 +579,7 @@ public class JMSForwardListener implements Runnable
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(refDP);
                     try {
                         if (data.isDebug()) {
-                            logger.debug("Working on data provider[" + refDP + "]: " + dataProvider.getClass());
+                            logger.debug("Working on data provider[" + refDP + "]: " + dataProvider);
                         }
                         dataProvider.setObject(gvBuffer);
                         Object result = dataProvider.getResult();

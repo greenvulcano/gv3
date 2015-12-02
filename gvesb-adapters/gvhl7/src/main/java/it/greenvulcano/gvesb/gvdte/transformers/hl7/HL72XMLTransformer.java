@@ -76,6 +76,7 @@ public class HL72XMLTransformer implements DTETransformer
 {
     private static final Logger     logger          = GVLogger.getLogger(HL72XMLTransformer.class);
 
+    private String                  name;
     private String                  validationType;
 
     private String                  xslMapName;
@@ -108,6 +109,7 @@ public class HL72XMLTransformer implements DTETransformer
         logger.debug("Init start");
         try {
             this.dsf = dsf;
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             xslMapName = XMLConfig.get(node, "@OutputXSLMapName", "");
             dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
 
@@ -158,6 +160,11 @@ public class HL72XMLTransformer implements DTETransformer
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][]{{"msg", "Unexpected error."}}, exc);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**

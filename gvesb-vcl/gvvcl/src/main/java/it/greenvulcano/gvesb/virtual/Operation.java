@@ -73,7 +73,8 @@ public interface Operation
      *
      * @see it.greenvulcano.gvesb.buffer.GVBuffer
      */
-    GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, VCLException, InvalidDataException;
+    GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, VCLException, InvalidDataException, 
+                                               InterruptedException;
 
     /**
      * Must be always called after 'perform' for execute

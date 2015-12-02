@@ -52,6 +52,7 @@ public class AddTagTransformer implements DTETransformer
     private static final String XML_END          = "\" ?>";
     private static final String DEFAULT_ENCODING = "ISO-8859-1";
 
+    private String              name;
     private String              tagName          = "";
     private String              encoding         = "";
     private boolean             useCDATA         = false;
@@ -75,6 +76,7 @@ public class AddTagTransformer implements DTETransformer
     {
         logger.debug("Init start");
         try {
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             tagName = XMLConfig.get(node, "@TagName");
             encoding = XMLConfig.get(node, "@Encoding", DEFAULT_ENCODING);
             useCDATA = XMLConfig.getBoolean(node, "@UseCDATA", false);
@@ -92,6 +94,11 @@ public class AddTagTransformer implements DTETransformer
         }
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
     /**
      * The <code>input</code> parameter is a byte array. The return value is a byte array
      * containing the XML string.
@@ -105,8 +112,8 @@ public class AddTagTransformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         try {
             byte[] inputBuffer = null;

@@ -84,11 +84,13 @@ public class HTTPCallOperation implements CallOperation
     private static final Logger logger                 = GVLogger.getLogger(HTTPCallOperation.class);
     private static final String RESPONSE_PREFIX        = "GVHTTP_RESPONSE_";
     private static final String RESPONSE_STATUS        = RESPONSE_PREFIX + "STATUS";
+    private static final String RESPONSE_MESSAGE       = RESPONSE_PREFIX + "MESSAGE";
     private static final String RESPONSE_HEADER_PREFIX = RESPONSE_PREFIX + "HEADER_";
     public static final int     DEFAULT_CONN_TIMEOUT   = 10000;
     public static final int     DEFAULT_SO_TIMEOUT     = 30000;
 
     private String              methodURI;
+    private String              contextPath;
     private boolean             uriEscaped             = true;
     private HttpClient          httpClient;
     private String              refDP;
@@ -114,6 +116,7 @@ public class HTTPCallOperation implements CallOperation
             Node endpointNode = XMLConfig.getNode(config, "endpoint");
             String host = XMLConfig.get(endpointNode, "@host");
             int port = XMLConfig.getInteger(endpointNode, "@port", 80);
+            contextPath = XMLConfig.get(endpointNode, "@context-path", "");
             boolean secure = XMLConfig.getBoolean(endpointNode, "@secure", false);
             connTimeout = XMLConfig.getInteger(endpointNode, "@conn-timeout", DEFAULT_CONN_TIMEOUT);
             soTimeout = XMLConfig.getInteger(endpointNode, "@so-timeout", DEFAULT_SO_TIMEOUT);
@@ -168,7 +171,8 @@ public class HTTPCallOperation implements CallOperation
         try {
             String currMethodURI = null;
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
-            currMethodURI = PropertiesHandler.expand(methodURI, params, gvBuffer);
+            currMethodURI = PropertiesHandler.expand(contextPath + methodURI, params, gvBuffer);
+            logger.debug("MethodURI[escaped:" + uriEscaped + "]=[" + currMethodURI + "]");
             switch (methodName) {
                 case OPTIONS :
                     method = new OptionsMethod();
@@ -211,6 +215,8 @@ public class HTTPCallOperation implements CallOperation
 
             int status = httpClient.executeMethod(method);
             gvBuffer.setProperty(RESPONSE_STATUS, String.valueOf(status));
+            String statusTxt = method.getStatusText();
+            gvBuffer.setProperty(RESPONSE_MESSAGE, (statusTxt != null ? statusTxt : "NULL"));
             Header[] responseHeaders = method.getResponseHeaders();
             for (Header header : responseHeaders) {
                 String headerName = RESPONSE_HEADER_PREFIX + header.getName();

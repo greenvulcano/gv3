@@ -1972,7 +1972,7 @@ public final class XMLConfig
 
         while (!configurationEvents.isEmpty()) {
             try {
-                EventHandler.fireEventSync("configurationChanged", configurationEvents.remove(0));
+                EventHandler.fireEvent("configurationChanged", configurationEvents.remove(0));
             }
             catch (Exception exc) {
                 exc.printStackTrace();

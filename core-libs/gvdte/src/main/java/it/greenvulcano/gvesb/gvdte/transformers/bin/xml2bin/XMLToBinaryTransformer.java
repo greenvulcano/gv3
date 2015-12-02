@@ -57,6 +57,7 @@ public class XMLToBinaryTransformer implements DTETransformer
 {
     private static Logger            logger            = GVLogger.getLogger(XMLToBinaryTransformer.class);
 
+    private String                   name;
     /**
      * The output buffer, which is allocated once and re-used at every
      * XML-To-Binary transformation request.
@@ -99,6 +100,7 @@ public class XMLToBinaryTransformer implements DTETransformer
         dataSourceF = dsf;
         logger.debug("Init start");
         try {
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             conversionMapName = XMLConfig.get(node, "@ConversionMapName");
             dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
             logger.debug("Loaded parameters: conversionMapName = " + conversionMapName + " - DataSourceSet: "
@@ -118,6 +120,11 @@ public class XMLToBinaryTransformer implements DTETransformer
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTEXDT_GENERIC_ERROR", new String[][]{{"msg", "Unexpected error."}}, exc);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**
@@ -158,8 +165,8 @@ public class XMLToBinaryTransformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         try {
             Document inDocument = convertInputFormat(input);
