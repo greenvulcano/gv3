@@ -32,11 +32,14 @@ import java.io.FileNotFoundException;
 import junit.framework.TestCase;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
 
 /**
  * @version 3.3.0 05/lug/2012
  * @author GreenVulcano Developer Team
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class FileChangeMonitorTestCase extends TestCase
 {
     private static final String TEST_FILE_DIR = System.getProperty("user.dir") + File.separator
@@ -103,6 +106,7 @@ public class FileChangeMonitorTestCase extends TestCase
     protected void tearDown() throws Exception
     {
         FileUtils.deleteQuietly(new File(TEST_FILE_DIR));
+        FileChangeMonitor.getInstance().resetMonitor();
         super.tearDown();
     }
 
@@ -111,6 +115,7 @@ public class FileChangeMonitorTestCase extends TestCase
      */
     public void testNoFile() throws Exception
     {
+        System.out.println("---------------- File exists: " + (new File(TEST_FILE_1)).exists());
         try {
             TestListener tl = new TestListener(TEST_FILE_1);
             FileChangeMonitor.addFileChangeListener(tl, TEST_FILE_1);

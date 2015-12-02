@@ -111,15 +111,16 @@ public class GVNotificationNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-    	long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         if ((notificationVector.size() == 0)) {
             logger.info("Skipping execution of GVNotificationNode '" + getId()
                     + "': No GVNotification configured for this GVNotificationNode");
             return nextNodeId;
         }
         logger.info("Executing GVNotificationNode '" + getId() + "'");
+        checkInterrupted("GVNotificationNode", logger);
         dumpEnvironment(logger, true, environment);
 
         try {
@@ -128,7 +129,7 @@ public class GVNotificationNode extends GVFlowNode
                 logger.info(GVFormatLog.formatINPUT((GVBuffer) inputObj, false, false));
             }
             GVNotificationException criticalExc = null;
-            for (int ind = 0; ind < notificationVector.size(); ind++) {
+            for (int ind = 0; (ind < notificationVector.size()) && !isInterrupted(); ind++) {
                 GVNotification notification = notificationVector.elementAt(ind);
                 try {
                     notification.execute(environment);
@@ -145,6 +146,7 @@ public class GVNotificationNode extends GVFlowNode
                     }
                 }
             }
+            checkInterrupted("GVNotificationNode", logger);
             if (criticalExc != null) {
                 environment.put(getOutput(), criticalExc);
             }
@@ -155,6 +157,9 @@ public class GVNotificationNode extends GVFlowNode
             if (GVBuffer.class.isInstance(inputObj) && (logger.isDebugEnabled() || isDumpInOut())) {
                 logger.info(GVFormatLog.formatOUTPUT((GVBuffer) outputObj, false, false));
             }
+        }
+        catch (InterruptedException exc) {
+            throw exc;
         }
         catch (Exception exc) {
             environment.put(getOutput(), exc);

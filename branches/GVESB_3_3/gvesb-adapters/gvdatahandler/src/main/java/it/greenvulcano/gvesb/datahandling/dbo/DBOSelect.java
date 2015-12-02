@@ -25,15 +25,19 @@ import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -203,8 +207,8 @@ public class DBOSelect extends AbstractDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException,
+            InterruptedException {
         XMLUtils xml = null;
         try {
             prepare();
@@ -237,6 +241,7 @@ public class DBOSelect extends AbstractDBO
             Element docRoot = doc.getDocumentElement();
 
             for (Entry<String, String> entry : statements.entrySet()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                 Object key = entry.getKey();
                 String stmt = entry.getValue();
                 Set<Integer> keyField = keysMap.get(key);
@@ -357,6 +362,15 @@ public class DBOSelect extends AbstractDBO
                                                 }
                                             }
                                                 break;
+                                            case Types.NCHAR :
+                                            case Types.NVARCHAR : {
+                                                xml.setAttribute(col, TYPE_NAME, NSTRING_TYPE);
+                                                textVal = rs.getNString(j);
+                                                if (textVal == null) {
+                                                    textVal = "";
+                                                }
+                                            }
+                                                break;
                                             case Types.CHAR :
                                             case Types.VARCHAR : {
                                                 xml.setAttribute(col, TYPE_NAME, STRING_TYPE);
@@ -366,20 +380,32 @@ public class DBOSelect extends AbstractDBO
                                                 }
                                             }
                                                 break;
+                                            case Types.NCLOB : {
+                                                xml.setAttribute(col, TYPE_NAME, LONG_NSTRING_TYPE);
+                                                NClob clob = rs.getNClob(j);
+                                                if (clob != null) {
+                                                    Reader is = clob.getCharacterStream();
+                                                    StringWriter str = new StringWriter();
+                        
+                                                    IOUtils.copy(is, str);
+                                                    is.close();
+                                                    textVal = str.toString();
+                                                }
+                                                else {
+                                                    textVal = "";
+                                                }
+                                            }
+                                                break;
                                             case Types.CLOB : {
                                                 xml.setAttribute(col, TYPE_NAME, LONG_STRING_TYPE);
                                                 Clob clob = rs.getClob(j);
                                                 if (clob != null) {
-                                                    InputStream is = clob.getAsciiStream();
-                                                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                                    IOUtils.copy(is, baos);
+                                                	Reader is = clob.getCharacterStream();
+                                                    StringWriter str = new StringWriter();
+                        
+                                                    IOUtils.copy(is, str);
                                                     is.close();
-                                                    try {
-                                                        textVal = new String(baos.toByteArray(), 0, (int) clob.length());
-                                                    }
-                                                    catch (SQLFeatureNotSupportedException exc) {
-                                                        textVal = baos.toString();
-                                                    }
+                                                    textVal = str.toString();
                                                 }
                                                 else {
                                                     textVal = "";
@@ -496,11 +522,17 @@ public class DBOSelect extends AbstractDBO
         }
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
+        }
+        catch (InterruptedException exc) {
+            logger.error("DBO[" + getName() + "] interrupted", exc);
+            throw exc;
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         finally {
             // cleanup();

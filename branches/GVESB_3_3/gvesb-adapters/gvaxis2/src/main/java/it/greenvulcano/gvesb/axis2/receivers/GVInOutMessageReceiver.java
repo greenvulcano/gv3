@@ -84,7 +84,12 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
             if (logger.isDebugEnabled()) {
             	logger.debug("INPUT Envelope:\n" + input.getEnvelope().toString());
             }
-            input.getEnvelope().toString();
+            else {
+            	input.getEnvelope().toString();
+            }
+            String inputNS = input.getEnvelope().getNamespace().getNamespaceURI();
+            logger.debug("Input version URI: " + inputNS);
+
             try {
                 mrConfigurator.checkConfig();
             }
@@ -139,7 +144,7 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
                     else if (inputType.equals("body-element")) {
                         inObj = input.getEnvelope().getBody().getFirstElement().toString();
                     }
-                    else if (inputType.equals("header")) { // inputType.equals("header")
+                    else if (inputType.equals("header")) {
                         inObj = input.getEnvelope().getHeader().toString();
                     }
                     else if (inputType.equals("envelope-om")) {
@@ -151,7 +156,7 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
                     else if (inputType.equals("body-element-om")) {
                         inObj = input.getEnvelope().getBody().getFirstElement();
                     }
-                    else { // returnType.equals("header")
+                    else { // returnType.equals("header-om")
                         inObj = input.getEnvelope().getHeader();
                     }
 
@@ -159,6 +164,7 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
 
                     currentGVBuffer.setProperty("WS_SERVICE", serviceName);
                     currentGVBuffer.setProperty("WS_OPERATION", operationName);
+                    currentGVBuffer.setProperty("WS_REQ_SOAP_VERSION", inputNS);
                     currentGVBuffer.setProperty("WS_CONTENT_TYPE",
                             (String) input.getProperty(Constants.Configuration.MESSAGE_TYPE));
                     // get remote transport address...
@@ -190,10 +196,11 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
 
                     String refDP = selectedOperation.getRefDp();
                     if ((refDP != null) && (refDP.length() > 0)) {
-                        logger.debug("Calling configured Data Provider: " + refDP);
-                        output.getOptions().setSoapVersionURI(input.getEnvelope().getNamespace().getNamespaceURI());
+                    	//logger.debug("Output version URI(in): " + (output.getEnvelope() != null ? output.getEnvelope().getNamespace().getNamespaceURI() : ""));
+                        output.getOptions().setSoapVersionURI(inputNS);
                         DataProviderManager dataProviderManager = DataProviderManager.instance();
                         IDataProvider dataProvider = dataProviderManager.getDataProvider(refDP);
+                        logger.debug("Calling configured Data Provider: " + dataProvider);
                         try {
                             dataProvider.setContext(output);
                             dataProvider.setObject(outputGVBuffer);
@@ -211,6 +218,7 @@ public class GVInOutMessageReceiver extends AbstractInOutMessageReceiver
                     else {
                         output.setEnvelope((SOAPEnvelope) outputGVBuffer.getObject());
                     }
+                    //logger.debug("Output version URI(out): " + output.getEnvelope().getNamespace().getNamespaceURI());
 
                     if ("Y".equalsIgnoreCase(outputGVBuffer.getProperty("WS_FORCE_TX_ROLLBACK"))) {
                         logger.warn("Output contains WS_FORCE_TX_ROLLBACK=Y : prepare to roll back transaction");

@@ -79,7 +79,8 @@ public interface IDBO
      * @throws DBOException
      *         if any error occurs.
      */
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException;
+    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException, 
+            InterruptedException;
 
     /**
      * Method <i>execute</i> implemented by IDBO classes having read interaction
@@ -94,7 +95,8 @@ public interface IDBO
      * @throws DBOException
      *         if any error occurs.
      */
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException;
+    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException, 
+            InterruptedException;
 
     /**
      * @param dataIn
@@ -104,7 +106,7 @@ public interface IDBO
      * @throws DBOException
      */
     public void execute(Object dataIn, OutputStream dataOut, Connection conn, Map<String, Object> props)
-            throws DBOException;
+            throws DBOException, InterruptedException;
 
     /**
      * @return the configured name of this IDBO

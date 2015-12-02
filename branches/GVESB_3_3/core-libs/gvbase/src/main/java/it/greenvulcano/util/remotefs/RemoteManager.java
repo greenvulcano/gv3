@@ -289,7 +289,7 @@ public abstract class RemoteManager
      * @throws RemoteManagerException
      */
     public abstract Set<FileProperties> ls(String remoteDirectory, String fileNamePattern, Date modifiedSince,
-            int fileTypeFilter) throws RemoteManagerException;
+            int fileTypeFilter, Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Downloads a file, whose name is <i>remoteFile</i>, from the
@@ -305,8 +305,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the download is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean get(String remoteDirectory, String remoteFile, OutputStream outputStream)
-            throws RemoteManagerException;
+    public abstract boolean get(String remoteDirectory, String remoteFile, OutputStream outputStream,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Downloads from the <i>remoteDirectory</i> directory all file/directory
@@ -324,8 +324,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the download is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean get(String remoteDirectory, String remoteFilePattern, String localDirectory)
-            throws RemoteManagerException;
+    public abstract boolean get(String remoteDirectory, String remoteFilePattern, String localDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Downloads a file, whose name is <i>remoteFile</i>, from the
@@ -346,8 +346,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the download is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean get(String remoteDirectory, String remoteFile, String localDirectory, String localFile)
-            throws RemoteManagerException;
+    public abstract boolean get(String remoteDirectory, String remoteFile, String localDirectory, String localFile,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Downloads a directory, whose path is <i>remoteDirectory</i>, with all its
@@ -367,8 +367,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the download is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean getDir(String remoteDirectory, String localParentDirectory, String localDirectory)
-            throws RemoteManagerException;
+    public abstract boolean getDir(String remoteDirectory, String localParentDirectory, String localDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Uploads a local file, read from <i>inputDataStream</i>, to a remote
@@ -383,8 +383,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the upload is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean put(InputStream inputDataStream, String remoteDirectory, String remoteFile)
-            throws RemoteManagerException;
+    public abstract boolean put(InputStream inputDataStream, String remoteDirectory, String remoteFile,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Uploads a local file, whose name is <i>localFile</i>, from the
@@ -405,8 +405,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the upload is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean put(String localDirectory, String localFile, String remoteDirectory, String remoteFile)
-            throws RemoteManagerException;
+    public abstract boolean put(String localDirectory, String localFile, String remoteDirectory, String remoteFile,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Uploads a local file/directory, whose name match <i>localFilePattern</i>,
@@ -422,8 +422,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the upload is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean put(String localDirectory, String localFilePattern, String remoteDirectory)
-            throws RemoteManagerException;
+    public abstract boolean put(String localDirectory, String localFilePattern, String remoteDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Uploads a local directory, whose name is <i>localDirectory</i>, with all
@@ -443,8 +443,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the upload is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean putDir(String localDirectory, String remoteParentDirectory, String remoteDirectory)
-            throws RemoteManagerException;
+    public abstract boolean putDir(String localDirectory, String remoteParentDirectory, String remoteDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Removes a remote entry, whose name is <i>remoteEntryName</i>, from the
@@ -458,7 +458,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the removal is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean rm(String remoteDirectory, String entryNamePattern) throws RemoteManagerException;
+    public abstract boolean rm(String remoteDirectory, String entryNamePattern, Map<String, String> optProperties)
+            throws RemoteManagerException;
 
     /**
      * Renames a remote entry, whose name is <i>oldEntryName</i>, within the
@@ -474,8 +475,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the renaming is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean mv(String remoteDirectory, String oldEntryName, String newEntryName)
-            throws RemoteManagerException;
+    public abstract boolean mv(String remoteDirectory, String oldEntryName, String newEntryName,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Creates an empty remote directory, whose name is <i>remoteDirectory</i>,
@@ -488,7 +489,8 @@ public abstract class RemoteManager
      * @return <code>true</code> if the directory creation is successful.
      * @throws RemoteManagerException
      */
-    public abstract boolean mkdir(String remoteParentDirectory, String remoteDirectory) throws RemoteManagerException;
+    public abstract boolean mkdir(String remoteParentDirectory, String remoteDirectory,
+            Map<String, String> optProperties) throws RemoteManagerException;
 
     /**
      * Return a key identifying the Monitor instance.

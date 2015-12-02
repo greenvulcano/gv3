@@ -28,6 +28,7 @@ import it.greenvulcano.gvesb.virtual.ConnectionException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import org.w3c.dom.Node;
 
@@ -70,14 +71,15 @@ public class JSCallOperation implements CallOperation
      *
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
-    {
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException, 
+            InterruptedException {
     	ExpressionEvaluatorHelper.startEvaluation();
         try {
         	ExpressionEvaluatorHelper.getValue(ExpressionEvaluatorHelper.JSCRIPT_EXPRESSION_LANGUAGE, javaScript, gvBuffer);
             return gvBuffer;
         }
         catch (Exception exc) {
+            ThreadUtils.checkInterrupted(exc);
             throw new CallException("GVVCL_CALL_SERVICE_ERROR", new String[][]{{"service", gvBuffer.getService()},
                     {"system", gvBuffer.getSystem()}, {"id", gvBuffer.getId().toString()},
                     {"message", exc.getMessage()}}, exc);

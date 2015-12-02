@@ -2000,6 +2000,7 @@ data.setObject(baos.toByteArray());</Script>
                                  connection-factory="java:/XAConnectionFactory"
                                  destination-name="gvesb/jms/queue/TOUPPER_A_Response_Queue"
                                  destination-type="queue" dump-message="true"
+                                 keep-input-extra-properties="true"
                                  name="JMSDequeueFrom::TOUPPER_A_Resp"
                                  receive-timeout="10000"
                                  receive-timeout-overridable="false"
@@ -2795,6 +2796,12 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
             </DataSourceSet>
         </DataSourceSets>
         <Transformations>
+            <Base64Transformation Operation="Encode"
+                                  class="it.greenvulcano.gvesb.gvdte.transformers.bin.bin2bin.Base64Transformer"
+                                  name="ToBase64" type="transformation"/>
+            <Base64Transformation Operation="Decode"
+                                  class="it.greenvulcano.gvesb.gvdte.transformers.bin.bin2bin.Base64Transformer"
+                                  name="FromBase64" type="transformation"/>
             <XSLTransformation DataSourceSet="Default" XSLMapName="identity.xsl"
                                class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
                                name="identityXML" type="transformation"/>

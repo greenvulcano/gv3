@@ -34,6 +34,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.bin.Dump;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayInputStream;
@@ -89,8 +90,6 @@ public class DBOBuilder implements IDBOBuilder
             return "Source: " + source + " - xpathSrc: " + xpathSrc + " - xpathDest: " + xpathDest;
         }
     }
-
-    private static int                concurrentCount    = 0;
 
     private Vector<IDBO>              dboList            = null;
     private Map<String, IDBO>         dboOutputMap       = null;
@@ -230,8 +229,8 @@ public class DBOBuilder implements IDBOBuilder
      *      byte[], java.util.Map)
      */
     @Override
-    public void XML2DB(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException
-    {
+    public void XML2DB(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException,
+            InterruptedException {
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
@@ -249,8 +248,6 @@ public class DBOBuilder implements IDBOBuilder
         Connection conn = null;
         String intConnName = null;
         try {
-            concurrentCount++;
-
             logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
@@ -269,6 +266,8 @@ public class DBOBuilder implements IDBOBuilder
             AbstractRetriever.setAllConnection(conn, configurationNode);
 
             while (hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
+
                 IDBO idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -340,6 +339,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
@@ -350,7 +350,6 @@ public class DBOBuilder implements IDBOBuilder
             catch (Exception exc) {
                 // do nothing
             }
-            concurrentCount--;
             logger.debug("End executing XML2DB [" + operation + "]. Execution time: " + getPartialTime(start));
             NMDC.pop();
         }
@@ -361,8 +360,8 @@ public class DBOBuilder implements IDBOBuilder
      *      byte[], java.util.Map)
      */
     @Override
-    public byte[] DB2XML(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException
-    {
+    public byte[] DB2XML(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException,
+            InterruptedException {
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
@@ -374,8 +373,6 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayInputStream in = null;
         String intConnName = null;
         try {
-            concurrentCount++;
-
             logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
@@ -395,6 +392,7 @@ public class DBOBuilder implements IDBOBuilder
             IDBO idbo = firstDBO();
             dataCache.put(idbo.getInputDataName(), file);
             while (hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -541,6 +539,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.warn("Unhandled Exception", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
@@ -551,7 +550,6 @@ public class DBOBuilder implements IDBOBuilder
             catch (Exception exc) {
                 // do nothing
             }
-            concurrentCount--;
             logger.debug("End executing DB2XML [" + operation + "]. Execution time: " + getPartialTime(start));
             NMDC.pop();
         }
@@ -562,8 +560,8 @@ public class DBOBuilder implements IDBOBuilder
      *      byte[], java.util.Map)
      */
     @Override
-    public byte[] CALL(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException
-    {
+    public byte[] CALL(String operation, byte[] file, Map<String, Object> params) throws DataHandlerException,
+            InterruptedException {
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
@@ -583,8 +581,6 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayInputStream in = null;
         String intConnName = null;
         try {
-            concurrentCount++;
-
             logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
@@ -604,6 +600,7 @@ public class DBOBuilder implements IDBOBuilder
             IDBO idbo = firstDBO();
             dataCache.put(idbo.getInputDataName(), file);
             while (hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -701,6 +698,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
@@ -711,7 +709,6 @@ public class DBOBuilder implements IDBOBuilder
             catch (Exception exc) {
                 // do nothing
             }
-            concurrentCount--;
             logger.debug("End executing CALL [" + operation + "]. Execution time: " + getPartialTime(start));
             NMDC.pop();
         }
@@ -722,8 +719,8 @@ public class DBOBuilder implements IDBOBuilder
      *      java.lang.Object, java.util.Map)
      */
     @Override
-    public DHResult EXECUTE(String operation, Object object, Map<String, Object> params) throws DataHandlerException
-    {
+    public DHResult EXECUTE(String operation, Object object, Map<String, Object> params) throws DataHandlerException,
+            InterruptedException {
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
@@ -755,8 +752,6 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayOutputStream out = null;
         String intConnName = null;
         try {
-            concurrentCount++;
-
             logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
@@ -778,6 +773,7 @@ public class DBOBuilder implements IDBOBuilder
             dhr.setData(object);
             dataCache.put(idbo.getInputDataName(), dhr);
             while (hasNext()) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -1040,6 +1036,7 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
             logger.error("Unhandled Exception", exc);
+            ThreadUtils.checkInterrupted(exc);
             throw new DataHandlerException("Unhandled Exception: " + exc.getMessage(), exc);
         }
         finally {
@@ -1050,7 +1047,6 @@ public class DBOBuilder implements IDBOBuilder
             catch (Exception exc) {
                 // do nothing
             }
-            concurrentCount--;
             logger.debug("End executing EXECUTE [" + operation + "]. Execution time: " + getPartialTime(start));
             NMDC.pop();
         }

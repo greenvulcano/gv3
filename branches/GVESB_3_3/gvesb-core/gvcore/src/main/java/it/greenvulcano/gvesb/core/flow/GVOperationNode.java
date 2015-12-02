@@ -181,13 +181,14 @@ public class GVOperationNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-    	long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         Object data = null;
         String input = getInput();
         String output = getOutput();
         logger.info("Executing GVOperationNode '" + getId() + "'");
+        checkInterrupted("GVOperationNode", logger);
         dumpEnvironment(logger, true, environment);
 
         data = environment.get(input);
@@ -225,6 +226,10 @@ public class GVOperationNode extends GVFlowNode
             }
             internalData = outputServices.perform(internalData);
             environment.put(output, internalData);
+        }
+        catch (InterruptedException exc) {
+            logger.error("GVOperationNode [" + getId() + "] interrupted!", exc);
+            throw exc;
         }
         catch (Exception exc) {
             isError = true;
@@ -306,7 +311,7 @@ public class GVOperationNode extends GVFlowNode
      * @throws GVCoreException
      *         if an error occurs at Virtual Communication Layer or core level
      */
-    protected GVBuffer performVCLOpCall(GVBuffer gvBuffer) throws GVCoreException
+    protected GVBuffer performVCLOpCall(GVBuffer gvBuffer) throws GVCoreException, InterruptedException
     {
         GVBuffer outputGVBuffer = null;
 
@@ -324,6 +329,10 @@ public class GVOperationNode extends GVFlowNode
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatOUTPUT(outputGVBuffer, false, false));
             }
+        }
+        catch (InterruptedException exc) {
+            logger.error("VCLOperation in GVOperationNode '" + getId() + "' interrupted.");
+            throw exc;
         }
         catch (VCLException exc) {
             throw new GVCoreException("GVCORE_VCL_OPERATION_ERROR", new String[][]{{"id", getId()},

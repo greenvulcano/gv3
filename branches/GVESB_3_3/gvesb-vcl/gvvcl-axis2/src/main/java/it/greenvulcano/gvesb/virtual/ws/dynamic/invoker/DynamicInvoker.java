@@ -80,6 +80,7 @@ public class DynamicInvoker
     private String                                     _operationName;
     private String                                     _portName;
     private boolean                                    throwsFault         = false;
+    private boolean                                    emptyAction         = false;
 
     private long                                       timeout             = -1;
 
@@ -321,14 +322,21 @@ public class DynamicInvoker
             long timeoutInMilliseconds = timeout * 1000;
             options.setTimeOutInMilliSeconds(timeoutInMilliseconds);
         }
-        String soapAction = opDesc.getSOAPAction();
-        if ((soapAction != null) && !"".equals(soapAction)) {
-            logger.debug("Setting Action Header to: " + soapAction);
-            options.setAction(soapAction);
+        if (emptyAction) {
+        	logger.debug("Setting Action Header to: ");
+        	options.setAction("");
+        	options.setProperty(org.apache.axis2.Constants.Configuration.DISABLE_SOAP_ACTION, true);
         }
         else {
-            logger.debug("Setting Action Header to: " + _operationName);
-            options.setAction(_operationName);
+            String soapAction = opDesc.getSOAPAction();
+            if (soapAction != null) {
+                logger.debug("Setting Action Header to: " + soapAction);
+                options.setAction(soapAction);
+            }
+            else {
+                logger.debug("Setting Action Header to: " + _operationName);
+                options.setAction(_operationName);
+            }
         }
         String epr = svcDesc.getAddress();
         if (isREST) {
@@ -338,7 +346,7 @@ public class DynamicInvoker
             logger.debug("Setting REST Verb: " + opDesc.getVerb());
             options.setProperty(Constants.Configuration.HTTP_METHOD, opDesc.getVerb());
             logger.debug("Setting REST MessageType: " + opDesc.getMediaType());
-            //options.setProperty(Constants.Configuration.MESSAGE_TYPE, opDesc.getMediaType());
+            // options.setProperty(Constants.Configuration.MESSAGE_TYPE, opDesc.getMediaType());
             options.setProperty(Constants.Configuration.CONTENT_TYPE, HTTPConstants.MEDIA_TYPE_X_WWW_FORM);
             options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_X_WWW_FORM);
         }
@@ -402,9 +410,8 @@ public class DynamicInvoker
                 logger.error("Error invoking operation " + _operationName, exc);
                 postSendFaultOperations(client, modules);
                 if (throwsFault) {
-                    throw new WSCallException("ERROR_INVOKING_OPERATION", new String[][]{{"cause",
-                            "Error invoking operation " + _operationName}, 
-                            {"fault", "" + exc}}, exc);
+                    throw new WSCallException("ERROR_INVOKING_OPERATION", new String[][]{
+                            {"cause", "Error invoking operation " + _operationName}, {"fault", "" + exc}}, exc);
                 }
             }
             result = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
@@ -415,9 +422,8 @@ public class DynamicInvoker
             else {
                 logger.debug("Service request returned with NULL message!");
                 if (fault != null) {
-                    throw new WSCallException("ERROR_INVOKING_OPERATION", new String[][]{{"cause",
-                            "Error invoking operation " + _operationName}, 
-                            {"fault", "" + fault}}, fault);
+                    throw new WSCallException("ERROR_INVOKING_OPERATION", new String[][]{
+                            {"cause", "Error invoking operation " + _operationName}, {"fault", "" + fault}}, fault);
                 }
             }
         }
@@ -427,7 +433,7 @@ public class DynamicInvoker
                     re);
         }
         catch (WSCallException e) {
-        	throw e;
+            throw e;
         }
         catch (Exception e) {
             logger.error("Cannot execute service", e);
@@ -632,5 +638,15 @@ public class DynamicInvoker
     public void setThrowsFault(boolean throwsFault)
     {
         this.throwsFault = throwsFault;
+    }
+    
+    public boolean isEmptyAction()
+    {
+        return emptyAction;
+    }
+
+    public void setEmptyAction(boolean emptyAction)
+    {
+        this.emptyAction = emptyAction;
     }
 }

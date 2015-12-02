@@ -47,6 +47,7 @@ public class CryptoTransformer implements DTETransformer
 {
     private static final Logger logger  = GVLogger.getLogger(CryptoTransformer.class);
 
+    private String              name;
     private String              keyId   = "";
     private boolean             encrypt = false;
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
@@ -67,6 +68,7 @@ public class CryptoTransformer implements DTETransformer
     {
         logger.debug("Init start");
         try {
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             encrypt = XMLConfig.get(node, "@Operation").equals("Encrypt");
             keyId = XMLConfig.get(node, "@KeyID", CryptoHelper.DEFAULT_KEY_ID);
             logger.debug("Loaded parameters: operation = " + (encrypt ? "Encrypt" : "Decrypt") + " - keyID = "
@@ -83,6 +85,11 @@ public class CryptoTransformer implements DTETransformer
         }
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
     /**
      * The <code>input</code> parameter is a byte array. The return value is a byte array
      * representing the input encrypted or decrypted.
@@ -97,8 +104,8 @@ public class CryptoTransformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
-    {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         try {
             byte[] inputBuffer = (byte[]) input;

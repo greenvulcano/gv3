@@ -31,10 +31,13 @@ import it.greenvulcano.util.xml.XMLUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -51,6 +54,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 import org.w3c.dom.Document;
@@ -232,6 +236,15 @@ public class DBOThreadSelect extends AbstractDBO
                                         }
                                     }
                                         break;
+                                     case Types.NCHAR :
+                                     case Types.NVARCHAR : {
+                                        xml.setAttribute(col, TYPE_NAME, STRING_TYPE);
+                                        textVal = rs.getNString(j);
+                                        if (textVal == null) {
+                                             textVal = "";
+                                        }
+                                    }
+                                        break;
                                     case Types.CHAR :
                                     case Types.VARCHAR :{
                                         xml.setAttribute(col, TYPE_NAME, STRING_TYPE);
@@ -241,19 +254,32 @@ public class DBOThreadSelect extends AbstractDBO
                                         }
                                     }
                                         break;
-                                    case Types.CLOB :{
-                                        xml.setAttribute(col, TYPE_NAME, STRING_TYPE);
+                                    case Types.NCLOB : {
+                                        xml.setAttribute(col, TYPE_NAME, LONG_NSTRING_TYPE);
+                                        NClob clob = rs.getNClob(j);
+                                        if (clob != null) {
+                                            Reader is = clob.getCharacterStream();
+                                            StringWriter str = new StringWriter();
+                
+                                            IOUtils.copy(is, str);
+                                            is.close();
+                                            textVal = str.toString();
+                                        }
+                                        else {
+                                            textVal = "";
+                                        }
+                                    }
+                                        break;
+                                    case Types.CLOB : {
+                                        xml.setAttribute(col, TYPE_NAME, LONG_STRING_TYPE);
                                         Clob clob = rs.getClob(j);
                                         if (clob != null) {
-                                            InputStream is = clob.getAsciiStream();
-                                            byte[] buffer = new byte[2048];
-                                            ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-                                            int size;
-                                            while ((size = is.read(buffer)) != -1) {
-                                                baos.write(buffer, 0, size);
-                                            }
+                                        	Reader is = clob.getCharacterStream();
+                                            StringWriter str = new StringWriter();
+                
+                                            IOUtils.copy(is, str);
                                             is.close();
-                                            textVal = baos.toString();
+                                            textVal = str.toString();
                                         }
                                         else {
                                             textVal = "";

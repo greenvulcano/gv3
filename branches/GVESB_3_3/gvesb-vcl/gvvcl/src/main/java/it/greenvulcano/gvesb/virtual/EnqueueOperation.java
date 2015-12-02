@@ -37,6 +37,6 @@ public interface EnqueueOperation extends Operation
     /**
      * @see it.greenvulcano.gvesb.virtual.Operation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, EnqueueException, InvalidDataException;
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, EnqueueException, InvalidDataException, InterruptedException;
 
 }

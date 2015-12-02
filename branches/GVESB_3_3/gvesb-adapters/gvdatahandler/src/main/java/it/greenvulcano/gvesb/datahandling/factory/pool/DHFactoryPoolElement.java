@@ -74,7 +74,7 @@ public class DHFactoryPoolElement extends DHFactory implements ConfigurationList
      * @see it.greenvulcano.gvesb.datahandling.factory.DHFactory#getDBOBuilder(String)
      */
     @Override
-    public IDBOBuilder getDBOBuilder(String name) throws DataHandlerException
+    public IDBOBuilder getDBOBuilder(String name) throws DataHandlerException, InterruptedException
     {
         if (!isInitialized()) {
             initialize(null);

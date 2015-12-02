@@ -75,6 +75,7 @@ import org.w3c.dom.NodeList;
 public class XSLFOPTransformer implements DTETransformer {
     private static Logger          logger    = GVLogger.getLogger(XSLFOPTransformer.class);
 
+    private String                 name;
     private String                 validationType;
 
     private String                 xslMapName;
@@ -110,6 +111,7 @@ public class XSLFOPTransformer implements DTETransformer {
             this.dsf = dsf;
             fopFactory = FopFactory.newInstance();
 
+            name = XMLConfig.get(nodo, "@name", "NO_NAME");
             xslMapName = XMLConfig.get(nodo, "@XSLMapName");
             outputMIME = XMLConfig.get(nodo, "@OutputMIME", "application/pdf");
             dataSourceSet = XMLConfig.get(nodo, "@DataSourceSet", "Default");
@@ -162,6 +164,11 @@ public class XSLFOPTransformer implements DTETransformer {
         }
     }
 
+
+    @Override
+    public String getName() {
+        return name;
+    }
 
     /**
      * This method initialize the Map containing templates for certain
@@ -227,7 +234,8 @@ public class XSLFOPTransformer implements DTETransformer {
      * @throws DTETransfException
      *             if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException {
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+            InterruptedException {
         logger.debug("Transform start");
         Transformer transformer = null;
         try {

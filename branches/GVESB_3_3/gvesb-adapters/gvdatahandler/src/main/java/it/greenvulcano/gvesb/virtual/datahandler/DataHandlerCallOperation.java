@@ -68,8 +68,8 @@ public class DataHandlerCallOperation implements CallOperation
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
     @Override
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
-    {
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException,
+            InterruptedException {
         try {
             String operation = gvBuffer.getProperty(DH_SERVICE_NAME);
             if (operation == null) {
@@ -96,6 +96,9 @@ public class DataHandlerCallOperation implements CallOperation
             gvBuffer.setProperty("REC_DISCARD", "" + result.getDiscard());
             gvBuffer.setProperty("REC_DISCARD_CAUSE", "" + result.getDiscardCauseListAsString());
             return gvBuffer;
+        }
+        catch (InterruptedException exc) {
+            throw exc;
         }
         catch (DataHandlerException exc) {
             throw new DataHandlerCallException("GVVCL_DATA_HANDLER_EXCEPTION", new String[][] {{"message", exc.getMessage()}}, exc);

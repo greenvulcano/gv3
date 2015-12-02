@@ -25,6 +25,7 @@ import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -151,8 +152,8 @@ public class DBOFlatSelect extends AbstractDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException,
+            InterruptedException {
         try {
             prepare();
             rowCounter = 0;
@@ -164,6 +165,7 @@ public class DBOFlatSelect extends AbstractDBO
             StringBuffer sb = new StringBuffer(sbRowLength);
 
             if (statement != null) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                 String expandedSQL = PropertiesHandler.expand(statement, localProps, conn, null);
                 Statement sqlStatement = null;
                 try {
@@ -177,6 +179,9 @@ public class DBOFlatSelect extends AbstractDBO
                                     fieldIdToFormatter);
                             String textVal = null;
                             while (rs.next()) {
+                                if (rowCounter % 10 == 0) {
+                                    ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
+                                }
                                 for (int j = 1; j <= metadata.getColumnCount(); j++) {
                                     FieldFormatter fF = fFormatters[j];
                                     if (fF == null) {
@@ -219,6 +224,17 @@ public class DBOFlatSelect extends AbstractDBO
                                             }
                                         }
                                             break;
+                                        case Types.NCHAR :
+                                        case Types.NVARCHAR :{
+                                            String val = rs.getNString(j);
+                                            if (val == null) {
+                                                textVal = fF.formatField("");
+                                            }
+                                            else {
+                                                textVal = fF.formatField(val);
+                                            }
+                                        }
+                                            break;
                                         case Types.CHAR :
                                         case Types.VARCHAR :{
                                             String val = rs.getString(j);
@@ -228,6 +244,10 @@ public class DBOFlatSelect extends AbstractDBO
                                             else {
                                                 textVal = fF.formatField(val);
                                             }
+                                        }
+                                            break;
+                                        case Types.NCLOB :{
+                                            textVal = "";
                                         }
                                             break;
                                         case Types.CLOB :{
@@ -287,11 +307,13 @@ public class DBOFlatSelect extends AbstractDBO
         }
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         finally {
             // cleanup();

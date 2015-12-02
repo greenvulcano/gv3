@@ -45,13 +45,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -79,6 +77,7 @@ public class XML2HL7Transformer implements DTETransformer
 {
     private static final Logger     logger      = GVLogger.getLogger(XML2HL7Transformer.class);
 
+    private String                  name;
     private String                  validationType;
 
     private String                  xslMapName;
@@ -112,6 +111,7 @@ public class XML2HL7Transformer implements DTETransformer
         logger.debug("Init start");
         try {
             this.dsf = dsf;
+            name = XMLConfig.get(node, "@name", "NO_NAME");
             xslMapName = XMLConfig.get(node, "@InputXSLMapName", "");
             dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
 
@@ -162,6 +162,11 @@ public class XML2HL7Transformer implements DTETransformer
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][]{{"msg", "Unexpected error."}}, exc);
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**
@@ -238,7 +243,8 @@ public class XML2HL7Transformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+        InterruptedException
     {
         logger.debug("Transform start");
         Transformer transformer = null;

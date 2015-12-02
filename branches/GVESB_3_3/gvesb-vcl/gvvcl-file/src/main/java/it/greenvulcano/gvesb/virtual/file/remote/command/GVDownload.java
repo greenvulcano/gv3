@@ -28,10 +28,12 @@ import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.remotefs.RemoteManager;
 
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Download a remote file/directory on local file system, or in the GVBuffer
@@ -51,6 +53,7 @@ public class GVDownload implements GVRemoteCommand
     private String              toGVBufferExpression;
     private String              targetPath;
     private boolean             isCritical;
+    private Map<String, String> optProperties = new HashMap<String, String>();
 
     /**
      *
@@ -72,6 +75,15 @@ public class GVDownload implements GVRemoteCommand
         toGVBufferExpression = XMLConfig.get(node, "@toGVBufferExpression");
         targetPath = XMLConfig.get(node, "@targetPath");
         isCritical = XMLConfig.getBoolean(node, "@isCritical", true);
+
+        NodeList nl = XMLConfig.getNodeList(node, "PropertyDef");
+        if (nl != null) {
+            for (int i = 0; i < nl.getLength(); i++) {
+                String name = XMLConfig.get(nl.item(i), "@name");
+                String value = XMLConfig.get(nl.item(i), "@value", "");
+                optProperties.put(name, value);
+            }
+        }
     }
 
     /**
@@ -103,10 +115,15 @@ public class GVDownload implements GVRemoteCommand
             String currRemoteFile = PropertiesHandler.expand(remoteFilePattern, params, gvBuffer);
             String currTargetPath = PropertiesHandler.expand(targetPath, params, gvBuffer);
 
+            Map<String, String> localOptProperties = new HashMap<String, String>();
+            for (String prop : optProperties.keySet()) {
+                localOptProperties.put(prop, PropertiesHandler.expand(optProperties.get(prop), params, gvBuffer));
+            }
+            
             boolean result = true;
             if ((toGVBufferExpression != null) && (toGVBufferExpression.length() > 0)) {
                 ByteArrayOutputStream outputDataStream = new ByteArrayOutputStream();
-                result = ftpAccess.get(currRemotePath, currRemoteFile, outputDataStream);
+                result = ftpAccess.get(currRemotePath, currRemoteFile, outputDataStream, localOptProperties);
                 outputDataStream.close();
                 OGNLExpressionEvaluator ognl = new OGNLExpressionEvaluator();
                 ognl.addToContext("gvbuffer", gvBuffer);
@@ -114,7 +131,7 @@ public class GVDownload implements GVRemoteCommand
                 ognl.getValue(toGVBufferExpression, gvBuffer);
             }
             else {
-                result = ftpAccess.get(currRemotePath, currRemoteFile, currTargetPath);
+                result = ftpAccess.get(currRemotePath, currRemoteFile, currTargetPath, localOptProperties);
             }
             if (result) {
                 logger.debug("File(s) " + currRemoteFile + " successfully downloaded from remote directory "

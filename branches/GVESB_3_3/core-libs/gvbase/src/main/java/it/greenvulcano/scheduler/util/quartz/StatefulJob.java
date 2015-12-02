@@ -36,6 +36,7 @@ import org.quartz.JobExecutionException;
 public class StatefulJob implements org.quartz.StatefulJob
 {
     private static Logger logger = GVLogger.getLogger(StatefulJob.class);
+    private Thread currentThread = null; 
 
     /**
      *
@@ -54,13 +55,16 @@ public class StatefulJob implements org.quartz.StatefulJob
         String sName = "UNDEFINED";
         String gName = "UNDEFINED";
         String tName = "UNDEFINED";
+        currentThread = Thread.currentThread();
+        String cthName = currentThread.getName();
 
         NMDC.push();
         try {
             sName = context.getScheduler().getSchedulerName();
             gName = context.getJobDetail().getGroup();
             tName = context.getJobDetail().getName();
-
+            currentThread.setName(cthName + "#" + gName + "." + tName);
+            
             NMDC.setServer(JMXEntryPoint.getServerName());
             TaskManagerFactory.instance().executeTask(sName, gName, tName, context);
         }
@@ -70,7 +74,13 @@ public class StatefulJob implements org.quartz.StatefulJob
         finally {
             NMDC.pop();
             ThreadMap.clean();
+            currentThread.setName(cthName);
+            currentThread = null;
         }
+    }
+
+    public Thread getCurrentThread() {
+        return currentThread;
     }
 
 }

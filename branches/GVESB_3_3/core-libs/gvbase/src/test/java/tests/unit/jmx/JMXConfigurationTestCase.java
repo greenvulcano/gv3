@@ -34,15 +34,12 @@ import junit.framework.TestCase;
  */
 public class JMXConfigurationTestCase extends TestCase
 {
-    private static final String CONFIGURATION_FILE = "gv-jmx.xml";
-
     /**
      *
      */
     public void testJMXConfiguration()
     {
         try {
-            //JMXEntryPoint.setConfigurationFile(CONFIGURATION_FILE);
             JMXEntryPoint jmx = JMXEntryPoint.instance();
             MBeanServer server = jmx.getServer();
 

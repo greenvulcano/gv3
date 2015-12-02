@@ -10,4 +10,7 @@ second row</elem>
     </elemB>
     <elemC id="E" int="12345" intStr="12345" float="123.456" nullVal="null"/>
     <elemD id="F"/>
+    <elemL>text 1</elemL>
+    <elemL>text 2</elemL>
+    <elemL>text 3</elemL>
 </root>

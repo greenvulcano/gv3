@@ -97,7 +97,7 @@ public class ProxyCallOperation implements CallOperation
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
     @Override
-    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException
+    public GVBuffer perform(GVBuffer gvBuffer) throws ConnectionException, CallException, InvalidDataException, InterruptedException
     {
         return operation.perform(gvBuffer);
     }

@@ -264,124 +264,130 @@ public class GreenVulcano
     {
         running = true;
         try {
-	        GVBuffer gvBuffer = new GVBuffer(flowSystem, flowService, new Id(id));
-	        NMDC.push();
-	        GVBufferMDC.put(gvBuffer);
-	        NMDC.setOperation(gvsOperation);
-	
-	        GVBuffer returnData = null;
-	        GVServiceConf gvsConfig = null;
-	        ServiceConcurrencyInfo serviceConcInfo = null;
-	        boolean success = false;
-	        long startTime = 0;
-	
-	        gvContext.setContext(gvsOperation, gvBuffer);
-	
-	        try {
-	            gvContext.push();
-	            startTime = System.currentTimeMillis();
-	
-	            serviceConcInfo = ConcurrencyHandler.instance().add(GVC_SUBSYSTEM, gvBuffer);
-	            
-	            gvsConfig = createGVSConfig(gvBuffer, flowSystem, flowService);
-	            
-	            GVFlow gvOp = gvsConfig.getGVOperation(gvBuffer, gvsOperation);
-	
-	            Level level = null;
-	            try {
-	                level = GVLogger.setThreadMasterLevel(gvsConfig.getLoggerLevel());
-	                
-	                if (logger.isInfoEnabled()) {
-	                    GVBufferDump dump = new GVBufferDump(gvBuffer, false);
-	                    logger.info("INPUT GVBuffer: ");
-	                    logger.info(dump);
-	                }
-	                
-	                returnData = gvOp.recover(recoveryNode, environment);
-	                gvsConfig.manageAliasOutput(returnData);
-	    
-	                if (logger.isInfoEnabled()) {
-	                    GVBufferDump dump = new GVBufferDump(returnData, false);
-	                    logger.info("OUTPUT GVBuffer: ");
-	                    logger.info(dump);
-	                }
-	            }
-	            finally {
-	                GVLogger.removeThreadMasterLevel(level);
-	            }
-	
-	            long endTime = System.currentTimeMillis();
-	
-	            if (logger.isInfoEnabled()) {
-	                logger.info(GVFormatLog.formatENDOperation(returnData, endTime - startTime));
-	            }
-	
-	            success = true;
-	        }
-	        catch (GVCoreCallSvcException exc) {
-	            throwGVPublicException("GV_CALL_SERVICE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreInputServiceException exc) {
-	            throwGVPublicException("GV_INPUT_SERVICE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreOutputServiceException exc) {
-	            throwGVPublicException("GV_OUTPUT_SERVICE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreTimeoutException exc) {
-	            throwGVPublicException("GV_SERVICE_TIMEOUT_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreWrongOpException exc) {
-	            throwGVPublicException("GV_WRONG_PARADIGM_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreDisabledServiceException exc) {
-	            throwGVPublicException("GV_SERVICE_DISABLED_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreServiceNotFoundException exc) {
-	            throwGVPublicException("GV_SERVICE_NOT_FOUND_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreWrongInterfaceException exc) {
-	            throwGVPublicException("GV_WRONG_INTERFACE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreWrongParameterException exc) {
-	            throwGVPublicException("GV_PARAMETER_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreConfException exc) {
-	            throwGVPublicException("GV_CONFIGURATION_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreException exc) {
-	            logger.error("GVCore Internal Exception", exc);
-	            throwGVPublicException("GV_CALL_SERVICE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVPublicException exc) {
-	            logExc(exc, startTime);
-	            throw exc;
-	        }
-	        catch (Exception exc) {
-	            logExcST(exc);
-	            throwGVPublicException("GV_GENERIC_ERROR", gvBuffer, exc, startTime);
-	        }
-	        finally {
-	            if (serviceConcInfo != null) {
-	                serviceConcInfo.remove();
-	            }
-	            try {
-	                if (gvsConfig != null) {
-	                    ServiceOperationInfo serviceInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(
-	                            gvsConfig.getServiceName(), true);
-	                    serviceInfo.flowTerminated(gvsOperation, id, success);
-	                }
-	            }
-	            catch (Exception exc) {
-	                logger.warn("Error on MBean registration");
-	            }
+            GVBuffer gvBuffer = new GVBuffer(flowSystem, flowService, new Id(id));
+            NMDC.push();
+            GVBufferMDC.put(gvBuffer);
+            NMDC.setOperation(gvsOperation);
+
+            GVBuffer returnData = null;
+            GVServiceConf gvsConfig = null;
+            ServiceConcurrencyInfo serviceConcInfo = null;
+            boolean success = false;
+            long startTime = 0;
+
+            gvContext.setContext(gvsOperation, gvBuffer);
+
+            try {
+                gvContext.push();
+                startTime = System.currentTimeMillis();
+
+                serviceConcInfo = ConcurrencyHandler.instance().add(GVC_SUBSYSTEM, gvBuffer);
+
+                gvsConfig = createGVSConfig(gvBuffer, flowSystem, flowService);
+                
+                GVFlow gvOp = gvsConfig.getGVOperation(gvBuffer, gvsOperation);
+
+                Level level = null;
+                try {
+                    level = GVLogger.setThreadMasterLevel(gvsConfig.getLoggerLevel());
+
+                    if (logger.isInfoEnabled()) {
+                        GVBufferDump dump = new GVBufferDump(gvBuffer, false);
+                        logger.info("INPUT GVBuffer: ");
+                        logger.info(dump);
+                    }
+
+                    returnData = gvOp.recover(recoveryNode, environment);
+                    gvsConfig.manageAliasOutput(returnData);
+
+                    if (logger.isInfoEnabled()) {
+                        GVBufferDump dump = new GVBufferDump(returnData, false);
+                        logger.info("OUTPUT GVBuffer: ");
+                        logger.info(dump);
+                    }
+                }
+                finally {
+                    GVLogger.removeThreadMasterLevel(level);
+                }
+    
+                long endTime = System.currentTimeMillis();
+    
+                if (logger.isInfoEnabled()) {
+                    logger.info(GVFormatLog.formatENDOperation(returnData, endTime - startTime));
+                }
+    
+                success = true;
+            }
+            catch (GVCoreCallSvcException exc) {
+                throwGVPublicException("GV_CALL_SERVICE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreInputServiceException exc) {
+                throwGVPublicException("GV_INPUT_SERVICE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreOutputServiceException exc) {
+                throwGVPublicException("GV_OUTPUT_SERVICE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreTimeoutException exc) {
+                throwGVPublicException("GV_SERVICE_TIMEOUT_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreWrongOpException exc) {
+                throwGVPublicException("GV_WRONG_PARADIGM_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreDisabledServiceException exc) {
+                throwGVPublicException("GV_SERVICE_DISABLED_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreServiceNotFoundException exc) {
+                throwGVPublicException("GV_SERVICE_NOT_FOUND_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreWrongInterfaceException exc) {
+                throwGVPublicException("GV_WRONG_INTERFACE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreWrongParameterException exc) {
+                throwGVPublicException("GV_PARAMETER_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreConfException exc) {
+                throwGVPublicException("GV_CONFIGURATION_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreException exc) {
+                logger.error("GVCore Internal Exception", exc);
+                throwGVPublicException("GV_CALL_SERVICE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVPublicException exc) {
+                logExc(exc, startTime);
+                throw exc;
+            }
+            catch (InterruptedException exc) {
+                logExcST(exc);
+                throwGVPublicException("GV_INTERRUPTED_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (Exception exc) {
+                logExcST(exc);
+                throwGVPublicException("GV_GENERIC_ERROR", gvBuffer, exc, startTime);
+            }
+            finally {
+                if (serviceConcInfo != null) {
+                    serviceConcInfo.remove();
+                }
+                try {
+                    if (gvsConfig != null) {
+                        ServiceOperationInfo serviceInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(
+                                gvsConfig.getServiceName(), true);
+                        serviceInfo.flowTerminated(gvsOperation, id, success);
+                    }
+                }
+                catch (Exception exc) {
+                    logger.warn("Error on MBean registration");
+                }
 
                 gvContext.pop();
                 NMDC.pop();
-        	}
+            }
+
             return returnData;
         }
         finally {
             running = false;
+            ThreadMap.remove("IS_XA_ABORT");
         }
     }
 
@@ -394,6 +400,7 @@ public class GreenVulcano
     }
 
     protected void setValid(boolean valid) {
+        logger.debug("Invalidating GreenVulcano instance " + this);
         this.valid = valid;
     }
 
@@ -402,11 +409,11 @@ public class GreenVulcano
      */
     public void destroy(boolean force)
     {
-        valid = false;
+        setValid(false);
         if (running && !force) {
             return;
         }
-        logger.debug("Destroing GreenVulcano instance");
+        logger.debug("Destroing GreenVulcano instance " + this);
         if (gvContext != null) {
             gvContext.destroy();
             gvContext = null;
@@ -460,136 +467,140 @@ public class GreenVulcano
     {
         running = true;
         try {
-	        NMDC.push();
-	        GVBufferMDC.put(gvBuffer);
-	        NMDC.setOperation(gvsOperation);
-	
-	        GVBuffer returnData = null;
-	        GVServiceConf gvsConfig = null;
-	        ServiceConcurrencyInfo serviceConcInfo = null;
-	        boolean success = false;
-	        String id = gvBuffer.getId().toString();
-	        long startTime = 0;
-	
-	        gvContext.setContext(gvsOperation, gvBuffer);
-	
-	        try {
-	            gvContext.push();
-	            startTime = System.currentTimeMillis();
-	
-	            serviceConcInfo = ConcurrencyHandler.instance().add(GVC_SUBSYSTEM, gvBuffer);
-	
-	            if (logger.isInfoEnabled()) {
-	                logger.info(GVFormatLog.formatBEGINOperation(gvBuffer));
-	            }
-	
-	            gvsConfig = createGVSConfig(gvBuffer, flowSystem, flowService);
-	            
-	            gvsConfig.manageAliasInput(gvBuffer);
-	
-	            if (!ACLManager.canAccess(new GVCoreServiceKey(gvsConfig.getGroupName(), gvsConfig.getServiceName(),
-	                    gvsOperation))) {
-	                throw new GVCoreSecurityException("GV_SERVICE_POLICY_ERROR", new String[][]{
-	                        {"service", gvBuffer.getService()}, {"system", gvBuffer.getSystem()},
-	                        {"id", gvBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
-	            }
-	
-	            GVFlow gvOp = gvsConfig.getGVOperation(gvBuffer, gvsOperation);
-	
-	            Level level = null;
-	            try {
-	                level = GVLogger.setThreadMasterLevel(gvOp.getLoggerLevel());
-	
-	                if (logger.isInfoEnabled()) {
-	                    GVBufferDump dump = new GVBufferDump(gvBuffer, false);
-	                    logger.info("INPUT GVBuffer: ");
-	                    logger.info(dump);
-	                }
-	
-	                returnData = gvOp.perform(gvBuffer);
-	                gvsConfig.manageAliasOutput(returnData);
-	    
-	                if (logger.isInfoEnabled()) {
-	                    GVBufferDump dump = new GVBufferDump(returnData, false);
-	                    logger.info("OUTPUT GVBuffer: ");
-	                    logger.info(dump);
-	                }
-	            }
-	            finally {
-	                GVLogger.removeThreadMasterLevel(level);
-	            }
-	
-	            long endTime = System.currentTimeMillis();
-	
-	            if (logger.isInfoEnabled()) {
-	                logger.info(GVFormatLog.formatENDOperation(returnData, endTime - startTime));
-	            }
-	
-	            success = true;
-	        }
-	        catch (GVCoreCallSvcException exc) {
-	            throwGVPublicException("GV_CALL_SERVICE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreInputServiceException exc) {
-	            throwGVPublicException("GV_INPUT_SERVICE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreOutputServiceException exc) {
-	            throwGVPublicException("GV_OUTPUT_SERVICE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreTimeoutException exc) {
-	            throwGVPublicException("GV_SERVICE_TIMEOUT_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreWrongOpException exc) {
-	            throwGVPublicException("GV_WRONG_PARADIGM_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreDisabledServiceException exc) {
-	            throwGVPublicException("GV_SERVICE_DISABLED_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreServiceNotFoundException exc) {
-	            throwGVPublicException("GV_SERVICE_NOT_FOUND_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreWrongInterfaceException exc) {
-	            throwGVPublicException("GV_WRONG_INTERFACE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreWrongParameterException exc) {
-	            throwGVPublicException("GV_PARAMETER_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreConfException exc) {
-	            throwGVPublicException("GV_CONFIGURATION_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreSecurityException exc) {
-	            throwGVPublicException("GV_SERVICE_POLICY_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVCoreException exc) {
-	            logger.error("GVCore Internal Exception", exc);
-	            throwGVPublicException("GV_CALL_SERVICE_ERROR", gvBuffer, exc, startTime);
-	        }
-	        catch (GVPublicException exc) {
-	            logExc(exc, startTime);
-	            throw exc;
-	        }
-	        catch (Exception exc) {
-	            logExcST(exc);
-	            throwGVPublicException("GV_GENERIC_ERROR", gvBuffer, exc, startTime);
-	        }
-	        finally {
-	            if (serviceConcInfo != null) {
-	                serviceConcInfo.remove();
-	            }
-	            try {
-	                if (gvsConfig != null) {
-	                    ServiceOperationInfo serviceInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(
-	                            gvsConfig.getServiceName(), true);
-	                    serviceInfo.flowTerminated(gvsOperation, id, success);
-	                }
-	            }
-	            catch (Exception exc) {
-	                logger.warn("Error on MBean registration");
-	            }
-	
-	            gvContext.pop();
-	            gvContext.cleanup();
-	            NMDC.pop();
+            NMDC.push();
+            GVBufferMDC.put(gvBuffer);
+            NMDC.setOperation(gvsOperation);
+
+            GVBuffer returnData = null;
+            GVServiceConf gvsConfig = null;
+            ServiceConcurrencyInfo serviceConcInfo = null;
+            boolean success = false;
+            String id = gvBuffer.getId().toString();
+            long startTime = 0;
+
+            gvContext.setContext(gvsOperation, gvBuffer);
+
+            try {
+                gvContext.push();
+                startTime = System.currentTimeMillis();
+
+                serviceConcInfo = ConcurrencyHandler.instance().add(GVC_SUBSYSTEM, gvBuffer);
+
+                if (logger.isInfoEnabled()) {
+                    logger.info(GVFormatLog.formatBEGINOperation(gvBuffer));
+                }
+
+                gvsConfig = createGVSConfig(gvBuffer, flowSystem, flowService);
+
+                gvsConfig.manageAliasInput(gvBuffer);
+
+                if (!ACLManager.canAccess(new GVCoreServiceKey(gvsConfig.getGroupName(), gvsConfig.getServiceName(),
+                        gvsOperation))) {
+                    throw new GVCoreSecurityException("GV_SERVICE_POLICY_ERROR", new String[][]{
+                            {"service", gvBuffer.getService()}, {"system", gvBuffer.getSystem()},
+                            {"id", gvBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
+                }
+
+                GVFlow gvOp = gvsConfig.getGVOperation(gvBuffer, gvsOperation);
+
+                Level level = null;
+                try {
+                    level = GVLogger.setThreadMasterLevel(gvOp.getLoggerLevel());
+
+                    if (logger.isInfoEnabled()) {
+                        GVBufferDump dump = new GVBufferDump(gvBuffer, false);
+                        logger.info("INPUT GVBuffer: ");
+                        logger.info(dump);
+                    }
+
+                    returnData = gvOp.perform(gvBuffer);
+                    gvsConfig.manageAliasOutput(returnData);
+
+                    if (logger.isInfoEnabled()) {
+                        GVBufferDump dump = new GVBufferDump(returnData, false);
+                        logger.info("OUTPUT GVBuffer: ");
+                        logger.info(dump);
+                    }
+                }
+                finally {
+                    GVLogger.removeThreadMasterLevel(level);
+                }
+    
+                long endTime = System.currentTimeMillis();
+    
+                if (logger.isInfoEnabled()) {
+                    logger.info(GVFormatLog.formatENDOperation(returnData, endTime - startTime));
+                }
+    
+                success = true;
+            }
+            catch (GVCoreCallSvcException exc) {
+                throwGVPublicException("GV_CALL_SERVICE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreInputServiceException exc) {
+                throwGVPublicException("GV_INPUT_SERVICE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreOutputServiceException exc) {
+                throwGVPublicException("GV_OUTPUT_SERVICE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreTimeoutException exc) {
+                throwGVPublicException("GV_SERVICE_TIMEOUT_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreWrongOpException exc) {
+                throwGVPublicException("GV_WRONG_PARADIGM_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreDisabledServiceException exc) {
+                throwGVPublicException("GV_SERVICE_DISABLED_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreServiceNotFoundException exc) {
+                throwGVPublicException("GV_SERVICE_NOT_FOUND_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreWrongInterfaceException exc) {
+                throwGVPublicException("GV_WRONG_INTERFACE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreWrongParameterException exc) {
+                throwGVPublicException("GV_PARAMETER_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreConfException exc) {
+                throwGVPublicException("GV_CONFIGURATION_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreSecurityException exc) {
+                throwGVPublicException("GV_SERVICE_POLICY_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVCoreException exc) {
+                logger.error("GVCore Internal Exception", exc);
+                throwGVPublicException("GV_CALL_SERVICE_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (GVPublicException exc) {
+                logExc(exc, startTime);
+                throw exc;
+            }
+            catch (InterruptedException exc) {
+                logExcST(exc);
+                throwGVPublicException("GV_INTERRUPTED_ERROR", gvBuffer, exc, startTime);
+            }
+            catch (Exception exc) {
+                logExcST(exc);
+                throwGVPublicException("GV_GENERIC_ERROR", gvBuffer, exc, startTime);
+            }
+            finally {
+                if (serviceConcInfo != null) {
+                    serviceConcInfo.remove();
+                }
+                try {
+                    if (gvsConfig != null) {
+                        ServiceOperationInfo serviceInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(
+                                gvsConfig.getServiceName(), true);
+                        serviceInfo.flowTerminated(gvsOperation, id, success);
+                    }
+                }
+                catch (Exception exc) {
+                    logger.warn("Error on MBean registration");
+                }
+
+                gvContext.pop();
+                gvContext.cleanup();
+                NMDC.pop();
             }
 
             return returnData;

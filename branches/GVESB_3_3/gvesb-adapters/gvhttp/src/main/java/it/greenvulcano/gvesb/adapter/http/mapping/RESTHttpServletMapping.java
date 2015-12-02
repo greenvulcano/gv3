@@ -560,8 +560,21 @@ public class RESTHttpServletMapping implements HttpServletMapping
                 if (respContentType == null) {
                     respContentType = responseContentType;
                 }
-                setRespContentTypeAndCharset(resp, respContentType, respCharacterEncoding);
-
+                String fileName = response.getProperty("HTTP_RESP_FILE_NAME");
+                if ((fileName != null) && !"".equals(fileName)) {
+                    int fileSize = -1;
+                    if (data instanceof byte[]) {
+                        fileSize = ((byte[]) data).length;
+                    }
+                    else {
+                        throw new InboundHttpResponseException("Invalid GVBuffer content: " + data.getClass().getName());
+                    }
+                    setRespDownloadHeaders(resp, respContentType, fileName, fileSize);
+                }
+                else {
+	          setRespContentTypeAndCharset(resp, respContentType, respCharacterEncoding);
+                }
+	
                 OutputStream out = resp.getOutputStream();
                 if (respContentType.equals(AdapterHttpConstants.APPXML_MIMETYPE_NAME) ||
                     respContentType.equals(AdapterHttpConstants.APPJSON_MIMETYPE_NAME) ||
@@ -627,5 +640,28 @@ public class RESTHttpServletMapping implements HttpServletMapping
     {
         resp.setContentType(contentType);
         resp.setCharacterEncoding(charset);
+    }
+
+    /**
+     * Sets header fields for file download.
+     * 
+     * @param resp
+     *        An HttpServletResponse object
+     * @param contentType
+     *        A string containing the declared response's content type
+     * @param fileName
+     *        A string containing the downloaded file name
+     * @param fileSize
+     *        A string containing the downloaded file size
+     */
+    private void setRespDownloadHeaders(HttpServletResponse resp, String contentType, String fileName, int fileSize)
+    {
+        resp.setContentType(contentType);
+        resp.setContentLength(fileSize);
+        resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        resp.setHeader("Connection", "close");
+        resp.setHeader("Expires", "-1");
+        resp.setHeader("Pragma", "no-cache");
+        resp.setHeader("Cache-Control", "no-cache");
     }
 }

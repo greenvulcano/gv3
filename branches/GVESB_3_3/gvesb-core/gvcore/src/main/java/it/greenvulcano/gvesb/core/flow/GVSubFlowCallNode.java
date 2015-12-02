@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -86,6 +87,15 @@ public class GVSubFlowCallNode extends GVFlowNode
      * The SubFlow instances cache.
      */
     private Map<String, GVSubFlow> subFlowMap       = null;
+    /**
+     * the input services
+     */
+    private GVInternalServiceHandler inputServices  = new GVInternalServiceHandler();
+    /**
+     * the output services
+     */
+    private GVInternalServiceHandler outputServices = new GVInternalServiceHandler();
+
     /**
      * If true update the log context.
      */
@@ -138,13 +148,14 @@ public class GVSubFlowCallNode extends GVFlowNode
      *      boolean)
      */
     @Override
-    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException
+    public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-    	long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         GVBuffer internalData = null;
         String input = getInput();
         String output = getOutput();
         logger.info("Executing GVSubFlowCallNode '" + getId() + "'");
+        checkInterrupted("GVSubFlowCallNode", logger);
         dumpEnvironment(logger, true, environment);
 
         Object inData = environment.get(input);
@@ -179,7 +190,7 @@ public class GVSubFlowCallNode extends GVFlowNode
                 if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
                     try {
-                        logger.debug("Working on Input data provider: " + dataProvider.getClass());
+                        logger.debug("Working on Input data provider: " + dataProvider);
                         dataProvider.setObject(internalData);
                         Object inputCall = dataProvider.getResult();
                         internalData.setObject(inputCall);
@@ -188,14 +199,16 @@ public class GVSubFlowCallNode extends GVFlowNode
                         dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
                     }
                 }
-                data = subFlow.perform(internalData, onDebug);
+                internalData = inputServices.perform(internalData);
+                internalData = subFlow.perform(internalData, onDebug);
+                internalData = outputServices.perform(internalData);
                 if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
                     IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
                     try {
-                        logger.debug("Working on Output data provider: " + dataProvider.getClass());
-                        dataProvider.setObject(data);
+                        logger.debug("Working on Output data provider: " + dataProvider);
+                        dataProvider.setObject(internalData);
                         Object outputCall = dataProvider.getResult();
-                        data.setObject(outputCall);
+                        internalData.setObject(outputCall);
                     }
                     finally {
                         dataProviderManager.releaseDataProvider(outputRefDP, dataProvider);
@@ -205,10 +218,14 @@ public class GVSubFlowCallNode extends GVFlowNode
             finally {
                 NMDC.pop();
             }
-            environment.put(output, data);
+            environment.put(output, internalData);
             if (logger.isDebugEnabled() || isDumpInOut()) {
-                logger.info(GVFormatLog.formatOUTPUT(data, false, false));
+                logger.info(GVFormatLog.formatOUTPUT(internalData, false, false));
             }
+        }
+        catch (InterruptedException exc) {
+            logger.error("GVSubFlowCallNode [" + getId() + "] interrupted!", exc);
+            throw exc;
         }
         catch (Exception exc) {
             environment.put(output, exc);
@@ -281,6 +298,8 @@ public class GVSubFlowCallNode extends GVFlowNode
     @Override
     public void cleanUp() throws GVCoreException
     {
+        inputServices.cleanUp();
+        outputServices.cleanUp();
         for (GVRouting r : routingVector) {
             r.cleanUp();
         }
@@ -294,6 +313,8 @@ public class GVSubFlowCallNode extends GVFlowNode
     {
         defNode = null;
         subFlow = null;
+        inputServices = null;
+        outputServices = null;
         routingVector.clear();
         if (subFlowMap != null) {
             Iterator<String> i = subFlowMap.keySet().iterator();
@@ -329,6 +350,15 @@ public class GVSubFlowCallNode extends GVFlowNode
             }
 
             createSubFlow(null);
+            
+            Node intSvcNode = XMLConfig.getNode(defNode, "InputServices");
+            if (intSvcNode != null) {
+                inputServices.init(intSvcNode, this, true);
+            }
+            intSvcNode = XMLConfig.getNode(defNode, "OutputServices");
+            if (intSvcNode != null) {
+                outputServices.init(intSvcNode, this, false);
+            }
         }
         catch (XMLConfigException exc) {
             throw new GVCoreConfException("GVCORE_SUB_FLOW_SEARCH_ERROR", new String[][]{{"id", getId()},
@@ -339,7 +369,7 @@ public class GVSubFlowCallNode extends GVFlowNode
                     {"node", XPathFinder.buildXPath(defNode)}}, exc);
         }
         catch (GVException exc) {
-            throw new GVCoreConfException("GVCORE_SUB_FLOW_SEARCH_ERROR", new String[][]{{"id", getId()},
+            throw new GVCoreConfException("GVCORE_SUB_FLOW_INIT_ERROR", new String[][]{{"id", getId()},
                     {"node", XPathFinder.buildXPath(defNode)}}, exc);
         }
     }

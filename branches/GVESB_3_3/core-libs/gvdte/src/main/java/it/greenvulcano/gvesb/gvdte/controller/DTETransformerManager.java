@@ -23,6 +23,7 @@ import it.greenvulcano.gvesb.gvdte.DTEException;
 import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
 import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,10 +72,12 @@ public class DTETransformerManager
      * @param name
      * @return the requested transformer
      * @throws DTEException
+     * @throws InterruptedException 
      */
-    public DTETransformer getTransformer(String name) throws DTEException
+    public DTETransformer getTransformer(String name) throws DTEException, InterruptedException
     {
         logger.debug("Requested transformer '" + name + "'");
+        ThreadUtils.checkInterrupted("DTETransformerManager", name, logger);
         DTETransformer transformer = transformerCache.get(name);
         if (transformer == null) {
             logger.debug("Transformer '" + name + "' not found in cache, creating ...");

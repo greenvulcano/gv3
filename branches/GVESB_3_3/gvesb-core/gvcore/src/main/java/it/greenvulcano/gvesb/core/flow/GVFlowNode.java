@@ -25,6 +25,7 @@ import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.log.GVBufferDump;
+import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xpath.XPathFinder;
 
@@ -152,8 +153,10 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      * @return the next flow node id
      * @throws GVCoreException
      *         if errors occurs
+     * @throws InterruptedException
+     *         if the current Thread is interrupted
      */
-    public String execute(Map<String, Object> environment) throws GVCoreException {
+    public String execute(Map<String, Object> environment) throws GVCoreException, InterruptedException {
         return execute(environment, false);
     }
 
@@ -165,8 +168,11 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      * @return the next flow node id
      * @throws GVCoreException
      *         if errors occurs
+     * @throws InterruptedException
+     *         if the current Thread is interrupted
      */
-    public abstract String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException;
+    public abstract String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, 
+        InterruptedException;
 
     /**
      * @return if GVBuffer should be dumped for input and output logging
@@ -202,6 +208,19 @@ public abstract class GVFlowNode implements GVFlowNodeIF
     public abstract void destroy() throws GVCoreException;
 
     /**
+     * 
+     * @return
+     *        the current Thread interrupted state
+     */
+    public boolean isInterrupted() {
+        return Thread.currentThread().isInterrupted();
+    }
+
+    public void checkInterrupted(String type, Logger logger) throws InterruptedException {
+        ThreadUtils.checkInterrupted(type, getId(), logger);
+    }
+    
+    /**
      * @param logger
      * @param isInput
      * @param environment
@@ -226,7 +245,7 @@ public abstract class GVFlowNode implements GVFlowNodeIF
                 else if (value instanceof Throwable) {
                     msg.append("***** Entry [").append(element.getKey()).append("] of class: ").append(
                             value.getClass().getName()).append("\n").append(value).append("\n").append(
-                            TextUtils.getStackTrace((Throwable) value)).append("\n\n");
+                            ThreadUtils.getStackTrace((Throwable) value)).append("\n\n");
                 }
                 else if (value == null) {
                     msg.append("***** Entry [").append(element.getKey()).append("] IS NULL\n\n");

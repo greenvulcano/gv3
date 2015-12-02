@@ -31,6 +31,7 @@
             <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc"/>
             <XPathNamespace namespace="http://drools.org/drools-5.0/change-set"
                             prefix="drools-cs"/>
+            <XPathNamespace namespace="urn:hl7-org:v2xml" prefix="hl7"/>
         </XPath>
     </GVXPath>
     <GVForwards name="JMS_FORWARD" type="module">
@@ -2277,6 +2278,7 @@ data.setObject(fb);</Script>
                                  connection-factory="java:/XAConnectionFactory"
                                  destination-name="gvesb/jms/queue/TOUPPER_A_Response_Queue"
                                  destination-type="queue" dump-message="true"
+                                 keep-input-extra-properties="true"
                                  name="JMSDequeueFrom::TOUPPER_A_Resp"
                                  receive-timeout="10000"
                                  receive-timeout-overridable="false"
@@ -3106,6 +3108,12 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
             </DataSourceSet>
         </DataSourceSets>
         <Transformations>
+            <Base64Transformation Operation="Encode"
+                                  class="it.greenvulcano.gvesb.gvdte.transformers.bin.bin2bin.Base64Transformer"
+                                  name="ToBase64" type="transformation"/>
+            <Base64Transformation Operation="Decode"
+                                  class="it.greenvulcano.gvesb.gvdte.transformers.bin.bin2bin.Base64Transformer"
+                                  name="FromBase64" type="transformation"/>
             <XSLTransformation DataSourceSet="Default" XSLMapName="identity.xsl"
                                class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
                                name="identityXML" type="transformation"/>
@@ -3190,6 +3198,9 @@ SVC=LIST_BIRT[!TYPE=EXCEL or PDF(default)][!NAME=.....]</message-text>
             <XSLTransformation DataSourceSet="Default" XSLMapName="HL7/TestHL7_OK.xsl"
                                class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
                                name="TestHL7_OK" type="transformation"/>
+            <XSLTransformation DataSourceSet="Default" XSLMapName="HL7/TestHL7_KO.xsl"
+                               class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
+                               name="TestHL7_KO" type="transformation"/>
         </Transformations>
     </GVDataTransformation>
     <GVTaskManagerConfiguration name="GVTASKS" type="module">

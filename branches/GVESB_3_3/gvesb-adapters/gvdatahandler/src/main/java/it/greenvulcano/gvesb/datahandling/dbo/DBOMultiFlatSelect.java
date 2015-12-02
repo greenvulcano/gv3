@@ -25,7 +25,7 @@ import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -179,7 +179,6 @@ public class DBOMultiFlatSelect extends AbstractDBO
     @Override
     public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException
     {
-        XMLUtils xml = null;
         try {
             prepare();
             rowCounter = 0;
@@ -212,6 +211,9 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                         fieldIdToFormatter);
                                 String textVal = null;
                                 while (rs.next()) {
+                                    if (rowCounter % 10 == 0) {
+                                        ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
+                                    }
                                     for (int j = 1; j <= metadata.getColumnCount(); j++) {
                                         FieldFormatter fF = fFormatters[j];
                                         if (fF == null) {
@@ -254,6 +256,17 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                                 }
                                             }
                                                 break;
+                                            case Types.NCHAR :
+                                            case Types.NVARCHAR :{
+                                                String val = rs.getNString(j);
+                                                if (val == null) {
+                                                    textVal = fF.formatField("");
+                                                }
+                                                else {
+                                                    textVal = fF.formatField(val);
+                                                }
+                                            }
+                                                break;
                                             case Types.CHAR :
                                             case Types.VARCHAR :{
                                                 String val = rs.getString(j);
@@ -263,6 +276,10 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                                 else {
                                                     textVal = fF.formatField(val);
                                                 }
+                                            }
+                                                break;
+                                            case Types.NCLOB :{
+                                                textVal = "";
                                             }
                                                 break;
                                             case Types.CLOB :{
@@ -322,11 +339,13 @@ public class DBOMultiFlatSelect extends AbstractDBO
         }
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                        + exc.getMessage(), exc);
         }
         finally {
             //cleanup();

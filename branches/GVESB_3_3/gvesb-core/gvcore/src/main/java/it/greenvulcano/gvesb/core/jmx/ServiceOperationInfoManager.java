@@ -285,6 +285,29 @@ public final class ServiceOperationInfoManager implements ConfigurationListener,
     }
 
     /**
+     * Returns the requested SubFlowInfo instance
+     *
+     * @param service
+     *        The Service name
+     * @param operation
+     *        The Operation name
+     * @param subflow
+     *        The SubFlow name
+     * @param register
+     *        If true register the instance as a JMX object
+     * @return The requested SubFlowInfo instance
+     * @throws Exception
+     *         If errors occurs
+     */
+    public SubFlowInfo getSubFlowInfo(String service, String operation, String subflow, boolean register)
+    throws Exception
+    {
+        ServiceOperationInfo serviceInfo = getServiceOperationInfo(service, register);
+        OperationInfo operationInfo =  serviceInfo.getOperationInfo(operation, register);
+        return operationInfo.getSubFlowInfo(subflow, register);
+    }
+    
+    /**
      * Returns the requested OperationInfo instance
      *
      * @param operationInfoData
@@ -298,6 +321,22 @@ public final class ServiceOperationInfoManager implements ConfigurationListener,
     public OperationInfo getOperationInfo(Map<String, Object> operationInfoData, boolean register) throws Exception
     {
         return getOperationInfo((String) operationInfoData.get("IDService"), (String) operationInfoData.get("IDOperation"), register);
+    }
+
+    /**
+     * Returns the requested SubFlowInfo instance
+     *
+     * @param subflowInfoData
+     *        The object data
+     * @param register
+     *        If true register the instance as a JMX object
+     * @return The requested SubFlowInfo instance
+     * @throws Exception
+     *         If errors occurs
+     */
+    public SubFlowInfo getSubFlowInfo(Map<String, Object> subflowInfoData, boolean register) throws Exception
+    {
+        return getSubFlowInfo((String) subflowInfoData.get("IDService"), (String) subflowInfoData.get("IDOperation"), (String) subflowInfoData.get("IDSubFlow"), register);
     }
 
     /**
@@ -343,6 +382,13 @@ public final class ServiceOperationInfoManager implements ConfigurationListener,
                 activation = operationInfo.getOperationActivation() ? "on" : "off";
                 xpdb.addAttribute(document, "/GreenVulcanoStatus[1]/Services[1]/Service[" + i
                         + "]/Operation[" + j + "]", "operationActivation", activation);
+                Map<String, SubFlowInfo> subflowMap = operationInfo.getGVSubFlowMap();
+                int k = 1;
+                for (SubFlowInfo subflowInfo : subflowMap.values()) {
+                    xpdb.addAttribute(document, "/GreenVulcanoStatus[1]/Services[1]/Service[" + i
+                            + "]/Operation[" + j + "]/SubFlow[" + k + "]", "subflow", subflowInfo.getSubFlow());
+                    k++;
+                }
                 j++;
             }
             i++;

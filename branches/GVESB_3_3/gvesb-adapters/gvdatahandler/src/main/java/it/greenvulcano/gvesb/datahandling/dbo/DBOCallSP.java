@@ -897,8 +897,8 @@ public class DBOCallSP extends AbstractDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException, 
+            InterruptedException {
         dataOut = new ByteArrayOutputStream();
         try {
             createOutXML();
@@ -919,8 +919,8 @@ public class DBOCallSP extends AbstractDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException
-    {
+    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException, 
+            InterruptedException {
         dataOut = data;
         try {
             createOutXML();
@@ -942,8 +942,7 @@ public class DBOCallSP extends AbstractDBO
      */
     @Override
     public void execute(Object dataIn, OutputStream dataOut, Connection conn, Map<String, Object> props)
-            throws DBOException
-    {
+            throws DBOException, InterruptedException {
         this.dataOut = dataOut;
         try {
             createOutXML();

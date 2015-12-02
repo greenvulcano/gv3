@@ -867,9 +867,31 @@ public class TextUtils
         return new String(Base64.encodeBase64(bval), 0, length).replace('/', '$');
     }
 
+    
+    /**
+     * Check if a given string is null and if so returns an empty string.
+     * 
+     * @param value
+     * @return the input value or an empty string if input is null
+     */
+    public static String nullToEmpty(String value)
+    {
+        if (value == null) {
+            return "";
+        }
+        return value;
+    }
+    
+    public static void checkNull(String message, Object value) throws NullPointerException
+    {
+        if (value == null) {
+            throw new NullPointerException(message);
+        }
+    }
+
     /**
      * @param throwable
-     * @return riturn the stack-trace
+     * @return return the stack-trace
      */
     public static String getStackTrace(Throwable throwable)
     {
