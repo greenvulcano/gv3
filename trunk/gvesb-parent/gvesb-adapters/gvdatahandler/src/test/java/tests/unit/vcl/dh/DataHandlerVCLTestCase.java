@@ -111,7 +111,7 @@ public class DataHandlerVCLTestCase extends TestCase
         assertEquals(1, result.getRetCode());
         assertEquals("0", result.getProperty("REC_DISCARD"));
         assertEquals("0", result.getProperty("REC_UPDATE"));
-        assertEquals("0", result.getProperty("REC_TOTAL"));
+        assertEquals("1", result.getProperty("REC_TOTAL"));
         assertEquals("0", result.getProperty("REC_INSERT"));
         assertEquals("1", result.getProperty("REC_READ"));
         assertEquals("", result.getProperty("REC_DISCARD_CAUSE"));
