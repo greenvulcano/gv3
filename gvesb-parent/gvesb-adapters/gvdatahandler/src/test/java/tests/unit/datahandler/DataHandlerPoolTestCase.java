@@ -82,7 +82,7 @@ public class DataHandlerPoolTestCase extends TestCase
         assertNotNull(result);
         assertEquals(0, result.getDiscard());
         assertEquals(0, result.getUpdate());
-        assertEquals(0, result.getTotal());
+        assertEquals(1, result.getTotal());
         assertEquals(0, result.getInsert());
         assertEquals(1, result.getRead());
         assertEquals("", result.getDiscardCauseListAsString());

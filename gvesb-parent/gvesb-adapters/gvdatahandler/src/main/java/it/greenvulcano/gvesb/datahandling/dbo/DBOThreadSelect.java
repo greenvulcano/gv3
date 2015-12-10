@@ -488,6 +488,7 @@ public class DBOThreadSelect extends AbstractDBO
             dataOut.write(dataDOM);
 
             dhr.setRead(rowCounter);
+            dhr.setTotal(rowCounter);
 
             logger.debug("End execution of DB data read through " + dboclass);
         }

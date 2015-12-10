@@ -321,6 +321,7 @@ public class DBOFlatSelect extends AbstractDBO
             }
 
             dhr.setRead(rowCounter);
+            dhr.setTotal(rowCounter);
 
             logger.debug("End execution of DB data read through " + dboclass);
         }
