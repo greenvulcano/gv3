@@ -1,5 +1,6 @@
 importPackage(Packages.it.greenvulcano.gvesb.buffer);
 importPackage(Packages.it.greenvulcano.gvesb.utils);
+importPackage(Packages.it.greenvulcano.util.bin);
 importPackage(Packages.it.greenvulcano.util.xml);
 importPackage(Packages.it.greenvulcano.util.xpath);
 importPackage(Packages.it.greenvulcano.util.txt);

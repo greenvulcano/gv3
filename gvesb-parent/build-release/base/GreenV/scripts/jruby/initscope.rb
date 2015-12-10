@@ -2,6 +2,8 @@ module M
     include_package "it.greenvulcano.gvesb.buffer"
     [GVBuffer,Id]
     include_package "it.greenvulcano.gvesb.utils"
+    include_package "it.greenvulcano.util.bin"
+    [Dump,BinaryUtils]
     include_package "it.greenvulcano.util.xml"
     [XMLUtils]
     include_package "it.greenvulcano.util.xpath"
