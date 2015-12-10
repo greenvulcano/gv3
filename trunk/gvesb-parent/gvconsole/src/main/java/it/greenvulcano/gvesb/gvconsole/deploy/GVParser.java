@@ -34,7 +34,6 @@ import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.apache.xmlbeans.XmlException;
 
 
 /**
@@ -54,7 +53,6 @@ public class GVParser
 
     /**
      * @throws IOException
-     * @throws XmlException
      * @throws XMLConfigException
      */
     public GVParser() throws Exception
@@ -83,7 +81,7 @@ public class GVParser
         String nomeZipDir="GVDeploy_"+ DateUtils.nowToString("yyyyMMddHHmmss");
         nomeZipFile= nomeZipDir + ".zip";
         try {
-            tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}");        
+            tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}");
             appoDir = tmpDir + File.separator + nomeZipDir;
             gvDir = PropertiesHandler.expand("${{gv.app.home}}");
             String xmlDir = File.separator + "xmlconfig";
@@ -130,10 +128,10 @@ public class GVParser
             throw exc;
         }
     }
-    
+
     /**
      * The caller MUST close the stream!!!
-     * 
+     *
      * @return
      * @throws Exception
      */
@@ -178,12 +176,12 @@ public class GVParser
     {
         return nomeZipFile;
     }
-    
+
     public static void main(String[] args) throws Exception
     {
             GVParser parser = new GVParser();
             //parser.creaFileZip();
     }
-            
+
 
 }
