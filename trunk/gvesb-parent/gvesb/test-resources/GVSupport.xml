@@ -354,14 +354,6 @@
       </logger>
     </log4j:configuration>
   </GVLog4JConfiguration>
-  <GVJavaScriptConfig name="JAVASCRIPT" type="module">
-    <JavaScriptInitializers>
-      <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="basic" type="jsinit" />
-      <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="gvesb" script-file="js/initscope.js" type="jsinit" />
-      <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="JavaScriptRetriever" script-file="js/deploy/main.js" type="jsinit" />
-      <BasicJSInit class="it.greenvulcano.js.initializer.BasicJSInit" name="cfgdeploy" script-file="js/deploy/main.js" type="jsinit" />
-    </JavaScriptInitializers>
-  </GVJavaScriptConfig>
   <GVScriptConfig name="SCRIPT" type="module">
     <ScriptCache base-path="target/test-classes/scripts"/>
     <ScriptEngines>
