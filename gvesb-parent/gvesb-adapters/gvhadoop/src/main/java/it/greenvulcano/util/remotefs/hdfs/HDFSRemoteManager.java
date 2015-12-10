@@ -382,7 +382,7 @@ public class HDFSRemoteManager extends RemoteManager
 
                     FileProperties currFile = new FileProperties(fileStatusItem.getPath().getName(),
                             fileStatusItem.getModificationTime(), fileStatusItem.getLen(),
-                            fileStatusItem.isDirectory(), hasReadPermission(userAction), hasReadPermission(userAction), hasExecutePermission(userAction));
+                            fileStatusItem.isDirectory(), hasReadPermission(userAction), hasWritePermission(userAction), hasExecutePermission(userAction));
                     resultsSet.add(currFile);
                 }
                 else {
@@ -1174,30 +1174,27 @@ public class HDFSRemoteManager extends RemoteManager
     }
 
     public static boolean hasReadPermission(FsAction userAction) {
-        boolean hasPermission = (  (FsAction.ALL.name().equals(userAction.name()))
-                || (FsAction.READ.name().equals(userAction.name()) )
-                || (FsAction.READ_EXECUTE.name().equals(userAction.name()) )
-                || (FsAction.READ_WRITE.name().equals(userAction.name()) )
-                );
+        boolean hasPermission = ((FsAction.ALL == userAction)
+                || (FsAction.READ == userAction)
+                || (FsAction.READ_EXECUTE == userAction)
+                || (FsAction.READ_WRITE == userAction));
 
         return hasPermission;
     }
 
     public static boolean hasWritePermission(FsAction userAction) {
-        boolean hasPermission = (  (FsAction.ALL.name().equals(userAction.name()))
-                || (FsAction.WRITE.name().equals(userAction.name()) )
-                || (FsAction.WRITE_EXECUTE.name().equals(userAction.name()) )
-                );
+        boolean hasPermission = ((FsAction.ALL == userAction)
+                || (FsAction.WRITE == userAction)
+                || (FsAction.WRITE_EXECUTE == userAction));
 
         return hasPermission;
     }
 
     public static boolean hasExecutePermission(FsAction userAction) {
-        boolean hasPermission = (  (FsAction.ALL.name().equals(userAction.name()))
-                || (FsAction.EXECUTE.name().equals(userAction.name()) )
-                || (FsAction.READ_EXECUTE.name().equals(userAction.name()) )
-                || (FsAction.READ_WRITE.name().equals(userAction.name()) )
-                );
+        boolean hasPermission = ((FsAction.ALL == userAction)
+                || (FsAction.EXECUTE == userAction)
+                || (FsAction.READ_EXECUTE == userAction)
+                || (FsAction.READ_WRITE == userAction));
 
         return hasPermission;
     }
