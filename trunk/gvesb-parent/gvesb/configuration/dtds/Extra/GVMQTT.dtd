@@ -106,7 +106,7 @@
     #Label: @name
     #SelectOnInsert
 -->
-<!ELEMENT Moquette (Description?)>
+<!ELEMENT Moquette (Description?, moq-property*)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -130,6 +130,61 @@
     #NotNull
 -->
 <!ATTLIST Moquette messageStore CDATA #REQUIRED>
+
+<!--
+    Defines a property to set in Moquette configuration.
+
+    #Label: @name
+    #SelectOnInsert
+-->
+<!ELEMENT moq-property (Description)?>
+<!--
+    Property name.
+
+    #NotNull
+    #Unique: ../moq-property/@name
+-->
+<!ATTLIST moq-property   name CDATA #REQUIRED>
+<!--
+    Property value.
+    Can contains the following metadata:
+     - fixed : a text string;
+     - %{{class}}         : the obj class name;
+     - %{{fqclass}}       : the obj fully qualified class name;
+     - %{{package}}       : the obj package name;
+     - ${{propname}}      : a System property name;
+     - sp{{propname}}     : a System property name;
+     - env{{varname}}     : an Environment variable value;
+     - @{{propname}}      : a inProperties property name;
+     - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value,
+                                        formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} :
+                               reformat 'date' from 'source-pattern' to 'dest-pattern',
+                               and optionally from 'source-tZone' to 'dest-tZone'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+                               evaluate as if-then-else; if 'field' is equal to cond1...n,
+                               return the value of val1...n, otherwise 'default'
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+                               is equivalent to 'decode', with the difference that 'condX'
+                               can be a list of values separated by 'sep'
+     - script{{lang::[scope::]script}} : evaluate a 'lang' script, using the base context 'scope',
+                               the GVBuffer is added to the scope as 'object'
+     - js{{[scope::]script}} : evaluate a JavaScript script, using the context 'scope',
+                               the GVBuffer is added to the scope as 'object'
+     - ognl{{script}} : evaluate a OGNL script,
+                               the GVBuffer is added to the scope as 'object' (and is also the object on which execute the script !! NO MORE FROM 3.5 !!),
+     - sql{{conn::statement}}            : execute a select sql statement sql and return the value of
+                                           the first field of the first selected record.
+                                           The 'conn' parameter is the JNDI name of a DataSource
+     - sqllist{{conn[::sep]::statement}} : execute a select sql statement sql and return the value of
+                                           the first field of all selected records as a 'sep' separated list.
+                                           The 'conn' parameter is the JNDI name of a DataSource
+                                           The 'sep' parameter defaults to comma
+     - sqltable{{conn::statement}}       : executes a select sql statement and returns all values of
+                                           returned cursor as an XML.
+                                           The 'conn' parameter is the JNDI name of a DataSource
+-->
+<!ATTLIST moq-property   value CDATA #REQUIRED>
 
 <!--
     Reference an external MQTT broker.
