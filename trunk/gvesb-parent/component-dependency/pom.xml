@@ -8,7 +8,7 @@
   <groupId>it.greenvulcano.gvesb</groupId>
   <artifactId>gvesb-component-dependency</artifactId>
   <packaging>pom</packaging>
-  <version>3.5.0-Trunk</version>
+  <version>3.5.0-SNAPSHOT</version>
   <name>GreenVulcano ESB Component Dependency</name>
 
   <description>
@@ -18,6 +18,7 @@
   <url>http://www.greenvulcano.com/</url>
 
   <properties>
+    <cloud.nexus.content>http://mvn.greenvulcano.com/nexus/content</cloud.nexus.content>
     <version.adam>2.0.7</version.adam>
     <version.antlr>3.3</version.antlr>
     <version.apache.mime4j.core>0.7.2</version.apache.mime4j.core>
@@ -768,7 +769,7 @@
             <artifactId>xmlgraphics-commons</artifactId>
             <version>${version.xmlgraphics-commons}</version>
             <type>jar</type>
-            <scope>runtime</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>avalon-framework</groupId>
@@ -1379,6 +1380,13 @@
             <classifier>jdk15</classifier>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>net.sf.ezmorph</groupId>
+            <artifactId>ezmorph</artifactId>
+            <version>1.0.6</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.jbpm</groupId>
@@ -1673,6 +1681,20 @@
             <version>2.5.0</version>
         </dependency>
 
+        <!-- Neo4j -->
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-jdbc</artifactId>
+            <version>2.2-SNAPSHOT</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-jdbc-gv</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
@@ -1959,5 +1981,19 @@
 
     </dependencies>
   </dependencyManagement>
+
+  <distributionManagement>
+      <repository>
+          <id>nexus-cloud-deploy</id>
+          <name>Cloud Nexus instance - RELEASES </name>
+          <url>${cloud.nexus.content}/repositories/releases</url>
+      </repository>
+      <snapshotRepository>
+          <id>nexus-cloud-deploy</id>
+          <name>Cloud Nexus instance - SNAPSHOTS</name>
+          <url>${cloud.nexus.content}/repositories/snapshots</url>
+          <uniqueVersion>false</uniqueVersion>
+      </snapshotRepository>
+  </distributionManagement>
 
 </project>

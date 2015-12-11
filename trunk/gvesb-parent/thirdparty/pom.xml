@@ -5,13 +5,15 @@
     <parent>
         <groupId>it.greenvulcano.gvesb</groupId>
         <artifactId>gvesb-parent</artifactId>
-        <version>3.5.0-Trunk</version>
+        <version>3.5.0-SNAPSHOT</version>
     </parent>
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvesb-thirdparty</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>GreenVulcano ESB Thirdparty Build</name>
+
     <url>http://www.greenvulcano.com</url>
     <description>GreenVulcano ESB (system module)</description>
 
@@ -395,6 +397,69 @@
 
                         <dependency>
                             <groupId>it.greenvulcano.gvesb</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.commons</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.commons.gvdp</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.core</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.core.debug</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.vcl</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.adapter</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.adapter.rsh</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.util</groupId>
+                            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>gvesb</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>it.greenvulcano.gvesb.util.jboss</groupId>
                             <artifactId>*</artifactId>
                             <mapping>
                                 <componentId>gvesb</componentId>
@@ -1102,7 +1167,7 @@
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -1158,245 +1223,245 @@
 
         <!-- GVESB -->
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvbase</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvdte</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvws_commons</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvpolicy</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvthroughput</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvhttp_commons</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons.gvdp</groupId>
             <artifactId>gvdp-http</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons.gvdp</groupId>
             <artifactId>gvdp-axis2</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons.gvdp</groupId>
             <artifactId>gvdp-jms</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>ejb-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>ejb3-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-internal</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-j2ee</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-axis2</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-rest</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-http</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-jca</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-jmx</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-mail</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-msexchange</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-ldap</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-file</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-db</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl-openspcoop</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.util</groupId>
             <artifactId>gvstatistics</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.util</groupId>
             <artifactId>ejb-gvstatistics</artifactId>
             <type>ejb</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core</groupId>
             <artifactId>gvcore</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core</groupId>
             <artifactId>gvcore-ode</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core</groupId>
             <artifactId>ejb-gvcore</artifactId>
             <type>ejb</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core</groupId>
             <artifactId>ejb3-gvcore</artifactId>
             <type>ejb</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core.debug</groupId>
             <artifactId>ejb3-gvdebug</artifactId>
             <type>ejb</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core</groupId>
             <artifactId>gvcore-forward</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core</groupId>
             <artifactId>task-gvcore</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvdatahandler</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvbirt</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvexcel</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvpdf</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvhttp</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvaxis2</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvjbpm</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvrules</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvrules</artifactId>
             <type>test-jar</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvhl7</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvsocial</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvzmq</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter.rsh</groupId>
             <artifactId>gvrsh_commons</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter.rsh</groupId>
             <artifactId>gvrsh_server</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter.rsh</groupId>
             <artifactId>gvrsh_client</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvhadoop</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvdicom</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvnet</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvpushnot</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter</groupId>
             <artifactId>gvmqtt</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.util.jboss</groupId>
             <artifactId>jboss51-utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.util</groupId>
             <artifactId>gvboot</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core.debug</groupId>
             <artifactId>gvdebug</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.util</groupId>
             <artifactId>gvconsole</artifactId>
             <type>war</type>
         </dependency>

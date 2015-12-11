@@ -2,27 +2,30 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <artifactId>gvesb.adapters</artifactId>
-    <groupId>it.greenvulcano.gvesb</groupId>
-    <version>3.5.0-Trunk</version>
+      <groupId>it.greenvulcano.gvesb.adapter</groupId>
+      <artifactId>gvesb.adapters</artifactId>
+      <version>3.5.0-SNAPSHOT</version>
   </parent>
-  <groupId>it.greenvulcano.gvesb</groupId>
+
+  <groupId>it.greenvulcano.gvesb.adapter</groupId>
   <artifactId>gvhadoop</artifactId>
+  <version>3.5.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>GreenVulcano ESB Hadoop HDFS Adapter</name>
 
   <dependencies>
     <dependency>
-      <groupId>it.greenvulcano.gvesb</groupId>
+      <groupId>it.greenvulcano.gvesb.commons</groupId>
       <artifactId>gvbase</artifactId>
     </dependency>
     <dependency>
-      <groupId>it.greenvulcano.gvesb</groupId>
+      <groupId>it.greenvulcano.gvesb.vcl</groupId>
       <artifactId>gvvcl</artifactId>
     </dependency>
     <dependency>
-      <groupId>it.greenvulcano.gvesb</groupId>
+      <groupId>it.greenvulcano.gvesb.vcl</groupId>
         <artifactId>gvvcl-file</artifactId>
     </dependency>
 

@@ -2,13 +2,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>it.greenvulcano.gvesb</groupId>
+        <groupId>it.greenvulcano.gvesb.vcl</groupId>
         <artifactId>gvesb.core.gvvcl</artifactId>
-        <version>3.5.0-Trunk</version>
+        <version>3.5.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>it.greenvulcano.gvesb</groupId>
+    <groupId>it.greenvulcano.gvesb.vcl</groupId>
     <artifactId>ejb3-test</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
     <packaging>ejb</packaging>
     <name>GreenVulcano VCL J2EE Test EJB3</name>
 
