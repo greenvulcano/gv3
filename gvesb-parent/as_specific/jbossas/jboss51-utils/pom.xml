@@ -2,18 +2,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>it.greenvulcano.gvesb</groupId>
+        <groupId>it.greenvulcano.gvesb.util.jboss</groupId>
         <artifactId>it.greenvulcano.as_specific.jbossas</artifactId>
-        <version>3.5.0-Trunk</version>
+        <version>3.5.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>it.greenvulcano.gvesb</groupId>
+    <groupId>it.greenvulcano.gvesb.util.jboss</groupId>
     <artifactId>jboss51-utils</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
     <name>GreenVulcano JBoss 5.1 AS specific libs</name>
 
     <dependencies>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvbase</artifactId>
         </dependency>
 

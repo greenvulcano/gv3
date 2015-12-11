@@ -3,19 +3,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>it.greenvulcano.gvesb</groupId>
+        <groupId>it.greenvulcano.gvesb.commons</groupId>
         <artifactId>gvesb.core.libs</artifactId>
-        <version>3.5.0-Trunk</version>
+        <version>3.5.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>it.greenvulcano.gvesb</groupId>
+    <groupId>it.greenvulcano.gvesb.commons</groupId>
     <artifactId>pdf-doc</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>GreenVulcano PDF Reference Guide</name>
 
     <dependencies>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvbase</artifactId>
         </dependency>
 
@@ -26,12 +27,10 @@
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>xmlgraphics-commons</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>avalon-framework</groupId>
             <artifactId>avalon-framework</artifactId>
-            <scope>runtime</scope>
         </dependency>
 	</dependencies>
 </project>

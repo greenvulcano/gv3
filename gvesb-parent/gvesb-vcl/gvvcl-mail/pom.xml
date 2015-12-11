@@ -2,20 +2,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>it.greenvulcano.gvesb</groupId>
+        <groupId>it.greenvulcano.gvesb.vcl</groupId>
         <artifactId>gvesb.core.gvvcl</artifactId>
-        <version>3.5.0-Trunk</version>
+        <version>3.5.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>it.greenvulcano.gvesb</groupId>
+    <groupId>it.greenvulcano.gvesb.vcl</groupId>
     <artifactId>gvvcl-mail</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>GreenVulcano VCL Mail Plugin</name>
 
     <dependencies>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.vcl</groupId>
             <artifactId>gvvcl</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.geronimo.javamail</groupId>
             <artifactId>geronimo-javamail_1.4_mail</artifactId>

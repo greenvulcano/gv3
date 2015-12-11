@@ -4,27 +4,28 @@
     <parent>
         <groupId>it.greenvulcano.gvesb</groupId>
         <artifactId>gvesb-parent</artifactId>
-        <version>3.5.0-Trunk</version>
+        <version>3.5.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>it.greenvulcano.gvesb</groupId>
+    <groupId>it.greenvulcano.gvesb.adapter</groupId>
     <artifactId>gvesb.adapters</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>GreenVulcano Adapters Parent Project</name>
 
     <dependencies>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvbase</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core</groupId>
             <artifactId>gvcore</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.commons</groupId>
             <artifactId>gvpolicy</artifactId>
             <scope>provided</scope>
         </dependency>

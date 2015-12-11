@@ -2,18 +2,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>it.greenvulcano.gvesb</groupId>
+        <groupId>it.greenvulcano.gvesb.adapter.rsh</groupId>
         <artifactId>gvesb.adapters.rsh</artifactId>
-        <version>3.5.0-Trunk</version>
+        <version>3.5.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>it.greenvulcano.gvesb</groupId>
+    <groupId>it.greenvulcano.gvesb.adapter.rsh</groupId>
     <artifactId>gvrsh_server</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>GreenVulcano RSH RMI Server</name>
 
     <dependencies>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.adapter.rsh</groupId>
             <artifactId>gvrsh_commons</artifactId>
         </dependency>
     </dependencies>

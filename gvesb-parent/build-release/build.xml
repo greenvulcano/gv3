@@ -31,7 +31,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
             <pathelement location="${basedir}/../tools/lib/ant-contrib-1.0b3.jar"/>
         </classpath>
     </taskdef>
-  
+
     <!-- Read in properties file for configuration -->
     <property file="build.properties"/>
 
@@ -181,8 +181,9 @@ Please ensure that build.properties exists in the build dir of the checkout tree
                   dir="@{basedir}" resultproperty="@{resultproperty}">
                 <jvmarg value="-Xms512m"/>
                 <jvmarg value="-Xmx1024m"/>
-                <jvmarg value="-XX:MaxPermSize=256m"/>
+                <!--<jvmarg value="-XX:MaxPermSize=256m"/>-->
                 <jvmarg value="-Dmaven.artifact.threads=4"/>
+                <jvmarg value="-Dmaven.multiModuleProjectDirectory=${maven.home}"/>
                 <classpath>
                 <fileset dir="${maven.home}/boot">
                     <include name="*.jar" />
@@ -317,9 +318,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         <!-- clean-up released artifacts -->
         <delete dir="${basedir}/../maven-repository/it/greenvulcano"/>
         <!-- clean-up old release folder -->
-        <delete file="${basedir}/../thirdparty/libraries.ent"/>
-        <delete dir="${basedir}/../thirdparty/libraries"/>
-        <delete dir="${basedir}/../thirdparty/licenses"/>
+        <delete dir="${basedir}/../thirdparty/target"/>
     </target>
 
 </project>

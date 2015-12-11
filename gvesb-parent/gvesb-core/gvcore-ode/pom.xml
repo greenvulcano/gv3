@@ -2,18 +2,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>it.greenvulcano.gvesb</groupId>
+        <groupId>it.greenvulcano.gvesb.core</groupId>
         <artifactId>gvesb.core.gvcore</artifactId>
-        <version>3.5.0-Trunk</version>
+        <version>3.5.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>it.greenvulcano.gvesb</groupId>
+    <groupId>it.greenvulcano.gvesb.core</groupId>
     <artifactId>gvcore-ode</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>GreenVulcano ESB Core ODE Plugin</name>
 
     <dependencies>
         <dependency>
-            <groupId>it.greenvulcano.gvesb</groupId>
+            <groupId>it.greenvulcano.gvesb.core</groupId>
             <artifactId>gvcore</artifactId>
         </dependency>
 
