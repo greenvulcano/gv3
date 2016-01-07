@@ -91,7 +91,8 @@ public class GVKnowledgeBaseConfig implements KnowledgeBaseConfig
     {
         String baseDoc = "<change-set xmlns='http://drools.org/drools-5.0/change-set'\n"
                 + "xmlns:xs='http://www.w3.org/2001/XMLSchema-instance'\n"
-                + "xs:schemaLocation='http://drools.org/drools-5.0/change-set.xsd' >\n" + "<add></add>\n"
+                + "xs:schemaLocation='http://drools.org/drools-5.0/change-set "
+                +                    "file://change-set-1.0.0.xsd' >\n" + "<add></add>\n"
                 + "</change-set>";
         XMLUtils parser = null;
         try {
