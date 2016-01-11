@@ -25,9 +25,6 @@ import it.greenvulcano.gvesb.datahandling.IDBOBuilder;
 import it.greenvulcano.gvesb.datahandling.factory.DHFactory;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +33,8 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
+
+import org.junit.Ignore;
 
 /**
  * @version 3.5.0 Nov 07, 2015
