@@ -24,6 +24,7 @@ import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 import it.greenvulcano.log.GVLogger;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -52,6 +53,7 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
     private PoolingDataSource dataSource      = null;
     private GenericObjectPool connectionPool  = null;
     private boolean           debugJDBCConn   = false;
+    private boolean           isFirst         = true;
 
     public void init(Node node) throws GVDBException
     {
@@ -106,6 +108,26 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
             Connection conn = dataSource.getConnection();
             if (debugJDBCConn) {
                 logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "]");
+                if (isFirst) {
+                    isFirst = false;
+                    DatabaseMetaData dbmd = conn.getMetaData();  
+                    
+                    logger.debug("=====  Database info =====");  
+                    logger.debug("DatabaseProductName: " + dbmd.getDatabaseProductName() );  
+                    logger.debug("DatabaseProductVersion: " + dbmd.getDatabaseProductVersion() );  
+                    logger.debug("DatabaseMajorVersion: " + dbmd.getDatabaseMajorVersion() );  
+                    logger.debug("DatabaseMinorVersion: " + dbmd.getDatabaseMinorVersion() );  
+                    logger.debug("=====  Driver info =====");  
+                    logger.debug("DriverName: " + dbmd.getDriverName() );  
+                    logger.debug("DriverVersion: " + dbmd.getDriverVersion() );  
+                    logger.debug("DriverMajorVersion: " + dbmd.getDriverMajorVersion() );  
+                    logger.debug("DriverMinorVersion: " + dbmd.getDriverMinorVersion() );  
+                    logger.debug("=====  JDBC/DB attributes =====");  
+                    if (dbmd.supportsGetGeneratedKeys() )  
+                        logger.debug("Supports getGeneratedKeys(): true");  
+                    else  
+                        logger.debug("Supports getGeneratedKeys(): false");  
+                }
             }
 
             return conn;

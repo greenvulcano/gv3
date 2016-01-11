@@ -24,6 +24,7 @@ import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 import it.greenvulcano.log.GVLogger;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 
 import org.apache.log4j.Logger;
@@ -45,6 +46,7 @@ public class DriverConnectionBuilder implements ConnectionBuilder
     private String        password      = null;
     private String        name          = null;
     private boolean       debugJDBCConn = false;
+    private boolean       isFirst       = true;
 
     public void init(Node node) throws GVDBException
     {
@@ -82,6 +84,26 @@ public class DriverConnectionBuilder implements ConnectionBuilder
             }
             if (debugJDBCConn) {
                 logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "]");
+                if (isFirst) {
+                    isFirst = false;
+                    DatabaseMetaData dbmd = conn.getMetaData();  
+                    
+                    logger.debug("=====  Database info =====");  
+                    logger.debug("DatabaseProductName: " + dbmd.getDatabaseProductName() );  
+                    logger.debug("DatabaseProductVersion: " + dbmd.getDatabaseProductVersion() );  
+                    logger.debug("DatabaseMajorVersion: " + dbmd.getDatabaseMajorVersion() );  
+                    logger.debug("DatabaseMinorVersion: " + dbmd.getDatabaseMinorVersion() );  
+                    logger.debug("=====  Driver info =====");  
+                    logger.debug("DriverName: " + dbmd.getDriverName() );  
+                    logger.debug("DriverVersion: " + dbmd.getDriverVersion() );  
+                    logger.debug("DriverMajorVersion: " + dbmd.getDriverMajorVersion() );  
+                    logger.debug("DriverMinorVersion: " + dbmd.getDriverMinorVersion() );  
+                    logger.debug("=====  JDBC/DB attributes =====");  
+                    if (dbmd.supportsGetGeneratedKeys() )  
+                        logger.debug("Supports getGeneratedKeys(): true");  
+                    else  
+                        logger.debug("Supports getGeneratedKeys(): false");  
+                }
             }
             return conn;
         }
