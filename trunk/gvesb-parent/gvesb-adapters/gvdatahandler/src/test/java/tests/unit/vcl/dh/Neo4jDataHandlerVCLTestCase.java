@@ -21,28 +21,18 @@ package tests.unit.vcl.dh;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
-import it.greenvulcano.gvesb.datahandling.DHResult;
-import it.greenvulcano.gvesb.datahandling.IDBOBuilder;
 import it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import junit.framework.TestCase;
-import org.junit.Ignore;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.junit.Ignore;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import tests.unit.datahandler.CommonsNeo4j;
 
@@ -64,7 +54,7 @@ public class Neo4jDataHandlerVCLTestCase extends TestCase
 	{
 		Context context = new InitialContext();
 		try {
-			DataSource ds = (DataSource) context.lookup("openejb:Resource/testDHDataSource");
+			DataSource ds = (DataSource) context.lookup("openejb:Resource/testDHDataSourceN4J");
 			connection = ds.getConnection();
 		}
 		finally {

@@ -61,7 +61,9 @@ public class CommonsNeo4j
      */
     public static void clearDB(Connection connection) throws SQLException
     {
+        System.out.println("Cleaning-up DB...");
         connection.prepareStatement("MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n, r;").execute();
+        System.out.println("Cleaning-up DB completed.");
     }
 
     public static Document createInsertXmlInputData() throws Exception

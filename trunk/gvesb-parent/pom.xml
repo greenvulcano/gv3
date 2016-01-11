@@ -230,6 +230,7 @@
               <gv.app.home>${basedir}/target</gv.app.home>
               <it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath>GVCore.xml&#124;/GVCore/GVXPath/XPath</it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath>
               <org.jruby.embed.localcontext.scope>threadsafe</org.jruby.embed.localcontext.scope>
+              <it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder.debugJDBCConn>true</it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder.debugJDBCConn>
             </systemPropertyVariables>
           </configuration>
         </plugin>

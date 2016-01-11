@@ -25,6 +25,9 @@ import it.greenvulcano.gvesb.datahandling.IDBOBuilder;
 import it.greenvulcano.gvesb.datahandling.factory.DHFactory;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +36,6 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-import org.junit.Ignore;
 
 /**
  * @version 3.5.0 Nov 07, 2015
@@ -59,12 +61,33 @@ public class Neo4jDataHandlerTestCase extends TestCase
 		try {
 			DataSource ds = (DataSource) context.lookup("openejb:Resource/testDHDataSourceN4J");
 			connection = ds.getConnection();
+			
+			/*DatabaseMetaData dbmd = connection.getMetaData();  
+			System.out.println("Connection Class: " + connection.getClass().getName());
+            System.out.println("=====  Database info =====");  
+            System.out.println("DatabaseProductName: " + dbmd.getDatabaseProductName() );  
+            System.out.println("DatabaseProductVersion: " + dbmd.getDatabaseProductVersion() );  
+            System.out.println("DatabaseMajorVersion: " + dbmd.getDatabaseMajorVersion() );  
+            System.out.println("DatabaseMinorVersion: " + dbmd.getDatabaseMinorVersion() );  
+            System.out.println("=====  Driver info =====");  
+            System.out.println("DriverName: " + dbmd.getDriverName() );  
+            System.out.println("DriverVersion: " + dbmd.getDriverVersion() );  
+            System.out.println("DriverMajorVersion: " + dbmd.getDriverMajorVersion() );  
+            System.out.println("DriverMinorVersion: " + dbmd.getDriverMinorVersion() ); 
+            
+            System.out.println("Check JDBC Driver:");
+            Enumeration<java.sql.Driver> driversRegistered = DriverManager.getDrivers();
+            while(driversRegistered.hasMoreElements()){
+                java.sql.Driver driverSelected = (java.sql.Driver) driversRegistered.nextElement();
+                System.out.println("Driver Class: " + driverSelected.getClass().getName());
+                System.out.println("Driver Version: " + driverSelected.getMajorVersion() + "/" + driverSelected.getMinorVersion());
+            }*/
+
 		}
 		finally {
 			context.close();
 		}
 		CommonsNeo4j.createDB(connection);
-		connection.close();
 		dhFactory = new DHFactory();
 		dhFactory.initialize(null);
 	}
