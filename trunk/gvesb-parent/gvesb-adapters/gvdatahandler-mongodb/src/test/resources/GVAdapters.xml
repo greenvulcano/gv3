@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+  <GVDataHandlerConfiguration version="1.0" type="module" name="DH_ENGINE">
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestInsertMongoDB">
+         <!-- <statement id="0" type="insert">testdb|test_collection|{item: "AAAA", details: { model: "MODEL1", manufacturer: "XYZ Company"}, stock: [ { size: "S", qty: 25 }, { size: "M", qty: 50 } ], category: "clothing" }</statement> -->
+        <DBOMongoInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoInsert" name="TestInsert-insertMongoDB">
+            <MDBInsert id="0" db="testdb" collection="test_collection">
+                <data>{item: "AAAA", details: { model: "MODEL1", manufacturer: "XYZ Company"}, stock: [ { size: "S", qty: 25 }, { size: "M", qty: 50 } ], category: "clothing" }</data>
+           </MDBInsert>
+        </DBOMongoInsert>
+     </DBOMongoBuilder>
+
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestInsertMultiMongoDB">
+        <!-- <statement id="0" type="insert">testdb|test_collection</statement> -->
+        <DBOMongoInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoInsert" name="TestInsert-insertMultiMongoDB">
+           <MDBInsert id="0" db="testdb" collection="test_collection">
+           </MDBInsert>
+        </DBOMongoInsert>
+     </DBOMongoBuilder>
+
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestInsertPropsMongoDB">
+        <!-- <statement id="0" type="insert">testdb|test_collection|{item: "@{{ITEM_ID}}", details: { model: "14Q3", manufacturer: "@{{COMPANY}}"}, stock: [ { size: "S", qty: 25 }, { size: "M", qty: 50 } ], category: "clothing" }</statement> -->
+        <DBOMongoInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoInsert" name="TestInsert-insertPropsMongoDB">
+            <MDBInsert id="0" db="testdb" collection="test_collection">
+                <data>{item: "@{{ITEM_ID}}", details: { model: "14Q3", manufacturer: "@{{COMPANY}}"}, stock: [ { size: "S", qty: 25 }, { size: "M", qty: 50 } ], category: "clothing" }</data>
+            </MDBInsert>
+        </DBOMongoInsert>
+     </DBOMongoBuilder>
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestSelectMongoDB">
+        <!-- <statement id="0" type="select">testdb|test_collection|{"item" : "ZZZZ"}</statement>
+           <statement id="1" type="select">testdb|test_collection|{"item" : "@{{ITEM_ID}}"}</statement>
+           <statement id="2" type="select">testdb|test_collection|{ $or: [ {"stock.qty" : { $lt: 26 } }, {"stock.qty" : { $gt: 26 } } ] }</statement>
+             -->
+        <DBOMongoSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoSelect" name="TestSelect-selectMongoDB">
+           <MDBSelect id="0" db="testdb" collection="test_collection">
+                <filter>{"item" : "ZZZZ"}</filter>
+           </MDBSelect>
+           <MDBSelect id="1" db="testdb" collection="test_collection">
+                <filter>{"item" : "@{{ITEM_ID}}"}</filter>
+           </MDBSelect>
+           <MDBSelect id="2" db="testdb" collection="test_collection">
+                <filter>{ $or: [ {"stock.qty" : { $lt: 26 } }, {"stock.qty" : { $gt: 26 } } ] }</filter>
+           </MDBSelect>
+        </DBOMongoSelect>
+     </DBOMongoBuilder>
+
+     <!-- TEST 1 <statement id="0" type="select">testdb|test_collection|{"item" : "@{{ITEM_ID}}"}</statement> -->
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestSelectXmlMongoDB">
+        <DBOMongoSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoSelect" name="TestSelect-selectXmlMongoDB">
+           <MDBSelect id="0" db="testdb" collection="test_collection">
+                <filter>{"item" : "@{{ITEM_ID}}"}</filter>
+           </MDBSelect>
+        </DBOMongoSelect>
+     </DBOMongoBuilder>
+
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                     class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::testDHCallSelectRowSetMongoDB">
+        <!-- <statement id="0" type="select">testdb|test_collection|{"ID0_ROW1" : { "item" : "@{{PARAM1}}" } }</statement>
+           <statement id="1" type="select">testdb|test_collection|{"ID0_ROW2" : { "item" : "@{{PARAM2}}" } }</statement>
+           -->
+        <DBOMongoSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoSelect" name="TestSelect-selectRowSetMongoDB">
+            <MDBSelect id="0" db="testdb" collection="test_collection">
+                <filter>{"ID0_ROW1" : { "item" : "@{{PARAM1}}" } }</filter>
+            </MDBSelect>
+            <MDBSelect id="1" db="testdb" collection="test_collection">
+                <filter>{"ID0_ROW2" : { "item" : "@{{PARAM2}}" } }</filter>
+            </MDBSelect>
+        </DBOMongoSelect>
+     </DBOMongoBuilder>
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestUpdateMongoDB">
+        <!-- <statement id="0" type="update">testdb|test_collection|{ item: "@{{ITEM_ID}}" }|{ $set : {"details.model": "DETAILS_MODEL_Updated"} }</statement> -->
+        <DBOMongoUpdate type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoUpdate" name="TestUpdate-updateMongoDB">
+            <MDBUpdate id="0" db="testdb" collection="test_collection">
+                <filter>{ item: "@{{ITEM_ID}}" }</filter>
+                <set>{ $set : {"details.model": "DETAILS_MODEL_Updated"} }</set>
+            </MDBUpdate>
+        </DBOMongoUpdate>
+     </DBOMongoBuilder>
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestUpsertMongoDBInpuRowSet">
+        <!-- <statement id="0" type="upsert">testdb|test_collection|{ "name" : "MongoDBUpsert", "type" : "databaseMODIFIEDyy" }|{ $set : {category: "clothingMODIFIED"} }</statement> -->
+        <DBOMongoUpsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoUpsert" name="TestUpsert-upsertMongoDB">
+            <MDBUpsert id="0" db="testdb" collection="test_collection">
+                <filter>{ "name" : "MongoDBUpsert", "type" : "databaseMODIFIEDyy" }</filter>
+                <set>{ $set : {category: "clothingMODIFIED"} }</set>
+            </MDBUpsert>
+        </DBOMongoUpsert>
+     </DBOMongoBuilder>
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestDeleteMongoDB">
+        <!-- <statement id="0" type="delete">testdb|test_collection|{"ID0_ROW1" : { "item" : "@{{ITEM_ID}}" } }</statement> -->
+        <DBOMongoDelete type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoDelete" name="TestDelete-deleteMongoDB">
+            <MDBDelete id="0" db="testdb" collection="test_collection">
+                <filter>{"ID0_ROW1" : { "item" : "@{{ITEM_ID}}" } }</filter>
+            </MDBDelete>
+        </DBOMongoDelete>
+     </DBOMongoBuilder>
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestInsertMapReduceMongoDB">
+        <!-- <statement id="0" type="insert">testdb|test_in_mapreduce|{ cust_id : "@{{CUST_ID}}", amount: @{{AMOUNT}}, status: "@{{STATUS}}" }</statement>
+           <statement id="1" type="insert">testdb|test_in_mapreduce|{ cust_id : "@{{CUST_ID}}", amount: @{{AMOUNT}}, status: "@{{STATUS}}" }</statement>
+           <statement id="2" type="insert">testdb|test_in_mapreduce|{ cust_id : "@{{CUST_ID}}", amount: @{{AMOUNT}}, status: "@{{STATUS}}" }</statement>
+            -->
+        <DBOMongoInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoInsert" name="TestInsertMapReduce-insertMapReduceMongoDB">
+            <MDBInsert id="0" db="testdb" collection="test_in_mapreduce">
+                <data>{ cust_id : "@{{CUST_ID}}", amount: @{{AMOUNT}}, status: "@{{STATUS}}" }</data>
+            </MDBInsert>
+            <MDBInsert id="1" db="testdb" collection="test_in_mapreduce">
+                <data>{ cust_id : "@{{CUST_ID}}", amount: @{{AMOUNT}}, status: "@{{STATUS}}" }</data>
+            </MDBInsert>
+            <MDBInsert id="2" db="testdb" collection="test_in_mapreduce">
+                <data>{ cust_id : "@{{CUST_ID}}", amount: @{{AMOUNT}}, status: "@{{STATUS}}" }</data>
+            </MDBInsert>
+        </DBOMongoInsert>
+     </DBOMongoBuilder>
+     <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                      class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="GVESB::TestMapReduceMongoDB">
+        <!-- <statement id="0" type="mapreduce">testdb|test_in_mapreduce|function(){ emit( this.cust_id, this.amount ); }|function(key, values){ return Array.sum(values); }|{status : "A"}|test_out_mapreduce</statement> -->
+        <DBOMongoMapReduce type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoMapReduce" name="TestMapReduce-mapReduceMongoDB">
+            <MDBMapReduce id="0" db="testdb" input-collection="test_in_mapreduce" output-collection="test_out_mapreduce">
+                <map-function>function(){ emit( this.cust_id, this.amount ); }</map-function>
+                <reduce-function>function(key, values){ return Array.sum(values); }</reduce-function>
+                <filter>{status : "A"}</filter>
+                <!-- OUTPUT_TYPE:  REPLACE, MERGE, REDUCE, INLINE-->
+                <output-type>INLINE</output-type>
+            </MDBMapReduce>
+        </DBOMongoMapReduce>
+     </DBOMongoBuilder>
+
+  </GVDataHandlerConfiguration>
+</GVAdapters>
+

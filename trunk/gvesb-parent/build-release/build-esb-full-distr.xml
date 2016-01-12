@@ -90,6 +90,7 @@
                 <include name="Extra/GVNet.dtd"/>
                 <include name="Extra/GVPushNotification.dtd"/>
                 <include name="Extra/GVMQTT.dtd"/>
+                <include name="Extra/GVDataHandlerMongoDB.dtd"/>
             </fileset>
         </copy>
 

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+
+<GVCore version="1.0">
+  <GVCryptoHelper name="CRYPTO_HELPER" type="module"/>
+  <GVXPath name="XPATH" type="module">
+    <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
+      <Description>Funzioni estese e namespaces per l&apos;XPath.</Description>
+      <XPathExtension class="it.greenvulcano.util.xpath.search.extension.ExternalDocumentXPathFunction"
+                      function-name="document">
+            <Description>Accede ad un documento esterno. Uso: gvf:document('xml file path')</Description>
+      </XPathExtension>
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema-instance" prefix="xsi" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/soap/" prefix="soap" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl" />
+      <XPathNamespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j" />
+      <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano" prefix="gvesbws"/>
+      <XPathNamespace namespace="http://www.greenvulcano.it/jca/xml" prefix="jca" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc" />
+      <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
+    </XPath>
+  </GVXPath>
+  <GVSystems name="SYSTEMS" type="module">
+    <Systems>
+      <System id-system="GVESB" system-activation="on">
+        <Channel id-channel="TEST_CHANNEL">
+            <dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation" name="test-dh-call-select-mongo" type="call">
+                <DBOMongoBuilder  mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                        class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="TestInsertSelectXmlMongoDB">
+                    <DBOMongoInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoInsert" name="TestInsert-insertPropsMongoDB">
+                        <MDBInsert id="0" db="testdb" collection="test_collection">
+                            <data>{item: "@{{ITEM_ID}}", details: { model: "14Q3", manufacturer: "COMPANY"}, stock: [ { size: "S", qty: 25 }, { size: "M", qty: 50 } ], category: "clothing" }</data>
+                        </MDBInsert>
+                    </DBOMongoInsert>
+
+                    <DBOMongoSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoSelect" name="TestSelect-selectXmlMongoDB">
+                        <MDBSelect id="0" db="testdb" collection="test_collection">
+                            <filter>{"item" : "@{{ITEM_ID}}"}</filter>
+                        </MDBSelect>
+                    </DBOMongoSelect>
+                </DBOMongoBuilder>
+            </dh-call>
+
+            <dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation" name="test-dh-call-insert-mapreduce-mongo" type="call">
+                <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                                 class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="TestInsertAndMapReduceMongoDB">
+                    <DBOMongoInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoInsert" name="TestInsert-insertMultiMongoDB">
+                        <MDBInsert id="0" db="testdb" collection="test_in_mapreduce">
+                        </MDBInsert>
+                    </DBOMongoInsert>
+
+                    <DBOMongoMapReduce type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoMapReduce" name="TestMapReduce-mapReduceMongoDB">
+                        <MDBMapReduce id="1" db="testdb" input-collection="test_in_mapreduce" output-collection="test_out_mapreduce">
+                            <map-function>function(){ emit( this.cust_id, this.amount ); }</map-function>
+                            <reduce-function>function(key, values){ return Array.sum(values); }</reduce-function>
+                            <filter>{status : "A"}</filter>
+                            <!-- OUTPUT_TYPE:  REPLACE, MERGE, REDUCE, INLINE-->
+                            <output-type>INLINE</output-type>
+                        </MDBMapReduce>
+                    </DBOMongoMapReduce>
+                </DBOMongoBuilder>
+            </dh-call>
+
+            <dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation" name="test-dh-call-insert-update-mongo" type="call">
+                <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                                 class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="TestInsertUpdateMongoDB">
+                    <DBOMongoInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoInsert" name="TestInsert-MongoDB">
+                        <MDBInsert id="0" db="testdb" collection="test_collection">
+                            <data>{item: "@{{ITEM_ID}}", details: { model: "14Q3", manufacturer: "COMPANY"}, stock: [ { size: "S", qty: 25 }, { size: "M", qty: 50 } ], category: "clothing" }</data>
+                        </MDBInsert>
+                        <MDBInsert id="1" db="testdb" collection="test_collection">
+                            <data>{item: "AAAA", details: { model: "MODEL1", manufacturer: "XYZ Company"}, stock: [ { size: "S", qty: 25 }, { size: "M", qty: 50 } ], category: "clothing" }</data>
+                        </MDBInsert>
+                    </DBOMongoInsert>
+                    <DBOMongoUpdate type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoUpdate" name="TestUpdate-updateMongoDB">
+                        <MDBUpdate id="0" db="testdb" collection="test_collection">
+                            <filter>{ item: "@{{ITEM_ID}}" }</filter>
+                            <set>{ $set : {"details.model": "DETAILS_MODEL_Updated"} }</set>
+                        </MDBUpdate>
+                    </DBOMongoUpdate>
+                </DBOMongoBuilder>
+            </dh-call>
+
+            <dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation" name="test-dh-call-insert-multi-mongo" type="call">
+                <DBOMongoBuilder mongo-server-uri="mongodb://localhost:27017" type="dbobuilder"
+                                 class="it.greenvulcano.gvesb.datahandling.mongodb.dbobuilder.DBOMongoBuilder" name="TestInsertMultiMongoDB">
+                    <DBOMongoInsert type="dbo" class="it.greenvulcano.gvesb.datahandling.mongodb.dbo.DBOMongoInsert" name="TestInsertMulti-MongoDB">
+                        <MDBInsert id="0" db="testdb" collection="test_collection">
+                        </MDBInsert>
+                    </DBOMongoInsert>
+                </DBOMongoBuilder>
+            </dh-call>
+          </Channel>
+      </System>
+    </Systems>
+  </GVSystems>
+  <GVDataTransformation name="GVDT" type="module">
+    <DataSourceSets>
+      <DataSourceSet name="Default">
+        <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xsl" name="Default"
+          repositoryHome="target/test-classes/gvdte/datasource/xsl" type="datasource" />
+        <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xsd" name="DefaultXSD"
+          repositoryHome="target/test-classes/gvdte/datasource/xsd" type="datasource" />
+         <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="bin" name="DefaultBIN"
+          repositoryHome="target/test-classes/gvdte/datasource/bin" type="datasource"
+          formatHandlerClass="it.greenvulcano.gvesb.gvdte.config.XMLLoader"/>
+        <LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xq" name="Default"
+          repositoryHome="target/test-classes/gvdte/datasource/xq" type="datasource" />
+      </DataSourceSet>
+    </DataSourceSets>
+    <Transformations>
+      <XSLTransformation XSLMapName="identity.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
+        name="identityXML" type="transformation"/>
+    </Transformations>
+  </GVDataTransformation>
+</GVCore>
