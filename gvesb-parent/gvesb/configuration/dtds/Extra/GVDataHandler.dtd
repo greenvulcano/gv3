@@ -47,7 +47,7 @@
             </xsl:if>
         </xsl:template>
 -->
-<!ELEMENT dh-call (Description?, RetrieverConfig?, DBOBuilder+)>
+<!ELEMENT dh-call (Description?, RetrieverConfig?, (DBOBuilder|DBOMongoBuilder)+ )>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
@@ -328,7 +328,7 @@
 <!--
     Service name.
 
-    #Unique: ../DBOBuilder/@name
+    #Unique: ../*[@type='dbobuilder']/@name
     #NotNull
 -->
 <!ATTLIST DBOBuilder name CDATA #REQUIRED>

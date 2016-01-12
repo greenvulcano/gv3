@@ -50,5 +50,6 @@
         <module>gvdicom</module>
         <module>gvpushnot</module>
         <module>gvmqtt</module>
+        <module>gvdatahandler-mongodb</module>
     </modules>
 </project>

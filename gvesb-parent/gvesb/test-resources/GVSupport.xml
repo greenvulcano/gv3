@@ -276,6 +276,10 @@
         <level value="DEBUG" />
         <appender-ref ref="LOGGER_FOR_GVDH" />
       </logger>
+      <logger additivity="false" name="org.mongodb">
+        <level value="WARN" />
+        <appender-ref ref="LOGGER_FOR_GVDH" />
+      </logger>
       <logger additivity="false" name="it.greenvulcano.gvesb.ws">
         <level value="INFO" />
         <appender-ref ref="LOGGER_FOR_WS" />
