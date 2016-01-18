@@ -48,6 +48,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
+          <xs:attribute name="id" use="optional" type="xs:string"/>
           <xs:attribute name="type" use="optional" type="ColTypes"/>
           <xs:attribute name="format" use="optional"/>
           <xs:attribute name="decimal-separator" use="optional" type="xs:NMTOKEN"/>
