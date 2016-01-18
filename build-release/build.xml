@@ -31,7 +31,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
             <pathelement location="${basedir}/../tools/lib/ant-contrib-1.0b3.jar"/>
         </classpath>
     </taskdef>
-  
+
     <!-- Read in properties file for configuration -->
     <property file="build.properties"/>
 
@@ -126,6 +126,12 @@ Please ensure that build.properties exists in the build dir of the checkout tree
         <ant antfile="build-esb-full-distr.xml" dir="${basedir}" target="release"/>
     </target>
 
+    <!-- Build ESB Full No Examples distribution -->
+    <target name="full_no_examples" depends="maven-install, checkthirdparty"
+            description="Executes the ESB Full No Examples building">
+        <ant antfile="build-esb-full_no_examples-distr.xml" dir="${basedir}" target="release"/>
+    </target>
+
     <!-- Build HL7 Adapter distribution -->
     <target name="hl7" depends="configure, checkthirdparty"
             description="Executes the HL7 Adapter building">
@@ -162,6 +168,7 @@ Please ensure that build.properties exists in the build dir of the checkout tree
             description="Executes the Full building">
         <ant antfile="build-esb-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-esb-full-distr.xml" dir="${basedir}" target="release"/>
+        <ant antfile="build-esb-full_no_examples-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-hl7-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-rules-distr.xml" dir="${basedir}" target="release"/>
         <ant antfile="build-openspc-distr.xml" dir="${basedir}" target="release"/>
