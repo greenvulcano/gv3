@@ -4633,7 +4633,6 @@
     #References: {{../GVSavePointNode[@id!=../@first-node][preceding-sibling::GVOperationNode or following-sibling::GVOperationNode or preceding-sibling::GVNodeCheck or following-sibling::GVNodeCheck or preceding-sibling::ChangeGVBufferNode or following-sibling::ChangeGVBufferNode or preceding-sibling::GVNotificationNode or following-sibling::GVNotificationNode or preceding-sibling::GVIteratorOperationNode or following-sibling::GVIteratorOperationNode or preceding-sibling::GVCoreCallNode or following-sibling::GVCoreCallNode or preceding-sibling::GVSavePointNode or following-sibling::GVSavePointNode or preceding-sibling::GVSubFlowCallNode or following-sibling::GVSubFlowCallNode or preceding-sibling::GVSubFlowSpawnNode or following-sibling::GVSubFlowSpawnNode or preceding-sibling::GVSubFlowParallelNode or following-sibling::GVSubFlowParallelNode or preceding-sibling::GVSubFlowSplittedNode or following-sibling::GVSubFlowSplittedNode]}} ../GVSubFlowSplittedNode/@output
 -->
 <!ATTLIST GVSavePointNode input CDATA #REQUIRED>
-
 <!--
     Indicates the next node in the workflow to execute
     when the operation ends.
@@ -4642,7 +4641,6 @@
     #References: following-sibling::*/@id
 -->
 <!ATTLIST GVSavePointNode next-node-id CDATA #REQUIRED>
-
 <!--
     X position of the node in the VulCon workflows editor.
     Immutable, used by VulCon.
@@ -4651,7 +4649,6 @@
     #Freezed
 -->
 <!ATTLIST GVSavePointNode point-x CDATA #IMPLIED>
-
 <!--
     Y position of the node in the VulCon workflows editor.
     Immutable, used by VulCon.
@@ -4668,13 +4665,11 @@
     #Freezed
 -->
 <!ATTLIST GVSavePointNode breakpoint (true|false) #IMPLIED>
-
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 -->
 <!ATTLIST GVSavePointNode dump-in-out (true|false) #IMPLIED>
-
 <!--
     If true enable the dump of the input/output Execution Environment.
     Default false.
@@ -9929,7 +9924,6 @@
         - for properties:
             - ${property['PROP_NAME']}
     ]
-
 
     #NotNull
 -->
