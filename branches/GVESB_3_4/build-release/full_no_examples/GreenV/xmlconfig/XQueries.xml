@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XQueries>
+	<XQuery nome="GreenVulcano Services">
+		<Descrizione>GreenVulcano Services List</Descrizione>
+		<XQueryString>doc(&amp;quot;GreenVulcanoServices&amp;quot;)/GreenVulcano/Services/Service</XQueryString>
+	</XQuery>
+</XQueries>

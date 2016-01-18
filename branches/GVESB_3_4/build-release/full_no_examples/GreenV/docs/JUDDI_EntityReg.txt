@@ -1,0 +1,46 @@
+﻿authInfo è da generare con l'operazione apposita
+
+Request:
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+  <soapenv:Body>
+    <save_business generic="2.0" xmlns="urn:uddi-org:api_v2">
+      <authInfo>authToken:A53AA6D0-E91E-11E0-A6D0-CC5CA06ADAD0</authInfo>
+      <businessEntity businessKey="">
+        <name>GreenVulcano</name>
+        <description>GreenVulcano ESB</description>
+        <contacts>
+          <contact useType="general">
+            <personName>GreenVulcano domain admin</personName>
+            <phone>00000000</phone>
+            <email>boh@greenvulcano.com</email>
+          </contact>
+        </contacts>
+      </businessEntity>
+    </save_business>
+  </soapenv:Body>
+</soapenv:Envelope>
+
+Response:
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+    <soapenv:Body xmlns="urn:uddi-org:api_v2">
+        <businessDetail generic="2.0" operator="jUDDI.org">
+            <businessEntity authorizedName="GreenVulcano ESB" businessKey="B6862450-E91E-11E0-A450-92E67C7F80F4" operator="jUDDI.org">
+                <discoveryURLs>
+                    <discoveryURL useType="businessEntity">http://localhost:8080/juddi/uddiget.jsp?businesskey=B6862450-E91E-11E0-A450-92E67C7F80F4</discoveryURL>
+                </discoveryURLs>
+                <name>GreenVulcano</name>
+                <description>GreenVulcano ESB</description>
+                <contacts>
+                    <contact useType="general">
+                        <personName>GreenVulcano domain admin</personName>
+                        <phone>00000000</phone>
+                        <email>boh@greenvulcano.com</email>
+                    </contact>
+                </contacts>
+            </businessEntity>
+        </businessDetail>
+    </soapenv:Body>
+</soapenv:Envelope>
+
