@@ -74,6 +74,41 @@ public class JSONUtilsTestCase extends XMLTestCase
         String outJSON = TextUtils.readFileFromCP("testJ2X.json");
         JSONAssert.assertEquals(outJSON, json, true);
     }
+    
+    public void testXML2JSON_2() throws Exception
+    {
+        Set<String> forceElementsArray = new HashSet<String>();
+        forceElementsArray.add("driver");
+        forceElementsArray.add("manager");
+        forceElementsArray.add("supervisor");
+        forceElementsArray.add("administrator");
+        Set<String> forceStringValue = new HashSet<String>();
+        forceStringValue.add("status");
+        forceStringValue.add("code");
+        forceStringValue.add("message");
+        forceStringValue.add("token");
+        forceStringValue.add("userId");
+        forceStringValue.add("name");
+        forceStringValue.add("surname");
+        forceStringValue.add("nationalRegistration");
+        forceStringValue.add("email");
+        forceStringValue.add("telephone");
+        forceStringValue.add("address");
+        forceStringValue.add("town");
+        forceStringValue.add("country");
+        forceStringValue.add("zipCode");
+        forceStringValue.add("company");
+        forceStringValue.add("fleetId");
+        forceStringValue.add("fleetName");
+        forceStringValue.add("fleetCreationDate");
+        forceStringValue.add("groupId");
+        forceStringValue.add("groupName");
+
+        JSONObject json= JSONUtils.xmlToJson(XMLUtils.parseDOM_S(TextUtils.readFileFromCP("testX2J_2.xml")), forceElementsArray, forceStringValue);
+        //System.out.println("\nTestXml2Json_2: " + json);
+        String outJSON = TextUtils.readFileFromCP("testJ2X_2.json");
+        JSONAssert.assertEquals(outJSON, json, true);
+    }
 
     /**
      * Test the XML2JSON BadgerFish.

@@ -154,7 +154,7 @@ public class JSONUtils
                         switch (nodeType) {
                             case Node.ELEMENT_NODE :
                                 if (forceElementsArray.contains(name)) {
-                                	if (n.hasChildNodes() || hasElementChild) {
+                                	if (n.hasChildNodes() || n.hasAttributes()) {
                                 		current.append(name, processElement(parser, (Element) n, forceElementsArray, forceStringValue));
                                 	}
                                 	else {
@@ -188,7 +188,7 @@ public class JSONUtils
                         }
                     }
                 }
-                return current;
+                return (current.length() > 0) ? current : "";
             }
             else {
                 return "";
