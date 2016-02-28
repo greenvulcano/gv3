@@ -4,7 +4,7 @@
 <!ENTITY % flow-nodes "GVOperationNode|GVNodeCheck|ChangeGVBufferNode|GVWaitNode|GVNotificationNode|GVIteratorOperationNode|GVCoreCallNode|GVSubFlowCallNode|GVEndNode|GVSavePointNode|GVSubFlowSpawnNode|GVSubFlowParallelNode|GVSubFlowSplittedNode">
 <!ENTITY % filters    "IDFilter|RetCodeFilter|SystemFilter|ServiceFilter|PropertyFilter">
 <!ENTITY % j2ee-calls "j2ee-ejb-call|j2ee-jca-call|jmx-call %extra-j2ee-calls;">
-<!ENTITY % comm-calls "smtp-call|pop-call|pop-uid-remove-call|exchange-send-call|exchange-receive-call|exchange-manage-call|ws-call|rest-call|http-call %extra-comm-calls;">
+<!ENTITY % comm-calls "smtp-call|pop-call|imap-call|imap-manage-call|pop-uid-remove-call|exchange-send-call|exchange-receive-call|exchange-manage-call|ws-call|rest-call|http-call %extra-comm-calls;">
 <!ENTITY % file-calls "filereader-call|filewriter-call|filemanager-call|fsmonitor-call|remotemanager-call|rsh-call|rsh-filereader-call|rsh-filewriter-call %extra-file-calls;">
 <!ENTITY % db-calls   "db-call|ldap-search-call|ldap-update-call %extra-db-calls;">
 <!ENTITY % util-calls "extract-data-call|routed-call|birt-report-call|test-service-call|generic-call %extra-util-calls;">
@@ -10263,6 +10263,13 @@
     #NotNull
 -->
 <!ATTLIST pop-call export-EML (true|false) #IMPLIED>
+<!--
+    Maximum number of emails to be read.
+    Default 10, a value of -1 means read all.
+
+    #NotNull
+-->
+<!ATTLIST pop-call max-read-messages CDATA #IMPLIED>
 
 <!--
     Plugin for removing emails UID from UID cache, useful for email reprocess.
@@ -10308,6 +10315,175 @@
     #NotNull
 -->
 <!ATTLIST pop-uid-remove-call jndi-name CDATA #REQUIRED>
+
+<!--
+    Plugin for receiving emails via IMAP protocol.
+
+    #Label: @name
+    #Icon: GVPopCall.png
+    #Category: Web/Mail
+    #SelectOnInsert
+    #Table: | JNDI Context | JNDIHelper | Factory initial | @initial-context-factory | Provider URL | @provider-url | Security Principal | @security-principal | Security Credentials | @security-credentials | Description | Description
+    #Template:
+
+        <xsl:template match="imap-call">
+                <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT imap-call (Description?, JNDIHelper?, mail-properties?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST imap-call type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+
+-->
+<!ATTLIST imap-call class CDATA #FIXED "it.greenvulcano.gvesb.virtual.imap.IMAPCallOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST imap-call name CDATA #REQUIRED>
+<!--
+    JNDI name of the mail Session configured in the application server.
+
+    #NotNull
+-->
+<!ATTLIST imap-call jndi-name CDATA #IMPLIED>
+<!--
+    Corresponds to the property mail.protocol.host
+    and overwrites the value of property mail.host
+    specified in the configuration of the mail Session.
+
+    #NotNull
+-->
+<!ATTLIST imap-call override-protocol-host CDATA #IMPLIED>
+<!--
+    Corresponds to the property mail.protocol.user
+    and overwrites the value of property mail.user
+    specified in the configuration of the mail Session.
+
+    #NotNull
+-->
+<!ATTLIST imap-call override-protocol-user CDATA #IMPLIED>
+<!--
+    Mark a processed message as DELETED.
+    Default false.
+-->
+<!ATTLIST imap-call delete-messages (true|false) #IMPLIED>
+<!--
+    Expunge (permanently remove) messages marked DELETED.
+    Default false.
+-->
+<!ATTLIST imap-call expunge (true|false) #IMPLIED>
+<!--
+    RegExp pattern for email address cleaning.
+    Default "[A-z][A-z0-9_]*([.][A-z0-9_]+)*[@][A-z0-9_]+([.][A-z0-9_]+)*[.][A-z]{2,4}".
+    #NotNull
+-->
+<!ATTLIST imap-call email-rx-cleaner CDATA #IMPLIED>
+<!--
+    Also export a message in EML format.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST imap-call export-EML (true|false) #IMPLIED>
+<!--
+    Maximum number of emails to be read.
+    Default 10, a value of -1 means read all.
+
+    #NotNull
+-->
+<!ATTLIST imap-call max-read-messages CDATA #IMPLIED>
+<!--
+    Mail sorting criteria.
+    Default ARRIVAL.
+
+    #NotNull
+-->
+<!ATTLIST imap-call sort-field (ARRIVAL|CC|DATE|FROM|SIZE|SUBJECT|TO) #IMPLIED>
+<!--
+    Mail sorting ascending direction.
+    Default false.
+
+    #NotNull
+-->
+<!ATTLIST imap-call sort-ascending (true|false) #IMPLIED>
+
+<!--
+    Plugin for managing emails through IMAP protocol.
+    The message on wich operate is identified by its InternetMessageId contained
+    into the MESSAGE_ID property of the input GVBuffer.
+    The property MANAGED_MESSAGE_COUNT in the output GVBuffer contains the number:
+       0 : no message processed
+       1 : message <MESSAGE_ID> processed
+
+    #Label: @name
+    #Icon: GVPopCall.png
+    #Category: Web/Mail
+    #SelectOnInsert
+    #Template:
+
+        <xsl:template match="imap-manage-call">
+                <xsl:if test="Description">
+                <small><xsl:value-of select="Description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT imap-manage-call (Description?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST imap-manage-call type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+
+-->
+<!ATTLIST imap-manage-call class CDATA #FIXED "it.greenvulcano.gvesb.virtual.imap.ManageEmailCallOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST imap-manage-call name CDATA #REQUIRED>
+<!--
+    JNDI name of the mail Session configured in the application server.
+
+    #NotNull
+-->
+<!ATTLIST imap-manage-call jndi-name CDATA #IMPLIED>
+<!--
+    Folder from wich read email.
+    Default to INBOX.
+
+    #NotNull
+-->
+<!ATTLIST imap-manage-call folderFrom CDATA #IMPLIED>
+<!--
+    Folder on wich copy/move email.
+
+    #NotNull
+-->
+<!ATTLIST imap-manage-call folderTo CDATA #IMPLIED>
+<!--
+    Action to execute on message.
+
+    #NotNull
+-->
+<!ATTLIST imap-manage-call action (copy|move|delete|set-read|set-unread) #REQUIRED>
 
 <!--
     Plugin for sending an email from MS Exchange through WS interface..
