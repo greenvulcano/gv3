@@ -90,6 +90,7 @@ public class ChangeGVBufferNode extends GVFlowNode
             }
         }
         catch (Exception exc) {
+        	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "]", exc);
             throw new GVCoreConfException("GVCORE_CGVBUFFER_NODE_INIT_ERROR", new String[][]{{"id", getId()},
                     {"node", XPathFinder.buildXPath(cGVBufferNode)}}, exc);
         }
@@ -100,6 +101,7 @@ public class ChangeGVBufferNode extends GVFlowNode
                 cGVBuffer.init(cGVBufferNode);
             }
             catch (XMLConfigException exc) {
+            	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "]", exc);
                 throw new GVCoreConfException("GVCORE_CGVBUFFER_NODE_INIT_ERROR", new String[][]{{"id", getId()},
                         {"node", XPathFinder.buildXPath(cGVBufferNode)}}, exc);
             }
