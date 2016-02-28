@@ -71,6 +71,9 @@
           <pop-call name="ReadEmails" jndi-name="openejb:Resource/mailServerRec" class="it.greenvulcano.gvesb.virtual.pop.POPCallOperation"  
           delete-messages="false" type="call">
           </pop-call>
+          <pop-call name="ReadEmailsCount" jndi-name="openejb:Resource/mailServerRec" class="it.greenvulcano.gvesb.virtual.pop.POPCallOperation"  
+          delete-messages="false" max-read-messages="1" type="call">
+          </pop-call>
         </Channel>
       </System>
     </Systems>

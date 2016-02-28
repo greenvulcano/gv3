@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
+ * Copyright (c) 2009-2015 GreenVulcano ESB Open Source Project. All rights
  * reserved.
  *
  * This file is part of GreenVulcano ESB.
@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
-package it.greenvulcano.gvesb.virtual.pop;
+package it.greenvulcano.gvesb.virtual.imap;
 
+import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.commons.BaseReceiveMailOperation;
-import it.greenvulcano.gvesb.virtual.pop.uidcache.UIDCache;
-import it.greenvulcano.gvesb.virtual.pop.uidcache.UIDCacheManagerFactory;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xml.XMLUtils;
 
@@ -34,11 +33,14 @@ import java.util.List;
 
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
+import javax.mail.search.FlagTerm;
+import javax.mail.search.SearchTerm;
 
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.log4j.Logger;
@@ -46,25 +48,29 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.sun.mail.pop3.POP3Store;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.SortTerm;
 
 /**
- * Check for emails on POP3 server.
+ * Check for emails on IMAP server.
  *
- * @version 3.0.0 Feb 17, 2010
+ * @version 3.5.0 Feb 17, 2015
  * @author GreenVulcano Developer Team
  *
  *
  */
-public class POPCallOperation extends BaseReceiveMailOperation
+public class IMAPCallOperation extends BaseReceiveMailOperation
 {
 
-    private static final Logger logger          = GVLogger.getLogger(POPCallOperation.class);
+    private static final Logger logger        = GVLogger.getLogger(IMAPCallOperation.class);
 
-    private String              protocol        = "pop3";
+    protected String            protocol      = "imap";
     
-    private String              cacheKey        = null;
-
+    private String              sortField     = null;
+    private boolean             sortAscending = false;
+    private List<SortTerm>      sortingTerms  = new ArrayList<SortTerm>();
+    
     /**
      * Invoked from <code>OperationFactory</code> when an <code>Operation</code>
      * needs initialization.<br>
@@ -75,10 +81,37 @@ public class POPCallOperation extends BaseReceiveMailOperation
     {
         try {
             preInit(node);
+
+            sortField = XMLConfig.get(node, "@sort-field", "");
+            //logger.info("---@sort-field: " + sortField);
+
+            sortAscending = XMLConfig.getBoolean(node, "@sort-ascending", false);
+
+            if (!sortAscending) {
+                sortingTerms.add(SortTerm.REVERSE);
+            }
+            if (sortField.equals("CC")){
+                sortingTerms.add(SortTerm.CC);
+            } else if (sortField.equals("DATE")){
+                sortingTerms.add(SortTerm.DATE);
+            } else if (sortField.equals("FROM")){
+                sortingTerms.add(SortTerm.FROM);
+            } else if (sortField.equals("SIZE")){
+                sortingTerms.add(SortTerm.SIZE);
+            } else if (sortField.equals("SUBJECT")){
+                sortingTerms.add(SortTerm.SUBJECT);
+            } else if (sortField.equals("TO")){
+                sortingTerms.add(SortTerm.TO);
+            } else {
+                //The default value
+                sortingTerms.add(SortTerm.ARRIVAL);
+            }
+            
+            //logger.info("sortingTerms: " + sortingTerms.toString());
         }
         catch (Exception exc) {
-            logger.error("Error initializing POP call operation", exc);
-            throw new InitializationException("GVVCL_POP_INIT_ERROR", new String[][]{{"node", node.getLocalName()}},
+            logger.error("Error initializing IMAP call operation", exc);
+            throw new InitializationException("GVVCL_IMAP_INIT_ERROR", new String[][]{{"node", node.getLocalName()}},
                     exc);
         }
     }
@@ -87,16 +120,10 @@ public class POPCallOperation extends BaseReceiveMailOperation
     protected String getProtocol() {
         return protocol;
     }
-
+    
     @Override
     protected void postStore(Store locStore, GVBuffer data) throws Exception {
-        cacheKey = null;
-        if (!dynamicServer) {
-            cacheKey = jndiName;
-            return;
-        }
-
-        cacheKey = serverHost + "_" + loginUser;
+        // do nothing
     }
     
     /**
@@ -118,6 +145,19 @@ public class POPCallOperation extends BaseReceiveMailOperation
             localStore.connect();
         }
 
+        boolean sortable = false;
+        if (localStore instanceof IMAPStore){
+            //Test if sortable store
+            if (((IMAPStore) localStore).hasCapability("SORT")){
+                sortable = true;
+            } else {
+                logger.debug("UNSORTABLE Store");
+            }
+        } else {
+            //Store is NOT sortable
+            //sortable = false;
+            logger.debug("UNSORTABLE Store");
+        }
         XMLUtils xml = null;
         try {
             Folder folder = localStore.getDefaultFolder();
@@ -146,53 +186,45 @@ public class POPCallOperation extends BaseReceiveMailOperation
             }
             else {
                 List<Message> seen = new ArrayList<Message>();
-                Message[] msgs = folder.getMessages();
+                Message[] msgs;
+                Flags f = new Flags();
+                f.add(Flag.SEEN);
+                if (sortable){
+                    SearchTerm onlyUnread = new FlagTerm(new Flags(f), false);
+                    SortTerm[] terms = sortingTerms.toArray(new SortTerm[sortingTerms.size()]);
+                    msgs = ((IMAPFolder)folder).getSortedMessages(terms, onlyUnread);
+                } else {
+                    msgs = folder.search(new FlagTerm(f, false));
+                }
+                
                 FetchProfile fp = new FetchProfile();
                 fp.add(FetchProfile.Item.ENVELOPE);
                 fp.add(UIDFolder.FetchProfileItem.UID);
                 fp.add("X-Mailer");
                 folder.fetch(msgs, fp);
                 
-                UIDCache uidCache = UIDCacheManagerFactory.getInstance().getUIDCache(cacheKey);
-
                 xml = XMLUtils.getParserInstance();
                 Document doc = xml.newDocument("MailMessages");
-                int i = 0;
-                while ((i < msgs.length) && ((maxReadMessages == -1) || (messageCount < maxReadMessages))) {
-                    boolean skipMessage = false;
-
-                    if (!delete_messages) {
-                        if (localStore instanceof POP3Store) {
-                            String uid = msgs[i].getHeader("Message-ID")[0];
-                            if (uid != null) {
-                                if (uidCache.contains(uid)) {
-                                    skipMessage = true;
-                                }
-                                else {
-                                    uidCache.add(uid);
-                                }
-                            }
-                        }
+                for (int i = 0; i < msgs.length; i++) {
+                    if ((maxReadMessages != -1) && (messageCount == maxReadMessages)) {
+                        break;
                     }
-                    if (!skipMessage) {
-                        Element msg = xml.insertElement(doc.getDocumentElement(), "Message");
-                        dumpPart(msgs[i], msg, xml);
-                        messageCount++;
-                        if (exportEML) {
-                            Element eml = xml.insertElement(msg, "EML");
-                            xml.setAttribute(eml, "encoding", "base64");
-                            OutputStream os = new ByteArrayOutputStream();
-                            Base64OutputStream b64os = new Base64OutputStream(os, true, -1, "".getBytes());
-                            msgs[i].writeTo(b64os);
-                            b64os.flush();
-                            b64os.close();
-                            xml.insertText(eml, os.toString());
-                        }
+                    Element msg = xml.insertElement(doc.getDocumentElement(), "Message");
+                    dumpPart(msgs[i], msg, xml);
+                    if (exportEML) {
+                        Element eml = xml.insertElement(msg, "EML");
+                        xml.setAttribute(eml, "encoding", "base64");
+                        OutputStream os = new ByteArrayOutputStream();
+                        Base64OutputStream b64os = new Base64OutputStream(os, true, -1, "".getBytes());
+                        msgs[i].writeTo(b64os);
+                        b64os.flush();
+                        b64os.close();
+                        xml.insertText(eml, os.toString());
                     }
-
+                    
                     msgs[i].setFlag(Flags.Flag.SEEN, true);
                     seen.add(msgs[i]);
-                    i++;
+                    messageCount++;
                 }
                 if (messageCount > 0) {
                     data.setObject(doc);
