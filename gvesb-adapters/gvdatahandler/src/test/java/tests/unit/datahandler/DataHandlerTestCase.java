@@ -243,7 +243,7 @@ public class DataHandlerTestCase extends TestCase
         Object out = result.getData();
         assertNotNull(out);
         String output = new String((byte[]) out);
-        assertEquals("1@testvalue.....................@20000101 183045@123,45@\n", output);
+        assertEquals("1@testvalue.....................@20000101 123045@123,45@\n", output);
     }
 
     /**
@@ -265,7 +265,7 @@ public class DataHandlerTestCase extends TestCase
         Object out = result.getData();
         assertNotNull(out);
         String output = new String((byte[]) out);
-        assertEquals("1@testvalue.....................@20000101 173045@123,45@\n", output);
+        assertEquals("1@testvalue.....................@20000101 113045@123,45@\n", output);
     }
 
    /**
@@ -287,7 +287,7 @@ public class DataHandlerTestCase extends TestCase
        Object out = result.getData();
        assertNotNull(out);
        String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestFlatSelectFile.csv"));
-       assertEquals("1@testvalue.....................@20000101 183045@123,45@\n", output);
+       assertEquals("1@testvalue.....................@20000101 123045@123,45@\n", output);
    }
 
    /**
@@ -309,7 +309,7 @@ public class DataHandlerTestCase extends TestCase
        Object out = result.getData();
        assertNotNull(out);
        String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestMultiFlatSelectFile.csv"));
-       assertEquals("id@field1@field2@field3@\n1@testvalue.....................@20000101 183045@123,45@\n", output);
+       assertEquals("id@field1@field2@field3@\n1@testvalue.....................@20000101 123045@123,45@\n", output);
    }
 
 
@@ -332,6 +332,6 @@ public class DataHandlerTestCase extends TestCase
        Object out = result.getData();
        assertNotNull(out);
        String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestFlatTZoneSelectFile.csv"));
-       assertEquals("1@testvalue.....................@20000101 173045@123,45@\n", output);
+       assertEquals("1@testvalue.....................@20000101 113045@123,45@\n", output);
    }
 }
