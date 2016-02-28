@@ -1,0 +1,40 @@
+<DEFAULT_ROOT>
+    <status>success</status>
+    <code>200</code>
+    <message/>
+    <token>123qwer54</token>
+    <data>
+        <userInfo>
+            <userId>5379741</userId>
+            <personalDetails>
+                <name>FEDERICA</name>
+                <surname>VALENTINI</surname>
+                <nationalRegistration/>
+                <email/>
+                <telephone/>
+                <address/>
+                <town/>
+                <country/>
+                <zipCode/>
+            </personalDetails>
+        </userInfo>
+        <profiles>
+            <driver/>
+            <manager>
+                <fleetId>1</fleetId>
+                <fleetName>Fame Fleet</fleetName>
+                <company>Fame inc</company>
+                <fleetCreationDate>01/23/2016</fleetCreationDate>
+                <groupId>2</groupId>
+                <groupName>Group_1</groupName>
+            </manager>
+            <supervisor/>
+            <administrator>
+                <fleetId>1</fleetId>
+                <fleetName>Fame Fleet</fleetName>
+                <company>Fame inc</company>
+                <fleetCreationDate>01/23/2016</fleetCreationDate>
+            </administrator>
+        </profiles>
+    </data>
+</DEFAULT_ROOT>
