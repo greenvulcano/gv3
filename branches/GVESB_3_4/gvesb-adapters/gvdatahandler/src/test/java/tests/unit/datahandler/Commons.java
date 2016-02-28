@@ -79,7 +79,7 @@ public class Commons
         Element col3 = doc.createElement("col");
         col3.setAttribute("type", "timestamp");
         col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col3.appendChild(doc.createTextNode("2010/12/31 23:59:59"));
+        col3.appendChild(doc.createTextNode("31/12/2010 23:59:59"));
         row.appendChild(col3);
         Element col4 = doc.createElement("col");
         col4.setAttribute("type", "float");
@@ -102,7 +102,7 @@ public class Commons
         col3 = doc.createElement("col");
         col3.setAttribute("type", "timestamp");
         col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col3.appendChild(doc.createTextNode("2011/01/10 00:00:00"));
+        col3.appendChild(doc.createTextNode("10/01/2011 00:00:00"));
         row.appendChild(col3);
         col4 = doc.createElement("col");
         col4.setAttribute("type", "float");
@@ -140,7 +140,7 @@ public class Commons
         Element col3 = doc.createElement("col");
         col3.setAttribute("type", "timestamp");
         col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col3.appendChild(doc.createTextNode("2010/12/31 15:00:00"));
+        col3.appendChild(doc.createTextNode("31/12/2010 15:00:00"));
         row.appendChild(col3);
         Element col4 = doc.createElement("col");
         col4.setAttribute("type", "float");
@@ -158,7 +158,7 @@ public class Commons
         Element col_update3 = doc.createElement("col-update");
         col_update3.setAttribute("type", "timestamp");
         col_update3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col_update3.appendChild(doc.createTextNode("2010/12/31 15:00:00"));
+        col_update3.appendChild(doc.createTextNode("31/12/2010 15:00:00"));
         row.appendChild(col_update3);
         Element col_update4 = doc.createElement("col-update");
         col_update4.setAttribute("type", "float");
@@ -188,7 +188,7 @@ public class Commons
         col3 = doc.createElement("col");
         col3.setAttribute("type", "timestamp");
         col3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col3.appendChild(doc.createTextNode("2010/10/20 16:00:00"));
+        col3.appendChild(doc.createTextNode("20/10/2010 16:00:00"));
         row.appendChild(col3);
         col4 = doc.createElement("col");
         col4.setAttribute("type", "float");
@@ -206,7 +206,7 @@ public class Commons
         col_update3 = doc.createElement("col-update");
         col_update3.setAttribute("type", "timestamp");
         col_update3.setAttribute("format", "dd/MM/yyyy HH:mm:ss");
-        col_update3.appendChild(doc.createTextNode("2010/10/20 16:00:00"));
+        col_update3.appendChild(doc.createTextNode("20/10/2010 16:00:00"));
         row.appendChild(col_update3);
         col_update4 = doc.createElement("col-update");
         col_update4.setAttribute("type", "float");
