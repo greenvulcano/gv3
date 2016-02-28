@@ -69,7 +69,9 @@ public class GVRulesTestCase extends TestCase
     public static void testLicense() throws Exception
     {
         Applicant applicant = new Applicant("Mr John Smith", 16);
-        Application application = new Application(DateUtils.addTime(new Date(), Calendar.YEAR, -1));
+        Calendar cal = Calendar.getInstance();
+        cal.set(2014, Calendar.DECEMBER, 31);
+        Application application = new Application(cal.getTime());
         List lst = new ArrayList();
         lst.add(applicant);
         lst.add(application);
@@ -78,8 +80,9 @@ public class GVRulesTestCase extends TestCase
         ksession.execute(lst);
         assertFalse(application.isValid());
 
+        cal.set(2015, Calendar.JANUARY, 02);
         applicant = new Applicant("Mr John Smith", 16);
-        application = new Application(new Date());
+        application = new Application(cal.getTime());
         lst.clear();
         lst.add(applicant);
         lst.add(application);
@@ -88,8 +91,9 @@ public class GVRulesTestCase extends TestCase
         ksession.execute(lst);
         assertFalse(application.isValid());
 
+        cal.set(2014, Calendar.DECEMBER, 31);
         applicant = new Applicant("Mr John Doe", 21);
-        application = new Application(DateUtils.addTime(new Date(), Calendar.YEAR, -1));
+        application = new Application(cal.getTime());
         lst.clear();
         lst.add(applicant);
         lst.add(application);
@@ -98,8 +102,9 @@ public class GVRulesTestCase extends TestCase
         ksession.execute(lst);
         assertTrue(application.isValid());
 
+        cal.set(2015, Calendar.JANUARY, 02);
         applicant = new Applicant("Mr John Doe", 21);
-        application = new Application(new Date());
+        application = new Application(cal.getTime());
         lst.clear();
         lst.add(applicant);
         lst.add(application);
