@@ -37,6 +37,12 @@
           <Expression type="ognl">object.getNodeValue()</Expression>
         </Field>
       </StringDataProvider>
+      <StringDataProvider class="it.greenvulcano.gvesb.gvdp.impl.StringDataProvider"
+                          name="stringSerializeNodeDataProvider" type="dataProvider">
+          <Field direction="INOUT" key="buffer" type="field">
+              <Expression type="ognl">@it.greenvulcano.util.xml.XMLUtils@serializeDOM_S(object)</Expression>
+          </Field>
+      </StringDataProvider>
       <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider" name="xpathCollectionDataProvider"
         source-selector="object" type="dataProvider">
         <Field direction="INOUT" key="buffer" type="field">
@@ -47,6 +53,12 @@
         source-selector="object" type="dataProvider">
         <Field direction="INOUT" key="buffer" type="field">
           <Expression type="xpath">/root/element</Expression>
+        </Field>
+      </CollectionDataProvider>
+      <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider" name="xpathSplitter2"
+        source-selector="object" type="dataProvider">
+        <Field direction="INOUT" key="buffer" type="field">
+          <Expression type="xpath">/*/*</Expression>
         </Field>
       </CollectionDataProvider>
       <CollectionDataProvider class="it.greenvulcano.gvesb.gvdp.impl.CollectionDataProvider" name="ognlCollectionDataProvider"

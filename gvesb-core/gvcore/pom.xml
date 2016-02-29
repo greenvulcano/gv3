@@ -38,5 +38,10 @@
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdte</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-file</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -26,6 +26,7 @@ import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.identity.impl.DummyIdentityInfo;
 import it.greenvulcano.gvesb.virtual.pool.OperationManagerPool;
 import it.greenvulcano.jmx.JMXEntryPoint;
+import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.util.HashSet;
@@ -34,8 +35,8 @@ import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import junit.framework.TestCase;
-
+import org.custommonkey.xmlunit.XMLTestCase;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.w3c.dom.Document;
 
 import tests.unit.gvesb.gvcore.jmx.Test;
@@ -45,7 +46,7 @@ import tests.unit.gvesb.gvcore.jmx.TestMBean;
  * @version 3.0.0 Feb 26, 2010
  * @author GreenVulcano Developer Team
  */
-public class GVCoreTestCase extends TestCase
+public class GVCoreTestCase extends XMLTestCase
 {
     private static JMXEntryPoint jmx                = null;
 
@@ -57,6 +58,7 @@ public class GVCoreTestCase extends TestCase
     @Override
     protected void setUp() throws Exception
     {
+        XMLUnit.setIgnoreWhitespace(true);
         if (jmx == null) {
             jmx = JMXEntryPoint.instance();
             MBeanServer server = jmx.getServer();
@@ -375,5 +377,66 @@ public class GVCoreTestCase extends TestCase
         greenVulcano.requestReply(gvBuffer);
         long timeout = System.currentTimeMillis() - start;
         assertTrue(Math.abs(timeout - 1000) < 200);
+    }
+    
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreAggregate() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_AGGREGATE";
+        Document outXML = XMLUtils.parseDOM_S(TextUtils.readFileFromCP("doc_aggr_1.xml"));
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME);
+
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        System.out.println("testGVCoreAggregate: " + XMLUtils.serializeDOM_S((Document) gvBufferout.getObject()));
+        assertXMLEqual("testGVCoreAggregate failed", outXML, (Document) gvBufferout.getObject());
+    }
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreAggregate2() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_AGGREGATE2";
+        Document outXML = XMLUtils.parseDOM_S(TextUtils.readFileFromCP("doc_aggr_2.xml"));
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME);
+
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        System.out.println("testGVCoreAggregate2: " + XMLUtils.serializeDOM_S((Document) gvBufferout.getObject()));
+        assertXMLEqual("testGVCoreAggregate2 failed", outXML, (Document) gvBufferout.getObject());
+    }
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreAggregateDte() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_AGGREGATE_DTE";
+        Document outXML = XMLUtils.parseDOM_S(TextUtils.readFileFromCP("doc_aggr_1.xml"));
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME);
+
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        System.out.println("testGVCoreAggregateDte: " + XMLUtils.serializeDOM_S((Document) gvBufferout.getObject()));
+        assertXMLEqual("testGVCoreAggregateDte failed", outXML, (Document) gvBufferout.getObject());
+    }
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreMerge() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_MERGE";
+        Document outXML = XMLUtils.parseDOM_S(TextUtils.readFileFromCP("doc_merge_1.xml"));
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME);
+
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        System.out.println("testGVCoreMerge: " + XMLUtils.serializeDOM_S((Document) gvBufferout.getObject()));
+        assertXMLEqual("testGVCoreMerge failed", outXML, (Document) gvBufferout.getObject());
     }
 }
