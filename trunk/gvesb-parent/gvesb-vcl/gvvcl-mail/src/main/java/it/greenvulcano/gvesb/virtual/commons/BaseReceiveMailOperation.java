@@ -52,6 +52,7 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
      * The emails cleaner pattern
      */
     protected Pattern           emailRxPattern  = null;
+    protected int               maxReadMessages = -1;
 
     /**
      * Preliminary initialization operations
@@ -65,6 +66,8 @@ public abstract class BaseReceiveMailOperation extends BaseMailOperation {
             expunge = XMLConfig.getBoolean(node, "@expunge", false);
 
             exportEML = XMLConfig.getBoolean(node, "@export-EML", false);
+            
+            maxReadMessages = XMLConfig.getInteger(node, "@max-read-messages", 10);
 
             String regex = XMLConfig.get(node, "@email-rx-cleaner", "[A-z][A-z0-9_\\-]*([.][A-z0-9_\\-]+)*[@][A-z0-9_\\-]+([.][A-z0-9_\\-]+)*[.][A-z]{2,4}");
             emailRxPattern = Pattern.compile(regex);

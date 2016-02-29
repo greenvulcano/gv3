@@ -25,11 +25,8 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.pop.POPCallOperation;
-import it.greenvulcano.gvesb.virtual.smtp.SMTPCallOperation;
 import it.greenvulcano.util.xml.XMLUtils;
 
-import javax.mail.Message;
-import javax.mail.Multipart;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
@@ -121,6 +118,60 @@ public class POP3CallTestCase extends TestCase
             assertTrue(xml.get(att,"@content-type").indexOf("text/plain") != -1);
             assertEquals("test.txt", xml.get(att,"@file-name"));
             assertEquals("simple attachment", xml.get(att,"@description"));
+        }
+        finally {
+            XMLUtils.releaseParserInstance(xml);
+        }
+    }
+
+    public final void testReadEmailCount() throws Exception
+    {
+        Node node = XMLConfig.getNode("GVCore.xml", "//*[@name='ReadEmailsCount']");
+        CallOperation op = new POPCallOperation();
+        op.init(node);
+
+        GVBuffer gvBuffer = new GVBuffer(TEST_SYSTEM, TEST_SERVICE);
+        
+        GreenMailUtil.sendTextEmail("test1@gv.com", "test@gv.com", TEST_SUBJECT + " 1", TEST_MESSAGE + " 1", SMTP);
+        GreenMailUtil.sendTextEmail("test1@gv.com", "test@gv.com", TEST_SUBJECT + " 2", TEST_MESSAGE + " 2", SMTP);
+        GreenMailUtil.sendTextEmail("test1@gv.com", "test@gv.com", TEST_SUBJECT + " 3", TEST_MESSAGE + " 3", SMTP);
+        
+        XMLUtils xml = null;
+        try {
+            xml = XMLUtils.getParserInstance();
+            gvBuffer = op.perform(gvBuffer);
+            assertEquals("1", gvBuffer.getProperty("POP_MESSAGE_COUNT"));
+            Document doc = (Document) gvBuffer.getObject();
+            System.out.println("Received message 1:\n" + xml.serializeDOM(doc, "UTF-8", false, true));
+            Node msg1 = xml.selectSingleNode(doc, "/MailMessages/Message[1]"); 
+            assertEquals(TEST_SUBJECT + " 1", xml.get(msg1,"Subject"));
+            assertTrue(xml.get(msg1, ".//PlainMessage").startsWith(TEST_MESSAGE + " 1"));
+            assertEquals("test@gv.com", xml.get(msg1,"From"));
+            assertEquals("test1@gv.com", xml.get(msg1,"To"));
+            op.cleanUp();
+            /*
+            gvBuffer = op.perform(gvBuffer);
+            assertEquals("1", gvBuffer.getProperty("POP_MESSAGE_COUNT"));
+            doc = (Document) gvBuffer.getObject();
+            System.out.println("Received message 2:\n" + xml.serializeDOM(doc, "UTF-8", false, true));
+            msg1 = xml.selectSingleNode(doc, "/MailMessages/Message[1]"); 
+            assertEquals(TEST_SUBJECT + " 2", xml.get(msg1,"Subject"));
+            assertTrue(xml.get(msg1, ".//PlainMessage").startsWith(TEST_MESSAGE + " 2"));
+            assertEquals("test@gv.com", xml.get(msg1,"From"));
+            assertEquals("test1@gv.com", xml.get(msg1,"To"));
+            op.cleanUp();
+
+            gvBuffer = op.perform(gvBuffer);
+            assertEquals("1", gvBuffer.getProperty("POP_MESSAGE_COUNT"));
+            doc = (Document) gvBuffer.getObject();
+            System.out.println("Received message 3:\n" + xml.serializeDOM(doc, "UTF-8", false, true));
+            msg1 = xml.selectSingleNode(doc, "/MailMessages/Message[1]"); 
+            assertEquals(TEST_SUBJECT + " 3", xml.get(msg1,"Subject"));
+            assertTrue(xml.get(msg1, ".//PlainMessage").startsWith(TEST_MESSAGE + " 3"));
+            assertEquals("test@gv.com", xml.get(msg1,"From"));
+            assertEquals("test1@gv.com", xml.get(msg1,"To"));
+            op.cleanUp();
+            */
         }
         finally {
             XMLUtils.releaseParserInstance(xml);
