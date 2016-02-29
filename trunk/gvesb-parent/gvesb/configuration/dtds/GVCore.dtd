@@ -3011,13 +3011,69 @@
 <!ATTLIST PropertyFilter value CDATA #IMPLIED>
 
 <!--
+    #Label: @source
+-->
+<!ELEMENT DocMerge EMPTY>
+<!--
+    Source document name.
+
+    #NotNull
+    #References: ../../../*[@type='flow-node']/@input
+    #References: ../../../*[@type='flow-node']/@output
+-->
+<!ATTLIST DocMerge source CDATA #IMPLIED>
+<!--
+    Source nodes xpath.
+
+    #NotNull
+-->
+<!ATTLIST DocMerge xpath-source CDATA #IMPLIED>
+<!--
+    Destination node spath.
+
+    #NotNull
+-->
+<!ATTLIST DocMerge xpath-dest CDATA #IMPLIED>
+
+<!ELEMENT ExecXMLMerge (DocMerge*)>
+
+<!--
+    #Label: @source
+-->
+<!ELEMENT DocAggregate EMPTY>
+<!--
+    Source document name.
+
+    #NotNull
+    #References: ../../../*[@type='flow-node']/@input
+    #References: ../../../*[@type='flow-node']/@output
+-->
+<!ATTLIST DocAggregate source CDATA #IMPLIED>
+<!--
+    #CompositeLabel: || @namespace | : | @root
+-->
+<!ELEMENT ExecXMLAggregate (DocAggregate*)>
+<!--
+    Aggregate document root node name.
+
+    #NotNull
+-->
+<!ATTLIST ExecXMLAggregate root CDATA #REQUIRED>
+<!--
+    Root node namespace URI.
+
+    #NotNull
+-->
+<!ATTLIST ExecXMLAggregate namespace CDATA #IMPLIED>
+
+<!--
     Allows you to define a node in a workflow where you can make
     a change to the data buffer.
 
     #Label: @id
     #ErrorIcon: change_error.png
 -->
-<!ELEMENT ChangeGVBufferNode (Description?, ChangeGVBuffer?, OutputServices?)>
+<!ELEMENT ChangeGVBufferNode (Description?, (ExecXMLAggregate|ExecXMLMerge)?, ChangeGVBuffer?, OutputServices?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
