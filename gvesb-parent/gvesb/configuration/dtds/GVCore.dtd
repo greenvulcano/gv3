@@ -10233,6 +10233,13 @@
     #NotNull
 -->
 <!ATTLIST pop-call export-EML (true|false) #IMPLIED>
+<!--
+    Maximum number of emails to be read.
+    Default 10, a value of -1 means read all.
+
+    #NotNull
+-->
+<!ATTLIST pop-call max-read-messages CDATA #IMPLIED>
 
 <!--
     Plugin for removing emails UID from UID cache, useful for email reprocess.
@@ -10362,11 +10369,11 @@
 <!ATTLIST imap-call export-EML (true|false) #IMPLIED>
 <!--
     Maximum number of emails to be read.
-    Default 10.
+    Default 10, a value of -1 means read all.
 
     #NotNull
 -->
-<!ATTLIST imap-call max-rows CDATA #IMPLIED>
+<!ATTLIST imap-call max-read-messages CDATA #IMPLIED>
 <!--
     Mail sorting criteria.
     Default ARRIVAL.

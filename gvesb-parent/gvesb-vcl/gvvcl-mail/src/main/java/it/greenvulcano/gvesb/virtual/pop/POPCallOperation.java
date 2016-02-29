@@ -29,6 +29,8 @@ import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -137,12 +139,13 @@ public class POPCallOperation extends BaseReceiveMailOperation
                 folder.open(Folder.READ_ONLY);
             }
             int totalMessages = folder.getMessageCount();
-            int messageCount = totalMessages;
+            int messageCount = 0;
 
             if (totalMessages == 0) {
                 logger.debug("Empty folder " + mbox);
             }
             else {
+                List<Message> seen = new ArrayList<Message>();
                 Message[] msgs = folder.getMessages();
                 FetchProfile fp = new FetchProfile();
                 fp.add(FetchProfile.Item.ENVELOPE);
@@ -154,7 +157,8 @@ public class POPCallOperation extends BaseReceiveMailOperation
 
                 xml = XMLUtils.getParserInstance();
                 Document doc = xml.newDocument("MailMessages");
-                for (int i = 0; i < msgs.length; i++) {
+                int i = 0;
+                while ((i < msgs.length) && ((maxReadMessages == -1) || (messageCount < maxReadMessages))) {
                     boolean skipMessage = false;
 
                     if (!delete_messages) {
@@ -173,6 +177,7 @@ public class POPCallOperation extends BaseReceiveMailOperation
                     if (!skipMessage) {
                         Element msg = xml.insertElement(doc.getDocumentElement(), "Message");
                         dumpPart(msgs[i], msg, xml);
+                        messageCount++;
                         if (exportEML) {
                             Element eml = xml.insertElement(msg, "EML");
                             xml.setAttribute(eml, "encoding", "base64");
@@ -184,22 +189,21 @@ public class POPCallOperation extends BaseReceiveMailOperation
                             xml.insertText(eml, os.toString());
                         }
                     }
-                    else {
-                        messageCount--;
-                    }
 
                     msgs[i].setFlag(Flags.Flag.SEEN, true);
+                    seen.add(msgs[i]);
+                    i++;
                 }
                 if (messageCount > 0) {
                     data.setObject(doc);
                 }
 
                 if (delete_messages) {
-                    folder.setFlags(msgs, new Flags(Flags.Flag.DELETED), true);
+                    folder.setFlags(seen.toArray(new Message[seen.size()]), new Flags(Flags.Flag.DELETED), true);
                 }
             }
             data.setRetCode(0);
-            data.setProperty("POP_MESSAGE_COUNT", "" + messageCount);
+            data.setProperty("POP_MESSAGE_COUNT", String.valueOf(messageCount));
             folder.close(expunge);
         }
         finally {

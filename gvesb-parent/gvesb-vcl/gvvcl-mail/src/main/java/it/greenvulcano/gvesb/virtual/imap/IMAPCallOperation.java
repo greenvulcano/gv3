@@ -70,7 +70,6 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
     private String              sortField     = null;
     private boolean             sortAscending = false;
     private List<SortTerm>      sortingTerms  = new ArrayList<SortTerm>();
-    private int                 maxRows       = 0;
     
     /**
      * Invoked from <code>OperationFactory</code> when an <code>Operation</code>
@@ -109,8 +108,6 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
             }
             
             //logger.info("sortingTerms: " + sortingTerms.toString());
-
-            maxRows = XMLConfig.getInteger(node, "@max-rows", 10);
         }
         catch (Exception exc) {
             logger.error("Error initializing IMAP call operation", exc);
@@ -188,7 +185,7 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
                 logger.debug("Empty folder " + mbox);
             }
             else {
-                
+                List<Message> seen = new ArrayList<Message>();
                 Message[] msgs;
                 Flags f = new Flags();
                 f.add(Flag.SEEN);
@@ -209,7 +206,7 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
                 xml = XMLUtils.getParserInstance();
                 Document doc = xml.newDocument("MailMessages");
                 for (int i = 0; i < msgs.length; i++) {
-                    if (i==maxRows) {
+                    if ((maxReadMessages != -1) && (messageCount == maxReadMessages)) {
                         break;
                     }
                     Element msg = xml.insertElement(doc.getDocumentElement(), "Message");
@@ -226,6 +223,7 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
                     }
                     
                     msgs[i].setFlag(Flags.Flag.SEEN, true);
+                    seen.add(msgs[i]);
                     messageCount++;
                 }
                 if (messageCount > 0) {
@@ -233,11 +231,11 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
                 }
 
                 if (delete_messages) {
-                    folder.setFlags(msgs, new Flags(Flags.Flag.DELETED), true);
+                    folder.setFlags(seen.toArray(new Message[seen.size()]), new Flags(Flags.Flag.DELETED), true);
                 }
             }
             data.setRetCode(0);
-            data.setProperty("POP_MESSAGE_COUNT", "" + messageCount);
+            data.setProperty("POP_MESSAGE_COUNT", String.valueOf(messageCount));
             folder.close(expunge);
         }
         finally {
