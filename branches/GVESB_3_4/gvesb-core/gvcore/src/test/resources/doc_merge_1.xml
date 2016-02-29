@@ -1,0 +1,8 @@
+<doc>
+    <elem1>value1</elem1>
+    <elem2>value2</elem2>
+    <elem>
+	    <data1>value1</data1>
+	    <data2>value2</data2>
+    </elem>
+</doc>

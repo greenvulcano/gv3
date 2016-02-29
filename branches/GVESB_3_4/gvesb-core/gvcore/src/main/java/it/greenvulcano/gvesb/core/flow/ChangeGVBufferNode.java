@@ -25,6 +25,8 @@ import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.core.exc.GVCoreWrongInterfaceException;
+import it.greenvulcano.gvesb.core.flow.util.XMLAggregate;
+import it.greenvulcano.gvesb.core.flow.util.XMLMerge;
 import it.greenvulcano.gvesb.internal.data.ChangeGVBuffer;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
@@ -59,6 +61,9 @@ public class ChangeGVBufferNode extends GVFlowNode
      * the output services
      */
     private GVInternalServiceHandler outputServices = new GVInternalServiceHandler();
+    
+    private XMLMerge xmlMerge = null;
+    private XMLAggregate xmlAggregate = null;
 
     /**
      * Initialize the instance
@@ -90,10 +95,31 @@ public class ChangeGVBufferNode extends GVFlowNode
             }
         }
         catch (Exception exc) {
-        	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "]", exc);
+        	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "] OutputServices", exc);
             throw new GVCoreConfException("GVCORE_CGVBUFFER_NODE_INIT_ERROR", new String[][]{{"id", getId()},
                     {"node", XPathFinder.buildXPath(cGVBufferNode)}}, exc);
         }
+
+        try {
+        	Node mNode = XMLConfig.getNode(defNode, "ExecXMLMerge");
+            if (mNode != null) {
+                xmlMerge = new XMLMerge(mNode);
+            }
+		} catch (Exception exc) {
+        	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "] ExecXMLMerge", exc);
+            throw new GVCoreConfException("GVCORE_CGVBUFFER_NODE_INIT_ERROR", new String[][]{{"id", getId()},
+                    {"node", XPathFinder.buildXPath(cGVBufferNode)}}, exc);
+		}
+        try {
+        	Node aNode = XMLConfig.getNode(defNode, "ExecXMLAggregate");
+            if (aNode != null) {
+                xmlAggregate = new XMLAggregate(aNode);
+            }
+		} catch (Exception exc) {
+        	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "] ExecXMLAggregate", exc);
+            throw new GVCoreConfException("GVCORE_CGVBUFFER_NODE_INIT_ERROR", new String[][]{{"id", getId()},
+                    {"node", XPathFinder.buildXPath(cGVBufferNode)}}, exc);
+		}
 
         if (cGVBufferNode != null) {
             cGVBuffer = new ChangeGVBuffer();
@@ -101,7 +127,7 @@ public class ChangeGVBufferNode extends GVFlowNode
                 cGVBuffer.init(cGVBufferNode);
             }
             catch (XMLConfigException exc) {
-            	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "]", exc);
+            	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "] ChangeGVBuffer", exc);
                 throw new GVCoreConfException("GVCORE_CGVBUFFER_NODE_INIT_ERROR", new String[][]{{"id", getId()},
                         {"node", XPathFinder.buildXPath(cGVBufferNode)}}, exc);
             }
@@ -138,7 +164,7 @@ public class ChangeGVBufferNode extends GVFlowNode
             logger.debug("END - Execute ChangeGVBufferNode '" + getId() + "'");
             return nextNodeId;
         }
-        if ((cGVBuffer != null) || outputServices.isValid()) {
+        if ((cGVBuffer != null) || outputServices.isValid() || (xmlMerge != null) || (xmlAggregate != null)) {
             if (obj instanceof GVBuffer) {
                 try {
                     GVBuffer data = (GVBuffer) obj;
@@ -148,6 +174,14 @@ public class ChangeGVBufferNode extends GVFlowNode
                     if (!output.equals("")) {
                         data = new GVBuffer(data);
                     }
+
+                    if (xmlAggregate != null) {
+                    	data.setObject(xmlAggregate.aggregate(input, environment));
+                    }
+                    else if (xmlMerge != null) {
+                    	data.setObject(xmlMerge.merge(input, environment));
+                    } 
+
                     if (cGVBuffer != null) {
                         data = cGVBuffer.execute(data, environment);
                     }
