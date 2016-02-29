@@ -83,12 +83,17 @@ public class RESTHttpServletMapping implements HttpServletMapping
     private String                        responseCharacterEncoding = null;
     private List<PatternResolver>         operationMappings   = new ArrayList<PatternResolver>();
 
+    /*
+     * /APP=prova/ELEMENT=test{{/DATA=\d+{{/SUD_DATA=blabla}}}}
+     * {{...}} optional terminal URL path component
+     */
     static private class PatternResolver {
         private String pattern;
         private String method;
         private String service;
         private String system;
         private String operation;
+        private boolean haveOptional;
         private boolean extractHdr;
         private List<String> propNames = new ArrayList<String>();
         private List<Pattern> patterns = new ArrayList<Pattern>();
@@ -138,6 +143,14 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     logger.debug("Element: " + elem);
                     String pN = elem.split("=")[0].trim();
                     String p = elem.split("=")[1].trim();
+                    if (pN.startsWith("?:")) {
+                    	haveOptional = true;
+                    }
+                    else {
+                    	if (haveOptional) {
+                    		throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + method + "#" + pattern + "]: NON Optional property [" + pN + "] come afther an optional property");
+                    	}
+                    }
                     propNames.add(pN);
                     patterns.add(Pattern.compile(p));
                     logger.debug("[" + pN + "]=[" + p + "]");
@@ -162,7 +175,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     locPath = locPath.substring(1);
                 }
                 String[] parts = locPath.split("/");
-                if (parts.length == patterns.size()) {
+                if ((parts.length == patterns.size()) || (haveOptional && (parts.length <= patterns.size()))) {
                     for (int i = 0; i < parts.length; i++) {
                         Matcher m = patterns.get(i).matcher(parts[i]);
                         if (m.matches()) {
@@ -173,11 +186,27 @@ public class RESTHttpServletMapping implements HttpServletMapping
                             return null;
                         }
                     }
-    
+                    if (parts.length < patterns.size()) {
+                    	String pN = propNames.get(parts.length);
+                    	if (! pN.startsWith("?:")) {
+                    		logger.debug("Pattern [" + method + "#" + pattern +"] NOT matched");
+                            return null;
+                    	}
+                    }
+
                     data.setService(service);
                     data.setSystem(system);
                     for (int i = 0; i < propNames.size(); i++) {
-                        data.setProperty(propNames.get(i), values.get(i));
+                    	String pN = propNames.get(i);
+                    	if (pN.startsWith("?:")) {
+                    		pN = pN.substring(2);
+                    	}
+                    	if (i < values.size()) {
+                    		data.setProperty(pN, values.get(i));
+                    	}
+                    	else {
+                    		data.setProperty(pN, "NULL");
+                    	}
                     }
                     logger.debug("Pattern [" + method + "#" + pattern +"] matched");
                     return operation;

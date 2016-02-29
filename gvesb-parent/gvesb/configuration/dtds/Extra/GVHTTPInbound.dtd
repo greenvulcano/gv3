@@ -241,13 +241,20 @@
     The URI pattern refers to the Path component only:
     http://localhost:8080/gvhttp/inbound/AddressBook/entry/123
     Path -> /AddressBook/entry/123
-    Sample mapping: /APPLICATION=AddressBook/E_COLLECTION=entry/E_UUID=\d+
+    Sample mapping: /APPLICATION=AddressBook/E_COLLECTION=entry/?:E_UUID=\d+
+    or, with optional mappings ?: before the property name:
+    http://localhost:8080/gvhttp/inbound/AddressBook/entry
+    Path -> /AddressBook/entry
+    Sample mapping: /APPLICATION=AddressBook/E_COLLECTION=entry/?:E_UUID=\d+
+
     The URL is splitted on / and must start with the string 'AddressBook', then must contain the string 'entry',
-    then the last tocken must match the regular expression '\d+' (must be a number of at least 1 digit).
+    then the last tocken, if not optional, must match the regular expression '\d+' (must be a number of at least 1 digit).
     On match, the input GVBuffer will contain the following properties:
         APPLICATION  = AddressBook
         E_COLLECTION = entry
         E_UUID       = 123
+    or, with optional mapping
+        E_UUID       = NULL
 
     #NotNull
 -->
