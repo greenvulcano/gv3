@@ -4,8 +4,8 @@
 
 <GVCore version="1.0">
   <GVCryptoHelper name="CRYPTO_HELPER" type="module">
-        <KeyStoreID id="HTTPS_KeyStore" key-store-name="keystores/client.jks" key-store-pwd="client" key-store-type="JKS" key-store-prv="SUN"/>
-        <KeyStoreID id="HTTPS_TrustStore" key-store-name="keystores/client_trust.jks" key-store-pwd="client_trust" key-store-type="JKS" key-store-prv="SUN"/>
+        <KeyStoreID id="HTTPS_KeyStore" key-store-name="client.jks" key-store-pwd="client" key-store-type="JKS" key-store-prv="SUN"/>
+        <KeyStoreID id="HTTPS_TrustStore" key-store-name="client_trust.jks" key-store-pwd="client_trust" key-store-type="JKS" key-store-prv="SUN"/>
         
         <KeyStoreID id="testKS" key-store-name="teststore.jks" key-store-pwd="testpwd"/>
         <KeyID id="test" key-alias="testalias" key-pwd="keypwd" key-store-id="testKS" key-type="3DES"/>
