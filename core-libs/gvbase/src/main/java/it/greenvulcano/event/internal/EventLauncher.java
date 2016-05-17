@@ -63,13 +63,19 @@ public class EventLauncher extends BaseThread
     @Override
     public final void run()
     {
-        while (!terminate) {
-            EventData eventD = EventToFireQueue.getEvent();
-            while (eventD != null) {
-                processEvent(eventD);
-                eventD = EventToFireQueue.getEvent();
-            }
-        }
+    	setRunning(true);
+    	try {
+	        while (!terminate) {
+	            EventData eventD = EventToFireQueue.getEvent();
+	            while (eventD != null) {
+	                processEvent(eventD);
+	                eventD = EventToFireQueue.getEvent();
+	            }
+	        }
+    	}
+    	finally {
+    		setRunning(true);
+    	}
     }
 
     /**

@@ -49,6 +49,7 @@ public class SimplePublisher extends BaseThread
     @Override
     public void run()
     {
+    	setRunning(true);
         try {
             // Prepare our publisher
             publisher = zctx.createSocket(ZMQ.PUB);
@@ -87,6 +88,7 @@ public class SimplePublisher extends BaseThread
                 // do nothing
             }
             publisher = null;
+            setRunning(false);
         }
     }
 

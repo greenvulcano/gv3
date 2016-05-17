@@ -47,6 +47,7 @@ public class SimpleServer extends BaseThread
     @Override
     public void run()
     {
+    	setRunning(true);
         try {
             // Prepare our publisher
             rec = zctx.createSocket(ZMQ.REP);
@@ -90,6 +91,7 @@ public class SimpleServer extends BaseThread
                 // do nothing
             }
             rec = null;
+            setRunning(false);
         }
     }
 
