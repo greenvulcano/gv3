@@ -19,9 +19,13 @@
  */
 package it.greenvulcano.util.bin;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -39,6 +43,7 @@ public class Dump
 
     private byte[]          buffer;
     private int             maxBufferLength = 0;
+    private BufferedReader  reader;
 
     /**
      * @param buffer
@@ -56,6 +61,22 @@ public class Dump
     {
         this.buffer = buffer;
         this.maxBufferLength = maxBufferLength;
+    }
+
+    /**
+     * 
+     * @param reader used to read dumped lines to be converted as bytes
+     */
+    public Dump(Reader reader) {
+        this.reader = new BufferedReader(reader);
+    }
+
+    /**
+     * 
+     * @param dump used to read dumped lines to be converted as bytes
+     */
+    public Dump(String dump) {
+        this.reader = new BufferedReader(new StringReader(dump));
     }
 
     /**
@@ -123,6 +144,24 @@ public class Dump
         writer.flush();
     }
 
+    public byte[] recoverToBytes() throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        recoverToStream(buffer);
+        return buffer.toByteArray();
+    }
+
+    public void recoverToStream(OutputStream stream) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String hex = splitRow(line);
+            if (hex == null) {
+                throw new IOException("Error: unsupported data format");
+            }
+            //stream.write(hex.getBytes());
+            stream.write(BinaryUtils.dumpHexIntsAsByteArray(hex));
+        }
+    }
+
     private static final String spaces = "                                                ";
 
     private void dump(int start, int end, Writer writer) throws IOException
@@ -166,4 +205,26 @@ public class Dump
         return ret;
     }
 
+    /**
+     * Split the string into 3 blocks, separated by ';'
+     *
+     * @param row
+     * @return the splitted row
+     */
+    private String splitRow(String row)
+    {
+        String output = null;
+        int i = row.indexOf(";");
+        int j = row.indexOf(";", i + 1);
+        if ((i > 0) && (j > 0)) {
+            output = row.substring(i + 1, j);
+        }
+        if ((i < 0) && (j < 0)) {
+            output = row.trim();
+        }
+        if (output != null) {
+            output = output.replaceAll("\\s", "");
+        }
+        return output;
+    }
 }
