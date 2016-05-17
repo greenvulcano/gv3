@@ -70,6 +70,7 @@ public class ZMQPublisher extends BaseThread
     @Override
     public void run()
     {
+    	setRunning(true);
         try {
             publisher = zctx.createSocket(ZMQ.PUB);
             publisher.bind(address);
@@ -104,6 +105,7 @@ public class ZMQPublisher extends BaseThread
                 // do nothing
             }
             publisher = null;
+            setRunning(false);
         }
     }
 

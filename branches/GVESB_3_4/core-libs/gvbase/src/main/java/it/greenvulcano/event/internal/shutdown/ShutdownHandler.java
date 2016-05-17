@@ -53,6 +53,7 @@ public class ShutdownHandler extends BaseThread {
      */
     @Override
     public final void run() {
+    	setRunning(true);
         try {
             EventHandler.fireEvent("shutdownStarted", shutdownEvent);
             try {
@@ -64,6 +65,7 @@ public class ShutdownHandler extends BaseThread {
         }
         finally {
             EventHandler.getEventLauncher().stopThread();
+            setRunning(false);
         }
     }
 }

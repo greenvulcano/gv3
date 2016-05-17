@@ -44,6 +44,7 @@ public class SimpleListener extends BaseThread
     @Override
     public void run()
     {
+    	setRunning(true);
         try {
             // Prepare our subscriber
             subscriber = zctx.createSocket(ZMQ.SUB);
@@ -71,6 +72,7 @@ public class SimpleListener extends BaseThread
                 // do nothing
             }
             subscriber = null;
+            setRunning(false);
         }
     }
 

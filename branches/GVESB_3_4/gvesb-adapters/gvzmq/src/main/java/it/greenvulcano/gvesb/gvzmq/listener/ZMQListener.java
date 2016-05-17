@@ -93,6 +93,7 @@ public class ZMQListener extends BaseThread
     @Override
     public void run()
     {
+    	setRunning(true);
         try {
             if ("Subscribe".equals(mode)) {
                 subscriber = zctx.createSocket(ZMQ.SUB);
@@ -135,6 +136,7 @@ public class ZMQListener extends BaseThread
                 invoker.destroy();
             }
             invoker = null;
+            setRunning(false);
         }
     }
 
