@@ -222,13 +222,11 @@ public class GVSubFlowPool
         if (subFlow == null) {
             return;
         }
-
-        logger.debug("GVSubFlowPool - releasing instance(" + pool.size() + "/" + created + "/"
-                + maximumCreation + ")");
-
         synchronized (this) {
             try {
                 if (assignedSF.remove(subFlow)) {
+                    logger.debug("GVSubFlowPool - releasing instance(" + pool.size() + "/" + created + "/"
+                            + maximumCreation + ")");
                     if ((maximumSize == -1) || ((pool != null) && (pool.size() < maximumSize))) {
                         pool.addFirst(subFlow);
                         return;
