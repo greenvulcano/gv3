@@ -227,6 +227,8 @@
               <gv.dtds.home>${greenv.project.home}/gvesb/configuration/dtds</gv.dtds.home>
               <gv.app.home>${basedir}/target</gv.app.home>
               <it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath>GVCore.xml&#124;/GVCore/GVXPath/XPath</it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath>
+              <it.greenvulcano.util.thread.BaseThread.dumpInstCount>true</it.greenvulcano.util.thread.BaseThread.dumpInstCount>
+              <it.greenvulcano.util.thread.BaseThread.dumpStartStop>true</it.greenvulcano.util.thread.BaseThread.dumpStartStop>
             </systemPropertyVariables>
           </configuration>
         </plugin>
@@ -477,7 +479,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore</artifactId>
-            <version>3.4.0.3-Final</version>
+            <version>3.4.0.4-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -656,7 +658,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvconsole</artifactId>
-            <version>3.4.0.5-Final</version>
+            <version>3.4.0.6-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>

@@ -1,4 +1,39 @@
 -------------------------------------------
+ESB version 3.4.0.10
+-------------------------------------------
+
+Commons:
+- Added support to Java 8 runtime.
+- Improved JSON<->XML conversion of arrays.
+
+Core:
+- Improved ChangeGVBuffer node initialization error logging.
+- Added XML merge and aggregate functionality to ChangeGVBufferNode.
+- Added to parallel nodes the capability to avoid collecting subflows output data.
+
+GVConsole:
+- Improved deployment of call VCL operations: now are deployed only effectively used service's VCL operations.
+- Improved deployment of dh-call VCL operations: now is deployed every single DBOBuilder and DataRetriever as indipendent unit.
+
+DataHandler:
+- Added capability to DBOxxxFlatSelect to write extracted records directly into a local file, in order to better handle massive data extractions.
+- Corrected DataHandler.xsd missing definitions.
+- Corrected error reporting in DBOThreadSelect.
+
+Adapter HTTP:
+- Added support to REST mapping of optional URL's path components
+
+VCL File:
+- Added to RemoteManager methods the capability to provide at the real implementations a Map containing implementation-specific properties.
+- Updated the remote commands to reads a list of properties from configuration.
+
+VCL Mail:
+- Added imap-call and imap-manage-call VCL operations, added the capability to define the max number of email to be read.
+
+VCL Excel:
+- Improved Excel Report generator in order to generate report based on XML data.
+
+-------------------------------------------
 ESB version 3.4.0.9
 -------------------------------------------
 
