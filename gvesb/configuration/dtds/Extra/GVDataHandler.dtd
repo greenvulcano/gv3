@@ -783,6 +783,12 @@
     #NotNull
 -->
 <!ATTLIST DBOThreadSelect output-data CDATA #IMPLIED>
+<!--
+    Tell the engine the RowSet document creation policy.
+    Default is standard.
+
+-->
+<!ATTLIST DBOThreadSelect rowset-builder (standard|extended) #IMPLIED>
 
 <!--
     DBO optimized for select operations and conversion in CSV rows.
