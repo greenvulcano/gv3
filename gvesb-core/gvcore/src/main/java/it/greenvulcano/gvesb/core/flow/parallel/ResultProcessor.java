@@ -54,7 +54,7 @@ public class ResultProcessor
 {
     public enum ProcessorInput {
         PROCESS_ONLY_OBJECT("Process Only Object"), PROCESS_OBJECT_ERROR("Process Object and Error"), PROCESS_ONLY_GVBUFFER(
-                "Process Only GVBuffer"), PROCESS_GVBUFFER_ERROR("Process GVBuffer and Error");
+                "Process Only GVBuffer"), PROCESS_GVBUFFER_ERROR("Process GVBuffer and Error"), PROCESS_NOTHING("Process nothing");
 
         private String desc;
 
@@ -82,6 +82,9 @@ public class ResultProcessor
             }
             if ("gvbuffer-and-error".equals(name)) {
                 return PROCESS_GVBUFFER_ERROR;
+            }
+            if ("nothing".equals(name)) {
+                return PROCESS_NOTHING;
             }
             return null;
         }
@@ -121,6 +124,14 @@ public class ResultProcessor
         javaScript = XMLConfig.get(node, "JavaScript", null);
         jsScope = XMLConfig.get(node, "JavaScript/@scope-name", "gvesb");
 
+
+        if (processorInput == ProcessorInput.PROCESS_NOTHING) {
+        	if ((aggregateRoot != null) || (ognlScript != null) || (javaScript != null)) {
+        		throw new GVCoreConfException("GVCORE_BAD_CFG_ERROR", new String[][]{
+                        {"name", "'processor-input'"}, {"message", "If processor-input=nothing cannot be configured a specific output processor"}});
+        	}
+        }
+        
         logger.debug("Configured " + toString());
     }
 
@@ -141,6 +152,10 @@ public class ResultProcessor
         return defaultProcessor(input, results);
     }
 
+    public boolean needsOutput() {
+    	return processorInput != ProcessorInput.PROCESS_NOTHING;
+    }
+
     @Override
     public String toString() {
         String desc = "ResultProcessor: failOnError[" + failOnError + "] - processorInput[" + processorInput + "]";
@@ -154,7 +169,7 @@ public class ResultProcessor
             desc += " - Use JavaScript Processor:\n" + javaScript;
         }
         else {
-            desc += " - Use Default Processor";
+            desc += " - Use Default Processor" + (processorInput == ProcessorInput.PROCESS_NOTHING ? " (No output)" : "");
         }
         return desc;
     }
@@ -197,6 +212,9 @@ public class ResultProcessor
                             toProcess.add(((GVBuffer) d).getObject());
                         }
                     }
+                    break;
+                case PROCESS_NOTHING :
+                    // do nothing
                     break;
             }
         }
