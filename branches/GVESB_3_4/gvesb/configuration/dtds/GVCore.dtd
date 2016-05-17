@@ -5151,8 +5151,11 @@
 
     If a processor is not defined, the output GVBuffer.object will contain the
     java.util.List as defined as input for JavaScript and OGNLScript but unwrapped.
+
+    If the value is 'nothing' cannot be defined any ResultProcessor and the output
+    will contains an empty java.util.List.
 -->
-<!ATTLIST ResultProcessor  processor-input (only-object|only-gvbuffer|object-and-error|gvbuffer-and-error) #REQUIRED>
+<!ATTLIST ResultProcessor  processor-input (only-object|only-gvbuffer|object-and-error|gvbuffer-and-error|nothing) #REQUIRED>
 <!--
     If true and any of the SubFlows output contains an Exception then the
     ResultProcessor returns an error.
