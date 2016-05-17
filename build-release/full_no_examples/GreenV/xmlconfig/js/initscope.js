@@ -3,6 +3,7 @@ importPackage(Packages.it.greenvulcano.gvesb.utils);
 importPackage(Packages.it.greenvulcano.util.xml);
 importPackage(Packages.it.greenvulcano.util.xpath);
 importPackage(Packages.it.greenvulcano.util.txt);
+importPackage(Packages.it.greenvulcano.util.metadata);
 importPackage(Packages.it.greenvulcano.configuration);
 importPackage(Packages.it.greenvulcano.gvesb.core.exc);
 

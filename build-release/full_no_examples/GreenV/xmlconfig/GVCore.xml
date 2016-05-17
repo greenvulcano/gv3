@@ -289,6 +289,10 @@
                                class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
                                name="identityXMLNoNamespace" type="transformation"/>
             <XSLTransformation DataSourceSet="Default"
+                               XSLMapName="identityAddNamespace.xsl"
+                               class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
+                               name="identityXMLAddNamespace" type="transformation"/>
+            <XSLTransformation DataSourceSet="Default"
                                XSLMapName="DataHandler/RecoveryPoint/ListRecoveryPoint.xsl"
                                class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
                                name="ListRecoveryPoint" type="transformation"/>

@@ -1,5 +1,5 @@
 Prerequisiti:
-- installazione di jdk 1.6.x SUN/Oracle
+- installazione di jdk 1.8.x SUN/Oracle
 
 Il file contiene due directory:
 (1) jboss-5.1.0.GA: application server Jboss
@@ -10,7 +10,7 @@ Installazione (Windows):
 - modificare il file C:\@base.dir@\GreenV\bin\env_scripts.cmd settando le variabili d'ambiente:
     - JBOSS_HOME=C:\@base.dir@\jboss-5.1.0.GA
     - GV_HOME=C:\@base.dir@\GreenV
-    - JAVA_HOME="path del JDK 1.6"
+    - JAVA_HOME="path del JDK 1.8"
     - GV_SERVER=%JBOSS_HOME%\server\GreenV
 
 Installazione (Unix):
@@ -18,7 +18,7 @@ Installazione (Unix):
 - modificare il file /home/jboss/@base.dir@/GreenV/bin/env_scripts.sh settando le variabili d'ambiente:
     - JBOSS_HOME=/home/jboss/@base.dir@/jboss-5.1.0.GA
     - GV_HOME=/home/jboss/@base.dir@/GreenV
-    - JAVA_HOME="path del JDK 1.6"
+    - JAVA_HOME="path del JDK 1.8"
     - GV_SERVER=$JBOSS_HOME/server/GreenV
 
 Per avviare il database HSQLDB di supporto eseguire lo script:
@@ -62,4 +62,4 @@ o
 
 Saluti,
 Il Team di GreenVulcano.
-(C)Ottobre 2009.
+(C)Maggio 2016.

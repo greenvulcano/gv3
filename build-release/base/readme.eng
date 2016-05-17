@@ -1,5 +1,5 @@
 Prerequisites:
-- installation of JDK 1.6 SUN/Oracle
+- installation of JDK 1.8 SUN/Oracle
 
 The file contains two folders:
 (1) jboss-5.1.0.GA: Jboss Application Server
@@ -10,7 +10,7 @@ Installation (Windows):
 - change the file C:\@base.dir@\GreenV\bin\env_scripts.cmd setting the environment variables:
     - JBOSS_HOME=C:\@base.dir@\jboss-5.1.0.GA
     - GV_HOME=C:\@base.dir@\GreenV
-    - JAVA_HOME -> "path to JDK 1.6"
+    - JAVA_HOME -> "path to JDK 1.8"
     - GV_SERVER -> %JBOSS_HOME%\server\GreenV
 
 Installation (Unix):
@@ -18,7 +18,7 @@ Installation (Unix):
 - change the file @base.dir@/GreenV/bin/env_scripts.sh setting the environment variables:
     - JBOSS_HOME=/home/jboss/@base.dir@/jboss-5.1.0.GA
     - GV_HOME=/home/jboss/@base.dir@/GvServer/GreenV
-    - JAVA_HOME -> "path to JDK 1.6"
+    - JAVA_HOME -> "path to JDK 1.8"
     - GV_SERVER -> $JBOSS_HOME/server/GreenV
 
 
@@ -66,4 +66,4 @@ o
 
 Regards,
 Il Team di GreenVulcano.
-(C)Ottobre 2009.
+(C)May 2016.
