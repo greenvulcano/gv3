@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE form-definition PUBLIC "-//FormDef//Combined FormDef Form Definition 1.0 and Validation 1.2.0//EN" "form-defs_1_0-validator_1_2_0.dtd">
+<form-definition>
+	<formdef-config
+	        formType="it.greenvulcano.gvesb.gvconsole.util.BaseForm"/>
+	<formset>
+        <form name="BirtReportForm" validate="false">
+            <field property="group" type="java.lang.String"/>
+            <field property="report" type="java.lang.String"/>
+            <field property="reportConfig" type="java.lang.String"/>
+        </form>
+        <form name="SavePointForm" validate="false">
+            <field property="rec_id" type="java.lang.String"/>
+            <field property="id" type="java.lang.String"/>
+            <field property="service" type="java.lang.String"/>
+            <field property="date" type="java.lang.String"/>
+        </form>
+        <form name="LogViewerForm" validate="false">
+            <field property="dateFrom" type="java.lang.String"/>
+            <field property="dateTo" type="java.lang.String"/>
+            <field property="date" type="java.lang.String"/>
+            <field property="system" type="java.lang.String"/>
+            <field property="service" type="java.lang.String"/>
+            <field property="id" type="java.lang.String"/>
+            <field property="severity" type="java.lang.String"/>
+            <field property="id_msg" type="java.lang.String"/>
+            <field property="dialogType" type="java.lang.String"/>
+        </form>
+        
+        <form name="GlobalProperty" beanType="it.greenvulcano.gvesb.gvconsole.gvcon.property.GlobalProperty" validate="false"/>
+        <form name="PropertiesEditorForm" beanType="it.greenvulcano.gvesb.gvconsole.gvcon.property.PropertiesEditorForm" validate="false">
+            <field property="properties"
+                type="java.util.List" exclude="false">
+                <converter type="formdef.plugin.conversion.FormCollectionConverter"
+                           param="GlobalProperty">
+                    <set-property key="formType" value="java.util.ArrayList"/>
+                    <set-property key="beanType" value="java.util.ArrayList"/>
+                </converter>
+            </field>
+        </form>
+   </formset>
+</form-definition>

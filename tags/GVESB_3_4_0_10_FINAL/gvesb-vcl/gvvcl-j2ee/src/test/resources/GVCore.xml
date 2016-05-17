@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+
+<GVCore version="1.0">
+  <GVCryptoHelper name="CRYPTO_HELPER" type="module"/>
+  <GVXPath name="XPATH" type="module">
+    <XPath xpath-factory="it.greenvulcano.util.xpath.search.jaxen.JaxenXPathAPIFactoryImpl">
+      <Description>Funzioni estese e namespaces per l&apos;XPath.</Description>
+      <XPathExtension class="it.greenvulcano.util.xpath.search.extension.ExternalDocumentXPathFunction"
+                      function-name="document">
+            <Description>Accede ad un documento esterno. Uso: gvf:document('xml file path')</Description>
+      </XPathExtension>
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd" />
+      <XPathNamespace namespace="http://www.w3.org/2001/XMLSchema-instance" prefix="xsi" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/soap/" prefix="soap" />
+      <XPathNamespace namespace="http://schemas.xmlsoap.org/wsdl/" prefix="wsdl" />
+      <XPathNamespace namespace="http://jakarta.apache.org/log4j/" prefix="log4j" />
+      <XPathNamespace namespace="http://www.w3.org/XML/1998/namespace" prefix="xml" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano" prefix="gvesbws"/>
+      <XPathNamespace namespace="http://www.greenvulcano.it/jca/xml" prefix="jca" />
+      <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc" />
+      <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
+    </XPath>
+  </GVXPath>
+  <GVSystems name="SYSTEMS" type="module">
+    <Systems>
+      <System id-system="GVESB" system-activation="on">
+        <Channel id-channel="TEST_CHANNEL">
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb2ToupperGVBuffer" remote-or-local-interface="test.unit.ejb.J2EETest"
+            version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            method="toupper" parameterTypes="it.greenvulcano.gvesb.buffer.GVBuffer" type="call">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb2ToupperStringArr" remote-or-local-interface="test.unit.ejb.J2EETest"
+            version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            method="toupper" parameterTypes="java.lang.String[]" type="call"
+            input-ref-dp="toupperInArrayDataProvider" output-ref-dp="toupperOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb2SumInt" remote-or-local-interface="test.unit.ejb.J2EETest"
+            version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            method="sum" parameterTypes="int,int" type="call"
+            input-ref-dp="sumInArrayDataProvider" output-ref-dp="sumOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb2AddTime" remote-or-local-interface="test.unit.ejb.J2EETest"
+            version="2" home-interface="test.unit.ejb.J2EETestHome" jndi-name="J2EETest_mainRemoteHome" 
+            method="addTime" parameterTypes="java.util.Date,int,int" type="call"
+            input-ref-dp="addTimeInArrayDataProvider" output-ref-dp="addTimeOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb3ToupperGVBuffer" remote-or-local-interface="test.unit.ejb3.J2EETest"
+            version="3" jndi-name="gvesb/test3/Test" 
+            method="toupper" parameterTypes="it.greenvulcano.gvesb.buffer.GVBuffer" type="call">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb3ToupperStringArr" remote-or-local-interface="test.unit.ejb3.J2EETest"
+            version="3" jndi-name="gvesb/test3/Test" 
+            method="toupper" parameterTypes="java.lang.String[]" type="call"
+            input-ref-dp="toupperInArrayDataProvider" output-ref-dp="toupperOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb3SumInt" remote-or-local-interface="test.unit.ejb3.J2EETest"
+            version="3" jndi-name="gvesb/test3/Test" 
+            method="sum" parameterTypes="int,int" type="call"
+            input-ref-dp="sumInArrayDataProvider" output-ref-dp="sumOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+          <j2ee-ejb-call class="it.greenvulcano.gvesb.virtual.j2ee.J2EECallOperation" 
+            name="ejb3AddTime" remote-or-local-interface="test.unit.ejb3.J2EETest"
+            version="3" jndi-name="gvesb/test3/Test" 
+            method="addTime" parameterTypes="java.util.Date,int,int" type="call"
+            input-ref-dp="addTimeInArrayDataProvider" output-ref-dp="addTimeOutGVBChangeDataProvider">
+            <JNDIHelper initial-context-factory="org.apache.openejb.client.LocalInitialContextFactory" />
+          </j2ee-ejb-call>
+        </Channel>
+      </System>
+    </Systems>
+  </GVSystems>
+</GVCore>

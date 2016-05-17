@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+
+<GVCore version="1.0">
+
+    <GVPoolManager name="POOL_MANAGER" type="module">
+        .......
+        <GreenVulcanoPool default-timeout="5000" initial-size="1" maximum-creation="10"
+                          maximum-size="5" shrink-timeout="120000"
+                          subsystem="GVHL7Listener"/>
+    </GVPoolManager>
+    <GVServices name="SERVICES" type="module">
+        ....
+        <Services>
+            ....
+            <Service group-name="DEFAULT_GRP" id-service="TestHL7" service-activation="on"
+                     statistics="off">
+                <Operation name="RequestReply" operation-activation="on" class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
+                           out-check-type="sys-svc-id" type="operation">
+                    <Participant id-channel="TEST_CHANNEL_HL7" id-system="GVESB"/>
+                    <Flow first-node="process" point-x="20" point-y="150">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         dump-in-out="false" id="process"
+                                         id-system="GVESB" input="input"
+                                         next-node-id="end" op-type="call"
+                                         operation-name="echo_call" output="output"
+                                         point-x="127" point-y="139" type="flow-node">
+                            <InputServices>
+                                <gvdte-service critical="yes" internal="yes"
+                                               remove-fields="yes" type="service">
+                                    <map-name-param name="map-name" type="param"
+                                                    value="TestHL72XML"/>
+                                    <gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall"
+                                                        name="TestHL72XML" type="call"/>
+                                </gvdte-service>
+                            </InputServices>
+                            <OutputServices>
+                                <gvdte-service critical="yes" internal="yes"
+                                               remove-fields="yes" type="service">
+                                    <map-name-param name="map-name" type="param"
+                                                    value="TestXML2HL7"/>
+                                    <gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall"
+                                                        name="TestXML2HL7" type="call"/>
+                                </gvdte-service>
+                            </OutputServices>
+                        </GVOperationNode>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   end-business-process="yes" id="end" op-type="end"
+                                   output="output" point-x="256" point-y="138"
+                                   type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
+            <Service group-name="DEFAULT_GRP" id-service="TestHL7_Listener"
+                     service-activation="on" statistics="off">
+                <Operation name="RequestReply" operation-activation="on" class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
+                           out-check-type="sys-svc-id" type="operation">
+                    <Participant id-channel="TEST_CHANNEL_HL7" id-system="GVESB"/>
+                    <Flow first-node="process" point-x="20" point-y="150">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         dump-in-out="false" id="process"
+                                         id-system="GVESB" input="input"
+                                         next-node-id="end" op-type="call"
+                                         operation-name="echo_call" output="output"
+                                         point-x="127" point-y="139" type="flow-node">
+                            <OutputServices>
+                                <gvdte-service critical="yes" internal="yes"
+                                               remove-fields="yes" type="service">
+                                    <map-name-param name="map-name" type="param"
+                                                    value="TestHL7_OK"/>
+                                    <gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall"
+                                                        name="TestHL7_OK" type="call"/>
+                                </gvdte-service>
+                            </OutputServices>
+                        </GVOperationNode>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   end-business-process="yes" id="end" op-type="end"
+                                   output="output" point-x="256" point-y="138"
+                                   type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
+            <Service group-name="DEFAULT_GRP" id-service="TestHL7_Client"
+                     service-activation="on" statistics="off">
+                <Operation name="RequestReply" operation-activation="on" class="it.greenvulcano.gvesb.core.flow.GVFlowWF"
+                           out-check-type="sys-svc-id" type="operation">
+                    <Participant id-channel="TEST_CHANNEL_HL7" id-system="GVESB"/>
+                    <Flow first-node="process" point-x="20" point-y="150">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         dump-in-out="false" id="process"
+                                         id-system="GVESB" input="input"
+                                         next-node-id="end" op-type="call"
+                                         operation-name="hl7_call" output="output"
+                                         point-x="127" point-y="139" type="flow-node">
+                            <InputServices>
+                                <gvdte-service critical="yes" internal="yes"
+                                               remove-fields="yes" type="service">
+                                    <map-name-param name="map-name" type="param"
+                                                    value="TestHL72XML"/>
+                                    <gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall"
+                                                        name="TestHL72XML" type="call"/>
+                                </gvdte-service>
+                            </InputServices>
+                            <OutputServices>
+                                <gvdte-service critical="yes" internal="yes"
+                                               remove-fields="yes" type="service">
+                                    <map-name-param name="map-name" type="param"
+                                                    value="TestXML2HL7"/>
+                                    <gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall"
+                                                        name="TestXML2HL7" type="call"/>
+                                </gvdte-service>
+                            </OutputServices>
+                        </GVOperationNode>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   end-business-process="yes" id="end" op-type="end"
+                                   output="output" point-x="256" point-y="138"
+                                   type="flow-node"/>
+                    </Flow>
+                </Operation>
+            </Service>
+
+        </Services>
+    </GVServices>
+    <GVSystems name="SYSTEMS" type="module">
+        <Systems>
+            <System id-system="GVESB" system-activation="on">
+                ....
+                <Channel id-channel="TEST_CHANNEL_HL7">
+                    <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall"
+                                       name="echo_call" service="echo" sleep-on-init="75"
+                                       sleep-on-perform="50" type="call"/>
+                    <hl7-call class="it.greenvulcano.gvesb.virtual.hl7.HL7CallOperation"
+                              host="localhost" name="hl7_call" port="8181" type="call"/>
+                </Channel>
+            </System>
+        </Systems>
+    </GVSystems>
+
+    <GVDataTransformation name="GVDT" type="module">
+        ....
+        <Transformations>
+            ....
+            <HL72XMLTransformation class="it.greenvulcano.gvesb.gvdte.transformers.hl7.HL72XMLTransformer"
+                                   name="TestHL72XML" type="transformation"/>
+            <XML2HL7Transformation class="it.greenvulcano.gvesb.gvdte.transformers.hl7.XML2HL7Transformer"
+                                   name="TestXML2HL7" type="transformation"/>
+            <XSLTransformation DataSourceSet="Default" XSLMapName="HL7/TestHL7_OK.xsl"
+                               class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
+                               name="TestHL7_OK" type="transformation"/>
+        </Transformations>
+    </GVDataTransformation>
+
+</GVCore>

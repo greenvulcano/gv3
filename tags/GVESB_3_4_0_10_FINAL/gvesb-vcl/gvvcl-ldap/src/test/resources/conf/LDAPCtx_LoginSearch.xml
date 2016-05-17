@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ldapc:LDAPContext xmlns:ldapc="http://www.greenvulcano.it/ldap">
+    <ldapc:Entry full-id="cn=Gianluca Di Maio,ou=People,o=JNDITutorial,dc=example,dc=com" id="cn=Gianluca Di Maio,ou=People">
+        <ldapc:AttributeList>
+            <ldapc:Attribute id="telephoneNumber">
+                <ldapc:Value>004 222444777</ldapc:Value>
+                <ldapc:Value>004 222444888</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="mail">
+                <ldapc:Value>gdimaio@example.com</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="userPassword">
+                <ldapc:Value>NjU0MzIx</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="facsimileTelephoneNumber">
+                <ldapc:Value>004 222444666</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="objectClass">
+                <ldapc:Value>top</ldapc:Value>
+                <ldapc:Value>person</ldapc:Value>
+                <ldapc:Value>organizationalPerson</ldapc:Value>
+                <ldapc:Value>inetOrgPerson</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="sn">
+                <ldapc:Value>Di Maio</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="cn">
+                <ldapc:Value>Gianluca Di Maio</ldapc:Value>
+            </ldapc:Attribute>
+        </ldapc:AttributeList>
+    </ldapc:Entry>
+    <ldapc:Entry full-id="cn=Accounting Managers,ou=Groups,o=JNDITutorial,dc=example,dc=com" id="cn=Accounting Managers,ou=Groups">
+        <ldapc:AttributeList>
+            <ldapc:Attribute id="ou">
+                <ldapc:Value>groups</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="description">
+                <ldapc:Value>People who can manage accounting entries</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="objectClass">
+                <ldapc:Value>top</ldapc:Value>
+                <ldapc:Value>groupOfUniqueNames</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="uniqueMember">
+                <ldapc:Value>cn=Niels Bohr,ou=People,o=JNDITutorial,dc=example,dc=com</ldapc:Value>
+                <ldapc:Value>cn=Spuds Mackenzie,ou=People,o=JNDITutorial,dc=example,dc=com</ldapc:Value>
+                <ldapc:Value>cn=Gianluca Di Maio,ou=People,o=JNDITutorial,dc=example,dc=com</ldapc:Value>
+            </ldapc:Attribute>
+            <ldapc:Attribute id="cn">
+                <ldapc:Value>Accounting Managers</ldapc:Value>
+            </ldapc:Attribute>
+        </ldapc:AttributeList>
+    </ldapc:Entry>
+</ldapc:LDAPContext>
