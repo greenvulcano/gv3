@@ -178,7 +178,7 @@ public class GVESBPropertyHandler implements PropertyHandler
                 }
             }
 
-            return (paramValue != null) ? paramValue.trim() : paramValue;
+            return (paramValue != null) ? paramValue.trim() : "";
         }
         catch (Exception exc) {
             logger.warn("Error handling 'sql' metadata '" + sqlStatement + "'", exc);
@@ -287,7 +287,7 @@ public class GVESBPropertyHandler implements PropertyHandler
                 paramValue = paramValue.substring(separator.length());
             }
 
-            return (paramValue != null) ? paramValue.trim() : paramValue;
+            return (paramValue != null) ? paramValue.trim() : "";
         }
         catch (Exception exc) {
             logger.warn("Error handling 'sqllist' metadata '" + sqlStatement + "'", exc);
