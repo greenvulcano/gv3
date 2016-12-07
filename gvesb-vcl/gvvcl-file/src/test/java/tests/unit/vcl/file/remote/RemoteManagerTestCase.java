@@ -95,7 +95,8 @@ public class RemoteManagerTestCase extends TestCase
         GVBuffer result = rm.perform(gvBuffer);
         System.out.println("testExistFile: " + result.getProperty("GVRM_FOUND_FILES_LIST"));
         assertEquals(2, Integer.parseInt(result.getProperty("GVRM_FOUND_FILES_NUM")));
-        assertEquals("Test0.txt;Test1.txt", result.getProperty("GVRM_FOUND_FILES_LIST"));
+        assertTrue(result.getProperty("GVRM_FOUND_FILES_LIST").contains("Test0.txt"));
+        assertTrue(result.getProperty("GVRM_FOUND_FILES_LIST").contains("Test1.txt"));
     }
 
     /**
