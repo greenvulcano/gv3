@@ -68,6 +68,7 @@ public class CSVToXMLTransformer implements DTETransformer
     private String                  fieldDelimiter              = "";
     private boolean                 useCDATA                    = false;
     private boolean                 excludeFirstRow             = false;
+    private String                  encoding                    = "";
     private String                  tagRoot                     = DEFAULT_TARGET_TAG_ROOT;
     private String                  tagGroup                    = DEFAULT_TARGET_TAG_GROUP;
     private String                  tagRecord                   = DEFAULT_TARGET_TAG_RECORD;
@@ -103,6 +104,7 @@ public class CSVToXMLTransformer implements DTETransformer
             name = XMLConfig.get(node, "@name", "NO_NAME");
             fieldsSeparator = XMLConfig.get(node, "@FieldsSeparator", ",");
             fieldDelimiter = XMLConfig.get(node, "@FieldDelimiter", "");
+            encoding = XMLConfig.get(node, "@FileEncoding", System.getProperty("file.encoding"));
             useCDATA = XMLConfig.getBoolean(node, "@UseCDATA", false);
             excludeFirstRow = XMLConfig.getBoolean(node, "@ExcludeFirstRow", false);
             tagsStr = XMLConfig.get(node, "@Tags", "");
@@ -116,7 +118,7 @@ public class CSVToXMLTransformer implements DTETransformer
 
             logger.debug("Loaded parameters: FieldSeparator = [" + fieldsSeparator + "] - FieldDelimiter = ["
                     + fieldDelimiter + "] - UseCDATA = [" + useCDATA + "] - ExcludeFirstRow = [" + excludeFirstRow
-                    + "] - Tags = [" + tagsStr + "] - GroupBy = [" + groupByStr + "]");
+                    + "] - Tags = [" + tagsStr + "] - GroupBy = [" + groupByStr + "] - FileEncoding = [" + encoding + "]");
 
             logger.debug("Init stop");
         }
@@ -181,7 +183,7 @@ public class CSVToXMLTransformer implements DTETransformer
         try {
             Reader inputStr = null;
             if (input instanceof byte[]) {
-                inputStr = new InputStreamReader(new ByteArrayInputStream((byte[]) input));
+                inputStr = new InputStreamReader(new ByteArrayInputStream((byte[]) input), encoding);
             }
             else if (input instanceof String) {
                 inputStr = new StringReader((String) input);
