@@ -43,13 +43,11 @@ import org.quartz.impl.SchedulerRepository;
 import org.quartz.impl.StdJobRunShellFactory;
 import org.quartz.impl.StdScheduler;
 import org.quartz.impl.jdbcjobstore.JobStoreTX;
-import org.quartz.plugins.management.ShutdownHookPlugin;
 import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.simpl.RAMJobStore;
 import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobStore;
-import org.quartz.spi.SchedulerPlugin;
 import org.quartz.utils.DBConnectionManager;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -179,9 +177,9 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 thPool.initialize();
                 qrs.setJobStore(jobStore);
 
-                SchedulerPlugin shPlugin = new ShutdownHookPlugin();
+                /*SchedulerPlugin shPlugin = new ShutdownHookPlugin();
                 ((ShutdownHookPlugin) shPlugin).setCleanShutdown(true);
-                qrs.addSchedulerPlugin(shPlugin);
+                qrs.addSchedulerPlugin(shPlugin);*/
 
                 QuartzScheduler qs = new QuartzScheduler(qrs, schedCtxt, 30000, 15000);
 
@@ -194,7 +192,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
 
                 scheduler = new StdScheduler(qs, schedCtxt2);
 
-                shPlugin.initialize(qrs.getInstanceId(), scheduler);
+                //shPlugin.initialize(qrs.getInstanceId(), scheduler);
 
                 jrsf.initialize(scheduler, schedCtxt);
                 qs.initialize();
@@ -236,6 +234,21 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     }
 
     @Override
+    public synchronized void shutdownScheduler(String schedulerName) {
+    	SchedulerRepository schedRep = SchedulerRepository.getInstance();
+        Scheduler scheduler = schedRep.lookup(schedulerName);
+        if (scheduler != null) {
+            try {
+            	scheduler.shutdown();
+            }
+            catch (Exception exc) {
+                logger.error("Error destroying Scheduler[" + schedulerName + "]", exc);
+            }
+        	schedRep.remove(schedulerName);
+        }
+    }
+
+    @Override
     public Calendar getCalendar(String schedName, String calName) throws TaskException
     {
         try {
@@ -244,6 +257,15 @@ public class GVSchedulerBuilder implements SchedulerBuilder
         catch (SchedulerException exc) {
             throw new TaskException("Error obtaining Calendar[" + calName + "] of Scheduler[" + schedName + "]", exc);
         }
+    }
+    
+    @Override
+    public void destroy() {
+    	calendars.clear();
+    	if (cBuilder != null) {
+    		cBuilder.destroy();
+    		cBuilder = null;
+    	}
     }
 
     @Override
