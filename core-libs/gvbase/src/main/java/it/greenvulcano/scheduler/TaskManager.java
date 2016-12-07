@@ -183,7 +183,7 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
     {
         killTasks();
         try {
-            getScheduler().shutdown();
+        	schedulerBuilder.shutdownScheduler(managerName);
         }
         catch (Exception exc) {
             // do nothing
@@ -255,6 +255,9 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
         }
         if (destroy) {
             //destroy(); TEST TEST TEST
+        	if (schedulerBuilder != null) {
+        		schedulerBuilder.shutdownScheduler(managerName);
+        	}
         }
         else {
             logger.info("TaskManager[" + managerName + "] - No last active server... Skip destroy");
@@ -581,6 +584,10 @@ public class TaskManager implements ConfigurationListener, ShutdownEventListener
         }
         catch (Exception exc) {
             // do nothing
+        }
+        if (schedulerBuilder != null) {
+        	schedulerBuilder.destroy();
+        	schedulerBuilder = null;
         }
         init();
     }

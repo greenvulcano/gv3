@@ -34,6 +34,10 @@ public interface SchedulerBuilder
     public void init(Node node) throws TaskException;
 
     public Scheduler getScheduler(String schedName) throws TaskException;
+    
+    public void shutdownScheduler(String schedName);
 
     public Calendar getCalendar(String schedName, String calName) throws TaskException;
+    
+    public void destroy();
 }
