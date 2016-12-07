@@ -274,7 +274,21 @@ public class GVDTETestCase extends XMLTestCase
         //System.out.println("TestJson2Xml: " + dom);
         assertXMLEqual("TestJson2Xml failed", outXML, dom);
     }
-    
+
+    /**
+     * Test the JSON2XMLTransformer.
+     * 
+     * @throws Exception
+     */
+    public void testJSON2XML_Array() throws Exception
+    {
+        Object output = controller.transform("TestJson2Xml", TextUtils.readFileFromCP("str_array.json"), null);
+        String dom = XMLUtils.serializeDOM_S((Node) output);
+        String outXML = TextUtils.readFileFromCP("str_array.xml");
+        //System.out.println("TestJson2Xml_Array: " + dom);
+        assertXMLEqual("TestJson2Xml_Array failed", outXML, dom);
+    }
+
     /**
      * Test the XML2JSONTransformer BadgerFish.
      * 
