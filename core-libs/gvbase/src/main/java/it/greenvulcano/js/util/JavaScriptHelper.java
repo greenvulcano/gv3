@@ -123,6 +123,7 @@ public final class JavaScriptHelper
      */
     public static String resultToString(Object result)
     {
+    	if (result == null) return "";
         return Context.toString(result);
     }
 
