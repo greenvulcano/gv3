@@ -30,6 +30,7 @@ import it.greenvulcano.util.xml.XMLUtils;
 import java.io.StringReader;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +63,8 @@ public class BasicPropertyHandler implements PropertyHandler
         PropertiesHandler.registerHandler("xpath", handler);
         PropertiesHandler.registerHandler("timestamp", handler);
         PropertiesHandler.registerHandler("dateformat", handler);
+        PropertiesHandler.registerHandler("dateAdd", handler);
+        PropertiesHandler.registerHandler("dateformatAdd", handler);
         PropertiesHandler.registerHandler("decode", handler);
         PropertiesHandler.registerHandler("decodeL", handler);
         PropertiesHandler.registerHandler("js", handler);
@@ -98,6 +101,9 @@ public class BasicPropertyHandler implements PropertyHandler
      * - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value, formatted as 'pattern'
      * - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} : reformat 'date' from 'source-pattern' to 'dest-pattern',
      *                          and optionally from 'source-tZone' to 'dest-tZone'   
+     * - dateAdd{{date::pattern::type::value}} : add to 'date', formatted as 'pattern', 'value' element of 'type': [s]econd, [m]inute, [h]our, [d]ay, [M]onth, [y]ear
+     * - dateformatAdd{{date::source-pattern::dest-pattern::type::value[::source-tZone::dest-tZone]}} : reformat 'date' from 'source-pattern' to 'dest-pattern',
+     *                          and optionally from 'source-tZone' to 'dest-tZone', add to 'date' 'value' element of 'type'
      * - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
      *                          evaluate as if-then-else; if 'field' is equal to cond1...n,
      *                          return the value of val1...n, otherwise 'default'
@@ -156,8 +162,14 @@ public class BasicPropertyHandler implements PropertyHandler
         else if (type.startsWith("timestamp")) {
             return expandTimestamp(str, inProperties, object, scope, extra);
         }
+        else if (type.startsWith("dateformatAdd")) {
+            return expandDateFormatAdd(str, inProperties, object, scope, extra);
+        }
         else if (type.startsWith("dateformat")) {
             return expandDateFormat(str, inProperties, object, scope, extra);
+        }
+        else if (type.startsWith("dateAdd")) {
+            return expandDateAdd(str, inProperties, object, scope, extra);
         }
         else if (type.startsWith("decodeL")) {
             return expandDecodeL(str, inProperties, object, scope, extra);
@@ -212,8 +224,7 @@ public class BasicPropertyHandler implements PropertyHandler
         if (!PropertiesHandler.isExpanded(paramValue)) {
             paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
         }
-        str = paramValue;
-        return str;
+        return (paramValue != null ? paramValue : "");
     }
 
     /**
@@ -235,8 +246,7 @@ public class BasicPropertyHandler implements PropertyHandler
         if (!PropertiesHandler.isExpanded(paramValue)) {
             paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
         }
-        str = paramValue;
-        return str;
+        return (paramValue != null ? paramValue : "");
     }
 
     /**
@@ -330,7 +340,7 @@ public class BasicPropertyHandler implements PropertyHandler
                 paramValue = parser.get(doc, xpath);
             }
 
-            return paramValue;
+            return (paramValue != null ? paramValue : "");
         }
         catch (Exception exc) {
             System.out.println("Error handling 'xpath' metadata '" + paramName + "': " + exc);
@@ -418,6 +428,121 @@ public class BasicPropertyHandler implements PropertyHandler
                 throw new PropertiesHandlerException("Error handling 'dateformat' metadata '" + str + "'", exc);
             }
             return "dateformat" + PROP_START + str + PROP_END;
+        }
+    }
+
+    private String expandDateAdd(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+            Object extra) throws PropertiesHandlerException
+    {
+        try {
+            if (!PropertiesHandler.isExpanded(str)) {
+                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+            }
+            String intType = "";
+            List<String> parts = TextUtils.splitByStringSeparator(str, "::");
+            String date = parts.get(0);
+            String sourcePattern = parts.get(1);
+            String type = parts.get(2);
+            if ("s".equals(type)) {
+            	intType = String.valueOf(Calendar.SECOND);
+            }
+            else if ("m".equals(type)) {
+            	intType = String.valueOf(Calendar.MINUTE);
+            }
+            else if ("h".equals(type)) {
+            	intType = String.valueOf(Calendar.HOUR_OF_DAY);
+            }
+            else if ("d".equals(type)) {
+            	intType = String.valueOf(Calendar.DAY_OF_MONTH);
+            }
+            else if ("M".equals(type)) {
+            	intType = String.valueOf(Calendar.MONTH);
+            }
+            else if ("y".equals(type)) {
+            	intType = String.valueOf(Calendar.YEAR);
+            }
+            else {
+            	throw new PropertiesHandlerException("Invalid value[" + type + "] for 'type'");
+            }
+            String value = parts.get(3);
+            String paramValue = DateUtils.addTime(date, sourcePattern, intType, value);
+            if (paramValue == null) {
+                throw new PropertiesHandlerException("Error handling 'dateAdd' metadata '" + str
+                        + "'. Invalid format.");
+            }
+            return paramValue;
+        }
+        catch (Exception exc) {
+            System.out.println("Error handling 'dateAdd' metadata '" + str + "': " + exc);
+            exc.printStackTrace();
+            if (PropertiesHandler.isExceptionOnErrors()) {
+                if (exc instanceof PropertiesHandlerException) {
+                    throw (PropertiesHandlerException) exc;
+                }
+                throw new PropertiesHandlerException("Error handling 'dateAdd' metadata '" + str + "'", exc);
+            }
+            return "dateAdd" + PROP_START + str + PROP_END;
+        }
+    }
+
+    private String expandDateFormatAdd(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+            Object extra) throws PropertiesHandlerException
+    {
+        try {
+            if (!PropertiesHandler.isExpanded(str)) {
+                str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
+            }
+            String intType = "";
+            List<String> parts = TextUtils.splitByStringSeparator(str, "::");
+            String sourceTZone = DateUtils.getDefaultTimeZone().getID();
+            String destTZone = sourceTZone;
+            String date = parts.get(0);
+            String sourcePattern = parts.get(1);
+            String destPattern = parts.get(2);
+            String type = parts.get(3);
+            if ("s".equals(type)) {
+            	intType = String.valueOf(Calendar.SECOND);
+            }
+            else if ("m".equals(type)) {
+            	intType = String.valueOf(Calendar.MINUTE);
+            }
+            else if ("h".equals(type)) {
+            	intType = String.valueOf(Calendar.HOUR_OF_DAY);
+            }
+            else if ("d".equals(type)) {
+            	intType = String.valueOf(Calendar.DAY_OF_MONTH);
+            }
+            else if ("M".equals(type)) {
+            	intType = String.valueOf(Calendar.MONTH);
+            }
+            else if ("y".equals(type)) {
+            	intType = String.valueOf(Calendar.YEAR);
+            }
+            else {
+            	throw new PropertiesHandlerException("Invalid value[" + type + "] for 'type'");
+            }
+            String value = parts.get(4);
+            if (parts.size() > 5) {
+                sourceTZone = parts.get(5);
+                destTZone = parts.get(6);
+            }
+            String paramValue = DateUtils.convertAddTime(date, sourcePattern, sourceTZone, destPattern, destTZone, intType, value);
+            if (paramValue == null) {
+                throw new PropertiesHandlerException("Error handling 'dateformatAdd' metadata '" + str
+                        + "'. Invalid format.");
+            }
+            return paramValue;
+        }
+        catch (Exception exc) {
+            System.out.println("Error handling 'dateformatAdd' metadata '" + str + "': " + exc);
+            exc.printStackTrace();
+            if (PropertiesHandler.isExceptionOnErrors()) {
+                if (exc instanceof PropertiesHandlerException) {
+                    throw (PropertiesHandlerException) exc;
+                }
+                throw new PropertiesHandlerException("Error handling 'dateformatAdd' metadata '" + str + "'", exc);
+            }
+            return "dateformatAdd" + PROP_START + str + PROP_END;
         }
     }
 
