@@ -107,8 +107,8 @@ public class DataSourceConnectionBuilder implements ConnectionBuilder
                 ds = (DataSource) context.lookup(dsJNDI);
                 conn = ds.getConnection();
             }
-            if (debugJDBCConn) {
-                logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "]");
+            if (debugJDBCConn && (conn != null)) {
+                logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "]");
             }
             return conn;
         }
@@ -134,16 +134,16 @@ public class DataSourceConnectionBuilder implements ConnectionBuilder
      */
     public void releaseConnection(Connection conn) throws GVDBException
     {
-        if (debugJDBCConn) {
-            logger.debug("Closed JDBC Connection [" + name + "]: [" + conn + "]");
-        }
         if (conn != null) {
+	        if (debugJDBCConn) {
+	            logger.debug("Closed JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() +  "]");
+	        }
             try {
                 conn.close();
             }
             catch (Exception exc) {
                 logger.error("DataSourceConnectionBuilder - Error while closing Connection[" + name + "]: [" + conn
-                        + "]", exc);
+                		 + "/" + conn.hashCode() + "]", exc);
             }
         }
     }
