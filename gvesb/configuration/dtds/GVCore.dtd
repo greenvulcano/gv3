@@ -1496,6 +1496,13 @@
     #NotNull
 -->
 <!ATTLIST CSV2XMLTransformation GroupBy CDATA #IMPLIED>
+<!--
+    Defines the csv file encoding to be used in conversion.
+    Default to system encoding.
+
+    #NotNull
+-->
+<!ATTLIST CSV2XMLTransformation FileEncoding CDATA #IMPLIED>
 
 <!--
     Defines a text to XML trasformation.
