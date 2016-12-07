@@ -80,8 +80,8 @@ public class DriverConnectionBuilder implements ConnectionBuilder
             else {
                 conn = DriverManager.getConnection(url);
             }
-            if (debugJDBCConn) {
-                logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "]");
+            if (debugJDBCConn && (conn != null)) {
+                logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "]");
             }
             return conn;
         }
@@ -92,15 +92,15 @@ public class DriverConnectionBuilder implements ConnectionBuilder
 
     public void releaseConnection(Connection conn) throws GVDBException
     {
-        if (debugJDBCConn) {
-            logger.debug("Closed JDBC Connection [" + name + "]: [" + conn + "]");
-        }
         if (conn != null) {
+		    if (debugJDBCConn) {
+		        logger.debug("Closed JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "]");
+		    }
             try {
                 conn.close();
             }
             catch (Exception exc) {
-                logger.error("DriverConnectionBuilder - Error while closing Connection[" + name + "]: [" + conn + "]",
+                logger.error("DriverConnectionBuilder - Error while closing Connection[" + name + "]: [" + conn + "/" + conn.hashCode() + "]",
                         exc);
             }
         }

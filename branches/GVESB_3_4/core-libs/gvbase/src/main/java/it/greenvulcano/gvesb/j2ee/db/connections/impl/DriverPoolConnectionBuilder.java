@@ -104,8 +104,8 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
     {
         try {
             Connection conn = dataSource.getConnection();
-            if (debugJDBCConn) {
-                logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "]");
+            if (debugJDBCConn && (conn != null)) {
+                logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "] [" + connectionPool.getNumActive() + "/" + connectionPool.getNumIdle() + "]");
             }
 
             return conn;
@@ -117,17 +117,21 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
 
     public void releaseConnection(Connection conn) throws GVDBException
     {
-        if (debugJDBCConn) {
-            logger.debug("Closed JDBC Connection [" + name + "]: [" + conn + "]");
-        }
         if (conn != null) {
+	    	String msg = "";
+	    	if (debugJDBCConn) {
+	    		msg = "Closed JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "]";    		
+	    	}
             try {
                 conn.close();
             }
             catch (Exception exc) {
                 logger.error("DriverPoolConnectionBuilder - Error while closing Connection[" + name + "]: [" + conn
-                        + "]", exc);
+                		 + "/" + conn.hashCode() + "]", exc);
             }
+	        if (debugJDBCConn) {
+	            logger.debug(msg + " [" + connectionPool.getNumActive() + "/" + connectionPool.getNumIdle() + "]");
+	        }
         }
     }
 
