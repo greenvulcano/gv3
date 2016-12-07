@@ -209,6 +209,9 @@
                   <resource>
                     <directory>${greenv.project.home}/gvesb/test-resources</directory>
                   </resource>
+                  <resource>
+                    <directory>${greenv.project.home}/gvesb/test-resources/keystores</directory>
+                  </resource>
                 </resources>
               </configuration>
             </execution>
@@ -280,14 +283,14 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvbase</artifactId>
-            <version>3.4.0.10-Final</version>
+            <version>3.4.0.11-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdte</artifactId>
-            <version>3.4.0.2-Final</version>
+            <version>3.4.0.3-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -543,7 +546,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvexcel</artifactId>
-            <version>3.4.0.2-Final</version>
+            <version>3.4.0.3-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
