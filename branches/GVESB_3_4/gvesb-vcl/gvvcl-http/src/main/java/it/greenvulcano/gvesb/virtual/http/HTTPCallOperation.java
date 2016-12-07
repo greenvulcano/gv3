@@ -142,6 +142,7 @@ public class HTTPCallOperation implements CallOperation
             proxy.init(XMLConfig.getNode(endpointNode, "Proxy"));
             
             auth = HttpAuthFactory.getInstance(XMLConfig.getNode(endpointNode, "*[@type='http-auth']"));
+            logger.debug("HttpAuth: " + auth);
 
             Node methodNode = XMLConfig.getNode(config, "method");
             refDP = XMLConfig.get(methodNode, "@ref-dp", "");
