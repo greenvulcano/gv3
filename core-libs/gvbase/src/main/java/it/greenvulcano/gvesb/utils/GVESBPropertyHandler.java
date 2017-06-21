@@ -24,6 +24,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.metadata.PropertiesHandlerException;
 import it.greenvulcano.util.metadata.PropertyHandler;
+import it.greenvulcano.util.txt.DateUtils;
 
 import java.io.Reader;
 import java.io.StringWriter;
@@ -32,6 +33,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Map;
 
@@ -162,19 +164,31 @@ public class GVESBPropertyHandler implements PropertyHandler
 
             if (rs.next()) {
                 ResultSetMetaData rsmeta = rs.getMetaData();
-                if (rsmeta.getColumnType(1) == Types.CLOB) {
-                    Clob clob = rs.getClob(1);
-                    if (clob != null) {
-	                    Reader is = clob.getCharacterStream();
-                        StringWriter strW = new StringWriter();
+                switch (rsmeta.getColumnType(1)) {
+	                case Types.DATE :
+	                case Types.TIME :
+	                case Types.TIMESTAMP : {
+	                    Timestamp dateVal = rs.getTimestamp(1);
+	                    if (dateVal != null) {
+	                    	paramValue = DateUtils.dateToString(dateVal, "yyyyMMdd HH:mm:ss");
+	                    }
+	                }
+                    	break;
+	                case Types.CLOB :{
+                        Clob clob = rs.getClob(1);
+                        if (clob != null) {
+    	                    Reader is = clob.getCharacterStream();
+                            StringWriter strW = new StringWriter();
 
-                        IOUtils.copy(is, strW);
-                        is.close();
-                        paramValue = strW.toString();
+                            IOUtils.copy(is, strW);
+                            is.close();
+                            paramValue = strW.toString();
+                        }
                     }
-                }
-                else {
-                    paramValue = rs.getString(1);
+                        break;
+                    default: {
+                    	paramValue = rs.getString(1);
+                    }
                 }
             }
 
@@ -264,23 +278,38 @@ public class GVESBPropertyHandler implements PropertyHandler
             int type = rs.getMetaData().getColumnType(1);
 
             while (rs.next()) {
-                if (type == Types.CLOB) {
-                    Clob clob = rs.getClob(1);
-                    if (clob != null) {
-                        Reader is = clob.getCharacterStream();
-                        StringWriter strW = new StringWriter();
-
-                        IOUtils.copy(is, strW);
-                        is.close();
-                        paramValue += separator + strW.toString();
-                    }
-                    else {
-                    	paramValue += separator + "null";
-                    }
-                }
-                else {
-                    paramValue += separator + rs.getString(1);
-                }
+            	switch (type) {
+	                case Types.DATE :
+	                case Types.TIME :
+	                case Types.TIMESTAMP : {
+	                    Timestamp dateVal = rs.getTimestamp(1);
+	                    if (dateVal != null) {
+	                    	paramValue += separator + DateUtils.dateToString(dateVal, "yyyyMMdd HH:mm:ss");
+	                    }
+	                    else {
+	                    	paramValue += separator + "null";
+	                    }
+	                }
+	                	break;
+	                case Types.CLOB :{
+	                    Clob clob = rs.getClob(1);
+	                    if (clob != null) {
+		                    Reader is = clob.getCharacterStream();
+	                        StringWriter strW = new StringWriter();
+	
+	                        IOUtils.copy(is, strW);
+	                        is.close();
+	                        paramValue += separator + strW.toString();
+	                    }
+	                    else {
+	                    	paramValue += separator + "null";
+	                    }
+	                }
+	                    break;
+	                default: {
+	                	paramValue += separator + rs.getString(1);
+	                }
+	            }
             }
 
             if (!paramValue.equals("")) {
