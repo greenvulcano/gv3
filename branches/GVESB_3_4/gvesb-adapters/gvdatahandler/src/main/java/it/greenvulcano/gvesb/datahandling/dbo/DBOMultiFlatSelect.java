@@ -213,6 +213,7 @@ public class DBOMultiFlatSelect extends AbstractDBO
                     try {
                         sqlStatement = getInternalConn(conn).createStatement();
                         logger.debug("Executing select:\n" + expandedSQL);
+                        sqlStatementInfo = new StatementInfo(id, expandedSQL, sqlStatement);
                         ResultSet rs = sqlStatement.executeQuery(expandedSQL);
                         if (rs != null) {
                             try {
@@ -331,13 +332,14 @@ public class DBOMultiFlatSelect extends AbstractDBO
                         sbRowLength = Math.max(sbRowLength, sb.length());
                     }
                     finally {
-                        if (sqlStatement != null) {
+                    	if (sqlStatementInfo != null) {
                             try {
-                                sqlStatement.close();
+                            	sqlStatementInfo.close();
                             }
                             catch (Exception exc) {
                                 // do nothing
                             }
+                            sqlStatementInfo = null;
                             sqlStatement = null;
                         }
                     }

@@ -96,6 +96,7 @@ public class DBOThreadSelect extends AbstractDBO
             state = RUNNING;
             Connection conn = null;
             Statement sqlStatement = null;
+            StatementInfo sqlStatementInfo = null;
             ResultSet rs = null;
             try {
                 Set<Integer> keyField = keysMap.get(key);
@@ -113,6 +114,7 @@ public class DBOThreadSelect extends AbstractDBO
                     String expandedSQL = PropertiesHandler.expand(stmt, props, conn, null);
                     sqlStatement = conn.createStatement();
                     logger.debug("Executing select statement: " + expandedSQL + ".");
+                    sqlStatementInfo = new StatementInfo(key.toString(), expandedSQL, sqlStatement);
                     rs = sqlStatement.executeQuery(expandedSQL);
                     if (rs != null) {
                         Document localDoc = rowSetBuilder.createDocument(null);
@@ -146,6 +148,8 @@ public class DBOThreadSelect extends AbstractDBO
                 }
             }
             catch (SQLException exc) {
+            	logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+                logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
                 OracleExceptionHandler.handleSQLException(exc).printLoggerInfo();
                 state = ERROR;
                 throwable = exc;
@@ -164,13 +168,15 @@ public class DBOThreadSelect extends AbstractDBO
                         // do nothing
                     }
                 }
-                if (sqlStatement != null) {
+                if (sqlStatementInfo != null) {
                     try {
-                        sqlStatement.close();
+                    	sqlStatementInfo.close();
                     }
                     catch (Exception exc) {
                         // do nothing
                     }
+                    sqlStatementInfo = null;
+                    sqlStatement = null;
                 }
                 if (conn != null) {
                     try {

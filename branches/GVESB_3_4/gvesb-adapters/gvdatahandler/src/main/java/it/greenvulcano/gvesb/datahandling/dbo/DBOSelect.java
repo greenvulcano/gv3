@@ -200,6 +200,7 @@ public class DBOSelect extends AbstractDBO
     public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         XMLUtils parser = null;
+        String expandedSQL = null;
         try {
             prepare();
             rowCounter = 0;
@@ -251,11 +252,12 @@ public class DBOSelect extends AbstractDBO
                 }
 
                 if (stmt != null) {
-                    String expandedSQL = PropertiesHandler.expand(stmt, localProps, conn, null);
+                    expandedSQL = PropertiesHandler.expand(stmt, localProps, conn, null);
                     Statement statement = null;
                     try {
                         statement = getInternalConn(conn).createStatement();
                         logger.debug("Executing select:\n" + expandedSQL);
+                        sqlStatementInfo = new StatementInfo(key.toString(), expandedSQL, statement);
                         ResultSet rs = statement.executeQuery(expandedSQL);
                         if (rs != null) {
                             try {
@@ -275,14 +277,22 @@ public class DBOSelect extends AbstractDBO
                             }
                         }
                     }
+                    catch (SQLException exc) {
+                    	logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+                        logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
+                        OracleExceptionHandler.handleSQLException(exc);
+                        throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+                                    + exc.getMessage(), exc);
+                    }
                     finally {
-                        if (statement != null) {
+                        if (sqlStatementInfo != null) {
                             try {
-                                statement.close();
+                            	sqlStatementInfo.close();
                             }
                             catch (Exception exc) {
                                 // do nothing
                             }
+                            sqlStatementInfo = null;
                             statement = null;
                         }
                     }
@@ -295,10 +305,8 @@ public class DBOSelect extends AbstractDBO
 
             logger.debug("End execution of DB data read through " + dboclass);
         }
-        catch (SQLException exc) {
-            OracleExceptionHandler.handleSQLException(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
-                        + exc.getMessage(), exc);
+        catch (DBOException exc) {
+        	throw exc;
         }
         catch (InterruptedException exc) {
             logger.error("DBO[" + getName() + "] interrupted", exc);
