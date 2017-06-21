@@ -181,6 +181,7 @@ public class DBOFlatSelect extends AbstractDBO
                 try {
                     sqlStatement = getInternalConn(conn).createStatement();
                     logger.debug("Executing select:\n" + expandedSQL);
+                    sqlStatementInfo = new StatementInfo("0", expandedSQL, sqlStatement);
                     ResultSet rs = sqlStatement.executeQuery(expandedSQL);
                     if (rs != null) {
                         try {
@@ -298,13 +299,14 @@ public class DBOFlatSelect extends AbstractDBO
                     }
                 }
                 finally {
-                    if (sqlStatement != null) {
+                	if (sqlStatementInfo != null) {
                         try {
-                            sqlStatement.close();
+                        	sqlStatementInfo.close();
                         }
                         catch (Exception exc) {
                             // do nothing
                         }
+                        sqlStatementInfo = null;
                         sqlStatement = null;
                     }
                 }
