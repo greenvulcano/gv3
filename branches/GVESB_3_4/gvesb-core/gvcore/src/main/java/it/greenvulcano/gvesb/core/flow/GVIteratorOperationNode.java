@@ -31,6 +31,7 @@ import it.greenvulcano.util.xpath.XPathFinder;
 
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -118,47 +119,56 @@ public class GVIteratorOperationNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-        long startTime = System.currentTimeMillis();
-        Object data = null;
-        String input = getInput();
-        String output = getOutput();
-        logger.info("Executing OperationNode '" + getId() + "'");
-        checkInterrupted("OperationNode", logger);
-        dumpEnvironment(logger, true, environment);
-
-        data = environment.get(input);
-        if (Throwable.class.isInstance(data)) {
-            environment.put(output, data);
-            logger.debug("END - Execute OperationNode '" + getId() + "'");
-            return nextNodeId;
+        Level level = GVLogger.getThreadMasterLevel();
+    	if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
+    	try {
+	        long startTime = System.currentTimeMillis();
+	        Object data = null;
+	        String input = getInput();
+	        String output = getOutput();
+	        logger.info("Executing OperationNode '" + getId() + "'");
+	        checkInterrupted("OperationNode", logger);
+	        dumpEnvironment(logger, true, environment);
+	
+	        data = environment.get(input);
+	        if (Throwable.class.isInstance(data)) {
+	            environment.put(output, data);
+	            logger.debug("END - Execute OperationNode '" + getId() + "'");
+	            return nextNodeId;
+	        }
+	
+	        try {
+	            GVBuffer internalData = null;
+	            if (input.equals(output)) {
+	                internalData = (GVBuffer) data;
+	            }
+	            else {
+	                internalData = new GVBuffer((GVBuffer) data);
+	            }
+	
+	            internalData = inputServices.perform(internalData);
+	            internalData = performVCLOpCall(internalData, onDebug);
+	            internalData = outputServices.perform(internalData);
+	            environment.put(output, internalData);
+	        }
+	        catch (InterruptedException exc) {
+	            logger.error("GVIteratorOperationNode [" + getId() + "] interrupted!", exc);
+	            throw exc;
+	        }
+	        catch (Exception exc) {
+	            environment.put(output, exc);
+	        }
+	
+	        dumpEnvironment(logger, false, environment);
+	        long endTime = System.currentTimeMillis();
+	        logger.info("END - Execute OperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
+	        return nextNodeId;
+    	}
+        finally {
+        	if (isDumpInOut() && !level.equals(Level.ALL)) {
+        		GVLogger.setThreadMasterLevel(level);
+        	}
         }
-
-        try {
-            GVBuffer internalData = null;
-            if (input.equals(output)) {
-                internalData = (GVBuffer) data;
-            }
-            else {
-                internalData = new GVBuffer((GVBuffer) data);
-            }
-
-            internalData = inputServices.perform(internalData);
-            internalData = performVCLOpCall(internalData, onDebug);
-            internalData = outputServices.perform(internalData);
-            environment.put(output, internalData);
-        }
-        catch (InterruptedException exc) {
-            logger.error("GVIteratorOperationNode [" + getId() + "] interrupted!", exc);
-            throw exc;
-        }
-        catch (Exception exc) {
-            environment.put(output, exc);
-        }
-
-        dumpEnvironment(logger, false, environment);
-        long endTime = System.currentTimeMillis();
-        logger.info("END - Execute OperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-        return nextNodeId;
     }
 
     /* (non-Javadoc)
@@ -212,7 +222,6 @@ public class GVIteratorOperationNode extends GVFlowNode
     protected GVBuffer performVCLOpCall(GVBuffer data, boolean onDebug) throws GVCoreException, InterruptedException
     {
         GVBuffer outputGVBuffer = null;
-
         logger.info("BEGIN - Perform Remote Call");
 
         long totalTime = 0;

@@ -401,7 +401,7 @@ STACK  : ${stackTrace}
         </Operation>
       </Service>
       
-      <Service group-name="DEFAULT_GRP" id-service="TOUPPER_ITER" service-activation="on">
+      <Service group-name="DEFAULT_GRP" id-service="TOUPPER_ITER" service-activation="on" loggerLevel="DEBUG">
         <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id" 
                    type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
           <Description>VulCon generated Operation</Description>
@@ -413,7 +413,7 @@ STACK  : ${stackTrace}
               <CoreCall id-service="TOUPPER" id-system="PIPPO" operation="RequestReply" ref-dp="stringFromNodeDataProvider" change-log-context="true"/>
             </GVIteratorOperationNode>
             <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="return_status" id="check_status"
-              input="output_toupper" on-exception-id="return_error" op-type="check" point-x="350" point-y="150" type="flow-node" />
+              dump-in-out="false" input="output_toupper" on-exception-id="return_error" op-type="check" point-x="350" point-y="150" type="flow-node" />
             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_status" op-type="end" output="output_toupper"
               point-x="700" point-y="50" type="flow-node" end-business-process="yes"/>
             <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_error" op-type="end" output="output_toupper"

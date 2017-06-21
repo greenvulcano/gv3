@@ -39,6 +39,7 @@ import it.greenvulcano.util.xpath.XPathFinder;
 
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -183,69 +184,78 @@ public class GVOperationNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-        long startTime = System.currentTimeMillis();
-        Object data = null;
-        String input = getInput();
-        String output = getOutput();
-        logger.info("Executing GVOperationNode '" + getId() + "'");
-        checkInterrupted("GVOperationNode", logger);
-        dumpEnvironment(logger, true, environment);
-
-        data = environment.get(input);
-        if (Throwable.class.isInstance(data)) {
-            environment.put(output, data);
-            logger.debug("END - Execute GVOperationNode '" + getId() + "'");
-            return nextNodeId;
+        Level level = GVLogger.getThreadMasterLevel();
+    	if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
+    	try {
+	        long startTime = System.currentTimeMillis();
+	        Object data = null;
+	        String input = getInput();
+	        String output = getOutput();
+	        logger.info("Executing GVOperationNode '" + getId() + "'");
+	        checkInterrupted("GVOperationNode", logger);
+	        dumpEnvironment(logger, true, environment);
+	
+	        data = environment.get(input);
+	        if (Throwable.class.isInstance(data)) {
+	            environment.put(output, data);
+	            logger.info("END - Skip Execute GVOperationNode '" + getId() + "'");
+	            return nextNodeId;
+	        }
+	
+	        boolean isError = false;
+	        Exception error = null;
+	        try {
+	            GVBuffer internalData = null;
+	            if (input.equals(output)) {
+	                internalData = (GVBuffer) data;
+	            }
+	            else {
+	                internalData = new GVBuffer((GVBuffer) data);
+	            }
+	
+	            internalData = inputServices.perform(internalData);
+	            operationManager = ((InvocationContext) InvocationContext.getInstance()).getOperationManager();
+	            vclOperation = createVCLOperation();
+	            if (filter != null) {
+	                ((DequeueOperation) vclOperation).setFilter(filter.getFilterDef(internalData, vclOperation));
+	            }
+	            try {
+	                internalData = performVCLOpCall(internalData);
+	            }
+	            catch (GVCoreWrongInterfaceException exc) {
+	                if (vclOpType.equals("dequeue")) {
+	                    throw new GVCoreTimeoutException("GVCORE_VCLOP_OUT_NULL_ERROR", exc);
+	                }
+	                throw exc;
+	            }
+	            internalData = outputServices.perform(internalData);
+	            environment.put(output, internalData);
+	        }
+	        catch (InterruptedException exc) {
+	            logger.error("GVOperationNode [" + getId() + "] interrupted!", exc);
+	            throw exc;
+	        }
+	        catch (Exception exc) {
+	            isError = true;
+	            error = exc;
+	            environment.put(output, exc);
+	        }
+	
+	        dumpEnvironment(logger, false, environment);
+	        long endTime = System.currentTimeMillis();
+	        if (isError) {
+	            logger.error("END - Execute GVOperationNode '" + getId() + "'. Exception: " + error);
+	        }
+	        else {
+	            logger.info("END - Execute GVOperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
+	        }
+	        return nextNodeId;
+    	}
+        finally {
+        	if (isDumpInOut() && !level.equals(Level.ALL)) {
+        		GVLogger.setThreadMasterLevel(level);
+        	}
         }
-
-        boolean isError = false;
-        Exception error = null;
-        try {
-            GVBuffer internalData = null;
-            if (input.equals(output)) {
-                internalData = (GVBuffer) data;
-            }
-            else {
-                internalData = new GVBuffer((GVBuffer) data);
-            }
-
-            internalData = inputServices.perform(internalData);
-            operationManager = ((InvocationContext) InvocationContext.getInstance()).getOperationManager();
-            vclOperation = createVCLOperation();
-            if (filter != null) {
-                ((DequeueOperation) vclOperation).setFilter(filter.getFilterDef(internalData, vclOperation));
-            }
-            try {
-                internalData = performVCLOpCall(internalData);
-            }
-            catch (GVCoreWrongInterfaceException exc) {
-                if (vclOpType.equals("dequeue")) {
-                    throw new GVCoreTimeoutException("GVCORE_VCLOP_OUT_NULL_ERROR", exc);
-                }
-                throw exc;
-            }
-            internalData = outputServices.perform(internalData);
-            environment.put(output, internalData);
-        }
-        catch (InterruptedException exc) {
-            logger.error("GVOperationNode [" + getId() + "] interrupted!", exc);
-            throw exc;
-        }
-        catch (Exception exc) {
-            isError = true;
-            error = exc;
-            environment.put(output, exc);
-        }
-
-        dumpEnvironment(logger, false, environment);
-        long endTime = System.currentTimeMillis();
-        if (isError) {
-            logger.error("END - Execute GVOperationNode '" + getId() + "'. Exception: " + error);
-        }
-        else {
-            logger.info("END - Execute GVOperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-        }
-        return nextNodeId;
     }
 
     /*
