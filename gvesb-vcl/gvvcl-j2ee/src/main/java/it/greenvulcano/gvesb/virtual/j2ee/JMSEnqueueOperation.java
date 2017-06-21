@@ -100,6 +100,7 @@ public class JMSEnqueueOperation extends J2EEOperation implements EnqueueOperati
      * If true the message is enriched with GVBuffer properties.
      */
     private boolean             decorateMessage = true; 
+    private boolean             forceCorrelationIDasID = false;
 
     /**
      * @see it.greenvulcano.gvesb.virtual.j2ee.J2EEOperation#j2eeInit(org.w3c.dom.Node)
@@ -184,7 +185,9 @@ public class JMSEnqueueOperation extends J2EEOperation implements EnqueueOperati
 
         dumpMessage = XMLConfig.getBoolean(node, "@dump-message", false);
         decorateMessage = XMLConfig.getBoolean(node, "@decorate-message", true);
+        forceCorrelationIDasID = XMLConfig.getBoolean(node, "@force-correlation-id-as-id", false);
         logger.debug("Decorate Message.......: " + decorateMessage);
+        logger.debug("Force CorrelationID as ID: " + forceCorrelationIDasID);
     }
 
     /**
@@ -331,7 +334,9 @@ public class JMSEnqueueOperation extends J2EEOperation implements EnqueueOperati
     private void sendOrPublish(Message message, Id id) throws J2EEConnectionException, J2EEEnqueueException,
             InvalidDataException, JMSException
     {
-        message.setJMSCorrelationID(id.toString());
+    	if (forceCorrelationIDasID) {
+    		message.setJMSCorrelationID(id.toString());
+    	}
 
         MessageProducer messageProducer = null;
 
