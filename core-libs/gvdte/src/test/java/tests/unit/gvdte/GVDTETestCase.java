@@ -23,6 +23,9 @@ import it.greenvulcano.gvesb.gvdte.controller.DTEController;
 import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.custommonkey.xmlunit.XMLTestCase;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -261,6 +264,19 @@ public class GVDTETestCase extends XMLTestCase
         JSONAssert.assertEquals(outJSON, json, true);
     }
 
+    public void testXML2JSON_Props() throws Exception
+    {
+    	Map<String, Object> mapParam = new HashMap<String, Object>();
+    	mapParam.put("EL_ARRAY", "author,editor");
+    	mapParam.put("STR_VALUE", "year");
+
+        Object output = controller.transform("TestXml2Json_Props", TextUtils.readFileFromCP("bib.xj"), mapParam);
+        String json = (String) output;
+        String outJSON = TextUtils.readFileFromCP("bib.json");
+        //System.out.println("\nTestXml2Json_Props: " + json);
+        JSONAssert.assertEquals(outJSON, json, true);
+    }
+
     /**
      * Test the JSON2XMLTransformer.
      * 
@@ -328,6 +344,18 @@ public class GVDTETestCase extends XMLTestCase
         String dom = XMLUtils.serializeDOM_S((Node) output);
         String outXML = TextUtils.readFileFromCP("bib_attr.xml");
         //System.out.println("\nTestJson2Xml_attr: " + dom);
+        assertXMLEqual("TestJson2Xml_attr failed", outXML, dom);
+    }
+
+    public void testJSON2XML_Props() throws Exception
+    {
+    	Map<String, Object> mapParam = new HashMap<String, Object>();
+    	mapParam.put("ATTRIBUTES", "last,affiliation,first,title,price,year,publisher");
+
+        Object output = controller.transform("TestJson2Xml_Props", TextUtils.readFileFromCP("bib.json"), mapParam);
+        String dom = XMLUtils.serializeDOM_S((Node) output);
+        String outXML = TextUtils.readFileFromCP("bib_attr.xml");
+        //System.out.println("\nTestJson2Xml_Props: " + dom);
         assertXMLEqual("TestJson2Xml_attr failed", outXML, dom);
     }
 

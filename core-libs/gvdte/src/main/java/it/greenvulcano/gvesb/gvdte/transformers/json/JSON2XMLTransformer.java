@@ -33,6 +33,7 @@ import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.json.JSONUtils;
 import it.greenvulcano.util.json.JSONUtilsException;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
@@ -92,7 +93,8 @@ public class JSON2XMLTransformer implements DTETransformer {
     
     private ConversionPolicy        policy          = ConversionPolicy.SIMPLE;
     
-    private Set<String>             forceAttributes = new HashSet<String>();
+    private String             		forceAttributes = "";
+    private Set<String>             forceAttributesSet = new HashSet<String>();
 
     public JSON2XMLTransformer() {
         // do nothing
@@ -139,10 +141,8 @@ public class JSON2XMLTransformer implements DTETransformer {
 
             policy = ConversionPolicy.fromString(XMLConfig.get(nodo, "@ConversionPolicy", ConversionPolicy.SIMPLE.toString()));
             if (policy == ConversionPolicy.SIMPLE) {
-                String fAttrs = XMLConfig.get(nodo, "@ForceAttributes", "");
-                for (String attr : fAttrs.split(",")) {
-                    forceAttributes.add(attr.trim());
-                }
+            	forceAttributes = XMLConfig.get(nodo, "@ForceAttributes", "");
+            	forceAttributesSet = listToSet(forceAttributes);
             }
             
             logger.debug("Loaded parameters: outputXslMapName = " + xslMapName + " - DataSourceSet: "
@@ -175,6 +175,14 @@ public class JSON2XMLTransformer implements DTETransformer {
     public String getName() {
         return name;
     }
+
+    private Set<String> listToSet(String list) {
+		Set<String> set = new HashSet<String>();
+		for (String el : list.split(",")) {
+		    set.add(el.trim());
+		}
+		return set;
+	}
 
     /**
      * This method initialize the Map containing templates for certain
@@ -249,7 +257,11 @@ public class JSON2XMLTransformer implements DTETransformer {
         try {
             Document docXML = null; 
             if (policy == ConversionPolicy.SIMPLE) {
-                docXML = (Document) JSONUtils.jsonToXml(input, forceAttributes);
+            	Set<String> currForceAttributesSet = forceAttributesSet;
+            	if (!PropertiesHandler.isExpanded(forceAttributes)) {
+            		currForceAttributesSet = listToSet(PropertiesHandler.expand(forceAttributes, mapParam));
+            	}
+                docXML = (Document) JSONUtils.jsonToXml(input, currForceAttributesSet);
             }
             else {
                 docXML = (Document) JSONUtils.jsonToXml_BadgerFish(input);
