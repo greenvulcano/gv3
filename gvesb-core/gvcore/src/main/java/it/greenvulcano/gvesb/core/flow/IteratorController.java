@@ -522,6 +522,7 @@ public class IteratorController
                     dataProviderManager.releaseDataProvider(call_dp, dataProvider);
                 }
             }
+            Level level = null;
             NMDC.push();
             try {
                 gvContext.push();
@@ -529,9 +530,11 @@ public class IteratorController
                     NMDC.setOperation(localSubFlow);
                     GVBufferMDC.put(internalGVBuffer);
                 }
+                level = GVLogger.setThreadMasterLevel(subFlow.getLoggerLevel());
                 result = subFlow.perform(internalGVBuffer, onDebug);
             }
             finally {
+                GVLogger.removeThreadMasterLevel(level);
                 NMDC.pop();
                 try {
                     gvContext.pop();
