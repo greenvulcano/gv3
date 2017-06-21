@@ -77,10 +77,15 @@
         
       <XML2JSONTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer"
         name="TestXml2Json" ForceElementsArray="author,editor" ForceStringValue="year" type="transformation"/>
+      <XML2JSONTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer"
+        name="TestXml2Json_Props" ForceElementsArray="@{{EL_ARRAY}}" ForceStringValue="@{{STR_VALUE}}" type="transformation"/>
       <JSON2XMLTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.JSON2XMLTransformer"
         name="TestJson2Xml" type="transformation"/>
       <JSON2XMLTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.JSON2XMLTransformer"
         name="TestJson2Xml_attr" ForceAttributes="last,affiliation,first,title,price,year,publisher"
+        type="transformation"/>
+      <JSON2XMLTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.JSON2XMLTransformer"
+        name="TestJson2Xml_Props" ForceAttributes="@{{ATTRIBUTES}}"
         type="transformation"/>
 
       <XML2JSONTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer"
