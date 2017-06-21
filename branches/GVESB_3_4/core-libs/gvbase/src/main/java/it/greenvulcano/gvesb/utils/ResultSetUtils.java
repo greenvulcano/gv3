@@ -20,6 +20,7 @@
 
 package it.greenvulcano.gvesb.utils;
 
+import it.greenvulcano.util.txt.DateUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -31,6 +32,7 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Arrays;
 
@@ -101,6 +103,18 @@ public class ResultSetUtils
                             col = xml.createElement(doc, "col");
                             restartResultset = false;
                             switch (metadata.getColumnType(j)) {
+	                            case Types.DATE :
+	                            case Types.TIME :
+	                            case Types.TIMESTAMP : {
+	                                Timestamp dateVal = rs.getTimestamp(j);
+	                                if (dateVal == null) {
+	                                    textVal = "";
+	                                }
+	                                else {
+                                        textVal = DateUtils.dateToString(dateVal, "yyyyMMdd HH:mm:ss");
+	                                }
+	                            }
+	                            	break;
                                 case Types.CLOB :{
                                     Clob clob = rs.getClob(j);
                                     if (clob != null) {
