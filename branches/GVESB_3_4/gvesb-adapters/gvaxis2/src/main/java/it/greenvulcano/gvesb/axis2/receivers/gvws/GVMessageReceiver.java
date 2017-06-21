@@ -30,6 +30,7 @@ import it.greenvulcano.gvesb.gvdp.IDataProvider;
 import it.greenvulcano.gvesb.j2ee.XAHelper;
 import it.greenvulcano.gvesb.j2ee.XAHelperException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.xml.XMLUtils;
 
 import java.util.Map;
@@ -243,6 +244,7 @@ public class GVMessageReceiver extends AbstractInOutMessageReceiver
                     throw new AxisFault("Error handling tansaction", exc);
                 }
             }
+            NMDC.remove("MASTER_SERVICE");
         }
     }
 
