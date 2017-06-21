@@ -84,7 +84,7 @@
     <version.saxon>9.1.0.8</version.saxon>
     <version.scout>1.2.5</version.scout>
     <version.springframework>2.5.6</version.springframework>
-    
+
     <version.twitter4j>4.0.1</version.twitter4j>
     <version.ws.security>1.6.4</version.ws.security>
     <version.wsdl4j>1.6.2</version.wsdl4j>
@@ -99,7 +99,7 @@
 
   <dependencyManagement>
     <dependencies>
-    
+
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-ant-tasks</artifactId>
@@ -1215,7 +1215,7 @@
             <scope>runtime</scope>
             <type>jar</type>
         </dependency>
-        
+
         <dependency>
             <groupId>net.sourceforge.jexcelapi</groupId>
             <artifactId>jxl</artifactId>
@@ -1571,7 +1571,7 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.ganyo</groupId>
             <artifactId>gcm-server</artifactId>
