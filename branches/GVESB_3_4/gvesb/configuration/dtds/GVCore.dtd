@@ -50,7 +50,7 @@
 
     #SortChild
 -->
-<!ELEMENT GVCryptoHelper (Description?, KeyStoreID*, KeyID*)>
+<!ELEMENT GVCryptoHelper (Description?, (KeyStoreID|KeyID)*)>
 <!--
     Element type 'module'.
 -->
@@ -138,6 +138,19 @@
     #Encrypted
 -->
 <!ATTLIST KeyID key-pwd CDATA #IMPLIED>
+<!--
+    The Key Type Mode to be used in the Cypher.
+
+    #NotNull
+-->
+<!ATTLIST KeyID key-type-mode CDATA #IMPLIED>
+<!--
+    The Key Type Padding to use in the Cypher.
+    Default to NoPadding
+
+    #NotNull
+-->
+<!ATTLIST KeyID key-type-padding CDATA #IMPLIED>
 
 <!--
     Root element for XPath engine configuration.
@@ -6691,6 +6704,11 @@
     Default: true.
 -->
 <!ATTLIST jms-enqueue decorate-message (true|false) #IMPLIED>
+<!--
+    If true the message to be enqueued have the JMSCorrelationID forced as input GVBuffer ID value.
+    Default: false
+-->
+<!ATTLIST jms-enqueue force-correlation-id-as-id (true|false) #IMPLIED>
 
 <!--
     Used to make a routing mechanism at the level of communication channel,
