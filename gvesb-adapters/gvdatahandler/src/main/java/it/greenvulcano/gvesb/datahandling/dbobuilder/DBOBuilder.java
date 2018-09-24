@@ -1,23 +1,40 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.datahandling.dbobuilder;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Vector;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -37,23 +54,6 @@ import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Vector;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
  * <code>DBOBuilder</code> is the class that holds the creation logic of IDBO
  * objects. Its role is to invoke the DTE to make transformations and
@@ -61,11 +61,11 @@ import org.w3c.dom.NodeList;
  * based on a connection requested to the <code>JdbcDataBaseConnection</code>
  * and released at the end of operations. This component, to handle the
  * concurrent behavior, is designed as thread-safe module.
- * 
+ *
  * @version 3.0.0 Mar 30, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class DBOBuilder implements IDBOBuilder
 {
@@ -87,7 +87,7 @@ public class DBOBuilder implements IDBOBuilder
 
         @Override
         public String toString() {
-            return "Source: " + source + " - xpathSrc: " + xpathSrc + " - xpathDest: " + xpathDest;
+            return "Source: " + this.source + " - xpathSrc: " + this.xpathSrc + " - xpathDest: " + this.xpathDest;
         }
     }
 
@@ -121,8 +121,8 @@ public class DBOBuilder implements IDBOBuilder
     private static final Logger       logger             = GVLogger.getLogger(DBOBuilder.class);
 
     private final Map<String, Object> dataCache          = new HashMap<String, Object>();
-    private List<MergeInfo>           mergeList          = new Vector<MergeInfo>();
-    
+    private final List<MergeInfo>           mergeList          = new Vector<MergeInfo>();
+
     private int                       makeDump           = DUMP_TEXT;
 
     /**
@@ -131,9 +131,9 @@ public class DBOBuilder implements IDBOBuilder
     @Override
     public void init(Node builder) throws DataHandlerException
     {
-        dboList = new Vector<IDBO>();
-        dboOutputMap = new HashMap<String, IDBO>();
-        baseProps = new HashMap<String, String>();
+        this.dboList = new Vector<IDBO>();
+        this.dboOutputMap = new HashMap<String, IDBO>();
+        this.baseProps = new HashMap<String, String>();
         String dboClassName = "";
 
         NMDC.push();
@@ -142,22 +142,22 @@ public class DBOBuilder implements IDBOBuilder
             logger.debug("DBOBuilder initialized with node [" + builder.toString() + "].");
             String sDump = XMLConfig.get(builder, "@make-dump", "text");
             if (sDump.equals("none")) {
-                makeDump = DUMP_NONE;
+                this.makeDump = DUMP_NONE;
             }
             else if (sDump.equals("hex")) {
-                makeDump = DUMP_HEX;
+                this.makeDump = DUMP_HEX;
             }
             else {
-                makeDump = DUMP_TEXT;
+                this.makeDump = DUMP_TEXT;
             }
-            serviceName = XMLConfig.get(builder, "@name");
-            NMDC.put("DH_SERVICE", serviceName);
-            jdbcConnectionName = XMLConfig.get(builder, "@jdbc-connection-name");
-            logger.debug("Connection = " + jdbcConnectionName);
-            transacted = XMLConfig.getBoolean(builder, "@transacted", true);
-            logger.debug("Execute in transaction: " + transacted + ".");
-            isXA = XMLConfig.getBoolean(builder, "@isXA", false);
-            logger.debug("Is XA: " + isXA + ".");
+            this.serviceName = XMLConfig.get(builder, "@name");
+            NMDC.put("DH_SERVICE", this.serviceName);
+            this.jdbcConnectionName = XMLConfig.get(builder, "@jdbc-connection-name");
+            logger.debug("Connection = " + this.jdbcConnectionName);
+            this.transacted = XMLConfig.getBoolean(builder, "@transacted", true);
+            logger.debug("Execute in transaction: " + this.transacted + ".");
+            this.isXA = XMLConfig.getBoolean(builder, "@isXA", false);
+            logger.debug("Is XA: " + this.isXA + ".");
 
             logger.debug("Listing for DBOs.");
             NodeList dbosNodes = XMLConfig.getNodeList(builder, "*[@type='dbo']");
@@ -168,34 +168,34 @@ public class DBOBuilder implements IDBOBuilder
 
                 idbo = (IDBO) Class.forName(dboClassName).newInstance();
                 idbo.init(dboNode);
-                idbo.setServiceName(serviceName);
-                idbo.setTransacted(transacted);
-                idbo.setJdbcConnectionName(jdbcConnectionName);
-                dboList.add(idbo);
-                dboOutputMap.put(idbo.getOutputDataName(), idbo);
+                idbo.setServiceName(this.serviceName);
+                idbo.setTransacted(this.transacted);
+                idbo.setJdbcConnectionName(this.jdbcConnectionName);
+                this.dboList.add(idbo);
+                this.dboOutputMap.put(idbo.getOutputDataName(), idbo);
                 logger.debug("Added a IDBO class [" + dboClassName + "].");
             }
 
-            outputDataName = XMLConfig.get(builder, "@output-data", idbo.getOutputDataName());
+            this.outputDataName = XMLConfig.get(builder, "@output-data", idbo.getOutputDataName());
             // stats-data = ALL ensure to add all the statistics by DHResult
-            statsDataName = XMLConfig.get(builder, "@output-stats", outputDataName);
+            this.statsDataName = XMLConfig.get(builder, "@output-stats", this.outputDataName);
 
-            resolveMetadata = XMLConfig.getBoolean(builder, "DHVariables/@resolve-metadata-on-call", true);
+            this.resolveMetadata = XMLConfig.getBoolean(builder, "DHVariables/@resolve-metadata-on-call", true);
             NodeList nlv = XMLConfig.getNodeList(builder, "DHVariables/DHVariable");
             if (nlv != null) {
                 for (int i = 0; i < nlv.getLength(); i++) {
                     Node nv = nlv.item(i);
-                    baseProps.put(XMLConfig.get(nv, "@name"),
+                    this.baseProps.put(XMLConfig.get(nv, "@name"),
                             XMLConfig.get(nv, "@value", XMLConfig.get(nv, ".", "")).trim());
                 }
             }
-            
+
             NodeList mergeNodes = XMLConfig.getNodeList(builder, "XMLMerge/MergeInfo");
             for (int i = 0; i < mergeNodes.getLength(); i++) {
                 Node mergeNode = mergeNodes.item(i);
                 MergeInfo mergeInfo = new MergeInfo(XMLConfig.get(mergeNode, "@source"), XMLConfig.get(mergeNode, "@xpath-source"),
                 		XMLConfig.get(mergeNode, "@xpath-dest"));
-                mergeList.add(mergeInfo);
+                this.mergeList.add(mergeInfo);
                 logger.debug("Added a MergeInfo[" + mergeInfo + "].");
             }
         }
@@ -234,39 +234,39 @@ public class DBOBuilder implements IDBOBuilder
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
-        NMDC.put("DH_SERVICE", serviceName);
+        NMDC.put("DH_SERVICE", this.serviceName);
         logger.debug("Start executing XML2DB [" + operation + "]\n\tParams    : " + localParams.toString());
-        if (logger.isDebugEnabled() && (file != null) && (makeDump != DUMP_NONE)) {
-            if (makeDump == DUMP_HEX) {
+        if (logger.isDebugEnabled() && (file != null) && (this.makeDump != DUMP_NONE)) {
+            if (this.makeDump == DUMP_HEX) {
                 logger.debug("Input data: [\n" + new Dump(file, -1) + "\n].");
             }
             else {
                 logger.debug("Input data: [\n" + new String(file) + "\n].");
             }
         }
-        internalIdx = 0;
+        this.internalIdx = 0;
         Connection conn = null;
         String intConnName = null;
         try {
-            logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
+            logger.debug("Searching for a new available connection named [" + this.jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
                 logger.debug("Overwriting default Connection with: " + intConnName);
             }
             else {
-                intConnName = jdbcConnectionName;
+                intConnName = this.jdbcConnectionName;
             }
 
             conn = JDBCConnectionBuilder.getConnection(intConnName);
-            if (transacted && !isXA) {
+            if (this.transacted && !this.isXA) {
                 conn.setAutoCommit(false);
             }
 
             // Static utility classes initialization
-            AbstractRetriever.setAllConnection(conn, configurationNode);
+            AbstractRetriever.setAllConnection(conn, this.configurationNode);
 
             while (hasNext()) {
-                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), this.serviceName, logger);
 
                 IDBO idbo = nextDBO();
                 NMDC.push();
@@ -274,9 +274,9 @@ public class DBOBuilder implements IDBOBuilder
                     NMDC.put("DH_DBO", idbo.getName());
                     Object xmlFile = transform(idbo, file, localParams);
                     if (xmlFile != null) {
-                        if (logger.isDebugEnabled() && (makeDump != DUMP_NONE)) {
+                        if (logger.isDebugEnabled() && (this.makeDump != DUMP_NONE)) {
                             if (xmlFile instanceof byte[]) {
-                                if (makeDump == DUMP_HEX) {
+                                if (this.makeDump == DUMP_HEX) {
                                     logger.debug("Transformation output: [\n" + new Dump((byte[]) xmlFile, -1) + "\n].");
                                 }
                                 else {
@@ -306,14 +306,14 @@ public class DBOBuilder implements IDBOBuilder
                     NMDC.pop();
                 }
             }
-            if (transacted && !isXA) {
+            if (this.transacted && !this.isXA) {
                 logger.debug("Committing XML2DB [" + operation + "].");
                 conn.commit();
             }
         }
         catch (SQLException exc) {
             if (conn != null) {
-                if (transacted && !isXA) {
+                if (this.transacted && !this.isXA) {
                     try {
                         logger.warn("Rolling-back XML2DB [" + operation + "].");
                         conn.rollback();
@@ -328,7 +328,7 @@ public class DBOBuilder implements IDBOBuilder
         }
         catch (Exception exc) {
             if (conn != null) {
-                if (transacted && !isXA) {
+                if (this.transacted && !this.isXA) {
                     try {
                         logger.warn("Rolling-back XML2DB [" + operation + "].");
                         conn.rollback();
@@ -365,45 +365,45 @@ public class DBOBuilder implements IDBOBuilder
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
-        NMDC.put("DH_SERVICE", serviceName);
+        NMDC.put("DH_SERVICE", this.serviceName);
         logger.debug("Start executing DB2XML [" + operation + "]\n\tParams    : " + localParams.toString());
-        internalIdx = 0;
+        this.internalIdx = 0;
         Connection conn = null;
         ByteArrayOutputStream out = null;
         ByteArrayInputStream in = null;
         String intConnName = null;
         try {
-            logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
+            logger.debug("Searching for a new available connection named [" + this.jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
                 logger.debug("Overwriting default Connection with: " + intConnName);
             }
             else {
-                intConnName = jdbcConnectionName;
+                intConnName = this.jdbcConnectionName;
             }
             conn = JDBCConnectionBuilder.getConnection(intConnName);
-            if (transacted) {
+            if (this.transacted) {
                 conn.setAutoCommit(false);
             }
 
             // Static utility classes initialization
-            AbstractRetriever.setAllConnection(conn, configurationNode);
+            AbstractRetriever.setAllConnection(conn, this.configurationNode);
 
             IDBO idbo = firstDBO();
-            dataCache.put(idbo.getInputDataName(), file);
+            this.dataCache.put(idbo.getInputDataName(), file);
             while (hasNext()) {
-                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), this.serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
                     NMDC.put("DH_DBO", idbo.getName());
                     if (idbo.getForcedMode().equals(IDBO.MODE_XML2DB)) {
-                        Object xmlFile = transform(idbo, dataCache.get(idbo.getInputDataName()), localParams);
+                        Object xmlFile = transform(idbo, this.dataCache.get(idbo.getInputDataName()), localParams);
                         if (xmlFile != null) {
-                            dataCache.put(idbo.getOutputDataName(), xmlFile);
-                            if (logger.isDebugEnabled() && (makeDump != DUMP_NONE)) {
+                            this.dataCache.put(idbo.getOutputDataName(), xmlFile);
+                            if (logger.isDebugEnabled() && (this.makeDump != DUMP_NONE)) {
                                 if (xmlFile instanceof byte[]) {
-                                    if (makeDump == DUMP_HEX) {
+                                    if (this.makeDump == DUMP_HEX) {
                                         logger.debug("Transformation output: [\n" + new Dump((byte[]) xmlFile, -1)
                                                 + "\n].");
                                     }
@@ -429,8 +429,8 @@ public class DBOBuilder implements IDBOBuilder
                         logger.debug("End executing IDBO [" + idbo.toString() + "] in normal mode. Execution time: "
                                 + getPartialTime(start));
                         byte[] output = out.toByteArray();
-                        if (logger.isDebugEnabled() && (output != null) && (makeDump != DUMP_NONE)) {
-                            if (makeDump == DUMP_HEX) {
+                        if (logger.isDebugEnabled() && (output != null) && (this.makeDump != DUMP_NONE)) {
+                            if (this.makeDump == DUMP_HEX) {
                                 logger.debug("Received data from DB: [\n" + new Dump(output, -1) + "\n].");
                             }
                             else {
@@ -438,7 +438,7 @@ public class DBOBuilder implements IDBOBuilder
                             }
                         }
                         Object xmlFile = transform(idbo, output, localParams);
-                        dataCache.put(idbo.getOutputDataName(), xmlFile);
+                        this.dataCache.put(idbo.getOutputDataName(), xmlFile);
                     }
                 }
                 finally {
@@ -461,24 +461,24 @@ public class DBOBuilder implements IDBOBuilder
                     NMDC.pop();
                 }
             }
-            if (transacted && !isXA) {
+            if (this.transacted && !this.isXA) {
                 logger.debug("Committing DB2XML [" + operation + "].");
                 conn.commit();
             }
             byte[] xmlFile = null;
-            
-            if (mergeList.size() < 2) {
-                xmlFile = (byte[]) dataCache.get(outputDataName);
+
+            if (this.mergeList.size() < 2) {
+                xmlFile = (byte[]) this.dataCache.get(this.outputDataName);
             }
             else {
                 XMLUtils parser = null;
                 try {
                     parser = XMLUtils.getParserInstance();
-                    MergeInfo mergeDest = mergeList.get(0);
-                    Document dest = (Document) parser.parseObject(dataCache.get(mergeDest.source), false, true);
-                    for (int i = 1; i < mergeList.size(); i++) {
-                        MergeInfo mergeInfo = mergeList.get(i);
-                        Object srcO = dataCache.get(mergeInfo.source);
+                    MergeInfo mergeDest = this.mergeList.get(0);
+                    Document dest = (Document) parser.parseObject(this.dataCache.get(mergeDest.source), false, true);
+                    for (int i = 1; i < this.mergeList.size(); i++) {
+                        MergeInfo mergeInfo = this.mergeList.get(i);
+                        Object srcO = this.dataCache.get(mergeInfo.source);
                         if (srcO != null) {
                             Document src = (Document) parser.parseObject(srcO, false, true);
                             NodeList sources = parser.selectNodeList(src, mergeInfo.xpathSrc);
@@ -499,9 +499,9 @@ public class DBOBuilder implements IDBOBuilder
                     XMLUtils.releaseParserInstance(parser);
                 }
             }
-            
-            if (logger.isDebugEnabled() && (xmlFile != null) && (makeDump != DUMP_NONE)) {
-                if (makeDump == DUMP_HEX) {
+
+            if (logger.isDebugEnabled() && (xmlFile != null) && (this.makeDump != DUMP_NONE)) {
+                if (this.makeDump == DUMP_HEX) {
                     logger.debug("Returning data: [\n" + new Dump(xmlFile, -1) + "\n].");
                 }
                 else {
@@ -513,7 +513,7 @@ public class DBOBuilder implements IDBOBuilder
         catch (SQLException exc) {
             logger.error("Unhandled SQL exception.", exc);
             if (conn != null) {
-                if (transacted && !isXA) {
+                if (this.transacted && !this.isXA) {
                     try {
                         logger.warn("Rolling-back DB2XML [" + operation + "].");
                         conn.rollback();
@@ -528,7 +528,7 @@ public class DBOBuilder implements IDBOBuilder
         }
         catch (Exception exc) {
             if (conn != null) {
-                if (transacted && !isXA) {
+                if (this.transacted && !this.isXA) {
                     try {
                         logger.warn("Rolling-back DB2XML [" + operation + "].");
                         conn.rollback();
@@ -565,42 +565,42 @@ public class DBOBuilder implements IDBOBuilder
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
-        NMDC.put("DH_SERVICE", serviceName);
+        NMDC.put("DH_SERVICE", this.serviceName);
         logger.debug("Start executing CALL [" + operation + "]\n\tParams    :" + localParams.toString());
-        if (logger.isDebugEnabled() && (file != null) && (makeDump != DUMP_NONE)) {
-            if (makeDump == DUMP_HEX) {
+        if (logger.isDebugEnabled() && (file != null) && (this.makeDump != DUMP_NONE)) {
+            if (this.makeDump == DUMP_HEX) {
                 logger.debug("Input data: [\n" + new Dump(file, -1) + "\n].");
             }
             else {
                 logger.debug("Input data: [\n" + new String(file) + "\n].");
             }
         }
-        internalIdx = 0;
+        this.internalIdx = 0;
         Connection conn = null;
         ByteArrayOutputStream out = null;
         ByteArrayInputStream in = null;
         String intConnName = null;
         try {
-            logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
+            logger.debug("Searching for a new available connection named [" + this.jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
                 logger.debug("Overwriting default Connection with: " + intConnName);
             }
             else {
-                intConnName = jdbcConnectionName;
+                intConnName = this.jdbcConnectionName;
             }
             conn = JDBCConnectionBuilder.getConnection(intConnName);
-            if (transacted && !isXA) {
+            if (this.transacted && !this.isXA) {
                 conn.setAutoCommit(false);
             }
 
             // Static utility classes initialization
-            AbstractRetriever.setAllConnection(conn, configurationNode);
+            AbstractRetriever.setAllConnection(conn, this.configurationNode);
 
             IDBO idbo = firstDBO();
-            dataCache.put(idbo.getInputDataName(), file);
+            this.dataCache.put(idbo.getInputDataName(), file);
             while (hasNext()) {
-                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), this.serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
@@ -608,10 +608,10 @@ public class DBOBuilder implements IDBOBuilder
 
                     Object xmlFile = transform(idbo, file, localParams);
                     if (xmlFile != null) {
-                        dataCache.put(idbo.getOutputDataName(), xmlFile);
-                        if (logger.isDebugEnabled() && (makeDump != DUMP_NONE)) {
+                        this.dataCache.put(idbo.getOutputDataName(), xmlFile);
+                        if (logger.isDebugEnabled() && (this.makeDump != DUMP_NONE)) {
                             if (xmlFile instanceof byte[]) {
-                                if (makeDump == DUMP_HEX) {
+                                if (this.makeDump == DUMP_HEX) {
                                     logger.debug("Transformation output: [\n" + new Dump((byte[]) xmlFile, -1) + "\n].");
                                 }
                                 else {
@@ -641,7 +641,7 @@ public class DBOBuilder implements IDBOBuilder
 
                     byte[] output = out.toByteArray();
                     xmlFile = output;
-                    dataCache.put(idbo.getOutputDataName(), xmlFile);
+                    this.dataCache.put(idbo.getOutputDataName(), xmlFile);
                 }
                 finally {
                     if (in != null) {
@@ -655,13 +655,13 @@ public class DBOBuilder implements IDBOBuilder
                     NMDC.pop();
                 }
             }
-            if (transacted && !isXA) {
+            if (this.transacted && !this.isXA) {
                 logger.debug("Committing CALL [" + operation + "].");
                 conn.commit();
             }
-            byte[] xmlFile = (byte[]) dataCache.get(outputDataName);
-            if (logger.isDebugEnabled() && (xmlFile != null) && (makeDump != DUMP_NONE)) {
-                if (makeDump == DUMP_HEX) {
+            byte[] xmlFile = (byte[]) this.dataCache.get(this.outputDataName);
+            if (logger.isDebugEnabled() && (xmlFile != null) && (this.makeDump != DUMP_NONE)) {
+                if (this.makeDump == DUMP_HEX) {
                     logger.debug("Returning data: [\n" + new Dump(xmlFile, -1) + "\n].");
                 }
                 else {
@@ -672,7 +672,7 @@ public class DBOBuilder implements IDBOBuilder
         }
         catch (SQLException exc) {
             if (conn != null) {
-                if (transacted && !isXA) {
+                if (this.transacted && !this.isXA) {
                     try {
                         logger.warn("Rolling-back CALL [" + operation + "].");
                         conn.rollback();
@@ -687,7 +687,7 @@ public class DBOBuilder implements IDBOBuilder
         }
         catch (Exception exc) {
             if (conn != null) {
-                if (transacted && !isXA) {
+                if (this.transacted && !this.isXA) {
                     try {
                         logger.warn("Rolling-back CALL [" + operation + "].");
                         conn.rollback();
@@ -724,11 +724,11 @@ public class DBOBuilder implements IDBOBuilder
         long start = System.currentTimeMillis();
         Map<String, Object> localParams = buildProps(params);
         NMDC.push();
-        NMDC.put("DH_SERVICE", serviceName);
+        NMDC.put("DH_SERVICE", this.serviceName);
         logger.debug("Start executing EXECUTE [" + operation + "]\n\tParams    : " + localParams.toString());
-        if (logger.isDebugEnabled() && (object != null) && (makeDump != DUMP_NONE)) {
+        if (logger.isDebugEnabled() && (object != null) && (this.makeDump != DUMP_NONE)) {
             if (object instanceof byte[]) {
-                if (makeDump == DUMP_HEX) {
+                if (this.makeDump == DUMP_HEX) {
                     logger.debug("Input data: [\n" + new Dump((byte[]) object, -1) + "\n].");
                 }
                 else {
@@ -747,39 +747,39 @@ public class DBOBuilder implements IDBOBuilder
                 logger.debug("Input data: [\n" + object.toString() + "\n].");
             }
         }
-        internalIdx = 0;
+        this.internalIdx = 0;
         Connection conn = null;
         ByteArrayOutputStream out = null;
         String intConnName = null;
         try {
-            logger.debug("Searching for a new available connection named [" + jdbcConnectionName + "].");
+            logger.debug("Searching for a new available connection named [" + this.jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
                 logger.debug("Overwriting default Connection with: " + intConnName);
             }
             else {
-                intConnName = jdbcConnectionName;
+                intConnName = this.jdbcConnectionName;
             }
             conn = JDBCConnectionBuilder.getConnection(intConnName);
-            if (transacted && !isXA) {
+            if (this.transacted && !this.isXA) {
                 conn.setAutoCommit(false);
             }
 
             // Static utility classes initialization
-            AbstractRetriever.setAllConnection(conn, configurationNode);
+            AbstractRetriever.setAllConnection(conn, this.configurationNode);
 
             IDBO idbo = firstDBO();
             DHResult dhr = idbo.getExecutionResult();
             dhr.setData(object);
-            dataCache.put(idbo.getInputDataName(), dhr);
+            this.dataCache.put(idbo.getInputDataName(), dhr);
             while (hasNext()) {
-                ThreadUtils.checkInterrupted(getClass().getSimpleName(), serviceName, logger);
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), this.serviceName, logger);
                 idbo = nextDBO();
                 NMDC.push();
                 try {
                     NMDC.put("DH_DBO", idbo.getName());
                     if (idbo.getForcedMode().equals(IDBO.MODE_XML2DB)) {
-                        dhr = (DHResult) dataCache.get(idbo.getInputDataName());
+                        dhr = (DHResult) this.dataCache.get(idbo.getInputDataName());
                         if (dhr == null) {
                             dhr = idbo.getExecutionResult();
                             dhr.setData(object);
@@ -787,11 +787,11 @@ public class DBOBuilder implements IDBOBuilder
                         Object xmlFile = transform(idbo, dhr.getData(), localParams);
                         dhr = idbo.getExecutionResult();
                         dhr.setData(xmlFile);
-                        dataCache.put(idbo.getOutputDataName(), dhr);
+                        this.dataCache.put(idbo.getOutputDataName(), dhr);
                         if (xmlFile != null) {
-                            if (logger.isDebugEnabled() && (makeDump != DUMP_NONE)) {
+                            if (logger.isDebugEnabled() && (this.makeDump != DUMP_NONE)) {
                                 if (xmlFile instanceof byte[]) {
-                                    if (makeDump == DUMP_HEX) {
+                                    if (this.makeDump == DUMP_HEX) {
                                         logger.debug("Input data: [\n" + new Dump((byte[]) xmlFile, -1) + "\n].");
                                     }
                                     else {
@@ -824,21 +824,28 @@ public class DBOBuilder implements IDBOBuilder
                         logger.debug("End executing IDBO [" + idbo.toString()
                                 + "] in forced DB2XML mode. Execution time: " + getPartialTime(start));
                         byte[] output = out.toByteArray();
-                        if (logger.isDebugEnabled() && (output != null) && (makeDump != DUMP_NONE)) {
-                            if (makeDump == DUMP_HEX) {
+                        if (logger.isDebugEnabled() && (output != null) && (this.makeDump != DUMP_NONE)) {
+                            if (this.makeDump == DUMP_HEX) {
                                 logger.debug("Received data from DB: [\n" + new Dump(output, -1) + "\n].");
                             }
                             else {
                                 logger.debug("Received data from DB: [\n" + new String(output) + "\n].");
                             }
                         }
-                        Object xmlFile = transform(idbo, output, localParams);
+                        Object xmlOut = null;
+                        try {
+                        	xmlOut = XMLUtils.parseObject_S(output, false, true);
+                        }
+                        catch (Throwable e) {
+                        	xmlOut = output;
+                        }
+                        Object xmlFile = transform(idbo, xmlOut, localParams);
                         dhr = idbo.getExecutionResult();
                         dhr.setData(xmlFile);
-                        dataCache.put(idbo.getOutputDataName(), dhr);
+                        this.dataCache.put(idbo.getOutputDataName(), dhr);
                     }
                     else {
-                        dhr = (DHResult) dataCache.get(idbo.getInputDataName());
+                        dhr = (DHResult) this.dataCache.get(idbo.getInputDataName());
                         if (dhr == null) {
                             dhr = idbo.getExecutionResult();
                             dhr.setData(object);
@@ -846,11 +853,11 @@ public class DBOBuilder implements IDBOBuilder
                         Object xmlFile = transform(idbo, dhr.getData(), localParams);
                         dhr = idbo.getExecutionResult();
                         dhr.setData(xmlFile);
-                        dataCache.put(idbo.getOutputDataName(), dhr);
+                        this.dataCache.put(idbo.getOutputDataName(), dhr);
                         if (xmlFile != null) {
-                            if (logger.isDebugEnabled() && (makeDump != DUMP_NONE)) {
+                            if (logger.isDebugEnabled() && (this.makeDump != DUMP_NONE)) {
                                 if (xmlFile instanceof byte[]) {
-                                    if (makeDump == DUMP_HEX) {
+                                    if (this.makeDump == DUMP_HEX) {
                                         logger.debug("Input data: [\n" + new Dump((byte[]) xmlFile, -1) + "\n].");
                                     }
                                     else {
@@ -882,7 +889,7 @@ public class DBOBuilder implements IDBOBuilder
                         xmlFile = output;
                         dhr = idbo.getExecutionResult();
                         dhr.setData(xmlFile);
-                        dataCache.put(idbo.getOutputDataName(), dhr);
+                        this.dataCache.put(idbo.getOutputDataName(), dhr);
                     }
                 }
                 finally {
@@ -897,22 +904,22 @@ public class DBOBuilder implements IDBOBuilder
                     NMDC.pop();
                 }
             }
-            if (transacted && !isXA) {
+            if (this.transacted && !this.isXA) {
                 logger.debug("Committing EXECUTE [" + operation + "].");
                 conn.commit();
             }
-            dhr = (DHResult) dataCache.get(outputDataName);
-            if (!dboOutputMap.get(outputDataName).isReturnData()) {
+            dhr = (DHResult) this.dataCache.get(this.outputDataName);
+            if (!this.dboOutputMap.get(this.outputDataName).isReturnData()) {
                 dhr.setData(null);
             }
             Object xmlFile = dhr.getData();
 
             // Manage statistics (if the @output-stats attribute is set)
-            if (statsDataName != null) {
-                if (statsDataName.equals(ALL_STATS)) {
+            if (this.statsDataName != null) {
+                if (this.statsDataName.equals(ALL_STATS)) {
 
                     // statistics from all DBOs...
-                    internalIdx = 0;
+                    this.internalIdx = 0;
 
                     DHResult _dhr = null;
                     long readAll = 0;
@@ -923,7 +930,7 @@ public class DBOBuilder implements IDBOBuilder
                     long totalAll = 0;
                     while (hasNext()) {
                         idbo = nextDBO();
-                        _dhr = (DHResult) dataCache.get(idbo.getOutputDataName());
+                        _dhr = (DHResult) this.dataCache.get(idbo.getOutputDataName());
 
                         readAll += _dhr.getRead();
                         insertAll += _dhr.getInsert();
@@ -940,9 +947,9 @@ public class DBOBuilder implements IDBOBuilder
                     dhr.setDiscardCauseList(discardCause);
                     dhr.setTotal(totalAll);
                 }
-                else if (!statsDataName.equals(outputDataName)) {
+                else if (!this.statsDataName.equals(this.outputDataName)) {
                     // You need statistics from a different IDBO
-                    DHResult _dhr = (DHResult) dataCache.get(statsDataName);
+                    DHResult _dhr = (DHResult) this.dataCache.get(this.statsDataName);
 
                     dhr.setRead(_dhr.getRead());
                     dhr.setInsert(_dhr.getInsert());
@@ -954,15 +961,15 @@ public class DBOBuilder implements IDBOBuilder
                 }
             }
 
-            if (mergeList.size() >1) {
+            if (this.mergeList.size() >1) {
                 XMLUtils parser = null;
                 try {
                     parser = XMLUtils.getParserInstance();
-                    MergeInfo mergeDest = mergeList.get(0);
-                    Document dest = (Document) parser.parseObject(((DHResult)dataCache.get(mergeDest.source)).getData(), false, true);
-                    for (int i = 1; i < mergeList.size(); i++) {
-                        MergeInfo mergeInfo = mergeList.get(i);
-                        Object srcO = ((DHResult) dataCache.get(mergeInfo.source)).getData();
+                    MergeInfo mergeDest = this.mergeList.get(0);
+                    Document dest = (Document) parser.parseObject(((DHResult)this.dataCache.get(mergeDest.source)).getData(), false, true);
+                    for (int i = 1; i < this.mergeList.size(); i++) {
+                        MergeInfo mergeInfo = this.mergeList.get(i);
+                        Object srcO = ((DHResult) this.dataCache.get(mergeInfo.source)).getData();
                         if (srcO != null) {
                             Document src = (Document) parser.parseObject(srcO, false, true);
                             NodeList sources = parser.selectNodeList(src, mergeInfo.xpathSrc);
@@ -984,10 +991,10 @@ public class DBOBuilder implements IDBOBuilder
                 }
                 dhr.setData(xmlFile);
             }
-            
-            if (logger.isDebugEnabled() && (xmlFile != null) && (makeDump != DUMP_NONE)) {
+
+            if (logger.isDebugEnabled() && (xmlFile != null) && (this.makeDump != DUMP_NONE)) {
                 if (xmlFile instanceof byte[]) {
-                    if (makeDump == DUMP_HEX) {
+                    if (this.makeDump == DUMP_HEX) {
                         logger.debug("Returning data: [\n" + new Dump((byte[]) xmlFile, -1) + "\n].");
                     }
                     else {
@@ -1010,7 +1017,7 @@ public class DBOBuilder implements IDBOBuilder
         }
         catch (SQLException exc) {
             if (conn != null) {
-                if (transacted && !isXA) {
+                if (this.transacted && !this.isXA) {
                     try {
                     	logger.warn("Rolling-back EXECUTE [" + operation + "].");
                         conn.rollback();
@@ -1025,9 +1032,9 @@ public class DBOBuilder implements IDBOBuilder
         }
         catch (Exception exc) {
             if (conn != null) {
-                if (transacted && !isXA) {
+                if (this.transacted && !this.isXA) {
                     try {
-                    	logger.warn("Rolling-back EXECUTE [" + operation + "]."); 
+                    	logger.warn("Rolling-back EXECUTE [" + operation + "].");
                         conn.rollback();
                     }
                     catch (Exception ex) {
@@ -1058,8 +1065,8 @@ public class DBOBuilder implements IDBOBuilder
     @Override
     public void cleanup()
     {
-        dataCache.clear();
-        internalIdx = 0;
+        this.dataCache.clear();
+        this.internalIdx = 0;
         while (hasNext()) {
             IDBO idbo = nextDBO();
             try {
@@ -1079,9 +1086,9 @@ public class DBOBuilder implements IDBOBuilder
     @Override
     public void destroy()
     {
-        baseProps.clear();
+        this.baseProps.clear();
 
-        internalIdx = 0;
+        this.internalIdx = 0;
         while (hasNext()) {
             IDBO idbo = nextDBO();
             try {
@@ -1101,7 +1108,7 @@ public class DBOBuilder implements IDBOBuilder
     @Override
     public Node getConfigurationNode()
     {
-        return configurationNode;
+        return this.configurationNode;
     }
 
     /**
@@ -1128,7 +1135,7 @@ public class DBOBuilder implements IDBOBuilder
         String transformation = idbo.getTransformation();
         if ((transformation != null) && !transformation.equals("")) {
             logger.debug("Transformation [" + transformation + "] execution using DTE.");
-            output = dteController.transform(transformation, input, params);
+            output = this.dteController.transform(transformation, input, params);
         }
         else {
             logger.debug("No transformation for this IDBO.");
@@ -1138,27 +1145,27 @@ public class DBOBuilder implements IDBOBuilder
 
     private IDBO firstDBO()
     {
-        return dboList.get(0);
+        return this.dboList.get(0);
     }
 
     private IDBO nextDBO()
     {
-        return dboList.get(internalIdx++);
+        return this.dboList.get(this.internalIdx++);
     }
 
     private boolean hasNext()
     {
-        return (internalIdx < dboList.size());
+        return (this.internalIdx < this.dboList.size());
     }
 
     private Map<String, Object> buildProps(Map<String, Object> props) throws DataHandlerException
     {
         try {
-            Map<String, Object> allProps = new HashMap<String, Object>(baseProps);
+            Map<String, Object> allProps = new HashMap<String, Object>(this.baseProps);
             if (props != null) {
                 allProps.putAll(props);
             }
-            if (resolveMetadata) {
+            if (this.resolveMetadata) {
                 boolean toDecode = true;
                 while (toDecode) {
                     toDecode = false;
