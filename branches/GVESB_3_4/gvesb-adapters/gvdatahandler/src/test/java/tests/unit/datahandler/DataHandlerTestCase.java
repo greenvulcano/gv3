@@ -116,6 +116,7 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("testvalue", field1);
         String field2 = cols.item(2).getTextContent();
         assertEquals("20000101 12:30:45", field2);
+        //assertEquals("20000101 18:30:45", field2);
         String field3 = cols.item(3).getTextContent();
         assertEquals("123,45", field3);
     }
@@ -165,6 +166,7 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("testvalue", field1);
         String field2 = cols.item(2).getTextContent();
         assertEquals("20000101 12:30:45", field2);
+        //assertEquals("20000101 18:30:45", field2);
         String field3 = cols.item(3).getTextContent();
         assertEquals("123,45", field3);
     }
@@ -183,6 +185,7 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("testvalue", field1);
         String field2 = cols.item(3).getTextContent();
         assertEquals("20000101 12:30:45", field2);
+        //assertEquals("20000101 18:30:45", field2);
     }
     /**
      * @throws Exception
