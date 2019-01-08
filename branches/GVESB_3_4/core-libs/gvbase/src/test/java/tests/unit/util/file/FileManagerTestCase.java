@@ -19,14 +19,13 @@
  */
 package tests.unit.util.file;
 
-import it.greenvulcano.util.file.FileProperties;
-import it.greenvulcano.util.file.FileManager;
-
 import java.io.File;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
+import it.greenvulcano.util.file.FileManager;
+import it.greenvulcano.util.file.FileProperties;
 import junit.framework.TestCase;
 
 /**
@@ -39,6 +38,7 @@ public class FileManagerTestCase extends TestCase
                                                                   + "target" + File.separator + "test-classes";
     private static final String TEST_FILE_DIR             = "TestFileManager";
     private static final String TEST_FILE_DIR_RENAMED     = "TestFileManager_Renamed";
+    private static final String TEST_FILE_DIR_NEW         = "TestFileManager_New";
     private static final String TEST_FILE_DEST_RESOURCES  = System.getProperty("java.io.tmpdir") + File.separator
                                                                   + TEST_FILE_DIR;
     private static final String TEST_FILE_MANAGER         = "fileManager_test.txt";
@@ -53,6 +53,7 @@ public class FileManagerTestCase extends TestCase
     {
         super.setUp();
         FileUtils.deleteQuietly(new File(TEST_FILE_DEST_RESOURCES));
+        FileUtils.deleteQuietly(new File(TEST_FILE_DIR_NEW));
         FileUtils.forceMkdir(new File(TEST_FILE_DEST_RESOURCES));
         assertTrue("System property 'it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath' not set.",
                 System.getProperty("it.greenvulcano.util.xpath.search.XPathAPIFactory.cfgFileXPath") != null);
@@ -73,8 +74,8 @@ public class FileManagerTestCase extends TestCase
      */
     public void testExistFile() throws Exception
     {
-        Set<FileProperties> files = FileManager.ls(TEST_FILE_RESOURCES, TEST_FILE_MANAGER);
-        assertTrue("Resource " + TEST_FILE_MANAGER + " not found in " + TEST_FILE_RESOURCES, files != null
+        Set<FileProperties> files = FileManager.ls(TEST_FILE_RESOURCES, TEST_FILE_MANAGER, -1);
+        assertTrue("Resource " + TEST_FILE_MANAGER + " not found in " + TEST_FILE_RESOURCES, (files != null)
                 && !files.isEmpty());
     }
 
@@ -163,11 +164,11 @@ public class FileManagerTestCase extends TestCase
         assertTrue("Resource " + TEST_FILE_MANAGER_XML + " not found in " + TEST_FILE_RESOURCES, new File(
                 TEST_FILE_RESOURCES + File.separator + TEST_FILE_MANAGER_XML).exists());
 
-        System.out.println("testCopyRemoveFilterFile: " + FileManager.ls(TEST_FILE_DEST_RESOURCES, null));
+        System.out.println("testCopyRemoveFilterFile: " + FileManager.ls(TEST_FILE_DEST_RESOURCES, null, -1));
 
         FileManager.rm(TEST_FILE_DEST_RESOURCES, ".*\\.xml");
 
-        System.out.println("testCopyRemoveFilterFile: " + FileManager.ls(TEST_FILE_DEST_RESOURCES, null));
+        System.out.println("testCopyRemoveFilterFile: " + FileManager.ls(TEST_FILE_DEST_RESOURCES, null, -1));
 
         assertTrue("Resource " + TEST_FILE_MANAGER + " not found in " + TEST_FILE_RESOURCES, new File(
                 TEST_FILE_RESOURCES + File.separator + TEST_FILE_MANAGER).exists());
@@ -216,4 +217,20 @@ public class FileManagerTestCase extends TestCase
         assertTrue("Resource " + TEST_FILE_MANAGER + " not found in " + TEST_FILE_DEST_RESOURCES + File.separator + TEST_FILE_DIR_RENAMED, new File(
                 TEST_FILE_DEST_RESOURCES + File.separator + TEST_FILE_DIR_RENAMED + File.separator + TEST_FILE_MANAGER).exists());
     }
+
+
+    /**
+     * @throws Exception
+     */
+    public void testCreateDirectory() throws Exception
+    {
+    	assertFalse("Resource " + TEST_FILE_DIR_NEW + " ALREADY found in " + TEST_FILE_DEST_RESOURCES, new File(
+                TEST_FILE_DEST_RESOURCES + File.separator + TEST_FILE_DIR_NEW).isDirectory());
+
+        FileManager.mkdir(TEST_FILE_DEST_RESOURCES + File.separator + TEST_FILE_DIR_NEW);
+
+        assertTrue("Resource " + TEST_FILE_DIR_NEW + " not found in " + TEST_FILE_DEST_RESOURCES, new File(
+                TEST_FILE_DEST_RESOURCES + File.separator + TEST_FILE_DIR_NEW).isDirectory());
+    }
+
 }

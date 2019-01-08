@@ -20,8 +20,6 @@
  */
 package it.greenvulcano.util.file;
 
-import it.greenvulcano.log.GVLogger;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -29,6 +27,8 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+
+import it.greenvulcano.log.GVLogger;
 
 /**
  * This class provides utility method to manage files on the local file system.
@@ -60,11 +60,13 @@ public final class FileManager {
      *            Absolute pathname of the parent directory of the file to be searched.
      * @param filePattern
      *            the name of the file. May be a regular expression.
+     * @param fileLimit
+     * 			  if greater than 0 identify the max number of file names to return.
      * @return a <code>java.util.Set</code> of
      *         <code>FileProperties</code> objects.
      * @throws IOException
      */
-    public static Set<FileProperties> ls(String parentDirectory, String filePattern) throws IOException {
+    public static Set<FileProperties> ls(String parentDirectory, String filePattern, int fileLimit) throws IOException {
         File targetDir = new File(parentDirectory);
         if (!targetDir.isAbsolute()) {
             throw new IllegalArgumentException("The pathname of the parent directory is NOT absolute: "
@@ -79,9 +81,14 @@ public final class FileManager {
                     + ") is NOT a directory.");
         }
         File[] files = targetDir.listFiles(new RegExFileFilter(filePattern, RegExFileFilter.ALL));
-        Set<FileProperties> matchingFiles = new HashSet<FileProperties>(files.length);
+        Set<FileProperties> matchingFiles = new HashSet<FileProperties>(fileLimit > 0 ? fileLimit : files.length);
+        int i = 0;
         for (File file : files) {
             matchingFiles.add(new FileProperties(file));
+            i++;
+            if ((fileLimit > 0) && (i >= fileLimit)) {
+            	break;
+            }
         }
         return matchingFiles;
     }
@@ -113,7 +120,7 @@ public final class FileManager {
                 FileUtils.cleanDirectory(target);
             }
             else {
-                Set<FileProperties> files = ls(targetPath, filePattern);
+                Set<FileProperties> files = ls(targetPath, filePattern, -1);
                 for (FileProperties file : files) {
                     logger.debug("Removing file/directory " + file.getName() + " from directory " + target.getAbsolutePath());
                     FileUtils.forceDelete(new File(target, file.getName()));
@@ -158,7 +165,7 @@ public final class FileManager {
                 FileUtils.moveDirectory(src, target);
             }
             else {
-                Set<FileProperties> files = ls(oldPath, filePattern);
+                Set<FileProperties> files = ls(oldPath, filePattern, -1);
                 for (FileProperties file : files) {
                     logger.debug("Moving file " + file.getName() + " from directory " + src.getAbsolutePath() + " to directory "
                         + target.getAbsolutePath());
@@ -219,7 +226,7 @@ public final class FileManager {
                 FileUtils.copyDirectory(src, new File(targetPath));
             }
             else {
-                Set<FileProperties> files = ls(sourcePath, filePattern);
+                Set<FileProperties> files = ls(sourcePath, filePattern, -1);
                 for (FileProperties file : files) {
                     logger.debug("Copying file " + file.getName() + " from directory " + src.getAbsolutePath() + " to directory "
                         + target.getAbsolutePath());
@@ -240,6 +247,36 @@ public final class FileManager {
             else {
                 logger.debug("Copying file " + src.getAbsolutePath() + " to " + target.getAbsolutePath());
                 FileUtils.copyFile(src, target);
+            }
+        }
+    }
+
+
+    /**
+     * Create a new directory, if already exists does nothing.<br>
+     * If a file, whose name matches the <code>targetPath</code> pattern, already
+     * exists, it will thrown an exception.<br>
+     *
+     * @param targetPath
+     *            Absolute pathname of the target directory.
+     * @throws Exception
+     */
+    public static void mkdir(String targetPath) throws Exception {
+        File target = new File(targetPath);
+        if (!target.isAbsolute()) {
+            throw new IllegalArgumentException("The pathname of the target directory is NOT absolute: " + targetPath);
+        }
+
+        if (target.isFile()) {
+        	throw new IllegalArgumentException("The pathname of the target directory exists and is a FILE: " + targetPath);
+        }
+        else {
+            if (target.isDirectory()) {
+                logger.debug("Directory " + target.getAbsolutePath() + " already exists.");
+            }
+            else {
+                logger.debug("Creating directory " + target.getAbsolutePath());
+                FileUtils.forceMkdir(target);
             }
         }
     }

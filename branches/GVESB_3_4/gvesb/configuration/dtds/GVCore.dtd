@@ -31,8 +31,8 @@
 <!ENTITY % remote_managers "FTPManager|FTPSManager|SFTPManager">
 <!ENTITY % fs-monitor "LocalFileSystemMonitor|RemoteFileSystemMonitor">
 <!ENTITY % fs-monitor-status "InMemoryMonitorStatus|FileMonitorStatus">
-<!ENTITY % file-commands "FileSearchCommand|FileMoveCommand|FileDeleteCommand|FileCopyCommand|FileZipCommand|FileUnZipCommand">
-<!ENTITY % remote-file-commands "RemoteSearchCommand|RemoteMoveCommand|RemoteDeleteCommand|RemoteDownloadCommand|RemoteUploadCommand">
+<!ENTITY % file-commands "FileSearchCommand|FileMoveCommand|FileDeleteCommand|FileCopyCommand|MkDirCommand|FileZipCommand|FileUnZipCommand">
+<!ENTITY % remote-file-commands "RemoteSearchCommand|RemoteMoveCommand|RemoteDeleteCommand|RemoteMkDirCommand|RemoteDownloadCommand|RemoteUploadCommand">
 <!ENTITY % jmx-op "(invoke-method|set-attribute|get-attribute)">
 <!ENTITY % preFwdValidators "DUMMY %extra-pre-fwd-validators;">
 
@@ -7956,6 +7956,70 @@
 -->
 <!ATTLIST RemoteDeleteCommand isCritical (true|false) #IMPLIED>
 
+<!--
+    Create a directory.
+    The directory pathname can be static or contain placeholders 
+    that are replaced at runtime.
+
+    Can contains the following placeholders:
+     - fixed : a text string;
+     - ${{propname}}      : a System property name;
+     - sp{{propname}}     : a System property name;
+     - env{{varname}}     : an Environment variable value;
+     - @{{propname}}      : a inProperties property name;
+     - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value,
+                                        formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} :
+                               reformat 'date' from 'source-pattern' to 'dest-pattern',
+                               and optionally from 'source-tZone' to 'dest-tZone'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+                               evaluate as if-then-else; if 'field' is equal to cond1...n,
+                               return the value of val1...n, otherwise 'default'
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+                               is equivalent to 'decode', with the difference that 'condX'
+                               can be a list of values separated by 'sep'
+     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
+                             the GVBuffer is added to the scope as 'object'
+     - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
+                                 the first field of the first selected record.
+                                 The 'conn' parameter is the JNDI name of a DataSource
+     - sqllist{{conn[::sep]::statement}}
+                                   : execute a select sql statement sql and return the value of
+                                     the first field of all selected records as a 'sep' separated list.
+                                     The 'conn' parameter is the JNDI name of a DataSource
+                                     The 'sep' parameter defaults to comma
+     - sqltable{{conn::statement}} : executes a select sql statement and returns all values of
+                                     returned cursor as an XML.
+                                     The 'conn' parameter is the JNDI name of a DataSource
+     - ognl{{script}} : evaluate a OGNL script,
+                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
+
+    #SelectOnInsert
+-->
+<!ELEMENT RemoteMkDirCommand (Description?, PropertyDef*)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST RemoteMkDirCommand type CDATA #FIXED "remote-command">
+
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST RemoteDeleteCommand class CDATA #FIXED "it.greenvulcano.gvesb.virtual.file.remote.command.GVMkDir">
+<!--
+    Absolute path of the directory to create.
+
+    #NotNull
+-->
+<!ATTLIST RemoteMkDirCommand targetPath CDATA #REQUIRED>
+<!--
+    If true an internal error interrupt the command sequence.
+    Default true.
+-->
+<!ATTLIST RemoteMkDirCommand isCritical (true|false) #IMPLIED>
+
 
 <!--
     Download file / directory from remote directory and saved
@@ -8276,10 +8340,19 @@
 <!ATTLIST FileSearchCommand filePattern CDATA #REQUIRED>
 
 <!--
-    If true the found files are inserted in list with full path.
-    Default false.
+    If greater than 0 identify the max number of file names to return.
+    Default to -1.
+    
+    #Pattern: ! [0-9]* ! set a integer value
 -->
-<!ATTLIST FileSearchCommand returnFullPath (true|false) #IMPLIED>
+<!ATTLIST FileSearchCommand maxFileList CDATA #IMPLIED>
+
+<!--
+    File name to search for. Can be a regular espression.
+
+    #NotNull
+-->
+<!ATTLIST FileSearchCommand filePattern CDATA #REQUIRED>
 
 <!--
     If true an internal error interrupt the command sequence.
@@ -8537,6 +8610,72 @@
 -->
 <!ATTLIST FileCopyCommand isCritical (true|false) #IMPLIED>
 
+
+<!--
+    Create a directory.
+    The directory pathname can be static or contain placeholders that are replaced at runtime.
+
+    If the destination directory already exists and is a file, the operation fail, otherwise the operation does nothing.
+
+    Can contains the following placeholders:
+     - fixed : a text string;
+     - ${{propname}}      : a System property name;
+     - sp{{propname}}     : a System property name;
+     - env{{varname}}     : an Environment variable value;
+     - @{{propname}}      : a inProperties property name;
+     - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value,
+                                        formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} :
+                               reformat 'date' from 'source-pattern' to 'dest-pattern',
+                               and optionally from 'source-tZone' to 'dest-tZone'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+                               evaluate as if-then-else; if 'field' is equal to cond1...n,
+                               return the value of val1...n, otherwise 'default'
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+                               is equivalent to 'decode', with the difference that 'condX'
+                               can be a list of values separated by 'sep'
+     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
+                             the GVBuffer is added to the scope as 'object'
+     - sql{{conn::statement}}            : execute a select sql statement sql and return the value of
+                                           the first field of the first selected record.
+                                           The 'conn' parameter is the JNDI name of a DataSource
+     - sqllist{{conn[::sep]::statement}} : execute a select sql statement sql and return the value of
+                                           the first field of all selected records as a 'sep' separated list.
+                                           The 'conn' parameter is the JNDI name of a DataSource
+                                           The 'sep' parameter defaults to comma
+     - sqltable{{conn::statement}}       : executes a select sql statement and returns all values of
+                                           returned cursor as an XML.
+                                           The 'conn' parameter is the JNDI name of a DataSource
+     - ognl{{script}} : evaluate a OGNL script,
+                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
+
+    #SelectOnInsert
+-->
+<!ELEMENT MkDirCommand (Description?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST MkDirCommand type CDATA #FIXED "file-command">
+
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST MkDirCommand class CDATA #FIXED "it.greenvulcano.gvesb.virtual.file.command.GVMkDir">
+
+<!--
+    Absolute path of the directory to be created.
+
+    #NotNull
+-->
+<!ATTLIST MkDirCommand targetPath CDATA #REQUIRED>
+
+<!--
+    If true an internal error interrupt the command sequence.
+    Default true.
+-->
+<!ATTLIST MkDirCommand isCritical (true|false) #IMPLIED>
 
 <!--
     Compression of one or more files/directories in a directory
