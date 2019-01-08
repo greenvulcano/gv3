@@ -10128,11 +10128,17 @@
 -->
 <!ELEMENT mail-message (destinations?, message-body?, attachments?, Description?)>
 <!--
-    Il display name del sender.
+    The sender display name.
 
     #NotNull
 -->
 <!ATTLIST mail-message sender-display-name CDATA #REQUIRED>
+<!--
+    The sender adrress.
+
+    #NotNull
+-->
+<!ATTLIST mail-message sender-address CDATA #IMPLIED>
 <!--
     The subject of the email.
     Can contains placeholder to be resolved at runtime.

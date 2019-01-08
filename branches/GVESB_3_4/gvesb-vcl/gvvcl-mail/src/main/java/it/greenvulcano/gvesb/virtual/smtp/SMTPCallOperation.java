@@ -112,6 +112,11 @@ public class SMTPCallOperation implements CallOperation
     private String              senderDisplayName          = null;
 
     /**
+     * The sender address.
+     */
+    private String              senderAddress              = null;
+
+    /**
      * The content type.
      */
     private String              contentType                = null;
@@ -289,6 +294,10 @@ public class SMTPCallOperation implements CallOperation
     {
         senderDisplayName = XMLConfig.get(node, "@sender-display-name");
         logger.debug("Sender: " + senderDisplayName);
+        senderAddress = XMLConfig.get(node, "@sender-address", "");
+        if (!"".equals(senderAddress)) {
+        	logger.debug("Sender address: " + senderAddress);
+        }
         subjectText = XMLConfig.get(node, "@subject");
         logger.debug("Subject: " + subjectText);
         contentType = XMLConfig.get(node, "@content-type").replace('-', '/');
@@ -456,8 +465,11 @@ public class SMTPCallOperation implements CallOperation
                 if (isHighPriority) {
                     msg.addHeader("X-Priority", "1");
                 }
-                msg.setFrom(new InternetAddress(localSession.getProperties().getProperty("mail.from"), 
-                		PropertiesHandler.expand(senderDisplayName, params, gvBuffer)));
+                String localSA = localSession.getProperties().getProperty("mail.from");
+        		if (!"".equals(senderAddress)) {
+            		localSA = PropertiesHandler.expand(senderAddress, params, gvBuffer);
+        		}
+                msg.setFrom(new InternetAddress(localSA, PropertiesHandler.expand(senderDisplayName, params, gvBuffer)));
         
                 String appoTO = gvBuffer.getProperty("GV_SMTP_TO");
                 if ((appoTO == null) || "".equals(appoTO)) {
