@@ -1,23 +1,44 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.internal.data;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.Scriptable;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -35,28 +56,16 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.crypto.CryptoHelper;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
+import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xpath.XPathFinder;
 import it.greenvulcano.util.zip.ZipHelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.Scriptable;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class ChangeGVBuffer
 {
@@ -73,6 +82,14 @@ public class ChangeGVBuffer
      * define the crypto operation "decrypt".
      */
     public static final String      CRYPTO_OP_DECRYPT         = "decrypt";
+    /**
+     * define the compress algorithm "zip".
+     */
+    public static final String      COMPRESS_TYPE_ZIP         = "zip";
+    /**
+     * define the compress algorithm "gzip".
+     */
+    public static final String      COMPRESS_TYPE_GZIP        = "gzip";
     /**
      * define the compress operation "none".
      */
@@ -121,11 +138,11 @@ public class ChangeGVBuffer
     /**
      * the names/values to set as GVBuffer properties.
      */
-    private HashMap<String, String> properties                = new HashMap<String, String>();
+    private final HashMap<String, String> properties                = new HashMap<String, String>();
     /**
      * defines the order of properties setting in GVBuffer.
      */
-    private List<String>            propertiesList            = new ArrayList<String>();
+    private final List<String>            propertiesList            = new ArrayList<String>();
     /**
      * if true is configured a crypto operation.
      */
@@ -146,6 +163,10 @@ public class ChangeGVBuffer
      * the value of the compress operation.
      */
     private boolean                 compressOpZip             = false;
+    /**
+     * the value to use as compression algorithm.
+     */
+    private String                  compressionType          = "zip";
     /**
      * the value to use as compression level level.
      */
@@ -208,7 +229,7 @@ public class ChangeGVBuffer
 
     /**
      * Initialize the instance.
-     * 
+     *
      * @param node
      *        the node from which to read the configuration
      * @throws XMLConfigException
@@ -217,74 +238,77 @@ public class ChangeGVBuffer
     public final void init(Node node) throws XMLConfigException
     {
         try {
-            clearData = XMLConfig.getBoolean(node, "@clear-data", false);
-            system = XMLConfig.get(node, "@system", "");
-            service = XMLConfig.get(node, "@service", "");
-            ognlScript = XMLConfig.get(node, "OGNLScript");
+            this.clearData = XMLConfig.getBoolean(node, "@clear-data", false);
+            this.system = XMLConfig.get(node, "@system", "");
+            this.service = XMLConfig.get(node, "@service", "");
+            this.ognlScript = XMLConfig.get(node, "OGNLScript");
 
             int operations = 0;
 
             String cryptoOp = XMLConfig.get(node, "@crypto-op", CRYPTO_OP_NONE);
-            keyId = XMLConfig.get(node, "@key-id", CryptoHelper.DEFAULT_KEY_ID);
+            this.keyId = XMLConfig.get(node, "@key-id", CryptoHelper.DEFAULT_KEY_ID);
 
             if (cryptoOp.equals(CRYPTO_OP_NONE)) {
-                cryptoOn = false;
+                this.cryptoOn = false;
             }
             else {
-                cryptoOn = true;
+                this.cryptoOn = true;
                 operations++;
-                cryptoOpEncrypt = cryptoOp.equals(CRYPTO_OP_ENCRYPT);
+                this.cryptoOpEncrypt = cryptoOp.equals(CRYPTO_OP_ENCRYPT);
             }
 
             String compressOp = XMLConfig.get(node, "@compress-op", COMPRESS_OP_NONE);
-            compressionLevel = XMLConfig.get(node, "@compress-level", ZipHelper.DEFAULT_COMPRESSION_S);
+            this.compressionType = XMLConfig.get(node, "@compress-type", COMPRESS_TYPE_ZIP);
+            this.compressionLevel = XMLConfig.get(node, "@compress-level", ZipHelper.DEFAULT_COMPRESSION_S);
 
             if (compressOp.equals(COMPRESS_OP_NONE)) {
-                compressOn = false;
+                this.compressOn = false;
             }
             else {
-                compressOn = true;
+                this.compressOn = true;
                 operations++;
-                compressOpZip = compressOp.equals(COMPRESS_OP_COMPRESS);
-                zipHelper = new ZipHelper();
-                zipHelper.setCompressionLevel(compressionLevel);
+                this.compressOpZip = compressOp.equals(COMPRESS_OP_COMPRESS);
+                if (this.compressionType.equals(COMPRESS_TYPE_ZIP)) {
+                	this.zipHelper = new ZipHelper();
+                	this.zipHelper.setCompressionLevel(this.compressionLevel);
+                }
             }
 
             String base64Op = XMLConfig.get(node, "@base64-op", BASE64_OP_NONE);
 
             if (base64Op.equals(BASE64_OP_NONE)) {
-                base64On = false;
+                this.base64On = false;
             }
             else {
-                base64On = true;
+                this.base64On = true;
                 operations++;
-                base64OpEncode = base64Op.equals(BASE64_OP_ENCODE);
+                this.base64OpEncode = base64Op.equals(BASE64_OP_ENCODE);
             }
 
-            scopeName = XMLConfig.get(node, "@scope-name", "");
-            if (!scopeName.equals("")) {
-                scriptName = XMLConfig.get(node, "@script-file", INTERNAL_SCRIPT);
-                if (scriptName.equals(INTERNAL_SCRIPT)) {
-                    script = XMLConfig.get(node, "Script", "");
-                    if (script.equals("")) {
+            this.scopeName = XMLConfig.get(node, "@scope-name", "");
+            if (!this.scopeName.equals("")) {
+                this.scriptName = XMLConfig.get(node, "@script-file", INTERNAL_SCRIPT);
+                if (this.scriptName.equals(INTERNAL_SCRIPT)) {
+                    this.script = XMLConfig.get(node, "Script", "");
+                    if (this.script.equals("")) {
                         throw new XMLConfigException(
                                 "Must be defined at least the @script-file attribute or the Script element. Node: "
                                         + XPathFinder.buildXPath(node));
                     }
                 }
-                javascriptOn = true;
+                this.javascriptOn = true;
                 operations++;
             }
 
             Node bbNode = XMLConfig.getNode(node, "*[@type='body-builder']");
             if (bbNode == null) {
-                bodyBuilderOn = false;
+                this.bodyBuilderOn = false;
             }
             else {
                 String className = XMLConfig.get(bbNode, "@class");
-                bodyBuilder = (GVBufferBodyMaker) Class.forName(className).newInstance();
-                bodyBuilder.init(bbNode);
-                bodyBuilderOn = true;
+                this.bodyBuilder = (GVBufferBodyMaker) Class.forName(className).newInstance();
+                this.bodyBuilder.init(bbNode);
+                this.bodyBuilderOn = true;
             }
 
             if (operations > 1) {
@@ -295,10 +319,10 @@ public class ChangeGVBuffer
 
             String sRetCode = XMLConfig.get(node, "./@ret-code", UNDEFINED);
             if (!sRetCode.equals(UNDEFINED)) {
-                retCode = Integer.parseInt(sRetCode);
+                this.retCode = Integer.parseInt(sRetCode);
             }
             else {
-                retCode = Integer.MIN_VALUE;
+                this.retCode = Integer.MIN_VALUE;
             }
 
             NodeList nl = XMLConfig.getNodeList(node, "./PropertyDef");
@@ -308,15 +332,15 @@ public class ChangeGVBuffer
                     String value = XMLConfig.get(nl.item(i), "./@value", "");
                     boolean overwriteBody = XMLConfig.getBoolean(nl.item(i), "./@overwrite-body", false);
                     if (overwriteBody) {
-                        if (!overwriteBodyWithProperty.equals("")) {
+                        if (!this.overwriteBodyWithProperty.equals("")) {
                             throw new XMLConfigException(
                                     "The 'overwrite-body' body attribute can be set only once. Node: "
                                             + XPathFinder.buildXPath(nl.item(i)));
                         }
-                        overwriteBodyWithProperty = name;
+                        this.overwriteBodyWithProperty = name;
                     }
-                    properties.put(name, value);
-                    propertiesList.add(name);
+                    this.properties.put(name, value);
+                    this.propertiesList.add(name);
                 }
             }
         }
@@ -330,7 +354,7 @@ public class ChangeGVBuffer
 
     /**
      * Perform the GVBuffer modification.
-     * 
+     *
      * @param gvBuffer
      *        the input data
      * @param environment
@@ -343,30 +367,30 @@ public class ChangeGVBuffer
     public final GVBuffer execute(GVBuffer gvBuffer, Map<String, Object> environment) throws GVException,
             ExpressionEvaluatorException, InterruptedException
     {
-        if (!system.equals("")) {
-            gvBuffer.setSystem(system);
+        if (!this.system.equals("")) {
+            gvBuffer.setSystem(this.system);
         }
-        if (!service.equals("")) {
-            gvBuffer.setService(service);
+        if (!this.service.equals("")) {
+            gvBuffer.setService(this.service);
         }
-        if (retCode != Integer.MIN_VALUE) {
-            gvBuffer.setRetCode(retCode);
+        if (this.retCode != Integer.MIN_VALUE) {
+            gvBuffer.setRetCode(this.retCode);
         }
 
         try {
             PropertiesHandler.enableExceptionOnErrors();
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
-            for (String fName : propertiesList) {
-                if (overwriteBodyWithProperty.equals(fName)) {
+            for (String fName : this.propertiesList) {
+                if (this.overwriteBodyWithProperty.equals(fName)) {
                     String value = gvBuffer.getProperty(fName);
                     if (value == null) {
-                        value = properties.get(fName);
+                        value = this.properties.get(fName);
                     }
                     value = PropertiesHandler.expand(value, params, gvBuffer);
                     gvBuffer.setObject(value.getBytes());
                 }
                 else {
-                    String value = PropertiesHandler.expand(properties.get(fName), params, gvBuffer);
+                    String value = PropertiesHandler.expand(this.properties.get(fName), params, gvBuffer);
                     params.put(fName, value);
                     gvBuffer.setProperty(fName, value);
                 }
@@ -380,27 +404,27 @@ public class ChangeGVBuffer
             PropertiesHandler.disableExceptionOnErrors();
         }
 
-        if (clearData) {
+        if (this.clearData) {
             gvBuffer.setObject(null);
         }
 
-        if ((ognlScript != null) && (ognlScript.length() > 0)) {
+        if ((this.ognlScript != null) && (this.ognlScript.length() > 0)) {
             handleOgnlScript(gvBuffer, environment);
         }
-        if (!clearData) {
-            if (bodyBuilderOn) {
-                gvBuffer.setObject(bodyBuilder.getBuffer(gvBuffer));
+        if (!this.clearData) {
+            if (this.bodyBuilderOn) {
+                gvBuffer.setObject(this.bodyBuilder.getBuffer(gvBuffer));
             }
-            if (cryptoOn) {
+            if (this.cryptoOn) {
                 handleEncryption(gvBuffer);
             }
-            else if (compressOn) {
+            else if (this.compressOn) {
                 handleCompression(gvBuffer);
             }
-            else if (base64On) {
+            else if (this.base64On) {
                 handleBase64(gvBuffer);
             }
-            else if (javascriptOn) {
+            else if (this.javascriptOn) {
                 handleJavaScript(gvBuffer, environment);
             }
         }
@@ -419,7 +443,7 @@ public class ChangeGVBuffer
         try {
             ExpressionEvaluatorHelper.addToContext("environment", environment);
             ExpressionEvaluator expressionEvaluator = ExpressionEvaluatorHelper.getExpressionEvaluator(ExpressionEvaluatorHelper.OGNL_EXPRESSION_LANGUAGE);
-            expressionEvaluator.getValue(ognlScript, gvBuffer);
+            expressionEvaluator.getValue(this.ognlScript, gvBuffer);
         }
         catch (ExpressionEvaluatorException exc) {
             ThreadUtils.checkInterrupted(exc);
@@ -439,12 +463,53 @@ public class ChangeGVBuffer
     private void handleCompression(GVBuffer gvBuffer) throws GVInternalException
     {
         try {
-            if (compressOpZip) {
-                gvBuffer.setObject(zipHelper.zip((byte[]) gvBuffer.getObject()));
-            }
-            else {
-                gvBuffer.setObject(zipHelper.unzip((byte[]) gvBuffer.getObject()));
-            }
+        	if (this.compressionType.equals(COMPRESS_TYPE_ZIP)) {
+	            if (this.compressOpZip) {
+	                gvBuffer.setObject(this.zipHelper.zip(toBytes(gvBuffer.getObject())));
+	            }
+	            else {
+	                gvBuffer.setObject(this.zipHelper.unzip(toBytes(gvBuffer.getObject())));
+	            }
+        	}
+        	else {
+        		InputStream in = null;
+        		OutputStream out = null;
+        		ByteArrayOutputStream outBA = new ByteArrayOutputStream();
+                try {
+                    if (this.compressOpZip) {
+                        in = new ByteArrayInputStream(toBytes(gvBuffer.getObject()));
+                        out = new GZIPOutputStream(outBA);
+                        IOUtils.copy(in, out);
+                        out.flush();
+                    }
+                    else {
+                		outBA = new ByteArrayOutputStream();
+                		out = outBA;
+                    	in = new GZIPInputStream(new ByteArrayInputStream(toBytes(gvBuffer.getObject())));
+                        IOUtils.copy(in, out);
+                        out.flush();
+                    }
+                }
+                finally {
+                    if (in != null) {
+                        try {
+                            in.close();
+                        }
+                        catch (Exception exc) {
+                            // do nothing
+                        }
+                    }
+                    if (out != null) {
+                        try {
+                            out.close();
+                        }
+                        catch (Exception exc) {
+                            // do nothing
+                        }
+                    }
+                }
+                gvBuffer.setObject(outBA.toByteArray());
+        	}
         }
         catch (Exception exc) {
             throw new GVInternalException("COMPRESS_ERROR", new String[][]{{"message", exc.getMessage()}}, exc);
@@ -460,15 +525,15 @@ public class ChangeGVBuffer
     private void handleEncryption(GVBuffer gvBuffer) throws GVInternalException
     {
         try {
-            if (cryptoOpEncrypt) {
-                gvBuffer.setObject(CryptoHelper.encrypt(keyId, (byte[]) gvBuffer.getObject(), false));
+            if (this.cryptoOpEncrypt) {
+                gvBuffer.setObject(CryptoHelper.encrypt(this.keyId, toBytes(gvBuffer.getObject()), false));
             }
             else {
-                gvBuffer.setObject(CryptoHelper.decrypt(keyId, (byte[]) gvBuffer.getObject(), false));
+                gvBuffer.setObject(CryptoHelper.decrypt(this.keyId, toBytes(gvBuffer.getObject()), false));
             }
         }
         catch (Exception exc) {
-            throw new GVInternalException("CRYPTO_ERROR", new String[][]{{"keyId", keyId},
+            throw new GVInternalException("CRYPTO_ERROR", new String[][]{{"keyId", this.keyId},
                     {"message", exc.getMessage()}}, exc);
         }
     }
@@ -482,11 +547,11 @@ public class ChangeGVBuffer
     private void handleBase64(GVBuffer gvBuffer) throws GVInternalException
     {
         try {
-            if (base64OpEncode) {
-                gvBuffer.setObject(Base64.encodeBase64((byte[]) gvBuffer.getObject()));
+            if (this.base64OpEncode) {
+                gvBuffer.setObject(Base64.encodeBase64(toBytes(gvBuffer.getObject())));
             }
             else {
-                gvBuffer.setObject(Base64.decodeBase64((byte[]) gvBuffer.getObject()));
+                gvBuffer.setObject(Base64.decodeBase64(toBytes(gvBuffer.getObject())));
             }
         }
         catch (Exception exc) {
@@ -504,42 +569,61 @@ public class ChangeGVBuffer
      */
     private void handleJavaScript(GVBuffer gvBuffer, Map<String, Object> environment) throws GVInternalException, InterruptedException
     {
-        cx = ContextFactory.getGlobal().enterContext();
+        this.cx = ContextFactory.getGlobal().enterContext();
         Scriptable scope = null;
         try {
-            scope = JSInitManager.instance().getJSInit(scopeName).getScope();
+            scope = JSInitManager.instance().getJSInit(this.scopeName).getScope();
             scope = JSInit.setProperty(scope, "environment", environment);
             scope = JSInit.setProperty(scope, "data", gvBuffer);
             scope = JSInit.setProperty(scope, "logger", logger);
-            if (!scriptName.equals(INTERNAL_SCRIPT)) {
-                script = ScriptCache.instance().getScript(scriptName);
+            if (!this.scriptName.equals(INTERNAL_SCRIPT)) {
+                this.script = ScriptCache.instance().getScript(this.scriptName);
             }
-            String localScript = script;
-            if (!PropertiesHandler.isExpanded(script)) {
+            String localScript = this.script;
+            if (!PropertiesHandler.isExpanded(this.script)) {
                 Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
-                localScript = PropertiesHandler.expand(script, params, gvBuffer);
+                localScript = PropertiesHandler.expand(this.script, params, gvBuffer);
                 logger.debug("Executing JavaScript:\n" + localScript);
             }
-            JavaScriptHelper.executeScript(localScript, scriptName, scope, cx);
+            JavaScriptHelper.executeScript(localScript, this.scriptName, scope, this.cx);
         }
         catch (Exception exc) {
             ThreadUtils.checkInterrupted(exc);
-            throw new GVInternalException("JAVASCRIPT_ERROR", new String[][]{{"scope", scopeName},
-                    {"script", scriptName}, {"message", exc.toString()}}, exc);
+            throw new GVInternalException("JAVASCRIPT_ERROR", new String[][]{{"scope", this.scopeName},
+                    {"script", this.scriptName}, {"message", exc.toString()}}, exc);
         }
+    }
+
+    private byte[] toBytes(Object obj) throws Exception {
+    	if (obj == null) {
+    		return null;
+    	}
+    	if (obj instanceof byte[]) {
+    		return (byte[]) obj;
+    	}
+    	if (obj instanceof String) {
+    		return ((String) obj).getBytes("UTF-8");
+    	}
+    	if (obj instanceof Node) {
+    		return XMLUtils.serializeDOMToByteArray_S((Node) obj);
+    	}
+    	if (obj instanceof JSONObject) {
+    		return ((JSONObject) obj).toString().getBytes("UTF-8");
+    	}
+    	return null;
     }
 
     /**
      * Perform cleanup operations.
-     * 
+     *
      */
     public final void cleanUp()
     {
-        if (bodyBuilder != null) {
-            bodyBuilder.cleanUp();
+        if (this.bodyBuilder != null) {
+            this.bodyBuilder.cleanUp();
         }
-        if (cx != null) {
-            cx = null;
+        if (this.cx != null) {
+            this.cx = null;
             Context.exit();
         }
     }
