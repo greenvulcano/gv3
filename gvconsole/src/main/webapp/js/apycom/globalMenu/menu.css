@@ -1,142 +1,150 @@
 div#menu {
-    margin: 0 auto;
-    width: 1000px;
-    height: 46px;
-    float:left;
-    margin-left:100px;
-    padding-left: 5px;
-    background: url(images/left.png) no-repeat
+	margin: 0 auto;
+	width: 100%;
+	height: 46px;
+	float: left;
 }
 
 div#menu ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    float: left
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	float: left
 }
 
 div#menu ul.menu {
-    padding-right: 5px;
-    background: url(images/right.png) no-repeat right 0
+	width: 100%;
+	border-radius: 8px;
+	background: url(images/right.png) no-repeat right 0;
+	background-repeat: repeat-x;
 }
 
 div#menu li {
-    position: relative;
-    margin: 0;
-    padding: 0 0 0 0;
-    display: block;
-    float: left;
-    z-index: 9;
-    width: auto
+	position: relative;
+	margin: 0;
+	padding: 0 0 0 0;
+	display: block;
+	float: left;
+	z-index: 9;
+	width: auto
 }
 
 div#menu ul ul li {
-    z-index: 9
+	z-index: 9
 }
 
 div#menu li div {
-    list-style: none;
-    float: left;
-    position: absolute;
-    z-index: 11;
-    top: 36px;
-    left: 0;
-    visibility: hidden;
-    width: 187px;
-    padding: 0 0 11px 7px;
-    background: url(images/submenu-bottom.png) no-repeat 7px bottom;
-    margin: 0px 0 0 -4px
+	list-style: none;
+	float: left;
+	position: absolute;
+	z-index: 11;
+	top: 36px;
+	left: 0;
+	visibility: hidden;
+	width: 187px;
+	padding: 0 0 11px 7px;
+	background: url(images/submenu-bottom.png) no-repeat 7px bottom;
+	margin: 0px 0 0 -4px
 }
 
 div#menu li:hover>div {
-    visibility: visible
+	visibility: visible
 }
 
 div#menu a {
-    position: relative;
-    z-index: 10;
-    height: 41px;
-    display: block;
-    float: left;
-    line-height: 41px;
-    text-decoration: none;
-    margin-top: 1px;
-    white-space: nowrap;
-    width: auto;
-    padding-right: 5px;
-    text-align: center
+	position: relative;
+	z-index: 10;
+	height: 41px;
+	display: block;
+	float: left;
+	line-height: 41px;
+	text-decoration: none;
+	margin-top: 1px;
+	white-space: nowrap;
+	width: auto;
+	padding-right: 5px;
+	text-align: center
 }
 
 div#menu span {
-    display: block;
-    cursor: pointer;
-    background-repeat: no-repeat;
-    background-position: 95% 0;
-    text-align: center
+	display: block;
+	cursor: pointer;
+	background-repeat: no-repeat;
+	background-position: 95% 0;
+	text-align: center
 }
 
 div#menu a {
-    padding: 0 30px 0 0;
-    line-height: 40px;
-    height: 46px;
-    background: none
+	padding: 0 30px 0 0;
+	line-height: 40px;
+	height: 46px;
+	background: none
 }
 
 div#menu span {
-    margin-top: 2px;
-    padding-left: 30px;
-    color: #fff;
-    font: bold 11px Trebuchet MS, Arial, san-serif;
-    background: none;
-    line-height: 40px
+	margin-top: 2px;
+	padding-left: 30px;
+	color: #fff;
+	font: bold 11px Trebuchet MS, Arial, san-serif;
+	background: none;
+	line-height: 40px
 }
 
-div#menu a:hover,div#menu a.over {
-    background: url(images/selected-right-sub.png) no-repeat right -1px
+div#menu a:hover,
+div#menu a.over {
+	background: url(images/selected-right-sub.png) no-repeat right -1px
 }
 
-div#menu a:hover span,div#menu a.over span {
-    background: url(images/selected-left-sub.png) no-repeat 0 -3px;
-    _background-image: url(images/selected-left-sub.png)
+div#menu a:hover span,
+div#menu a.over span {
+	background: url(images/selected-left-sub.png) no-repeat 0 -3px;
+	_background-image: url(images/selected-left-sub.png)
 }
 
-div#menu li.current a,div#menu ul.menu>li:hover>a {
-    background: url(images/selected-right-sub.png) no-repeat right -1px
+div#menu li.current a,
+div#menu ul.menu>li:hover>a {
+	background: url(images/selected-right-sub.png) no-repeat right -1px
 }
 
-div#menu li.current a span,div#menu ul.menu>li:hover>a span {
-    background: url(images/selected-left-sub.png) no-repeat 0 -3px
+div#menu li.current a span,
+div#menu ul.menu>li:hover>a span {
+	background: url(images/selected-left-sub.png) no-repeat 0 -3px
 }
 
 div#menu ul.menu>li:hover>a span {
-    color: #515151
+	color: #515151
 }
 
 div#menu li.last {
-    background: none
+	background: none
 }
 
-div#menu li.current a,div#menu li.current a span,div#menu.js-active a:hover,div#menu.js-active a:hover span,div#menu.js-active a,div#menu.js-active span
-    {
-    background: none
+div#menu li.current a,
+div#menu li.current a span,
+div#menu.js-active a:hover,
+div#menu.js-active a:hover span,
+div#menu.js-active a,
+div#menu.js-active span {
+	background: none
 }
 
-div#menu.js-active ul.menu>li:hover>a,div#menu.js-active ul.menu>li:hover>a span
-    {
-    background: none
+div#menu.js-active ul.menu>li:hover>a,
+div#menu.js-active ul.menu>li:hover>a span {
+	background: none
 }
 
 div#menu li.current a.over {
-    background: url(images/selected-right-sub.png) no-repeat right -1px
+	background: url(images/selected-right-sub.png) no-repeat right -1px
 }
 
 div#menu li.current a.over span {
-    background: url(images/selected-left-sub.png) no-repeat 0 -3px
+	background: url(images/selected-left-sub.png) no-repeat 0 -3px
 }
 
 div#menu a.over span {
-    color: #515151
+	color: #515151
 }
+
 
 /*div#menu ul ul li {
     background: none;
@@ -237,24 +245,24 @@ div#menu ul ul div li {
 }*/
 
 div#menu li.back {
-    background: url(images/lavalamp-left.png) no-repeat 0 0;
-    width: 10px;
-    height: 46px;
-    z-index: 8;
-    position: absolute;
-    padding: 0;
-    margin: 0
+	background: url(images/lavalamp-left.png) no-repeat 0 0;
+	width: 10px;
+	height: 46px;
+	z-index: 8;
+	position: absolute;
+	padding: 0;
+	margin: 0
 }
 
 div#menu li.back .left {
-    padding: 0;
-    width: auto;
-    background: url(images/lavalamp-right.png) no-repeat right 0;
-    height: 46px;
-    margin: 0 5px 0 10px;
-    float: none;
-    position: relative;
-    top: 0;
-    left: 0;
-    visibility: visible
+	padding: 0;
+	width: auto;
+	background: url(images/lavalamp-right.png) no-repeat right 0;
+	height: 46px;
+	margin: 0 5px 0 10px;
+	float: none;
+	position: relative;
+	top: 0;
+	left: 0;
+	visibility: visible
 }

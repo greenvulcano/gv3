@@ -20,10 +20,7 @@
 package it.greenvulcano.gvesb.gvconsole.deploy.action;
 
 import it.greenvulcano.gvesb.gvconsole.deploy.FileZip;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVAdapterParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVCoreParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVSupportParser;
+import it.greenvulcano.gvesb.gvconsole.deploy.GVDeploy;
 import it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsUploadForm;
 import it.greenvulcano.log.GVLogger;
 
@@ -77,27 +74,10 @@ public class StrutsUploadAction extends Action
                 return mapping.findForward("unsuccess");
             }
             FileZip fileZip = new FileZip(fileName, myFile.getFileData());
-            GVParser parser = new GVParser();
-            GVCoreParser parserService = parser.getGVCoreParser();
-            GVAdapterParser parserAdapter = parser.getGVAdapterParser();
-            GVSupportParser parserSupport = parser.getGVSupportParser();
 
             sessione.setAttribute("fileZip", fileZip);
-            sessione.setAttribute("listaServizi", parserService.getListaServiziZip());
-            sessione.setAttribute("listaTransformation", parserService.getListaTransformationZip());
-            sessione.setAttribute("listaAdapter", parserAdapter.getListaAdapterZip());
-            sessione.setAttribute("listaWebServices", parserAdapter.getListaWebServicesZip());
-            sessione.setAttribute("listaDataProvider", parserAdapter.getListaDataProviderZip());
-            sessione.setAttribute("listaKnowledgeBaseConfig", parserAdapter.getKnowledgeBaseConfigZip());
-            sessione.setAttribute("listaGVExcelWorkbook", parserAdapter.getListaGVExcelWorkbookZip());
-            sessione.setAttribute("listaGVExcelRepo", parserAdapter.getListaGVExcelRepoZip());
-            sessione.setAttribute("listaGVDataHandler", parserAdapter.getListaGVDataHandlerZip());
-            sessione.setAttribute("listaGVHL7", parserAdapter.getListaGVHL7Zip());
-            sessione.setAttribute("listaGVHTTP", parserAdapter.getListaGVHTTPZip());
-            sessione.setAttribute("listaGVBirtRepo", parserAdapter.getListaGVBirtRepoZip());
-            sessione.setAttribute("listaSupport", parserSupport.getListaSupportZip());
-            sessione.setAttribute("listaCoreParametri", parserService.getListParameterZip());
-            sessione.setAttribute("parser", parser);
+            GVDeploy deploy = new GVDeploy();
+            sessione.setAttribute("deploy", deploy);
             logger.debug("End StrutsUploadAction");
             return mapping.findForward("success");
         }

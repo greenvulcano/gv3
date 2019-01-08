@@ -42,6 +42,9 @@
 
         </script>
 <br/>
+<div class="titleSection">
+												<h1>Report</h1>
+											</div>
 <div style="float: left;">
     <div  style="float: left; width: 300px">
         <html:form action="/report/HandleReportAction" onsubmit="return checkForm(this);">

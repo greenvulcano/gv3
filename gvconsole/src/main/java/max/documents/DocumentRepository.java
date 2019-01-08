@@ -3,7 +3,7 @@ package max.documents;
 import it.greenvulcano.catalog.GVCatalogResolver;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
+import it.greenvulcano.gvesb.gvconsole.deploy.GVDeploy;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 
 import java.io.BufferedReader;
@@ -597,7 +597,7 @@ public class DocumentRepository
         		os.close();
         	}	
         }
-        GVParser gvParser = new GVParser(false);
+        GVDeploy gvParser = new GVDeploy();
         ByteArrayInputStream in = gvParser.copyFileForBackupZip();
     	vm.newDocumentVersion(name, in, notes, author, new Date());
     	gvParser.deleteFileZip();

@@ -7,7 +7,7 @@
 package max.documents;
 
 import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
+import it.greenvulcano.gvesb.gvconsole.deploy.GVDeploy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -73,13 +73,13 @@ public class SaveDocumentAction extends MenuAction {
         VersionManager vm = VersionManager.instance();
         String descr = req.getParameter("notes"); 
         InputStream in = null;
-        GVParser gvParser = null;
+        GVDeploy gvParser = null;
         try {
             if (!vm.exists(desc.getName())) {
                 descr = descr + " -> First version";
             }
             if(!req.getRequestURI().equals("/gvconsole/deploy/save.jsp")){
-                gvParser = new GVParser(false);
+                gvParser = new GVDeploy();
                 in = gvParser.copyFileForBackupZip();
                 builder.encryptDocument();
                 Document document = builder.getDocument();
@@ -87,7 +87,7 @@ public class SaveDocumentAction extends MenuAction {
                 XMLBuilder.removeFromSession(session);
             }
             else{
-                gvParser = (GVParser) session.getAttribute("parser");
+                gvParser = (GVDeploy) session.getAttribute("deploy");
                 in = gvParser.readFileZip();
             }
        
@@ -97,7 +97,7 @@ public class SaveDocumentAction extends MenuAction {
             gvParser.deleteFileZip();
             // forward to document page.
             if(req.getRequestURI().equals("/gvconsole/deploy/save.jsp"))
-                forward(req, resp, "/deploy/listaServiziCore.jsp");
+                forward(req, resp, "/def/admin/index.jsp");
             else
                 forward(req, resp, "/def/xmleditor/index.jsp");
         }

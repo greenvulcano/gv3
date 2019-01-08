@@ -6,9 +6,7 @@
 <struts-config>
   <form-beans>
     <form-bean name="fileUpload" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsUploadForm" />
-    <form-bean name="deployCore" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
-    <form-bean name="deployAdapter" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
-    <form-bean name="deploySupport" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
+    <form-bean name="deployConfig" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
     <form-bean name="fileExport" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsGestFileForm" />
     <form-bean name="deploy" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsDeployForm" />
     <form-bean name="save" type="it.greenvulcano.gvesb.gvconsole.deploy.form.StrutsDeployForm" />
@@ -32,33 +30,13 @@
       <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
     </action>
     <action path="/fileUpload" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsUploadAction" name="fileUpload"
-      scope="request" validate="true" input="/fileUpload.jsp">
-      <forward name="success" path="/deploy/listaServiziCore.jsp" />
-      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
-    </action>
-    <action path="/deployCore" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsGestCoreAction" name="deployCore"
-      scope="session" validate="true" input="/deployFile.jsp">
-      <forward name="success" path="/deploy/deployFile.jsp" />
-      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
-    </action>
-    <action path="/deployAdapter" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsGestAdapterAction" name="deployAdapter"
-      scope="session" validate="true" input="/deployFile.jsp">
-      <forward name="success" path="/deploy/deployFile.jsp" />
-      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
-    </action>
-    <action path="/deploySupport" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsGestSupportAction" name="deploySupport"
-      scope="session" validate="true" input="/deployFile.jsp">
-      <forward name="success" path="/deploy/deployFile.jsp" />
+      scope="request" validate="true" input="/deploy/listaWarnings.jsp">
+      <forward name="success" path="/deploy/listaWarnings.jsp" />
       <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
     </action>
     <action path="/deploy" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsDeployAction" name="deploy" scope="request"
       validate="true" input="/deploy/save.jsp">
       <forward name="success" path="/deploy/save.jsp" />
-      <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
-    </action>
-    <action path="/save" type="it.greenvulcano.gvesb.gvconsole.deploy.action.StrutsSaveAction" name="save" scope="request"
-      validate="true" input="/deployFile.jsp">
-      <forward name="success" path="/deploy/deployFile.jsp" />
       <forward name="unsuccess" path="/deploy/unsuccess.jsp" />
     </action>
     
