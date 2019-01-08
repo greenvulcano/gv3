@@ -1,37 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.datahandling.dbo;
-
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.datahandling.DBOException;
-import it.greenvulcano.gvesb.datahandling.DHResult;
-import it.greenvulcano.gvesb.datahandling.IDBO;
-import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
-import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleError;
-import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
-import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.thread.ThreadUtils;
-import it.greenvulcano.util.txt.DateUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -67,10 +53,24 @@ import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.gvesb.datahandling.DHResult;
+import it.greenvulcano.gvesb.datahandling.IDBO;
+import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
+import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleError;
+import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
+import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
+import it.greenvulcano.util.txt.DateUtils;
+
 /**
  * Extends the class {@link DefaultHandler} to parse input RowSet document
  * using SAX.
- * 
+ *
  * @version 3.0.0 Mar 30, 2010
  * @author GreenVulcano Developer Team
  */
@@ -141,6 +141,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     private String                jdbcConnectionName      = null;
 
     private String                jdbcConnectionNameInt   = null;
+    private String                currentJdbcConnectionNameInt   = null;
 
     /**
      *
@@ -164,7 +165,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected Map<String, String> uuids;
 
-    protected static final String GENERATED_KEY_ID        = "GV_GENERATED_KEY_"; 
+    protected static final String GENERATED_KEY_ID        = "GV_GENERATED_KEY_";
     protected boolean             autogenerateKeys        = false;
     protected boolean             readGeneratedKey        = false;
     protected String              generatedKeyID          = "";
@@ -186,7 +187,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
      * Properties eventually configured to overwrite in the service call.
      */
-    private Map<String, Object>   baseProps;
+    private final Map<String, Object>   baseProps;
 
     private String                currentId               = "0";
 
@@ -268,12 +269,12 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     protected boolean             isInsert                = true;
 
     /**
-     * 
+     *
      */
     public static final String ROWSET_NAME                = "RowSet";
-    
+
     /**
-     * 
+     *
      */
     public static final String DATA_NAME                  = "data";
 
@@ -416,7 +417,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     *
     */
     public static final String DECIMAL_TYPE               = "decimal";
-   
+
     /**
      *
      */
@@ -495,14 +496,14 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected AbstractDBO()
     {
-        dboclass = this.getClass().getName();
-        dboclass = dboclass.substring(dboclass.lastIndexOf('.') + 1);
-        dateFormatter = new SimpleDateFormat(DEFAULT_DATE_FORMAT, DateUtils.getDefaultLocale());
-        currentRowFields = new Vector<Object>(10);
-        statements = new HashMap<String, String>();
-        uuids = new HashMap<String, String>();
-        baseProps = new HashMap<String, Object>();
-        numberFormatter.setRoundingMode(RoundingMode.FLOOR);
+        this.dboclass = this.getClass().getName();
+        this.dboclass = this.dboclass.substring(this.dboclass.lastIndexOf('.') + 1);
+        this.dateFormatter = new SimpleDateFormat(DEFAULT_DATE_FORMAT, DateUtils.getDefaultLocale());
+        this.currentRowFields = new Vector<Object>(10);
+        this.statements = new HashMap<String, String>();
+        this.uuids = new HashMap<String, String>();
+        this.baseProps = new HashMap<String, Object>();
+        this.numberFormatter.setRoundingMode(RoundingMode.FLOOR);
     }
 
     /**
@@ -512,37 +513,38 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     public void init(Node config) throws DBOException
     {
         try {
-            name = XMLConfig.get(config, "@name");
-            transformation = XMLConfig.get(config, "@transformation");
-            ignoreInput = XMLConfig.getBoolean(config, "@ignore-input", false);
-            forcedMode = XMLConfig.get(config, "@force-mode", MODE_CALLER);
-            jdbcConnectionNameInt = XMLConfig.get(config, "@jdbc-connection-name", "default");
-            inputDataName = XMLConfig.get(config, "@input-data", name + "-Input");
-            outputDataName = XMLConfig.get(config, "@output-data", name + "-Output");
-            logger.debug("Initializing [" + dboclass + "] with name [" + name + "] and transformation ["
-                    + transformation + "].");
-            onlyXSLErrorMsg = XMLConfig.getBoolean(config, "@onlyXSLErrorMsg", false);
-            onlyXSLErrorMsgInTrans = XMLConfig.getBoolean(config, "@onlyXSLErrorMsgInTrans", false);
-            isReturnData = XMLConfig.getBoolean(config, "@return-data", false);
-            executeQuery = XMLConfig.getBoolean(config, "@execute-query", false);
-            blockPlatformError = XMLConfig.getBoolean(config, "@blockPlatformError", true);
-            blockDataError = XMLConfig.getBoolean(config, "@blockDataError", true);
-            blockConstraintError = XMLConfig.getBoolean(config, "@blockConstraintError", true);
-            blockStatementError = XMLConfig.getBoolean(config, "@blockStatementError", true);
-            blockSecurityError = XMLConfig.getBoolean(config, "@blockSecurityError", true);
+            this.name = XMLConfig.get(config, "@name");
+            this.transformation = XMLConfig.get(config, "@transformation");
+            this.ignoreInput = XMLConfig.getBoolean(config, "@ignore-input", false);
+            this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_CALLER);
+            this.jdbcConnectionNameInt = XMLConfig.get(config, "@jdbc-connection-name", "default");
+            this.currentJdbcConnectionNameInt = this.jdbcConnectionNameInt;
+            this.inputDataName = XMLConfig.get(config, "@input-data", this.name + "-Input");
+            this.outputDataName = XMLConfig.get(config, "@output-data", this.name + "-Output");
+            logger.debug("Initializing [" + this.dboclass + "] with name [" + this.name + "] and transformation ["
+                    + this.transformation + "].");
+            this.onlyXSLErrorMsg = XMLConfig.getBoolean(config, "@onlyXSLErrorMsg", false);
+            this.onlyXSLErrorMsgInTrans = XMLConfig.getBoolean(config, "@onlyXSLErrorMsgInTrans", false);
+            this.isReturnData = XMLConfig.getBoolean(config, "@return-data", false);
+            this.executeQuery = XMLConfig.getBoolean(config, "@execute-query", false);
+            this.blockPlatformError = XMLConfig.getBoolean(config, "@blockPlatformError", true);
+            this.blockDataError = XMLConfig.getBoolean(config, "@blockDataError", true);
+            this.blockConstraintError = XMLConfig.getBoolean(config, "@blockConstraintError", true);
+            this.blockStatementError = XMLConfig.getBoolean(config, "@blockStatementError", true);
+            this.blockSecurityError = XMLConfig.getBoolean(config, "@blockSecurityError", true);
 
             NodeList nlv = XMLConfig.getNodeList(config, "DHVariables/DHVariable");
             if (nlv != null) {
                 for (int i = 0; i < nlv.getLength(); i++) {
                     Node nv = nlv.item(i);
-                    baseProps.put(XMLConfig.get(nv, "@name"),
+                    this.baseProps.put(XMLConfig.get(nv, "@name"),
                             XMLConfig.get(nv, "@value", XMLConfig.get(nv, ".", "")).trim());
                 }
             }
 
-            xr = XMLReaderFactory.createXMLReader();
-            
-            autogenerateKeys = XMLConfig.getBoolean(config, "@autogenerate-keys", false);
+            this.xr = XMLReaderFactory.createXMLReader();
+
+            this.autogenerateKeys = XMLConfig.getBoolean(config, "@autogenerate-keys", false);
             /*if (autogenerateKeys) {
                 autogenerateKeyColumns = new HashSet<String>();
                 String keyColums = XMLConfig.get(config, "@key-columns");
@@ -552,12 +554,12 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
             }*/
         }
         catch (XMLConfigException exc) {
-            logger.error("Error reading configuration of [" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + this.dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + this.dboclass + "]", exc);
         }
         catch (SAXException exc) {
-            logger.error("Error reading configuration of [" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + this.dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + this.dboclass + "]", exc);
         }
     }
 
@@ -570,15 +572,15 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
         if (id == null) {
             id = "0";
         }
-        if ((sqlStatementInfo == null) || !getCurrentId().equals(id)) {
+        if ((this.sqlStatementInfo == null) || !getCurrentId().equals(id)) {
             try {
-                if (sqlStatementInfo != null) {
-                    sqlStatementInfo.close();
+                if (this.sqlStatementInfo != null) {
+                    this.sqlStatementInfo.close();
                 }
-                String expandedSQL = PropertiesHandler.expand(statements.get(id), currentProps, internalConn, null);
+                String expandedSQL = PropertiesHandler.expand(this.statements.get(id), this.currentProps, this.internalConn, null);
                 logger.debug("expandedSQL stmt: " + expandedSQL);
-                Statement statement = internalConn.prepareStatement(expandedSQL);
-                sqlStatementInfo = new StatementInfo(id, expandedSQL, statement);
+                Statement statement = this.internalConn.prepareStatement(expandedSQL);
+                this.sqlStatementInfo = new StatementInfo(id, expandedSQL, statement);
                 setCurrentId(id);
             }
             catch (SQLException exc) {
@@ -597,34 +599,32 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException, 
+    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         try {
             prepare();
-            logger.debug("Begin execution of DB data read/update through " + dboclass);
-            call_DEFAULT_NUMBER_FORMAT = (String) props.get(FORMAT_NAME);
-            if (call_DEFAULT_NUMBER_FORMAT == null) {
-                call_DEFAULT_NUMBER_FORMAT = DEFAULT_NUMBER_FORMAT;
+            logger.debug("Begin execution of DB data read/update through " + this.dboclass);
+            this.call_DEFAULT_NUMBER_FORMAT = (String) props.get(FORMAT_NAME);
+            if (this.call_DEFAULT_NUMBER_FORMAT == null) {
+                this.call_DEFAULT_NUMBER_FORMAT = DEFAULT_NUMBER_FORMAT;
             }
-            call_DEFAULT_GRP_SEPARATOR = (String) props.get(GRP_SEPARATOR_NAME);
-            if (call_DEFAULT_GRP_SEPARATOR == null) {
-                call_DEFAULT_GRP_SEPARATOR = DEFAULT_GRP_SEPARATOR;
+            this.call_DEFAULT_GRP_SEPARATOR = (String) props.get(GRP_SEPARATOR_NAME);
+            if (this.call_DEFAULT_GRP_SEPARATOR == null) {
+                this.call_DEFAULT_GRP_SEPARATOR = DEFAULT_GRP_SEPARATOR;
             }
-            call_DEFAULT_DEC_SEPARATOR = (String) props.get(DEC_SEPARATOR_NAME);
-            if (call_DEFAULT_DEC_SEPARATOR == null) {
-                call_DEFAULT_DEC_SEPARATOR = DEFAULT_DEC_SEPARATOR;
+            this.call_DEFAULT_DEC_SEPARATOR = (String) props.get(DEC_SEPARATOR_NAME);
+            if (this.call_DEFAULT_DEC_SEPARATOR == null) {
+                this.call_DEFAULT_DEC_SEPARATOR = DEFAULT_DEC_SEPARATOR;
             }
-            resultMessage = new StringBuffer();
-            resultStatus = STATUS_OK;
-            internalConn = conn;
-            if (!jdbcConnectionNameInt.equals("default")) {
-                logger.debug("Overwriting default Connection with: " + jdbcConnectionNameInt);
-                internalConn = JDBCConnectionBuilder.getConnection(jdbcConnectionNameInt);
-            }
-            currentProps = buildProps(props);
-            logProps(currentProps);
+            this.resultMessage = new StringBuffer();
+            this.resultStatus = STATUS_OK;
 
-            if (ignoreInput) {
+            this.currentProps = buildProps(props);
+            logProps(this.currentProps);
+
+            getInternalConn(conn, this.currentProps);
+
+            if (this.ignoreInput) {
                 input = null;
             }
             if (input != null) {
@@ -667,63 +667,63 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                     if (xmlSource == null) {
                         throw new DBOException("Cannot convert " + input.getClass() + " to InputSource");
                     }
-                    xr.setContentHandler(this);
-                    xr.setErrorHandler(this);
-                    xr.parse(xmlSource);
+                    this.xr.setContentHandler(this);
+                    this.xr.setErrorHandler(this);
+                    this.xr.parse(xmlSource);
                 }
             }
             else {
                 getStatement(null);
                 executeStatement();
             }
-            logger.debug("End execution of DB data read/update through " + dboclass);
+            logger.debug("End execution of DB data read/update through " + this.dboclass);
         }
         catch (IOException exc) {
-            logger.error("Error on execution of " + dboclass + " with name [" + name + "]", exc);
-            if (currentRowFields != null) {
+            logger.error("Error on execution of " + this.dboclass + " with name [" + this.name + "]", exc);
+            if (this.currentRowFields != null) {
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
             }
-            logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + name + "]: " + exc.getMessage(), exc);
+            logger.error("SQL Statement Informations:\n" + this.sqlStatementInfo);
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + this.name + "]: " + exc.getMessage(), exc);
         }
         catch (SAXException exc) {
-            logger.error("Error on execution of " + dboclass + " with name [" + name + "]", exc);
-            if (currentRowFields != null) {
+            logger.error("Error on execution of " + this.dboclass + " with name [" + this.name + "]", exc);
+            if (this.currentRowFields != null) {
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
             }
-            logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
+            logger.error("SQL Statement Informations:\n" + this.sqlStatementInfo);
             ThreadUtils.checkInterrupted(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + name + "]: " + exc.getMessage(), exc);
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + this.name + "]: " + exc.getMessage(), exc);
         }
         catch (Exception exc) {
-            logger.error("Error on execution of " + dboclass + " with name [" + name + "]", exc);
-            if (currentRowFields != null) {
+            logger.error("Error on execution of " + this.dboclass + " with name [" + this.name + "]", exc);
+            if (this.currentRowFields != null) {
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
             }
-            logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
-            String msg = "" + exc.getMessage() + " - XSL Message: " + currentXSLMessage;
-            dhr.addDiscardCause(new DiscardCause(rowCounter, msg));
+            logger.error("SQL Statement Informations:\n" + this.sqlStatementInfo);
+            String msg = "" + exc.getMessage() + " - XSL Message: " + this.currentXSLMessage;
+            this.dhr.addDiscardCause(new DiscardCause(this.rowCounter, msg));
             throw new DBOException(msg, exc);
         }
         finally {
-            if (resultStatus != STATUS_OK) {
-                logger.warn("Partial insert for service " + serviceName + ":" + resultMessage.toString() + ".");
-                logger.warn("Elaboration result for service '" + serviceName + "':\nrecord insert  \t[" + rowInsOk
-                        + "]\nrecord updated\t[" + rowUpdOk + "]\nrecord discarded  \t["
-                        + Long.toString(rowCounter - (rowInsOk + rowUpdOk)) + "]\nrecord total  \t["
-                        + Long.toString(rowInsOk + rowUpdOk + rowDisc) + "].");
+            if (this.resultStatus != STATUS_OK) {
+                logger.warn("Partial insert for service " + this.serviceName + ":" + this.resultMessage.toString() + ".");
+                logger.warn("Elaboration result for service '" + this.serviceName + "':\nrecord insert  \t[" + this.rowInsOk
+                        + "]\nrecord updated\t[" + this.rowUpdOk + "]\nrecord discarded  \t["
+                        + Long.toString(this.rowCounter - (this.rowInsOk + this.rowUpdOk)) + "]\nrecord total  \t["
+                        + Long.toString(this.rowInsOk + this.rowUpdOk + this.rowDisc) + "].");
 
             }
             else {
-                logger.debug("Elaboration result for service '" + serviceName + "':\nrecord insert  \t[" + rowInsOk
-                        + "]\nrecord updated\t[" + rowUpdOk + "]\nrecord total  \t["
-                        + Long.toString(rowInsOk + rowUpdOk + rowDisc) + "].");
+                logger.debug("Elaboration result for service '" + this.serviceName + "':\nrecord insert  \t[" + this.rowInsOk
+                        + "]\nrecord updated\t[" + this.rowUpdOk + "]\nrecord total  \t["
+                        + Long.toString(this.rowInsOk + this.rowUpdOk + this.rowDisc) + "].");
             }
 
-            dhr.setTotal(rowInsOk + rowUpdOk + rowDisc);
-            dhr.setInsert(rowInsOk);
-            dhr.setUpdate(rowUpdOk);
-            dhr.setDiscard(rowDisc);
+            this.dhr.setTotal(this.rowInsOk + this.rowUpdOk + this.rowDisc);
+            this.dhr.setInsert(this.rowInsOk);
+            this.dhr.setUpdate(this.rowUpdOk);
+            this.dhr.setDiscard(this.rowDisc);
         }
     }
 
@@ -732,43 +732,45 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException, 
+    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         try {
             prepare();
-            logger.debug("Begin execution of DB data read/update through " + dboclass);
-            call_DEFAULT_NUMBER_FORMAT = (String) props.get(FORMAT_NAME);
-            if (call_DEFAULT_NUMBER_FORMAT == null) {
-                call_DEFAULT_NUMBER_FORMAT = DEFAULT_NUMBER_FORMAT;
+            logger.debug("Begin execution of DB data read/update through " + this.dboclass);
+            this.call_DEFAULT_NUMBER_FORMAT = (String) props.get(FORMAT_NAME);
+            if (this.call_DEFAULT_NUMBER_FORMAT == null) {
+                this.call_DEFAULT_NUMBER_FORMAT = DEFAULT_NUMBER_FORMAT;
             }
-            call_DEFAULT_GRP_SEPARATOR = (String) props.get(GRP_SEPARATOR_NAME);
-            if (call_DEFAULT_GRP_SEPARATOR == null) {
-                call_DEFAULT_GRP_SEPARATOR = DEFAULT_GRP_SEPARATOR;
+            this.call_DEFAULT_GRP_SEPARATOR = (String) props.get(GRP_SEPARATOR_NAME);
+            if (this.call_DEFAULT_GRP_SEPARATOR == null) {
+                this.call_DEFAULT_GRP_SEPARATOR = DEFAULT_GRP_SEPARATOR;
             }
-            call_DEFAULT_DEC_SEPARATOR = (String) props.get(DEC_SEPARATOR_NAME);
-            if (call_DEFAULT_DEC_SEPARATOR == null) {
-                call_DEFAULT_DEC_SEPARATOR = DEFAULT_DEC_SEPARATOR;
+            this.call_DEFAULT_DEC_SEPARATOR = (String) props.get(DEC_SEPARATOR_NAME);
+            if (this.call_DEFAULT_DEC_SEPARATOR == null) {
+                this.call_DEFAULT_DEC_SEPARATOR = DEFAULT_DEC_SEPARATOR;
             }
-            internalConn = conn;
-            currentProps = buildProps(props);
-            logProps(currentProps);
+
+            this.currentProps = buildProps(props);
+            logProps(this.currentProps);
+
+            getInternalConn(conn, this.currentProps);
 
             getStatement(null);
             executeStatement();
-            logger.debug("End execution of DB data read/update through " + dboclass);
+            logger.debug("End execution of DB data read/update through " + this.dboclass);
         }
         catch (Exception exc) {
-            logger.error("Error on execution of " + dboclass + " with name [" + name + "]", exc);
-            logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + name + "]", exc);
+            logger.error("Error on execution of " + this.dboclass + " with name [" + this.name + "]", exc);
+            logger.error("SQL Statement Informations:\n" + this.sqlStatementInfo);
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + this.name + "]", exc);
         }
         finally {
 
-            dhr.setTotal(rowCounter);
-            dhr.setRead(rowCounter);
-            dhr.setInsert(rowInsOk);
-            dhr.setUpdate(rowUpdOk);
-            dhr.setDiscard(rowCounter - (rowInsOk + rowUpdOk));
+            this.dhr.setTotal(this.rowCounter);
+            this.dhr.setRead(this.rowCounter);
+            this.dhr.setInsert(this.rowInsOk);
+            this.dhr.setUpdate(this.rowUpdOk);
+            this.dhr.setDiscard(this.rowCounter - (this.rowInsOk + this.rowUpdOk));
         }
     }
 
@@ -797,7 +799,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     public boolean isTransacted()
     {
-        return transacted;
+        return this.transacted;
     }
 
     /**
@@ -813,7 +815,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     public boolean isXA()
     {
-        return isXA;
+        return this.isXA;
     }
 
     /**
@@ -822,7 +824,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public String getName()
     {
-        return name;
+        return this.name;
     }
 
     /**
@@ -831,7 +833,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public String getTransformation()
     {
-        return transformation;
+        return this.transformation;
     }
 
     /**
@@ -839,11 +841,12 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected void prepare()
     {
-        internalConn = null;
-        dhr.reset();
+        this.currentJdbcConnectionNameInt = this.jdbcConnectionNameInt;
+        this.internalConn = null;
+        this.dhr.reset();
         resetRowCounter();
-        if (autogenerateKeys) {
-            generatedKeys = new HashMap<String, Object>();
+        if (this.autogenerateKeys) {
+            this.generatedKeys = new HashMap<String, Object>();
         }
     }
 
@@ -853,21 +856,22 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public void cleanup()
     {
-        uuids.clear();
-        currentRowFields.clear();
-        if (sqlStatementInfo != null) {
+        this.uuids.clear();
+        this.currentRowFields.clear();
+        if (this.sqlStatementInfo != null) {
             try {
-                sqlStatementInfo.close();
+                this.sqlStatementInfo.close();
             }
             catch (Exception exc) {
                 // do nothing
             }
-            sqlStatementInfo = null;
+            this.sqlStatementInfo = null;
         }
-        if (!jdbcConnectionNameInt.equals("default")) {
+        if (!this.currentJdbcConnectionNameInt.equals("default")) {
             try {
-                JDBCConnectionBuilder.releaseConnection(jdbcConnectionNameInt, internalConn);
-                internalConn = null;
+                JDBCConnectionBuilder.releaseConnection(this.currentJdbcConnectionNameInt, this.internalConn);
+                this.currentJdbcConnectionNameInt = this.jdbcConnectionNameInt;
+                this.internalConn = null;
             }
             catch (Exception exc) {
                 // do nothing
@@ -899,7 +903,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public DHResult getExecutionResult()
     {
-        return dhr;
+        return this.dhr;
     }
 
     /**
@@ -908,7 +912,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public boolean isReturnData()
     {
-        return isReturnData;
+        return this.isReturnData;
     }
 
     /**
@@ -917,7 +921,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public String getForcedMode()
     {
-        return forcedMode;
+        return this.forcedMode;
     }
 
     /**
@@ -926,7 +930,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public String getInputDataName()
     {
-        return inputDataName;
+        return this.inputDataName;
     }
 
     /**
@@ -935,18 +939,18 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public String getOutputDataName()
     {
-        return outputDataName;
+        return this.outputDataName;
     }
 
     /**
      * Returns the name of this IDBO object.
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString()
     {
-        return name;
+        return this.name;
     }
 
     /**
@@ -955,10 +959,10 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     protected String dumpCurrentRowFields()
     {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < currentRowFields.size(); i++) {
-            sb.append("Field(").append(i + 1).append(") value: [").append(currentRowFields.elementAt(i)).append("]\n");
+        for (int i = 0; i < this.currentRowFields.size(); i++) {
+            sb.append("Field(").append(i + 1).append(") value: [").append(this.currentRowFields.elementAt(i)).append("]\n");
         }
-        sb.append("XSL Message: ").append(currentXSLMessage).append("\n\n");
+        sb.append("XSL Message: ").append(this.currentXSLMessage).append("\n\n");
         return sb.toString();
     }
 
@@ -967,10 +971,10 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected void resetRowCounter()
     {
-        rowCounter = 0;
-        rowInsOk = 0;
-        rowUpdOk = 0;
-        rowDisc = 0;
+        this.rowCounter = 0;
+        this.rowInsOk = 0;
+        this.rowUpdOk = 0;
+        this.rowDisc = 0;
     }
 
     /**
@@ -979,17 +983,17 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     protected void executeStatement() throws SAXException
     {
         try {
-            ThreadUtils.checkInterrupted(getClass().getSimpleName(), name, logger);
+            ThreadUtils.checkInterrupted(getClass().getSimpleName(), this.name, logger);
             int actualOk = 0;
-            Statement sqlStatement = sqlStatementInfo.getStatement();
+            Statement sqlStatement = this.sqlStatementInfo.getStatement();
             if (sqlStatement != null) {
-                if (executeQuery) {
+                if (this.executeQuery) {
                     ((PreparedStatement) sqlStatement).executeQuery();
                     actualOk++;
                 }
                 else {
                     actualOk = ((PreparedStatement) sqlStatement).executeUpdate();
-                    if (readGeneratedKey) {
+                    if (this.readGeneratedKey) {
                         ResultSet rs = sqlStatement.getGeneratedKeys();
                         if (rs.next()) {
                             /*ResultSetMetaData rsm = rs.getMetaData();
@@ -1000,8 +1004,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                             }*/
 
                             // handle only one key field
-                            generatedKeys.put(GENERATED_KEY_ID + generatedKeyID, rs.getObject(1));
-                            logger.debug("Key generated on row " + rowCounter + ": " + generatedKeys);
+                            this.generatedKeys.put(GENERATED_KEY_ID + this.generatedKeyID, rs.getObject(1));
+                            logger.debug("Key generated on row " + this.rowCounter + ": " + this.generatedKeys);
                         }
                         /*
                         if (rs.next()) {
@@ -1011,72 +1015,72 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
                             logger.debug("Key generated on row " + rowCounter + ": " + generatedKeys);
                         }*/
                     }
-                    if (resetGeneratedKeyID != null) {
-                        generatedKeys.remove(GENERATED_KEY_ID + resetGeneratedKeyID);
+                    if (this.resetGeneratedKeyID != null) {
+                        this.generatedKeys.remove(GENERATED_KEY_ID + this.resetGeneratedKeyID);
                     }
                 }
             }
             // check the chance to force the insert when it's a DBOUpdate.
-            if (isInsert && statsOnInsert) {
-                rowInsOk += actualOk;
+            if (this.isInsert && this.statsOnInsert) {
+                this.rowInsOk += actualOk;
             }
             else {
                 if (actualOk > 0) {
-                    rowUpdOk += actualOk;
+                    this.rowUpdOk += actualOk;
                 }
-                else if ((actualOk == 0) && incrDiscIfUpdKO) {
-                    rowDisc++;
-                    dhr.addDiscardCause(new DiscardCause(rowCounter, NO_RECORD_TO_UPDATE_MSG));
+                else if ((actualOk == 0) && this.incrDiscIfUpdKO) {
+                    this.rowDisc++;
+                    this.dhr.addDiscardCause(new DiscardCause(this.rowCounter, NO_RECORD_TO_UPDATE_MSG));
                 }
             }
         }
         catch (SQLException exc) {
-            rowDisc++;
-            if (transacted) {
-                resultStatus = STATUS_KO;
-                logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
+            this.rowDisc++;
+            if (this.transacted) {
+                this.resultStatus = STATUS_KO;
+                logger.error("SQL Statement Informations:\n" + this.sqlStatementInfo);
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
-                if (onlyXSLErrorMsgInTrans && (currentXSLMessage != null)) {
-                    logger.error("SQLException configured as blocking error for the IDBO '" + serviceName + "' on row "
-                            + Long.toString(rowCounter) + ".", exc);
-                    throw new SAXException(new DBOException(currentXSLMessage));
+                if (this.onlyXSLErrorMsgInTrans && (this.currentXSLMessage != null)) {
+                    logger.error("SQLException configured as blocking error for the IDBO '" + this.serviceName + "' on row "
+                            + Long.toString(this.rowCounter) + ".", exc);
+                    throw new SAXException(new DBOException(this.currentXSLMessage));
                 }
-                throw new SAXException(new DBOException("SQLException error on row " + rowCounter + ": "
+                throw new SAXException(new DBOException("SQLException error on row " + this.rowCounter + ": "
                         + exc.getMessage(), exc));
             }
 
             OracleError oraerr = OracleExceptionHandler.handleSQLException(exc);
             if (isBlockingError(oraerr.getErrorType())) {
-                resultStatus = STATUS_KO;
-                logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
+                this.resultStatus = STATUS_KO;
+                logger.error("SQL Statement Informations:\n" + this.sqlStatementInfo);
                 logger.error("Record parameters:\n" + dumpCurrentRowFields());
-                logger.error("SQLException configured as blocking error for the IDBO '" + serviceName + "' on row "
-                        + Long.toString(rowCounter) + ".", exc);
+                logger.error("SQLException configured as blocking error for the IDBO '" + this.serviceName + "' on row "
+                        + Long.toString(this.rowCounter) + ".", exc);
                 throw new SAXException(new DBOException("SQLException configured as blocking error class on row "
-                        + rowCounter + ": " + exc.getMessage(), exc));
+                        + this.rowCounter + ": " + exc.getMessage(), exc));
             }
 
             // adding the DiscardCause to the DHR...
             String msg = "";
-            if (onlyXSLErrorMsg && (currentXSLMessage != null)) {
-                msg += currentXSLMessage;
+            if (this.onlyXSLErrorMsg && (this.currentXSLMessage != null)) {
+                msg += this.currentXSLMessage;
             }
             else {
-                msg += exc + " - XSL Message: " + currentXSLMessage;
+                msg += exc + " - XSL Message: " + this.currentXSLMessage;
             }
-            dhr.addDiscardCause(new DiscardCause(rowCounter, msg));
+            this.dhr.addDiscardCause(new DiscardCause(this.rowCounter, msg));
 
-            resultMessage.append("SQLException error on row ").append(rowCounter).append(": ").append(exc.getMessage());
-            resultMessage.append("SQL Statement Informations:\n").append(sqlStatementInfo);
-            resultMessage.append("Record parameters:\n").append(dumpCurrentRowFields());
-            resultStatus = STATUS_PARTIAL;
+            this.resultMessage.append("SQLException error on row ").append(this.rowCounter).append(": ").append(exc.getMessage());
+            this.resultMessage.append("SQL Statement Informations:\n").append(this.sqlStatementInfo);
+            this.resultMessage.append("Record parameters:\n").append(dumpCurrentRowFields());
+            this.resultStatus = STATUS_PARTIAL;
         }
         catch (InterruptedException exc) {
-            logger.error("DBO[" + name + "] interrupted", exc);
-            throw new SAXException("DBO[" + name + "] interrupted", exc);
+            logger.error("DBO[" + this.name + "] interrupted", exc);
+            throw new SAXException("DBO[" + this.name + "] interrupted", exc);
         }
         finally {
-            rowCounter++;
+            this.rowCounter++;
         }
     }
 
@@ -1088,15 +1092,15 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     {
         switch (errorType) {
             case OracleError.PLATFORM_ERROR :
-                return blockPlatformError;
+                return this.blockPlatformError;
             case OracleError.DATA_ERROR :
-                return blockDataError;
+                return this.blockDataError;
             case OracleError.CONSTRAINT_ERROR :
-                return blockConstraintError;
+                return this.blockConstraintError;
             case OracleError.STATEMENT_ERROR :
-                return blockStatementError;
+                return this.blockStatementError;
             case OracleError.SECURITY_ERROR :
-                return blockSecurityError;
+                return this.blockSecurityError;
         }
         return true;
     }
@@ -1106,7 +1110,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected long getRowCounter()
     {
-        return rowCounter;
+        return this.rowCounter;
     }
 
     /**
@@ -1114,7 +1118,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected Map<String, Object> getCurrentProps()
     {
-        return currentProps;
+        return this.currentProps;
     }
 
     /**
@@ -1122,7 +1126,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected Connection getInternalConn()
     {
-        return internalConn;
+        return this.internalConn;
     }
 
     /**
@@ -1130,17 +1134,18 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      * @return the internal connection
      * @throws Exception
      */
-    protected Connection getInternalConn(Connection conn) throws Exception
+    protected Connection getInternalConn(Connection conn, Map<String, Object> props) throws Exception
     {
-        if (internalConn == null) {
-            internalConn = conn;
-            if (!jdbcConnectionNameInt.equals("default")) {
-                logger.debug("Overwriting default Connection with: " + jdbcConnectionNameInt);
-                internalConn = JDBCConnectionBuilder.getConnection(jdbcConnectionNameInt);
+        if (this.internalConn == null) {
+            this.internalConn = conn;
+            if (!this.currentJdbcConnectionNameInt.equals("default")) {
+            	this.currentJdbcConnectionNameInt = PropertiesHandler.expand(this.currentJdbcConnectionNameInt, props);
+                logger.info("Overwriting default Connection with: " + this.currentJdbcConnectionNameInt);
+                this.internalConn = JDBCConnectionBuilder.getConnection(this.currentJdbcConnectionNameInt);
             }
         }
 
-        return internalConn;
+        return this.internalConn;
     }
 
     /**
@@ -1149,7 +1154,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected Map<String, Object> buildProps(Map<String, Object> props)
     {
-        Map<String, Object> allProps = new HashMap<String, Object>(baseProps);
+        Map<String, Object> allProps = new HashMap<String, Object>(this.baseProps);
         allProps.putAll(props);
         return allProps;
     }
@@ -1167,10 +1172,10 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     public String getJdbcConnectionName()
     {
-        if (!jdbcConnectionNameInt.equals("default")) {
-            return jdbcConnectionNameInt;
+        if (!this.currentJdbcConnectionNameInt.equals("default")) {
+            return this.currentJdbcConnectionNameInt;
         }
-        return jdbcConnectionName;
+        return this.jdbcConnectionName;
     }
 
     /**
@@ -1187,7 +1192,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     protected String getCurrentId()
     {
-        return currentId;
+        return this.currentId;
     }
 
     /**

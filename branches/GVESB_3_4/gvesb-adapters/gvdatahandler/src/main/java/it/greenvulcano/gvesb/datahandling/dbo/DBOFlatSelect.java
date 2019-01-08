@@ -19,14 +19,6 @@
  */
 package it.greenvulcano.gvesb.datahandling.dbo;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.datahandling.DBOException;
-import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
-import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.thread.ThreadUtils;
-
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -48,6 +40,14 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
+import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
+
 /**
  * IDBO Class specialized in selecting data from the DB.
  * The selected data are formatted as CSV text.
@@ -59,8 +59,8 @@ public class DBOFlatSelect extends AbstractDBO
 {
     private static final Logger         logger               = GVLogger.getLogger(DBOFlatSelect.class);
 
-    private Map<String, FieldFormatter> fieldNameToFormatter = new HashMap<String, FieldFormatter>();
-    private Map<String, FieldFormatter> fieldIdToFormatter   = new HashMap<String, FieldFormatter>();
+    private final Map<String, FieldFormatter> fieldNameToFormatter = new HashMap<String, FieldFormatter>();
+    private final Map<String, FieldFormatter> fieldIdToFormatter   = new HashMap<String, FieldFormatter>();
 
     private int                         sbRowLength          = 100;
     private String                      endLine              = DEFAULT_END_LINE;
@@ -81,21 +81,21 @@ public class DBOFlatSelect extends AbstractDBO
     {
         super.init(config);
         try {
-            endLine = XMLConfig.get(config, "@end-line", DEFAULT_END_LINE);
-            encoding = XMLConfig.get(config, "@encoding", DEFAULT_ENCODING);
-            forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
-            isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
-            directFilePath = XMLConfig.get(config, "@direct-file-path", null);
+            this.endLine = XMLConfig.get(config, "@end-line", DEFAULT_END_LINE);
+            this.encoding = XMLConfig.get(config, "@encoding", DEFAULT_ENCODING);
+            this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
+            this.isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
+            this.directFilePath = XMLConfig.get(config, "@direct-file-path", null);
             Node stmt = XMLConfig.getNode(config, "statement[@type='select']");
             if (stmt == null) {
-                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
+                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + this.dboclass + "]");
             }
 
-            stmID = XMLConfig.get(stmt, "@id");
-            if (stmID == null) {
-                stmID = Integer.toString(0);
+            this.stmID = XMLConfig.get(stmt, "@id");
+            if (this.stmID == null) {
+                this.stmID = Integer.toString(0);
             }
-            statement = XMLConfig.getNodeValue(stmt);
+            this.statement = XMLConfig.getNodeValue(stmt);
 
             Node fFrmsL = XMLConfig.getNode(config, "FieldFormatters");
             NodeList fFrms = XMLConfig.getNodeList(fFrmsL, "*[@type='field-formatter']");
@@ -108,11 +108,11 @@ public class DBOFlatSelect extends AbstractDBO
                     if (fName.indexOf(",") != -1) {
                         StringTokenizer st = new StringTokenizer(fName, " ,");
                         while (st.hasMoreTokens()) {
-                            fieldNameToFormatter.put(st.nextToken(), fForm);
+                            this.fieldNameToFormatter.put(st.nextToken(), fForm);
                         }
                     }
                     else {
-                        fieldNameToFormatter.put(fForm.getFieldName(), fForm);
+                        this.fieldNameToFormatter.put(fForm.getFieldName(), fForm);
                     }
                 }
                 String fId = fForm.getFieldId();
@@ -120,11 +120,11 @@ public class DBOFlatSelect extends AbstractDBO
                     if (fId.indexOf(",") != -1) {
                         StringTokenizer st = new StringTokenizer(fId, " ,");
                         while (st.hasMoreTokens()) {
-                            fieldIdToFormatter.put(st.nextToken(), fForm);
+                            this.fieldIdToFormatter.put(st.nextToken(), fForm);
                         }
                     }
                     else {
-                        fieldIdToFormatter.put(fForm.getFieldId(), fForm);
+                        this.fieldIdToFormatter.put(fForm.getFieldId(), fForm);
                     }
                 }
             }
@@ -133,8 +133,8 @@ public class DBOFlatSelect extends AbstractDBO
             throw exc;
         }
         catch (Exception exc) {
-            logger.error("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
         }
     }
 
@@ -161,36 +161,36 @@ public class DBOFlatSelect extends AbstractDBO
         FileWriter fw = null;
         try {
             prepare();
-            rowCounter = 0;
-            logger.debug("Begin execution of DB data read through " + dboclass);
+            this.rowCounter = 0;
+            logger.debug("Begin execution of DB data read through " + this.dboclass);
 
             Map<String, Object> localProps = buildProps(props);
             logProps(localProps);
 
-            String localDirectFilePath = PropertiesHandler.expand(directFilePath, localProps, conn, null);
+            String localDirectFilePath = PropertiesHandler.expand(this.directFilePath, localProps, conn, null);
             if (localDirectFilePath != null) {
                 fw = new FileWriter(localDirectFilePath);
             }
-            
-            StringBuilder sb = new StringBuilder(sbRowLength);
 
-            if (statement != null) {
+            StringBuilder sb = new StringBuilder(this.sbRowLength);
+
+            if (this.statement != null) {
                 ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
-                String expandedSQL = PropertiesHandler.expand(statement, localProps, conn, null);
+                String expandedSQL = PropertiesHandler.expand(this.statement, localProps, conn, null);
                 Statement sqlStatement = null;
                 try {
-                    sqlStatement = getInternalConn(conn).createStatement();
+                    sqlStatement = getInternalConn(conn, localProps).createStatement();
                     logger.debug("Executing select:\n" + expandedSQL);
-                    sqlStatementInfo = new StatementInfo("0", expandedSQL, sqlStatement);
+                    this.sqlStatementInfo = new StatementInfo("0", expandedSQL, sqlStatement);
                     ResultSet rs = sqlStatement.executeQuery(expandedSQL);
                     if (rs != null) {
                         try {
                             ResultSetMetaData metadata = rs.getMetaData();
-                            FieldFormatter[] fFormatters = buildFormatterArray(metadata, fieldNameToFormatter,
-                                    fieldIdToFormatter);
+                            FieldFormatter[] fFormatters = buildFormatterArray(metadata, this.fieldNameToFormatter,
+                                    this.fieldIdToFormatter);
                             String textVal = null;
                             while (rs.next()) {
-                                if (rowCounter % 10 == 0) {
+                                if ((this.rowCounter % 10) == 0) {
                                     ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                                 }
                                 for (int j = 1; j <= metadata.getColumnCount(); j++) {
@@ -200,7 +200,7 @@ public class DBOFlatSelect extends AbstractDBO
                                     }
                                     switch (metadata.getColumnType(j)) {
                                         case Types.DATE :
-                                        case Types.TIME : 
+                                        case Types.TIME :
                                         case Types.TIMESTAMP :{
                                             Timestamp dateVal = rs.getTimestamp(j);
                                             if (dateVal == null) {
@@ -221,7 +221,7 @@ public class DBOFlatSelect extends AbstractDBO
                                         case Types.BIGINT :
                                         case Types.INTEGER :
                                         case Types.NUMERIC :
-                                        case Types.SMALLINT : 
+                                        case Types.SMALLINT :
                                         case Types.TINYINT : {
                                             BigDecimal bigdecimal = rs.getBigDecimal(j);
                                             if (bigdecimal == null) {
@@ -275,13 +275,13 @@ public class DBOFlatSelect extends AbstractDBO
                                     }
                                     sb.append(textVal);
                                 }
-                                rowCounter++;
+                                this.rowCounter++;
                                 if (fw != null) {
-                                    fw.append(sb).append(endLine);
+                                    fw.append(sb).append(this.endLine);
                                     sb.delete(0, sb.length());
                                 }
                                 else {
-                                    sb.append(endLine);
+                                    sb.append(this.endLine);
                                 }
                             }
                         }
@@ -299,41 +299,41 @@ public class DBOFlatSelect extends AbstractDBO
                     }
                 }
                 finally {
-                	if (sqlStatementInfo != null) {
+                	if (this.sqlStatementInfo != null) {
                         try {
-                        	sqlStatementInfo.close();
+                        	this.sqlStatementInfo.close();
                         }
                         catch (Exception exc) {
                             // do nothing
                         }
-                        sqlStatementInfo = null;
+                        this.sqlStatementInfo = null;
                         sqlStatement = null;
                     }
                 }
             }
-            sbRowLength = sb.length();
+            this.sbRowLength = sb.length();
 
 
             if (fw == null) {
-                Charset cs = Charset.forName(encoding);
+                Charset cs = Charset.forName(this.encoding);
                 ByteBuffer bb = cs.encode(CharBuffer.wrap(sb));
                 //dataOut.write(bb.array());
                 dataOut.write(bb.array(), 0, sb.length()); // da verificare!!!
                 dataOut.flush();
             }
 
-            dhr.setRead(rowCounter);
+            this.dhr.setRead(this.rowCounter);
 
-            logger.debug("End execution of DB data read through " + dboclass);
+            logger.debug("End execution of DB data read through " + this.dboclass);
         }
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + getName() + "]: "
                         + exc.getMessage(), exc);
         }
         catch (Exception exc) {
-            logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+            logger.error("Error on execution of " + this.dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + getName() + "]: "
                         + exc.getMessage(), exc);
         }
         finally {
@@ -354,7 +354,7 @@ public class DBOFlatSelect extends AbstractDBO
             Map<String, FieldFormatter> fIdToFormatter) throws Exception
     {
         FieldFormatter[] fFA = new FieldFormatter[rsm.getColumnCount() + 1];
-        fFA[0] = fieldIdToFormatter.get("0");
+        fFA[0] = this.fieldIdToFormatter.get("0");
 
         for (int i = 1; i < fFA.length; i++) {
             FieldFormatter fF = fNToFormatter.get(rsm.getColumnName(i));
