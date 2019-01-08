@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -21,15 +21,16 @@ package tests.unit.util.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import it.greenvulcano.util.crypto.CryptoHelper;
 
 import org.apache.commons.codec.binary.Base64;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import it.greenvulcano.util.crypto.CryptoHelper;
+
 /**
- * 
+ *
  * @version 3.0.0 08/giu/2010
  * @author GreenVulcano Developer Team
  */
@@ -162,7 +163,7 @@ public class CryptoTestCase
                 Base64.decodeBase64(TEST_STRING_CYPHER_3DES_L), true);
         assertArrayEquals("Decrypt Failed", TEST_STRING_CLEAR.getBytes("ISO-8859-1"), result);
     }
-    
+
     /**
      * Test method for
      * {@link it.greenvulcano.util.crypto.CryptoHelper#decrypt(java.lang.String, byte[], boolean)}

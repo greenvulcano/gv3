@@ -1,42 +1,51 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.util.crypto;
 
+import java.security.AlgorithmParameters;
+import java.security.KeyFactory;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.HashMap;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import it.greenvulcano.configuration.ConfigurationEvent;
 import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 
-import java.security.AlgorithmParameters;
-import java.security.KeyStore;
-import java.util.HashMap;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
  * CryptoHelper class
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  **/
 public final class CryptoHelper implements ConfigurationListener
 {
@@ -99,7 +108,7 @@ public final class CryptoHelper implements ConfigurationListener
 
     /**
      * Check if the given data is already encrypted with the keyID key.
-     * 
+     *
      * @param keyID
      * @param data
      * @return
@@ -117,14 +126,14 @@ public final class CryptoHelper implements ConfigurationListener
     /**
      * Encrypt the given data with the algorithm of the keyID key. The result
      * is encoded in Base64 and with the type prefix.
-     * 
+     *
      * @param keyID
      *        the key identification name
      * @param data
      *        the data to encrypt, with encoding 'ISO-8859-1'
      * @param encode
      *        if true the the output is encoded with the type prefix
-     * 
+     *
      * @return the encrypted data
      * @throws CryptoHelperException
      *         if error occurs
@@ -140,7 +149,7 @@ public final class CryptoHelper implements ConfigurationListener
     /**
      * Encrypt the given data with the algorithm of the keyID key. The result
      * is encoded in Base64 and with the type prefix.
-     * 
+     *
      * @param keyID
      *        the key identification name
      * @param data
@@ -149,7 +158,7 @@ public final class CryptoHelper implements ConfigurationListener
      *        the input encoding
      * @param encode
      *        if true the the output is encoded with the type prefix
-     * 
+     *
      * @return the encrypted data
      * @throws CryptoHelperException
      *         if error occurs
@@ -167,7 +176,7 @@ public final class CryptoHelper implements ConfigurationListener
     /**
      * Encrypt the given data with the algorithm of the keyID key. The result
      * is encoded in Base64 and with the type prefix.
-     * 
+     *
      * @param keyID
      *        the key identification name
      * @param data
@@ -176,7 +185,7 @@ public final class CryptoHelper implements ConfigurationListener
      *        the input encoding
      * @param encode
      *        if true the the output is encoded with the type prefix
-     * 
+     *
      * @return the encrypted data
      * @throws CryptoHelperException
      *         if error occurs
@@ -194,7 +203,7 @@ public final class CryptoHelper implements ConfigurationListener
     /**
      * Decrypt the given data with the algorithm of the keyID key. The input
      * must be encoded in Base64 and with the type prefix.
-     * 
+     *
      * @param keyID
      *        the key identification name
      * @param data
@@ -218,7 +227,7 @@ public final class CryptoHelper implements ConfigurationListener
     /**
      * Decrypt the given data with the algorithm of the keyID key. The input
      * must be encoded in Base64 and with the type prefix.
-     * 
+     *
      * @param keyID
      *        the key identification name
      * @param data
@@ -242,14 +251,14 @@ public final class CryptoHelper implements ConfigurationListener
 
     /**
      * Encrypt the given data with the algorithm of the keyID key.
-     * 
+     *
      * @param keyID
      *        the key identification name
      * @param data
      *        the data to encrypt
      * @param encode
      *        if true the the output is encoded with the type prefix
-     * 
+     *
      * @return the encrypted data
      * @throws CryptoHelperException
      *         if error occurs
@@ -267,7 +276,7 @@ public final class CryptoHelper implements ConfigurationListener
     /**
      * Decrypt the given data with the algorithm of the keyID key. The input
      * must be encoded in Base64.
-     * 
+     *
      * @param keyID
      *        the key identification name
      * @param data
@@ -291,7 +300,7 @@ public final class CryptoHelper implements ConfigurationListener
     /**
      * Decrypt the given data with the algorithm of the keyID key. The input
      * must be encoded in Base64.
-     * 
+     *
      * @param keyID
      *        the key identification name
      * @param data
@@ -331,7 +340,7 @@ public final class CryptoHelper implements ConfigurationListener
 
     /**
      * Retrieve the requested key
-     * 
+     *
      * @param kID
      *        the key identification name
      * @return the requested key
@@ -358,7 +367,7 @@ public final class CryptoHelper implements ConfigurationListener
 
     /**
      * Retrieve the requested keyStore
-     * 
+     *
      * @param kStoreID
      *        the keyStore identification name
      * @return the requested keyStore
@@ -377,6 +386,79 @@ public final class CryptoHelper implements ConfigurationListener
             throw new CryptoHelperException("CryptoHelper - Error: invalid keyStoreID '" + kStoreID + "'");
         }
         return keySid;
+    }
+
+    /**
+    * Use to sign the content using a Base64 encoded signing key
+    *
+    * @param key
+    * @param content
+    * @return
+    * @throws CryptoHelperException
+    *         if error occurs
+    */
+    public static String getSignature(String content, String signKey, String keyType, String signatureType) throws CryptoHelperException {
+        return getSignature(content, getSigningKey(signKey, keyType), signatureType);
+    }
+
+    /**
+    * Use to sign the content using a private signing key
+    *
+    * @param key
+    * @param content
+    * @return
+    * @throws CryptoHelperException
+    *         if error occurs
+    */
+    public static String getSignature(String content, PrivateKey key, String signatureType) throws CryptoHelperException {
+        try {
+            Signature sig = Signature.getInstance(signatureType);
+            sig.initSign(key);
+            sig.update(content.getBytes());
+            byte[] signed = sig.sign();
+            return new String(Base64.encodeBase64(signed, false), "UTF-8");
+        } catch (Exception exc) {
+            throw new CryptoHelperException("CryptoHelper - Error creating signature", exc);
+        }
+    }
+
+    public static PrivateKey getSigningKey(String keyString, String keyType) throws CryptoHelperException {
+        try {
+            byte[] keyBytes = Base64.decodeBase64(keyString.getBytes("UTF-8"));
+            KeyFactory kf = KeyFactory.getInstance(keyType);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            return kf.generatePrivate(keySpec);
+        } catch (Exception exc) {
+            throw new CryptoHelperException("CryptoHelper - Error creating signing key", exc);
+        }
+    }
+
+    /**
+    * Use to encrypt the content with the Base64 encoded encryption key
+    *
+    * @param key
+    * @param content
+    * @return
+    * @throws CryptoHelperException
+    *         if error occurs
+    */
+    public static String getEncrypted(String content, String encryptionKey, String keyType, String encryptionType) throws CryptoHelperException {
+        try {
+            Cipher cipher = Cipher.getInstance(encryptionType);
+            cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(encryptionKey, keyType));
+            return new String(Base64.encodeBase64(cipher.doFinal(content.getBytes("UTF-8"))), "UTF-8");
+        } catch (Exception exc) {
+            throw new CryptoHelperException("CryptoHelper - Error creating signing key", exc);
+        }
+    }
+
+    public static SecretKey getEncryptionKey(String keyString, String keyType) throws CryptoHelperException {
+        try {
+            byte[] encodedKey = Base64.decodeBase64(keyString.getBytes("UTF-8"));
+            return new SecretKeySpec(encodedKey, keyType);
+        } catch (Exception exc) {
+            throw new CryptoHelperException("CryptoHelper - Error creating encryption key", exc);
+        }
     }
 
     /**
@@ -476,7 +558,7 @@ public final class CryptoHelper implements ConfigurationListener
 
     /**
      * Obtains events about configuration changes.
-     * 
+     *
      * @param event
      *        the configuration event
      */
