@@ -10,7 +10,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvbase</artifactId>
-    <version>3.4.0.11-Final</version>
+    <version>3.4.0.13-Final</version>
     <packaging>jar</packaging>
     <name>GreenVulcano ESB Base Library</name>
 
@@ -91,6 +91,10 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.juddi.scout</groupId>
