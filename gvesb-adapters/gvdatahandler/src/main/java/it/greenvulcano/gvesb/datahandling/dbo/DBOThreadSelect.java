@@ -19,19 +19,6 @@
  */
 package it.greenvulcano.gvesb.datahandling.dbo;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.datahandling.DBOException;
-import it.greenvulcano.gvesb.datahandling.dbo.utils.ExtendedRowSetBuilder;
-import it.greenvulcano.gvesb.datahandling.dbo.utils.RowSetBuilder;
-import it.greenvulcano.gvesb.datahandling.dbo.utils.StandardRowSetBuilder;
-import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
-import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
-import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.thread.ThreadUtils;
-import it.greenvulcano.util.xml.XMLUtils;
-
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -53,6 +40,19 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.gvesb.datahandling.dbo.utils.ExtendedRowSetBuilder;
+import it.greenvulcano.gvesb.datahandling.dbo.utils.RowSetBuilder;
+import it.greenvulcano.gvesb.datahandling.dbo.utils.StandardRowSetBuilder;
+import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
+import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
+import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
+import it.greenvulcano.util.xml.XMLUtils;
+
 /**
  * IDBO Class specialized in selecting data from the DB using multiple Threads.
  * The selected data are formatted as RowSet XML document.
@@ -65,6 +65,7 @@ public class DBOThreadSelect extends AbstractDBO
 
     private class ThreadSelect implements Runnable
     {
+    	private String              localJdbcConnName = null;
         private String              stmt             = null;
         private Document            doc              = null;
         private Object              key              = null;
@@ -83,43 +84,43 @@ public class DBOThreadSelect extends AbstractDBO
 
         private ThreadSelect(Map<Object, Object> ctx)
         {
-            context = ctx;
+            this.context = ctx;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public void run()
         {
-            MDC.getContext().putAll(context);
+            MDC.getContext().putAll(this.context);
             Thread thd = Thread.currentThread();
             logger.debug("Thread " + thd.getName() + " started.");
-            state = RUNNING;
+            this.state = RUNNING;
             Connection conn = null;
             Statement sqlStatement = null;
             StatementInfo sqlStatementInfo = null;
             ResultSet rs = null;
             try {
-                Set<Integer> keyField = keysMap.get(key);
+                Set<Integer> keyField = DBOThreadSelect.this.keysMap.get(this.key);
                 Map<String, FieldFormatter> fieldNameToFormatter = new HashMap<String, FieldFormatter>();
-                if (statIdToNameFormatters.containsKey(key)) {
-                    fieldNameToFormatter = statIdToNameFormatters.get(key);
+                if (DBOThreadSelect.this.statIdToNameFormatters.containsKey(this.key)) {
+                    fieldNameToFormatter = DBOThreadSelect.this.statIdToNameFormatters.get(this.key);
                 }
                 Map<String, FieldFormatter> fieldIdToFormatter = new HashMap<String, FieldFormatter>();
-                if (statIdToIdFormatters.containsKey(key)) {
-                    fieldIdToFormatter = statIdToIdFormatters.get(key);
+                if (DBOThreadSelect.this.statIdToIdFormatters.containsKey(this.key)) {
+                    fieldIdToFormatter = DBOThreadSelect.this.statIdToIdFormatters.get(this.key);
                 }
 
-                if (stmt != null) {
+                if (this.stmt != null) {
                     conn = getConnection();
-                    String expandedSQL = PropertiesHandler.expand(stmt, props, conn, null);
+                    String expandedSQL = PropertiesHandler.expand(this.stmt, this.props, conn, null);
                     sqlStatement = conn.createStatement();
                     logger.debug("Executing select statement: " + expandedSQL + ".");
-                    sqlStatementInfo = new StatementInfo(key.toString(), expandedSQL, sqlStatement);
+                    sqlStatementInfo = new StatementInfo(this.key.toString(), expandedSQL, sqlStatement);
                     rs = sqlStatement.executeQuery(expandedSQL);
                     if (rs != null) {
-                        Document localDoc = rowSetBuilder.createDocument(null);
+                        Document localDoc = this.rowSetBuilder.createDocument(null);
                         try {
-                            rowThreadCounter += rowSetBuilder.build(localDoc, "" + key, rs, keyField, 
+                            this.rowThreadCounter += this.rowSetBuilder.build(localDoc, "" + this.key, rs, keyField,
                                     fieldNameToFormatter, fieldIdToFormatter);
                         }
                         finally {
@@ -134,12 +135,12 @@ public class DBOThreadSelect extends AbstractDBO
                             }
                         }
                         if (!thd.isInterrupted()) {
-                            synchronized (doc) {
-                                Element docRoot = doc.getDocumentElement();
+                            synchronized (this.doc) {
+                                Element docRoot = this.doc.getDocumentElement();
                                 Element localDocRoot = localDoc.getDocumentElement();
                                 NodeList nodes = localDocRoot.getChildNodes();
                                 for (int i = 0; i < nodes.getLength(); i++) {
-                                    Node dataNode = doc.importNode(nodes.item(i), true);
+                                    Node dataNode = this.doc.importNode(nodes.item(i), true);
                                     docRoot.appendChild(dataNode);
                                 }
                             }
@@ -148,16 +149,16 @@ public class DBOThreadSelect extends AbstractDBO
                 }
             }
             catch (SQLException exc) {
-            	logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            	logger.error("Error on execution of " + DBOThreadSelect.this.dboclass + " with name [" + getName() + "]", exc);
                 logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
                 OracleExceptionHandler.handleSQLException(exc).printLoggerInfo();
-                state = ERROR;
-                throwable = exc;
+                this.state = ERROR;
+                this.throwable = exc;
             }
             catch (Throwable exc) {
                 logger.error("Thread " + thd.getName() + " terminated with error.", exc);
-                state = ERROR;
-                throwable = exc;
+                this.state = ERROR;
+                this.throwable = exc;
             }
             finally {
                 if (rs != null) {
@@ -187,11 +188,11 @@ public class DBOThreadSelect extends AbstractDBO
                     }
                 }
                 logger.debug("Thread " + thd.getName() + " terminated.");
-                if (state != ERROR) {
-                    state = TERM;
+                if (this.state != ERROR) {
+                    this.state = TERM;
                 }
-                synchronized (synchObj) {
-                    synchObj.notify();
+                synchronized (DBOThreadSelect.this.synchObj) {
+                    DBOThreadSelect.this.synchObj.notify();
                 }
             }
         }
@@ -215,20 +216,25 @@ public class DBOThreadSelect extends AbstractDBO
         {
             this.stmt = stmt;
         }
-        
+
         private void setRowSetBuilder(RowSetBuilder rowSetBuilder)
         {
             this.rowSetBuilder = rowSetBuilder;
         }
 
+        private void setLocalJdbcConnName(String localJdbcConnName)
+        {
+            this.localJdbcConnName = localJdbcConnName;
+        }
+
         private Connection getConnection() throws Exception
         {
-            return JDBCConnectionBuilder.getConnection(getJdbcConnectionName());
+            return JDBCConnectionBuilder.getConnection(this.localJdbcConnName);
         }
 
         private void releaseConnection(Connection conn) throws Exception
         {
-            JDBCConnectionBuilder.releaseConnection(getJdbcConnectionName(), conn);
+            JDBCConnectionBuilder.releaseConnection(this.localJdbcConnName, conn);
         }
 
         /**
@@ -236,7 +242,7 @@ public class DBOThreadSelect extends AbstractDBO
          */
         public long getRowThreadCounter()
         {
-            return rowThreadCounter;
+            return this.rowThreadCounter;
         }
     }
 
@@ -245,8 +251,8 @@ public class DBOThreadSelect extends AbstractDBO
     private String                                   numberFormat           = DEFAULT_NUMBER_FORMAT;
     private String                                   groupSeparator         = DEFAULT_GRP_SEPARATOR;
     private String                                   decSeparator           = DEFAULT_DEC_SEPARATOR;
-    private Map<String, Map<String, FieldFormatter>> statIdToNameFormatters = new HashMap<String, Map<String, FieldFormatter>>();
-    private Map<String, Map<String, FieldFormatter>> statIdToIdFormatters   = new HashMap<String, Map<String, FieldFormatter>>();
+    private final Map<String, Map<String, FieldFormatter>> statIdToNameFormatters = new HashMap<String, Map<String, FieldFormatter>>();
+    private final Map<String, Map<String, FieldFormatter>> statIdToIdFormatters   = new HashMap<String, Map<String, FieldFormatter>>();
 
     private static final Logger                      logger                 = GVLogger.getLogger(DBOThreadSelect.class);
 
@@ -259,7 +265,7 @@ public class DBOThreadSelect extends AbstractDBO
     public DBOThreadSelect()
     {
         super();
-        keysMap = new HashMap<String, Set<Integer>>();
+        this.keysMap = new HashMap<String, Set<Integer>>();
     }
 
     /**
@@ -270,17 +276,17 @@ public class DBOThreadSelect extends AbstractDBO
     {
         super.init(config);
         try {
-            forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
-            isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
+            this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
+            this.isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
             String rsBuilder = XMLConfig.get(config, "@rowset-builder", "standard");
             if (rsBuilder.equals("extended")) {
-                rowSetBuilder = new ExtendedRowSetBuilder();
+                this.rowSetBuilder = new ExtendedRowSetBuilder();
             }
             else {
-                rowSetBuilder = new StandardRowSetBuilder();
+                this.rowSetBuilder = new StandardRowSetBuilder();
             }
-            rowSetBuilder.setName(getName());
-            rowSetBuilder.setLogger(logger);
+            this.rowSetBuilder.setName(getName());
+            this.rowSetBuilder.setLogger(logger);
 
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='select']");
             String id = null;
@@ -293,7 +299,7 @@ public class DBOThreadSelect extends AbstractDBO
                 if (id == null) {
                     id = Integer.toString(i);
                 }
-                statements.put(id, XMLConfig.getNodeValue(stmt));
+                this.statements.put(id, XMLConfig.getNodeValue(stmt));
                 if (keys != null) {
                     Set<Integer> s = new HashSet<Integer>();
                     StringTokenizer sTok = new StringTokenizer(keys, ",");
@@ -301,7 +307,7 @@ public class DBOThreadSelect extends AbstractDBO
                         String str = sTok.nextToken();
                         s.add(new Integer(str.trim()));
                     }
-                    keysMap.put(id, s);
+                    this.keysMap.put(id, s);
                 }
             }
 
@@ -345,20 +351,20 @@ public class DBOThreadSelect extends AbstractDBO
                         }
                     }
                 }
-                statIdToNameFormatters.put(id, fieldNameToFormatter);
-                statIdToIdFormatters.put(id, fieldIdToFormatter);
+                this.statIdToNameFormatters.put(id, fieldNameToFormatter);
+                this.statIdToIdFormatters.put(id, fieldIdToFormatter);
             }
 
-            if (statements.isEmpty()) {
-                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
+            if (this.statements.isEmpty()) {
+                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + this.dboclass + "]");
             }
         }
         catch (DBOException exc) {
             throw exc;
         }
         catch (Exception exc) {
-            logger.error("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
         }
     }
 
@@ -389,44 +395,46 @@ public class DBOThreadSelect extends AbstractDBO
 
         try {
             prepare();
-            rowCounter = 0;
-            logger.debug("Begin execution of DB data read through " + dboclass);
+            this.rowCounter = 0;
+            logger.debug("Begin execution of DB data read through " + this.dboclass);
 
             Map<String, Object> localProps = buildProps(props);
             logProps(localProps);
 
-            numberFormat = (String) localProps.get(FORMAT_NAME);
-            if (numberFormat == null) {
-                numberFormat = DEFAULT_NUMBER_FORMAT;
+            this.numberFormat = (String) localProps.get(FORMAT_NAME);
+            if (this.numberFormat == null) {
+                this.numberFormat = DEFAULT_NUMBER_FORMAT;
             }
-            groupSeparator = (String) localProps.get(GRP_SEPARATOR_NAME);
-            if (groupSeparator == null) {
-                groupSeparator = DEFAULT_GRP_SEPARATOR;
+            this.groupSeparator = (String) localProps.get(GRP_SEPARATOR_NAME);
+            if (this.groupSeparator == null) {
+                this.groupSeparator = DEFAULT_GRP_SEPARATOR;
             }
-            decSeparator = (String) localProps.get(DEC_SEPARATOR_NAME);
-            if (decSeparator == null) {
-                decSeparator = DEFAULT_DEC_SEPARATOR;
+            this.decSeparator = (String) localProps.get(DEC_SEPARATOR_NAME);
+            if (this.decSeparator == null) {
+                this.decSeparator = DEFAULT_DEC_SEPARATOR;
             }
-            DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
-            dfs.setDecimalSeparator(decSeparator.charAt(0));
-            dfs.setGroupingSeparator(groupSeparator.charAt(0));
-            numberFormatter.setDecimalFormatSymbols(dfs);
-            numberFormatter.applyPattern(numberFormat);
+            DecimalFormatSymbols dfs = this.numberFormatter.getDecimalFormatSymbols();
+            dfs.setDecimalSeparator(this.decSeparator.charAt(0));
+            dfs.setGroupingSeparator(this.groupSeparator.charAt(0));
+            this.numberFormatter.setDecimalFormatSymbols(dfs);
+            this.numberFormatter.applyPattern(this.numberFormat);
 
             parser = XMLUtils.getParserInstance();
-            Document doc = rowSetBuilder.createDocument(parser);
-            
-            rowSetBuilder.setXMLUtils(parser);
-            rowSetBuilder.setDateFormatter(dateFormatter);
-            rowSetBuilder.setNumberFormatter(numberFormatter);
-            rowSetBuilder.setDecSeparator(decSeparator);
-            rowSetBuilder.setGroupSeparator(groupSeparator);
-            rowSetBuilder.setNumberFormat(numberFormat);
-            
+            Document doc = this.rowSetBuilder.createDocument(parser);
+
+            this.rowSetBuilder.setXMLUtils(parser);
+            this.rowSetBuilder.setDateFormatter(this.dateFormatter);
+            this.rowSetBuilder.setNumberFormatter(this.numberFormatter);
+            this.rowSetBuilder.setDecSeparator(this.decSeparator);
+            this.rowSetBuilder.setGroupSeparator(this.groupSeparator);
+            this.rowSetBuilder.setNumberFormat(this.numberFormat);
+
+            String localJdbcConnName = PropertiesHandler.expand(getJdbcConnectionName(), props);
+            logger.info("Using Connection: " + localJdbcConnName);
 
             Vector<ThreadSelect> thrSelVector = new Vector<ThreadSelect>();
             Vector<Thread> thrVector = new Vector<Thread>();
-            for (Entry<String, String> entry : statements.entrySet()) {
+            for (Entry<String, String> entry : this.statements.entrySet()) {
                 Object key = entry.getKey();
                 String stmt = entry.getValue();
                 ThreadSelect ts = new ThreadSelect(MDC.getContext());
@@ -434,7 +442,8 @@ public class DBOThreadSelect extends AbstractDBO
                 ts.setStatement(stmt);
                 ts.setKey(key);
                 ts.setProps(localProps);
-                ts.setRowSetBuilder(rowSetBuilder.getCopy());
+                ts.setRowSetBuilder(this.rowSetBuilder.getCopy());
+                ts.setLocalJdbcConnName(localJdbcConnName);
                 thrSelVector.add(ts);
 
                 Thread t = new Thread(ts);
@@ -457,12 +466,12 @@ public class DBOThreadSelect extends AbstractDBO
                         switch (to.state) {
                             case ThreadSelect.TERM :{
                                 thrSelVector.remove(idx);
-                                rowCounter += to.getRowThreadCounter();
+                                this.rowCounter += to.getRowThreadCounter();
                             }
                                 break;
                             case ThreadSelect.ERROR :{
                                 thrSelVector.remove(idx);
-                                rowCounter += to.getRowThreadCounter();
+                                this.rowCounter += to.getRowThreadCounter();
                                 error = true;
                                 throwable = to.throwable;
                                 idx = 0;
@@ -477,8 +486,8 @@ public class DBOThreadSelect extends AbstractDBO
                     }
                     else {
                         try {
-                            synchronized (synchObj) {
-                                synchObj.wait(1000);
+                            synchronized (this.synchObj) {
+                                this.synchObj.wait(1000);
                             }
                         }
                         catch (InterruptedException exc) {
@@ -502,14 +511,14 @@ public class DBOThreadSelect extends AbstractDBO
             byte[] dataDOM = parser.serializeDOMToByteArray(doc);
             dataOut.write(dataDOM);
 
-            dhr.setRead(rowCounter);
+            this.dhr.setRead(this.rowCounter);
 
-            logger.debug("End execution of DB data read through " + dboclass);
+            logger.debug("End execution of DB data read through " + this.dboclass);
         }
         catch (Throwable exc) {
-            logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            logger.error("Error on execution of " + this.dboclass + " with name [" + getName() + "]", exc);
             ThreadUtils.checkInterrupted(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + getName() + "]: "
                         + exc.getMessage(), exc);
         }
         finally {

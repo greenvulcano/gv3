@@ -248,14 +248,15 @@ public class DBOBuilder implements IDBOBuilder
         Connection conn = null;
         String intConnName = null;
         try {
-            logger.debug("Searching for a new available connection named [" + this.jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
-                logger.debug("Overwriting default Connection with: " + intConnName);
+                logger.info("Overwriting default Connection with: " + intConnName);
             }
             else {
                 intConnName = this.jdbcConnectionName;
             }
+            intConnName = PropertiesHandler.expand(intConnName, localParams);
+            logger.info("Searching for a new available connection named [" + intConnName + "].");
 
             conn = JDBCConnectionBuilder.getConnection(intConnName);
             if (this.transacted && !this.isXA) {
@@ -373,14 +374,16 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayInputStream in = null;
         String intConnName = null;
         try {
-            logger.debug("Searching for a new available connection named [" + this.jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
-                logger.debug("Overwriting default Connection with: " + intConnName);
+                logger.info("Overwriting default Connection with: " + intConnName);
             }
             else {
                 intConnName = this.jdbcConnectionName;
             }
+            intConnName = PropertiesHandler.expand(intConnName, localParams);
+            logger.info("Searching for a new available connection named [" + intConnName + "].");
+
             conn = JDBCConnectionBuilder.getConnection(intConnName);
             if (this.transacted) {
                 conn.setAutoCommit(false);
@@ -581,14 +584,16 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayInputStream in = null;
         String intConnName = null;
         try {
-            logger.debug("Searching for a new available connection named [" + this.jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
-                logger.debug("Overwriting default Connection with: " + intConnName);
+                logger.info("Overwriting default Connection with: " + intConnName);
             }
             else {
                 intConnName = this.jdbcConnectionName;
             }
+            intConnName = PropertiesHandler.expand(intConnName, localParams);
+            logger.info("Searching for a new available connection named [" + intConnName + "].");
+
             conn = JDBCConnectionBuilder.getConnection(intConnName);
             if (this.transacted && !this.isXA) {
                 conn.setAutoCommit(false);
@@ -752,14 +757,16 @@ public class DBOBuilder implements IDBOBuilder
         ByteArrayOutputStream out = null;
         String intConnName = null;
         try {
-            logger.debug("Searching for a new available connection named [" + this.jdbcConnectionName + "].");
             intConnName = (String) localParams.get(DBO_JDBC_CONNECTION_NAME);
             if ((intConnName != null) && !"".equals(intConnName) && !"NULL".equals(intConnName)) {
-                logger.debug("Overwriting default Connection with: " + intConnName);
+                logger.info("Overwriting default Connection with: " + intConnName);
             }
             else {
                 intConnName = this.jdbcConnectionName;
             }
+            intConnName = PropertiesHandler.expand(intConnName, localParams);
+            logger.info("Searching for a new available connection named [" + intConnName + "].");
+
             conn = JDBCConnectionBuilder.getConnection(intConnName);
             if (this.transacted && !this.isXA) {
                 conn.setAutoCommit(false);

@@ -19,14 +19,6 @@
  */
 package it.greenvulcano.gvesb.datahandling.dbo;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.datahandling.DBOException;
-import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
-import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.thread.ThreadUtils;
-
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -52,6 +44,14 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
+import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
+
 /**
  * IDBO Class specialized in selecting multiple set of data from the DB.
  * The selected data are formatted as CSV text.
@@ -67,10 +67,10 @@ public class DBOMultiFlatSelect extends AbstractDBO
 
     private int                                      sbRowLength            = 100;
 
-    private Map<String, Map<String, FieldFormatter>> statIdToNameFormatters = new HashMap<String, Map<String, FieldFormatter>>();
-    private Map<String, Map<String, FieldFormatter>> statIdToIdFormatters   = new HashMap<String, Map<String, FieldFormatter>>();
+    private final Map<String, Map<String, FieldFormatter>> statIdToNameFormatters = new HashMap<String, Map<String, FieldFormatter>>();
+    private final Map<String, Map<String, FieldFormatter>> statIdToIdFormatters   = new HashMap<String, Map<String, FieldFormatter>>();
 
-    private List<Integer>                            statIDs                = new ArrayList<Integer>();
+    private final List<Integer>                            statIDs                = new ArrayList<Integer>();
 
     private static final Logger                      logger                 = GVLogger.getLogger(DBOMultiFlatSelect.class);
 
@@ -86,11 +86,11 @@ public class DBOMultiFlatSelect extends AbstractDBO
     {
         super.init(config);
         try {
-            endLine = XMLConfig.get(config, "@end-line", DEFAULT_END_LINE);
-            encoding = XMLConfig.get(config, "@encoding", DEFAULT_ENCODING);
-            forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
-            isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
-            directFilePath = XMLConfig.get(config, "@direct-file-path", null);
+            this.endLine = XMLConfig.get(config, "@end-line", DEFAULT_END_LINE);
+            this.encoding = XMLConfig.get(config, "@encoding", DEFAULT_ENCODING);
+            this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
+            this.isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
+            this.directFilePath = XMLConfig.get(config, "@direct-file-path", null);
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='select']");
             String id = null;
             Node stmt;
@@ -100,11 +100,11 @@ public class DBOMultiFlatSelect extends AbstractDBO
                 if (id == null) {
                     id = Integer.toString(i);
                 }
-                statements.put(id, XMLConfig.getNodeValue(stmt));
-                statIDs.add(new Integer(id));
+                this.statements.put(id, XMLConfig.getNodeValue(stmt));
+                this.statIDs.add(new Integer(id));
             }
 
-            Collections.sort(statIDs);
+            Collections.sort(this.statIDs);
 
             NodeList fFrmsList = XMLConfig.getNodeList(config, "FieldFormatters");
             for (int i = 0; i < fFrmsList.getLength(); i++) {
@@ -146,20 +146,20 @@ public class DBOMultiFlatSelect extends AbstractDBO
                         }
                     }
                 }
-                statIdToNameFormatters.put(id, fieldNameToFormatter);
-                statIdToIdFormatters.put(id, fieldIdToFormatter);
+                this.statIdToNameFormatters.put(id, fieldNameToFormatter);
+                this.statIdToIdFormatters.put(id, fieldIdToFormatter);
             }
 
-            if (statements.isEmpty()) {
-                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
+            if (this.statements.isEmpty()) {
+                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + this.dboclass + "]");
             }
         }
         catch (DBOException exc) {
             throw exc;
         }
         catch (Exception exc) {
-            logger.error("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
         }
     }
 
@@ -186,34 +186,34 @@ public class DBOMultiFlatSelect extends AbstractDBO
         FileWriter fw = null;
         try {
             prepare();
-            rowCounter = 0;
-            logger.debug("Begin execution of DB data read through " + dboclass);
+            this.rowCounter = 0;
+            logger.debug("Begin execution of DB data read through " + this.dboclass);
 
             Map<String, Object> localProps = buildProps(props);
             logProps(localProps);
 
-            String localDirectFilePath = PropertiesHandler.expand(directFilePath, localProps, conn, null);
+            String localDirectFilePath = PropertiesHandler.expand(this.directFilePath, localProps, conn, null);
             if (localDirectFilePath != null) {
                 fw = new FileWriter(localDirectFilePath);
             }
-            
-            StringBuilder sb = new StringBuilder(sbRowLength);
 
-            Iterator<Integer> itr = statIDs.iterator();
+            StringBuilder sb = new StringBuilder(this.sbRowLength);
+
+            Iterator<Integer> itr = this.statIDs.iterator();
             while (itr.hasNext()) {
                 ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                 String id = itr.next().toString();
-                String stmt = statements.get(id);
-                Map<String, FieldFormatter> fieldNameToFormatter = statIdToNameFormatters.get(id);
-                Map<String, FieldFormatter> fieldIdToFormatter = statIdToIdFormatters.get(id);
+                String stmt = this.statements.get(id);
+                Map<String, FieldFormatter> fieldNameToFormatter = this.statIdToNameFormatters.get(id);
+                Map<String, FieldFormatter> fieldIdToFormatter = this.statIdToIdFormatters.get(id);
 
                 if (stmt != null) {
                     String expandedSQL = PropertiesHandler.expand(stmt, localProps, conn, null);
                     Statement sqlStatement = null;
                     try {
-                        sqlStatement = getInternalConn(conn).createStatement();
+                        sqlStatement = getInternalConn(conn, localProps).createStatement();
                         logger.debug("Executing select:\n" + expandedSQL);
-                        sqlStatementInfo = new StatementInfo(id, expandedSQL, sqlStatement);
+                        this.sqlStatementInfo = new StatementInfo(id, expandedSQL, sqlStatement);
                         ResultSet rs = sqlStatement.executeQuery(expandedSQL);
                         if (rs != null) {
                             try {
@@ -222,7 +222,7 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                         fieldIdToFormatter);
                                 String textVal = null;
                                 while (rs.next()) {
-                                    if (rowCounter % 10 == 0) {
+                                    if ((this.rowCounter % 10) == 0) {
                                         ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
                                     }
                                     for (int j = 1; j <= metadata.getColumnCount(); j++) {
@@ -232,7 +232,7 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                         }
                                         switch (metadata.getColumnType(j)) {
                                             case Types.DATE :
-                                        	case Types.TIME : 
+                                        	case Types.TIME :
                                             case Types.TIMESTAMP :{
                                                 Timestamp dateVal = rs.getTimestamp(j);
                                                 if (dateVal == null) {
@@ -253,7 +253,7 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                             case Types.BIGINT :
                                             case Types.INTEGER :
                                             case Types.NUMERIC :
-                                            case Types.SMALLINT : 
+                                            case Types.SMALLINT :
                                             case Types.TINYINT : {
                                                 BigDecimal bigdecimal = rs.getBigDecimal(j);
                                                 if (bigdecimal == null) {
@@ -307,13 +307,13 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                         }
                                         sb.append(textVal);
                                     }
-                                    rowCounter++;
+                                    this.rowCounter++;
                                     if (fw != null) {
-                                        fw.append(sb).append(endLine);
+                                        fw.append(sb).append(this.endLine);
                                         sb.delete(0, sb.length());
                                     }
                                     else {
-                                        sb.append(endLine);
+                                        sb.append(this.endLine);
                                     }
                                 }
                             }
@@ -329,42 +329,42 @@ public class DBOMultiFlatSelect extends AbstractDBO
                                 }
                             }
                         }
-                        sbRowLength = Math.max(sbRowLength, sb.length());
+                        this.sbRowLength = Math.max(this.sbRowLength, sb.length());
                     }
                     finally {
-                    	if (sqlStatementInfo != null) {
+                    	if (this.sqlStatementInfo != null) {
                             try {
-                            	sqlStatementInfo.close();
+                            	this.sqlStatementInfo.close();
                             }
                             catch (Exception exc) {
                                 // do nothing
                             }
-                            sqlStatementInfo = null;
+                            this.sqlStatementInfo = null;
                             sqlStatement = null;
                         }
                     }
                 }
             }
             if (fw == null) {
-                Charset cs = Charset.forName(encoding);
+                Charset cs = Charset.forName(this.encoding);
                 ByteBuffer bb = cs.encode(CharBuffer.wrap(sb));
                 //dataOut.write(bb.array());
                 dataOut.write(bb.array(), 0, sb.length()); // da verificare!!!
                 dataOut.flush();
             }
 
-            dhr.setRead(rowCounter);
+            this.dhr.setRead(this.rowCounter);
 
-            logger.debug("End execution of DB data read through " + dboclass);
+            logger.debug("End execution of DB data read through " + this.dboclass);
         }
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + getName() + "]: "
                         + exc.getMessage(), exc);
         }
         catch (Exception exc) {
-            logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
+            logger.error("Error on execution of " + this.dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + getName() + "]: "
                         + exc.getMessage(), exc);
         }
         finally {
