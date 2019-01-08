@@ -48,7 +48,7 @@ public class HttpServletTransaction
     {
         service = XMLConfig.get(node, "@service", "");
         system = XMLConfig.get(node, "@system", "ALL");
-        operation = XMLConfig.get(node, "@operation", "");
+        operation = XMLConfig.get(node, "@operation", "ALL");
         transacted = XMLConfig.getBoolean(node, "@transacted", false);
         timeout = XMLConfig.getInteger(node, "@timeout", 30);
         closeBeforeReply = XMLConfig.get(node, "@close-on-response", "before").equals("before");
@@ -93,5 +93,10 @@ public class HttpServletTransaction
             return (service + "::" + operation);
         }
         return (service + "::" + system + "::" + operation);
+    }
+
+    @Override
+    public String toString() {
+    	return "[" + service + "::" + system + "::" + operation + "/" + transacted  + "/" + timeout + "/" + closeBeforeReply + "]";
     }
 }
