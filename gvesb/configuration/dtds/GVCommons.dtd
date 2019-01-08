@@ -1020,6 +1020,14 @@
 -->
 <!ATTLIST ChangeGVBuffer    compress-op (none|compress|uncompress) #IMPLIED>
 <!--
+    This attribute defines which algorithm to use if you compress
+    or decompress the body field.
+    Default to zip.
+
+    #Warn: {{../ChangeGVBuffer[not(@compress-op) or @compress-op='none']}} The attribute 'compress-type' must be defined only if defined the attribute 'compress-op'!='none'
+-->
+<!ATTLIST ChangeGVBuffer    compress-type (zip|gzip) #IMPLIED>
+<!--
     This attribute sets the compression ratio to use.
 
     #Warn: {{../ChangeGVBuffer[not(@compress-op) or @compress-op='none' or @compress-op='uncompress']}} The attribute 'compress-level' must be defined only if defined the attribute 'compress-op'='compress'
