@@ -9,7 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvvcl-file</artifactId>
-    <version>3.4.0.1-Final</version>
+    <version>3.4.0.2-Final</version>
     <name>GreenVulcano VCL File Plugin</name>
 
     <dependencies>
