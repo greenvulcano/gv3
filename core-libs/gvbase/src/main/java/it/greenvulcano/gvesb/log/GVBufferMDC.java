@@ -49,8 +49,14 @@ public class GVBufferMDC
         }
         NMDC.put(GVBuffer.Field.SYSTEM.toString(), gvBuffer.getSystem());
         NMDC.put(GVBuffer.Field.RETCODE.toString(), "" + gvBuffer.getRetCode());
+        if (NMDC.get("GV_MASTER_ID") == null) {
+        	String mid = gvBuffer.getProperty("GV_MASTER_ID");
+        	if (mid != null) {
+        		NMDC.put("GV_MASTER_ID", mid);
+        	}
+        }
     }
-    
+
     public static String changeMasterService(String newService)
     {
     	String service = (String) NMDC.get("MASTER_SERVICE");
@@ -61,5 +67,17 @@ public class GVBufferMDC
     		NMDC.remove("MASTER_SERVICE");
     	}
         return service;
+    }
+
+    public static String changeMasterId(String newId)
+    {
+    	String mid = (String) NMDC.get("GV_MASTER_ID");
+    	if (newId != null) {
+    		NMDC.put("GV_MASTER_ID", newId);
+    	}
+    	else {
+    		NMDC.remove("GV_MASTER_ID");
+    	}
+        return mid;
     }
 }
