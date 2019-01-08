@@ -19,11 +19,7 @@
  */
 package it.greenvulcano.gvesb.gvconsole.deploy.action;
 
-import it.greenvulcano.gvesb.gvconsole.deploy.DatiServizio;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVAdapterParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVCoreParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVSupportParser;
+import it.greenvulcano.gvesb.gvconsole.deploy.GVDeploy;
 import it.greenvulcano.log.GVLogger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -59,58 +55,6 @@ public class StrutsSaveAction extends Action
         logger.debug("Init StrutsSaveAction");
         HttpSession sessione = request.getSession(false);
         try {
-            GVParser parser = (GVParser) sessione.getAttribute("parser");
-            String file = request.getParameter("file");
-            if (file.equals("GVCore")) {
-                String nomeServizio = (String) sessione.getAttribute("servizio");
-                GVCoreParser coreParser = parser.getGVCoreParser();
-                DatiServizio datiServizio = new DatiServizio();
-                datiServizio.setEquals(coreParser.getEqualService(nomeServizio));
-                datiServizio.setExist(coreParser.getExist(nomeServizio));
-                String cZip = coreParser.getGvCoreZip(nomeServizio);
-                if (cZip != null) {
-                    datiServizio.setNodoNew(cZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
-                }
-                String cServer = coreParser.getGvCoreServer(nomeServizio);
-                if (cServer != null) {
-                    datiServizio.setNodoServer(cServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
-                }
-            }
-            else if (file.equals("GVAdapters")) {
-                String nomeAdapter = (String) sessione.getAttribute("adapter");
-                String nomeServizio = (String) sessione.getAttribute("servizio");
-                logger.debug("nomeServizio="+nomeServizio);
-                logger.debug("nomeAdapter="+nomeAdapter);
-                GVAdapterParser adapterParser = parser.getGVAdapterParser();
-                adapterParser.loadParser();
-                DatiServizio datiServizio = new DatiServizio();
-                datiServizio.setEquals(adapterParser.getEqual(nomeAdapter,nomeServizio));
-                datiServizio.setExist(adapterParser.getExist(nomeAdapter,nomeServizio));
-                String aZip = adapterParser.getGvAdapterZip(nomeAdapter, nomeServizio);
-                if (aZip != null) {
-                    datiServizio.setNodoNew(aZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
-                }
-                String aServer = adapterParser.getGvAdapterServer(nomeAdapter, nomeServizio);
-                if (aServer != null) {
-                    datiServizio.setNodoServer(aServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
-                }
-            }
-            else if (file.equals("GVSupport")) {
-                String support = (String) sessione.getAttribute("support");
-                GVSupportParser supportParser = parser.getGVSupportParser();
-                supportParser.loadParser();
-                DatiServizio datiServizio = new DatiServizio();
-                datiServizio.setEquals(supportParser.getEqual(support));
-                datiServizio.setExist(supportParser.getExist(support));
-                String sZip = supportParser.getGvSupportZip(support);
-                if (sZip != null) {
-                    datiServizio.setNodoNew(sZip.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
-                }
-                String sServer = supportParser.getGvSupportServer(support);
-                if (sServer != null) {
-                    datiServizio.setNodoServer(sServer.replaceAll("\n", "").replaceAll("\r", "").replaceAll("'", "&apos;"));
-                }
-            }
             logger.debug("End StrutsSaveAction");
             return mapping.findForward("success");
         }

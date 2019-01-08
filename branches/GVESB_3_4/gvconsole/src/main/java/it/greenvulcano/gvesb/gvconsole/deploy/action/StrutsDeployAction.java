@@ -20,10 +20,7 @@
 package it.greenvulcano.gvesb.gvconsole.deploy.action;
 
 
-import it.greenvulcano.gvesb.gvconsole.deploy.GVAdapterParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVCoreParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVParser;
-import it.greenvulcano.gvesb.gvconsole.deploy.GVSupportParser;
+import it.greenvulcano.gvesb.gvconsole.deploy.GVDeploy;
 import it.greenvulcano.log.GVLogger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -61,42 +58,12 @@ public class StrutsDeployAction extends Action
         logger.debug("init StrutsDeployAction");
         HttpSession sessione = request.getSession(false);
         try {
-            String file = request.getParameter("file");
-            GVParser parser = (GVParser) sessione.getAttribute("parser");
-            parser.copyFileForBackupZip();
-            if (file.equals("GVCore")) {
-                String nomeServizio = (String) sessione.getAttribute("servizio");
-                String tipoOggetto = (String) sessione.getAttribute("tipoOggetto");
-                logger.debug("Servizio:" + nomeServizio);
-                logger.debug("tipoOggetto:" + tipoOggetto);
-                GVCoreParser coreParser = parser.getGVCoreParser();
-                coreParser.aggiorna(tipoOggetto, nomeServizio);
-                coreParser.scriviFile();
-                DocumentRepository registry = DocumentRepository.instance();
-                XMLBuilder builder = registry.editDocument("GVCore", servlet.getServletContext(), false);
-                builder.storeInSession(sessione);
-            }
-            else if (file.equals("GVAdapters")) {
-                String nomeServizio = (String) sessione.getAttribute("servizio");
-                String adapter = (String) sessione.getAttribute("adapter");
-                logger.debug("Servizio:" + nomeServizio);
-                logger.debug("adapter:" + adapter);
-                GVAdapterParser adapterParser = parser.getGVAdapterParser();
-                adapterParser.aggiorna(adapter,nomeServizio);
-                adapterParser.scriviFile();
-                DocumentRepository registry = DocumentRepository.instance();
-                XMLBuilder builder = registry.editDocument("GVAdapters", servlet.getServletContext(), false);
-                builder.storeInSession(sessione);
-            }
-            else if (file.equals("GVSupport")) {
-                String servizio = (String) sessione.getAttribute("support");
-                GVSupportParser supportParser = parser.getGVSupportParser();
-                supportParser.aggiorna(servizio);
-                supportParser.scriviFile();
-                DocumentRepository registry = DocumentRepository.instance();
-                XMLBuilder builder = registry.editDocument("GVSupport", servlet.getServletContext(), false);
-                builder.storeInSession(sessione);
-            }
+            GVDeploy deploy = (GVDeploy) sessione.getAttribute("deploy");
+            deploy.copyFileForBackupZip();
+            deploy.save();
+            DocumentRepository registry = DocumentRepository.instance();
+            XMLBuilder builder = registry.editDocument("GVCore", servlet.getServletContext(), false);
+            builder.storeInSession(sessione);
             logger.debug("End StrutsDeployAction");
             return mapping.findForward("success");
         }

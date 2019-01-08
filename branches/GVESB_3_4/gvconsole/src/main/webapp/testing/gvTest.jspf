@@ -104,8 +104,7 @@
 		<form method="post" name="gvBufferInput" id="gvBufferInput"
 			action="<%=contextRoot%>/GVTesterManager"><input type="hidden"
 			name="method" />
-		<table class="ui-widget-header ui-corner-all"
-			style="margin-top: 20px; width: 1000px;">
+		<table class="ui-widget-header ui-corner-all gv-table">
 			<tr>
 				<td colspan="2">
 				<table style="width: 940px">
