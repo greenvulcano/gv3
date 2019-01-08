@@ -9,7 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvvcl-msexchange</artifactId>
-    <version>3.4.0.1-Final</version>
+    <version>3.4.0.2-Final</version>
     <name>GreenVulcano VCL MS Exchange Mail Plugin</name>
 
     <dependencies>
@@ -34,8 +34,16 @@
             <artifactId>jcifs</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.ewsjavaapi</groupId>
-            <artifactId>exchange-ws-api</artifactId>
+            <groupId>com.microsoft.ews-java-api</groupId>
+            <artifactId>ews-java-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>adal4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
         </dependency>
     </dependencies>
 </project>

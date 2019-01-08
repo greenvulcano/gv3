@@ -1,23 +1,37 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.virtual.msexchange;
+
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.EnumSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Base64OutputStream;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
@@ -27,66 +41,57 @@ import it.greenvulcano.gvesb.virtual.ConnectionException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
+import it.greenvulcano.gvesb.virtual.msexchange.oauth.OAuthHelper;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xml.XMLUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import microsoft.exchange.webservices.data.Attachment;
-import microsoft.exchange.webservices.data.AttachmentCollection;
-import microsoft.exchange.webservices.data.BasePropertySet;
-import microsoft.exchange.webservices.data.BodyType;
-import microsoft.exchange.webservices.data.ConflictResolutionMode;
-import microsoft.exchange.webservices.data.DeleteMode;
-import microsoft.exchange.webservices.data.EmailAddress;
-import microsoft.exchange.webservices.data.EmailAddressCollection;
-import microsoft.exchange.webservices.data.EmailMessage;
-import microsoft.exchange.webservices.data.EmailMessageSchema;
-import microsoft.exchange.webservices.data.ExchangeCredentials;
-import microsoft.exchange.webservices.data.ExchangeService;
-import microsoft.exchange.webservices.data.FileAttachment;
-import microsoft.exchange.webservices.data.FindFoldersResults;
-import microsoft.exchange.webservices.data.FindItemsResults;
-import microsoft.exchange.webservices.data.Folder;
-import microsoft.exchange.webservices.data.FolderSchema;
-import microsoft.exchange.webservices.data.FolderTraversal;
-import microsoft.exchange.webservices.data.FolderView;
-import microsoft.exchange.webservices.data.InternetMessageHeader;
-import microsoft.exchange.webservices.data.InternetMessageHeaderCollection;
-import microsoft.exchange.webservices.data.Item;
-import microsoft.exchange.webservices.data.ItemSchema;
-import microsoft.exchange.webservices.data.ItemView;
-import microsoft.exchange.webservices.data.MessageBody;
-import microsoft.exchange.webservices.data.PropertySet;
-import microsoft.exchange.webservices.data.SearchFilter;
-import microsoft.exchange.webservices.data.SortDirection;
-import microsoft.exchange.webservices.data.WebCredentials;
-import microsoft.exchange.webservices.data.WellKnownFolderName;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Base64OutputStream;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import microsoft.exchange.webservices.data.core.ExchangeService;
+import microsoft.exchange.webservices.data.core.PropertySet;
+import microsoft.exchange.webservices.data.core.enumeration.misc.ConnectingIdType;
+import microsoft.exchange.webservices.data.core.enumeration.misc.TraceFlags;
+import microsoft.exchange.webservices.data.core.enumeration.property.BasePropertySet;
+import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
+import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
+import microsoft.exchange.webservices.data.core.enumeration.search.FolderTraversal;
+import microsoft.exchange.webservices.data.core.enumeration.search.SortDirection;
+import microsoft.exchange.webservices.data.core.enumeration.service.ConflictResolutionMode;
+import microsoft.exchange.webservices.data.core.enumeration.service.DeleteMode;
+import microsoft.exchange.webservices.data.core.service.folder.Folder;
+import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
+import microsoft.exchange.webservices.data.core.service.item.Item;
+import microsoft.exchange.webservices.data.core.service.schema.EmailMessageSchema;
+import microsoft.exchange.webservices.data.core.service.schema.FolderSchema;
+import microsoft.exchange.webservices.data.core.service.schema.ItemSchema;
+import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
+import microsoft.exchange.webservices.data.credential.WebCredentials;
+import microsoft.exchange.webservices.data.misc.ITraceListener;
+import microsoft.exchange.webservices.data.misc.ImpersonatedUserId;
+import microsoft.exchange.webservices.data.property.complex.Attachment;
+import microsoft.exchange.webservices.data.property.complex.AttachmentCollection;
+import microsoft.exchange.webservices.data.property.complex.EmailAddress;
+import microsoft.exchange.webservices.data.property.complex.EmailAddressCollection;
+import microsoft.exchange.webservices.data.property.complex.FileAttachment;
+import microsoft.exchange.webservices.data.property.complex.InternetMessageHeader;
+import microsoft.exchange.webservices.data.property.complex.InternetMessageHeaderCollection;
+import microsoft.exchange.webservices.data.property.complex.MessageBody;
+import microsoft.exchange.webservices.data.search.FindFoldersResults;
+import microsoft.exchange.webservices.data.search.FindItemsResults;
+import microsoft.exchange.webservices.data.search.FolderView;
+import microsoft.exchange.webservices.data.search.ItemView;
+import microsoft.exchange.webservices.data.search.filter.SearchFilter;
 
 
 /**
  * Read emails from MS Exchange server.
- * 
+ *
  * @version 3.3.0 Oct 6, 2012
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class ReceiveCallOperation implements CallOperation
 {
-
     private static final Logger logger          = GVLogger.getLogger(ReceiveCallOperation.class);
+    private static final Logger loggerTrc       = GVLogger.getLogger("EWSApiTrace");
 
     /**
      * The configured operation key
@@ -105,52 +110,77 @@ public class ReceiveCallOperation implements CallOperation
      * Account domain.
      */
     private String              domain          = null;
+    private String              oauthId         = null;
     private int                 timeout         = 60000;
+    private int                 intOpTimeout    = -1;
 
     private String              exchangeURL     = null;
+    private boolean             traceEWS        = false;
 
     private ExchangeService     service         = null;
 
     private String              folderName      = "Inbox";
     private boolean             delete_messages = false;
     private Pattern             emailRxPattern  = null;
+    private int                 numEmails       = 10;
 
     private boolean             exportEML       = false;
 
     /**
      * Invoked from <code>OperationFactory</code> when an <code>Operation</code>
      * needs initialization.<br>
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#init(org.w3c.dom.Node)
      */
     @Override
     public void init(Node node) throws InitializationException
     {
         try {
-            userName = XMLConfig.get(node, "@userName");
-            password = XMLConfig.get(node, "@password");
-            domain = XMLConfig.get(node, "@domain", null);
-            exchangeURL = XMLConfig.get(node, "@exchangeURL");
+            this.userName = XMLConfig.get(node, "@userName", null);
+            this.password = XMLConfig.get(node, "@password", null);
+            this.domain = XMLConfig.get(node, "@domain", null);
+            this.oauthId = XMLConfig.get(node, "@oauth-id", null);
+            this.exchangeURL = XMLConfig.get(node, "@exchangeURL");
+            this.traceEWS = XMLConfig.getBoolean(node, "@traceEWS", false);
 
-            timeout = XMLConfig.getInteger(node, "@timeout", timeout);
+            this.timeout = XMLConfig.getInteger(node, "@timeout", this.timeout);
 
-            folderName = XMLConfig.get(node, "@folderName", "Inbox");
+            this.intOpTimeout = XMLConfig.getInteger(node, "@intOpTimeout", this.intOpTimeout);
 
-            delete_messages = XMLConfig.getBoolean(node, "@delete-messages", false);
+            this.folderName = XMLConfig.get(node, "@folderName", "Inbox");
+            this.numEmails  = XMLConfig.getInteger(node, "@numEmails", this.numEmails);
 
-            exportEML = XMLConfig.getBoolean(node, "@export-EML", false);
+            this.delete_messages = XMLConfig.getBoolean(node, "@delete-messages", false);
+
+            this.exportEML = XMLConfig.getBoolean(node, "@export-EML", false);
 
             String regex = XMLConfig.get(node, "@email-rx-cleaner",
                     "[A-z][A-z0-9_\\-]*([.][A-z0-9_\\-]+)*[@][A-z0-9_\\-]+([.][A-z0-9_\\-]+)*[.][A-z]{2,4}");
-            emailRxPattern = Pattern.compile(regex);
+            this.emailRxPattern = Pattern.compile(regex);
 
-            service = new ExchangeService();
-            service.setTimeout(timeout);
-            ExchangeCredentials credentials = (domain == null)
-                    ? new WebCredentials(userName, password)
-                    : new WebCredentials(userName, password, domain);
-            service.setCredentials(credentials);
-            service.setUrl(new URI(exchangeURL));
+            this.service = new ExchangeService();
+            if (this.traceEWS) {
+                this.service.setTraceEnabled(true);
+                this.service.setTraceFlags(EnumSet.allOf(TraceFlags.class)); // can also be restricted
+                this.service.setTraceListener(new ITraceListener() {
+                    @Override
+					public void trace(String traceType, String traceMessage) {
+                        // do some logging-mechanism here
+                        loggerTrc.debug("Type:" + traceType + " Message:" + traceMessage);
+                    }
+                });
+            }
+
+            this.service.setTimeout(this.timeout);
+            if (this.oauthId == null) {
+            	ExchangeCredentials credentials = (this.domain == null)
+            			? new WebCredentials(this.userName, this.password)
+            			: new WebCredentials(this.userName, this.password, this.domain);
+            			this.service.setCredentials(credentials);
+            }
+            this.service.setImpersonatedUserId(new ImpersonatedUserId(ConnectingIdType.SmtpAddress, this.userName));
+            //this.service.getHttpHeaders().put("X-AnchorMailbox", "testinvitalia@invitalia.it");
+            this.service.setUrl(new URI(this.exchangeURL));
         }
         catch (Exception exc) {
             logger.error("Error initializing Exchange Receive call operation", exc);
@@ -181,7 +211,7 @@ public class ReceiveCallOperation implements CallOperation
 
     /**
      * Receives e-mails.
-     * 
+     *
      * @param data
      *        the input GVBuffer.
      * @return the GVBuffer.
@@ -192,48 +222,54 @@ public class ReceiveCallOperation implements CallOperation
     {
         XMLUtils xml = null;
         try {
-            Folder searchFolder = null;
+            if (this.oauthId != null) {
+            	this.service.getHttpHeaders().put("Authorization", "Bearer " + OAuthHelper.instance().getToken(this.oauthId));
+            }
+        	Folder searchFolder = null;
 
-            if ((folderName != null) && !"Inbox".equals(folderName)) {
-                SearchFilter searchFilter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, folderName);
+            if ((this.folderName != null) && !"Inbox".equals(this.folderName)) {
+                SearchFilter searchFilter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, this.folderName);
                 FolderView view = new FolderView(1);
                 view.setPropertySet(new PropertySet(BasePropertySet.IdOnly));
                 view.getPropertySet().add(FolderSchema.DisplayName);
                 view.setTraversal(FolderTraversal.Deep);
-                FindFoldersResults ffrs = service.findFolders(WellKnownFolderName.Root, searchFilter, view);
+                FindFoldersResults ffrs = this.service.findFolders(WellKnownFolderName.Root, searchFilter, view);
                 searchFolder = ffrs.getFolders().get(0);
             }
 
-            ItemView view = new ItemView(10);
-            //ItemView view = new ItemView(1); // FOR TEST
+            ItemView view = new ItemView(this.numEmails);
             view.getOrderBy().add(ItemSchema.DateTimeReceived, SortDirection.Descending);
 
             FindItemsResults<Item> findResults = null;
             if (searchFolder == null) {
-                findResults = service.findItems(WellKnownFolderName.Inbox, new SearchFilter.IsEqualTo(
+                findResults = this.service.findItems(WellKnownFolderName.Inbox, new SearchFilter.IsEqualTo(
                         EmailMessageSchema.IsRead, false), view);
             }
             else {
-                findResults = service.findItems(searchFolder.getId(), new SearchFilter.IsEqualTo(
+                findResults = this.service.findItems(searchFolder.getId(), new SearchFilter.IsEqualTo(
                         EmailMessageSchema.IsRead, false), view);
             }
 
-            System.out.println("Total number of items found: " + findResults.getTotalCount());
+            logger.info("Total number of emails found: " + findResults.getTotalCount());
 
             int totalMessages = findResults.getTotalCount();
             if (totalMessages == 0) {
-                logger.debug("Empty folder " + folderName);
+                logger.debug("Empty folder " + this.folderName);
             }
             else {
                 PropertySet itemProps = new PropertySet(BasePropertySet.FirstClassProperties);
                 itemProps.setRequestedBodyType(BodyType.Text);
-                if (exportEML) {
+                if (this.exportEML) {
                     itemProps.add(ItemSchema.MimeContent);
                 }
 
                 xml = XMLUtils.getParserInstance();
                 Document doc = xml.newDocument("MailMessages");
                 for (Item item : findResults) {
+                    if (this.intOpTimeout > 0) {
+                        System.out.println("Sleeping for " + this.intOpTimeout + "ms during EWSAPI calls");
+                        Thread.sleep(this.intOpTimeout);
+                    }
                     //item = Item.bind(service, item.getId());
                     item.load(itemProps);
                     Element msg = xml.insertElement(doc.getDocumentElement(), "Message");
@@ -243,9 +279,13 @@ public class ReceiveCallOperation implements CallOperation
                 data.setObject(doc);
 
                 for (Item item : findResults) {
+                    if (this.intOpTimeout > 0) {
+                        System.out.println("Sleeping for " + this.intOpTimeout + "ms during EWSAPI calls");
+                        Thread.sleep(this.intOpTimeout);
+                    }
                     ((EmailMessage) item).setIsRead(true);
                     item.update(ConflictResolutionMode.AlwaysOverwrite);
-                    if (delete_messages) {
+                    if (this.delete_messages) {
                         item.delete(DeleteMode.MoveToDeletedItems);
                     }
                 }
@@ -295,12 +335,12 @@ public class ReceiveCallOperation implements CallOperation
     @Override
     public OperationKey getKey()
     {
-        return key;
+        return this.key;
     }
 
     /**
      * Return the alias for the given service
-     * 
+     *
      * @param gvBuffer
      *        the input service data
      * @return the configured alias
@@ -376,7 +416,7 @@ public class ReceiveCallOperation implements CallOperation
             }
         }
 
-        if (exportEML) {
+        if (this.exportEML) {
             Element eml = xml.insertElement(msg, "EML");
             xml.setAttribute(eml, "encoding", "base64");
             xml.insertText(eml, Base64.encodeBase64String(m.getMimeContent().getContent()));
@@ -388,7 +428,7 @@ public class ReceiveCallOperation implements CallOperation
     {
         Element cont = xml.insertElement(msg, container);
 
-        Matcher mtc = emailRxPattern.matcher("");
+        Matcher mtc = this.emailRxPattern.matcher("");
 
         String list = "";
         if (addr != null) {
@@ -406,7 +446,7 @@ public class ReceiveCallOperation implements CallOperation
     private void dumpSR(EmailAddress addr, Element msg, String container, XMLUtils xml) throws Exception
     {
         Element cont = xml.insertElement(msg, container);
-        Matcher mtc = emailRxPattern.matcher("");
+        Matcher mtc = this.emailRxPattern.matcher("");
 
         String list = "";
         if (addr != null) {

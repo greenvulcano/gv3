@@ -1,23 +1,37 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.virtual.msexchange;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+
+import javax.activation.FileDataSource;
+import javax.mail.MessagingException;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -31,49 +45,40 @@ import it.greenvulcano.gvesb.virtual.ConnectionException;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
+import it.greenvulcano.gvesb.virtual.msexchange.oauth.OAuthHelper;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.txt.StringToHTML;
 import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.activation.FileDataSource;
-import javax.mail.MessagingException;
-
-import microsoft.exchange.webservices.data.BodyType;
-import microsoft.exchange.webservices.data.EmailAddressCollection;
-import microsoft.exchange.webservices.data.EmailMessage;
-import microsoft.exchange.webservices.data.ExchangeCredentials;
-import microsoft.exchange.webservices.data.ExchangeService;
-import microsoft.exchange.webservices.data.FileAttachment;
-import microsoft.exchange.webservices.data.Importance;
-import microsoft.exchange.webservices.data.MessageBody;
-import microsoft.exchange.webservices.data.ServiceLocalException;
-import microsoft.exchange.webservices.data.WebCredentials;
-import microsoft.exchange.webservices.data.WellKnownFolderName;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import microsoft.exchange.webservices.data.core.ExchangeService;
+import microsoft.exchange.webservices.data.core.enumeration.misc.ConnectingIdType;
+import microsoft.exchange.webservices.data.core.enumeration.misc.TraceFlags;
+import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
+import microsoft.exchange.webservices.data.core.enumeration.property.Importance;
+import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
+import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
+import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
+import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
+import microsoft.exchange.webservices.data.credential.WebCredentials;
+import microsoft.exchange.webservices.data.misc.ITraceListener;
+import microsoft.exchange.webservices.data.misc.ImpersonatedUserId;
+import microsoft.exchange.webservices.data.property.complex.EmailAddressCollection;
+import microsoft.exchange.webservices.data.property.complex.FileAttachment;
+import microsoft.exchange.webservices.data.property.complex.MessageBody;
 
 /**
  * Send emails to MS Exchange server.
- * 
+ *
  * @version 3.3.0 Oct 6, 2012
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class SendCallOperation implements CallOperation
 {
-
     private static final Logger logger                     = GVLogger.getLogger(SendCallOperation.class);
+    private static final Logger loggerTrc                  = GVLogger.getLogger("EWSApiTrace");
 
     /**
      * The configured operation key
@@ -92,9 +97,11 @@ public class SendCallOperation implements CallOperation
      * Account domain.
      */
     private String              domain                     = null;
+    private String              oauthId                    = null;
     private int                 timeout                    = 60000;
 
     private String              exchangeURL                = null;
+    private boolean             traceEWS                   = false;
 
     private ExchangeService     service                    = null;
 
@@ -158,31 +165,62 @@ public class SendCallOperation implements CallOperation
     private boolean             saveCopy                   = true;
 
     /**
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#init(org.w3c.dom.Node)
      */
     @Override
     public void init(Node node) throws InitializationException
     {
         try {
-            userName = XMLConfig.get(node, "@userName");
-            password = XMLConfig.get(node, "@password");
-            domain = XMLConfig.get(node, "@domain", null);
-            exchangeURL = XMLConfig.get(node, "@exchangeURL");
+            this.userName = XMLConfig.get(node, "@userName", null);
+            this.password = XMLConfig.get(node, "@password", null);
+            this.domain = XMLConfig.get(node, "@domain", null);
+            this.oauthId = XMLConfig.get(node, "@oauth-id", null);
+            this.exchangeURL = XMLConfig.get(node, "@exchangeURL");
+            this.traceEWS = XMLConfig.getBoolean(node, "@traceEWS", false);
 
-            timeout = XMLConfig.getInteger(node, "@timeout", timeout);
+            this.timeout = XMLConfig.getInteger(node, "@timeout", this.timeout);
 
-            messageIDProperty = XMLConfig.get(node, "@message-id-property", "messageID");
-            saveCopy = XMLConfig.getBoolean(node, "@save-copy", true);
-            logger.debug("Save message copy: " + saveCopy + " - Message ID property: " + messageIDProperty);
+            this.messageIDProperty = XMLConfig.get(node, "@message-id-property", "messageID");
+            this.saveCopy = XMLConfig.getBoolean(node, "@save-copy", true);
+            logger.debug("Save message copy: " + this.saveCopy + " - Message ID property: " + this.messageIDProperty);
 
-            service = new ExchangeService();
-            service.setTimeout(timeout);
-            ExchangeCredentials credentials = (domain == null)
-                    ? new WebCredentials(userName, password)
-                    : new WebCredentials(userName, password, domain);
-            service.setCredentials(credentials);
-            service.setUrl(new URI(exchangeURL));
+            this.service = new ExchangeService();
+            this.service.setImpersonatedUserId(new ImpersonatedUserId(ConnectingIdType.SmtpAddress, this.userName));
+            if (this.traceEWS) {
+                this.service.setTraceEnabled(true);
+                this.service.setTraceFlags(EnumSet.allOf(TraceFlags.class)); // can also be restricted
+                this.service.setTraceListener(new ITraceListener() {
+                    @Override
+					public void trace(String traceType, String traceMessage) {
+                        // do some logging-mechanism here
+                        loggerTrc.debug("Type:" + traceType + " Message:" + traceMessage);
+                    }
+                });
+            }
+            this.service = new ExchangeService();
+            if (this.traceEWS) {
+                this.service.setTraceEnabled(true);
+                this.service.setTraceFlags(EnumSet.allOf(TraceFlags.class)); // can also be restricted
+                this.service.setTraceListener(new ITraceListener() {
+                    @Override
+					public void trace(String traceType, String traceMessage) {
+                        // do some logging-mechanism here
+                        loggerTrc.debug("Type:" + traceType + " Message:" + traceMessage);
+                    }
+                });
+            }
+
+            this.service.setTimeout(this.timeout);
+            if (this.oauthId == null) {
+            	ExchangeCredentials credentials = (this.domain == null)
+            			? new WebCredentials(this.userName, this.password)
+            			: new WebCredentials(this.userName, this.password, this.domain);
+            			this.service.setCredentials(credentials);
+            }
+            this.service.setImpersonatedUserId(new ImpersonatedUserId(ConnectingIdType.SmtpAddress, this.userName));
+            //this.service.getHttpHeaders().put("X-AnchorMailbox", "testinvitalia@invitalia.it");
+            this.service.setUrl(new URI(this.exchangeURL));
 
             initMailProperties(XMLConfig.getNode(node, "mail-message"));
         }
@@ -195,7 +233,7 @@ public class SendCallOperation implements CallOperation
 
     /**
      * Initializes the properties of the mail.
-     * 
+     *
      * @param node
      *        the configuration node containing the mail properties.
      * @throws XMLConfigException
@@ -203,10 +241,10 @@ public class SendCallOperation implements CallOperation
      */
     private void initMailProperties(Node node) throws XMLConfigException
     {
-        subjectText = XMLConfig.get(node, "@subject");
-        logger.debug("Subject: " + subjectText);
-        contentType = XMLConfig.get(node, "@content-type").replace('-', '/');
-        logger.debug("Content type: " + contentType);
+        this.subjectText = XMLConfig.get(node, "@subject");
+        logger.debug("Subject: " + this.subjectText);
+        this.contentType = XMLConfig.get(node, "@content-type").replace('-', '/');
+        logger.debug("Content type: " + this.contentType);
 
         Node destinations = XMLConfig.getNode(node, "destinations");
         if (destinations != null) {
@@ -223,13 +261,13 @@ public class SendCallOperation implements CallOperation
             initAttachments(attachments);
         }
 
-        isHighPriority = XMLConfig.getBoolean(node, "@high-priority", false);
-        logger.debug("Is high priority: " + isHighPriority);
+        this.isHighPriority = XMLConfig.getBoolean(node, "@high-priority", false);
+        logger.debug("Is high priority: " + this.isHighPriority);
     }
 
     /**
      * Initializes the list of mail destinations.
-     * 
+     *
      * @param node
      *        the configuration node containing the destinations.
      * @throws XMLConfigException
@@ -241,42 +279,42 @@ public class SendCallOperation implements CallOperation
         if (toNode != null) {
             NodeList list = XMLConfig.getNodeList(toNode, "mail-address");
             for (int i = 0; i < list.getLength(); i++) {
-                to += XMLConfig.get(list.item(i), "@address");
+                this.to += XMLConfig.get(list.item(i), "@address");
                 if (i < (list.getLength() - 1)) {
-                    to += ",";
+                    this.to += ",";
                 }
             }
-            logger.debug("To: " + to);
+            logger.debug("To: " + this.to);
         }
 
         Node ccNode = XMLConfig.getNode(node, "cc");
         if (ccNode != null) {
             NodeList list = XMLConfig.getNodeList(ccNode, "mail-address");
             for (int i = 0; i < list.getLength(); i++) {
-                cc += XMLConfig.get(list.item(i), "@address");
+                this.cc += XMLConfig.get(list.item(i), "@address");
                 if (i < (list.getLength() - 1)) {
-                    cc += ",";
+                    this.cc += ",";
                 }
             }
-            logger.debug("Cc: " + cc);
+            logger.debug("Cc: " + this.cc);
         }
 
         Node bccNode = XMLConfig.getNode(node, "bcc");
         if (bccNode != null) {
             NodeList list = XMLConfig.getNodeList(bccNode, "mail-address");
             for (int i = 0; i < list.getLength(); i++) {
-                bcc += XMLConfig.get(list.item(i), "@address");
+                this.bcc += XMLConfig.get(list.item(i), "@address");
                 if (i < (list.getLength() - 1)) {
-                    bcc += ",";
+                    this.bcc += ",";
                 }
             }
-            logger.debug("Bcc: " + bcc);
+            logger.debug("Bcc: " + this.bcc);
         }
     }
 
     /**
      * Initializes the message body of the mail.
-     * 
+     *
      * @param node
      *        the configuration node containing the message body properties.
      * @throws XMLConfigException
@@ -284,25 +322,25 @@ public class SendCallOperation implements CallOperation
      */
     private void initMessageBody(Node node) throws XMLConfigException
     {
-        gvBufferDump = XMLConfig.getBoolean(node, "@gvBuffer-dump", false);
-        logger.debug("GVBuffer Dump: " + gvBufferDump);
+        this.gvBufferDump = XMLConfig.getBoolean(node, "@gvBuffer-dump", false);
+        logger.debug("GVBuffer Dump: " + this.gvBufferDump);
 
         Node text = XMLConfig.getNode(node, "message-text");
 
         if (text != null) {
-            messageText = XMLConfig.get(text, "text()", "GreenVulcano Message");
-            escapeHTMLInGVBufferFields = XMLConfig.getBoolean(text, "@escape-HTML-in-gvBuffer-fields", true);
+            this.messageText = XMLConfig.get(text, "text()", "GreenVulcano Message");
+            this.escapeHTMLInGVBufferFields = XMLConfig.getBoolean(text, "@escape-HTML-in-gvBuffer-fields", true);
         }
         else {
-            messageText = "";
+            this.messageText = "";
         }
 
-        logger.debug("Text: " + messageText);
+        logger.debug("Text: " + this.messageText);
     }
 
     /**
      * Initializes the attachments of the mail.
-     * 
+     *
      * @param node
      *        the configuration node containing the attachments properties.
      * @throws XMLConfigException
@@ -313,17 +351,17 @@ public class SendCallOperation implements CallOperation
         NodeList list = XMLConfig.getNodeList(node, "file-attachment");
         int numFiles = list.getLength();
         if (numFiles > 0) {
-            fileAttachments = new ArrayList<String>();
+            this.fileAttachments = new ArrayList<String>();
             for (int i = 0; i < numFiles; i++) {
-                fileAttachments.add(XMLConfig.get(list.item(i), "@path"));
+                this.fileAttachments.add(XMLConfig.get(list.item(i), "@path"));
             }
-            logger.debug("Attach file: " + fileAttachments);
+            logger.debug("Attach file: " + this.fileAttachments);
         }
 
         Node gvBufferNode = XMLConfig.getNode(node, "gvBuffer");
         if (gvBufferNode != null) {
-            gvBufferName = XMLConfig.get(gvBufferNode, "@name");
-            logger.debug("Attach gvBuffer: " + gvBufferName);
+            this.gvBufferName = XMLConfig.get(gvBufferNode, "@name");
+            logger.debug("Attach gvBuffer: " + this.gvBufferName);
         }
     }
 
@@ -349,25 +387,28 @@ public class SendCallOperation implements CallOperation
 
     /**
      * Sends an email.
-     * 
+     *
      * @param gvBuffer
      *        the gvBuffer.
-     * 
+     *
      * @throws MessagingException
      * @throws UnsupportedEncodingException
      * @throws GVException
      */
     private void sendMail(GVBuffer gvBuffer) throws Exception
     {
-        EmailMessage msg = new EmailMessage(service);
+        if (this.oauthId != null) {
+        	this.service.getHttpHeaders().put("Authorization", "Bearer " + OAuthHelper.instance().getToken(this.oauthId));
+        }
+        EmailMessage msg = new EmailMessage(this.service);
 
-        if (isHighPriority) {
+        if (this.isHighPriority) {
             msg.setImportance(Importance.High);
         }
 
         String appoTO = gvBuffer.getProperty("GV_SMTP_TO");
         if ((appoTO == null) || "".equals(appoTO)) {
-            appoTO = to;
+            appoTO = this.to;
         }
         if (!appoTO.equals("")) {
             EmailAddressCollection eac = msg.getToRecipients();
@@ -380,7 +421,7 @@ public class SendCallOperation implements CallOperation
 
         String appoCC = gvBuffer.getProperty("GV_SMTP_CC");
         if ((appoCC == null) || "".equals(appoCC)) {
-            appoCC = cc;
+            appoCC = this.cc;
         }
         if (!appoCC.equals("")) {
             EmailAddressCollection eac = msg.getCcRecipients();
@@ -393,7 +434,7 @@ public class SendCallOperation implements CallOperation
 
         String appoBCC = gvBuffer.getProperty("GV_SMTP_BCC");
         if ((appoBCC == null) || "".equals(appoBCC)) {
-            appoBCC = bcc;
+            appoBCC = this.bcc;
         }
         if (!appoBCC.equals("")) {
             EmailAddressCollection eac = msg.getBccRecipients();
@@ -406,42 +447,42 @@ public class SendCallOperation implements CallOperation
         }
 
         String subject = null;
-        if (subjectText.indexOf("${") != -1) {
-            subject = parseMessage(subjectText, gvBuffer);
+        if (this.subjectText.indexOf("${") != -1) {
+            subject = parseMessage(this.subjectText, gvBuffer);
         }
         else {
-            subject = subjectText;
+            subject = this.subjectText;
         }
         logger.debug("Generated mail subject: " + subject);
         msg.setSubject(subject);
 
         String message = "";
-        if (messageText != null) {
-            if (messageText.indexOf("${") != -1) {
-                message = parseMessage(messageText, gvBuffer);
+        if (this.messageText != null) {
+            if (this.messageText.indexOf("${") != -1) {
+                message = parseMessage(this.messageText, gvBuffer);
             }
             else {
-                message = messageText;
+                message = this.messageText;
             }
         }
         logger.debug("Generated mail body: \n" + message);
 
-        if (gvBufferDump) {
+        if (this.gvBufferDump) {
             StringBuffer buf = new StringBuffer(message);
-            if (contentType.equals("text/html")) {
+            if (this.contentType.equals("text/html")) {
                 buf.append("<pre>");
             }
             buf.append(System.getProperty("line.separator"));
 
             String appMsg = new GVBufferDump(gvBuffer, true).toString();
 
-            if (contentType.equals("text/html")) {
+            if (this.contentType.equals("text/html")) {
                 appMsg = StringToHTML.quote(appMsg);
             }
 
             buf.append(appMsg);
 
-            if (contentType.equals("text/html")) {
+            if (this.contentType.equals("text/html")) {
                 buf.append("</pre>");
             }
 
@@ -449,7 +490,7 @@ public class SendCallOperation implements CallOperation
         }
 
         MessageBody body = new MessageBody();
-        if (contentType.equals("text/html")) {
+        if (this.contentType.equals("text/html")) {
             body.setBodyType(BodyType.HTML);
             body.setText(message);
         }
@@ -461,14 +502,14 @@ public class SendCallOperation implements CallOperation
 
         String appoBufferName = gvBuffer.getProperty("GV_SMTP_BUFFER_NAME");
         if ((appoBufferName == null) || "".equals(appoBufferName)) {
-            appoBufferName = gvBufferName;
+            appoBufferName = this.gvBufferName;
         }
 
         if (appoBufferName != null) {
             addAttachGVBuffer(msg, parseMessage(appoBufferName, gvBuffer), gvBuffer.getObject());
         }
 
-        List<String> appoFileAttachments = fileAttachments;
+        List<String> appoFileAttachments = this.fileAttachments;
         String appoFiles = gvBuffer.getProperty("GV_SMTP_ATTACHMENTS");
         if ((appoFiles != null) && (!"".equals(appoFiles))) {
             appoFileAttachments = TextUtils.splitByStringSeparator(appoFiles, ";");
@@ -479,7 +520,7 @@ public class SendCallOperation implements CallOperation
             }
         }
 
-        if (saveCopy) {
+        if (this.saveCopy) {
             msg.sendAndSaveCopy(WellKnownFolderName.SentItems);
         }
         else {
@@ -491,13 +532,13 @@ public class SendCallOperation implements CallOperation
 
     /**
      * Gets the MIME body part containing the file to be attached.
-     * 
+     *
      * @param filePath
      *        the path of the file to be attached.
      * @param gvBuffer
-     * 
+     *
      * @return the MIME body part containing the file to be attached.
-     * 
+     *
      * @throws IOException
      * @throws ServiceLocalException
      */
@@ -518,10 +559,10 @@ public class SendCallOperation implements CallOperation
 
     /**
      * Gets the MIME body part containing the data to be attached.
-     * 
+     *
      * @param data
      *        the data to be attached.
-     * 
+     *
      * @throws MessagingException
      *         if an error occurs.
      */
@@ -547,7 +588,7 @@ public class SendCallOperation implements CallOperation
 
     /**
      * Parses the text message applying the substitutions.
-     * 
+     *
      * @param messageText
      *        the template message.
      * @param gvBuffer
@@ -556,7 +597,7 @@ public class SendCallOperation implements CallOperation
      */
     private String parseMessage(String message, GVBuffer gvBuffer)
     {
-        MessageFormatter messageFormatter = new MessageFormatter(message, gvBuffer, escapeHTMLInGVBufferFields);
+        MessageFormatter messageFormatter = new MessageFormatter(message, gvBuffer, this.escapeHTMLInGVBufferFields);
         return messageFormatter.toString();
     }
 
@@ -593,12 +634,12 @@ public class SendCallOperation implements CallOperation
     @Override
     public OperationKey getKey()
     {
-        return key;
+        return this.key;
     }
 
     /**
      * Return the alias for the given service
-     * 
+     *
      * @param gvBuffer
      *        the input service data
      * @return the configured alias
