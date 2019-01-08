@@ -1,23 +1,35 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package tests.unit.gvesb.gvcore;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import org.apache.commons.codec.binary.Base64;
+import org.custommonkey.xmlunit.XMLTestCase;
+import org.custommonkey.xmlunit.XMLUnit;
+import org.w3c.dom.Document;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.buffer.Id;
@@ -26,19 +38,9 @@ import it.greenvulcano.gvesb.identity.GVIdentityHelper;
 import it.greenvulcano.gvesb.identity.impl.DummyIdentityInfo;
 import it.greenvulcano.gvesb.virtual.pool.OperationManagerPool;
 import it.greenvulcano.jmx.JMXEntryPoint;
+import it.greenvulcano.util.bin.BinaryUtils;
 import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.custommonkey.xmlunit.XMLTestCase;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.w3c.dom.Document;
-
 import tests.unit.gvesb.gvcore.jmx.Test;
 import tests.unit.gvesb.gvcore.jmx.TestMBean;
 
@@ -67,7 +69,7 @@ public class GVCoreTestCase extends XMLTestCase
             for (ObjectName objectName : set) {
                 System.out.println(objectName);
             }
-            assertTrue("No JMX object returned in GreenVulcano domain", set != null && !set.isEmpty());
+            assertTrue("No JMX object returned in GreenVulcano domain", (set != null) && !set.isEmpty());
             TestMBean t = new Test(result);
             server.registerMBean(t, new ObjectName("GreenVulcano:service=GVTestNotification"));
         }
@@ -222,7 +224,7 @@ public class GVCoreTestCase extends XMLTestCase
         GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
         gvBuffer.setObject(TEST_BUFFER);
         GreenVulcano greenVulcano = new GreenVulcano();
-        
+
         gvBuffer.setProperty("MODE", "TOUPPER");
         GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
         assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
@@ -378,7 +380,7 @@ public class GVCoreTestCase extends XMLTestCase
         long timeout = System.currentTimeMillis() - start;
         assertTrue(Math.abs(timeout - 1000) < 200);
     }
-    
+
     /**
      * @throws Exception
      */
@@ -394,6 +396,7 @@ public class GVCoreTestCase extends XMLTestCase
         System.out.println("testGVCoreAggregate: " + XMLUtils.serializeDOM_S((Document) gvBufferout.getObject()));
         assertXMLEqual("testGVCoreAggregate failed", outXML, (Document) gvBufferout.getObject());
     }
+
     /**
      * @throws Exception
      */
@@ -409,6 +412,7 @@ public class GVCoreTestCase extends XMLTestCase
         System.out.println("testGVCoreAggregate2: " + XMLUtils.serializeDOM_S((Document) gvBufferout.getObject()));
         assertXMLEqual("testGVCoreAggregate2 failed", outXML, (Document) gvBufferout.getObject());
     }
+
     /**
      * @throws Exception
      */
@@ -424,6 +428,7 @@ public class GVCoreTestCase extends XMLTestCase
         System.out.println("testGVCoreAggregateDte: " + XMLUtils.serializeDOM_S((Document) gvBufferout.getObject()));
         assertXMLEqual("testGVCoreAggregateDte failed", outXML, (Document) gvBufferout.getObject());
     }
+
     /**
      * @throws Exception
      */
@@ -438,5 +443,74 @@ public class GVCoreTestCase extends XMLTestCase
         GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
         System.out.println("testGVCoreMerge: " + XMLUtils.serializeDOM_S((Document) gvBufferout.getObject()));
         assertXMLEqual("testGVCoreMerge failed", outXML, (Document) gvBufferout.getObject());
+    }
+
+    /**
+     * @throws Exception
+     */
+    /*@Ignore
+    public void testGVCoreTestZipComp() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_ZIP";
+        String outZip = Base64.encodeBase64String(BinaryUtils.readFileAsBytesFromCP("zip_file.zip"));
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME);
+        gvBuffer.setObject("test zip data");
+
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals("testGVCoreTestZipComp failed", outZip, Base64.encodeBase64String((byte[]) gvBufferout.getObject()));
+    }*/
+
+    /**
+     * @throws Exception
+     */
+    /*@Ignore
+    public void testGVCoreTestZipUnComp() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_UNZIP";
+        String outTxt = "test zip data";
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME);
+
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals("testGVCoreTestZipUnComp failed", outTxt, new String((byte[]) gvBufferout.getObject()));
+    }*/
+
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreTestGZipComp() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_GZIP";
+        byte[] data = BinaryUtils.readFileAsBytesFromCP("gzip_file.gz");
+        String outZip = Base64.encodeBase64String(Arrays.copyOfRange(data, 10, data.length -10)); // skip gzip header
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME);
+        gvBuffer.setObject("test gzip data");
+
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        byte[] out = (byte[]) gvBufferout.getObject();
+        assertEquals("testGVCoreTestZipComp failed", outZip, Base64.encodeBase64String(Arrays.copyOfRange(out, 10, out.length -10)));  // skip gzip header
+    }
+
+    /**
+     * @throws Exception
+     */
+    public void testGVCoreTestGZipUnComp() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TEST_UNGZIP";
+        String outTxt = "test gzip data";
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME);
+        gvBuffer.setObject(BinaryUtils.readFileAsBytesFromCP("gzip_file.gz"));
+
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        String out = new String((byte[]) gvBufferout.getObject());
+        System.out.println("testGVCoreTestGZipUnComp : '" + out + "'");
+        assertEquals("testGVCoreTestGZipUnComp failed", outTxt, out);
     }
 }

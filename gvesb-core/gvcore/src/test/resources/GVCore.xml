@@ -274,6 +274,66 @@ STACK  : ${stackTrace}
           </Flow>
         </Operation>
       </Service>
+      <Service group-name="DEFAULT_GRP" id-service="TEST_ZIP" service-activation="on">
+        <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id" 
+                   type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+          <Description>VulCon generated Operation</Description>
+          <Participant id-channel="TEST_CHANNEL" id-system="GVESB" />
+          <Flow first-node="compress" point-x="50" point-y="150">
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="compress" input="input"
+              next-node-id="end" op-type="change GVBuffer" output="output" type="flow-node">
+              <ChangeGVBuffer clear-data="false" compress-op="compress" />
+            </ChangeGVBufferNode>
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output"
+              point-x="700" point-y="250" type="flow-node" end-business-process="yes"/>
+          </Flow>
+        </Operation>
+      </Service>
+      <Service group-name="DEFAULT_GRP" id-service="TEST_UNZIP" service-activation="on">
+        <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id" 
+                   type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+          <Description>VulCon generated Operation</Description>
+          <Participant id-channel="TEST_CHANNEL" id-system="GVESB" />
+          <Flow first-node="uncompress" point-x="50" point-y="150">
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="uncompress" input="input"
+              next-node-id="end" op-type="change GVBuffer" output="output" type="flow-node">
+              <ChangeGVBuffer clear-data="false" compress-op="uncompress" />
+            </ChangeGVBufferNode>
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output"
+              point-x="700" point-y="250" type="flow-node" end-business-process="yes"/>
+          </Flow>
+        </Operation>
+      </Service>
+      <Service group-name="DEFAULT_GRP" id-service="TEST_GZIP" service-activation="on">
+        <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id" 
+                   type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+          <Description>VulCon generated Operation</Description>
+          <Participant id-channel="TEST_CHANNEL" id-system="GVESB" />
+          <Flow first-node="compress" point-x="50" point-y="150">
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="compress" input="input"
+              next-node-id="end" op-type="change GVBuffer" output="output" type="flow-node">
+              <ChangeGVBuffer clear-data="false" compress-op="compress" compress-type="gzip"/>
+            </ChangeGVBufferNode>
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output"
+              point-x="700" point-y="250" type="flow-node" end-business-process="yes"/>
+          </Flow>
+        </Operation>
+      </Service>
+      <Service group-name="DEFAULT_GRP" id-service="TEST_UNGZIP" service-activation="on">
+        <Operation name="RequestReply" operation-activation="on" out-check-type="sys-svc-id" 
+                   type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+          <Description>VulCon generated Operation</Description>
+          <Participant id-channel="TEST_CHANNEL" id-system="GVESB" />
+          <Flow first-node="uncompress" point-x="50" point-y="150">
+            <ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="uncompress" input="input"
+              next-node-id="end" op-type="change GVBuffer" output="output" type="flow-node">
+              <ChangeGVBuffer clear-data="false" compress-op="uncompress" compress-type="gzip"/>
+            </ChangeGVBufferNode>
+            <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output"
+              point-x="700" point-y="250" type="flow-node" end-business-process="yes"/>
+          </Flow>
+        </Operation>
+      </Service>
       <Service group-name="DEFAULT_GRP" id-service="TOUPPER_A" service-activation="on">
         <Operation name="Request" operation-activation="on" out-check-type="sys-svc-id" 
                    type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
@@ -986,7 +1046,7 @@ data.setObject(str.substring(1));</JavaScript>
              <GVSubFlowSplittedNode class="it.greenvulcano.gvesb.core.flow.GVSubFlowSplittedNode"
                                     partition-dp="ognlCollectionDataProvider"
                                     default-id="end" id="split" input="input"
-                                    max-thread="5" on-exception-id="end-exc"
+                                    max-thread="15" on-exception-id="end-exc"
                                     on-skip-id="end-skip"
                                     on-timeout-id="end-tout" op-type="splitter"
                                     output="output" point-x="186" point-y="152"
