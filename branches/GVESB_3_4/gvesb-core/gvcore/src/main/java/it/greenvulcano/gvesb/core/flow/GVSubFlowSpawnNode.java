@@ -1,23 +1,33 @@
 /*
  * Copyright (c) 2009-2014 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.flow;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -36,19 +46,9 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.xpath.XPathFinder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
  * GVSubFlowSpawnNode class.
- * 
+ *
  * @version 3.4.0 Jan 17, 2013
  * @author GreenVulcano Developer Team
  */
@@ -71,7 +71,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
     /**
      * The SubFlow reference to invoke.
      */
-    private List<FlowDef>                    flowDefs         = new ArrayList<FlowDef>();
+    private final List<FlowDef>              flowDefs         = new ArrayList<FlowDef>();
     /**
      * The SubFlowPool instances.
      */
@@ -100,22 +100,22 @@ public class GVSubFlowSpawnNode extends GVFlowNode
 
         try {
             this.defNode = defNode;
-            defaultId = XMLConfig.get(defNode, "@default-id", "");
-            if (defaultId.equals("")) {
+            this.defaultId = XMLConfig.get(defNode, "@default-id", "");
+            if (this.defaultId.equals("")) {
                 throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'default-id'"},
                         {"node", XPathFinder.buildXPath(defNode)}});
             }
-            onExceptionId = XMLConfig.get(defNode, "@on-exception-id", "");
-            onSkipId = XMLConfig.get(defNode, "@on-skip-id", "");
-            timeout = XMLConfig.getInteger(defNode, "@timeout", 30);
+            this.onExceptionId = XMLConfig.get(defNode, "@on-exception-id", "");
+            this.onSkipId = XMLConfig.get(defNode, "@on-skip-id", "");
+            this.timeout = XMLConfig.getInteger(defNode, "@timeout", 30);
 
-            changeLogContext = XMLConfig.getBoolean(defNode, "@change-log-context", true);
+            this.changeLogContext = XMLConfig.getBoolean(defNode, "@change-log-context", true);
 
             initFlowDefs(defNode);
 
             Node intSvcNode = XMLConfig.getNode(defNode, "InputServices");
             if (intSvcNode != null) {
-                inputServices.init(intSvcNode, this, true);
+                this.inputServices.init(intSvcNode, this, true);
             }
             initSubFlowPool(defNode);
         }
@@ -144,9 +144,8 @@ public class GVSubFlowSpawnNode extends GVFlowNode
         Object inData = environment.get(input);
         if (Throwable.class.isInstance(inData)) {
             environment.put(output, inData);
-            logger.debug("END - Execute GVSubFlowSpawnNode '" + getId() + "' with Exception input -> "
-                    + onExceptionId);
-            return onExceptionId;
+            logger.debug("END - Execute GVSubFlowSpawnNode '" + getId() + "' with Exception input -> " + this.onExceptionId);
+            return this.onExceptionId;
         }
         try {
             GVBuffer data = (GVBuffer) inData;
@@ -163,7 +162,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
             try {
                 NMDC.push();
 
-                internalData = inputServices.perform(internalData);
+                internalData = this.inputServices.perform(internalData);
 
                 processSubFlow(internalData, onDebug);
                 checkInterrupted("GVSubFlowSpawnNode", logger);
@@ -186,22 +185,21 @@ public class GVSubFlowSpawnNode extends GVFlowNode
             isError = true;
         }
 
-        String nextNodeId = defaultId;
+        String nextNodeId = this.defaultId;
         String conditionName = "DEFAULT";
         if (isError) {
             conditionName = "EXCEPTION";
-            nextNodeId = onExceptionId;
+            nextNodeId = this.onExceptionId;
         }
         else if (isSkipped) {
             conditionName = "SKIPPED";
-            nextNodeId = ("".equals(onSkipId) ? defaultId : onSkipId);
+            nextNodeId = ("".equals(this.onSkipId) ? this.defaultId : this.onSkipId);
         }
         else {
             // environment.put(GVNodeCheck.LAST_GV_EXCEPTION, lastException);
         }
 
-        logger.info("Executing GVSubFlowSpawnNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId
-                + "'");
+        logger.info("Executing GVSubFlowSpawnNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
 
         dumpEnvironment(logger, false, environment);
         long endTime = System.currentTimeMillis();
@@ -211,12 +209,12 @@ public class GVSubFlowSpawnNode extends GVFlowNode
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getDefaultNextNodeId()
      */
     @Override
     public String getDefaultNextNodeId() {
-        return defaultId;
+        return this.defaultId;
     }
 
     /**
@@ -224,7 +222,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
      */
     @Override
     public void cleanUp() throws GVCoreException {
-        inputServices.cleanUp();
+        this.inputServices.cleanUp();
     }
 
     /**
@@ -232,14 +230,14 @@ public class GVSubFlowSpawnNode extends GVFlowNode
      */
     @Override
     public void destroy() throws GVCoreException {
-        inputServices = null;
-        if (subFlowPool != null) {
-            for (GVSubFlowPool sfp : subFlowPool.values()) {
+        this.inputServices = null;
+        if (this.subFlowPool != null) {
+            for (GVSubFlowPool sfp : this.subFlowPool.values()) {
                 sfp.destroy();
             }
-            subFlowPool.clear();
+            this.subFlowPool.clear();
         }
-        subFlowPool = null;
+        this.subFlowPool = null;
     }
 
 
@@ -259,7 +257,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
             for (int i = 0; i < fdNodes.getLength(); i++) {
                 FlowDef fd = new FlowDef();
                 fd.init(fdNodes.item(i));
-                flowDefs.add(fd);
+                this.flowDefs.add(fd);
             }
         }
         catch (XMLConfigException exc) {
@@ -271,7 +269,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
                     {"node", XPathFinder.buildXPath(defNode)}}, exc);
         }
     }
-    
+
     /**
      * @param defNode
      *        the flow node definition
@@ -280,17 +278,16 @@ public class GVSubFlowSpawnNode extends GVFlowNode
      */
     private void initSubFlowPool(Node defNode) throws GVCoreConfException {
         try {
-            for (FlowDef fd : flowDefs) {
-                Node sfNode = XMLConfig.getNode(defNode, "ancestor::Operation/SubFlow[@name='" + 
-                                                fd.getSubflow() + "']");
+            for (FlowDef fd : this.flowDefs) {
+                Node sfNode = XMLConfig.getNode(defNode, "ancestor::Operation/SubFlow[@name='" + fd.getSubflow() + "']");
                 if (sfNode == null) {
-                    throw new GVCoreConfException("GVCORE_INVALID_CFG_ERROR", new String[][]{{"message", 
+                    throw new GVCoreConfException("GVCORE_INVALID_CFG_ERROR", new String[][]{{"message",
                             "missing SubFlow[" + fd.getSubflow() + "]"},
                             {"node", XPathFinder.buildXPath(defNode)}});
                 }
                 GVSubFlowPool sfp = new GVSubFlowPool();
                 sfp.init(defNode, sfNode);
-                subFlowPool.put(sfp.getSubFlowName(), sfp);
+                this.subFlowPool.put(sfp.getSubFlowName(), sfp);
             }
         }
         catch (XMLConfigException exc) {
@@ -311,7 +308,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
         try {
             SpawnExecutor executor = SpawnExecutor.instance();
 
-            Iterator<FlowDef> itFlow = flowDefs.iterator();
+            Iterator<FlowDef> itFlow = this.flowDefs.iterator();
             while (itFlow.hasNext() && !isInterrupted()) {
                 FlowDef fd = itFlow.next();
 
@@ -320,7 +317,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
                     logger.debug("currInput[" + fd.getName() + "]= " + currInput.toString());
                 }
                 if (fd.check(currInput)) {
-                    tasks.add(new SubFlowTask(subFlowPool.get(fd.getSubflow()), currInput, onDebug, changeLogContext, logContext, fd.getInputRefDP(), false));
+                    tasks.add(new SubFlowTask(this.subFlowPool.get(fd.getSubflow()), currInput, onDebug, this.changeLogContext, logContext, fd.getInputRefDP(), false));
                 }
             }
 
@@ -331,7 +328,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
                         {"service", internalData.getService()}, {"system", internalData.getSystem()},
                         {"id", internalData.getId().toString()}, {"message", "No spawn task to execute"}});
             }
-            executor.execute(getId(), internalData.getId(), tasks, timeout);
+            executor.execute(getId(), internalData.getId(), tasks, this.timeout);
 
             logger.info("END ProcessSubFlow");
         }

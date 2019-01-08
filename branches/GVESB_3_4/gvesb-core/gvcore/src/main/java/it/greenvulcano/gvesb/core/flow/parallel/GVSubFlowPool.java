@@ -19,14 +19,6 @@
  */
 package it.greenvulcano.gvesb.core.flow.parallel;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
-import it.greenvulcano.gvesb.core.exc.GVCoreException;
-import it.greenvulcano.gvesb.core.flow.GVSubFlow;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.log.NMDC;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -34,6 +26,14 @@ import java.util.Set;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
+import it.greenvulcano.gvesb.core.exc.GVCoreException;
+import it.greenvulcano.gvesb.core.flow.GVSubFlow;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.log.NMDC;
 
 /**
  * Object Pool  <code>GVSubFlow</code>.
@@ -53,7 +53,7 @@ public class GVSubFlowPool
     /**
      * Set assigned pool's instances.
      */
-    private Set<GVSubFlow>        assignedSF  = new HashSet<GVSubFlow>();
+    private final Set<GVSubFlow>        assignedSF  = new HashSet<GVSubFlow>();
 
     private String                sfName      = null;
     private Node                  sfNode      = null;
@@ -61,15 +61,15 @@ public class GVSubFlowPool
      * The default logger level.
      */
     private Level                 loggerLevel = Level.ALL;
-    
+
     private int initialSize = 1;
-    private int maximumSize = 10;
-    private int maximumCreation = 20;
+    private int maximumSize = 20;
+    private int maximumCreation = 22;
     private int created = 0;
     private int maxCreated = 0;
-    
+
     /**
-     * 
+     *
      */
     public GVSubFlowPool()
     {
@@ -77,12 +77,12 @@ public class GVSubFlowPool
     }
 
     /**
-     * @throws DataHandlerException
+     * @throws GVCoreException if errors occurs
      */
     public void init(Node node, Node sfNode) throws GVCoreException
     {
         logger.debug("Initializing the GVSubFlow Pool.");
-        loggerLevel = GVLogger.getThreadMasterLevel();
+        this.loggerLevel = GVLogger.getThreadMasterLevel();
         this.sfNode = sfNode;
         try {
             this.sfName = XMLConfig.get(sfNode, "@name");
@@ -92,30 +92,32 @@ public class GVSubFlowPool
             throw new GVCoreConfException("GVSubFlowPool initialization error", exc);
         }
 
-        if (initialSize < 0) {
+        this.maximumSize = XMLConfig.getInteger(node, "@max-thread", 20);
+        this.maximumCreation = this.maximumSize + 2;
+        this.initialSize = this.maximumSize / 2;
+
+        if (this.initialSize < 0) {
             throw new GVCoreConfException("GVSubFlowPool initialSize < 0");
         }
-        if ((maximumSize > 0) && (initialSize > maximumSize)) {
-            throw new GVCoreConfException("GVSubFlowPool initialSize(" + initialSize + ") > maximumSize(" + maximumSize
-                    + ")");
+        if ((this.maximumSize > 0) && (this.initialSize > this.maximumSize)) {
+            throw new GVCoreConfException("GVSubFlowPool initialSize(" + this.initialSize + ") > maximumSize(" + this.maximumSize + ")");
         }
-        if ((maximumCreation > 0) && (maximumSize > maximumCreation)) {
-            throw new GVCoreConfException("GVSubFlowPool maximumSize(" + maximumSize + ") > maximumCreation(" + maximumCreation
-                    + ")");
+        if ((this.maximumCreation > 0) && (this.maximumSize > this.maximumCreation)) {
+            throw new GVCoreConfException("GVSubFlowPool maximumSize(" + this.maximumSize + ") > maximumCreation(" + this.maximumCreation + ")");
         }
 
         NMDC.push();
         try {
-            for (int i = 0; i < initialSize; ++i) {
-                pool.add(createSubFlow());
+            for (int i = 0; i < this.initialSize; ++i) {
+                this.pool.add(createSubFlow());
             }
         }
         finally {
             NMDC.pop();
         }
 
-        logger.debug("Initialized GVSubFlowPool instance: initialSize=" + initialSize + ", maximumSize="
-                + maximumSize + ", maximumCreation=" + maximumCreation);
+        logger.debug("Initialized GVSubFlowPool instance: initialSize=" + this.initialSize + ", maximumSize="
+                + this.maximumSize + ", maximumCreation=" + this.maximumCreation);
     }
 
     public String getSubFlowName() {
@@ -127,7 +129,7 @@ public class GVSubFlowPool
      */
     public int getInitialSize()
     {
-        return initialSize;
+        return this.initialSize;
     }
 
     /**
@@ -135,7 +137,7 @@ public class GVSubFlowPool
      */
     public int getMaximumCreation()
     {
-        return maximumCreation;
+        return this.maximumCreation;
     }
 
     /**
@@ -143,7 +145,7 @@ public class GVSubFlowPool
      */
     public int getMaximumSize()
     {
-        return maximumSize;
+        return this.maximumSize;
     }
 
 
@@ -152,7 +154,7 @@ public class GVSubFlowPool
      */
     public int getMaxCreated()
     {
-        return maxCreated;
+        return this.maxCreated;
     }
 
     /**
@@ -160,7 +162,7 @@ public class GVSubFlowPool
      */
     public int getPooledCount()
     {
-        return pool.size();
+        return this.pool.size();
     }
 
     /**
@@ -168,7 +170,7 @@ public class GVSubFlowPool
      */
     public int getInUseCount()
     {
-        return assignedSF.size();
+        return this.assignedSF.size();
     }
 
     /**
@@ -186,27 +188,27 @@ public class GVSubFlowPool
      */
     public GVSubFlow getSubFlow() throws GVCoreException
     {
-        if (pool == null) {
+        if (this.pool == null) {
             return null;
         }
 
         synchronized (this) {
-            if (pool.size() > 0) {
+            if (this.pool.size() > 0) {
                 logger.debug("GVSubFlowPool - found instance in pool");
-                GVSubFlow subFlow = pool.removeFirst();
-    
-                logger.debug("GVSubFlowPool - extracting instance from pool(" + pool.size() + "/"
-                        + created + "/" + maximumCreation + ")");
-                assignedSF.add(subFlow);
+                GVSubFlow subFlow = this.pool.removeFirst();
+
+                logger.debug("GVSubFlowPool - extracting instance from pool(" + this.pool.size() + "/"
+                        + this.created + "/" + this.maximumCreation + ")");
+                this.assignedSF.add(subFlow);
                 return subFlow;
             }
 
-            if ((maximumCreation == -1) || (created < maximumCreation)) {
+            if ((this.maximumCreation == -1) || (this.created < this.maximumCreation)) {
                 GVSubFlow subFlow = createSubFlow();
                 logger.debug("GVSubFlowPool - not found instance in pool");
-                logger.debug("GVSubFlowPool - creating new instance(" + pool.size() + "/" + created
-                        + "/" + maximumCreation + ")");
-                assignedSF.add(subFlow);
+                logger.debug("GVSubFlowPool - creating new instance(" + this.pool.size() + "/" + this.created
+                        + "/" + this.maximumCreation + ")");
+                this.assignedSF.add(subFlow);
                 return subFlow;
             }
         }
@@ -224,11 +226,10 @@ public class GVSubFlowPool
         }
         synchronized (this) {
             try {
-                if (assignedSF.remove(subFlow)) {
-                    logger.debug("GVSubFlowPool - releasing instance(" + pool.size() + "/" + created + "/"
-                            + maximumCreation + ")");
-                    if ((maximumSize == -1) || ((pool != null) && (pool.size() < maximumSize))) {
-                        pool.addFirst(subFlow);
+                if (this.assignedSF.remove(subFlow)) {
+                    logger.debug("GVSubFlowPool - releasing instance(" + this.pool.size() + "/" + this.created + "/" + this.maximumCreation + ")");
+                    if ((this.maximumSize == -1) || ((this.pool != null) && (this.pool.size() < this.maximumSize))) {
+                        this.pool.addFirst(subFlow);
                         return;
 
                         /*long now = System.currentTimeMillis();
@@ -239,8 +240,7 @@ public class GVSubFlowPool
                         subFlow = pool.removeLast();*/
                     }
                     destroySubFlow(subFlow);
-                    logger.debug("GVSubFlowPool - destroying instance(" + pool.size() + "/" + created
-                            + "/" + maximumCreation + ")");
+                    logger.debug("GVSubFlowPool - destroying instance(" + this.pool.size() + "/" + this.created + "/" + this.maximumCreation + ")");
                 }
                 else {
                     logger.debug("GVSubFlowPool - instance not created by this pool, destroing it");
@@ -258,17 +258,17 @@ public class GVSubFlowPool
      */
     public synchronized void destroy()
     {
-        if (pool == null) {
+        if (this.pool == null) {
             return;
         }
         logger.debug("GVSubFlowPool - Begin destroying instances");
-        while (pool.size() > 0) {
-            GVSubFlow subFlow = pool.removeFirst();
+        while (this.pool.size() > 0) {
+            GVSubFlow subFlow = this.pool.removeFirst();
             destroySubFlow(subFlow);
         }
         logger.debug("GVSubFlowPool - End destroying instances");
-        assignedSF.clear();
-        pool = null;
+        this.assignedSF.clear();
+        this.pool = null;
     }
 
     /**
@@ -286,11 +286,11 @@ public class GVSubFlowPool
     private GVSubFlow createSubFlow() throws GVCoreException
     {
         GVSubFlow subFlow = new GVSubFlow();
-        subFlow.init(sfNode, false);
-        subFlow.setLoggerLevel(loggerLevel);
-        ++created;
-        if (created > maxCreated) {
-            maxCreated = created;
+        subFlow.init(this.sfNode, false);
+        subFlow.setLoggerLevel(this.loggerLevel);
+        ++this.created;
+        if (this.created > this.maxCreated) {
+            this.maxCreated = this.created;
         }
         return subFlow;
     }
@@ -298,8 +298,8 @@ public class GVSubFlowPool
     private void destroySubFlow(GVSubFlow subFlow)
     {
         subFlow.destroy();
-        if (created > 0) {
-            --created;
+        if (this.created > 0) {
+            --this.created;
         }
     }
 }

@@ -1,26 +1,23 @@
 /*
  * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.flow.parallel;
-
-import it.greenvulcano.gvesb.buffer.Id;
-import it.greenvulcano.util.thread.BaseThreadFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,24 +36,27 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 
+import it.greenvulcano.gvesb.buffer.Id;
+import it.greenvulcano.util.thread.BaseThreadFactory;
+
 /**
- * 
+ *
  * @version 3.4.0 Jun 17, 2013
  * @author GreenVulcano Developer Team
- * 
+ *
  */
 public class ParallelExecutor
 {
     public enum TerminationMode {
         // all subflows must terminate normally
-        NORMAL_END("Normal End"), 
-        // max execution time for the node after wich all executing subflows are terminated 
+        NORMAL_END("Normal End"),
+        // max execution time for the node after wich all executing subflows are terminated
         // and all queued subflows are cancelled
-        TIMEOUT("Timeout"), 
-        // at first subflow that ends with succes all executing subflows are terminated 
+        TIMEOUT("Timeout"),
+        // at first subflow that ends with succes all executing subflows are terminated
         // and all queued subflows are cancelled
-        FIRST_END("First End"), 
-        // at first subflow that ends with error all executing subflows are terminated 
+        FIRST_END("First End"),
+        // at first subflow that ends with error all executing subflows are terminated
         // and all queued subflows are cancelled
         FIRST_ERROR("First Error");
 
@@ -68,7 +68,7 @@ public class ParallelExecutor
 
         @Override
         public String toString() {
-            return desc;
+            return this.desc;
         }
 
         public static TerminationMode fromString(String name) {
@@ -92,10 +92,10 @@ public class ParallelExecutor
     }
 
 
-    private Logger             logger;
-    private String             owner;
+    private final Logger             logger;
+    private final String             owner;
     private boolean            isTimedout;
-    
+
     /**
      * Executor of SubFlowTask instances.
      */
@@ -106,8 +106,7 @@ public class ParallelExecutor
         this.logger = logger;
 
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        executor = new ThreadPoolExecutor(threadMax, threadMax, 2L, TimeUnit.MINUTES, queue, new BaseThreadFactory(
-                "ParallelExecutor#NONE", true));
+        this.executor = new ThreadPoolExecutor(threadMax, threadMax, 2L, TimeUnit.MINUTES, queue, new BaseThreadFactory("ParallelExecutor#NONE", true));
     }
 
     public boolean isTimedout() {
@@ -116,16 +115,18 @@ public class ParallelExecutor
 
     public List<Result> execute(Id ownerId, List<SubFlowTask> tasks, TerminationMode termMode, long timeout)
             throws InterruptedException {
-        if (ownerId == null)
-            throw new NullPointerException("Invalid ownerId");
-        if (tasks == null)
-            throw new NullPointerException("Invalid tasks");
-        if (tasks.size() == 0)
-            throw new IllegalArgumentException("Empty tasks");
-        isTimedout = false;
+        if (ownerId == null) {
+			throw new NullPointerException("Invalid ownerId");
+		}
+        if (tasks == null) {
+			throw new NullPointerException("Invalid tasks");
+		}
+        if (tasks.size() == 0) {
+			throw new IllegalArgumentException("Empty tasks");
+		}
+        this.isTimedout = false;
 
-        ((BaseThreadFactory) executor.getThreadFactory()).setThNamePrefix("ParallelExecutor#" + owner + "#"
-                + ownerId.toString());
+        ((BaseThreadFactory) this.executor.getThreadFactory()).setThNamePrefix("ParallelExecutor#" + this.owner + "#" + ownerId.toString());
 
         List<Result> results = null;
 
@@ -152,10 +153,10 @@ public class ParallelExecutor
         List<Future<Result>> futures = null;
         boolean timed = (termMode == TerminationMode.TIMEOUT);
         if (timed) {
-            futures = executor.invokeAll(tasks, timeout, TimeUnit.SECONDS);
+            futures = this.executor.invokeAll(tasks, timeout, TimeUnit.SECONDS);
         }
         else {
-            futures = executor.invokeAll(tasks);
+            futures = this.executor.invokeAll(tasks);
         }
         List<Result> results = new ArrayList<Result>(tasks.size());
         Iterator<SubFlowTask> taskIter = tasks.iterator();
@@ -169,7 +170,7 @@ public class ParallelExecutor
             }
             catch (CancellationException exc) {
                 if (timed) {
-                    isTimedout = true;
+                    this.isTimedout = true;
                 }
                 results.add(task.getCancelledResult(exc));
             }
@@ -178,8 +179,8 @@ public class ParallelExecutor
         return results;
     }
 
-    
-    
+
+
     private List<Result> endOnFirst(List<SubFlowTask> tasks, TerminationMode termMode, long timeout)
             throws InterruptedException {
         boolean timed = (termMode == TerminationMode.TIMEOUT);
@@ -188,7 +189,7 @@ public class ParallelExecutor
         List<Result> results = new ArrayList<Result>();
         List<Future<Result>> futures = new ArrayList<Future<Result>>(ntasks);
         Map<Future<Result>, SubFlowTask> futuresToTasks = new HashMap<Future<Result>, SubFlowTask>();
-        ExecutorCompletionService<Result> ecs = new ExecutorCompletionService<Result>(executor);
+        ExecutorCompletionService<Result> ecs = new ExecutorCompletionService<Result>(this.executor);
         try {
             long lastTime = (timed) ? System.nanoTime() : 0;
             SubFlowTask t = null;
@@ -200,7 +201,7 @@ public class ParallelExecutor
                 futuresToTasks.put(f, t);
                 futures.add(f);
             }
-            
+
             for (int i = 0; i < ntasks; ++i) {
                 if (timed) {
                     f = ecs.poll(nanos, TimeUnit.NANOSECONDS);
@@ -254,8 +255,8 @@ public class ParallelExecutor
             }
         }
         catch (TimeoutException exc) {
-            logger.warn(exc.getMessage());
-            isTimedout = true;
+            this.logger.warn(exc.getMessage());
+            this.isTimedout = true;
         }
         finally {
             for (Future<Result> f : futures) {
@@ -266,14 +267,14 @@ public class ParallelExecutor
         }
         return results;
     }
-    
-    
+
+
     public void cleanup(boolean forceTermination) {
-        executor.getQueue().clear();
+        this.executor.getQueue().clear();
     }
 
     public void destroy() {
-        executor.shutdownNow();
-        executor = null;
+        this.executor.shutdownNow();
+        this.executor = null;
     }
 }
