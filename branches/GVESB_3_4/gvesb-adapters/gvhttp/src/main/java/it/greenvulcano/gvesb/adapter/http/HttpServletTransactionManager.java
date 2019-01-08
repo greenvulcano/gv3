@@ -226,8 +226,23 @@ public class HttpServletTransactionManager
     private HttpServletTransaction getServletTransaction(String key) {
         HttpServletTransaction servletTransaction = transactions.get(key);
         if (servletTransaction == null) {
-            key = key.substring(0, key.indexOf("::")) + "::ALL";
-            servletTransaction = transactions.get(key);
+        	String list[] = key.split("::");
+        	if (list.length == 3) {
+        		key = list[0] + "::ALL::" + list[2];
+        		servletTransaction = transactions.get(key);
+        		if (servletTransaction == null) {
+        			key = list[0] + "::" + list[1] + "::ALL";
+            		servletTransaction = transactions.get(key);
+	        		if (servletTransaction == null) {
+	        			key = list[0] + "::ALL::ALL";
+	            		servletTransaction = transactions.get(key);
+	        		}		
+        		}		
+        	}
+        	else {
+        		key = key.substring(0, key.indexOf("::")) + "::ALL";
+        		servletTransaction = transactions.get(key);
+        	}
         }
         return servletTransaction;
     }
@@ -249,7 +264,7 @@ public class HttpServletTransactionManager
                     HttpServletTransaction transaction = new HttpServletTransaction();
                     transaction.init(transactionNode);
                     transactions.put(transaction.getKey(), transaction);
-                    logger.debug("init - adding Transaction control for '" + transaction.getKey() + "'");
+                    logger.debug("init - adding Transaction control for " + transaction);
                 }
             }
 
@@ -283,7 +298,7 @@ public class HttpServletTransactionManager
      * @return
      */
     private String getKey(GVTransactionInfo transInfo) {
-        return transInfo.getService() + "::" + transInfo.getSystem();
+        return transInfo.getService() + "::" + transInfo.getSystem() + "::" + transInfo.getOperation();
     }
 
 }

@@ -39,7 +39,7 @@ public class GVTransactionInfo
     /**
      * Name of the system initiating the communication.
      */
-    private String  system;
+    private String  system = "ALL";
 
     /**
      * Name of the requested service.
@@ -54,7 +54,7 @@ public class GVTransactionInfo
     /**
      * GV Operation.
      */
-    private String  operation;
+    private String  operation = "ALL";
 
     /**
      * Error message encapsulated within an exception thrown or caught by the
