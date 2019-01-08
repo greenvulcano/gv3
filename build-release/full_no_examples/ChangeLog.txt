@@ -1,4 +1,25 @@
 -------------------------------------------
+ESB version 3.4.0.11
+-------------------------------------------
+
+Commons:
+- JavaScript objects conversion to string now return an empty string instead of null
+- Improved scheduler shutdown
+- Improved multi-byte chars support in properties files
+- Modified sqlX placeholder in order to return an empty string instead of null if no data found
+- Added dateAdd and dateformatAdd placeholders
+
+DTEControlled:
+- Added capability to specify file encoding in csv to xml DTE transformer
+- Added support at xml to json converter to use * as "all fields" for forcing conversion to string
+
+VCL Excel:
+- Improved configuration reloading
+
+VCL Mail:
+- Corrected message placeholder parsing
+
+-------------------------------------------
 ESB version 3.4.0.10
 -------------------------------------------
 
