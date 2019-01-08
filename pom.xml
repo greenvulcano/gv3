@@ -283,7 +283,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvbase</artifactId>
-            <version>3.4.0.11-Final</version>
+            <version>3.4.0.13-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -403,7 +403,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-http</artifactId>
-            <version>3.4.0.1-Final</version>
+            <version>3.4.0.2-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -431,7 +431,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-msexchange</artifactId>
-            <version>3.4.0.1-Final</version>
+            <version>3.4.0.2-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -445,7 +445,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-file</artifactId>
-            <version>3.4.0.1-Final</version>
+            <version>3.4.0.2-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -482,7 +482,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore</artifactId>
-            <version>3.4.0.5-Final</version>
+            <version>3.4.0.6-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -532,7 +532,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdatahandler</artifactId>
-            <version>3.4.0.7-Final</version>
+            <version>3.4.0.9-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -553,7 +553,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp</artifactId>
-            <version>3.4.0.7-Final</version>
+            <version>3.4.0.9-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
