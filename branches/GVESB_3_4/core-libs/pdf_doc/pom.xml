@@ -26,12 +26,10 @@
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>xmlgraphics-commons</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>avalon-framework</groupId>
             <artifactId>avalon-framework</artifactId>
-            <scope>runtime</scope>
         </dependency>
 	</dependencies>
 </project>
