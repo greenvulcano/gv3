@@ -1,23 +1,47 @@
 /*
  * Copyright (c) 2009-2014 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.adapter.http.mapping;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -41,38 +65,16 @@ import it.greenvulcano.gvesb.log.GVBufferMDC;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.json.JSONUtils;
 import it.greenvulcano.util.xml.XMLUtils;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * RESTHttpServletMapping class
- * 
+ *
  * @version 3.5.0 July 20, 2014
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class RESTHttpServletMapping implements HttpServletMapping
 {
@@ -83,10 +85,10 @@ public class RESTHttpServletMapping implements HttpServletMapping
     private boolean                       dump                = false;
     private String                        responseContentType = null;
     private String                        responseCharacterEncoding = null;
-    private List<PatternResolver>         operationMappings   = new ArrayList<PatternResolver>();
+    private final List<PatternResolver>         operationMappings   = new ArrayList<PatternResolver>();
 
     /*
-     * /APP=prova/ELEMENT=test{{/DATA=\d+{{/SUD_DATA=blabla}}}}
+     * /APP=prova/ELEMENT=test{{/DATA=\d+{{/SUB_DATA=blabla}}}}
      * {{...}} optional terminal URL path component
      */
     static private class PatternResolver {
@@ -95,12 +97,13 @@ public class RESTHttpServletMapping implements HttpServletMapping
         private String service;
         private String system;
         private String operation;
+        private String masterIdFilter;
         private boolean haveOptional;
         private boolean extractHdr;
         private ChangeGVBuffer cGVBuffer  = null;
-        private List<String> propNames = new ArrayList<String>();
-        private List<Pattern> patterns = new ArrayList<Pattern>();
-        
+        private final List<String> propNames = new ArrayList<String>();
+        private final List<Pattern> patterns = new ArrayList<Pattern>();
+
         public PatternResolver() {
             // do nothing
         }
@@ -108,28 +111,29 @@ public class RESTHttpServletMapping implements HttpServletMapping
         public void init(Node node) throws AdapterHttpInitializationException {
             try {
                 this.pattern = XMLConfig.get(node, "@pattern");
-                if ((pattern == null) || "".equals(pattern)) {
+                if ((this.pattern == null) || "".equals(this.pattern)) {
                     throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern: empty");
                 }
                 this.method = XMLConfig.get(node, "@method");
-                if ((method == null) || "".equals(method)) {
-                    throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + pattern + "]: empty @method");
+                if ((this.method == null) || "".equals(this.method)) {
+                    throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + this.pattern + "]: empty @method");
                 }
                 this.service = XMLConfig.get(node, "@service");
-                if ((service == null) || "".equals(service)) {
-                    throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + method + "#" + pattern + "]: empty @service");
+                if ((this.service == null) || "".equals(this.service)) {
+                    throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + this.method + "#" + this.pattern + "]: empty @service");
                 }
                 this.system = XMLConfig.get(node, "@system", GVBuffer.DEFAULT_SYS);
                 this.operation = XMLConfig.get(node, "@operation");
-                if ((operation == null) || "".equals(operation)) {
-                    throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + method + "#" + pattern + "]: empty @operation");
+                if ((this.operation == null) || "".equals(this.operation)) {
+                    throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + this.method + "#" + this.pattern + "]: empty @operation");
                 }
                 this.extractHdr = XMLConfig.getBoolean(node, "@extract-headers", false);
                 Node cGVBufferNode = XMLConfig.getNode(node, "ChangeGVBuffer");
                 if (cGVBufferNode != null) {
-                    cGVBuffer = new ChangeGVBuffer();
-                    cGVBuffer.init(cGVBufferNode);
+                    this.cGVBuffer = new ChangeGVBuffer();
+                    this.cGVBuffer.init(cGVBufferNode);
                 }
+                this.masterIdFilter = XMLConfig.get(node, "@master-id-filter", XMLConfig.get(node, "ancestor::RESTActionMapping/@master-id-filter", ""));
             }
             catch (XMLConfigException exc) {
                 throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern: error reading configuration", exc);
@@ -139,8 +143,8 @@ public class RESTHttpServletMapping implements HttpServletMapping
 
         private void compile() throws AdapterHttpInitializationException {
             logger.debug("Compile - BEGIN");
-            logger.debug("Pattern: " + method + "#" + pattern);
-            String locPattern = pattern;
+            logger.debug("Pattern: " + this.method + "#" + this.pattern);
+            String locPattern = this.pattern;
             if (locPattern.startsWith("/")) {
                 locPattern = locPattern.substring(1);
             }
@@ -152,29 +156,42 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     String pN = elem.split("=")[0].trim();
                     String p = elem.split("=")[1].trim();
                     if (pN.startsWith("?:")) {
-                    	haveOptional = true;
+                    	this.haveOptional = true;
                     }
                     else {
-                    	if (haveOptional) {
-                    		throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + method + "#" + pattern + "]: NON Optional property [" + pN + "] come afther an optional property");
+                    	if (this.haveOptional) {
+                    		throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + this.method + "#" + this.pattern + "]: NON Optional property [" + pN + "] come afther an optional property");
                     	}
                     }
-                    propNames.add(pN);
-                    patterns.add(Pattern.compile(p));
+                    this.propNames.add(pN);
+                    this.patterns.add(Pattern.compile(p));
                     logger.debug("[" + pN + "]=[" + p + "]");
                 }
             }
             logger.debug("Compile - END");
-            if (patterns.isEmpty()) {
-                throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + method + "#" + pattern + "]: empty");
+            if (this.patterns.isEmpty()) {
+                throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + this.method + "#" + this.pattern + "]: empty");
             }
         }
-        
+
         public String match(HttpServletRequest request, String methodName, String path, GVBuffer data) throws AdapterHttpExecutionException {
             try {
-                logger.debug("Checking [" + method + "#" + pattern +"] on [" + methodName + "#" + path + "]");
-                if (!method.equalsIgnoreCase(methodName)) {
-                    logger.debug("Pattern [" + method + "#" + pattern + "] NOT matched");
+            	try {
+            		if (this.masterIdFilter.startsWith("hdr:")) {
+            			String mid = request.getHeader(this.masterIdFilter.substring(this.masterIdFilter.indexOf("hdr:") + 4));
+            			if (mid != null) {
+            				data.setProperty("GV_MASTER_ID", mid);
+            				GVBufferMDC.changeMasterId(mid);
+            			}
+            		}
+            	}
+            	catch (Exception exc) {
+            		logger.error("Error decoding GV Master Id: " + this.masterIdFilter, exc);
+            	}
+
+                logger.debug("Checking [" + this.method + "#" + this.pattern +"] on [" + methodName + "#" + path + "]");
+                if (!this.method.equalsIgnoreCase(methodName)) {
+                    logger.debug("Pattern [" + this.method + "#" + this.pattern + "] NOT matched");
                     return null;
                 }
                 List<String> values = new ArrayList<String>();
@@ -183,29 +200,29 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     locPath = locPath.substring(1);
                 }
                 String[] parts = locPath.split("/");
-                if ((parts.length == patterns.size()) || (haveOptional && (parts.length <= patterns.size()))) {
+                if ((parts.length == this.patterns.size()) || (this.haveOptional && (parts.length <= this.patterns.size()))) {
                     for (int i = 0; i < parts.length; i++) {
-                        Matcher m = patterns.get(i).matcher(parts[i]);
+                        Matcher m = this.patterns.get(i).matcher(parts[i]);
                         if (m.matches()) {
                             values.add(parts[i]);
                         }
                         else {
-                            logger.debug("Pattern [" + method + "#" + pattern +"] NOT matched");
+                            logger.debug("Pattern [" + this.method + "#" + this.pattern +"] NOT matched");
                             return null;
                         }
                     }
-                    if (parts.length < patterns.size()) {
-                    	String pN = propNames.get(parts.length);
+                    if (parts.length < this.patterns.size()) {
+                    	String pN = this.propNames.get(parts.length);
                     	if (! pN.startsWith("?:")) {
-                    		logger.debug("Pattern [" + method + "#" + pattern +"] NOT matched");
+                    		logger.debug("Pattern [" + this.method + "#" + this.pattern +"] NOT matched");
                             return null;
                     	}
                     }
 
-                    data.setService(service);
-                    data.setSystem(system);
-                    for (int i = 0; i < propNames.size(); i++) {
-                    	String pN = propNames.get(i);
+                    data.setService(this.service);
+                    data.setSystem(this.system);
+                    for (int i = 0; i < this.propNames.size(); i++) {
+                    	String pN = this.propNames.get(i);
                     	if (pN.startsWith("?:")) {
                     		pN = pN.substring(2);
                     	}
@@ -216,14 +233,40 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     		data.setProperty(pN, "NULL");
                     	}
                     }
-                    logger.debug("Pattern [" + method + "#" + pattern +"] matched");
-                    return operation;
+
+                    try {
+                		if (this.masterIdFilter.startsWith("path:")) {
+                			String mid = data.getProperty(this.masterIdFilter.substring(this.masterIdFilter.indexOf("path:") + 5));
+                			if (mid != null) {
+                				data.setProperty("GV_MASTER_ID", mid);
+                				GVBufferMDC.changeMasterId(mid);
+                			}
+                		}
+                	}
+                	catch (Exception exc) {
+                		logger.error("Error decoding GV Master Id: " + this.masterIdFilter, exc);
+                	}
+
+                    try {
+                		if (this.masterIdFilter.startsWith("qs:")) {
+                			String mid = request.getParameter(this.masterIdFilter.substring(this.masterIdFilter.indexOf("qs:") + 3));
+                			if (mid != null) {
+                				data.setProperty("GV_MASTER_ID", mid);
+                				GVBufferMDC.changeMasterId(mid);
+                			}
+                		}
+                	}
+                	catch (Exception exc) {
+                		logger.error("Error decoding GV Master Id: " + this.masterIdFilter, exc);
+                	}
+                    logger.debug("Pattern [" + this.method + "#" + this.pattern +"] matched");
+                    return this.operation;
                 }
-                logger.debug("Pattern [" + method + "#" + pattern +"] NOT matched");
+                logger.debug("Pattern [" + this.method + "#" + this.pattern +"] NOT matched");
                 return null;
             }
             catch (Exception exc) {
-                throw new AdapterHttpExecutionException("RESTHttpServletMapping - Error evaluating Pattern[" + method + "#" + pattern + "]", exc);
+                throw new AdapterHttpExecutionException("RESTHttpServletMapping - Error evaluating Pattern[" + this.method + "#" + this.pattern + "]", exc);
             }
         }
 
@@ -235,9 +278,13 @@ public class RESTHttpServletMapping implements HttpServletMapping
 			return this.cGVBuffer;
 		}
 
+		public String getMasterIdFilter() {
+			return this.masterIdFilter;
+		}
+
         @Override
         public String toString() {
-            return method + "#" + pattern + " -> " + service + "/" + system + "/" + operation;
+            return this.method + "#" + this.pattern + " -> " + this.service + "/" + this.system + "/" + this.operation;
         }
     }
 
@@ -248,30 +295,31 @@ public class RESTHttpServletMapping implements HttpServletMapping
      * @param configurationFile
      * @throws AdapterHttpInitializationException
      */
-    public void init(HttpServletTransactionManager transactionManager, FormatterManager formatterMgr,
+    @Override
+	public void init(HttpServletTransactionManager transactionManager, FormatterManager formatterMgr,
             Node configurationNode) throws AdapterHttpInitializationException
     {
         this.transactionManager = transactionManager;
 
         try {
-            action = XMLConfig.get(configurationNode, "@Action");
-            dump = XMLConfig.getBoolean(configurationNode, "@dump-in-out", false);
-            responseContentType = XMLConfig.get(configurationNode, "@RespContentType",
+            this.action = XMLConfig.get(configurationNode, "@Action");
+            this.dump = XMLConfig.getBoolean(configurationNode, "@dump-in-out", false);
+            this.responseContentType = XMLConfig.get(configurationNode, "@RespContentType",
                     AdapterHttpConstants.APPXML_MIMETYPE_NAME);
-            responseCharacterEncoding = XMLConfig.get(configurationNode, "@RespCharacterEncoding", "UTF-8");
+            this.responseCharacterEncoding = XMLConfig.get(configurationNode, "@RespCharacterEncoding", "UTF-8");
 
             NodeList opMaps = XMLConfig.getNodeList(configurationNode, "OperationMappings/Mapping");
             for (int i = 0; i < opMaps.getLength(); i++) {
                 Node opM = opMaps.item(i);
-                operationMappings.add(buildPatternResolver(opM));
+                this.operationMappings.add(buildPatternResolver(opM));
             }
         }
         /*catch (AdapterHttpInitializationException exc) {
             throw exc;
         }*/
         catch (Exception exc) {
-            logger.error("RESTHttpServletMapping - Error initializing action '" + action + "'", exc);
-            throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing action '" + action
+            logger.error("RESTHttpServletMapping - Error initializing action '" + this.action + "'", exc);
+            throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing action '" + this.action
                     + "'", exc);
         }
     }
@@ -282,19 +330,21 @@ public class RESTHttpServletMapping implements HttpServletMapping
      * @return if request handling was successful
      * @throws InboundHttpResponseException
      */
-    public boolean handleRequest(String methodName, HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException
+    @Override
+	public boolean handleRequest(String methodName, HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException
     {
         logger.debug("handleRequest start");
         long startTime = System.currentTimeMillis();
         boolean mustRollback = true;
+        boolean forceTxRollBack = false;
         GVTransactionInfo transInfo = new GVTransactionInfo();
         boolean status = false;
         Throwable exception = null;
     	GVBuffer response = null;
     	Level level = Level.INFO;
-    	
+
         try {
-            if (dump) {
+            if (this.dump) {
                 StringBuffer sb = new StringBuffer();
                 DumpUtils.dump(req, sb);
                 logger.info(sb);
@@ -309,12 +359,12 @@ public class RESTHttpServletMapping implements HttpServletMapping
             if (query == null) {
                 query = "";
             }
-            
+
             GVBuffer request = new GVBuffer();
             String operationType = null;
             PatternResolver pr = null;
             ChangeGVBuffer cGVBuffer = null;
-            Iterator<PatternResolver> i = operationMappings.iterator();
+            Iterator<PatternResolver> i = this.operationMappings.iterator();
             while (i.hasNext()) {
                 pr = i.next();
                 operationType = pr.match(req, methodName, path, request);
@@ -322,9 +372,9 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     break;
                 }
             }
-            
+
             if (operationType == null) {
-                logger.error(action + " - handleRequest - Error while handling request parameters: unable to decode requested operation [" + methodName + "#" + path + "]");
+                logger.error(this.action + " - handleRequest - Error while handling request parameters: unable to decode requested operation [" + methodName + "#" + path + "]");
                 resp.sendError(400, "Unable to decode the requested operation [" + methodName + "#" + path + "]");
                 return false;
             }
@@ -334,7 +384,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
             transInfo.setId(request.getId());
             transInfo.setOperation(operationType);
 
-            request.setProperty("HTTP_ACTION", action);
+            request.setProperty("HTTP_ACTION", this.action);
             request.setProperty("HTTP_PATH", path);
             request.setProperty("HTTP_QUERY", query);
             request.setProperty("HTTP_METHOD", methodName);
@@ -343,20 +393,32 @@ public class RESTHttpServletMapping implements HttpServletMapping
             request.setProperty("HTTP_REMOTE_ADDR", (remAddr != null ? remAddr : ""));
 
             parseRequest(req, methodName, pr, request);
-            
+
             GVBufferMDC.put(request);
             NMDC.setOperation(operationType);
             logger.info(GVFormatLog.formatBEGINOperation(request));
 
-            transactionManager.begin(request);
+            this.transactionManager.begin(transInfo);
 
             response = executeService(operationType, request);
 
-            transactionManager.commit(transInfo, true);
+            if ("Y".equalsIgnoreCase(response.getProperty("HTTP_RESP_FORCE_TX_ROLLBACK"))) {
+                logger.warn("Output contains HTTP_RESP_FORCE_TX_ROLLBACK=Y : prepare to roll back transaction");
+                forceTxRollBack = true;
+            }
+
+            if (!forceTxRollBack) {
+            	this.transactionManager.commit(transInfo, true);
+            }
+            else {
+            	this.transactionManager.rollback(transInfo, false);
+            }
 
             manageHttpResponse(response, resp);
 
-            transactionManager.commit(transInfo, false);
+            if (!forceTxRollBack) {
+            	this.transactionManager.commit(transInfo, false);
+            }
             mustRollback = false;
             status = true;
             logger.debug("handleRequest stop");
@@ -376,7 +438,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
         finally {
             if (mustRollback) {
                 try {
-                    transactionManager.rollback(transInfo, false);
+                    this.transactionManager.rollback(transInfo, false);
                 }
                 catch (Exception exc) {
                     logger.error("handleRequest - Transaction failed: " + exc);
@@ -399,6 +461,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
             }
             logger.log(level, gvFormatLog);
             NMDC.remove("MASTER_SERVICE");
+            NMDC.remove("GV_MASTER_ID");
         }
         return status;
     }
@@ -466,6 +529,33 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     cGVBuffer.cleanUp();
                 }
             }
+
+            String masterIdFilter = pr.getMasterIdFilter();
+            try {
+        		if (masterIdFilter.startsWith("body:")) {
+        			String expr = masterIdFilter.substring(masterIdFilter.indexOf("body:") + 5);
+        			try {
+	        			JSONObject js = JSONUtils.parseObject(request.getObject());
+	        			String mid = JSONUtils.get(js, expr, null);
+	        			if (mid != null) {
+	        				request.setProperty("GV_MASTER_ID", mid);
+	        				GVBufferMDC.changeMasterId(mid);
+	        			}
+        			}
+        			catch (Exception exc) {
+                		logger.error("Error decoding GV Master Id: " + masterIdFilter, exc);
+	        			Node xml = XMLUtils.parseObject_S(request.getObject(), false, true);
+	        			String mid = XMLUtils.get_S(xml, expr, null);
+	        			if (mid != null) {
+	        				request.setProperty("GV_MASTER_ID", mid);
+	        				GVBufferMDC.changeMasterId(mid);
+	        			}
+                	}
+        		}
+        	}
+        	catch (Exception exc) {
+        		logger.error("Error decoding GV Master Id: " + masterIdFilter, exc);
+        	}
         }
         catch (Exception exc) {
             throw new AdapterHttpExecutionException("RESTHttpServletMapping - Error parsing request data", exc);
@@ -474,29 +564,31 @@ public class RESTHttpServletMapping implements HttpServletMapping
 
     @Override
     public boolean isDumpInOut() {
-        return dump;
+        return this.dump;
     }
 
     /**
      *
      */
-    public void destroy()
+    @Override
+	public void destroy()
     {
-        transactionManager = null;
-        operationMappings.clear();
+        this.transactionManager = null;
+        this.operationMappings.clear();
     }
 
     /**
      * @return the servlet action
      */
-    public String getAction()
+    @Override
+	public String getAction()
     {
-        return action;
+        return this.action;
     }
 
     /**
      * @return the <code>GVBuffer</code> response
-     * @throws AdapterHttpInitializationException 
+     * @throws AdapterHttpInitializationException
      */
     /*public GVBuffer getResponse()
     {
@@ -514,7 +606,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
      * operationType passing it the <code>GVBuffer</code> object
      * <code>gvdInput</code> as input. Returns an <code>GVBuffer</code> object
      * encapsulating response.
-     * 
+     *
      * @param operationType
      *        the type of communication paradigm to be used.
      * @param gvdInput
@@ -571,7 +663,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
     /**
      * Handle GreenVulcano response to service request from external systems
      * communicating via HTTP.
-     * 
+     *
      * @throws InboundHttpResponseException
      *         if any error occurs.
      */
@@ -605,11 +697,11 @@ public class RESTHttpServletMapping implements HttpServletMapping
             if (data != null) {
                 respCharacterEncoding = response.getProperty("HTTP_RESP_CHAR_ENCODING");
                 if (respCharacterEncoding == null) {
-                    respCharacterEncoding = responseCharacterEncoding;
+                    respCharacterEncoding = this.responseCharacterEncoding;
                 }
                 String respContentType = response.getProperty("HTTP_RESP_CONTENT_TYPE");
                 if (respContentType == null) {
-                    respContentType = responseContentType;
+                    respContentType = this.responseContentType;
                 }
             	String fileName = response.getProperty("HTTP_RESP_FILE_NAME");
             	if ((fileName != null) && !"".equals(fileName)) {
@@ -625,7 +717,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
             	else {
 	                setRespContentTypeAndCharset(resp, respContentType, respCharacterEncoding);
             	}
-            	
+
                 OutputStream out = resp.getOutputStream();
                 if (respContentType.equals(AdapterHttpConstants.APPXML_MIMETYPE_NAME) ||
                     respContentType.equals(AdapterHttpConstants.APPJSON_MIMETYPE_NAME) ||
@@ -655,7 +747,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
                 out.close();
             }
 
-            if (dump) {
+            if (this.dump) {
                 StringBuffer sb = new StringBuffer();
                 DumpUtils.dump(resp, sb);
                 logger.info(sb);
@@ -679,7 +771,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
 
     /**
      * Sets content type and charset header fields of the servlet response.
-     * 
+     *
      * @param resp
      *        An HttpServletResponse object
      * @param contentType
@@ -694,7 +786,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
     }
     /**
      * Sets header fields for file download.
-     * 
+     *
      * @param resp
      *        An HttpServletResponse object
      * @param contentType
