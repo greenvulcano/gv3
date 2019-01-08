@@ -71,7 +71,7 @@ public class ServiceInfo {
         this.activation = act;
         this.loggerLevel = loggerLevel;
         this.loggerLevelj = Level.toLevel(loggerLevel);
-        jmxFilter = "GreenVulcano:*,Component=" + ServiceOperationInfo.DESCRIPTOR_NAME
+        jmxFilter = "GreenVulcano:*,Component=" + DESCRIPTOR_NAME
         + ",Group=management,Internal=Yes,IDService=" + name;
     }
 
