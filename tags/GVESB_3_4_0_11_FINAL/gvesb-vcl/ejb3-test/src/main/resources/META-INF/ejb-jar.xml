@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ejb-jar version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_0.xsd">
+    <enterprise-beans>
+        <session>
+            <description>EJB3 per le invocazioni RMI di Test.</description>
+            <ejb-name>J2EE_EJB3_Test_main</ejb-name>
+            <business-remote>test.unit.ejb3.J2EETest</business-remote>
+            <ejb-class>test.unit.ejb3.J2EETestBean</ejb-class>
+            <session-type>Stateless</session-type>
+        </session>
+    </enterprise-beans>
+</ejb-jar>

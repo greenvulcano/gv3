@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PersonsData>
+    <PersonData>
+        <Name>ANTONIO ROSSI</Name>
+        <BirthDate>05/02/1980</BirthDate>
+        <City>MILANO</City>
+        <CardsData>
+            <CardData>
+                <Number>1111222233338888</Number>
+                <Credit>500.57</Credit>
+                <Active>Y</Active>
+            </CardData>
+        </CardsData>
+    </PersonData>
+</PersonsData>

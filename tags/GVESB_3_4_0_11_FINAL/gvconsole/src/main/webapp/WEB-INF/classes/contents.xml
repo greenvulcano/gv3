@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE contents SYSTEM "file://max/dtds/contents.dtd">
+
+<contents copyright="Maxime Informatica Intranet Framework">
+  <provider name="MAX_XML_PROVIDER">
+    <max-ascii-provider cache-size="64" class="max.def.MaxASCIIContentProvider" directory="sp{{gv.app.home}}/gvconsole/etc/xml"
+      type="provider" />
+  </provider>
+  <provider name="VERSION_MANAGER">
+    <description>Content provider per il VersionManager.</description>
+    <max-ascii-provider cache-size="64" class="max.def.MaxASCIIContentProvider" directory="sp{{gv.app.home}}/gvconsole/etc/versionManager"
+      type="provider" />
+  </provider>
+  <selector name="showDtd_selection_rule">
+    <description>Selector for the DTD repository.</description>
+    <max-selector category="entities" class="max.def.MaxContentSelectionRule" provider="MAX_XML_PROVIDER" type="selector" />
+  </selector>
+</contents>

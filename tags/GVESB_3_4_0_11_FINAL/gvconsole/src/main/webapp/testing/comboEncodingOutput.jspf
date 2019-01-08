@@ -1,0 +1,17 @@
+<%
+    String currentEncodingOutput = (String)testManager.get("charEncodingOutput");
+%>
+<td align="left">
+    <select id="charEncodingOutput">
+        <option value="<%= currentEncodingOutput %>" selected > <%= currentEncodingOutput %></option>
+        <%
+            for(int i = 0; i < charEncodings.length; i++) {
+                if(!charEncodings[i].equals(currentEncodingOutput)) {
+        %>
+        <option value="<%= charEncodings[i] %>"> <%= charEncodings[i] %></option>
+        <%
+                }
+            }
+        %>
+    </select>
+</td>

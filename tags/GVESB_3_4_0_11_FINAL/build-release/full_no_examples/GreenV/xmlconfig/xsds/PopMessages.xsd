@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="Headers">
+        <xs:complexType mixed="true">
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="Return-Path" type="xs:string"/>
+                <xs:element name="Received" type="xs:string"/>
+                <xs:element name="Message-ID" type="xs:string"/>
+                <xs:element name="From" type="xs:string"/>
+                <xs:element name="To" type="xs:string"/>
+                <xs:element name="Cc" type="xs:string"/>
+                <xs:element name="References" type="xs:string"/>
+                <xs:element name="Subject" type="xs:string"/>
+                <xs:element name="Date" type="xs:string"/>
+                <xs:element name="MIME-Version" type="xs:string"/>
+                <xs:element name="Content-Type" type="xs:string"/>
+                <xs:element name="X-Priority" type="xs:string"/>
+                <xs:element name="X-MSMail-Priority" type="xs:string"/>
+                <xs:element name="X-Mailer" type="xs:string"/>
+                <xs:element name="X-MimeOLE" type="xs:string"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Multipart">
+        <xs:complexType mixed="true">
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="Multipart"/>
+                <xs:element ref="PlainMessage"/>
+                <xs:element ref="HTMLMessage"/>
+                <xs:element ref="EncodedContent"/>
+            </xs:choice>
+            <xs:attribute name="content-type" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="PlainMessage">
+        <xs:complexType mixed="true">
+            <xs:attribute name="content-type" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="EncodedContent">
+        <xs:complexType mixed="true">
+            <xs:attribute name="content-type" type="xs:string"/>
+            <xs:attribute name="file-name" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="HTMLMessage">
+        <xs:complexType mixed="true">
+            <xs:attribute name="content-type" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="EML">
+        <xs:complexType mixed="true">
+            <xs:attribute name="encoding" type="xs:string" fixed="base64"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="Message">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element name="From" type="xs:string"/>
+                <xs:element name="To" type="xs:string"/>
+                <xs:element name="Cc" type="xs:string"/>
+                <xs:element name="Bcc" type="xs:string"/>
+                <xs:element name="ReplyTo" type="xs:string"/>
+                <xs:element ref="Headers"/>
+                <xs:element name="Subject" type="xs:string"/>
+                <xs:element ref="Multipart"/>
+                <xs:element ref="EML"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="MailMessages">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element ref="Message" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
