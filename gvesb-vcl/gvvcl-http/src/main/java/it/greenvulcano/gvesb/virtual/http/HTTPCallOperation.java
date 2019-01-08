@@ -1,42 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.virtual.http;
-
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.buffer.GVBuffer;
-import it.greenvulcano.gvesb.gvdp.DataProviderManager;
-import it.greenvulcano.gvesb.gvdp.IDataProvider;
-import it.greenvulcano.gvesb.http.ProtocolFactory;
-import it.greenvulcano.gvesb.http.auth.HttpAuth;
-import it.greenvulcano.gvesb.http.auth.HttpAuthFactory;
-import it.greenvulcano.gvesb.http.proxy.HttpProxy;
-import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
-import it.greenvulcano.gvesb.virtual.CallException;
-import it.greenvulcano.gvesb.virtual.CallOperation;
-import it.greenvulcano.gvesb.virtual.ConnectionException;
-import it.greenvulcano.gvesb.virtual.InitializationException;
-import it.greenvulcano.gvesb.virtual.InvalidDataException;
-import it.greenvulcano.gvesb.virtual.OperationKey;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -62,6 +43,7 @@ import org.apache.commons.httpclient.methods.OptionsMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.log4j.Logger;
 import org.w3c.dom.CDATASection;
@@ -70,11 +52,30 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.buffer.GVBuffer;
+import it.greenvulcano.gvesb.gvdp.DataProviderManager;
+import it.greenvulcano.gvesb.gvdp.IDataProvider;
+import it.greenvulcano.gvesb.http.ProtocolFactory;
+import it.greenvulcano.gvesb.http.auth.HttpAuth;
+import it.greenvulcano.gvesb.http.auth.HttpAuthFactory;
+import it.greenvulcano.gvesb.http.proxy.HttpProxy;
+import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
+import it.greenvulcano.gvesb.virtual.CallException;
+import it.greenvulcano.gvesb.virtual.CallOperation;
+import it.greenvulcano.gvesb.virtual.ConnectionException;
+import it.greenvulcano.gvesb.virtual.InitializationException;
+import it.greenvulcano.gvesb.virtual.InvalidDataException;
+import it.greenvulcano.gvesb.virtual.OperationKey;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.xml.XMLUtils;
+
 /**
  * @version 3.0.0 Jul 26, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class HTTPCallOperation implements CallOperation
 {
@@ -94,6 +95,7 @@ public class HTTPCallOperation implements CallOperation
     private String              contextPath;
     private boolean             uriEscaped             = true;
     private HttpClient          httpClient;
+    private String              userAgent;
     private String              host;
     private String              port;
     private Protocol            protocol               = null;
@@ -109,47 +111,50 @@ public class HTTPCallOperation implements CallOperation
     /**
      * Invoked from <code>OperationFactory</code> when an <code>Operation</code>
      * needs initialization.<br>
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#init(org.w3c.dom.Node)
      */
     @Override
     public void init(Node config) throws InitializationException
     {
-        httpClient = new HttpClient();
+        this.httpClient = new HttpClient();
 
         try {
             Node endpointNode = XMLConfig.getNode(config, "endpoint");
-            host = XMLConfig.get(endpointNode, "@host");
-            port = XMLConfig.get(endpointNode, "@port", "80");
-            contextPath = XMLConfig.get(endpointNode, "@context-path", "");
+            this.host = XMLConfig.get(endpointNode, "@host");
+            this.port = XMLConfig.get(endpointNode, "@port", "80");
+            this.contextPath = XMLConfig.get(endpointNode, "@context-path", "");
             boolean secure = XMLConfig.getBoolean(endpointNode, "@secure", false);
-            connTimeout = XMLConfig.getInteger(endpointNode, "@conn-timeout", DEFAULT_CONN_TIMEOUT);
-            soTimeout = XMLConfig.getInteger(endpointNode, "@so-timeout", DEFAULT_SO_TIMEOUT);
-            
-            HttpConnectionManagerParams params = httpClient.getHttpConnectionManager().getParams();
-            params.setConnectionTimeout(connTimeout);
-            params.setSoTimeout(soTimeout);
+            this.connTimeout = XMLConfig.getInteger(endpointNode, "@conn-timeout", DEFAULT_CONN_TIMEOUT);
+            this.soTimeout = XMLConfig.getInteger(endpointNode, "@so-timeout", DEFAULT_SO_TIMEOUT);
+
+            this.userAgent = XMLConfig.get(endpointNode, "@user-agent", "");
+            this.httpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, this.userAgent);
+
+            HttpConnectionManagerParams params = this.httpClient.getHttpConnectionManager().getParams();
+            params.setConnectionTimeout(this.connTimeout);
+            params.setSoTimeout(this.soTimeout);
 
             Node protocolNode = XMLConfig.getNode(endpointNode, "CustomProtocol");
             if (protocolNode != null) {
-                protocol = ProtocolFactory.create(protocolNode);
+                this.protocol = ProtocolFactory.create(protocolNode);
             }
             else {
-                protocol = Protocol.getProtocol(secure ? "https" : "http");
+                this.protocol = Protocol.getProtocol(secure ? "https" : "http");
             }
 
-            proxy = new HttpProxy();
-            proxy.init(XMLConfig.getNode(endpointNode, "Proxy"));
-            
-            auth = HttpAuthFactory.getInstance(XMLConfig.getNode(endpointNode, "*[@type='http-auth']"));
-            logger.debug("HttpAuth: " + auth);
+            this.proxy = new HttpProxy();
+            this.proxy.init(XMLConfig.getNode(endpointNode, "Proxy"));
+
+            this.auth = HttpAuthFactory.getInstance(XMLConfig.getNode(endpointNode, "*[@type='http-auth']"));
+            logger.debug("HttpAuth: " + this.auth);
 
             Node methodNode = XMLConfig.getNode(config, "method");
-            refDP = XMLConfig.get(methodNode, "@ref-dp", "");
+            this.refDP = XMLConfig.get(methodNode, "@ref-dp", "");
 
-            methodURI = XMLConfig.get(methodNode, "@request-uri", "/");
-            methodName = HttpMethodName.valueOf(XMLConfig.get(methodNode, "@name"));
-            uriEscaped = XMLConfig.getBoolean(methodNode, "@uri-escaped", true);
+            this.methodURI = XMLConfig.get(methodNode, "@request-uri", "/");
+            this.methodName = HttpMethodName.valueOf(XMLConfig.get(methodNode, "@name"));
+            this.uriEscaped = XMLConfig.getBoolean(methodNode, "@uri-escaped", true);
         }
         catch (Exception exc) {
             throw new InitializationException("GV_CONFIGURATION_ERROR", new String[][]{{"message", exc.getMessage()}},
@@ -169,17 +174,17 @@ public class HTTPCallOperation implements CallOperation
             String currMethodURI = null;
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
-            String currHost = PropertiesHandler.expand(host, params, gvBuffer);
-            String currPort = PropertiesHandler.expand(port, params, gvBuffer);
+            String currHost = PropertiesHandler.expand(this.host, params, gvBuffer);
+            String currPort = PropertiesHandler.expand(this.port, params, gvBuffer);
             logger.debug("Server Host: " + currHost + " - Port: " + currPort);
-            httpClient.getHostConfiguration().setHost(currHost, Integer.parseInt(currPort), protocol);
+            this.httpClient.getHostConfiguration().setHost(currHost, Integer.parseInt(currPort), this.protocol);
 
-            auth.setAuthentication(httpClient, host, Integer.parseInt(currPort), gvBuffer, params);
-            proxy.setProxy(httpClient, gvBuffer, params);
+            this.auth.setAuthentication(this.httpClient, this.host, Integer.parseInt(currPort), gvBuffer, params);
+            this.proxy.setProxy(this.httpClient, gvBuffer, params);
 
-            currMethodURI = PropertiesHandler.expand(contextPath + methodURI, params, gvBuffer);
-            logger.debug("MethodURI[escaped:" + uriEscaped + "]=[" + currMethodURI + "]");
-            switch (methodName) {
+            currMethodURI = PropertiesHandler.expand(this.contextPath + this.methodURI, params, gvBuffer);
+            logger.debug("MethodURI[escaped:" + this.uriEscaped + "]=[" + currMethodURI + "]");
+            switch (this.methodName) {
                 case OPTIONS :
                     method = new OptionsMethod();
                     break;
@@ -201,25 +206,25 @@ public class HTTPCallOperation implements CallOperation
                 default :
                     throw new CallException("GV_CALL_SERVICE_ERROR", new String[][]{{"service", gvBuffer.getService()},
                             {"system", gvBuffer.getSystem()}, {"id", gvBuffer.getId().toString()},
-                            {"message", "Unknown method = " + methodName}});
+                            {"message", "Unknown method = " + this.methodName}});
             }
-            method.setURI(new URI(currMethodURI, uriEscaped));
+            method.setURI(new URI(currMethodURI, this.uriEscaped));
 
-            if ((refDP != null) && (refDP.length() > 0)) {
-                logger.debug("Calling configured Data Provider: " + refDP);
+            if ((this.refDP != null) && (this.refDP.length() > 0)) {
+                logger.debug("Calling configured Data Provider: " + this.refDP);
                 DataProviderManager dataProviderManager = DataProviderManager.instance();
-                IDataProvider dataProvider = dataProviderManager.getDataProvider(refDP);
+                IDataProvider dataProvider = dataProviderManager.getDataProvider(this.refDP);
                 try {
                     dataProvider.setContext(method);
                     dataProvider.setObject(gvBuffer);
                     method = (HttpMethod) dataProvider.getResult();
                 }
                 finally {
-                    dataProviderManager.releaseDataProvider(refDP, dataProvider);
+                    dataProviderManager.releaseDataProvider(this.refDP, dataProvider);
                 }
             }
 
-            int status = httpClient.executeMethod(method);
+            int status = this.httpClient.executeMethod(method);
             gvBuffer.setProperty(RESPONSE_STATUS, String.valueOf(status));
             String statusTxt = method.getStatusText();
             gvBuffer.setProperty(RESPONSE_MESSAGE, (statusTxt != null ? statusTxt : "NULL"));
@@ -386,6 +391,6 @@ public class HTTPCallOperation implements CallOperation
     @Override
     public OperationKey getKey()
     {
-        return key;
+        return this.key;
     }
 }
