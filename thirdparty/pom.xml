@@ -301,13 +301,45 @@
                                 <componentId>openspcoop</componentId>
                             </mapping>
                         </dependency>
-                        <dependency>
-                            <groupId>com.microsoft.ewsjavaapi</groupId>
-                            <artifactId>exchange-ws-api</artifactId>
+				        <dependency>
+				            <groupId>com.microsoft.ews-java-api</groupId>
+				            <artifactId>ews-java-api</artifactId>
                             <mapping>
                                 <componentId>ewsjavaapi</componentId>
                             </mapping>
-                        </dependency>
+				        </dependency>
+				        <dependency>
+				            <groupId>com.microsoft.azure</groupId>
+				            <artifactId>adal4j</artifactId>
+                            <mapping>
+                                <componentId>azure</componentId>
+                            </mapping>
+				        </dependency>
+				        <dependency>
+				            <groupId>joda-time</groupId>
+				            <artifactId>joda-time</artifactId>
+                            <mapping>
+                                <componentId>jodatime</componentId>
+                            </mapping>
+				        </dependency>
+				        <dependency>
+				            <groupId>org.apache.httpcomponents</groupId>
+				            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>httpcomponents</componentId>
+                            </mapping>
+				        </dependency>
+				        <dependency>
+				            <groupId>com.nimbusds</groupId>
+				            <artifactId>*</artifactId>
+                            <mapping>
+                                <componentId>nimbusds</componentId>
+                            </mapping>
+				        </dependency>
+				        <dependency>
+				            <groupId>xmlunit</groupId>
+				            <artifactId>xmlunit</artifactId>
+				        </dependency>
                         <dependency>
                             <groupId>org.springframework</groupId>
                             <artifactId>*</artifactId>
@@ -322,6 +354,13 @@
                                 <componentId>json</componentId>
                             </mapping>
                         </dependency>
+				        <dependency>
+				            <groupId>com.jayway.jsonpath</groupId>
+				            <artifactId>json-path</artifactId>
+                            <mapping>
+                                <componentId>jsonpath</componentId>
+                            </mapping>
+				        </dependency>
                         <dependency>
                             <groupId>com.github.fge</groupId>
                             <artifactId>*</artifactId>
@@ -934,8 +973,32 @@
             <artifactId>openspcoop_stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.ewsjavaapi</groupId>
-            <artifactId>exchange-ws-api</artifactId>
+            <groupId>com.microsoft.ews-java-api</groupId>
+            <artifactId>ews-java-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>adal4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>oauth2-oidc-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ganyo</groupId>
@@ -953,6 +1016,10 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
         </dependency>
         <!--<dependency>
             <groupId>org.apache.openejb</groupId>

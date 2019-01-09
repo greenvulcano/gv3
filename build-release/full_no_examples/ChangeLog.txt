@@ -1,4 +1,53 @@
 -------------------------------------------
+ESB version 3.4.0.12
+-------------------------------------------
+
+Commons:
+- Added capability to CryptoHelper in order to create signed documents.
+- Improved ChangeGVBuffer support for g/zip de/compression algorithms.
+- Added support to json-path search in JSONUtils
+- Standardized time/date results format in sqlX placeholders
+- Corrected ThreadMap for Java 8 weak hashmap concurrency bug
+- Improved cripto key management
+
+Core:
+- Corrected thread pool size management in Core parallel nodes
+- Added timestamp to JMX Core operation info status change
+- The dump-in-out attribute, if set on WF nodes, force the logger level to DEBUG
+- Improved Log4j message context at service invocation end
+
+GVConsole:
+- Updated GVConsole in order to handle service level import/export with dependency management and visual comparison of deployment differences
+
+DTEControlled:
+- Improved management and logging of XML data
+- Added support to placeholders into transformers parameters
+
+DataHandler:
+- Added capability to DataHandler to use placeholders in JDBC connection names, in order to resolve the actual connection at runtime
+- Improved logging of statements in case of error
+
+Adapter HTTP Inbound:
+- Added support to GVBuffer.GV_MASTER_ID to be used in logging and properties resolving.
+  This field is set-up in HTTPInbound adapter using: request path/query, xml/json body search value, request header.
+- Improved configuration of HTTPInbound adapter transaction using ALL as default for id-system field
+
+VCL HTTP:
+- Added capability to configure user-agent in HTTPCallOperation
+
+VCL JMS:
+- Added to VCL J2EE JMSEnqueue force-correlation-id-as-id configuration attribute
+
+VCL SMTP:
+- Added capability to SMTPCall to define the sender address
+
+VCL File:
+- Added to GVVcl-File a make dir Command and capability to limit the number of files searched on search Command
+
+VCL Exchange:
+- Updated GVVcl-Exchange in order to use OAuth authentication.
+
+-------------------------------------------
 ESB version 3.4.0.11
 -------------------------------------------
 
