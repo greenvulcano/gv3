@@ -1,0 +1,779 @@
+<!--
+This example demonstrates the minimum amount of code required to use Mergely.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" /><title>Mergely</title>
+
+	<!-- Requires jQuery -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js" type="text/javascript"></script>
+	
+	<!-- Requires CodeMirror -->
+	<script type="text/javascript" src="../lib/codemirror.js"></script>
+	<link type="text/css" rel="stylesheet" href="../css/codemirror.css" />
+	
+	<!-- Requires Mergely -->
+	<script type="text/javascript" src="../lib/mergely.js"></script>
+	<!-- CSS-->
+	<link type="text/css" rel="stylesheet" href="../css/mergely.css" />
+	<link type="text/css" rel="stylesheet" href="../css/editor.css" />
+	<link type="text/css" rel="stylesheet" href="../css/farbtastic.css" />
+	<link type="text/css" rel="stylesheet" href="../css/tipsy.css" />
+	<link type="text/css" rel="stylesheet" href="../css/wicked-ui.css" />
+	<link rel="stylesheet" href="../css/font-awesome.min.css">
+	
+	<!-- JS -->
+	<script type="text/javascript" src="../js/editor.js"></script> 
+	<script type="text/javascript" src="../js/farbtastic.js"></script>
+	<script type="text/javascript" src="../js/gatag.js"></script>
+	<script type="text/javascript" src="../js/wicked-ui.js"></script>
+	<script type="text/javascript" src="../js/jquery.tipsy.js"></script>
+<script type="text/javascript" src="../lib/searchcursor.js"></script>	
+	
+	
+	
+	<script type="text/javascript">
+        var key = '';
+        var isSample = key == 'usaindep';
+    </script>
+</head>
+<body>
+
+<div align="center">
+ <ul id="toolbar">
+        <li class="separator"></li>
+		<button onclick="mergeLeft()" ><i class="fa fa-arrow-up"></i></button>
+		<button onclick="mergeRight()" ><i class="fa fa-arrow-down"></i></button>
+		
+        <!-- <li id="changePrev" data-icon="icon-arrow-up" title="Previous change"><button onclick="myFunction()""> Previous change</li>
+        <li id="changeNext" data-icon="icon-arrow-down" title="Next change">Next change</li>-->
+        <li class="separator"></li>
+        <!--
+		<li id="tb-edit-right-merge-left" data-icon="icon-arrow-left-v" title="Merge change left">Merge change left</li>
+        <li id="tb-edit-left-merge-right" data-icon="icon-arrow-right-v" title="Merge change right">Merge change right</li>
+        <li id="tb-view-swap" data-icon="icon-swap" title="Swap sides">Swap sides</li>
+		-->
+    </ul>
+	</div>
+
+	<div id="mergely-resizer">
+		<div id="compare">
+		</div>
+	</div>
+<script type="text/javascript">
+
+
+			
+        $(document).ready(function () {
+		var editor = $('#compare');
+		var ed= $("mergely");
+
+			editor.mergely({
+				cmsettings: { mode: 'application/xml', readOnly: true, lineWrapping: false  },
+				
+				lhs: function(setValue) {
+					setValue('<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE GVCore SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCore.dtd">
+<GVCore>
+<GVCryptoHelper name="CRYPTO_HELPER" type="module"/>
+<GVForwards name="JMS_FORWARD" type="module"/>
+<GVServices name="SERVICES" type="module">
+<Groups>
+<Group group-activation="on" id-group="DEFAULT_GRP"/>
+<Group group-activation="on" id-group="ELD"/>
+<Group group-activation="on" id-group="OCTO_GRP"/>
+</Groups>
+<Services>
+<Service group-name="ELD" id-service="ELD_ReportOperation" service-activation="on" statistics="off">
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="RequestReply" operation-activation="on" out-check-type="none" type="operation">
+<Conditions>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="IS_AUTHENTICATED" type="condition">
+<Property name="VALID_TOKEN" operator="equal" type="gvbuffer-field" value="true"/>
+</GVBufferCondition>
+</Conditions>
+<Participant id-channel="DB" id-system="ELD"/>
+<Flow first-node="Json2Xml" point-x="36" point-y="165">
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="getRequestHeader&amp;Params" input="outputXML" next-node-id="getAuthentication" op-type="change GVBuffer" output="outputGetRequest" point-x="88" point-y="109" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[var doc=XMLUtils.parseObject_S(data.getProperty("HTTP_REQ_HEADERS"),false,true);
+data.removeProperty("HTTP_REQ_HEADERS");
+
+data.setProperty("TOKEN", XMLUtils.get_S(doc, "/Hdr/h[@n="token"]/@v", "NULL"));
+data.setProperty("USER_ID", XMLUtils.get_S(doc, "/Hdr/h[@n="userid"]/@v", "NULL"));
+
+data.setObject("{ }");]]></Script>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="callReportOperationSP" id-system="ELD" input="outputGetRequest" next-node-id="checkSPCall" op-type="call" operation-name="ELD_ManageReportOperation" output="outputSP" point-x="393" point-y="289" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="ELD_ManageReportOperation" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="ELD_SPHandlingResponseToJson"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="toJSON" type="call"/>
+</gvdte-service>
+</OutputServices>
+</GVOperationNode>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="endOK" id="checkSPCall" input="outputSP" on-exception-id="setGenericErrorResp" op-type="check" point-x="533" point-y="289" type="flow-node"/>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="endOK" op-type="end" output="outputSP" point-x="781" point-y="289" type="flow-node"/>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="endKO" op-type="end" output="outputError" point-x="789" point-y="79" type="flow-node"/>
+<GVCoreCallNode change-log-context="true" class="it.greenvulcano.gvesb.core.flow.GVCoreCallNode" id="getAuthentication" id-service="CheckAuth" id-system="ELD" input="outputGetRequest" next-node-id="checkAuthentication" op-type="corecall" operation="RequestReply" output="outputAuth" point-x="299" point-y="79" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="setUnauthResp" id="checkAuthentication" input="outputAuth" on-exception-id="setGenericErrorResp" op-type="check" point-x="477" point-y="79" type="flow-node">
+<GVRouting condition="IS_AUTHENTICATED" next-node-id="manipulateInput"/>
+</GVNodeCheck>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="setGenericErrorResp" input="outputGetRequest" next-node-id="endKO" op-type="change GVBuffer" output="outputError" point-x="610" point-y="188" type="flow-node">
+<ChangeGVBuffer clear-data="false">
+<SimpleGVBufferBodyBuilder class="it.greenvulcano.gvesb.internal.data.SimpleGVBufferBodyMaker" process-metadata="true" type="body-builder"><![CDATA[{"status": "error", "code": "500", "message": "Internal Error"}]]></SimpleGVBufferBodyBuilder>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="setUnauthResp" input="outputAuth" next-node-id="endKO" op-type="change GVBuffer" output="outputError" point-x="627" point-y="79" type="flow-node">
+<ChangeGVBuffer clear-data="false">
+<SimpleGVBufferBodyBuilder class="it.greenvulcano.gvesb.internal.data.SimpleGVBufferBodyMaker" process-metadata="true" type="body-builder"><![CDATA[{"status": "error", "code": "401", "message": "Unauthorized"}]]></SimpleGVBufferBodyBuilder>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="Json2Xml" input="inputTransform" next-node-id="checkValidPayload" op-type="change GVBuffer" output="outputXML" point-x="37" point-y="-41" type="flow-node">
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="Json2Xml"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="JsonToXml" type="call"/>
+</gvdte-service>
+</OutputServices>
+</ChangeGVBufferNode>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="getRequestHeader&amp;Params" id="checkValidPayload" input="outputXML" on-exception-id="setFormatErrorResp" op-type="check" point-x="146" point-y="-41" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="setFormatErrorResp" input="inputTransform" next-node-id="endKO" op-type="change GVBuffer" output="outputError" point-x="563" point-y="-41" type="flow-node">
+<ChangeGVBuffer clear-data="false">
+<SimpleGVBufferBodyBuilder class="it.greenvulcano.gvesb.internal.data.SimpleGVBufferBodyMaker" process-metadata="true" type="body-builder"><![CDATA[{"status": "error", "code": "400", "message": "Bad Request Syntax"}]]></SimpleGVBufferBodyBuilder>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="manipulateInput" input="outputGetRequest" next-node-id="callReportOperationSP" op-type="change GVBuffer" point-x="395" point-y="188" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[data.setObject(environment.get("outputXML").getObject());]]></Script>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+</Flow>
+</Operation>
+</Service>
+<Service group-name="DEFAULT_GRP" id-service="insertPlatform" service-activation="on" statistics="off">
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" name="RequestReply" operation-activation="on" out-check-type="sys-svc-id" type="operation">
+<Description>VulCon generated Operation</Description>
+<Participant id-channel="CHANNEL_DB_IDM" id-system="OCTO"/>
+<Flow first-node="checkTokenId" point-x="60" point-y="259">
+<Conditions>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="isValid" type="condition">
+<Property name="ISVALID" operator="equal" type="gvbuffer-field" value="true" value-type="text"/>
+</GVBufferCondition>
+</Conditions>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="request" id-system="OCTO" input="input" next-node-id="check_status" op-type="call" operation-name="insertPlatform" output="output_insertPlatform" point-x="210" point-y="259" type="flow-node">
+<InputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="input"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="inoutInsertPlatform" type="call"/>
+</gvdte-service>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="insertPlatform" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="return"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="retInsertPlatform" type="call"/>
+</gvdte-service>
+</OutputServices>
+</GVOperationNode>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="return_status" id="check_status" input="output_insertPlatform" on-exception-id="return_error" op-type="check" point-x="354" point-y="259" type="flow-node"/>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_status" op-type="end" output="output_insertPlatform" point-x="444" point-y="199" type="flow-node"/>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="return_error" op-type="end" output="output_insertPlatform" point-x="447" point-y="289" type="flow-node"/>
+<GVCoreCallNode class="it.greenvulcano.gvesb.core.flow.GVCoreCallNode" id="checkTokenId" id-service="checkToken" input="input" next-node-id="checkIsValid" op-type="corecall" operation="RequestReply" output="outputCheckTokenId" point-x="140" point-y="109" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="setErrorUnauthorized" id="checkIsValid" input="outputCheckTokenId" on-exception-id="returnIsValid" op-type="check" point-x="265" point-y="49" type="flow-node">
+<GVRouting condition="isValid" next-node-id="request"/>
+</GVNodeCheck>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="setErrorUnauthorized" input="outputCheckTokenId" next-node-id="returnIsValid" op-type="change GVBuffer" output="outputSetErrorUnauthorized" point-x="362" point-y="19" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[var jsonOutput="{ "RETURN": {  "STATUS": "401"}}";
+data.setObject(jsonOutput);]]></Script>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="returnIsValid" op-type="end" output="outputSetErrorUnauthorized" point-x="475" point-y="79" type="flow-node"/>
+</Flow>
+</Operation>
+</Service>
+<Service group-name="OCTO_GRP" id-service="TWIntegration" loggerLevel="DEBUG" service-activation="on" statistics="off">
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" forward-name="CreateScoreAccountTW" name="Forward" operation-activation="on" out-check-type="none" type="operation">
+<Conditions>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="success" type="condition">
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="202" value-type="text"/>
+</GVBufferCondition>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="badRequest" type="condition">
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="400" value-type="text"/>
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="401" value-type="text"/>
+</GVBufferCondition>
+</Conditions>
+<Participant id-channel="OCTO_NA_CHANNEL" id-system="OCTO_NA"/>
+<Participant id-channel="STATE_AUTO_US_CHANNEL" id-system="STATE_AUTO_US"/>
+<Flow first-node="prepare" point-x="20" point-y="150">
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepare" input="input" next-node-id="getVoucherDetails" op-type="change GVBuffer" output="outputPrepare" point-x="207" point-y="150" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[//var inputObject = data.getObject();
+//var idVoucher = inputObject.getProperty("ID_VOUCHER");]]></Script>
+<PropertyDef name="ID_STATUS" value="2"/>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="callTWNewScoreAccount" id-system="STATE_AUTO_US" input="output" next-node-id="checkTWAccountData" op-type="call" operation-name="callTWNewScoreAccount" output="outputCall" point-x="845" point-y="150" type="flow-node"/>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output" point-x="647" point-y="619" type="flow-node"/>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="getVoucherDetails" id-system="STATE_AUTO_US" input="outputPrepare" next-node-id="checkGetVoucherDetails" op-type="call" operation-name="GetVoucherDetailsForTW" output="output" point-x="376" point-y="150" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="GetVoucherDetailsForTW" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="TWAccountData_Transformation"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="contextCall" type="call"/>
+</gvdte-service>
+</OutputServices>
+</GVOperationNode>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="callTWNewScoreAccount" id="checkGetVoucherDetails" input="output" on-exception-id="end" op-type="check" point-x="594" point-y="150" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="end" id="checkTWAccountData" input="outputCall" on-exception-id="end" op-type="check" point-x="856" point-y="289" type="flow-node">
+<GVRouting condition="badRequest" next-node-id="prepareRow"/>
+<GVRouting condition="success" next-node-id="updateTWAccountData"/>
+</GVNodeCheck>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="updateTWAccountData" id-system="OCTO_NA" input="output" next-node-id="end" op-type="call" operation-name="ManageMapping" output="output" point-x="851" point-y="499" type="flow-node">
+<InputServices>
+<java-script-service critical="yes" internal="yes" type="service">
+<java-script-call class="it.greenvulcano.gvesb.virtual.internal.JSCallOperation" name="jsCall" type="call">
+<Script><![CDATA[root.setObject("<doc/>");]]></Script>
+</java-script-call>
+</java-script-service>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="updateVoucherMap" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+</GVOperationNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="sendFailureEmail" id-system="OCTO_NA" input="outputFailure" next-node-id="end" op-type="call" operation-name="SendTWFailureOperation" output="output" point-x="1111" point-y="619" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepareRow" input="outputCall" next-node-id="writeFailureOperation" op-type="change GVBuffer" output="outputRow" point-x="1126" point-y="439" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[var inputRequest = environment.get("output").getObject();
+var outputRequest = data.getObject();
+var rowsToWrite = inputRequest + "\r\n" + outputRequest;
+data.setObject(rowsToWrite);
+data.setProperty("FILE_NAME", "FailureMessageOCTO_NA_TW.txt");]]></Script>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="writeFailureOperation" id-system="OCTO_NA" input="outputRow" next-node-id="sendFailureEmail" op-type="call" operation-name="writeFailureTWOperation" output="outputFailure" point-x="1094" point-y="529" type="flow-node"/>
+</Flow>
+</Operation>
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" forward-name="TWEnqueue" name="Forward" operation-activation="on" out-check-type="none" type="operation">
+<Participant id-channel="OCTO_NA_CHANNEL" id-system="OCTO_NA"/>
+<Flow first-node="prepare">
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="sendEnqueueTWFailureEmail" id-system="OCTO_NA" input="outputPrepare" next-node-id="endStatus" op-type="call" operation-name="SendEnqueueFailureEmail" point-x="276" point-y="19" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="endStatus" id="checkEnqueueTW" input="outputEnqueueTW" on-exception-id="sendEnqueueTWFailureEmail" op-type="check" point-x="237" point-y="139" type="flow-node"/>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="enqueueTW" id-system="OCTO_NA" input="outputPrepare" next-node-id="checkEnqueueTW" op-type="enqueue" operation-name="JMSEnqueueTo::SA_TW" output="outputEnqueueTW" point-x="258" point-y="259" type="flow-node"/>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="endStatus" op-type="end" output="outputPrepare" point-x="680" point-y="379" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepare" input="input" next-node-id="enqueueTW" op-type="change GVBuffer" output="outputPrepare" point-x="58" point-y="259" type="flow-node"/>
+</Flow>
+</Operation>
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" forward-name="ResetScoringData" name="Forward" operation-activation="on" out-check-type="none" type="operation">
+<Participant id-channel="STATE_AUTO_US_CHANNEL" id-system="STATE_AUTO_US"/>
+<Participant id-channel="OCTO_NA_CHANNEL" id-system="OCTO_NA"/>
+<Flow first-node="prepare">
+<Conditions>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="success" type="condition">
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="202" value-type="text"/>
+</GVBufferCondition>
+</Conditions>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="TWResetScoringCall" id-system="STATE_AUTO_US" input="output" next-node-id="checkTWResetScoring" op-type="call" operation-name="callTWResetScoring" output="output" point-x="882" point-y="150" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="TWResetScoringCall" id="checkGetVoucherDetails" input="output" on-exception-id="end" op-type="check" point-x="594" point-y="150" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepare" input="input" next-node-id="getVoucherDetails" op-type="change GVBuffer" output="output" point-x="207" point-y="150" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[//var inputObject = data.getObject();
+//var idVoucher = inputObject.getProperty("ID_VOUCHER");]]></Script>
+<PropertyDef name="ID_VOUCHER_STATUS" value="2"/>
+<PropertyDef name="TSP_CODE" value="OCTO"/>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="updateTWAccountData" id-system="OCTO_NA" input="output" next-node-id="end" op-type="call" operation-name="ManageMapping" output="output" point-x="868" point-y="559" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="updateVoucherMap" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+</GVOperationNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="getVoucherDetails" id-system="STATE_AUTO_US" input="output" next-node-id="checkGetVoucherDetails" op-type="call" operation-name="GetVoucherDetailsForTW" output="output" point-x="376" point-y="150" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="GetVoucherDetailsForTW" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="TWResetScoring_Transformation"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="contextCall" type="call"/>
+</gvdte-service>
+</OutputServices>
+</GVOperationNode>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output" point-x="661" point-y="559" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="end" id="checkTWResetScoring" input="output" on-exception-id="end" op-type="check" point-x="873" point-y="319" type="flow-node">
+<GVRouting condition="success" next-node-id="updateTWAccountData"/>
+</GVNodeCheck>
+</Flow>
+</Operation>
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" forward-name="DeactivateScoreAccount" name="Forward" operation-activation="on" out-check-type="none" type="operation">
+<Participant id-channel="STATE_AUTO_US_CHANNEL" id-system="STATE_AUTO_US"/>
+<Flow first-node="prepare">
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepare" input="input" next-node-id="deactivateScoreAccountCall" op-type="change GVBuffer" output="output" type="flow-node">
+<ChangeGVBuffer clear-data="false">
+<PropertyDef name="TSP_CODE" value="OCTO"/>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="deactivateScoreAccountCall" id-system="STATE_AUTO_US" input="output" next-node-id="end" op-type="call" operation-name="callTWDeactivateScoreAccount" type="flow-node"/>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output" type="flow-node"/>
+</Flow>
+</Operation>
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" forward-name="DeviceExchange" name="Forward" operation-activation="on" out-check-type="none" type="operation">
+<Participant id-channel="OCTO_NA_CHANNEL" id-system="OCTO_NA"/>
+<Participant id-channel="STATE_AUTO_US_CHANNEL" id-system="STATE_AUTO_US"/>
+<Flow first-node="prepare" point-x="30" point-y="19">
+<Conditions>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="badRequest" type="condition">
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="400" value-type="text"/>
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="401" value-type="text"/>
+</GVBufferCondition>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="success" type="condition">
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="202" value-type="text"/>
+</GVBufferCondition>
+</Conditions>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="TWDeviceExchangeCall" id-system="STATE_AUTO_US" input="output" next-node-id="checkTWDeviceExchange" op-type="call" operation-name="callTWDeviceExchange" output="outputCall" point-x="520" point-y="79" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="TWDeviceExchangeCall" id="checkGetVoucherDetails" input="output" on-exception-id="end" op-type="check" point-x="338" point-y="169" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepare" input="input" next-node-id="getVoucherDetails" op-type="change GVBuffer" output="output" point-x="30" point-y="169" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[//var inputObject = data.getObject();
+//var idVoucher = inputObject.getProperty("ID_VOUCHER");]]></Script>
+<PropertyDef name="ID_VOUCHER_STATUS" value="5"/>
+<PropertyDef name="TSP_CODE" value="OCTO"/>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="updateTWAccountData" id-system="OCTO_NA" input="outputCall" next-node-id="end" op-type="call" operation-name="ManageMapping" output="output" point-x="761" point-y="319" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="updateVoucherMap" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+</GVOperationNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="getVoucherDetails" id-system="STATE_AUTO_US" input="output" next-node-id="checkGetVoucherDetails" op-type="call" operation-name="GetVoucherDetailsForTW" output="output" point-x="177" point-y="169" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="GetVoucherDetailsForTW" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="TWDeviceExchange_Transformation"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="contextCall" type="call"/>
+</gvdte-service>
+</OutputServices>
+</GVOperationNode>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output" point-x="540" point-y="319" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="endStatus" id="checkTWDeviceExchange" input="outputCall" on-exception-id="endStatus" op-type="check" point-x="754" point-y="79" type="flow-node">
+<GVRouting condition="success" next-node-id="updateTWAccountData"/>
+<GVRouting condition="badRequest" next-node-id="prepareRow"/>
+</GVNodeCheck>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="endStatus" op-type="end" output="outputCall" point-x="655" point-y="259" type="flow-node"/>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="sendFailureEmail" id-system="OCTO_NA" input="outputFailure" next-node-id="end" op-type="call" operation-name="SendTWFailureOperation" output="output" point-x="993" point-y="499" type="flow-node"/>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="writeFailureOperation" id-system="OCTO_NA" input="outputRow" next-node-id="sendFailureEmail" op-type="call" operation-name="writeFailureTWOperation" output="outputFailure" point-x="976" point-y="379" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepareRow" input="outputCall" next-node-id="writeFailureOperation" op-type="change GVBuffer" output="outputRow" point-x="1007" point-y="259" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[var inputRequest = new java.lang.String(environment.get("output").getObject());
+var outputRequest = new java.lang.String(data.getObject());
+var rowsToWrite = inputRequest + "\r\n" + outputRequest;
+data.setObject(rowsToWrite);
+data.setProperty("FILE_NAME", "FailureMessageOCTO_NA_TW.txt");]]></Script>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+</Flow>
+</Operation>
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" forward-name="UpdateScoreAccount" name="Forward" operation-activation="on" out-check-type="none" type="operation">
+<Participant id-channel="OCTO_NA_CHANNEL" id-system="OCTO_NA"/>
+<Participant id-channel="STATE_AUTO_US_CHANNEL" id-system="STATE_AUTO_US"/>
+<Flow first-node="prepare" point-x="20" point-y="150">
+<Conditions>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="badRequest" type="condition">
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="400" value-type="text"/>
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="401" value-type="text"/>
+</GVBufferCondition>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="success" type="condition">
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="202" value-type="text"/>
+</GVBufferCondition>
+</Conditions>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="TWUpdateScoreAccountCall" id-system="STATE_AUTO_US" input="output" next-node-id="checkTWUpdateScoreAccount" op-type="call" operation-name="callTWUpdateScoreAccount" output="outputCall" point-x="882" point-y="150" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="TWUpdateScoreAccountCall" id="checkGetVoucherDetails" input="output" on-exception-id="end" op-type="check" point-x="594" point-y="150" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepare" input="input" next-node-id="getVoucherDetails" op-type="change GVBuffer" output="outputPrepare" point-x="207" point-y="150" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[//var inputObject = data.getObject();
+//var idVoucher = inputObject.getProperty("ID_VOUCHER");]]></Script>
+<PropertyDef name="ID_VOUCHER_STATUS" value="2"/>
+<PropertyDef name="TSP_CODE" value="OCTO"/>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="updateTWAccountData" id-system="OCTO_NA" input="output" next-node-id="end" op-type="call" operation-name="ManageMapping" output="output" point-x="900" point-y="529" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="updateVoucherMap" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+</GVOperationNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="getVoucherDetails" id-system="STATE_AUTO_US" input="outputPrepare" next-node-id="checkGetVoucherDetails" op-type="call" operation-name="GetVoucherDetailsForTW" output="output" point-x="376" point-y="150" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="GetVoucherDetailsForTW" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="TWUpdateScoreAccount_Transformation"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="contextCall" type="call"/>
+</gvdte-service>
+</OutputServices>
+</GVOperationNode>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output" point-x="661" point-y="559" type="flow-node"/>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="writeFailureOperation" id-system="OCTO_NA" input="outputRow" next-node-id="sendFailureEmail" op-type="call" operation-name="writeFailureTWOperation" output="outputFailure" point-x="1094" point-y="529" type="flow-node"/>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="sendFailureEmail" id-system="OCTO_NA" input="outputFailure" next-node-id="end" op-type="call" operation-name="SendTWFailureOperation" output="output" point-x="1111" point-y="619" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepareRow" input="outputCall" next-node-id="writeFailureOperation" op-type="change GVBuffer" output="outputRow" point-x="1126" point-y="439" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[var inputRequest = new java.lang.String(environment.get("output").getObject());
+var outputRequest = new java.lang.String(data.getObject());
+var rowsToWrite = inputRequest + "\r\n" + outputRequest;
+data.setObject(rowsToWrite);
+data.setProperty("FILE_NAME", "FailureMessageOCTO_NA_TW.txt");]]></Script>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="end" id="checkTWUpdateScoreAccount" input="outputCall" on-exception-id="end" op-type="check" point-x="877" point-y="319" type="flow-node">
+<GVRouting condition="badRequest" next-node-id="prepareRow"/>
+<GVRouting condition="success" next-node-id="updateTWAccountData"/>
+</GVNodeCheck>
+</Flow>
+</Operation>
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" forward-name="ReactivateScoreAccount" name="Forward" operation-activation="on" out-check-type="none" type="operation">
+<Participant id-channel="OCTO_NA_CHANNEL" id-system="OCTO_NA"/>
+<Participant id-channel="STATE_AUTO_US_CHANNEL" id-system="STATE_AUTO_US"/>
+<Flow first-node="prepare">
+<Conditions>
+<GVBufferCondition class="it.greenvulcano.gvesb.internal.condition.GVBufferCondition" condition="success" type="condition">
+<Property name="GVHTTP_RESPONSE_STATUS" operator="equal" type="gvbuffer-field" value="202" value-type="text"/>
+</GVBufferCondition>
+</Conditions>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="TWReactivateScoreAccountCall" id-system="STATE_AUTO_US" input="output" next-node-id="checkTWReactivateScoreAccount" op-type="call" operation-name="callTWReactivateScoreAccount" output="output" point-x="882" point-y="150" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="TWReactivateScoreAccountCall" id="checkGetVoucherDetails" input="output" on-exception-id="end" op-type="check" point-x="594" point-y="150" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepare" input="input" next-node-id="getVoucherDetails" op-type="change GVBuffer" output="output" point-x="207" point-y="150" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[//var inputObject = data.getObject();
+//var idVoucher = inputObject.getProperty("ID_VOUCHER");]]></Script>
+<PropertyDef name="ID_STATUS" value="2"/>
+<PropertyDef name="TSP_CODE" value="OCTO"/>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="updateTWAccountData" id-system="OCTO_NA" input="output" next-node-id="end" op-type="call" operation-name="ManageMapping" output="output" point-x="868" point-y="559" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="updateVoucherMap" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+</GVOperationNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="getVoucherDetails" id-system="STATE_AUTO_US" input="output" next-node-id="checkGetVoucherDetails" op-type="call" operation-name="GetVoucherDetailsForTW" output="output" point-x="376" point-y="150" type="flow-node">
+<InputServices>
+<dh-selector-service critical="yes" internal="yes" type="service">
+<dh-selector-call DH_SERVICE_NAME="GetVoucherDetailsForTW" class="it.greenvulcano.gvesb.virtual.datahandler.DBOBuilderSelectorCallOperation" name="setDBService" type="call"/>
+</dh-selector-service>
+</InputServices>
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="TWResetScoring_Transformation"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="contextCall" type="call"/>
+</gvdte-service>
+</OutputServices>
+</GVOperationNode>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output" point-x="661" point-y="559" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="end" id="checkTWReactivateScoreAccount" input="output" on-exception-id="end" op-type="check" point-x="873" point-y="319" type="flow-node">
+<GVRouting condition="success" next-node-id="updateTWAccountData"/>
+</GVNodeCheck>
+</Flow>
+</Operation>
+<Operation class="it.greenvulcano.gvesb.core.flow.GVFlowWF" forward-name="GetScoreTW" name="Forward" operation-activation="on" out-check-type="none" type="operation">
+<Participant id-channel="STATE_AUTO_US_CHANNEL" id-system="STATE_AUTO_US"/>
+<Flow first-node="validateInput" point-x="20" point-y="150">
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="prepare" input="output" next-node-id="GetScore" op-type="change GVBuffer" output="output" point-x="777" point-y="150" type="flow-node">
+<ChangeGVBuffer clear-data="false" scope-name="gvesb">
+<Script><![CDATA[var doc = XMLUtils.parseObject_S(data.getObject(),false, true);
+var idVoucher = XMLUtils.get_S(doc, "//idVoucher");
+data.setProperty("ID_VOUCHER", idVoucher);]]></Script>
+<PropertyDef name="COMPANY_ID" value="99700"/>
+</ChangeGVBuffer>
+</ChangeGVBufferNode>
+<GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode" id="GetScore" id-system="STATE_AUTO_US" input="output" next-node-id="end" op-type="call" operation-name="callTWGetScore" point-x="1012" point-y="150" type="flow-node"/>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="end" op-type="end" output="output" point-x="1320" point-y="150" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="validateInput" input="input" next-node-id="checkValidation" op-type="change GVBuffer" output="output" point-x="246" point-y="150" type="flow-node">
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="Json2Xml"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="Json2Xml" type="call"/>
+</gvdte-service>
+<xml-validation-service internal="yes" type="service">
+<xml-validation-call class="it.greenvulcano.gvesb.virtual.internal.xml.XMLValidationCallOperation" default-xsd="SA/GetScoreTW_in.xsd" name="getScoreTWValidation" return-dom="true" type="call" xsd-policy="force-default"/>
+</xml-validation-service>
+</OutputServices>
+</ChangeGVBufferNode>
+<GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode" id="errorValidation" op-type="end" output="outputJsonValidation" point-x="511" point-y="529" type="flow-node"/>
+<GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck" default-id="prepare" id="checkValidation" input="output" on-exception-id="returnErrorValidation" op-type="check" point-x="507" point-y="150" type="flow-node"/>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="toJSONValidation" input="outputErrValidation" next-node-id="errorValidation" op-type="change GVBuffer" output="outputJsonValidation" point-x="499" point-y="409" type="flow-node">
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="identityXMLNoNamespace"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="removeNS" type="call"/>
+</gvdte-service>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="xml2json"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="xml2json" type="call"/>
+</gvdte-service>
+</OutputServices>
+</ChangeGVBufferNode>
+<ChangeGVBufferNode class="it.greenvulcano.gvesb.core.flow.ChangeGVBufferNode" id="returnErrorValidation" input="input" next-node-id="toJSONValidation" op-type="change GVBuffer" output="outputErrValidation" point-x="486" point-y="289" type="flow-node">
+<ChangeGVBuffer clear-data="false">
+<PropertyDef name="RETURN_CODE" overwrite-body="no" value="98"/>
+</ChangeGVBuffer>
+<OutputServices>
+<gvdte-service critical="yes" internal="yes" remove-fields="yes" type="service">
+<map-name-param name="map-name" type="param" value="GetScoreTW_Response"/>
+<gvdte-context-call class="it.greenvulcano.gvesb.virtual.internal.DTEServiceContextCall" name="reponseError" type="call"/>
+</gvdte-service>
+</OutputServices>
+</ChangeGVBufferNode>
+</Flow>
+</Operation>
+</Service>
+</Services>
+</GVServices>
+<GVSystems name="SYSTEMS" type="module">
+<Systems>
+<System id-system="STATE_AUTO_US" system-activation="on">
+<Channel id-channel="STATE_AUTO_US_CHANNEL">
+<dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation" name="GetVoucherDetailsForTW" type="call">
+<DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" jdbc-connection-name="xmlp{{dbNameR}}" name="GetVoucherDetailsForTW" type="dbobuilder">
+<DBOSelect class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect" name="GetVoucherDetailsForTW" type="dbo">
+<statement id="0" type="select"><![CDATA[select c.policy_number,ve.vin, ve.make, ve.model, to_char(ve.date_imm, "YYYY"), t.imei from voucher v, contract c, vehicle ve, terminal t
+where v.id_voucher = @{{ID_VOUCHER}}
+and v.id_contract = c.id_contract
+and v.id_vehicle = ve.id_vehicle
+and v.id_terminal = t.id_terminal]]></statement>
+</DBOSelect>
+</DBOBuilder>
+</dh-call>
+<http-call class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="callTWDeactivateScoreAccount" type="call">
+<endpoint host="www.test.driveability.towerswatson.com" port="443" secure="true">
+<BasicHttpAuth class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth" password="{3DES}IagikqPvicpZgZovP6Srxg==" type="http-auth" user="OctoTestServiceUser"/>
+</endpoint>
+<method name="DELETE" request-uri="/AccountData/@{{TSP_CODE}}/@{{ID_VOUCHER}}" uri-escaped="true"/>
+</http-call>
+<http-call class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="callTWDeviceExchange" type="call">
+<endpoint host="www.test.driveability.towerswatson.com" port="443" secure="true">
+<BasicHttpAuth class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth" password="{3DES}IagikqPvicpZgZovP6Srxg==" type="http-auth" user="OctoTestServiceUser"/>
+</endpoint>
+<method name="PUT" ref-dp="setHttpJsonDPForByteInput" request-uri="/AccountData/@{{TSP_CODE}}/@{{ID_VOUCHER}}" uri-escaped="true"/>
+</http-call>
+<http-call class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="callTWGetScore" type="call">
+<endpoint host="www.test.driveability.towerswatson.com" port="443" secure="true">
+<BasicHttpAuth class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth" password="{3DES}IagikqPvicpZgZovP6Srxg==" type="http-auth" user="OctoTestServiceUser"/>
+</endpoint>
+<method name="GET" request-uri="/v2/ScoreData/@{{COMPANY_ID}}/@{{ID_VOUCHER}}" uri-escaped="true"/>
+</http-call>
+<http-call class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="callTWUpdateScoreAccount" type="call">
+<endpoint host="www.test.driveability.towerswatson.com" port="443" secure="true">
+<BasicHttpAuth class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth" password="{3DES}IagikqPvicpZgZovP6Srxg==" type="http-auth" user="OctoTestServiceUser"/>
+</endpoint>
+<method name="PUT" ref-dp="setHttpJsonDPForByteInput" request-uri="/AccountData/@{{TSP_CODE}}/@{{ID_VOUCHER}}" uri-escaped="true"/>
+</http-call>
+<http-call class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="callTWNewScoreAccount" type="call">
+<endpoint host="www.test.driveability.towerswatson.com" port="443" secure="true">
+<BasicHttpAuth class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth" password="{3DES}IagikqPvicpZgZovP6Srxg==" type="http-auth" user="OctoTestServiceUser"/>
+</endpoint>
+<method name="POST" ref-dp="setHttpJsonDPForByteInput" request-uri="/AccountData" uri-escaped="true"/>
+</http-call>
+<http-call class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="callTWResetScoring" type="call">
+<endpoint host="www.test.driveability.towerswatson.com" port="443" secure="true">
+<BasicHttpAuth class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth" password="{3DES}IagikqPvicpZgZovP6Srxg==" type="http-auth" user="OctoTestServiceUser"/>
+</endpoint>
+<method name="PUT" ref-dp="setHttpJsonDPForByteInput" request-uri="/AccountData/@{{TSP_CODE}}/@{{ID_VOUCHER}}" uri-escaped="true"/>
+</http-call>
+<http-call class="it.greenvulcano.gvesb.virtual.http.HTTPCallOperation" name="callTWReactivateScoreAccount" type="call">
+<endpoint host="www.test.driveability.towerswatson.com" port="443" secure="true">
+<BasicHttpAuth class="it.greenvulcano.gvesb.http.auth.impl.BasicHttpAuth" password="{3DES}IagikqPvicpZgZovP6Srxg==" type="http-auth" user="OctoTestServiceUser"/>
+</endpoint>
+<method name="PUT" ref-dp="setHttpJsonDPForByteInput" request-uri="/AccountData/@{{TSP_CODE}}/@{{ID_VOUCHER}}" uri-escaped="true"/>
+</http-call>
+</Channel>
+</System>
+<System id-system="ELD" system-activation="on">
+<Channel id-channel="DB">
+<dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation" name="ELD_ManageReportOperation" type="call">
+<DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" jdbc-connection-name="xmlp{{dbNameW}}" name="ELD_ManageReportOperation" type="dbobuilder">
+<DBOCallSP class="it.greenvulcano.gvesb.datahandling.dbo.DBOCallSP" name="ELD_ManageReportOperation" transformation="ELD_ManageSP_XML" type="dbo">
+<CallDescriptor>
+<statement id="1" type="callsp">{? = call PKG_ELD.APPROVE_DAILY_REPORT(?,?,?)}</statement>
+<SPOutputParameters>
+<SPOutputParameter db-type="number" java-type="string" param-name="RETID" position="1" prop-name="RETID"/>
+<SPOutputParameter db-type="number" java-type="string" param-name="ERRCODE" position="3" prop-name="ERRCODE"/>
+<SPOutputParameter db-type="string" java-type="string" param-name="ERRMSG" position="4" prop-name="ERRMSG"/>
+</SPOutputParameters>
+</CallDescriptor>
+</DBOCallSP>
+</DBOBuilder>
+</dh-call>
+</Channel>
+</System>
+<System id-system="OCTO" system-activation="on">
+<Channel id-channel="CHANNEL_DB_IDM">
+<dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation" name="insertPlatform" type="call">
+<DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" jdbc-connection-name="xmlp{{dbNameW}}" name="insertPlatform" type="dbobuilder">
+<DBOCallSP class="it.greenvulcano.gvesb.datahandling.dbo.DBOCallSP" name="insertPlatform" type="dbo">
+<CallDescriptor named-parameter-mode="false">
+<statement type="callsp">{? = call PKG_CAP.INSERT_PLATFORM(?,?,?)}</statement>
+<SPOutputParameters>
+<SPOutputParameter db-type="number" java-type="string" param-name="ID" position="1" prop-name="ID"/>
+<SPOutputParameter db-type="number" java-type="string" param-name="ERRCODE" position="3" prop-name="ERRCODE"/>
+<SPOutputParameter db-type="string" java-type="string" param-name="ERRMSG" position="4" prop-name="ERRMSG"/>
+</SPOutputParameters>
+</CallDescriptor>
+</DBOCallSP>
+</DBOBuilder>
+</dh-call>
+</Channel>
+</System>
+<System id-system="OCTO_NA" system-activation="on">
+<Channel id-channel="OCTO_NA_CHANNEL">
+<smtp-call class="it.greenvulcano.gvesb.virtual.smtp.SMTPCallOperation" jndi-name="gvesb.gvMailServer" name="SendTWFailureOperation" type="call">
+<mail-message content-type="text-html" high-priority="false" sender-display-name="Octo Telematics" subject="Towers Watson OCTO NA failure for voucher -  ${property["ID_VOUCHER"]}">
+<destinations>
+<to>
+<mail-address address="p.gopalakrishnan@octotelematics.com"/>
+</to>
+</destinations>
+<message-body>
+<message-text><![CDATA[An Exception occurred while for the Voucher Number - ${property["ID_VOUCHER"]} from Octo NA to Towers Watson]]></message-text>
+</message-body>
+<attachments>
+<gvBuffer name="InputOutputTW.txt"/>
+</attachments>
+</mail-message>
+</smtp-call>
+<dh-call class="it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation" name="ManageMapping" type="call">
+<DBOBuilder class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" jdbc-connection-name="xmlp{{dbNameR}}" name="updateVoucherMap" type="dbobuilder">
+<DBOUpdate class="it.greenvulcano.gvesb.datahandling.dbo.DBOUpdate" name="updateVoucherMap" transformation="VoucherMapping_Transformation" type="dbo">
+<statement id="0" type="update">update VOUCHER_MAPPING
+set VOUCHER_STATUS = @{{ID_STATUS}}, DATE_MOD = sysdate
+where ID_VOUCHER = @{{ID_VOUCHER}}</statement>
+<statement id="1" type="update">insert into VOUCHER_MAPPING (ID_VOUCHER, START_DATE, VOUCHER_STATUS) values (@{{ID_VOUCHER}}, sysdate, @{{ID_STATUS}})</statement>
+</DBOUpdate>
+</DBOBuilder>
+</dh-call>
+<jms-enqueue acknowledge-type="auto-acknowledge" class="it.greenvulcano.gvesb.virtual.j2ee.JMSEnqueueOperation" connection-factory="java:/XAConnectionFactory" delivery-mode="persistent" destination-name="gvesb/jms/queue/SA_TW_Queue" destination-type="queue" name="JMSEnqueueTo::SA_TW" priority="4" ref-dp="setEmptyBody" transacted="false" type="enqueue">
+<XAHelper auto-enlist="false" transaction-status="TMSUCCESS"/>
+</jms-enqueue>
+<filewriter-call append="true" appendEOL="CR" class="it.greenvulcano.gvesb.virtual.file.writer.FileWriter" fileName="@{{FILE_NAME}}" name="writeFailureTWOperation" targetPath="${{gv.app.home}}/TEST/FAILURE" type="call"/>
+<smtp-call class="it.greenvulcano.gvesb.virtual.smtp.SMTPCallOperation" jndi-name="gvesb.gvMailServer" name="SendEnqueueFailureEmail" type="call">
+<mail-message content-type="text-html" high-priority="false" sender-display-name="Octo Telematics" subject="Enqueue failure for voucher -  ${property["ID_VOUCHER"]}">
+<destinations>
+<to>
+<mail-address address="itdev@octousa.com"/>
+</to>
+</destinations>
+<message-body>
+<message-text><![CDATA[An Exception occurred while enqueuing the Voucher Number - ${property["ID_VOUCHER"]} from Octo NA to Octo Rome]]></message-text>
+</message-body>
+</mail-message>
+</smtp-call>
+</Channel>
+</System>
+</Systems>
+</GVSystems>
+<GVDataTransformation name="GVDT" type="module">
+<DataSourceSets>
+<DataSourceSet name="Default">
+<LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xsl" name="DefaultXSL" repositoryHome="${{gv.app.home}}/gvdte/datasource/xsl" type="datasource"/>
+<LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xsd" name="DefaultXSD" repositoryHome="${{gv.app.home}}/gvdte/datasource/xsd" type="datasource"/>
+<LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="xq" name="DefaultXQ" repositoryHome="${{gv.app.home}}/gvdte/datasource/xq" type="datasource"/>
+<LocalFSDataSource class="it.greenvulcano.gvesb.gvdte.config.LocalFSDataSource" formatHandled="bin" name="DefaultBIN" repositoryHome="${{gv.app.home}}/gvdte/datasource/bin" type="datasource"/>
+</DataSourceSet>
+</DataSourceSets>
+<Transformations>
+<XSLTransformation XSLMapName="SA/GetScoreTW_Response.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer" name="GetScoreTW_Response" type="transformation"/>
+<XSLTransformation XSLMapName="InsertXML.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer" name="xmlInput" type="transformation"/>
+<SequenceTransformation Output="DH_XML_CONCACT" class="it.greenvulcano.gvesb.gvdte.controller.SequenceTransformer" name="return" type="transformation">
+<SequenceElement Input="DH_CONCACT" Output="DH_XML_CONCACT" Transformer="returnCall"/>
+<SequenceElement Buffer="DH_XML_CONCACT" Input="DH_XML_CONCACT" Output="DH_XML_CONCACT" Transformer="jsonReturnCall"/>
+</SequenceTransformation>
+<XML2JSONTransformation DataSourceSet="Default" ForceStringValue="status,code,message" InputXSLMapName="ELD/ELD_SPHandlingResponse.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer" name="ELD_SPHandlingResponseToJson" type="transformation"/>
+<XSLTransformation XSLMapName="SA/TWDeviceExchange_Transformation.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer" name="TWDeviceExchange_Transformation" type="transformation"/>
+<XSLTransformation DataSourceSet="Default" XSLMapName="identityNoNamespace.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer" name="identityXMLNoNamespace" type="transformation"/>
+<XSLTransformation XSLMapName="SA/TWAccountData_Transformation.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer" name="TWAccountData_Transformation" type="transformation"/>
+<XSLTransformation XSLMapName="SA/TWUpdateScoreAccount_Transformation.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer" name="TWUpdateScoreAccount_Transformation" type="transformation"/>
+<SequenceTransformation Output="DH_XML_CONCACT" class="it.greenvulcano.gvesb.gvdte.controller.SequenceTransformer" name="input" type="transformation">
+<SequenceElement Input="DH_CONCACT" Output="DH_XML_CONCACT" Transformer="jsonInputCall"/>
+<SequenceElement Buffer="DH_XML_CONCACT" Input="DH_XML_CONCACT" Output="DH_XML_CONCACT" Transformer="xmlInput"/>
+</SequenceTransformation>
+<XSLTransformation XSLMapName="SA/TWResetScoring_Transformation.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer" name="TWResetScoring_Transformation" type="transformation"/>
+<XSLTransformation DataSourceSet="Default" SchemaInput="DataHandler.xsd" SchemaOutput="OctoCap.xsd" XSLMapName="return.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer" name="returnCall" type="transformation"/>
+<XML2JSONTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer" name="xml2json" type="transformation"/>
+<JSON2XMLTransformation ConversionPolicy="simple" class="it.greenvulcano.gvesb.gvdte.transformers.json.JSON2XMLTransformer" name="jsonInputCall" type="transformation"/>
+<XML2JSONTransformation ForceElementsArray="return" class="it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer" name="jsonReturnCall" type="transformation"/>
+<JSON2XMLTransformation class="it.greenvulcano.gvesb.gvdte.transformers.json.JSON2XMLTransformer" name="Json2Xml" type="transformation"/>
+</Transformations>
+</GVDataTransformation>
+</GVCore>);
+				},
+				rhs: function(setValue) {
+					setValue(<?xml version="1.0" encoding="UTF-8"?>\n'+
+     '<?xml-stylesheet type="text/css" href="cd_catalog.css"?>\n'+
+     '<CATALOG>\n'+
+     '<CD>\n'+
+     '<TITLE>Empire Burlesque</TITLE>\n'+
+     '<ARTIST>Bob Dylan</ARTIST>\n'+
+     '<COUNTRY>USA</COUNTRY>\n'+
+	 '<COMPANY>Columbia</COMPANY>\n'+
+     '<PRICE>10.90</PRICE>\n'+
+	 '<YEAR>15</YEAR>\n'+
+	 '</CD><CD>\n'+
+	 '<TITLE>Hide your heart</TITLE>\n'+
+	 '<ARTIST>Bonnie Tyler</ARTIST>\n'+
+	 '<COUNTRY>UK</COUNTRY>\n'+
+	 '<COMPANY> Records</COMPANY>\n'+
+	 '<YEAR>1988</YEAR>\n'+
+	 '</CD>...</CATALOG>');
+				}
+			});
+			
+			
+			
+			
+			
+			/*function handle_operation(id) {
+			   if (id == "changeNext") {
+                ed.mergely("scrollToDiff", "next")
+        }
+        		if (id == "changePrev") {
+            ed.mergely("scrollToDiff", "prev")
+        }
+		  console.log(id);
+		  };*/
+		   
+
+		});
+		
+		function mergeRight() {$('#compare').mergely("scrollToDiff", "next");};
+		function mergeLeft() {$('#compare').mergely("scrollToDiff", "prev");}
+		
+	</script>
+</body>
+</html>

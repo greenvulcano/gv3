@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="gvdebug">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="gvstatistics-3.4.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvstatistics/gvstatistics">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="gvvcl-3.4.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvvcl/gvvcl">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="gvthroughput-3.4.0-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvthroughput/gvthroughput">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="gvpolicy-3.4.0.1-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvpolicy/gvpolicy">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="gvdte-3.4.0.2-Final.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gvdte/gvdte">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="gvdebug"/>
+        <property name="java-output-path" value="/gvdebug/target/classes"/>
+    </wb-module>
+</project-modules>
