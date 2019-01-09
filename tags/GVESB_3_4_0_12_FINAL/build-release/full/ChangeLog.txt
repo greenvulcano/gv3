@@ -1,0 +1,410 @@
+-------------------------------------------
+ESB version 3.4.0.12
+-------------------------------------------
+
+Commons:
+- Added capability to CryptoHelper in order to create signed documents.
+- Improved ChangeGVBuffer support for g/zip de/compression algorithms.
+- Added support to json-path search in JSONUtils
+- Standardized time/date results format in sqlX placeholders
+- Corrected ThreadMap for Java 8 weak hashmap concurrency bug
+- Improved cripto key management
+
+Core:
+- Corrected thread pool size management in Core parallel nodes
+- Added timestamp to JMX Core operation info status change
+- The dump-in-out attribute, if set on WF nodes, force the logger level to DEBUG
+- Improved Log4j message context at service invocation end
+
+GVConsole:
+- Updated GVConsole in order to handle service level import/export with dependency management and visual comparison of deployment differences
+
+DTEControlled:
+- Improved management and logging of XML data
+- Added support to placeholders into transformers parameters
+
+DataHandler:
+- Added capability to DataHandler to use placeholders in JDBC connection names, in order to resolve the actual connection at runtime
+- Improved logging of statements in case of error
+
+Adapter HTTP Inbound:
+- Added support to GVBuffer.GV_MASTER_ID to be used in logging and properties resolving.
+  This field is set-up in HTTPInbound adapter using: request path/query, xml/json body search value, request header.
+- Improved configuration of HTTPInbound adapter transaction using ALL as default for id-system field
+
+VCL HTTP:
+- Added capability to configure user-agent in HTTPCallOperation
+
+VCL JMS:
+- Added to VCL J2EE JMSEnqueue force-correlation-id-as-id configuration attribute
+
+VCL SMTP:
+- Added capability to SMTPCall to define the sender address
+
+VCL File:
+- Added to GVVcl-File a make dir Command and capability to limit the number of files searched on search Command
+
+VCL Exchange:
+- Updated GVVcl-Exchange in order to use OAuth authentication.
+
+-------------------------------------------
+ESB version 3.4.0.11
+-------------------------------------------
+
+Commons:
+- JavaScript objects conversion to string now return an empty string instead of null
+- Improved scheduler shutdown
+- Improved multi-byte chars support in properties files
+- Modified sqlX placeholder in order to return an empty string instead of null if no data found
+- Added dateAdd and dateformatAdd placeholders
+
+DTEControlled:
+- Added capability to specify file encoding in csv to xml DTE transformer
+- Added support at xml to json converter to use * as "all fields" for forcing conversion to string
+
+VCL Excel:
+- Improved configuration reloading
+
+VCL Mail:
+- Corrected message placeholder parsing
+
+-------------------------------------------
+ESB version 3.4.0.10
+-------------------------------------------
+
+Commons:
+- Added support to Java 8 runtime.
+- Improved JSON<->XML conversion of arrays.
+
+Core:
+- Improved ChangeGVBuffer node initialization error logging.
+- Added XML merge and aggregate functionality to ChangeGVBufferNode.
+- Added to parallel nodes the capability to avoid collecting subflows output data.
+
+GVConsole:
+- Improved deployment of call VCL operations: now are deployed only effectively used service's VCL operations.
+- Improved deployment of dh-call VCL operations: now is deployed every single DBOBuilder and DataRetriever as indipendent unit.
+
+DataHandler:
+- Added capability to DBOxxxFlatSelect to write extracted records directly into a local file, in order to better handle massive data extractions.
+- Corrected DataHandler.xsd missing definitions.
+- Corrected error reporting in DBOThreadSelect.
+
+Adapter HTTP:
+- Added support to REST mapping of optional URL's path components
+
+VCL File:
+- Added to RemoteManager methods the capability to provide at the real implementations a Map containing implementation-specific properties.
+- Updated the remote commands to reads a list of properties from configuration.
+
+VCL Mail:
+- Added imap-call and imap-manage-call VCL operations, added the capability to define the max number of email to be read.
+
+VCL Excel:
+- Improved Excel Report generator in order to generate report based on XML data.
+
+-------------------------------------------
+ESB version 3.4.0.9
+-------------------------------------------
+
+Commons:
+- Added to TaskManager the capability to interrupt running Tasks execution on configuration reloading.
+  Modified TaskManager in order to append to Scheduler's Threads name also the executing TaskGroup.TaskName in order to simplify troubleshooting.
+- Corrected jms-dequeue/@decorate-gvbuffer definition in GVCore.dtd.
+
+Core:
+- Corrected @loggerLevel handling in GVCoreCallNode, GVIteratorOperationNode/CoreCall and parallel nodes
+- Added to GVCoreCallNode and GVIteratorOperationNode/CoreCall a new attibute change-log-master-service.
+  If true change the log master service with the used one (configured or calculated), in order to write log messages into a different log file.
+  Used only if @change-log-context is true.
+- Improved init/run logging of ServiceCallerTask.NextAction status
+
+DataHandler:
+- Provided a new getData method on DH retrievers in order to specify the parameter's actual values separator;
+  useful if the default separator (comma) is present into the parameter's actual values
+
+Adapter/VCL Axis2:
+- Corrected mixed SOAP 1.1/1.2 request/response handling in Axis2MessageContextDataProvider.
+- Added new property WS_REQ_SOAP_VERSION to input GVBuffer.
+
+VCL Mail:
+- Corrected default value for @email-rx-cleaner regular expression in receive email VCL Operations
+
+-------------------------------------------
+ESB version 3.4.0.8
+-------------------------------------------
+
+Commons:
+- Corrected JSON<->XML numeric values conversion.
+
+DTE:
+- Changed cardinality of ToPreload DTE element.
+
+Adapter:
+- Added Push Notification Adapter, with Android and iOS notification engine implementation.
+
+Core:
+- Corrected GVCore pool element clean-up after configuration reload.
+
+Adapter HTTP Inbound:
+- Added management of output GVBuffer property HTTP_RESP_FILE_NAME to RESTHttpServletMapping in order to define the name of the file to be downloaded through an HTTP request.
+
+RSH Handler:
+- Corrected RMI hostname definition in RSH start script.
+
+-------------------------------------------
+ESB version 3.4.0.7
+-------------------------------------------
+
+Commons:
+- Removed XPath engine re-initialization during startup.
+- Removed recursive invocation of JMXEntrypoint.init() during Initializers execution.
+- Improved (N)CLOB fields management in sqlX metadata.
+- Improved reload configuration locking in order to avoid dead-lock.
+- Corrected EML element definition in PopMessages.xsd
+
+Task Scheduler:
+- Improved TaskManager reload configuration locking in order to avoid dead-lock.
+
+JMS Listener:
+- Improved listeners instantiation algorithm in JMS listener pool.
+
+DataHandler:
+- Resolved a column name misreading error in DataHandler's extended RowSet builder.
+
+GVConsole:
+- Improved DTD referencing and deploy of aliased DTE Transformations
+
+VCL HTTP:
+- Corrected RegisterHttpClientProtocolManager initialization, in order to avoid double JMX registration.
+
+VCL J2EE:
+- Added to JMS Enqueue/Dequeue VCL operations the capability to exclude:
+    - GVBuffer -> Message properties enrichment during enqueue
+    - Message -> GVBuffer properties enrichment during dequeue
+
+-------------------------------------------
+ESB version 3.4.0.6
+-------------------------------------------
+
+Task Scheduler:
+- Improved transaction's timeout management in Service caller timer task.
+
+JMS Listener:
+- Improved listeners instantiation algorithm in JMS listener pool.
+
+DataHandler:
+- Improved handling of NCHAR,NVARCHAR,NCLOB fields in DataHandler.
+- Corrected NullPointerException in DH DBOInsert/DBOUpdate without an input XML.
+- Added to DataHandler's DBOInsert/DBOUpdate the capability to handle auto-generated keys at runtime (es. auto-increment primary key field)
+
+GVConsole:
+- Corrected GVConsole's services deployment section when used in HTTPS.
+
+DTE:
+- Improved dynamic connection naming in DH external retriever helper.
+- Improved empty array management in XML to JSON conversion.
+- Improved management of multi-root JSON document in JSON <-> XML simple conversion policy.
+- Improved namespaces exclusion in JSON <-> XML simple conversion policy and added a BadgerFish conversion policy.
+- Moved to a GV specific version of org.json json library: now the properties creation order is keep in dump and properties listing, in order of better handle conversion to/from XML documents.
+
+VCL HTTP:
+- Corrected http-call connection timeout test case.
+- Added new output property to http-call VCL plug-in: GVHTTP_RESPONSE_MESSAGE containing the response status text.
+
+VCL File:
+- Corrected zip file closing on unzip operation.
+
+-------------------------------------------
+ESB version 3.4.0.5
+-------------------------------------------
+
+Commons/DTE :
+- Enable the XML2JSON transformer to specify a list of XML element names to be forcefully set as String values in output JSON, ignoring automatic type conversion
+
+Core/GVConsole:
+- Added a JSON schema validation plug-in to be used as Inpu/Ouput Service. Added automatic deploy of JSON Schemas in GVConsole.
+
+DataHandler:
+- In DBOCallSP the "Cursor closed" error is intercepted and don't prevent a successful call completation, returning the other procedure output parameters
+
+-------------------------------------------
+ESB version 3.4.0.4
+-------------------------------------------
+
+Commons/DTE :
+- Added JSONUtils utility class in order to manage JSON<->XML conversions.
+- The new converter perform better than that implemented in JSON library and:
+    - enable the JSON2XML transformer to specify a list of JSON property names to be set as element attributes in output XML
+    - enable the XML2JSON transformer to specify a list of XML element names to be forcefully set as JSONArray in output JSON
+- Improved conversion of ISO8601 date-time in DateUtils.
+- Improved encrypt/decrypt of configuration parameters.
+
+Adapter HTTP Inbound:
+- Improved request text payload recognition in Adapter HTTP Inbound.
+- Added HTTP_QUERY property to request GVBuffer.
+- Improved customization of status messages in response header for HTTP Adapter Inbound (added a property in gvstart script).
+
+JMS Listener:
+- Improved Dump of JMS's MapMessage.
+- Added an utility class (JMSMessageToXML, to be used in ODP) to convert a JMS's message to XML document.
+
+-------------------------------------------
+ESB version 3.4.0.3
+-------------------------------------------
+
+Commons/JMSListener :
+- Added capability to define a delayed initialization on JMXEntryPoint initializers.
+  In order to avoid JMSListener/TimerTask dead-lock on startup recovery after a server crash.
+
+Adapter/VCL Axis2:
+- Improved Axis2 HTTP connection pool management in ws-call.
+
+Adapter HTTP Inbound:
+- Added a RESTfull Mapper to HTTP Adapter Inbound, in order to improve publishing of RESTfull services.
+- Added input http headers management in REST servlet mapping.
+- Improved HTTP Inbound dtd documentation.
+
+GVConsole:
+- Wrong url generation fixed, in Parameter section, "GreenVulcanoESB - Core Services configuration" menu, Search operation.
+
+-------------------------------------------
+ESB version 3.4.0.2
+-------------------------------------------
+
+Core:
+- Moved to INFO level the end trace message of workflow nodes, added execution time in ms.
+- Enabled missing FTPS remote manager in dtds
+
+GVConsole:
+- Corrected deployment of WSDL files contained in sub-folders.
+- Improved automatic deployment of service's ACL configuration.
+
+DataHandler:
+- Corrected connection release fake error message when using dynamic connection name definition in DBOBuilder
+- Improved SQL exception message propagation in DBOxxxSelect.
+
+JMS Listener:
+- Improved debug logging in JMSForwardListener
+
+Adapter HTTP Inbound:
+- Improved request body handling for POST and PUT HTTP methods in
+- Added new GVCore Http servlet mapping's input property: HTTP_PATH containing request's path info
+
+Adapter HL7:
+- Improved concurrent access to HL7ConnectionValidator
+
+VCL Mail:
+- Improved Session initialization using local properties in smtp-call.
+
+VCL OpenSPCoop:
+- Improved request/response marshalling
+
+-------------------------------------------
+ESB version 3.4.0
+-------------------------------------------
+
+Commons:
+- Implemented a normalized pluggable authentication framework for http-call, ws-call and rest-call. Provided implementation for Basic and NTLM HTTP/Proxy autentication.
+- Added task duration (in ms) to HeartBeat information.
+- Added a flag to HeartBeat indicating the failure/success on task execution (es.a failure is a GVCore service that terminate with exception).
+    - The SimpleHeartBeat report the flag value as [S] or [F] at log's line end.
+    - The JDBCHeartBeat report the flag value as S or F into the HEARTBEAT table's SUCCESS field.
+- Corrected default delete filter in LogCleanerTask
+- Added method to DateUtils to convert a long representing a ms duration into a string in the format HH:mm:ss.SSS.
+- Added to TaskManager the capability to enable/disable full TaskGroups and single TriggerBuilder of a Task.
+- Improved JMX entry-point initialization.
+- Improved security of XML document building utilities.
+
+Core:
+- Solved a bug on debugger when resuming after a breakpoint.
+- Improved fail-fast capability on XA abort in transacted workflows execution
+- Improved transaction error management in workflow engine
+- Corrected GVSubFlowCallNode @dynamic behavior
+- Modified Core's configuration reload management, in order to better handle already running service instances.
+- Added ACL check to GVCoreCallNode and IteratorController in order to enforce ACL check across flow calls.
+- Added Input/Output services support to GVSubFlow* and GVCoreCallNode nodes.
+- Added JMX interface to subflows (statistics and executing instances status)
+- Added support to interruptible services
+    - Added JMX operations that enables the interruption of Operations and/or SubFlows (by ID and Thread name)
+- Added GVSubFlowParallelNode in order to execute SubFlows in parallel.
+- Added GVSubFlowSplittedNode in order to execute SubFlows in parallel.
+- Added GVSubFlowSpawnNode in order to execute one or more subflows as detached Thread from the main Operation flow
+- Added configuration metadata and implementation of parallel flow ResultProcessor (Default, JavaScript, OGNLScript, XMLAggregate)
+- Added Parallel flow examples in/out description in release package definition.
+
+GVConsole:
+- New global properties (XMLConfig.properties) editor implemented.
+- Added to GVConsole's Log tab the capability to download the GV ESB and JBoss log files, for a given day, as zip package.
+- Corrected deployment of ServiceDump configuration
+- Moved to XMLConfig.properties many configuration parameter values, in order to demonstrate properties replacement in examples services.
+- Modified GVConsole's XML save function in order to use CDATA section for Element's text content in case the text contains XML invalid characters. Improve script/statement readability in XML files.
+- Insert capability to deploy individual DTE transformation
+- Insert an integrated backup/restore support to deployment procedure
+- Now the restore procedure is the same for every editable resource and recevore all deployable files (keystore/DTE/xml/WS/ecc.)
+- Default configuration export file name now contains the server instance name
+- Added deployment support to ODP of Parallel nodes
+
+DTE:
+- Added basic json to xml and xml to json DTE transformers
+- Improved DTEControlled clean-up on destroy.
+
+DataHandler:
+- DBOBuilder: renamed Merge element to XMLMerge
+
+JMS Listener:
+- Added support in JMS Forward of pre-processor validation framework, that add the capability to check some condition before dequeuing a JMS message from the queue.
+
+Adapter HTTP Inbound:
+- Improved dump of HTTP request/response
+- Corrected setting of HTTP_METHOD GVBuffer's property in GVCoreHttpServletMapping.
+- Added pluggable URL Mapping interface:
+    - standard GVCore call mapping
+    - HTTP forward mapping
+- Improved the URL mapping behaviour
+- Added the capability to forward HTTP request/response to/from a remote server
+
+Adapter HL7:
+- Added a HL7 Forward validator that checks the availability of a list of HL7 servers.
+- Added an XSL transformation for building HL7 KO response
+- Added DDL for creating HL7 messages log table on various DB
+- Improved logging of HL7ConnectionValidator events
+- Added new server's end-point definition methods: hl7-call-ref, DBSelect
+- Updated GV specific HAPI libraries adding version information in Manifest.
+- Updated HAPI libraries to resolve a bug in autogenerated NAK header compilation (missing sender/receiver identification).
+- Added the capability to the HL7 Listener to force Recevinig Application/Facility in autogenerated NAK.
+- Added the following properties in input to GV workflow:
+    - HL7_REMOTE_ADDR        Remote address of the invoking client
+    - HL7_LISTENER           GV Listener's name receiving the client request
+    - HL7_APPLICATION        GV Application's name processing the client request
+    - HL7_REC_APPLICATION    Configured GV Listener @receivingApplication value
+    - HL7_REC_FACILITY       Configured GV Listener @receivingFacility value
+
+Adapter Social:
+- Moved to twitter4j v4.0.1
+- Implemented getUserTimeline and query operations
+- Various bug-fix
+
+VCL http-call:
+- Added to http-call the capability to set a context path before the method URI
+- Added parameters for connection timeout and SO timeout
+- Added capability to use metadata for endpoint host and port
+
+VCL Mail:
+- Enabled Metadata handling in smtp-call @sender-display-name attribute.
+- Added 3 VCL operation to read/send/manipulate emails on Exchange server through its WS interface
+- Added to pop-call the capability to export the received email as Base64 encoded EML format, modified the ProcessSingleSVCEmail sample service to write the EML encoded email to a file.
+
+VCL J2EE:
+- Added a new attribute to jms-dequeue to specifies if the dequeue must keep input GVBuffer properties, not present in the JMS message, in the output GVBuffer.
+
+VCL Axis2:
+- Modified ws-call with a WSDLInfo/@ws-endpoint-url parameter that enable the configuration of WS EPR that overrides the value defined in the WSDL.
+- Added optional attribute to ws-call to avoid to set SOAPAction header in the request
+- Added HTTP preemptive authentication flag to Axis2 ODP samples
+- Added 2 utility Axis2 ODP: genericPassFullBody_WSDataProvider, genericPassEnvelopeOM_WSDataProvider
+
+VCL LDAP:
+- Improved login security in gvvcl-ldap operations
+- Added LDAP example services and related test instruction
+- Various improvement to gvvcl-ldap plug-in

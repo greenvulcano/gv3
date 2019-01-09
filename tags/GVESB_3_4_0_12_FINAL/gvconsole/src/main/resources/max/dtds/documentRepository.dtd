@@ -1,0 +1,448 @@
+<!ENTITY % derived-dest   "FileSystem-Derived|Zip-Derived|ContentProvider-Derived">
+
+<!ENTITY % commons SYSTEM "file://max/dtds/commons.dtd" >
+%commons;
+
+<!--
+    'documents' is the root element for the document repository.
+    The document repository is a registry of all the documents known by the XML
+    editor.
+
+	#Table: | Groups | group | Group | @label | Identifier | @name | Description | description
+	#Table: | Documents | document | Document | @label | Identifier | @name | Roles | role/@name | Access | role/@access | Description | description
+-->
+<!ELEMENT documents (description?,group*,document*)>
+
+<!--
+    Filters are particular XSL stylesheets that filter information during view
+    operations.
+    Filter are applied only for external users.
+
+    Filters are stored into content providers.
+
+    This attribute specify which content provider stores the filters.
+
+    #Config: contents.xml : /contents/provider/@name
+    #Config: contents.xml : /contents/alias/@provider
+-->
+<!ATTLIST documents filter-provider CDATA #REQUIRED>
+
+
+
+
+<!--
+	Groups a set of documents that are related each other.
+
+	#SelectOnInsert
+	#Label: @label
+	#Table: | Documents | document | Document | @label | Identifier | @name | Roles | role/@name | Access | role/@access | Description | description
+-->
+<!ELEMENT group (description?,document*)>
+<!--
+	Group name.
+	Must be unique.
+
+	#NotNull
+	#Unique: ../group/@name
+	#Pattern: | [a-zA-Z][a-zA-Z0-9_-]* | insert a valid alfanumeric identifier starting with a letter
+-->
+<!ATTLIST group name CDATA #REQUIRED>
+<!--
+	A human readable and meaningful label.
+
+	#NotNull
+-->
+<!ATTLIST group label CDATA #REQUIRED>
+
+
+
+<!--
+    Defines a document.
+
+    A document is provided to the XML editor by a proxy, which is a plugin that
+    knows how to read a document from its location, and know how to write the
+    document to its location when the document is saved.
+
+    Currently are available the following proxies:
+
+    - FileSystemProxy
+        Reads and saves a document in the file system.
+
+    - ZipProxy
+        Reads and saves a document contained into a zip or a jar file.
+
+    - MasterDerivedProxy
+        Maintains a master copy of the document in XML format. At save time,
+        from the master copy can produce many derived documents in any format.
+        Useful for manage non-XML documents.
+
+    - ContentProviderProxy
+        Reads and saves a document contained into a content provider.
+
+    For a document it is posssible to specify a check class that performs some
+    checks during the editing.
+
+    This element also allow you to specify access right to the document.
+
+    #Label: @label
+    #Template:
+
+        <xsl:template match="document">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>Label:</td>
+                    <td width="20"></td>
+                    <td><b><xsl:value-of select="@label"/></b></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT document ((%proxy-plug-in;), check?, description, role*)>
+
+<!--
+    Document name.
+    This name is used for access the versioning repository and for cross
+    document references.
+
+    #NotNull
+    #Unique: /documents/document/@name
+    #Unique: /documents/group/document/@name
+    #Pattern: : [a-zA-Z][a-zA-Z_0-9-]* : invalid document name
+-->
+<!ATTLIST document
+    name CDATA #REQUIRED
+>
+
+<!--
+    A human readable and meaningful name of the document.
+
+    #NotNull
+    #Unique: ../document/@label
+-->
+<!ATTLIST document
+    label CDATA #REQUIRED
+>
+
+
+
+
+<!--
+    Specify a Java class that performs checks during the editing.
+    The class must implements the max.documents.CheckConstraints interface.
+
+    #Label: @class
+    #Template:
+
+        <xsl:template match="check">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>Class:</td>
+                    <td width="20"></td>
+                    <td><b><xsl:value-of select="@class"/></b></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT check (param*)>
+
+<!--
+    Class the implements the max.documents.CheckConstraints interface.
+
+    #NotNull
+-->
+<!ATTLIST check
+    class CDATA #REQUIRED
+>
+
+
+
+
+<!--
+    A free and human meaningful description.
+
+    #SelectOnInsert
+-->
+<!ELEMENT description (#PCDATA)>
+
+
+
+
+<!--
+    A paremeter for the check class.
+
+    #Label: @name
+    #Template:
+
+        <xsl:template match="param">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>Name:</td>
+                    <td width="20"></td>
+                    <td><b><xsl:value-of select="@name"/></b></td>
+                </tr>
+                <tr>
+                    <td>Value:</td>
+                    <td width="20"></td>
+                    <td><b><xsl:value-of select="@value"/></b></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT param (description?)>
+
+<!--
+	Unique name of the parameter.
+
+    #NotNull
+    #Unique: ../param/@name
+-->
+<!ATTLIST param
+    name CDATA #REQUIRED
+>
+
+<!--
+	Value for the parameter.
+
+    #NotNull
+-->
+<!ATTLIST param
+    value CDATA #REQUIRED
+>
+
+
+<!--
+	A 'role' element specify a grant access to the document for a given role.
+
+    #Label: @name
+    #Template:
+
+        <xsl:template match="role">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>Name:</td>
+                    <td width="20"></td>
+                    <td><b><xsl:value-of select="@name"/></b></td>
+                </tr>
+                <tr>
+                    <td>Access:</td>
+                    <td width="20"></td>
+                    <td><b><xsl:value-of select="@access"/></b></td>
+                </tr>
+            </table>
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT role (description?)>
+
+<!--
+	Role name.
+
+    #NotNull
+-->
+<!ATTLIST role
+    name CDATA #REQUIRED
+>
+
+<!--
+	Grant access:
+
+	- rw: read/write access.
+		The role can read and write the document, show and restore older
+		versions.
+
+	- ro: read only access.
+		The role can only shows the current version and older versions of the
+		whole document.
+		It can not write the document nor restore the older versions.
+
+	- ex:
+		The EXternal role can only shows the current version of the document.
+		If a fileter is available for the document, the document is filtered.
+-->
+<!ATTLIST role
+    access (rw|ro|ex) #REQUIRED
+>
+
+
+
+
+<!--
+    Questo document proxy mantiene le informazioni del documento in un master XML.
+    Al momento del salvataggio, dal master produce una serie di documenti derivati
+    ottenuti applicando al master una serie di trasformazioni XSLT.
+    Le trasformazioni XSLT possono produrre un qualsiasi risultato: xml, plain text,
+    html ecc.
+
+    Il documento master e' acceduto tramite un qualsiasi altro tipo di document proxy.
+
+    I documenti derivati possono essere salvati su diversi output (file, zip, content
+    provider).
+    Gli sylesheets per la trasformazione possono essere prelevati da diverse sorgenti
+    (file, http, zip, content providers).
+    Dopo la trasformazione possono essere risolti i metadati xmlp{{...}}.
+
+    #Template:
+
+        <xsl:template match="MasterDerivedProxy">
+            <xsl:apply-templates select="*[@type='proxy']"/>
+            <p/>
+            Derived documents:
+            <ul>
+                <xsl:for-each select="derived">
+                    <li>
+                        <b><xsl:value-of select="@name"/></b><br/>
+                        <xsl:value-of select="description"/>
+                    </li>
+                </xsl:for-each>
+            </ul>
+
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT MasterDerivedProxy (description?,(%proxy-plug-in;),derived*)>
+<!ATTLIST MasterDerivedProxy
+    class CDATA #FIXED "max.documents.MasterDerivedDocProxy"
+    type  CDATA #FIXED "proxy"
+>
+
+<!--
+    Definisce un documento derivato dal documento master.
+
+    Specifica la sorgente per lo stylesheet e la destinazione per il documento
+    derivato.
+    Se sono specificati piu' sorgenti per lo stylesheet, allora queste sono
+    applicate in cascata, in tal tutti gli stylesheet intermedi devono produrre un
+    XML e solo l'ultimo puo' produrre un documento in un formato diverso.
+
+    #Label: @name
+    #Template:
+
+        <xsl:template match="derived">
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT derived (description?, (%stylesheet-src;)*, (%derived-dest;)+)>
+<!--
+    Nome del documento derivato.
+
+    #NotNull
+    #Unique: ../derived/@name
+-->
+<!ATTLIST derived name CDATA #REQUIRED>
+<!--
+    Se true sostituisce le properties xmlp{{...}} nel documento risultato della trasformazione.
+
+    #NotNull
+    #Unique: ../derived/@name
+-->
+<!ATTLIST derived replace-xml-properties (yes|no) #IMPLIED>
+
+
+<!--
+    Salva il documento derivato in un file del file system.
+
+    #Label: @path
+    #Template:
+
+        <xsl:template match="FileSystem-Derived">
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT FileSystem-Derived (description?)>
+<!ATTLIST FileSystem-Derived
+    class CDATA #FIXED "max.documents.FileSystemDerived"
+    type  CDATA #FIXED "derived-doc"
+>
+<!--
+    #NotNull
+-->
+<!ATTLIST FileSystem-Derived path CDATA #REQUIRED>
+
+
+
+
+<!--
+    Salva il documento derivato dentro un content provider.
+
+    #Label: @ContentProviderName
+    #Template:
+
+        <xsl:template match="ContentProvider-Derived">
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT ContentProvider-Derived (description?)>
+<!ATTLIST ContentProvider-Derived
+    class CDATA #FIXED "max.documents.ContentProviderDerived"
+    type  CDATA #FIXED "derived-doc"
+>
+<!--
+    #Config: contents.xml : /contents/provider/@name
+    #Config: contents.xml : /contents/alias/@provider
+-->
+<!ATTLIST ContentProvider-Derived ContentProviderName CDATA #REQUIRED>
+<!--
+    #NotNull
+-->
+<!ATTLIST ContentProvider-Derived Category            CDATA #REQUIRED>
+<!--
+    #NotNull
+-->
+<!ATTLIST ContentProvider-Derived ContentName         CDATA #REQUIRED>
+
+
+
+
+<!--
+    Salva il documento derivato dentro un file zip o jar.
+
+    #Label: @path
+    #Template:
+
+        <xsl:template match="Zip-Derived">
+            <xsl:if test="description">
+                <br/>
+                <small><xsl:value-of select="description"/></small><p/>
+            </xsl:if>
+        </xsl:template>
+-->
+<!ELEMENT Zip-Derived (description?)>
+<!ATTLIST Zip-Derived
+    class CDATA #FIXED "max.documents.ZipDerived"
+    type  CDATA #FIXED "derived-doc"
+>
+<!--
+    #NotNull
+-->
+<!ATTLIST Zip-Derived path  CDATA #REQUIRED>
+<!--
+    #NotNull
+-->
+<!ATTLIST Zip-Derived entry  CDATA #REQUIRED>

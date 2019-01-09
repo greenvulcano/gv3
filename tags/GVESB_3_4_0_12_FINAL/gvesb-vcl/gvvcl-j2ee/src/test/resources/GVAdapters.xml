@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+  <GVDataProviderManager name="GVDP" type="module">
+    <Description>Elenco dei Data Providers</Description>
+    <DataProviders>
+      <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="toupperInArrayDataProvider" type="dataProvider">
+        <Field direction="INOUT" key="0" type="field">
+          <Expression type="ognl">object.split(&quot;,&quot;)</Expression>
+        </Field>
+      </ArrayDataProvider>
+      <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="toupperOutGVBChangeDataProvider"
+        type="dataProvider">
+        <Field direction="OUT" key="buffer" type="field">
+          <Expression type="ognl">object = @java.util.Arrays@toString(#input)</Expression>
+        </Field>
+      </GVBufferChangeDataProvider>
+      <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="sumInArrayDataProvider" type="dataProvider">
+        <Field direction="INOUT" key="0" type="field">
+          <Expression type="ognl">@java.lang.Integer@parseInt(#input.getProperty(&apos;I1&apos;))</Expression>
+        </Field>
+        <Field direction="INOUT" key="1" type="field">
+          <Expression type="ognl">@java.lang.Integer@parseInt(#input.getProperty(&apos;I2&apos;))</Expression>
+        </Field>
+      </ArrayDataProvider>
+      <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="sumOutGVBChangeDataProvider"
+        type="dataProvider">
+        <Field direction="OUT" key="buffer" type="field">
+          <Expression type="ognl">#output.setProperty('SUM', @java.lang.String@valueOf(#input))</Expression>
+        </Field>
+      </GVBufferChangeDataProvider>
+      <ArrayDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ArrayDataProvider" name="addTimeInArrayDataProvider" type="dataProvider">
+        <Field direction="INOUT" key="0" type="field">
+          <Expression type="ognl">@it.greenvulcano.util.txt.DateUtils@stringToDate(property['DATE'], 'dd/MM/yyyy HH:mm:ss')</Expression>
+        </Field>
+        <Field direction="INOUT" key="1" type="field">
+          <Expression type="ognl">@java.util.Calendar@MINUTE</Expression>
+        </Field>
+        <Field direction="INOUT" key="2" type="field">
+          <Expression type="ognl">@java.lang.Integer@parseInt(property['DELTA'])</Expression>
+        </Field>
+      </ArrayDataProvider>
+      <GVBufferChangeDataProvider class="it.greenvulcano.gvesb.gvdp.impl.GVBufferChangeDataProvider" name="addTimeOutGVBChangeDataProvider"
+        type="dataProvider">
+        <Field direction="OUT" key="buffer" type="field">
+          <Expression type="ognl">#output.setProperty('DATE_OUT', @it.greenvulcano.util.txt.DateUtils@dateToString(#input, 'dd/MM/yyyy HH:mm:ss'))</Expression>
+        </Field>
+      </GVBufferChangeDataProvider>
+    </DataProviders>
+  </GVDataProviderManager>
+</GVAdapters>

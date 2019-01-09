@@ -1,0 +1,11 @@
+<Aggregate xmlns="http://boh.com">
+    <doc>
+        <elem1>value1</elem1>
+        <elem2>value2</elem2>
+        <elem/>
+    </doc>
+    <data>
+        <data1>value1</data1>
+        <data2>value2</data2>
+    </data>
+</Aggregate>
