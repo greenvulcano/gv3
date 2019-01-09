@@ -214,7 +214,7 @@
             <fileset dir="${ewsjavaapi.ewsjavaapi.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${org.apache.httpcomponents.lib}">
+            <fileset dir="${httpcomponents.httpcomponents.lib}">
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${icu4j.icu4j.lib}">
@@ -244,10 +244,13 @@
             <fileset dir="${jdom.jdom.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${joda.time.lib}">
+            <fileset dir="${jodatime.jodatime.lib}">
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${json.json.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${jsonpath.jsonpath.lib}">
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${fge.fge.lib}">
@@ -348,6 +351,9 @@
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${xom.xom.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${xmlunit.xmlunit.lib}">
                 <include name="*.jar"/>
             </fileset>
         </copy>
