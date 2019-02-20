@@ -1,5 +1,5 @@
 
-<!ENTITY % dbo_types        "DBOSelect|DBOThreadSelect|DBOUpdate|DBOInsert|DBOInsertOrUpdate|DBOUpdateOrInsert|DBOCallSP|DBOFlatSelect|DBOMultiFlatSelect">
+<!ENTITY % dbo_types        "DBOSelect|DBOThreadSelect|DBOUpdate|DBOInsert|DBOInsertOrUpdate|DBOUpdateOrInsert|DBOCallSP|DBOCallDynamicSP|DBOFlatSelect|DBOMultiFlatSelect">
 <!ENTITY % statement_type   "select|insert|update|callsp">
 
 <!--
@@ -977,6 +977,85 @@
     #NotNull
 -->
 <!ATTLIST DBOCallSP output-data CDATA #IMPLIED>
+
+<!--
+    DBO optimized for operations on store procedures.
+
+    #Label: @name
+    #SelectOnInsert
+    #Icon: GVDBOCallSP.png
+-->
+<!ELEMENT DBOCallDynamicSP (Description?, DHVariables?, statement+)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST DBOCallDynamicSP type CDATA #FIXED "dbo">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST DBOCallDynamicSP class CDATA #FIXED "it.greenvulcano.gvesb.datahandling.dbo.DBOCallDynamicSP">
+<!--
+    DBOCallSP name.
+
+    #Unique: ../*[@type='dbo']/@name
+    #NotNull
+-->
+<!ATTLIST DBOCallDynamicSP name CDATA #REQUIRED>
+<!--
+    Transformation to be applied on the input data to obtain the internal XML commands.
+
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOCallSP}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::dh-call/DBOBuilder/DBOCallSP}} /GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOCallSP}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/@name
+    #References: {{parent::DBOBuilder/parent::GVDataHandlerConfiguration/DBOBuilder/DBOCallSP}} gvesb:document('GVCore')/GVCore/GVDataTransformation/Transformations/*[@type='transformation']/TransformationAlias/@name
+-->
+<!ATTLIST DBOCallDynamicSP transformation CDATA #IMPLIED>
+<!--
+    Force mode of the DBO, can be used in DBOBuilder whit more heterogeneous DBO.
+    Mode:
+    caller - inherit the mode of the caller
+    call   - call procedure mode
+-->
+<!ATTLIST DBOCallDynamicSP force-mode (caller|call) #IMPLIED>
+<!--
+    This parameter specifies is the callable statements must be executed with API CallableStatement#executeQuery().
+    Default is false.
+-->
+<!ATTLIST DBOCallDynamicSP execute-query (true|false) #IMPLIED>
+<!--
+    DataBase connection name.
+    Override connection defined in DBOBuilder.
+
+    #NotNull
+-->
+<!ATTLIST DBOCallDynamicSP jdbc-connection-name CDATA #IMPLIED>
+<!--
+    Tell the engine do not use the input data.
+
+-->
+<!ATTLIST DBOCallDynamicSP ignore-input (true|false) #IMPLIED>
+<!--
+    The default is the value of @name-Input.
+    Can be set as the @output-data of a preceeding DBO to use its
+    output as input.
+
+    #NotNull
+-->
+<!ATTLIST DBOCallDynamicSP input-data CDATA #IMPLIED>
+<!--
+    The default is the value of @name-Output.
+
+    #NotNull
+-->
+<!ATTLIST DBOCallDynamicSP output-data CDATA #IMPLIED>
+<!--
+    Tell the engine the RowSet document creation policy.
+    Default is standard.
+
+-->
+<!ATTLIST DBOCallDynamicSP rowset-builder (standard|extended|json) #IMPLIED>
 
 <!--
     #SelectOnInsert
