@@ -1,23 +1,36 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.gvconsole.deploy;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
 
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.file.FileManager;
@@ -28,20 +41,10 @@ import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 import it.greenvulcano.util.zip.ZipHelper;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-
 /**
- * 
+ *
  * GVCoreParser class
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
  */
@@ -50,7 +53,7 @@ public class GVConfigZipFile
 
 	private static Logger  logger    = GVLogger.getLogger(GVConfigZipFile.class);
 	GVConfig gvConfig = null;
-	
+
 	public GVConfigZipFile(GVConfig gvConfig)
 	{
 		this.gvConfig=gvConfig;
@@ -76,7 +79,7 @@ public class GVConfigZipFile
 				FileUtils.deleteDirectory(new File(appoDir));
 				FileUtils.forceMkdir(new File(appoDir));
 			} catch (IOException e) {
-				
+
 				e.printStackTrace();
 			}
 			//FileManager.cp(xmlDir, appoDir, "^GVEsb\\.jks$");
@@ -88,39 +91,39 @@ public class GVConfigZipFile
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			String filenameCore = appoDir+File.separator+"GVCore.xml";
 			File fileCore = new File(filenameCore);
-			String gvcore = gvConfig.getGvCore(listaServizi,true);
+			String gvcore = this.gvConfig.getGvCore(listaServizi,true);
+			Node gvCoreDoc = XMLUtils.parseObject_S(gvcore, false, false);
 			try {
 				FileUtils.writeStringToFile(fileCore, gvcore);
 			} catch (IOException e1) {
-				
+
 				e1.printStackTrace();
 			}
 
 			String filenameAdapter = appoDir+File.separator+"GVAdapters.xml";
 			File fileAdapter = new File(filenameAdapter);
-			String gvadapter = gvConfig.getGvAdapters(listaServizi,true);
+			String gvadapter = this.gvConfig.getGvAdapters(listaServizi,true);
+			Node gvAdaptersDoc = XMLUtils.parseObject_S(gvadapter, false, false);
 			try {
 				FileUtils.writeStringToFile(fileAdapter, gvadapter);
 			} catch (IOException e1) {
-				
+
 				e1.printStackTrace();
 			}
 
 			try {
 				FileUtils.forceMkdir(new File(appoDir+File.separator+"keystores"));
 			} catch (IOException e1) {
-				
 				e1.printStackTrace();
 			}
-			List<String> listaKeyStore = gvConfig.getListaFileKeyStore(listaServizi);
+			List<String> listaKeyStore = this.gvConfig.getListaFileKeyStore(listaServizi);
 			for(String keyStore:listaKeyStore){
 				try {
-					FileManager.cp(xmlDir + File.separator + "keystores", appoDir + File.separator + "keystores", keyStore);
+					FileManager.cp(gvDir + File.separator + "keystores", appoDir + File.separator + "keystores", keyStore);
 				} catch (Exception e) {
-					
 					e.printStackTrace();
 				}
 			}
@@ -129,29 +132,26 @@ public class GVConfigZipFile
 			try {
 				FileUtils.forceMkdir(new File(appoDir+File.separator+dirXsd));
 			} catch (IOException e1) {
-				
 				e1.printStackTrace();
 			}
-			List<String> listaFileXsd = gvConfig.getListaFileXsd(listaServizi);
+			List<String> listaFileXsd = this.gvConfig.getListaFileXsd(listaServizi);
 			for(String fileXsd:listaFileXsd){
 				dirXsd = "xsds";
 				String[] listDir = fileXsd.split("/");
-				for(int i=0;i<listDir.length-1;i++){
+				for(int i=0;i<(listDir.length-1);i++){
 					dirXsd=dirXsd+File.separator+listDir[i];
 					try {
 						FileUtils.forceMkdir(new File(appoDir+File.separator+dirXsd));
 					} catch (IOException e) {
-						
 						e.printStackTrace();
 					}
-
 				}
-				if(listDir.length>0)
+				if(listDir.length>0) {
 					fileXsd = listDir[listDir.length-1];
+				}
 				try {
 					FileManager.cp(xmlDir + File.separator + dirXsd, appoDir + File.separator + dirXsd, fileXsd);
 				} catch (Exception e) {
-					
 					e.printStackTrace();
 				}
 			}
@@ -160,151 +160,190 @@ public class GVConfigZipFile
 			try {
 				FileManager.cp(xmlDir + File.separator + "jsds", appoDir + File.separator + "jsds", ".*");
 			} catch (Exception e1) {
-				
 				e1.printStackTrace();
 			}
 
-			Map<String,String> listFile = gvConfig.getListaFileXsl(listaServizi);
+			Map<String,String> listFile = this.gvConfig.getListaFileXsl(listaServizi);
 			for(String key:listFile.keySet()){
 				String nomeFile = listFile.get(key);
-				Node dataSource = gvConfig.getDataSourceFromTrasf(key);
+				Node dataSource = this.gvConfig.getDataSourceFromTrasf(key);
 				String xpath="LocalFSDataSource[@formatHandled='xsl']/@repositoryHome";
 				String dirDTE = XMLUtils.get_S(dataSource, xpath);
 				dirDTE = dirDTE.replace("${{gv.app.home}}", "");
 				try {
 					FileUtils.forceMkdir(new File(appoDir+File.separator+dirDTE));
 				} catch (IOException e) {
-					
 					e.printStackTrace();
 				}
 				String[] listDir = nomeFile.split("/");
-				for(int i=0;i<listDir.length-1;i++){
+				for(int i=0;i<(listDir.length-1);i++){
 					dirDTE=dirDTE+File.separator+listDir[i];
 					try {
 						FileUtils.forceMkdir(new File(appoDir+File.separator+dirDTE));
 					} catch (IOException e) {
-						
 						e.printStackTrace();
 					}
 				}
-				if(listDir.length>0)
+				if(listDir.length>0) {
 					nomeFile = listDir[listDir.length-1];
-				    String model = nomeFile.substring(0, nomeFile.indexOf(".xsl")) + ".gvxdt";
+				}
+			    String model = nomeFile.substring(0, nomeFile.indexOf(".xsl")) + ".gvxdt";
 				try {
 					FileManager.cp(gvDir+ dirDTE, appoDir + dirDTE, nomeFile);
 					FileManager.cp(gvDir+ dirDTE, appoDir + dirDTE, model);
 				} catch (Exception e) {
-					
 					e.printStackTrace();
-				}	
+				}
 			}
-			listFile = gvConfig.getListaFileXq(listaServizi);
+			listFile = this.gvConfig.getListaFileXq(listaServizi);
 			for(String key:listFile.keySet()){
 				String nomeFile = listFile.get(key);
-				Node dataSource = gvConfig.getDataSourceFromTrasf(key);
+				Node dataSource = this.gvConfig.getDataSourceFromTrasf(key);
 				String xpath="LocalFSDataSource[@formatHandled='xq']/@repositoryHome";
 				String dirDTE = XMLUtils.get_S(dataSource, xpath);
 				dirDTE = dirDTE.replace("${{gv.app.home}}", "");
 				try {
 					FileUtils.forceMkdir(new File(appoDir+File.separator+dirDTE));
 				} catch (IOException e) {
-					
 					e.printStackTrace();
 				}
 				String[] listDir = nomeFile.split("/");
-				for(int i=0;i<listDir.length-1;i++){
+				for(int i=0;i<(listDir.length-1);i++){
 					dirDTE=dirDTE+File.separator+listDir[i];
 					try {
 						FileUtils.forceMkdir(new File(appoDir+File.separator+dirDTE));
 					} catch (IOException e) {
-						
 						e.printStackTrace();
 					}
 				}
-				if(listDir.length>0)
+				if(listDir.length>0) {
 					nomeFile = listDir[listDir.length-1];
+				}
 				try {
 					FileManager.cp(gvDir+ dirDTE, appoDir + dirDTE, nomeFile);
 				} catch (Exception e) {
-					
 					e.printStackTrace();
-				}	
+				}
 			}
-			listFile = gvConfig.getListaFileBin(listaServizi);
+			listFile = this.gvConfig.getListaFileBin(listaServizi);
 			for(String key:listFile.keySet()){
 				String nomeFile = listFile.get(key);
-				Node dataSource = gvConfig.getDataSourceFromTrasf(key);
+				Node dataSource = this.gvConfig.getDataSourceFromTrasf(key);
 				String xpath="LocalFSDataSource[@formatHandled='bin']/@repositoryHome";
 				String dirDTE = XMLUtils.get_S(dataSource, xpath);
 				dirDTE = dirDTE.replace("${{gv.app.home}}", "");
 				try {
 					FileUtils.forceMkdir(new File(appoDir+File.separator+dirDTE));
 				} catch (IOException e) {
-					
 					e.printStackTrace();
 				}
 				String[] listDir = nomeFile.split("/");
-				for(int i=0;i<listDir.length-1;i++){
+				for(int i=0;i<(listDir.length-1);i++){
 					dirDTE=dirDTE+File.separator+listDir[i];
 					try {
 						FileUtils.forceMkdir(new File(appoDir+File.separator+dirDTE));
 					} catch (IOException e) {
-						
 						e.printStackTrace();
 					}
 				}
-				if(listDir.length>0)
+				if(listDir.length>0) {
 					nomeFile = listDir[listDir.length-1];
+				}
 				try {
 					FileManager.cp(gvDir+ dirDTE, appoDir + dirDTE, nomeFile);
 				} catch (Exception e) {
-					
 					e.printStackTrace();
-				}	
+				}
 			}
 			String wsdlDir = appoDir + File.separator + "wsdl";
 			String aarDir = appoDir + File.separator + "service";
-			Map<String, Node> listaWs = gvConfig.getListaBusinessWebServices(listaServizi); 
-			String dirWsdl = gvConfig.geWsdlDir();
-			String dirService = gvConfig.getWsServiceDir();
+			Map<String, Node> listaWs = this.gvConfig.getListaBusinessWebServices(listaServizi);
+			String dirWsdl = this.gvConfig.geWsdlDir();
+			String dirService = this.gvConfig.getWsServiceDir();
+			boolean usesRampart = false;
 
 			for(String wsService:listaWs.keySet()){
 				try {
+					if (!usesRampart) {
+						Node ws = listaWs.get(wsService);
+						usesRampart = XMLUtils.selectSingleNode_S(ws, "EngageModule[@name='rampart']") != null;
+					}
 					FileManager.cp(gvDir+ dirWsdl, wsdlDir, wsService+".wsdl");
 					FileManager.cp(gvDir+ dirService, aarDir, wsService+".aar");
 				} catch (Exception e) {
-					
-					e.printStackTrace();
-				}
-					
-			}
-
-
-			try {
-				FileManager.cp(birtDir + File.separator + "reports", appoDir + File.separator + "reports", ".*");
-			} catch (Exception e) {
-				
-				e.printStackTrace();
-			}
-			try {
-				FileManager.cp(gvDir + File.separator + "keystores", appoDir + File.separator + "keystores", ".*");
-			} catch (Exception e) {
-				
-				e.printStackTrace();
-			}
-			if ((new File(bipelDir)).exists()) {
-				try {
-					FileManager.cp(bipelDir, appoDir + File.separator + "BpelProcess", ".*");
-				} catch (Exception e) {
-					
 					e.printStackTrace();
 				}
 			}
-			if ((new File(rulesDir)).exists()) {
+			if (listaWs.isEmpty()) {
 				try {
-					FileManager.cp(rulesDir, appoDir + File.separator + "Rules", ".*");
+					FileManager.mkdir(wsdlDir);
+					FileManager.mkdir(aarDir);
 				} catch (Exception e) {
-					
+					e.printStackTrace();
+				}
+			}
+
+			if (XMLUtils.existNode_S(gvAdaptersDoc, "/GVAdapters/GVBIRTReportConfiguration/ReportGroups/ReportGroup/Report")) {
+				try {
+					FileManager.cp(birtDir + File.separator + "reports", appoDir + File.separator + "reports", ".*");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					FileManager.mkdir(appoDir + File.separator + "reports" + File.separator + "images");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (usesRampart) {
+				try {
+					FileManager.cp(gvDir + File.separator + "keystores", appoDir + File.separator + "keystores", ".*");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					FileManager.mkdir(appoDir + File.separator + "keystores");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+
+			if (XMLUtils.existNode_S(gvCoreDoc, "//BpelOperation")) {
+				if ((new File(bipelDir)).exists()) {
+					try {
+						FileManager.cp(bipelDir, appoDir + File.separator + "BpelProcess", ".*");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			else {
+				try {
+					FileManager.mkdir(appoDir + File.separator + "BpelProcess");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (XMLUtils.existNode_S(gvAdaptersDoc, "//RuleResource[@resourceType='DRL']")) {
+				if ((new File(rulesDir)).exists()) {
+					try {
+						FileManager.cp(rulesDir, appoDir + File.separator + "Rules", ".*");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			else {
+				try {
+					FileManager.mkdir(appoDir + File.separator + "Rules");
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -313,23 +352,19 @@ public class GVConfigZipFile
 			try {
 				zh.zipFile(tmpDir, "conf", tmpDir, "GVExport.zip");
 			} catch (IOException e) {
-				
 				e.printStackTrace();
 			}
 
 			try {
 				is = new ByteArrayInputStream(FileUtils.readFileToByteArray(new File(tmpDir, "GVExport.zip")));
 			} catch (IOException e) {
-				
 				e.printStackTrace();
 			}
 
 			logger.debug("File zippato con successo");
 		} catch (PropertiesHandlerException e) {
-			
 			e.printStackTrace();
 		} catch (XMLUtilsException e) {
-			
 			e.printStackTrace();
 		}
 
@@ -353,6 +388,7 @@ public class GVConfigZipFile
 		}
 		return is;
 	}
+
 	public ByteArrayInputStream creaFileZip()
 	{
 		ByteArrayInputStream is = new ByteArrayInputStream(new byte[0]);
@@ -426,6 +462,7 @@ public class GVConfigZipFile
 		}
 		return is;
 	}
+
 	public static ByteArrayInputStream copyFileForBackupZip() throws Exception
 	{
 		String tmpDir = null;
@@ -434,7 +471,7 @@ public class GVConfigZipFile
 		String nomeZipDir="GVDeploy_"+ DateUtils.nowToString("yyyyMMddHHmmss");
 		String nomeZipFile= nomeZipDir + ".zip";
 		try {
-			tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}", null);        
+			tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}", null);
 			appoDir = tmpDir + File.separator + nomeZipDir;
 			gvDir = PropertiesHandler.expand("${{gv.app.home}}", null);
 			String xmlDir = File.separator + "xmlconfig";
@@ -482,4 +519,27 @@ public class GVConfigZipFile
 		}
 	}
 
+	public static void main(String[] args) {
+		try {
+			GVConfig gvConfigServer = new GVConfig("/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVCore.xml","/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVAdapters.xml");
+			//System.out.println(gvConfigServer.getGvCore(true));
+			//System.out.println(gvConfigServer.getGvAdapters(true));
+			List <String> listaServizi = new ArrayList<String>();
+			listaServizi.add("ProcessSingleSVCEmail");
+			//listaServizi.add("TestRSH");
+			//listaServizi.add("TestHL7_Listener");listaServizi.add("TestHL7_ListenerPippo");
+			//listaServizi.add("TWEET");
+			//listaServizi.add("PushNotification");
+
+
+			System.out.println(gvConfigServer.getGvCore(listaServizi, true));
+			System.out.println(gvConfigServer.getGvAdapters(listaServizi, true));
+
+			GVConfigZipFile gvzip = new GVConfigZipFile(gvConfigServer);
+			IOUtils.copy(gvzip.creaFileZip(listaServizi), new FileOutputStream("/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GVExport.zip"));
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
