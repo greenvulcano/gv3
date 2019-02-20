@@ -220,14 +220,14 @@
 																								</div>
 																								<div class="ui-tabs ui-widget ui-widget-content ui-corner-all">
 																									<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
-																										<li class="tab-title-gv">Trasformazioni</li>
+																										<li class="tab-title-gv">Transformations</li>
 																									</ul>
 
 																									<div class="ui-tabs ui-widget ui-widget-content ui-corner-all backGv">
 																										<table>
 
 																											<tr>
-																												<th>Trasformation</th>
+																												<th>Transformation</th>
 																												<th>Used in</th>
 																											</tr>
 																											<%
