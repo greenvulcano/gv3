@@ -69,6 +69,7 @@ public class DBOSelect extends AbstractDBO
     private static final Logger                      logger                 = GVLogger.getLogger(DBOSelect.class);
 
     private RowSetBuilder                            rowSetBuilder          = null;
+    private String                                   rowSetBuilderType      = null;
 
     /**
      *
@@ -89,8 +90,8 @@ public class DBOSelect extends AbstractDBO
         try {
             this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
             this.isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
-            String rsBuilder = XMLConfig.get(config, "@rowset-builder", "standard");
-            if (rsBuilder.equals("extended")) {
+            this.rowSetBuilderType = XMLConfig.get(config, "@rowset-builder", "standard");
+            if (this.rowSetBuilderType.equals("extended")) {
                 this.rowSetBuilder = new ExtendedRowSetBuilder();
             }
             else {

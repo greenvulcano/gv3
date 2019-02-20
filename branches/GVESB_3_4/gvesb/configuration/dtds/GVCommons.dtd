@@ -634,6 +634,7 @@
     DBOInsertOrUpdate  : insert|update
     DBOUpdateOrInsert  : insert|update
     DBOCallSP          : callsp
+    DBOCallDynamicSP   : callsp
 
     Excel Sheet        : select
 
@@ -649,6 +650,7 @@
     #Choice: {{ancestor::DBOInsertOrUpdate/statement}} insert | update
     #Choice: {{ancestor::DBOUpdateOrInsert/statement}} insert | update
     #Choice: {{ancestor::CallDescriptor/statement}} callsp
+    #Choice: {{ancestor::DBOCallDynamicSP/statement}} callsp
     #Choice: {{ancestor::Sheet/statement}} select
     #Choice: {{ancestor::DBSelect/statement}} select
 -->
