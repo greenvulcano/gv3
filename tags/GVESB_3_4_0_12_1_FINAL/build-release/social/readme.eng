@@ -1,0 +1,26 @@
+Definitions:
+GV_HOME: GreenVulcano home path (example:/home/user/@base.dir@/GreenV)
+ADAPTER_HOME: Adapter_Social/GreenV
+
+Installing instruction:
+- Copy into GV_HOME/application/deploy/gvesb-javaee5.ear/lib all .jar files found into ADAPTER_HOME/application/deploy/gvesb-javaee5.ear/lib
+- Go to path GV_HOME/dtds/Extra :
+    - Copy here ADAPTER_HOME/dtds/Extra/GVSocial.dtd
+    - Modify Extra.dtd inserting the content of ADAPTER_HOME/dtds/Extra/Extra_frag.dtd
+- Go to path GV_HOME/xmlconfig :
+    - Modify GVAdapters.xml            inserting the elements found in ADAPTER_HOME/xmlconfig/GVAdapters_frag.xml
+    - Modify GVCore.xml                inserting the elements found in ADAPTER_HOME/xmlconfig/GVCore_frag.xml
+    - Modify gvesb-catalog.xml         inserting the elements found in ADAPTER_HOME/xmlconfig/gvesb-catalog_frag.xml
+    - Modify GVSupport.xml             inserting the elements found in ADAPTER_HOME/xmlconfig/GVSupport_frag.xml
+    - Modify XMLConfigSplit.properties inserting the elements found in ADAPTER_HOME/xmlconfig/XMLConfigSplit_frag.properties
+    - Create file TwitterAccounts.properties inserting the following lines for each configured account you wish to activate:
+            ACCOUNT_NAME.oauth_access_token=...
+            ACCOUNT_NAME.oauth_access_token_secret=...
+
+Test:
+You can find a Service already configured for a test on Twitter:
+- TWEET:
+    sends a tweet with the text specified into Data field;
+    configure GVAdapters.xml and TwitterAccounts.properties with the correct OAuth parameters for the account being tested,
+    see http://www.greenvulcano.com/gvwiki/index.php/GVSocialAdapter-Configuration
+    in order to successfully complete the test send a RequestReply and check in your Twitter account that the tweet has been published.

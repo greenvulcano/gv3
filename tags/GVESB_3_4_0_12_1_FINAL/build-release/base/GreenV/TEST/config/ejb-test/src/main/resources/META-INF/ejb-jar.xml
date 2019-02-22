@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE ejb-jar PUBLIC "-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN" "http://java.sun.com/j2ee/dtds/ejb-jar_2_0.dtd">
+
+<ejb-jar>
+    <enterprise-beans>
+        <session>
+            <description>EJB per le invocazioni RMI di Test.</description>
+            <ejb-name>J2EETest_main</ejb-name>
+            <home>test.unit.ejb.J2EETestHome</home>
+            <remote>test.unit.ejb.J2EETest</remote>
+            <local-home>test.unit.ejb.J2EETestLocalHome</local-home>
+            <local>test.unit.ejb.J2EETestLocal</local>
+            <ejb-class>test.unit.ejb.J2EETestBean</ejb-class>
+            <session-type>Stateless</session-type>
+            <transaction-type>Container</transaction-type>
+        </session>
+    </enterprise-beans>
+    <assembly-descriptor>
+        <container-transaction>
+            <method>
+                <ejb-name>J2EETest_main</ejb-name>
+                <method-intf>Remote</method-intf>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Supports</trans-attribute>
+        </container-transaction>
+        <container-transaction>
+            <method>
+                <ejb-name>J2EETest_main</ejb-name>
+                <method-intf>Local</method-intf>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Supports</trans-attribute>
+        </container-transaction>
+    </assembly-descriptor>
+</ejb-jar>

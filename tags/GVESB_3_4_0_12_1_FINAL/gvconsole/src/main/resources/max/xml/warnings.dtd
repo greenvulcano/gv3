@@ -1,0 +1,17 @@
+<!--    XMLBuilder fornisce l'interfaccia per l'editor XML
+    in formato XML.
+
+    Questo DTD ne definisce il formato.
+-->
+
+<!ELEMENT warnings        (warning*)>
+<!ATTLIST warnings
+    invoke      CDATA      #REQUIRED
+    context     CDATA      #REQUIRED
+>
+
+<!ELEMENT warning           EMPTY>
+<!ATTLIST warning
+    key         CDATA      #REQUIRED
+    text        CDATA      #REQUIRED
+>

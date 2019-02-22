@@ -1,0 +1,213 @@
+<!--
+	#Template:
+		<xsl:template match="*">
+			<xsl:if test="description">
+				<small><xsl:value-of select="description"/><xsl:text> </xsl:text></small>
+			</xsl:if>
+		</xsl:template>
+		
+		<xsl:template match="description">
+			<small><xsl:value-of select="."/><xsl:text> </xsl:text></small>
+		</xsl:template>
+-->
+<!ELEMENT document-factory (description?, document*)>
+<!--
+	DocumentRegistry di ICon.
+	Il DocumentFactory necessita del DocumentRegistry per aggiornare le entries
+	quando si creano nuovi documenti.
+
+	#NotNull
+-->
+<!ATTLIST document-factory document-registry CDATA #REQUIRED>
+
+
+
+<!--
+	Contiene le informazioni necessarie alla costruzione di un nuovo
+	documento:
+	
+	- template per la costruzione del nome
+	- template per la costruzione della label
+	- template per la costruzione del file name
+	- descrizione
+	- doctype
+	- multi-file configuration per mettere a disposizione di XMLConfig
+	  il nuovo file (ozionale, se assente non viene aggiornata alcuna
+	  configurazione multi-files. Cio' puo' accadere se il nuovo file
+	  non deve essere gestito da XMLConfig)
+	- informazioni per la registrazione del nuovo frammento nel document
+	  registry di ICon (opzionale, se assente non viene effettuata alcuna
+	  registrazione su ICon)
+	
+	#SelectOnInsert
+	#Label: @id
+-->
+<!ELEMENT document (description?,doctype,multi-file-configuration?,registry?)>
+<!--
+	#Unique: parent::*/document/@id
+	#Pattern: ! [a-zA-Z][a-zA-Z0-9_-]* ! Inserire un identificativo alfanumerico
+-->
+<!ATTLIST document id CDATA #REQUIRED>
+<!--
+	Descrizione della factory utilizzata nei menu'.
+
+	#NotNull
+-->
+<!ATTLIST document label CDATA #REQUIRED>
+<!--
+	Template per la costruzione del filename del nuovo documento.
+	E' possibile utilizzare nel nome le seguenti sintassi:
+	
+	- ${id}
+	  Progressivo numerico.
+	  Inizia da 1 ed incrementato ogni volta che il valore corrente provoca
+	  un conflitto di con i documenti gia' esistenti.
+	
+	#NotNull
+-->
+<!ATTLIST document filename-template CDATA #REQUIRED>
+
+
+
+<!--
+	#SelectOnInsert
+	#CompositeLabel: ! ! @root-element !, ! @systemId ! ! @publicId
+-->
+<!ELEMENT doctype (description?)>
+<!--
+	#NotNull
+-->
+<!ATTLIST doctype root-element CDATA #REQUIRED>
+<!--
+	#NotNull
+-->
+<!ATTLIST doctype systemId CDATA #REQUIRED>
+<!--
+	#NotNull
+-->
+<!ATTLIST doctype publicId CDATA #IMPLIED>
+<!--
+	Namespace for the root element.
+
+	#NotNull
+-->
+<!ATTLIST doctype namespace CDATA #IMPLIED>
+
+
+
+<!--
+	Specifica il file di configurazione multi-files da aggiornare per
+	permettere a XMLConfig la gestione del nuovo frammento di configurazione.
+	
+	Specifica inoltre i meccanismi di merging che XMLConfig dovra' mettere in atto
+	per ricostruire l'intero file di configurazione.
+	
+	#SelectOnInsert
+	#Label: @configuration
+-->
+<!ELEMENT multi-file-configuration (description?,merging*)>
+<!--
+	Indica il file di configurazione multi-file.
+
+	#NotNull
+-->
+<!ATTLIST multi-file-configuration configuration CDATA #REQUIRED>
+
+
+<!--
+	Specifica i parametri per la registrazione del nuovo documento su ICon.
+
+	#SelectOnInsert
+	#Label: @name-template
+-->
+<!ELEMENT registry (description?,role*)>
+<!--
+	#References: max:document('documents')/documents/group/@name
+-->
+<!ATTLIST registry group CDATA #REQUIRED>
+<!--
+	Template per la costruzione del nome del nuovo documento.
+	E' possibile utilizzare nel nome le seguenti sintassi:
+	
+	- ${id}
+	  Progressivo numerico.
+	  Inizia da 1 ed incrementato ogni volta che il valore corrente provoca
+	  un conflitto di con i documenti gia' esistenti.
+	
+	#NotNull
+-->
+<!ATTLIST registry name-template CDATA #REQUIRED>
+<!--
+	Template per la costruzione della label del nuovo documento.
+	E' possibile utilizzare nel nome le seguenti sintassi:
+	
+	- ${id}
+	  Progressivo numerico.
+	
+	#NotNull
+-->
+<!ATTLIST registry label-template CDATA #REQUIRED>
+
+
+<!--
+	A 'role' element specify a grant access to the document for a given role.
+
+    #Label: @name
+-->
+<!ELEMENT role (description?)>
+
+<!--
+	Role name.
+
+    #NotNull
+-->
+<!ATTLIST role name CDATA #REQUIRED>
+<!--
+	Grant access:
+
+	- rw: read/write access.
+		The role can read and write the document, show and restore older
+		versions.
+
+	- ro: read only access.
+		The role can only shows the current version and older versions of the
+		whole document.
+		It can not write the document nor restore the older versions.
+
+	- ex:
+		The EXternal role can only shows the current version of the document.
+		If a fileter is available for the document, the document is filtered.
+-->
+<!ATTLIST role access (rw|ro|ex) #REQUIRED>
+
+
+
+<!--
+	Questo elemento specifica quali nodi devono essere selezionati da un XML
+	contenente un frammento della configurazione e a quale nodo del documento
+	destinazione devono essere agganciati.
+
+	#SelectOnInsert
+	#CompositeLabel: ! ! @src ! -> ! @dest
+-->
+<!ELEMENT merging (description?)>
+<!--
+	XPath per la selezione dei nodi da appendere al documento finale.
+
+	#NotNull
+-->
+<!ATTLIST merging src CDATA #REQUIRED>
+<!--
+	XPath per la selezione del nodo di destinazione per il merging.
+
+	#NotNull
+-->
+<!ATTLIST merging dest CDATA #REQUIRED>
+
+
+
+<!--
+	#SelectOnInsert
+-->
+<!ELEMENT description (#PCDATA)>
+
