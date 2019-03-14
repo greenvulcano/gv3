@@ -517,7 +517,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore-forward</artifactId>
-            <version>3.4.0.3-Final</version>
+            <version>3.4.0.4-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -532,7 +532,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdatahandler</artifactId>
-            <version>3.4.0.9-Final</version>
+            <version>3.4.0.10-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

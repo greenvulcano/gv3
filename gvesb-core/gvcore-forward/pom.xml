@@ -9,7 +9,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvcore-forward</artifactId>
-    <version>3.4.0.3-Final</version>
+    <version>3.4.0.4-Final</version>
     <packaging>jar</packaging>
     <name>GreenVulcano Core JMS Forward Listener</name>
 

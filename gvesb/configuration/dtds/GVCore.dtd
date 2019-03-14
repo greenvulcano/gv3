@@ -258,6 +258,14 @@
 -->
 <!ATTLIST GVForwards name    CDATA   #FIXED  "JMS_FORWARD">
 <!--
+    Time in minutes to check for not working listeners and restart them.
+    Default to 5 minutes.
+
+    #NotNull
+-->
+<!ATTLIST GVForwards refresh-interval-min CDATA #IMPLIED>
+
+<!--
     #CompositeLabel: || @name | - | @forwardName
 -->
 <!ELEMENT ForwardConfiguration (Description?, ForwardDeployment, PreProcessor?, ErrorHandler*)>
