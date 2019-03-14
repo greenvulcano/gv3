@@ -1,31 +1,23 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project.
  * All rights reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.forward.jms;
-
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.core.forward.JMSForwardException;
-import it.greenvulcano.gvesb.core.forward.preprocess.Validator;
-import it.greenvulcano.gvesb.core.forward.preprocess.ValidatorManager;
-import it.greenvulcano.gvesb.core.pool.GreenVulcanoPool;
-import it.greenvulcano.gvesb.core.pool.GreenVulcanoPoolManager;
-import it.greenvulcano.jmx.JMXEntryPoint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +27,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.core.forward.JMSForwardException;
+import it.greenvulcano.gvesb.core.forward.preprocess.Validator;
+import it.greenvulcano.gvesb.core.forward.preprocess.ValidatorManager;
+import it.greenvulcano.gvesb.core.pool.GreenVulcanoPool;
+import it.greenvulcano.gvesb.core.pool.GreenVulcanoPoolManager;
+import it.greenvulcano.jmx.JMXEntryPoint;
 
 /**
  * @version 3.2.0 15/gen/2012
@@ -120,12 +120,12 @@ public class JMSForwardData
     /**
      * If true shutdown in progress.
      */
-    private AtomicBoolean          inShutdown           = new AtomicBoolean(false);
+    private final AtomicBoolean          inShutdown           = new AtomicBoolean(false);
 
     /**
      * If true the pool is active.
      */
-    private AtomicBoolean          isActive             = new AtomicBoolean(true);
+    private final AtomicBoolean          isActive             = new AtomicBoolean(true);
 
     /**
      * If true the incoming message is dumped on log.
@@ -133,10 +133,10 @@ public class JMSForwardData
     private boolean                dumpMessage          = false;
     private boolean                debug                = false;
 
-    private AtomicInteger          working              = new AtomicInteger(0);
+    private final AtomicInteger          working              = new AtomicInteger(0);
     private String                 descr                = "";
-    
-    private List<Validator>        validators           = new ArrayList<Validator>();
+
+    private final List<Validator>        validators           = new ArrayList<Validator>();
 
 
     /**
@@ -146,92 +146,92 @@ public class JMSForwardData
     public JMSForwardData(Node node, JMSForwardListenerPool pool, Logger logger) throws JMSForwardException
     {
         try {
-            cfgNode = node;
+            this.cfgNode = node;
             this.pool = pool;
             this.logger = logger;
-            name = XMLConfig.get(node, "@name", XMLConfig.get(node, "concat(@forwardName, '_', position())"));
-            forwardName = XMLConfig.get(node, "@forwardName", "UNDEFINED");
-            serverName = JMXEntryPoint.getServerName();
+            this.name = XMLConfig.get(node, "@name", XMLConfig.get(node, "concat(@forwardName, '_', position())"));
+            this.forwardName = XMLConfig.get(node, "@forwardName", "UNDEFINED");
+            this.serverName = JMXEntryPoint.getServerName();
 
-            flowSystem = XMLConfig.get(node, "@flow-system", "");
-            flowService = XMLConfig.get(node, "@flow-service", "");
-            refDP = XMLConfig.get(node, "@ref-dp", "");
-            sleepTimeout = XMLConfig.getLong(node, "@sleep-timeout", 5000);
+            this.flowSystem = XMLConfig.get(node, "@flow-system", "");
+            this.flowService = XMLConfig.get(node, "@flow-service", "");
+            this.refDP = XMLConfig.get(node, "@ref-dp", "");
+            this.sleepTimeout = XMLConfig.getLong(node, "@sleep-timeout", 5000);
 
-            debug = XMLConfig.getBoolean(node, "@full-debug", false);
-            dumpMessage = XMLConfig.getBoolean(node, "@dump-message", false);
+            this.debug = XMLConfig.getBoolean(node, "@full-debug", false);
+            this.dumpMessage = XMLConfig.getBoolean(node, "@dump-message", false);
 
             NodeList vnl = XMLConfig.getNodeList(node, "PreProcessor/Validators/*[@type='validator']");
             if (vnl.getLength() > 0) {
                 ValidatorManager vm = ValidatorManager.instance();
                 for (int i = 0; i < vnl.getLength(); i++) {
                     Node vn = vnl.item(i);
-                    validators.add(vm.getValidator(vn));
+                    this.validators.add(vm.getValidator(vn));
                 }
             }
 
             Node fdNode = XMLConfig.getNode(node, "ForwardDeployment");
-            connectionFactory = XMLConfig.get(fdNode, "@connection-factory");
-            transacted = XMLConfig.getBoolean(fdNode, "@transacted", false);
+            this.connectionFactory = XMLConfig.get(fdNode, "@connection-factory");
+            this.transacted = XMLConfig.getBoolean(fdNode, "@transacted", false);
 
-            connectionHolder = new JMSConnectionHolder(connectionFactory, transacted);
-            connectionHolder.setDebug(debug);
+            this.connectionHolder = new JMSConnectionHolder(this.connectionFactory, this.transacted);
+            this.connectionHolder.setDebug(this.debug);
 
-            initialSize = XMLConfig.getInteger(fdNode, "@initial-size", DEFAULT_INITIAL_SIZE);
-            maximumSize = XMLConfig.getInteger(fdNode, "@maximum-size", DEFAULT_MAXIMUM_SIZE);
-            if (initialSize < 0) {
-                throw new IllegalArgumentException("initialSize < 0, forwardName=" + forwardName);
+            this.initialSize = XMLConfig.getInteger(fdNode, "@initial-size", DEFAULT_INITIAL_SIZE);
+            this.maximumSize = XMLConfig.getInteger(fdNode, "@maximum-size", DEFAULT_MAXIMUM_SIZE);
+            if (this.initialSize < 0) {
+                throw new IllegalArgumentException("initialSize < 0, forwardName=" + this.forwardName);
             }
-            if ((maximumSize > 0) && (initialSize > maximumSize)) {
-                throw new IllegalArgumentException("initialSize(" + initialSize + ") > maximumSize(" + maximumSize
-                        + "), forwardName=" + forwardName);
+            if ((this.maximumSize > 0) && (this.initialSize > this.maximumSize)) {
+                throw new IllegalArgumentException("initialSize(" + this.initialSize + ") > maximumSize(" + this.maximumSize
+                        + "), forwardName=" + this.forwardName);
             }
 
             String destinationType = XMLConfig.get(fdNode, "@destination-type", "queue");
-            isQueue = destinationType.equals("queue");
-            destinationName = XMLConfig.get(fdNode, "@destination");
-            messageSelector = XMLConfig.get(fdNode, "message-selector", "");
-            reconnectInterval = XMLConfig.getLong(fdNode, "@reconnect-interval-sec", 10) * 1000;
-            transacted = XMLConfig.getBoolean(fdNode, "@transacted", false);
-            transactionTimeout = XMLConfig.getInteger(fdNode, "@transaction-timeout-sec", 30);
-            receiveTimeout = XMLConfig.getInteger(fdNode, "@receive-timeout-sec", 1) * 1000;
-            readBlockCount = XMLConfig.getInteger(fdNode, "@read-block-count", 60);
+            this.isQueue = destinationType.equals("queue");
+            this.destinationName = XMLConfig.get(fdNode, "@destination");
+            this.messageSelector = XMLConfig.get(fdNode, "message-selector", "");
+            this.reconnectInterval = XMLConfig.getLong(fdNode, "@reconnect-interval-sec", 10) * 1000;
+            this.transacted = XMLConfig.getBoolean(fdNode, "@transacted", false);
+            this.transactionTimeout = XMLConfig.getInteger(fdNode, "@transaction-timeout-sec", 30);
+            this.receiveTimeout = XMLConfig.getInteger(fdNode, "@receive-timeout-sec", 1) * 1000;
+            this.readBlockCount = XMLConfig.getInteger(fdNode, "@read-block-count", 60);
 
-            greenVulcanoPool = GreenVulcanoPoolManager.instance().getGreenVulcanoPool(SUBSYSTEM);
-            if (greenVulcanoPool == null) {
+            this.greenVulcanoPool = GreenVulcanoPoolManager.instance().getGreenVulcanoPool(SUBSYSTEM);
+            if (this.greenVulcanoPool == null) {
                 throw new JMSForwardException("GVJMS_GREENVULCANOPOOL_NOT_CONFIGURED", new String[][]{{"forward",
-                        forwardName}});
+                        this.forwardName}});
             }
 
             StringBuffer sb = new StringBuffer();
-            sb.append("Forward [").append(forwardName);
-            sb.append("] - flowSystem [").append(flowSystem);
-            sb.append("] - flowService [").append(flowService);
-            if (!refDP.equals("")) {
-                sb.append("] - refDP [").append(refDP);
+            sb.append("Forward [").append(this.forwardName);
+            sb.append("] - flowSystem [").append(this.flowSystem);
+            sb.append("] - flowService [").append(this.flowService);
+            if (!this.refDP.equals("")) {
+                sb.append("] - refDP [").append(this.refDP);
             }
             sb.append("] - using destinationType [").append(destinationType);
-            sb.append("] - destinationName [").append(destinationName);
-            if (!"".equals(messageSelector)) {
-                sb.append("] - using messageSelector [").append(messageSelector);
+            sb.append("] - destinationName [").append(this.destinationName);
+            if (!"".equals(this.messageSelector)) {
+                sb.append("] - using messageSelector [").append(this.messageSelector);
             }
-            sb.append("] - connectionFactory [").append(connectionFactory);
-            sb.append("] - transacted [").append(transacted);
-            sb.append("] - transactionTimeout [").append(transactionTimeout);
-            sb.append("] - readBlockCount [").append(readBlockCount);
-            sb.append("] - receiveTimeout [").append(receiveTimeout);
-            sb.append("] - reconnectInterval [").append(reconnectInterval);
-            sb.append("] - using on error sleepTimeout [").append(sleepTimeout);
-            sb.append("] - pool initialSize [").append(initialSize);
-            sb.append("] - pool maximumSize [").append(maximumSize).append("]");
+            sb.append("] - connectionFactory [").append(this.connectionFactory);
+            sb.append("] - transacted [").append(this.transacted);
+            sb.append("] - transactionTimeout [").append(this.transactionTimeout);
+            sb.append("] - readBlockCount [").append(this.readBlockCount);
+            sb.append("] - receiveTimeout [").append(this.receiveTimeout);
+            sb.append("] - reconnectInterval [").append(this.reconnectInterval);
+            sb.append("] - using on error sleepTimeout [").append(this.sleepTimeout);
+            sb.append("] - pool initialSize [").append(this.initialSize);
+            sb.append("] - pool maximumSize [").append(this.maximumSize).append("]");
 
-            descr = sb.toString();
+            this.descr = sb.toString();
         }
         catch (JMSForwardException exc) {
             throw exc;
         }
         catch (Exception exc) {
-            throw new JMSForwardException("GVJMSPOOL_APPLICATION_INIT_ERROR", new String[][]{{"forward", forwardName}},
+            throw new JMSForwardException("GVJMSPOOL_APPLICATION_INIT_ERROR", new String[][]{{"forward", this.forwardName}},
                     exc);
         }
     }
@@ -291,7 +291,7 @@ public class JMSForwardData
      */
     public int getMaxCreated()
     {
-        return pool.getMaxCreated();
+        return this.pool.getMaxCreated();
     }
 
     /**
@@ -299,7 +299,7 @@ public class JMSForwardData
      */
     public int getPooledCount()
     {
-        return pool.getPooledCount();
+        return this.pool.getPooledCount();
     }
 
 
@@ -521,8 +521,8 @@ public class JMSForwardData
 
     public void start()
     {
-        if (!inShutdown.get()) {
-            logger.info("Forward [" + forwardName + "] - Restarting Listeners...");
+        if (!this.inShutdown.get()) {
+            this.logger.info("Forward [" + this.forwardName + "] - Restarting Listeners...");
             this.isActive.set(true);
             this.pool.incrementListeners();
         }
@@ -530,7 +530,7 @@ public class JMSForwardData
 
     public void stop()
     {
-        logger.info("Forward [" + forwardName + "] - Arresting Listeners...");
+        this.logger.info("Forward [" + this.forwardName + "] - Arresting Listeners...");
         this.isActive.set(false);
     }
 
@@ -550,45 +550,45 @@ public class JMSForwardData
 
     public void beginWork()
     {
-        working.incrementAndGet();
-        if (pool != null) {
-            pool.incrementListeners();
+        this.working.incrementAndGet();
+        if (this.pool != null) {
+            this.pool.incrementListeners();
         }
     }
 
     public void endWork()
     {
-        working.decrementAndGet();
+        this.working.decrementAndGet();
     }
 
     public int getWorkingCount()
     {
-        return working.get();
+        return this.working.get();
     }
 
     public void stopListener(JMSForwardListener jmsFwd)
     {
-        if (pool != null) {
-            pool.rescheduleListeners(jmsFwd);
+        if (this.pool != null) {
+            this.pool.rescheduleListeners();
         }
     }
 
     @Override
     public String toString()
     {
-        return descr;
+        return this.descr;
     }
 
     public void destroy()
     {
-        isActive.set(false);
-        inShutdown.set(true);
-        pool = null;
-        if (connectionHolder != null) {
-            connectionHolder.setDebug(true);
-            connectionHolder.destroy();
+        this.isActive.set(false);
+        this.inShutdown.set(true);
+        this.pool = null;
+        if (this.connectionHolder != null) {
+            this.connectionHolder.setDebug(true);
+            this.connectionHolder.destroy();
         }
-        connectionHolder = null;
-        validators.clear();
+        this.connectionHolder = null;
+        this.validators.clear();
     }
 }

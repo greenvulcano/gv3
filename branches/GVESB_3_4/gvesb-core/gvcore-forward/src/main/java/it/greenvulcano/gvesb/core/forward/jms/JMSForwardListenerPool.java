@@ -1,31 +1,23 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.forward.jms;
-
-import it.greenvulcano.gvesb.buffer.GVPublicException;
-import it.greenvulcano.gvesb.core.exc.GVCoreException;
-import it.greenvulcano.gvesb.core.forward.JMSForwardException;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.log.NMDC;
-import it.greenvulcano.util.thread.BaseThread;
-import it.greenvulcano.util.thread.BaseThreadFactory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -36,10 +28,17 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
+import it.greenvulcano.gvesb.buffer.GVPublicException;
+import it.greenvulcano.gvesb.core.exc.GVCoreException;
+import it.greenvulcano.gvesb.core.forward.JMSForwardException;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.log.NMDC;
+import it.greenvulcano.util.thread.BaseThreadFactory;
+
 
 /**
  * Object Pool <code>JMSForwardListener</code>.
- * 
+ *
  * @version 3.2.0 11/gen/2012
  * @author GreenVulcano Developer Team
  */
@@ -76,23 +75,23 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
     public void init(Node node) throws JMSForwardException
     {
         try {
-            data = new JMSForwardData(node, this, logger);
-            name = data.getName();
-            forwardName = data.getForwardName();
-            serverName = data.getServerName();
+            this.data = new JMSForwardData(node, this, logger);
+            this.name = this.data.getName();
+            this.forwardName = this.data.getForwardName();
+            this.serverName = this.data.getServerName();
 
-            logger.debug("BEGIN - Initializing JMSForwardListenerPool[" + name + "/" + forwardName + "]");
+            logger.debug("BEGIN - Initializing JMSForwardListenerPool[" + this.name + "/" + this.forwardName + "]");
 
             NMDC.push();
-            NMDC.setServer(serverName);
+            NMDC.setServer(this.serverName);
             NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
             try {
                 BlockingQueue<Runnable> queue = new SynchronousQueue<Runnable>();
-                executor = new ThreadPoolExecutor(data.getInitialSize(), data.getMaximumSize(), 10L, TimeUnit.MINUTES,
-                        queue, new BaseThreadFactory("JMSForward#" + name + "#" + forwardName, true), this);
+                this.executor = new ThreadPoolExecutor(this.data.getInitialSize(), this.data.getMaximumSize(), 10L, TimeUnit.MINUTES,
+                        queue, new BaseThreadFactory("JMSForward#" + this.name + "#" + this.forwardName, true), this);
 
                 // single initial listener
-                executor.execute(createJMSForwardListener());
+                this.executor.execute(createJMSForwardListener());
 
                 try {
                     Thread.sleep(500);
@@ -106,17 +105,17 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
             }
 
 
-            logger.info("Initialized JMSForwardListenerPool instance: " + data);
+            logger.info("Initialized JMSForwardListenerPool instance: " + this.data);
         }
         catch (JMSForwardException exc) {
             throw exc;
         }
         catch (Exception exc) {
-            throw new JMSForwardException("GVJMSPOOL_APPLICATION_INIT_ERROR", new String[][]{{"forward", name + "/" + forwardName}},
+            throw new JMSForwardException("GVJMSPOOL_APPLICATION_INIT_ERROR", new String[][]{{"forward", this.name + "/" + this.forwardName}},
                     exc);
         }
         finally {
-            logger.debug("END - Initialized JMSForwardListenerPool[" + name + "/" + forwardName + "]");
+            logger.debug("END - Initialized JMSForwardListenerPool[" + this.name + "/" + this.forwardName + "]");
         }
     }
 
@@ -130,7 +129,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
      */
     public String getName()
     {
-        return name;
+        return this.name;
     }
 
     /**
@@ -138,7 +137,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
      */
     public String getForwardName()
     {
-        return forwardName;
+        return this.forwardName;
     }
 
     /**
@@ -146,7 +145,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
      */
     public int getMaxCreated()
     {
-        return executor.getLargestPoolSize();
+        return this.executor.getLargestPoolSize();
     }
 
 
@@ -155,43 +154,55 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
      */
     public int getPooledCount()
     {
-        return executor.getActiveCount();
+        return this.executor.getActiveCount();
     }
 
 
     public boolean isShutdown()
     {
-        return data.isShutdown();
+        return this.data.isShutdown();
     }
 
 
     public void incrementListeners()
     {
         if (!isShutdown()) {
-            synchronized (data) {
-                int working = data.getWorkingCount();
-                if ((working < data.getInitialSize()) || ((working == executor.getActiveCount()) && (working < executor.getMaximumPoolSize()))) {
+            synchronized (this.data) {
+                int working = this.data.getWorkingCount();
+                if ((working < this.data.getInitialSize()) || ((working == this.executor.getActiveCount()) && (working < this.executor.getMaximumPoolSize()))) {
                     try {
                         JMSForwardListener jmsFwd = createJMSForwardListener();
-                        executor.execute(jmsFwd);
-                        if (data.isDebug()) {
-                            logger.debug("Forward [" + name + "/" + forwardName + "] - creating new instance ("
-                                    + executor.getActiveCount() + "/" + data.getMaximumSize() + ")");
+                        this.executor.execute(jmsFwd);
+                        if (this.data.isDebug()) {
+                            logger.debug("Forward [" + this.name + "/" + this.forwardName + "] - creating new instance ("
+                                    + this.executor.getActiveCount() + "/" + this.data.getMaximumSize() + ")");
                         }
                     }
                     catch (Exception exc) {
-                        logger.error("Forward [" + name + "/" + forwardName + "] - error creating new instance", exc);
+                        logger.error("Forward [" + this.name + "/" + this.forwardName + "] - error creating new instance", exc);
                     }
                 }
             }
         }
     }
 
-    public void rescheduleListeners(JMSForwardListener jmsFwd)
+    public void rescheduleListeners()
     {
-        if (!isShutdown() && data.isActive()) {
-            synchronized (data) {
-                if (executor.getActiveCount() <= data.getInitialSize()) {
+        if (!isShutdown() && this.data.isActive()) {
+            synchronized (this.data) {
+                if (this.executor.getActiveCount() <= this.data.getInitialSize()) {
+                	try {
+                        JMSForwardListener jmsFwd = createJMSForwardListener();
+                        this.executor.execute(jmsFwd);
+                        if (this.data.isDebug()) {
+                            logger.debug("Forward [" + this.name + "/" + this.forwardName + "] - rescheduling new instance ("
+                                    + this.executor.getActiveCount() + "/" + this.data.getMaximumSize() + ")");
+                        }
+                    }
+                    catch (Exception exc) {
+                        logger.error("Forward [" + this.name + "/" + this.forwardName + "] - error rescheduling new instance", exc);
+                    }
+                	/*
                     Runnable rr = new Runnable() {
                         @Override
                         public void run()
@@ -219,6 +230,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
                     BaseThread bt = new BaseThread(rr, "Forward [" + name + "/" + forwardName + "] - rescheduler");
                     bt.setDaemon(true);
                     bt.start();
+                    */
                 }
             }
         }
@@ -229,18 +241,18 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
      */
     public void destroy()
     {
-        logger.debug("Forward [" + name + "/" + forwardName + "] - Begin destroying instances");
-        if (data != null) {
-            data.destroy();
+        logger.debug("Forward [" + this.name + "/" + this.forwardName + "] - Begin destroying instances");
+        if (this.data != null) {
+            this.data.destroy();
         }
-        data = null;
-        executor.shutdown();
-        executor = null;
-        logger.debug("Forward [" + name + "/" + forwardName + "] - End destroying instances");
+        this.data = null;
+        this.executor.shutdown();
+        this.executor = null;
+        logger.debug("Forward [" + this.name + "/" + this.forwardName + "] - End destroying instances");
     }
 
     /**
-     * 
+     *
      * @see java.lang.Object#finalize()
      */
     @Override
@@ -253,7 +265,7 @@ public class JMSForwardListenerPool implements RejectedExecutionHandler
     private JMSForwardListener createJMSForwardListener() throws JMSForwardException
     {
         JMSForwardListener jmsFwd = new JMSForwardListener();
-        jmsFwd.init(data);
+        jmsFwd.init(this.data);
         return jmsFwd;
     }
 

@@ -1,23 +1,33 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project.
  * All rights reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.forward;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.ConfigurationEvent;
 import it.greenvulcano.configuration.ConfigurationListener;
@@ -31,16 +41,8 @@ import it.greenvulcano.gvesb.core.forward.jmx.JMSForwardListenerPoolInfo;
 import it.greenvulcano.gvesb.core.forward.preprocess.ValidatorManager;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.thread.BaseThread;
 import it.greenvulcano.log.NMDC;
-
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import it.greenvulcano.util.thread.BaseThread;
 
 /**
  * @version 3.2.0 11/gen/2012
@@ -55,8 +57,40 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     private static String                           JMS_FORWARD_FILE_NAME = "GVJMSForward.xml";
     private static JMSForwardManager                instance              = null;
 
-    private List<JMSForwardListenerPool> jmsListeners          = new ArrayList<JMSForwardListenerPool>();
+    private final List<JMSForwardListenerPool> jmsListeners          = new ArrayList<JMSForwardListenerPool>();
     private String 									serverName;
+    private Timer           poolRefresherTimer    = null;
+    private long            refreshInterval       = 5 * 60 * 1000;
+
+    /*
+	 * Check if a listener pool have a minimum number of active listeners
+	 */
+    private class ListenerPoolRefresher extends TimerTask {
+        @Override
+        public void run() {
+        	NMDC.push();
+            NMDC.clear();
+            NMDC.setServer(JMSForwardManager.this.serverName);
+            NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
+            try {
+                logger.debug("BEGIN - Refreshing JMSForwardListenerPools");
+                for (JMSForwardListenerPool pool : JMSForwardManager.this.jmsListeners) {
+                    String forwardName = pool.getName() + "/" + pool.getForwardName();
+                    logger.debug("Refreshing JMSForwardListenerPool[" + forwardName + "]");
+                    try {
+                        pool.rescheduleListeners();
+                    }
+                    catch (Exception exc) {
+                        logger.error("Error refreshing JMSForwardListenerPool[" + forwardName + "]", exc);
+                    }
+                }
+                logger.debug("END - Refreshing JMSForwardListenerPools");
+        	}
+            finally {
+                NMDC.pop();
+            }
+        }
+    }
 
     private JMSForwardManager()
     {
@@ -82,24 +116,29 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     */
     private void init() throws JMSForwardException
     {
-    	serverName = JMXEntryPoint.getServerName();
-    	
+    	this.serverName = JMXEntryPoint.getServerName();
+
         logger.debug("Initializing JMSForwardManager");
         NMDC.push();
         NMDC.clear();
-        NMDC.setServer(serverName);
+        NMDC.setServer(this.serverName);
         NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
         try {
+            this.refreshInterval = XMLConfig.getLong(JMS_FORWARD_FILE_NAME, "/GVForwards/@refresh-interval-min", 5) * 60 * 1000; // every 5 minutes
+
             NodeList nl = XMLConfig.getNodeList(JMS_FORWARD_FILE_NAME,
                     "/GVForwards/ForwardConfiguration[@enabled='true']");
             for (int i = 0; i < nl.getLength(); i++) {
                 Node n = nl.item(i);
                 JMSForwardListenerPool jmsLP = new JMSForwardListenerPool();
                 jmsLP.init(n);
-                jmsListeners.add(jmsLP);
+                this.jmsListeners.add(jmsLP);
                 logger.debug("Configured JMSForwardListenerPool[" + jmsLP.getName() + "/" + jmsLP.getForwardName() + "]");
                 register(jmsLP);
             }
+
+            this.poolRefresherTimer = new Timer("JMSForwardManager#ListenerPoolRefresher", true);
+            this.poolRefresherTimer.schedule(new ListenerPoolRefresher(), this.refreshInterval, this.refreshInterval);
         }
         catch (JMSForwardException exc) {
             logger.error("Error initializing JMSForwardManager", exc);
@@ -118,12 +157,14 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
     {
         NMDC.push();
         NMDC.clear();
-        NMDC.setServer(serverName);
+        NMDC.setServer(this.serverName);
         NMDC.setSubSystem(JMSForwardData.SUBSYSTEM);
         try {
             logger.debug("BEGIN - Destroing JMSForwardManager");
+            this.poolRefresherTimer.cancel();
+            this.poolRefresherTimer = null;
             ValidatorManager.instance().reset();
-            for (JMSForwardListenerPool pool : jmsListeners) {
+            for (JMSForwardListenerPool pool : this.jmsListeners) {
                 String forwardName = pool.getName() + "/" + pool.getForwardName();
                 try {
                     deregister(pool, true);
@@ -133,7 +174,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
                     logger.error("Error destroing JMSForwardListenerPool[" + forwardName + "]", exc);
                 }
             }
-            jmsListeners.clear();
+            this.jmsListeners.clear();
             logger.debug("END - Destroing JMSForwardManager");
     	}
         finally {
@@ -183,7 +224,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
 
     /**
      * Register the pool as MBean.
-     * 
+     *
      * @param pool
      *        the instance to register.
      */
@@ -204,7 +245,7 @@ public class JMSForwardManager implements ConfigurationListener, ShutdownEventLi
 
     /**
      * Deregister the pool as MBean.
-     * 
+     *
      * @param pool
      *        the instance to deregister.
      */
