@@ -178,6 +178,8 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      */
     private Connection            internalConn;
 
+    protected long timeConn = 0;
+
     /**
      * Properties to substitute in the statement meta-data bound to single
      * execution.
@@ -859,6 +861,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     @Override
     public void cleanup()
     {
+        this.dhr.reset();
         this.uuids.clear();
         this.currentRowFields.clear();
         if (this.sqlStatementInfo != null) {
@@ -1144,11 +1147,18 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
             if (!this.currentJdbcConnectionNameInt.equals("default")) {
             	this.currentJdbcConnectionNameInt = PropertiesHandler.expand(this.currentJdbcConnectionNameInt, props);
                 logger.info("Overwriting default Connection with: " + this.currentJdbcConnectionNameInt);
+                long startConn = System.currentTimeMillis();
                 this.internalConn = JDBCConnectionBuilder.getConnection(this.currentJdbcConnectionNameInt);
+                this.timeConn = System.currentTimeMillis() - startConn;
             }
         }
 
         return this.internalConn;
+    }
+
+    @Override
+    public long getTimeConn() {
+    	return this.timeConn;
     }
 
     /**

@@ -229,7 +229,13 @@ public class DBOThreadSelect extends AbstractDBO
 
         private Connection getConnection() throws Exception
         {
-            return JDBCConnectionBuilder.getConnection(this.localJdbcConnName);
+        	long startConn = System.currentTimeMillis();
+            Connection conn = JDBCConnectionBuilder.getConnection(this.localJdbcConnName);
+            long duration = System.currentTimeMillis() - startConn;
+            if (duration > DBOThreadSelect.this.timeConn) {
+            	DBOThreadSelect.this.timeConn = duration;
+            }
+            return conn;
         }
 
         private void releaseConnection(Connection conn) throws Exception

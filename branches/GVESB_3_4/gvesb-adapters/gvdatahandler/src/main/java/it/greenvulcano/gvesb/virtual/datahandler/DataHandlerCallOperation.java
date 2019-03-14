@@ -1,23 +1,28 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.virtual.datahandler;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.w3c.dom.Node;
 
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.buffer.GVException;
@@ -33,11 +38,6 @@ import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.w3c.dom.Node;
-
 /**
  * @version 3.0.0 Mar 31, 2010
  * @author GreenVulcano Developer Team
@@ -45,7 +45,7 @@ import org.w3c.dom.Node;
 public class DataHandlerCallOperation implements CallOperation
 {
     public static final String DH_SERVICE_NAME = "DH_SERVICE_NAME";
-    
+
     private OperationKey key       = null;
     private DHFactory    dhFactory = null;
 
@@ -56,8 +56,8 @@ public class DataHandlerCallOperation implements CallOperation
     public void init(Node node) throws InitializationException
     {
         try {
-            dhFactory = new DHFactory();
-            dhFactory.initialize(node);
+            this.dhFactory = new DHFactory();
+            this.dhFactory.initialize(node);
         }
         catch (DataHandlerException exc) {
             throw new InitializationException("DataHandlerException Error: ", exc);
@@ -85,17 +85,25 @@ public class DataHandlerCallOperation implements CallOperation
                     GVBufferPropertiesHelper.handleProperty(Integer.toString(gvBuffer.getRetCode()), true));
             GVBufferPropertiesHelper.addProperties(params, gvBuffer, true);
 
-            IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
-            DHResult result = dboBuilder.EXECUTE(operation, gvBuffer.getObject(), params);
+            IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
+            DHResult result = null;
+            try {
+	            result = dboBuilder.EXECUTE(operation, gvBuffer.getObject(), params);
 
-            gvBuffer.setObject(result.getData());
-            gvBuffer.setProperty("REC_TOTAL", "" + result.getTotal());
-            gvBuffer.setProperty("REC_READ", "" + result.getRead());
-            gvBuffer.setProperty("REC_INSERT", "" + result.getInsert());
-            gvBuffer.setProperty("REC_UPDATE", "" + result.getUpdate());
-            gvBuffer.setProperty("REC_DISCARD", "" + result.getDiscard());
-            gvBuffer.setProperty("REC_DISCARD_CAUSE", "" + result.getDiscardCauseListAsString());
-            return gvBuffer;
+	            gvBuffer.setObject(result.getData());
+	            gvBuffer.setProperty("REC_TOTAL", "" + result.getTotal());
+	            gvBuffer.setProperty("REC_READ", "" + result.getRead());
+	            gvBuffer.setProperty("REC_INSERT", "" + result.getInsert());
+	            gvBuffer.setProperty("REC_UPDATE", "" + result.getUpdate());
+	            gvBuffer.setProperty("REC_DISCARD", "" + result.getDiscard());
+	            gvBuffer.setProperty("REC_DISCARD_CAUSE", "" + result.getDiscardCauseListAsString());
+	            return gvBuffer;
+            }
+            finally {
+            	if (result != null) {
+            		result.reset();
+            	}
+            }
         }
         catch (InterruptedException exc) {
             throw exc;
@@ -123,15 +131,15 @@ public class DataHandlerCallOperation implements CallOperation
     @Override
     public void destroy()
     {
-        if (dhFactory != null) {
+        if (this.dhFactory != null) {
             try {
-                dhFactory.destroy();
+                this.dhFactory.destroy();
             }
             catch (Exception exc) {
                 // do nothing
             }
         }
-        dhFactory = null;
+        this.dhFactory = null;
     }
 
     /**
@@ -159,6 +167,6 @@ public class DataHandlerCallOperation implements CallOperation
     @Override
     public OperationKey getKey()
     {
-        return key;
+        return this.key;
     }
 }
