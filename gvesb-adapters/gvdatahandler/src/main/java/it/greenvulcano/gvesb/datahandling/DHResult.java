@@ -19,11 +19,11 @@
  */
 package it.greenvulcano.gvesb.datahandling;
 
-import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
 
 /**
  * DHResult class
@@ -45,18 +45,32 @@ public class DHResult implements Serializable
     private long               discard;
     private List<DiscardCause> discardCauseList = new ArrayList<DiscardCause>();
 
+    public DHResult() {
+    	// do nothing
+    }
+
+    public DHResult(DHResult toCopy) {
+    	this.data = toCopy.data;
+        this.read = toCopy.read;
+        this.total = toCopy.total;
+        this.insert = toCopy.insert;
+        this.update = toCopy.update;
+        this.discard = toCopy.discard;
+        this.discardCauseList = new ArrayList<DiscardCause>(toCopy.discardCauseList);
+    }
+
     /**
      *
      */
     public void reset()
     {
-        data = null;
-        read = 0;
-        total = 0;
-        insert = 0;
-        update = 0;
-        discard = 0;
-        discardCauseList = new ArrayList<DiscardCause>();
+        this.data = null;
+        this.read = 0;
+        this.total = 0;
+        this.insert = 0;
+        this.update = 0;
+        this.discard = 0;
+        this.discardCauseList = new ArrayList<DiscardCause>();
     }
 
     /**
@@ -64,7 +78,7 @@ public class DHResult implements Serializable
      */
     public Object getData()
     {
-        return data;
+        return this.data;
     }
 
     /**
@@ -81,7 +95,7 @@ public class DHResult implements Serializable
      */
     public long getRead()
     {
-        return read;
+        return this.read;
     }
 
     /**
@@ -98,7 +112,7 @@ public class DHResult implements Serializable
      */
     public long getTotal()
     {
-        return total;
+        return this.total;
     }
 
     /**
@@ -115,7 +129,7 @@ public class DHResult implements Serializable
      */
     public long getInsert()
     {
-        return insert;
+        return this.insert;
     }
 
     /**
@@ -132,7 +146,7 @@ public class DHResult implements Serializable
      */
     public long getUpdate()
     {
-        return update;
+        return this.update;
     }
 
     /**
@@ -149,7 +163,7 @@ public class DHResult implements Serializable
      */
     public long getDiscard()
     {
-        return discard;
+        return this.discard;
     }
 
     /**
@@ -166,7 +180,7 @@ public class DHResult implements Serializable
      */
     public List<DiscardCause> getDiscardCauseList()
     {
-        return discardCauseList;
+        return this.discardCauseList;
     }
 
     /**
@@ -176,7 +190,7 @@ public class DHResult implements Serializable
     {
         StringBuilder DSList = new StringBuilder();
 
-        for (DiscardCause dc : discardCauseList) {
+        for (DiscardCause dc : this.discardCauseList) {
             DSList.append(dc.toString());
         }
         if (DSList.length() > 0) {
@@ -201,7 +215,7 @@ public class DHResult implements Serializable
      */
     public void addDiscardCause(DiscardCause discardCause)
     {
-        discardCauseList.add(discardCause);
+        this.discardCauseList.add(discardCause);
     }
 
     /**
@@ -209,7 +223,7 @@ public class DHResult implements Serializable
      */
     public void resetDiscardList()
     {
-        discardCauseList = new ArrayList<DiscardCause>();
+        this.discardCauseList = new ArrayList<DiscardCause>();
     }
 
     /**

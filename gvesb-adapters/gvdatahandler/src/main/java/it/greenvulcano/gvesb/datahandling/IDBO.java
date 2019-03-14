@@ -79,7 +79,7 @@ public interface IDBO
      * @throws DBOException
      *         if any error occurs.
      */
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException, 
+    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException;
 
     /**
@@ -95,7 +95,7 @@ public interface IDBO
      * @throws DBOException
      *         if any error occurs.
      */
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException, 
+    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException;
 
     /**
@@ -173,4 +173,6 @@ public interface IDBO
      * @return if returns data.
      */
     public boolean isReturnData();
+
+    public long getTimeConn();
 }
