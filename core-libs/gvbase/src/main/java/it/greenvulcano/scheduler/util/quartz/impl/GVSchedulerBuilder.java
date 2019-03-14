@@ -1,32 +1,23 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project.
  * All rights reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.scheduler.util.quartz.impl;
-
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder;
-import it.greenvulcano.jmx.JMXEntryPoint;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.scheduler.TaskException;
-import it.greenvulcano.scheduler.util.quartz.CalendarBuilder;
-import it.greenvulcano.scheduler.util.quartz.SchedulerBuilder;
-import it.greenvulcano.util.txt.DateUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +43,15 @@ import org.quartz.utils.DBConnectionManager;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder;
+import it.greenvulcano.jmx.JMXEntryPoint;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.scheduler.TaskException;
+import it.greenvulcano.scheduler.util.quartz.CalendarBuilder;
+import it.greenvulcano.scheduler.util.quartz.SchedulerBuilder;
+import it.greenvulcano.util.txt.DateUtils;
+
 /**
  * @version 3.2.0 20/nov/2011
  * @author GreenVulcano Developer Team
@@ -68,7 +68,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     private ConnectionBuilder     cBuilder               = null;
     private String                driverDelegate         = "UNDEFINED";
     private String                tablePrefix            = "UNDEFINED";
-    private List<CalendarBuilder> calendars              = new ArrayList<CalendarBuilder>();
+    private final List<CalendarBuilder> calendars              = new ArrayList<CalendarBuilder>();
 
     /* (non-Javadoc)
      * @see it.greenvulcano.scheduler.util.quartz.SchedulerBuilder#init(org.w3c.dom.Node)
@@ -77,26 +77,26 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     public void init(Node node) throws TaskException
     {
         try {
-            maxThreads = XMLConfig.getInteger(node, "@maxThreads", 5);
+            this.maxThreads = XMLConfig.getInteger(node, "@maxThreads", 5);
             Node st = XMLConfig.getNode(node, "*[@type='quartz-store']");
-            storeType = st.getLocalName();
-            if ("RamStore".equals(storeType)) {
-                misfireThreshold = XMLConfig.getInteger(st, "@misfireThreshold", 60000);
+            this.storeType = st.getLocalName();
+            if ("RamStore".equals(this.storeType)) {
+                this.misfireThreshold = XMLConfig.getInteger(st, "@misfireThreshold", 60000);
             }
-            else if ("JdbcStore".equals(storeType)) {
-                driverDelegate = XMLConfig.get(st, "@driverDelegate");
-                tablePrefix = XMLConfig.get(st, "@tablePrefix");
-                misfireThreshold = XMLConfig.getInteger(st, "@misfireThreshold", 60000);
-                clusterCheckinInterval = XMLConfig.getInteger(st, "@clusterCheckinInterval", 15000);
+            else if ("JdbcStore".equals(this.storeType)) {
+                this.driverDelegate = XMLConfig.get(st, "@driverDelegate");
+                this.tablePrefix = XMLConfig.get(st, "@tablePrefix");
+                this.misfireThreshold = XMLConfig.getInteger(st, "@misfireThreshold", 60000);
+                this.clusterCheckinInterval = XMLConfig.getInteger(st, "@clusterCheckinInterval", 15000);
 
                 Node cbn = XMLConfig.getNode(st, "*[@type='jdbc-connection-builder']");
                 String className = XMLConfig.get(cbn, "@class");
-                jdbcConnectionName = XMLConfig.get(cbn, "@name");
-                cBuilder = (ConnectionBuilder) Class.forName(className).newInstance();
-                cBuilder.init(cbn);
+                this.jdbcConnectionName = XMLConfig.get(cbn, "@name");
+                this.cBuilder = (ConnectionBuilder) Class.forName(className).newInstance();
+                this.cBuilder.init(cbn);
             }
             else {
-                throw new TaskException("Invalid Qartz store type: " + storeType);
+                throw new TaskException("Invalid Qartz store type: " + this.storeType);
             }
 
             NodeList cnl = XMLConfig.getNodeList(node, "Calendars/*[@type='cron-calendar']");
@@ -105,7 +105,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                     Node n = cnl.item(i);
                     CalendarBuilder cb = (CalendarBuilder) Class.forName(XMLConfig.get(n, "@class")).newInstance();
                     cb.init(n);
-                    calendars.add(cb);
+                    this.calendars.add(cb);
                     logger.debug("Added CalendarBuilder: " + cb);
                 }
             }
@@ -131,7 +131,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 logger.debug("BEGIN - creating Scheduler[" + instanceId + "]");
 
                 // create the thread pool
-                SimpleThreadPool thPool = new SimpleThreadPool(maxThreads, Thread.NORM_PRIORITY);
+                SimpleThreadPool thPool = new SimpleThreadPool(this.maxThreads, Thread.NORM_PRIORITY);
                 thPool.setInstanceName(schedulerName);
                 thPool.setInstanceId(instanceId);
                 thPool.setMakeThreadsDaemons(true);
@@ -139,21 +139,23 @@ public class GVSchedulerBuilder implements SchedulerBuilder
 
                 // create the job store
                 JobStore jobStore = null;
-                if ("JdbcStore".equals(storeType)) {
-                    DBConnectionManager.getInstance().addConnectionProvider(jdbcConnectionName,
-                            new GVQuartzConnectionProvider(cBuilder));
+                if ("JdbcStore".equals(this.storeType)) {
+                    DBConnectionManager.getInstance().addConnectionProvider(this.jdbcConnectionName,
+                            new GVQuartzConnectionProvider(this.cBuilder));
                     jobStore = new JobStoreTX();
-                    ((JobStoreTX) jobStore).setDataSource(jdbcConnectionName);
-                    ((JobStoreTX) jobStore).setDriverDelegateClass(driverDelegate);
-                    ((JobStoreTX) jobStore).setTablePrefix(tablePrefix);
+                    ((JobStoreTX) jobStore).setDataSource(this.jdbcConnectionName);
+                    ((JobStoreTX) jobStore).setDriverDelegateClass(this.driverDelegate);
+                    ((JobStoreTX) jobStore).setTablePrefix(this.tablePrefix);
                     ((JobStoreTX) jobStore).setInstanceId(instanceId);
-                    ((JobStoreTX) jobStore).setMisfireThreshold(misfireThreshold);
+                    ((JobStoreTX) jobStore).setMisfireThreshold(this.misfireThreshold);
                     ((JobStoreTX) jobStore).setIsClustered(true);
-                    ((JobStoreTX) jobStore).setClusterCheckinInterval(clusterCheckinInterval);
+                    ((JobStoreTX) jobStore).setClusterCheckinInterval(this.clusterCheckinInterval);
+                    ((JobStoreTX) jobStore).setAcquireTriggersWithinLock(true);
+                    ((JobStoreTX) jobStore).setDoubleCheckLockMisfireHandler(true);
                 }
                 else {
                     jobStore = new RAMJobStore();
-                    ((RAMJobStore) jobStore).setMisfireThreshold(misfireThreshold);
+                    ((RAMJobStore) jobStore).setMisfireThreshold(this.misfireThreshold);
                 }
 
                 JobRunShellFactory jrsf = new StdJobRunShellFactory();
@@ -213,15 +215,15 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 qs.addNoGCObject(schedRep);
 
                 // initialize Calendars
-                for (CalendarBuilder cal : calendars) {
+                for (CalendarBuilder cal : this.calendars) {
                     cal.registerCalendar(scheduler);
                 }
 
                 schedRep.bind(scheduler);
-                
+
                 // Add default trigger listener
                 scheduler.addGlobalTriggerListener(new GVTriggerListener());
-                
+
                 scheduler.start();
                 logger.debug("END - created Scheduler[" + instanceId + "]");
             }
@@ -258,13 +260,13 @@ public class GVSchedulerBuilder implements SchedulerBuilder
             throw new TaskException("Error obtaining Calendar[" + calName + "] of Scheduler[" + schedName + "]", exc);
         }
     }
-    
+
     @Override
     public void destroy() {
-    	calendars.clear();
-    	if (cBuilder != null) {
-    		cBuilder.destroy();
-    		cBuilder = null;
+    	this.calendars.clear();
+    	if (this.cBuilder != null) {
+    		this.cBuilder.destroy();
+    		this.cBuilder = null;
     	}
     }
 
@@ -272,13 +274,13 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     public String toString()
     {
         String desc = "GVSchedulerBuilder:";
-        if ("JdbcStore".equals(storeType)) {
-            desc += " - JdbcStore[" + jdbcConnectionName + "/" + tablePrefix + "/" + driverDelegate + "]";
+        if ("JdbcStore".equals(this.storeType)) {
+            desc += " - JdbcStore[" + this.jdbcConnectionName + "/" + this.tablePrefix + "/" + this.driverDelegate + "]";
         }
         else {
             desc += " - RamStore";
         }
-        desc += " - maxThreads[" + maxThreads + "]";
+        desc += " - maxThreads[" + this.maxThreads + "]";
         return desc;
     }
 }
