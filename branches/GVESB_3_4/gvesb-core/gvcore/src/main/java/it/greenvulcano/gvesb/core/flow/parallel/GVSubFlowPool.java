@@ -63,8 +63,8 @@ public class GVSubFlowPool
     private Level                 loggerLevel = Level.ALL;
 
     private int initialSize = 1;
-    private int maximumSize = 20;
-    private int maximumCreation = 22;
+    private int maximumSize = 30;
+    private int maximumCreation = 40;
     private int created = 0;
     private int maxCreated = 0;
 

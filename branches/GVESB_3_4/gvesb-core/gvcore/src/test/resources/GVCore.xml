@@ -1678,6 +1678,8 @@ data.setObject(str.substring(1));</JavaScript>
             exception-message="BOOM!!!!" type="call"/>
           <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall" name="toupper_call_wait" service="toupper"
             sleep-on-perform="5000" type="call"/>
+          <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall" name="tolower_call_wait" service="tolower"
+            sleep-on-perform="5000" type="call"/>
 
           <test-service-call class="it.greenvulcano.gvesb.virtual.internal.TestServiceCall" name="change_wait_call" service="toupper"
             type="call">
