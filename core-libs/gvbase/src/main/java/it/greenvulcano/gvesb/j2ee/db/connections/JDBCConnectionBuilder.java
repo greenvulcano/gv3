@@ -1,23 +1,34 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.j2ee.db.connections;
+
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.ConfigurationEvent;
 import it.greenvulcano.configuration.ConfigurationListener;
@@ -33,22 +44,11 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.thread.BaseThread;
 import it.greenvulcano.util.thread.ThreadMap;
 
-import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
+ *
  */
 public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEventListener
 {
@@ -62,7 +62,7 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
 
     private static final String            THMAP_KEY          = "JDBCConnectionBuilder_THMAP_KEY";
 
-    private Map<String, ConnectionBuilder> connBuilders       = new ConcurrentHashMap<String, ConnectionBuilder>();
+    private final Map<String, ConnectionBuilder> connBuilders       = new ConcurrentHashMap<String, ConnectionBuilder>();
 
     private JDBCConnectionBuilder() throws GVDBException
     {
@@ -72,7 +72,7 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
     private void init() throws GVDBException
     {
         logger.debug("JDBCConnectionBuilder - BEGIN initialization");
-        connBuilders.clear();
+        this.connBuilders.clear();
 
         try {
             Document docConfig = XMLConfig.getDocument(CONFIGURATION_FILE);
@@ -85,7 +85,7 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
                         String name = XMLConfig.get(node, "@name");
                         ConnectionBuilder cBuilder = (ConnectionBuilder) Class.forName(className).newInstance();
                         cBuilder.init(node);
-                        connBuilders.put(name, cBuilder);
+                        this.connBuilders.put(name, cBuilder);
                     }
                 }
                 catch (Exception exc) {
@@ -196,18 +196,19 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
     }
 
     /**
-     * 
+     *
      */
     private void destroy() {
-        for (Iterator<ConnectionBuilder> iterator = connBuilders.values().iterator(); iterator.hasNext();) {
+        for (Iterator<ConnectionBuilder> iterator = this.connBuilders.values().iterator(); iterator.hasNext();) {
             ConnectionBuilder cBuilder = iterator.next();
             cBuilder.destroy();
         }
-        connBuilders.clear();
+        this.connBuilders.clear();
     }
 
     private Connection intGetConnection(String name, boolean useThreadMap) throws GVDBException
     {
+    	long startConn = System.currentTimeMillis();
         try {
             Map<String, Connection> thConns = null;
             if (useThreadMap) {
@@ -219,18 +220,18 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
                 Connection conn = thConns.get(name);
                 //if ((conn != null) && conn.isValid(0)) {
                 if (conn != null) {
+                    logger.info("Requested JDBC connection[" + name + "]: " + (System.currentTimeMillis() - startConn) + " ms");
                     return conn;
                 }
             }
-            ConnectionBuilder cBuilder = connBuilders.get(name);
+            ConnectionBuilder cBuilder = this.connBuilders.get(name);
             if (cBuilder == null) {
                 synchronized (this) {
                     if (cBuilder == null) {
-                        logger.warn("ConnectionBuilder[" + name
-                                + "] not found. Creating an automatic local DataSourceConnectionBuilder");
+                        logger.warn("ConnectionBuilder[" + name + "] not found. Creating an automatic local DataSourceConnectionBuilder");
                         cBuilder = new DataSourceConnectionBuilder();
                         ((DataSourceConnectionBuilder) cBuilder).init(name);
-                        connBuilders.put(name, cBuilder);
+                        this.connBuilders.put(name, cBuilder);
                     }
                 }
             }
@@ -238,6 +239,7 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
             if (useThreadMap) {
                 thConns.put(name, conn);
             }
+            logger.info("Requested JDBC connection[" + name + "]: " + (System.currentTimeMillis() - startConn) + " ms");
             return conn;
         }
         catch (GVDBException exc) {
@@ -263,7 +265,7 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
                 }
             }
         }
-        ConnectionBuilder cBuilder = connBuilders.get(name);
+        ConnectionBuilder cBuilder = this.connBuilders.get(name);
         if (cBuilder == null) {
             logger.error("ConnectionBuilder not found for [" + name + "] - Forced close connection");
             if (conn != null) {
