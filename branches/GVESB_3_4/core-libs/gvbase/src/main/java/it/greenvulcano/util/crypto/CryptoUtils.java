@@ -1,29 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.util.crypto;
-
-import it.greenvulcano.util.ArgsManager;
-import it.greenvulcano.util.ArgsManagerException;
-import it.greenvulcano.util.bin.BinaryUtils;
-import it.greenvulcano.util.bin.Dump;
-import it.greenvulcano.util.metadata.PropertiesHandler;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -50,13 +44,19 @@ import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 
+import it.greenvulcano.util.ArgsManager;
+import it.greenvulcano.util.ArgsManagerException;
+import it.greenvulcano.util.bin.BinaryUtils;
+import it.greenvulcano.util.bin.Dump;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+
 /**
  * CryptoUtils class
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  **/
 public final class CryptoUtils
 {
@@ -156,7 +156,7 @@ public final class CryptoUtils
 
     /**
      * Generate a Secret key.
-     * 
+     *
      * @param type
      *        the algorithm type
      * @param keyBytes
@@ -223,7 +223,7 @@ public final class CryptoUtils
 
     /**
      * Generate a key pair.
-     * 
+     *
      * @param type
      *        the algorithm type
      * @return the key pair
@@ -265,7 +265,7 @@ public final class CryptoUtils
 
     /**
      * Encrypt the input string.
-     * 
+     *
      * @param type
      *        the algorithm type
      * @param key
@@ -286,7 +286,7 @@ public final class CryptoUtils
 
     /**
      * Encrypt the input string.
-     * 
+     *
      * @param type
      *        the algorithm type
      * @param key
@@ -309,7 +309,7 @@ public final class CryptoUtils
 
     /**
      * Encrypt the input string.
-     * 
+     *
      * @param type
      *        the algorithm type
      * @param key
@@ -347,7 +347,7 @@ public final class CryptoUtils
 
     /**
      * Encrypt the input byte array.
-     * 
+     *
      * @param type
      *        the algorithm type
      * @param key
@@ -368,7 +368,7 @@ public final class CryptoUtils
 
     /**
      * Encrypt the input byte array.
-     * 
+     *
      * @param type
      *        the algorithm type
      * @param key
@@ -404,7 +404,7 @@ public final class CryptoUtils
 
     /**
      * Decrypt the input string.
-     * 
+     *
      * @param type
      *        the algorithm type, if null or empty must be present as prefix in
      *        input
@@ -426,7 +426,7 @@ public final class CryptoUtils
 
     /**
      * Decrypt the input string.
-     * 
+     *
      * @param type
      *        the algorithm type, if null or empty must be present as prefix in
      *        input
@@ -450,7 +450,7 @@ public final class CryptoUtils
 
     /**
      * Decrypt the input string.
-     * 
+     *
      * @param type
      *        the algorithm type, if null or empty must be present as prefix in
      *        input
@@ -505,7 +505,7 @@ public final class CryptoUtils
 
     /**
      * Decrypt the input byte array.
-     * 
+     *
      * @param type
      *        the algorithm type, if null or empty must be present as prefix in
      *        input
@@ -527,7 +527,7 @@ public final class CryptoUtils
 
     /**
      * Decrypt the input byte array.
-     * 
+     *
      * @param type
      *        the algorithm type, if null or empty must be present as prefix in
      *        input
@@ -574,7 +574,7 @@ public final class CryptoUtils
 
     /**
      * Encrypt the input data buffer.
-     * 
+     *
      * @param type
      *        the algorithm to be used
      * @param key
@@ -594,7 +594,7 @@ public final class CryptoUtils
 
     /**
      * Encrypt the input data buffer.
-     * 
+     *
      * @param type
      *        the algorithm to be used
      * @param key
@@ -622,7 +622,7 @@ public final class CryptoUtils
 
     /**
      * Decrypt the input data buffer.
-     * 
+     *
      * @param type
      *        the algorithm to be used
      * @param key
@@ -642,7 +642,7 @@ public final class CryptoUtils
 
     /**
      * Decrypt the input data buffer.
-     * 
+     *
      * @param type
      *        the algorithm to be used
      * @param key
@@ -680,7 +680,7 @@ public final class CryptoUtils
 
     /**
      * Encrypt the input data buffer.
-     * 
+     *
      * @param type
      *        the algorithm to be used
      * @param mode
@@ -727,7 +727,7 @@ public final class CryptoUtils
 
     /**
      * Get the algorithm used for encryption: DES, 3DES.
-     * 
+     *
      * @param type
      *        the type prefix
      * @return the encryption algorithm
@@ -758,7 +758,7 @@ public final class CryptoUtils
 
     /**
      * Get the algorithm used for encryption: DES, 3DES.
-     * 
+     *
      * @param input
      *        the encrypted string, with the type prefix
      * @return the encryption algorithm
@@ -784,7 +784,7 @@ public final class CryptoUtils
 
     /**
      * Get the algorithm used for encryption.
-     * 
+     *
      * @param input
      *        the encrypted string, with the type prefix
      * @return the encryption algorithm
@@ -805,7 +805,7 @@ public final class CryptoUtils
 
     /**
      * Add the type prefix to input.
-     * 
+     *
      * @param type
      *        the encryption type
      * @param input
@@ -822,7 +822,7 @@ public final class CryptoUtils
 
     /**
      * Add the type prefix to input.
-     * 
+     *
      * @param type
      *        the encryption type
      * @param input
@@ -849,7 +849,7 @@ public final class CryptoUtils
 
     /**
      * Remove the type prefix from input.
-     * 
+     *
      * @param input
      *        the input
      * @return the encoded input
@@ -872,7 +872,7 @@ public final class CryptoUtils
 
     /**
      * Remove the type prefix from input.
-     * 
+     *
      * @param input
      *        the input
      * @return the encoded input
@@ -893,7 +893,7 @@ public final class CryptoUtils
 
     /**
      * Generate a X.509 certificate for the given key pair.
-     * 
+     *
      * @param keyPair
      *        the key pair to certify
      * @param serial
@@ -964,6 +964,7 @@ public final class CryptoUtils
         String puAlias = "";
         String prPwd = "";
         String puPwd = "";
+        boolean dumpKeySpec = false;
         KeyStoreID keySid = new KeyStoreID("TEMP", KeyStoreUtils.DEFAULT_KEYSTORE_TYPE, "", "",
                 KeyStoreUtils.DEFAULT_KEYSTORE_PROVIDER);
         KeyID keyid = new KeyID("TEMP", keySid, "");
@@ -971,13 +972,14 @@ public final class CryptoUtils
         String certSubject = "";
 
         try {
-            ArgsManager argsM = new ArgsManager("m:t:k:K:a:p:A:P:c:C:i:I:O:b:vsed", args);
+            ArgsManager argsM = new ArgsManager("m:t:k:K:a:p:A:P:c:C:i:I:O:b:vsedE", args);
 
             if (argsM.exist("d")) {
                 dumpProviders();
                 return;
             }
 
+            dumpKeySpec = argsM.exist("E");
             verbose = argsM.exist("v");
             asString = argsM.exist("s");
             encode = argsM.exist("e");
@@ -1054,7 +1056,7 @@ public final class CryptoUtils
                     if (argsM.exist("b")) {
                         keyBytes = Base64.decodeBase64(argsM.get("b").getBytes());
                     }
-                    makeKey(algType, prAlias, puAlias, prPwd, puPwd, certIssuer, certSubject, keyid, keyBytes, type);
+                    makeKey(algType, prAlias, puAlias, prPwd, puPwd, certIssuer, certSubject, keyid, keyBytes, type, dumpKeySpec);
                     break;
                 case 1 : // encrypt(keyfile) infile -> outfile
                     if (infile != null) {
@@ -1100,7 +1102,7 @@ public final class CryptoUtils
     {
         System.out.println();
         System.out.println("Usage:");
-        System.out.println("\tCryptoUtils <-m mode> <-t type> [-k file] <-K pwd> <-A alias> [-P pwd] [-a alias [-p pwd]] [-i data | -I file] [-O file] [-e] [-s] [-v]");
+        System.out.println("\tCryptoUtils <-m mode> <-t type> [-k file | -E] <-K pwd> <-A alias> [-P pwd] [-a alias [-p pwd]] [-i data | -I file] [-O file] [-e] [-s] [-v]");
         System.out.println("\t-m : 0 generate key -> -k or cukeydef.dat");
         System.out.println("\t     1/2 encrypt/decrypt -i or -I -> -O or stdout");
         System.out.println("\t-k : keystore (default cukeystore.dat)");
@@ -1114,6 +1116,7 @@ public final class CryptoUtils
         System.out.println("\t     2 AES (Secret)");
         System.out.println("\t     3 DSA (Private/Public)");
         System.out.println("\t     4 RSA (Private/Public)");
+        System.out.println("\t-E : *DES/AES Base64 encoded KeySpec");
         System.out.println("\t-e : encode the encryption type in the output");
         System.out.println("\t-s : input and output as string (Base64)");
         System.out.println("\t-d : dump Crypto providers data");
@@ -1253,7 +1256,7 @@ public final class CryptoUtils
      *         if an error occurs
      */
     private static void makeKey(String algType, String prAlias, String puAlias, String prPwd, String puPwd,
-            String certIssuer, String certSubject, KeyID keyid, byte[] keyBytes, int type) throws Exception
+            String certIssuer, String certSubject, KeyID keyid, byte[] keyBytes, int type, boolean dumpKeySpec) throws Exception
     {
         Key key;
         switch (type) {
@@ -1266,6 +1269,10 @@ public final class CryptoUtils
                 System.out.println("***************************************");
                 System.out.println("Registering SecretKey: " + key.getAlgorithm() + " " + key.getFormat() + " "
                         + key.toString());
+                if (dumpKeySpec) {
+                	System.out.println("KeySpec: " + Base64.encodeBase64String(((SecretKey) key).getEncoded()));
+                	break;
+                }
                 System.out.println("In: " + keyid);
                 KeyStoreUtils.writeKey(keyid, key, null);
                 System.out.println("***************************************");
