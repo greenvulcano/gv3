@@ -29,6 +29,7 @@ import java.util.HashMap;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
@@ -447,6 +448,64 @@ public final class CryptoHelper implements ConfigurationListener
             Cipher cipher = Cipher.getInstance(encryptionType);
             cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(encryptionKey, keyType));
             return new String(Base64.encodeBase64(cipher.doFinal(content.getBytes("UTF-8"))), "UTF-8");
+        } catch (Exception exc) {
+            throw new CryptoHelperException("CryptoHelper - Error creating signing key", exc);
+        }
+    }
+
+    /**
+    * Use to encrypt the content with the Base64 encoded encryption key, if the key is a simmetric one, the output is prepended with initialization vector.
+    *
+    * @param key
+    * @param content
+    * @return
+    * @throws CryptoHelperException
+    *         if error occurs
+    */
+    public static String getEncryptedWithIV(String content, String encryptionKey, String keyType, String encryptionType) throws CryptoHelperException {
+        try {
+            Cipher cipher = Cipher.getInstance(encryptionType);
+            cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(encryptionKey, keyType));
+            byte[] encryptedBytes = cipher.doFinal(content.getBytes("UTF-8"));
+            //take IV from this cipher
+            byte[] iv = cipher.getIV();
+            //append Initiation Vector as a prefix to use it during decryption:
+            byte[] combinedPayload = new byte[iv.length + encryptedBytes.length];
+            //populate payload with prefix IV and encrypted data
+            System.arraycopy(iv, 0, combinedPayload, 0, iv.length);
+            System.arraycopy(encryptedBytes, 0, combinedPayload, iv.length, encryptedBytes.length);
+
+            return new String(Base64.encodeBase64(combinedPayload), "UTF-8");
+        } catch (Exception exc) {
+            throw new CryptoHelperException("CryptoHelper - Error creating signing key", exc);
+        }
+    }
+
+    /**
+    * Use to decrypt the content with the Base64 encoded encryption key, if the key is a symmetric one, the content is expected to begin with initialization vector.
+    *
+    * @param key
+    * @param content
+    * @return
+    * @throws CryptoHelperException
+    *         if error occurs
+    */
+    public static byte[] getDecryptedWithIV(String content, String encryptionKey, String keyType, String encryptionType) throws CryptoHelperException {
+        try {
+        	Cipher cipher = Cipher.getInstance(encryptionType);
+        	//separate prefix with IV from the rest of encrypted data
+            byte[] encryptedPayload = Base64.decodeBase64(content.getBytes("UTF-8"));
+            byte[] iv = new byte[cipher.getBlockSize()];
+            byte[] encryptedBytes = new byte[encryptedPayload.length - iv.length];
+            //populate iv with bytes:
+            System.arraycopy(encryptedPayload, 0, iv, 0, iv.length);
+            //populate encryptedBytes with bytes:
+            System.arraycopy(encryptedPayload, iv.length, encryptedBytes, 0, encryptedBytes.length);
+
+            cipher.init(Cipher.DECRYPT_MODE, getEncryptionKey(encryptionKey, keyType), new IvParameterSpec(iv));
+
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+            return decryptedBytes;
         } catch (Exception exc) {
             throw new CryptoHelperException("CryptoHelper - Error creating signing key", exc);
         }
