@@ -1,23 +1,28 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core;
+
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
@@ -57,17 +62,12 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.thread.ThreadMap;
 
-import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 /**
  * The main GreenVulcano class.
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
+ *
  */
 public class GreenVulcano
 {
@@ -105,7 +105,7 @@ public class GreenVulcano
 
     /**
      * Default constructor to build and initialize a GreenVulcano instance.
-     * 
+     *
      * @exception GVCoreException
      */
     public GreenVulcano() throws GVCoreException
@@ -118,9 +118,9 @@ public class GreenVulcano
             XMLConfig.load(GreenVulcanoConfig.getSystemsConfigFileName());
             logger.debug("GreenVulcano Systems Configuration File: " + GreenVulcanoConfig.getSystemsConfigFileName());
 
-            statisticsDataManager = new StatisticsDataManager();
+            this.statisticsDataManager = new StatisticsDataManager();
             try {
-                statisticsDataManager.init();
+                this.statisticsDataManager.init();
             }
             catch (Exception exc) {
                 logger.error("Error initializing Statistics Manager", exc);
@@ -128,19 +128,19 @@ public class GreenVulcano
             String dteConfFileName = "GVDataTransformation.xml";
             logger.debug("DTE configuration file: " + dteConfFileName + ".");
             try {
-                dteController = new DTEController(dteConfFileName);
+                this.dteController = new DTEController(dteConfFileName);
             }
             catch (Exception exc) {
                 logger.error("Error initializing DTEController from file: " + dteConfFileName, exc);
             }
-            gvSvcConfMgr = new ServiceConfigManager();
-            gvSvcConfMgr.setStatisticsDataManager(statisticsDataManager);
-            gvContext = new InvocationContext();
-            gvContext.setGVServiceConfigManager(gvSvcConfMgr);
-            gvContext.setStatisticsDataManager(statisticsDataManager);
-            gvContext.setExtraField("DTE_CONTROLLER", dteController);
+            this.gvSvcConfMgr = new ServiceConfigManager();
+            this.gvSvcConfMgr.setStatisticsDataManager(this.statisticsDataManager);
+            this.gvContext = new InvocationContext();
+            this.gvContext.setGVServiceConfigManager(this.gvSvcConfMgr);
+            this.gvContext.setStatisticsDataManager(this.statisticsDataManager);
+            this.gvContext.setExtraField("DTE_CONTROLLER", this.dteController);
 
-            valid = true;
+            this.valid = true;
 
             logger.debug("END GreenVulcano init");
         }
@@ -152,7 +152,7 @@ public class GreenVulcano
 
     /**
      * This method is used by to perform an asynchronous request.
-     * 
+     *
      * @param gvBuffer
      *        The GreenVulcano data coming from the client
      * @return
@@ -166,7 +166,7 @@ public class GreenVulcano
 
     /**
      * This method is used to perform a synchronous request.
-     * 
+     *
      * @param gvBuffer
      *        The GreenVulcano data coming from the client
      * @return
@@ -180,7 +180,7 @@ public class GreenVulcano
 
     /**
      * This method is used to get a reply of a previous called service.
-     * 
+     *
      * @param gvBuffer
      *        The GreenVulcano data coming from the client.
      * @return
@@ -195,7 +195,7 @@ public class GreenVulcano
     /**
      * This method is used by a Call-back server to send a reply of a previous
      * called service.
-     * 
+     *
      * @param gvBuffer
      *        The GreenVulcano data coming from the server
      * @return
@@ -210,7 +210,7 @@ public class GreenVulcano
     /**
      * This method is used by the client to get a request to be elaborated. It
      * is used by Polling servers.
-     * 
+     *
      * @param gvBuffer
      * @return
      * @throws GVPublicException
@@ -223,7 +223,7 @@ public class GreenVulcano
 
     /**
      * This method is used by GreenVulcano to perform decoupling operation.
-     * 
+     *
      * @param gvBuffer
      *        The GreenVulcano data
      * @param name
@@ -239,7 +239,7 @@ public class GreenVulcano
 
     /**
      * This method is used by GreenVulcano to perform decoupling operation.
-     * 
+     *
      * @param gvBuffer
      *        The GreenVulcano data
      * @param name
@@ -262,7 +262,7 @@ public class GreenVulcano
     public GVBuffer recover(String id, String flowSystem, String flowService, String gvsOperation, String recoveryNode,
             Map<String, Object> environment) throws GVException, GVPublicException
     {
-        running = true;
+        this.running = true;
         try {
             GVBuffer gvBuffer = new GVBuffer(flowSystem, flowService, new Id(id));
             NMDC.push();
@@ -275,16 +275,16 @@ public class GreenVulcano
             boolean success = false;
             long startTime = 0;
 
-            gvContext.setContext(gvsOperation, gvBuffer);
+            this.gvContext.setContext(gvsOperation, gvBuffer);
 
             try {
-                gvContext.push();
+                this.gvContext.push();
                 startTime = System.currentTimeMillis();
 
                 serviceConcInfo = ConcurrencyHandler.instance().add(GVC_SUBSYSTEM, gvBuffer);
 
                 gvsConfig = createGVSConfig(gvBuffer, flowSystem, flowService);
-                
+
                 GVFlow gvOp = gvsConfig.getGVOperation(gvBuffer, gvsOperation);
 
                 Level level = null;
@@ -309,13 +309,13 @@ public class GreenVulcano
                 finally {
                     GVLogger.removeThreadMasterLevel(level);
                 }
-    
+
                 long endTime = System.currentTimeMillis();
-    
+
                 if (logger.isInfoEnabled()) {
                     logger.info(GVFormatLog.formatENDOperation(returnData, endTime - startTime));
                 }
-    
+
                 success = true;
             }
             catch (GVCoreCallSvcException exc) {
@@ -379,14 +379,14 @@ public class GreenVulcano
                     logger.warn("Error on MBean registration");
                 }
 
-                gvContext.pop();
+                this.gvContext.pop();
                 NMDC.pop();
             }
-    
+
             return returnData;
         }
         finally {
-            running = false;
+            this.running = false;
             ThreadMap.remove("IS_XA_ABORT");
         }
     }
@@ -410,31 +410,31 @@ public class GreenVulcano
     public void destroy(boolean force)
     {
         setValid(false);
-        if (running && !force) {
+        if (this.running && !force) {
             return;
         }
         logger.debug("Destroing GreenVulcano instance " + this);
-        if (gvContext != null) {
-            gvContext.destroy();
-            gvContext = null;
+        if (this.gvContext != null) {
+            this.gvContext.destroy();
+            this.gvContext = null;
         }
-        if (statisticsDataManager != null) {
-            statisticsDataManager.destroy();
-            statisticsDataManager = null;
+        if (this.statisticsDataManager != null) {
+            this.statisticsDataManager.destroy();
+            this.statisticsDataManager = null;
         }
-        if (gvSvcConfMgr != null) {
-            gvSvcConfMgr.destroy();
-            gvSvcConfMgr = null;
+        if (this.gvSvcConfMgr != null) {
+            this.gvSvcConfMgr.destroy();
+            this.gvSvcConfMgr = null;
         }
-        if (dteController != null) {
-            dteController.destroy();
-            dteController = null;
+        if (this.dteController != null) {
+            this.dteController.destroy();
+            this.dteController = null;
         }
     }
 
     /**
      * Execute the requested Operation.
-     * 
+     *
      * @param gvsOperation
      *        The name of the Operation to invoke
      * @param gvBuffer
@@ -450,7 +450,7 @@ public class GreenVulcano
 
     /**
      * Execute the requested Operation.
-     * 
+     *
      * @param gvsOperation
      *        The name of the Operation to invoke
      * @param gvBuffer
@@ -465,7 +465,7 @@ public class GreenVulcano
     private GVBuffer handleFlow(String gvsOperation, GVBuffer gvBuffer, String flowSystem, String flowService)
             throws GVPublicException
     {
-        running = true;
+        this.running = true;
         try {
             NMDC.push();
             GVBufferMDC.put(gvBuffer);
@@ -478,10 +478,10 @@ public class GreenVulcano
             String id = gvBuffer.getId().toString();
             long startTime = 0;
 
-            gvContext.setContext(gvsOperation, gvBuffer);
+            this.gvContext.setContext(gvsOperation, gvBuffer);
 
             try {
-                gvContext.push();
+                this.gvContext.push();
                 startTime = System.currentTimeMillis();
 
                 serviceConcInfo = ConcurrencyHandler.instance().add(GVC_SUBSYSTEM, gvBuffer);
@@ -525,13 +525,13 @@ public class GreenVulcano
                 finally {
                     GVLogger.removeThreadMasterLevel(level);
                 }
-    
+
                 long endTime = System.currentTimeMillis();
-    
+
                 if (logger.isInfoEnabled()) {
                     logger.info(GVFormatLog.formatENDOperation(returnData, endTime - startTime));
                 }
-    
+
                 success = true;
             }
             catch (GVCoreCallSvcException exc) {
@@ -595,18 +595,18 @@ public class GreenVulcano
                     }
                 }
                 catch (Exception exc) {
-                    logger.warn("Error on MBean registration");
+                    logger.warn("Error on MBean registration", exc);
                 }
 
-                gvContext.pop();
-                gvContext.cleanup();
+                this.gvContext.pop();
+                this.gvContext.cleanup();
                 NMDC.pop();
             }
 
             return returnData;
         }
         finally {
-            running = false;
+            this.running = false;
             ThreadMap.remove("IS_XA_ABORT");
         }
     }
@@ -635,7 +635,7 @@ public class GreenVulcano
     /**
      * Returns the a GVServiceConf instance that holds the given system::service
      * configuration.
-     * 
+     *
      * @param gvBuffer
      *        The GreenVulcano data coming from the client (the request buffer)
      * @return A GVServiceConf instance that holds the given system::service
@@ -649,13 +649,13 @@ public class GreenVulcano
         if ((flowSystem != null) && !flowSystem.equals("") && (flowService != null) && !flowService.equals("")) {
             gvBuffer = new GVBuffer(flowSystem, flowService, gvBuffer.getId());
         }
-        GVServiceConf gvsConfig = gvSvcConfMgr.getGVSConfig(gvBuffer);
+        GVServiceConf gvsConfig = this.gvSvcConfMgr.getGVSConfig(gvBuffer);
         return gvsConfig;
     }
 
     /**
      * Log the given exception.
-     * 
+     *
      * @param exc
      * @param startTime
      */
@@ -668,7 +668,7 @@ public class GreenVulcano
 
     /**
      * Log the given exception, with the stack trace.
-     * 
+     *
      * @param exc
      */
     private void logExcST(Exception exc)

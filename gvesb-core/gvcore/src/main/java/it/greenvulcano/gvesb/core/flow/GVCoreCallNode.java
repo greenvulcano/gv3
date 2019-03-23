@@ -1,23 +1,29 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.flow;
+
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -29,6 +35,8 @@ import it.greenvulcano.gvesb.core.config.ServiceConfigManager;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.core.exc.GVCoreSecurityException;
+import it.greenvulcano.gvesb.core.jmx.ServiceOperationInfo;
+import it.greenvulcano.gvesb.core.jmx.ServiceOperationInfoManager;
 import it.greenvulcano.gvesb.gvdp.DataProviderManager;
 import it.greenvulcano.gvesb.gvdp.IDataProvider;
 import it.greenvulcano.gvesb.identity.GVIdentityHelper;
@@ -42,18 +50,12 @@ import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.xpath.XPathFinder;
 
-import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-
 /**
  * GVOperationNode class.
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
+ *
  */
 public class GVCoreCallNode extends GVFlowNode
 {
@@ -115,8 +117,8 @@ public class GVCoreCallNode extends GVFlowNode
     {
         super.init(defNode);
 
-        nextNodeId = XMLConfig.get(defNode, "@next-node-id", "");
-        if (nextNodeId.equals("")) {
+        this.nextNodeId = XMLConfig.get(defNode, "@next-node-id", "");
+        if (this.nextNodeId.equals("")) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'next-node-id'"},
                     {"node", XPathFinder.buildXPath(defNode)}});
         }
@@ -130,8 +132,8 @@ public class GVCoreCallNode extends GVFlowNode
     @Override
     public void cleanUp() throws GVCoreException
     {
-        inputServices.cleanUp();
-        outputServices.cleanUp();
+        this.inputServices.cleanUp();
+        this.outputServices.cleanUp();
     }
 
     /**
@@ -140,8 +142,8 @@ public class GVCoreCallNode extends GVFlowNode
     @Override
     public void destroy() throws GVCoreException
     {
-        inputServices = null;
-        outputServices = null;
+        this.inputServices = null;
+        this.outputServices = null;
     }
 
     /**
@@ -152,21 +154,29 @@ public class GVCoreCallNode extends GVFlowNode
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
         Level level = GVLogger.getThreadMasterLevel();
-    	if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
+    	if (isDumpInOut()) {
+			GVLogger.setThreadMasterLevel(Level.DEBUG);
+		}
     	try {
 	    	long startTime = System.currentTimeMillis();
 	        GVBuffer internalData = null;
 	        String input = getInput();
 	        String output = getOutput();
+            GVServiceConf gvsConfig = null;
+            String localSystem = null;
+            String localService = null;
+            String localFlowOp = null;
+            String localId = null;
+            boolean localSuccess = false;
 	        logger.info("Executing GVCoreCallNode '" + getId() + "'");
 	        checkInterrupted("GVCoreCallNode", logger);
 	        dumpEnvironment(logger, true, environment);
-	
+
 	        Object inData = environment.get(input);
 	        if (Throwable.class.isInstance(inData)) {
 	            environment.put(output, inData);
 	            logger.info("END - Skip Execute GVCoreCallNode '" + getId() + "'");
-	            return nextNodeId;
+	            return this.nextNodeId;
 	        }
 	        try {
 	        	GVBuffer data = (GVBuffer) inData;
@@ -183,48 +193,47 @@ public class GVCoreCallNode extends GVFlowNode
 	            String origService = internalData.getService();
 	            logger.debug("origSystem  = " + origSystem);
 	            logger.debug("origService = " + origService);
-	
-	            String localSystem = (GVBuffer.DEFAULT_SYS.equals(system) ? origSystem : system);
-	            String localService = service;
-	            String localFlowOp = flowOp;
-	
-	            if (isFlowSysSvcOpDynamic) {
+
+	            localSystem = (GVBuffer.DEFAULT_SYS.equals(this.system) ? origSystem : this.system);
+	            localService = this.service;
+	            localFlowOp = this.flowOp;
+
+	            if (this.isFlowSysSvcOpDynamic) {
 	                Map<String, Object> props = GVBufferPropertiesHelper.getPropertiesMapSO(internalData, true);
 	                localSystem = PropertiesHandler.expand(localSystem, props, internalData);
 	                localService = PropertiesHandler.expand(localService, props, internalData);
-	                flowGVBuffer.setService(localService);
-	                flowGVBuffer.setSystem(localSystem);
+	                this.flowGVBuffer.setService(localService);
+	                this.flowGVBuffer.setSystem(localSystem);
 	                localFlowOp = PropertiesHandler.expand(localFlowOp, props, internalData);
 	            }
-	            GVServiceConf gvsConfig = null;
-	            InvocationContext gvCtx = (InvocationContext) InvocationContext.getInstance();
+	            InvocationContext gvCtx = (InvocationContext) it.greenvulcano.gvesb.internal.InvocationContext.getInstance();
 	            ServiceConfigManager svcMgr = gvCtx.getGVServiceConfigManager();
-	            gvsConfig = svcMgr.getGVSConfig(flowGVBuffer);
+	            gvsConfig = svcMgr.getGVSConfig(this.flowGVBuffer);
 	            if (!ACLManager.canAccess(new GVCoreServiceKey(gvsConfig.getGroupName(), gvsConfig.getServiceName(),
 	                    localFlowOp))) {
 	                throw new GVCoreSecurityException("GV_SERVICE_POLICY_ERROR", new String[][]{
-	                        {"service", flowGVBuffer.getService()}, {"system", flowGVBuffer.getSystem()},
-	                        {"id", flowGVBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
+	                        {"service", this.flowGVBuffer.getService()}, {"system", this.flowGVBuffer.getSystem()},
+	                        {"id", this.flowGVBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
 	            }
-	            GVFlow gvOp = gvsConfig.getGVOperation(flowGVBuffer, localFlowOp);
-	
+	            GVFlow gvOp = gvsConfig.getGVOperation(this.flowGVBuffer, localFlowOp);
+
 	            try {
 	                NMDC.push();
-	
-	                if (isFlowSysSvcSet) {
+
+	                if (this.isFlowSysSvcSet) {
 	                    internalData.setService(localService);
 	                    internalData.setSystem(localSystem);
 	                }
-	
-	                if (changeLogContext) {
+
+	                if (this.changeLogContext) {
 	                    GVBufferMDC.put(internalData);
 	                    NMDC.setOperation(localFlowOp);
 	                    NMDC.put(GVBuffer.Field.SERVICE.toString(), localService);
 	                    NMDC.put(GVBuffer.Field.SYSTEM.toString(), localSystem);
 	                }
 	                DataProviderManager dataProviderManager = DataProviderManager.instance();
-	                if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
-	                    IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
+	                if ((this.inputRefDP != null) && (this.inputRefDP.length() > 0)) {
+	                    IDataProvider dataProvider = dataProviderManager.getDataProvider(this.inputRefDP);
 	                    try {
 	                        logger.debug("Working on Input data provider: " + dataProvider);
 	                        dataProvider.setObject(internalData);
@@ -232,29 +241,30 @@ public class GVCoreCallNode extends GVFlowNode
 	                        internalData.setObject(inputCall);
 	                    }
 	                    finally {
-	                        dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
+	                        dataProviderManager.releaseDataProvider(this.inputRefDP, dataProvider);
 	                    }
 	                }
-	                internalData = inputServices.perform(internalData);
+	                localId = internalData.getId().toString();
+	                internalData = this.inputServices.perform(internalData);
 	            	String masterService = null;
 	            	Level locLevel = null;
 	                try {
-	                	if (changeLogMasterService) {
+	                	if (this.changeLogMasterService) {
 	                		masterService = GVBufferMDC.changeMasterService(localService);
 	                	}
 	               		locLevel = GVLogger.setThreadMasterLevel(gvOp.getLoggerLevel());
-	
+
 	                    internalData = gvOp.perform(internalData, onDebug);
 	                }
 	                finally {
 	                	GVLogger.removeThreadMasterLevel(locLevel);
-	                    if (changeLogMasterService) {
+	                    if (this.changeLogMasterService) {
 	                		GVBufferMDC.changeMasterService(masterService);
 	                	}
 	                }
-	                internalData = outputServices.perform(internalData);
-	                if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
-	                    IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
+	                internalData = this.outputServices.perform(internalData);
+	                if ((this.outputRefDP != null) && (this.outputRefDP.length() > 0)) {
+	                    IDataProvider dataProvider = dataProviderManager.getDataProvider(this.outputRefDP);
 	                    try {
 	                        logger.debug("Working on Output data provider: " + dataProvider);
 	                        dataProvider.setObject(internalData);
@@ -262,17 +272,18 @@ public class GVCoreCallNode extends GVFlowNode
 	                        internalData.setObject(outputCall);
 	                    }
 	                    finally {
-	                        dataProviderManager.releaseDataProvider(outputRefDP, dataProvider);
+	                        dataProviderManager.releaseDataProvider(this.outputRefDP, dataProvider);
 	                    }
 	                }
 	            }
 	            finally {
 	                NMDC.pop();
-	                if (isFlowSysSvcSet) {
+	                if (this.isFlowSysSvcSet) {
 	                    internalData.setSystem(origSystem);
 	                    internalData.setService(origService);
 	                }
 	            }
+	            localSuccess = true;
 	            environment.put(output, internalData);
 	            if (logger.isDebugEnabled() || isDumpInOut()) {
 	                logger.info(GVFormatLog.formatOUTPUT(internalData, false, false));
@@ -285,11 +296,22 @@ public class GVCoreCallNode extends GVFlowNode
 	        catch (Exception exc) {
 	            environment.put(output, exc);
 	        }
-	
+
+            if (gvsConfig != null) {
+            	try {
+            		ServiceOperationInfo serviceInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(
+                        gvsConfig.getServiceName(), true);
+            		serviceInfo.flowTerminated(localFlowOp, localId, localSuccess);
+            	}
+            	catch(Exception exc) {
+            		logger.error("Error cleaning-up Flow JMX status", exc);
+            	}
+            }
+
 	        dumpEnvironment(logger, false, environment);
 	        long endTime = System.currentTimeMillis();
 	        logger.info("END - Execute GVCoreCallNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-	        return nextNodeId;
+	        return this.nextNodeId;
         }
         finally {
         	if (isDumpInOut() && !level.equals(Level.ALL)) {
@@ -304,7 +326,7 @@ public class GVCoreCallNode extends GVFlowNode
     @Override
     public String getDefaultNextNodeId()
     {
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /**
@@ -315,39 +337,39 @@ public class GVCoreCallNode extends GVFlowNode
      */
     private void initNode(Node defNode) throws GVCoreConfException
     {
-        changeLogContext = XMLConfig.getBoolean(defNode, "@change-log-context", true);
-        changeLogMasterService = changeLogContext && XMLConfig.getBoolean(defNode, "@change-log-master-service", false);
+        this.changeLogContext = XMLConfig.getBoolean(defNode, "@change-log-context", true);
+        this.changeLogMasterService = this.changeLogContext && XMLConfig.getBoolean(defNode, "@change-log-master-service", false);
         try {
-            system = XMLConfig.get(defNode, "@id-system", GVBuffer.DEFAULT_SYS);
-            logger.debug("system  = " + system);
-            service = XMLConfig.get(defNode, "@id-service");
-            logger.debug("service = " + service);
-            flowOp = XMLConfig.get(defNode, "@operation");
-            logger.debug("flowOp  = " + flowOp);
-            isFlowSysSvcOpDynamic = XMLConfig.getBoolean(defNode, "@dynamic", false);
-            logger.debug("isFlowSysSvcOpDynamic  = " + isFlowSysSvcOpDynamic);
-            isFlowSysSvcSet = XMLConfig.getBoolean(defNode, "@overwrite-sys-svc", false);
-            logger.debug("isFlowSysSvcSet = " + isFlowSysSvcSet);
-            flowGVBuffer = new GVBuffer(system, service);
-            outputRefDP = XMLConfig.get(defNode, "@output-ref-dp", "");
-            inputRefDP = XMLConfig.get(defNode, "@input-ref-dp", "");
+            this.system = XMLConfig.get(defNode, "@id-system", GVBuffer.DEFAULT_SYS);
+            logger.debug("system  = " + this.system);
+            this.service = XMLConfig.get(defNode, "@id-service");
+            logger.debug("service = " + this.service);
+            this.flowOp = XMLConfig.get(defNode, "@operation");
+            logger.debug("flowOp  = " + this.flowOp);
+            this.isFlowSysSvcOpDynamic = XMLConfig.getBoolean(defNode, "@dynamic", false);
+            logger.debug("isFlowSysSvcOpDynamic  = " + this.isFlowSysSvcOpDynamic);
+            this.isFlowSysSvcSet = XMLConfig.getBoolean(defNode, "@overwrite-sys-svc", false);
+            logger.debug("isFlowSysSvcSet = " + this.isFlowSysSvcSet);
+            this.flowGVBuffer = new GVBuffer(this.system, this.service);
+            this.outputRefDP = XMLConfig.get(defNode, "@output-ref-dp", "");
+            this.inputRefDP = XMLConfig.get(defNode, "@input-ref-dp", "");
 
-            if (service.equals("")) {
+            if (this.service.equals("")) {
                 throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'id-service'"},
                         {"node", XPathFinder.buildXPath(defNode)}});
             }
-            if (flowOp.equals("")) {
+            if (this.flowOp.equals("")) {
                 throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'operation'"},
                         {"node", XPathFinder.buildXPath(defNode)}});
             }
-            
+
             Node intSvcNode = XMLConfig.getNode(defNode, "InputServices");
             if (intSvcNode != null) {
-                inputServices.init(intSvcNode, this, true);
+                this.inputServices.init(intSvcNode, this, true);
             }
             intSvcNode = XMLConfig.getNode(defNode, "OutputServices");
             if (intSvcNode != null) {
-                outputServices.init(intSvcNode, this, false);
+                this.outputServices.init(intSvcNode, this, false);
             }
         }
         catch (XMLConfigException exc) {
