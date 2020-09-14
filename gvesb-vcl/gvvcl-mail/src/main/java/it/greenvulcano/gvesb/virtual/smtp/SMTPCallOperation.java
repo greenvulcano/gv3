@@ -1,23 +1,50 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.virtual.smtp;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.naming.NamingException;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.sun.mail.smtp.SMTPTransport;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -40,39 +67,13 @@ import it.greenvulcano.util.txt.StringToHTML;
 import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.naming.NamingException;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
  * Sends an email message.
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class SMTPCallOperation implements CallOperation
 {
@@ -173,6 +174,7 @@ public class SMTPCallOperation implements CallOperation
     private List<String>        fileAttachments            = null;
 
     private String              messageIDProperty;
+    private String              serverResponseProperty;
 
     private boolean             dynamicServer              = false;
     private Properties          serverProps                = null;
@@ -182,7 +184,7 @@ public class SMTPCallOperation implements CallOperation
     private String              serverHost                 = null;
 
     /**
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#init(org.w3c.dom.Node)
      */
     @Override
@@ -190,75 +192,77 @@ public class SMTPCallOperation implements CallOperation
     {
         JNDIHelper initialContext = null;
         try {
-            jndiName = XMLConfig.get(node, "@jndi-name");
-            if (jndiName != null) {
-                logger.debug("JNDI name: " + jndiName);
+            this.jndiName = XMLConfig.get(node, "@jndi-name");
+            if (this.jndiName != null) {
+                logger.debug("JNDI name: " + this.jndiName);
             }
 
-            protocolHost = XMLConfig.get(node, "@override-protocol-host");
-            if (protocolHost != null) {
-                logger.debug("Override protocol host: " + protocolHost);
+            this.protocolHost = XMLConfig.get(node, "@override-protocol-host");
+            if (this.protocolHost != null) {
+                logger.debug("Override protocol host: " + this.protocolHost);
             }
 
-            protocolUser = XMLConfig.get(node, "@override-protocol-user");
-            if (protocolUser != null) {
-                logger.debug("Override protocol user: " + protocolUser);
+            this.protocolUser = XMLConfig.get(node, "@override-protocol-user");
+            if (this.protocolUser != null) {
+                logger.debug("Override protocol user: " + this.protocolUser);
             }
 
-            messageIDProperty = XMLConfig.get(node, "@message-id-property", "messageID");
-            logger.debug("Message ID property: " + messageIDProperty);
+            this.messageIDProperty = XMLConfig.get(node, "@message-id-property", "messageID");
+            logger.debug("Message ID property: " + this.messageIDProperty);
+            this.serverResponseProperty = XMLConfig.get(node, "@server-response-property", "serverResponse");
+            logger.debug("Server Response property: " + this.serverResponseProperty);
 
-            if (jndiName != null) {
+            if (this.jndiName != null) {
                 initialContext = new JNDIHelper(XMLConfig.getNode(node, "JNDIHelper"));
-                session = (Session) initialContext.lookup(jndiName);
+                this.session = (Session) initialContext.lookup(this.jndiName);
             }
 
             NodeList nodeList = XMLConfig.getNodeList(node, "mail-properties/mail-property");
             if ((nodeList != null) && (nodeList.getLength() > 0)) {
-                serverProps = new Properties();
+                this.serverProps = new Properties();
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     Node property = nodeList.item(i);
                     String name = XMLConfig.get(property, "@name");
                     String value = XMLConfig.get(property, "@value");
                     if (name.contains(".host")) {
                         logger.debug("Logging-in to host: " + value);
-                        serverHost = value;
+                        this.serverHost = value;
                     }
                     else if (name.contains(".user")) {
                         logger.debug("Logging-in as user: " + value);
-                        loginUser = value;
+                        this.loginUser = value;
                     }
                     else if (name.contains(".password")) {
                         value = XMLConfig.getDecrypted(value);
                         //logger.debug("Logging-in with password: " + value);
-                        loginPassword = value;
-                        performLogin = true;
+                        this.loginPassword = value;
+                        this.performLogin = true;
                     }
                     if (!PropertiesHandler.isExpanded(value)) {
-                        dynamicServer = true;
+                        this.dynamicServer = true;
                     }
-                    serverProps.setProperty(name, value);
+                    this.serverProps.setProperty(name, value);
                 }
             }
 
-            if ((protocolHost != null) || (protocolUser != null)) {
-                if (serverProps == null) {
-                    serverProps = session.getProperties();
+            if ((this.protocolHost != null) || (this.protocolUser != null)) {
+                if (this.serverProps == null) {
+                    this.serverProps = this.session.getProperties();
                 }
-                if (protocolHost != null) {
-                    serverProps.setProperty("mail.protocol.host", protocolHost);
+                if (this.protocolHost != null) {
+                    this.serverProps.setProperty("mail.protocol.host", this.protocolHost);
                 }
-                if (protocolUser != null) {
-                    serverProps.setProperty("mail.protocol.user", protocolUser);
+                if (this.protocolUser != null) {
+                    this.serverProps.setProperty("mail.protocol.user", this.protocolUser);
                 }
             }
 
-            if (!dynamicServer) {
-                if (serverProps != null) {
-                    session = Session.getInstance(serverProps, null);
+            if (!this.dynamicServer) {
+                if (this.serverProps != null) {
+                    this.session = Session.getInstance(this.serverProps, null);
                 }
 
-                if (session == null) {
+                if (this.session == null) {
                     throw new InitializationException("GVVCL_SMTP_NO_SESSION", new String[][]{{"node", node.getLocalName()}});
                 }
             }
@@ -284,7 +288,7 @@ public class SMTPCallOperation implements CallOperation
 
     /**
      * Initializes the properties of the mail.
-     * 
+     *
      * @param node
      *        the configuration node containing the mail properties.
      * @throws XMLConfigException
@@ -292,16 +296,16 @@ public class SMTPCallOperation implements CallOperation
      */
     private void initMailProperties(Node node) throws XMLConfigException
     {
-        senderDisplayName = XMLConfig.get(node, "@sender-display-name");
-        logger.debug("Sender: " + senderDisplayName);
-        senderAddress = XMLConfig.get(node, "@sender-address", "");
-        if (!"".equals(senderAddress)) {
-        	logger.debug("Sender address: " + senderAddress);
+        this.senderDisplayName = XMLConfig.get(node, "@sender-display-name");
+        logger.debug("Sender: " + this.senderDisplayName);
+        this.senderAddress = XMLConfig.get(node, "@sender-address", "");
+        if (!"".equals(this.senderAddress)) {
+        	logger.debug("Sender address: " + this.senderAddress);
         }
-        subjectText = XMLConfig.get(node, "@subject");
-        logger.debug("Subject: " + subjectText);
-        contentType = XMLConfig.get(node, "@content-type").replace('-', '/');
-        logger.debug("Content type: " + contentType);
+        this.subjectText = XMLConfig.get(node, "@subject");
+        logger.debug("Subject: " + this.subjectText);
+        this.contentType = XMLConfig.get(node, "@content-type").replace('-', '/');
+        logger.debug("Content type: " + this.contentType);
 
         Node destinations = XMLConfig.getNode(node, "destinations");
         if (destinations != null) {
@@ -318,13 +322,13 @@ public class SMTPCallOperation implements CallOperation
             initAttachments(attachments);
         }
 
-        isHighPriority = XMLConfig.getBoolean(node, "@high-priority", false);
-        logger.debug("Is high priority: " + isHighPriority);
+        this.isHighPriority = XMLConfig.getBoolean(node, "@high-priority", false);
+        logger.debug("Is high priority: " + this.isHighPriority);
     }
 
     /**
      * Initializes the list of mail destinations.
-     * 
+     *
      * @param node
      *        the configuration node containing the destinations.
      * @throws XMLConfigException
@@ -336,33 +340,33 @@ public class SMTPCallOperation implements CallOperation
         if (toNode != null) {
             NodeList list = XMLConfig.getNodeList(toNode, "mail-address");
             for (int i = 0; i < list.getLength(); i++) {
-                to += XMLConfig.get(list.item(i), "@address") + ",";
+                this.to += XMLConfig.get(list.item(i), "@address") + ",";
             }
-            logger.debug("To: " + to);
+            logger.debug("To: " + this.to);
         }
 
         Node ccNode = XMLConfig.getNode(node, "cc");
         if (ccNode != null) {
             NodeList list = XMLConfig.getNodeList(ccNode, "mail-address");
             for (int i = 0; i < list.getLength(); i++) {
-                cc += XMLConfig.get(list.item(i), "@address") + ",";
+                this.cc += XMLConfig.get(list.item(i), "@address") + ",";
             }
-            logger.debug("Cc: " + cc);
+            logger.debug("Cc: " + this.cc);
         }
 
         Node bccNode = XMLConfig.getNode(node, "bcc");
         if (bccNode != null) {
             NodeList list = XMLConfig.getNodeList(bccNode, "mail-address");
             for (int i = 0; i < list.getLength(); i++) {
-                bcc += XMLConfig.get(list.item(i), "@address") + ",";
+                this.bcc += XMLConfig.get(list.item(i), "@address") + ",";
             }
-            logger.debug("Bcc: " + bcc);
+            logger.debug("Bcc: " + this.bcc);
         }
     }
 
     /**
      * Initializes the message body of the mail.
-     * 
+     *
      * @param node
      *        the configuration node containing the message body properties.
      * @throws XMLConfigException
@@ -370,25 +374,25 @@ public class SMTPCallOperation implements CallOperation
      */
     private void initMessageBody(Node node) throws XMLConfigException
     {
-        gvBufferDump = XMLConfig.getBoolean(node, "@gvBuffer-dump", false);
-        logger.debug("GVBuffer Dump: " + gvBufferDump);
+        this.gvBufferDump = XMLConfig.getBoolean(node, "@gvBuffer-dump", false);
+        logger.debug("GVBuffer Dump: " + this.gvBufferDump);
 
         Node text = XMLConfig.getNode(node, "message-text");
 
         if (text != null) {
-            messageText = XMLConfig.get(text, "text()", "GreenVulcano Message");
-            escapeHTMLInGVBufferFields = XMLConfig.getBoolean(text, "@escape-HTML-in-gvBuffer-fields", true);
+            this.messageText = XMLConfig.get(text, "text()", "GreenVulcano Message");
+            this.escapeHTMLInGVBufferFields = XMLConfig.getBoolean(text, "@escape-HTML-in-gvBuffer-fields", true);
         }
         else {
-            messageText = "";
+            this.messageText = "";
         }
 
-        logger.debug("Text: " + messageText);
+        logger.debug("Text: " + this.messageText);
     }
 
     /**
      * Initializes the attachments of the mail.
-     * 
+     *
      * @param node
      *        the configuration node containing the attachments properties.
      * @throws XMLConfigException
@@ -399,17 +403,17 @@ public class SMTPCallOperation implements CallOperation
         NodeList list = XMLConfig.getNodeList(node, "file-attachment");
         int numFiles = list.getLength();
         if (numFiles > 0) {
-            fileAttachments = new ArrayList<String>();
+            this.fileAttachments = new ArrayList<String>();
             for (int i = 0; i < numFiles; i++) {
-                fileAttachments.add(XMLConfig.get(list.item(i), "@path"));
+                this.fileAttachments.add(XMLConfig.get(list.item(i), "@path"));
             }
-            logger.debug("Attach file: " + fileAttachments);
+            logger.debug("Attach file: " + this.fileAttachments);
         }
 
         Node gvBufferNode = XMLConfig.getNode(node, "gvBuffer");
         if (gvBufferNode != null) {
-            gvBufferName = XMLConfig.get(gvBufferNode, "@name");
-            logger.debug("Attach gvBuffer: " + gvBufferName);
+            this.gvBufferName = XMLConfig.get(gvBufferNode, "@name");
+            logger.debug("Attach gvBuffer: " + this.gvBufferName);
         }
     }
 
@@ -435,10 +439,10 @@ public class SMTPCallOperation implements CallOperation
 
     /**
      * Sends an email.
-     * 
+     *
      * @param gvBuffer
      *        the gvBuffer.
-     * 
+     *
      * @throws MessagingException
      * @throws UnsupportedEncodingException
      * @throws GVException
@@ -450,101 +454,101 @@ public class SMTPCallOperation implements CallOperation
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
             Session localSession = getSession(gvBuffer, params);
-            Transport transport = null;
-            
+            SMTPTransport transport = null;
+
             try {
-                transport = localSession.getTransport();
-                if (performLogin) {
-                    transport.connect(serverHost, loginUser, loginPassword);
+                transport = (SMTPTransport) localSession.getTransport();
+                if (this.performLogin) {
+                    transport.connect(this.serverHost, this.loginUser, this.loginPassword);
                 }
                 else {
                     transport.connect();
                 }
 
                 MimeMessage msg = new MimeMessage(localSession);
-                if (isHighPriority) {
+                if (this.isHighPriority) {
                     msg.addHeader("X-Priority", "1");
                 }
                 String localSA = localSession.getProperties().getProperty("mail.from");
-        		if (!"".equals(senderAddress)) {
-            		localSA = PropertiesHandler.expand(senderAddress, params, gvBuffer);
+        		if (!"".equals(this.senderAddress)) {
+            		localSA = PropertiesHandler.expand(this.senderAddress, params, gvBuffer);
         		}
-                msg.setFrom(new InternetAddress(localSA, PropertiesHandler.expand(senderDisplayName, params, gvBuffer)));
-        
+                msg.setFrom(new InternetAddress(localSA, PropertiesHandler.expand(this.senderDisplayName, params, gvBuffer)));
+
                 String appoTO = gvBuffer.getProperty("GV_SMTP_TO");
                 if ((appoTO == null) || "".equals(appoTO)) {
-                    appoTO = to;
+                    appoTO = this.to;
                 }
                 if (!appoTO.equals("")) {
                     msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(appoTO, false));
                     logger.debug("Send TO: " + appoTO);
                 }
-        
+
                 String appoCC = gvBuffer.getProperty("GV_SMTP_CC");
                 if ((appoCC == null) || "".equals(appoCC)) {
-                    appoCC = cc;
+                    appoCC = this.cc;
                 }
                 if (!appoCC.equals("")) {
                     msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(appoCC, false));
                     logger.debug("Send CC: " + appoCC);
                 }
-        
+
                 String appoBCC = gvBuffer.getProperty("GV_SMTP_BCC");
                 if ((appoBCC == null) || "".equals(appoBCC)) {
-                    appoBCC = bcc;
+                    appoBCC = this.bcc;
                 }
                 if (!appoBCC.equals("")) {
                     msg.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(appoBCC, false));
                     logger.debug("Send BCC: " + appoBCC);
                 }
-        
-                String subject = parseMessage(subjectText, gvBuffer, params);
+
+                String subject = parseMessage(this.subjectText, gvBuffer, params);
                 logger.debug("Generated mail subject: " + subject);
                 msg.setSubject(subject);
-        
+
                 MimeBodyPart messageBodyPart = new MimeBodyPart();
-        
-                String message = parseMessage(messageText, gvBuffer, params);
+
+                String message = parseMessage(this.messageText, gvBuffer, params);
                 logger.debug("Generated mail body: \n" + message);
-        
-                if (gvBufferDump) {
+
+                if (this.gvBufferDump) {
                     StringBuffer buf = new StringBuffer(message);
-                    if (contentType.equals("text/html")) {
+                    if (this.contentType.equals("text/html")) {
                         buf.append("<pre>");
                     }
                     buf.append(System.getProperty("line.separator"));
-        
+
                     String appMsg = new GVBufferDump(gvBuffer, true).toString();
-        
-                    if (contentType.equals("text/html")) {
+
+                    if (this.contentType.equals("text/html")) {
                         appMsg = StringToHTML.quote(appMsg);
                     }
-        
+
                     buf.append(appMsg);
-        
-                    if (contentType.equals("text/html")) {
+
+                    if (this.contentType.equals("text/html")) {
                         buf.append("</pre>");
                     }
-        
+
                     message = buf.toString();
                 }
-                messageBodyPart.setContent(message, contentType);
+                messageBodyPart.setContent(message, this.contentType);
                 messageBodyPart.setContentLanguage(new String[]{Locale.getDefault().getLanguage()});
-        
+
                 Multipart multipart = new MimeMultipart();
                 multipart.addBodyPart(messageBodyPart);
-        
+
                 String appoBufferName = gvBuffer.getProperty("GV_SMTP_BUFFER_NAME");
                 if ((appoBufferName == null) || "".equals(appoBufferName)) {
-                    appoBufferName = gvBufferName;
+                    appoBufferName = this.gvBufferName;
                 }
-        
+
                 if (appoBufferName != null) {
                     MimeBodyPart gvBufferPart = getAttachGVBuffer(parseMessage(appoBufferName, gvBuffer, params), gvBuffer.getObject());
                     multipart.addBodyPart(gvBufferPart);
                 }
-        
-                List<String> appoFileAttachments = fileAttachments;
+
+                List<String> appoFileAttachments = this.fileAttachments;
                 String appoFiles = gvBuffer.getProperty("GV_SMTP_ATTACHMENTS");
                 if ((appoFiles != null) && (!"".equals(appoFiles))) {
                     appoFileAttachments = TextUtils.splitByStringSeparator(appoFiles, ";");
@@ -562,15 +566,17 @@ public class SMTPCallOperation implements CallOperation
                         multipart.addBodyPart(filePart);
                     }
                 }
-        
+
                 msg.setContent(multipart);
                 msg.setSentDate(new Date());
-        
+
                 msg.saveChanges();
                 transport.sendMessage(msg, msg.getAllRecipients());
-        
+                String serverResponse = transport.getLastServerResponse();
+
                 String messageID = msg.getMessageID();
-                gvBuffer.setProperty(messageIDProperty, messageID);
+                gvBuffer.setProperty(this.messageIDProperty, messageID);
+                gvBuffer.setProperty(this.serverResponseProperty, serverResponse);
             }
             finally {
                 if (transport != null) {
@@ -584,31 +590,31 @@ public class SMTPCallOperation implements CallOperation
     }
 
     private Session getSession(GVBuffer data, Map<String, Object> params) throws Exception {
-        loginUser     = null;
-        loginPassword = null;
-        serverHost    = null;
+        this.loginUser     = null;
+        this.loginPassword = null;
+        this.serverHost    = null;
 
-        if (!dynamicServer) {
-            return session;
+        if (!this.dynamicServer) {
+            return this.session;
         }
-        
+
         try {
             Properties localProps = new Properties();
-            for (Iterator iterator = serverProps.keySet().iterator(); iterator.hasNext();) {
+            for (Iterator iterator = this.serverProps.keySet().iterator(); iterator.hasNext();) {
                 String name = (String) iterator.next();
-                String value = PropertiesHandler.expand(serverProps.getProperty(name), params, data);
+                String value = PropertiesHandler.expand(this.serverProps.getProperty(name), params, data);
                 if (name.contains(".host")) {
                     logger.debug("Logging-in to host: " + value);
-                    serverHost = value;
+                    this.serverHost = value;
                 }
                 else if (name.contains(".user")) {
                     logger.debug("Logging-in as user: " + value);
-                    loginUser = value;
+                    this.loginUser = value;
                 }
                 else if (name.contains(".password")) {
                     value = XMLConfig.getDecrypted(value);
                     //logger.debug("Logging-in with password: " + value);
-                    loginPassword = value;
+                    this.loginPassword = value;
                 }
                 localProps.setProperty(name, value);
             }
@@ -618,7 +624,7 @@ public class SMTPCallOperation implements CallOperation
             if (session == null) {
                 throw new CallException("GVVCL_SMTP_NO_SESSION", new String[][]{{"properties", "" + localProps}});
             }
-            
+
             return session;
         }
         catch (CallException exc) {
@@ -629,15 +635,15 @@ public class SMTPCallOperation implements CallOperation
         }
     }
 
-    
+
     /**
      * Gets the MIME body part containing the file to be attached.
-     * 
+     *
      * @param filePath
      *        the path of the file to be attached.
-     * 
+     *
      * @return the MIME body part containing the file to be attached.
-     * 
+     *
      * @throws MessagingException
      *         if an error occurs.
      */
@@ -653,12 +659,12 @@ public class SMTPCallOperation implements CallOperation
 
     /**
      * Gets the MIME body part containing the data to be attached.
-     * 
+     *
      * @param data
      *        the data to be attached.
-     * 
+     *
      * @return the MIME body part containing the data to be attached.
-     * 
+     *
      * @throws MessagingException
      *         if an error occurs.
      */
@@ -686,18 +692,18 @@ public class SMTPCallOperation implements CallOperation
 
     /**
      * Parses the text message applying the substitutions.
-     * 
+     *
      * @param messageText
      *        the template message.
      * @param gvBuffer
      *        the input buffer
      * @return the message parsed.
-     * @throws PropertiesHandlerException 
+     * @throws PropertiesHandlerException
      */
     private String parseMessage(String message, GVBuffer gvBuffer, Map<String, Object> params) throws PropertiesHandlerException
     {
-        MessageFormatter messageFormatter = new MessageFormatter(PropertiesHandler.expand(message, params, gvBuffer), 
-                gvBuffer, escapeHTMLInGVBufferFields);
+        MessageFormatter messageFormatter = new MessageFormatter(PropertiesHandler.expand(message, params, gvBuffer),
+                gvBuffer, this.escapeHTMLInGVBufferFields);
         return messageFormatter.toString();
     }
 
@@ -734,12 +740,12 @@ public class SMTPCallOperation implements CallOperation
     @Override
     public OperationKey getKey()
     {
-        return key;
+        return this.key;
     }
 
     /**
      * Return the alias for the given service
-     * 
+     *
      * @param gvBuffer
      *        the input service data
      * @return the configured alias
