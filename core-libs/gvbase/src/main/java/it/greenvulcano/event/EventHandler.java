@@ -20,6 +20,11 @@
  */
 package it.greenvulcano.event;
 
+import java.security.InvalidParameterException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import it.greenvulcano.event.interfaces.Event;
 import it.greenvulcano.event.interfaces.EventListener;
 import it.greenvulcano.event.interfaces.EventSelector;
@@ -29,11 +34,6 @@ import it.greenvulcano.event.internal.EventListenerData;
 import it.greenvulcano.event.internal.EventListenerHandler;
 import it.greenvulcano.event.internal.EventToFireQueue;
 import it.greenvulcano.event.internal.shutdown.ShutdownHandler;
-
-import java.security.InvalidParameterException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 /**
  * EventHandler class.
  *
@@ -47,6 +47,7 @@ public final class EventHandler {
      * The EventLauncher thread instance.
      */
     private static EventLauncher eLauncher = null;
+    private static ShutdownHandler shHandler = null;
 
     static {
         System.out.println("EventHandler - Registering EventLauncher");
@@ -55,8 +56,9 @@ public final class EventHandler {
         eLauncher.start();
 
         try {
+        	shHandler = new ShutdownHandler();
             System.out.println("EventHandler - Registering ShutdownHook");
-            Runtime.getRuntime().addShutdownHook(new ShutdownHandler());
+            Runtime.getRuntime().addShutdownHook(shHandler);
         }
         catch (Exception exc) {
             System.out.println("EventHandler - Unable to register ShutdownHook: " + exc);
@@ -189,7 +191,7 @@ public final class EventHandler {
             List<EventSelector> selectorList, Object source) {
         EventListenerHandler.removeEventListener(listener, elInterface, selectorList, source);
     }
-    
+
     /**
      * Remove all EventListener listening for a given event type and source.
      *
@@ -244,5 +246,15 @@ public final class EventHandler {
      */
     public static EventLauncher getEventLauncher() {
         return eLauncher;
+    }
+
+    /**
+     * Disable the ShutdownHook.
+     */
+    public static void removeShutdownHook() {
+        if (shHandler != null) {
+        	System.out.println("EventHandler - Disabled ShutdownHook");
+        	Runtime.getRuntime().removeShutdownHook(shHandler);
+        }
     }
 }
