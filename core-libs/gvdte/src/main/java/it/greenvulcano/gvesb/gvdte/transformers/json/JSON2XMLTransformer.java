@@ -19,24 +19,6 @@
  */
 package it.greenvulcano.gvesb.gvdte.transformers.json;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.gvdte.config.DataSource;
-import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
-import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
-import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
-import it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer.ConversionPolicy;
-import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
-import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
-import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
-import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.json.JSONUtils;
-import it.greenvulcano.util.json.JSONUtilsException;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.xml.XMLUtils;
-import it.greenvulcano.util.xml.XMLUtilsException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -62,6 +44,24 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.gvdte.config.DataSource;
+import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
+import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
+import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
+import it.greenvulcano.gvesb.gvdte.transformers.json.XML2JSONTransformer.ConversionPolicy;
+import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
+import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
+import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
+import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.json.JSONUtils;
+import it.greenvulcano.util.json.JSONUtilsException;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xml.XMLUtilsException;
+
 /**
  * This class is dedicated to JSON/XML transformations.
  *
@@ -84,15 +84,19 @@ public class JSON2XMLTransformer implements DTETransformer {
     private String                 dataSourceSet;
 
     private DataSourceFactory      dsf;
-    
+
     private String                 transformerFactory;
 
     private Map<String, Templates> templHashMap = null;
 
-    private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
-    
+    private boolean                 cacheTransformer = true;
+
+    private Transformer             transformer = null;
+
+    private final List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
+
     private ConversionPolicy        policy          = ConversionPolicy.SIMPLE;
-    
+
     private String             		forceAttributes = "";
     private Set<String>             forceAttributesSet = new HashSet<String>();
 
@@ -105,17 +109,19 @@ public class JSON2XMLTransformer implements DTETransformer {
      *
      * @throws DTETransfException
      */
-    public void init(Node nodo, DataSourceFactory dsf) throws DTETransfException {
+    @Override
+	public void init(Node nodo, DataSourceFactory dsf) throws DTETransfException {
         logger.debug("Init start");
         try {
             this.dsf = dsf;
 
-            name = XMLConfig.get(nodo, "@name", "NO_NAME");
-            xslMapName = XMLConfig.get(nodo, "@OutputXSLMapName");
-            dataSourceSet = XMLConfig.get(nodo, "@DataSourceSet", "Default");
-            
-            transformerFactory = XMLConfig.get(nodo, "@TransformerFactory", "");
-            
+            this.name = XMLConfig.get(nodo, "@name", "NO_NAME");
+            this.xslMapName = XMLConfig.get(nodo, "@OutputXSLMapName");
+            this.dataSourceSet = XMLConfig.get(nodo, "@DataSourceSet", "Default");
+            this.cacheTransformer = XMLConfig.getBoolean(nodo, "@CacheTransformer", true);
+
+            this.transformerFactory = XMLConfig.get(nodo, "@TransformerFactory", "");
+
             String validateXSL = XMLConfig.get(nodo, "@validate");
             String validateTransformations = XMLConfig.get(nodo, "../@validate");
             String lvalidationType = XMLConfig.get(nodo, "@validationType");
@@ -139,16 +145,16 @@ public class JSON2XMLTransformer implements DTETransformer {
                 }
             }
 
-            policy = ConversionPolicy.fromString(XMLConfig.get(nodo, "@ConversionPolicy", ConversionPolicy.SIMPLE.toString()));
-            if (policy == ConversionPolicy.SIMPLE) {
-            	forceAttributes = XMLConfig.get(nodo, "@ForceAttributes", "");
-            	forceAttributesSet = listToSet(forceAttributes);
+            this.policy = ConversionPolicy.fromString(XMLConfig.get(nodo, "@ConversionPolicy", ConversionPolicy.SIMPLE.toString()));
+            if (this.policy == ConversionPolicy.SIMPLE) {
+            	this.forceAttributes = XMLConfig.get(nodo, "@ForceAttributes", "");
+            	this.forceAttributesSet = listToSet(this.forceAttributes);
             }
-            
-            logger.debug("Loaded parameters: outputXslMapName = " + xslMapName + " - DataSourceSet: "
-                    + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory
-                    + " - conversionPolicy = " + policy
-                    + " - forceAttributes = " + forceAttributes);
+
+            logger.debug("Loaded parameters: outputXslMapName = " + this.xslMapName + " - DataSourceSet: "
+                    + this.dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + this.transformerFactory
+                    + " - conversionPolicy = " + this.policy
+                    + " - forceAttributes = " + this.forceAttributes);
 
             initTemplMap();
 
@@ -173,7 +179,7 @@ public class JSON2XMLTransformer implements DTETransformer {
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     private Set<String> listToSet(String list) {
@@ -192,20 +198,20 @@ public class JSON2XMLTransformer implements DTETransformer {
      * @throws DTETransfException
      */
     private Map<String, Templates> initTemplMap() throws DTETransfException {
-        if (xslMapName == null) {
+        if (this.xslMapName == null) {
             return null;
         }
-        String key = dataSourceSet + "::" + xslMapName;
+        String key = this.dataSourceSet + "::" + this.xslMapName;
         try {
-            templHashMap = new HashMap<String, Templates>();
-            Templates templates = getTemplate(dataSourceSet, xslMapName);
-            templHashMap.put(key, templates);
+            this.templHashMap = new HashMap<String, Templates>();
+            Templates templates = getTemplate(this.dataSourceSet, this.xslMapName);
+            this.templHashMap.put(key, templates);
         }
         catch (Throwable exc) {
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Unexpected error." } }, exc);
         }
-        return templHashMap;
+        return this.templHashMap;
     }
 
     /**
@@ -222,15 +228,15 @@ public class JSON2XMLTransformer implements DTETransformer {
         if (idx == -1) {
             mn = "gvdte://" + mn;
         }
-        DataSource reposManager = dsf.getDataSource(dss, mn);
+        DataSource reposManager = this.dsf.getDataSource(dss, mn);
         TransformerFactory tFactory = null;
-        if (transformerFactory.equals("")) {
+        if (this.transformerFactory.equals("")) {
             tFactory = TransformerFactory.newInstance();
         }
         else {
-            tFactory = TransformerFactory.newInstance(transformerFactory, null);
+            tFactory = TransformerFactory.newInstance(this.transformerFactory, null);
         }
-        tFactory.setURIResolver(new URIResolver(dss, dsf));
+        tFactory.setURIResolver(new URIResolver(dss, this.dsf));
         Source source = new StreamSource(new ByteArrayInputStream(reposManager.getResourceAsByteArray(mn)));
         source.setSystemId(reposManager.getResourceURL(mn));
         return tFactory.newTemplates(source);
@@ -250,33 +256,42 @@ public class JSON2XMLTransformer implements DTETransformer {
      * @throws DTETransfException
      *             if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+    @Override
+	public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException,
             InterruptedException {
         logger.debug("Transform start");
-        Transformer transformer = null;
+        Transformer localTransformer = null;
         try {
-            Document docXML = null; 
-            if (policy == ConversionPolicy.SIMPLE) {
-            	Set<String> currForceAttributesSet = forceAttributesSet;
-            	if (!PropertiesHandler.isExpanded(forceAttributes)) {
-            		currForceAttributesSet = listToSet(PropertiesHandler.expand(forceAttributes, mapParam));
+            Document docXML = null;
+            if (this.policy == ConversionPolicy.SIMPLE) {
+            	Set<String> currForceAttributesSet = this.forceAttributesSet;
+            	if (!PropertiesHandler.isExpanded(this.forceAttributes)) {
+            		currForceAttributesSet = listToSet(PropertiesHandler.expand(this.forceAttributes, mapParam));
             	}
                 docXML = (Document) JSONUtils.jsonToXml(input, currForceAttributesSet);
             }
             else {
                 docXML = (Document) JSONUtils.jsonToXml_BadgerFish(input);
             }
-            if (xslMapName != null) {
-                transformer = getTransformer(mapParam);
-                setParams(transformer, mapParam);
+            if (this.xslMapName != null) {
+            	if (this.cacheTransformer) {
+                    if (this.transformer == null) {
+                    	this.transformer = getTransformer(mapParam);
+                    }
+                    localTransformer = this.transformer;
+                }
+                else {
+                    localTransformer = getTransformer(mapParam);
+                }
+                setParams(localTransformer, mapParam);
                 Source theSource = new DOMSource(docXML);
-                String outputType = transformer.getOutputProperty(OutputKeys.METHOD);
+                String outputType = localTransformer.getOutputProperty(OutputKeys.METHOD);
                 if (outputType == null) {
                     outputType = "xml";
                 }
                 if (outputType.equals("xml")) {
                     DOMResult theDOMResult = new DOMResult();
-                    transformer.transform(theSource, theDOMResult);
+                    localTransformer.transform(theSource, theDOMResult);
                     Document docValidation = (Document) theDOMResult.getNode();
                     if (validate()) {
                         executeValidation(docValidation, mapParam);
@@ -286,7 +301,7 @@ public class JSON2XMLTransformer implements DTETransformer {
                 }
                 ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
                 StreamResult theStreamResult = new StreamResult(byteOutputStream);
-                transformer.transform(theSource, theStreamResult);
+                localTransformer.transform(theSource, theStreamResult);
                 byte[] byteResult = byteOutputStream.toByteArray();
 
                 logger.debug("Transform stop");
@@ -315,8 +330,8 @@ public class JSON2XMLTransformer implements DTETransformer {
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Unexpected error." } }, exc);
         }
         finally {
-            if (transformer != null) {
-                transformer.clearParameters();
+            if (localTransformer != null) {
+            	localTransformer.clearParameters();
             }
         }
     }
@@ -342,18 +357,18 @@ public class JSON2XMLTransformer implements DTETransformer {
             mn = (String) mapParam.get("xslmapname");
         }
         if ((dss == null) || (dss.equals(""))) {
-            dss = dataSourceSet;
+            dss = this.dataSourceSet;
         }
         if ((mn == null) || (mn.equals(""))) {
-            mn = xslMapName;
+            mn = this.xslMapName;
         }
         key = dss + "::" + mn;
         try {
-            Templates templates = templHashMap.get(key);
+            Templates templates = this.templHashMap.get(key);
 
             if (templates == null) {
                 templates = getTemplate(dss, mn);
-                templHashMap.put(key, templates);
+                this.templHashMap.put(key, templates);
             }
             transformer = templates.newTransformer();
         }
@@ -389,9 +404,9 @@ public class JSON2XMLTransformer implements DTETransformer {
                 dss = (String) mapParam.get("datasourceset");
             }
             if ((dss == null) || (dss.equals(""))) {
-                dss = dataSourceSet;
+                dss = this.dataSourceSet;
             }
-            XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(dss, dsf),
+            XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(dss, this.dsf),
                     new ErrorHandler());
         }
         catch (XMLUtilsException exc) {
@@ -403,7 +418,7 @@ public class JSON2XMLTransformer implements DTETransformer {
             XMLUtils.releaseParserInstance(xmlParser);
         }
     }
-    
+
     /**
      * Set the 'params' key:value pair as 'transformer' params
      *
@@ -439,7 +454,7 @@ public class JSON2XMLTransformer implements DTETransformer {
             Node n = nl.item(i);
             TransformerHelper helper = (TransformerHelper) Class.forName(XMLConfig.get(n, "@class")).newInstance();
             helper.init(n);
-            helpers.add(helper);
+            this.helpers.add(helper);
         }
     }
 
@@ -448,8 +463,9 @@ public class JSON2XMLTransformer implements DTETransformer {
      *
      * @return xslMapName The xslMap name
      */
-    public String getMapName() {
-        return xslMapName;
+    @Override
+	public String getMapName() {
+        return this.xslMapName;
     }
 
     /**
@@ -458,9 +474,10 @@ public class JSON2XMLTransformer implements DTETransformer {
      * @param validate
      *            if true validation is ok
      */
-    public void setValidate(String validate) {
+    @Override
+	public void setValidate(String validate) {
         if (validate.equals("true")) {
-            validateMap = true;
+            this.validateMap = true;
         }
     }
 
@@ -472,10 +489,10 @@ public class JSON2XMLTransformer implements DTETransformer {
      */
     public void setValidationType(String type) {
         if (type != null) {
-            validationType = type;
+            this.validationType = type;
         }
         else {
-            validationType = "xsd";
+            this.validationType = "xsd";
         }
     }
 
@@ -485,7 +502,7 @@ public class JSON2XMLTransformer implements DTETransformer {
      * @return validationType the validation type
      */
     public String getValidationType() {
-        return validationType;
+        return this.validationType;
     }
 
     /**
@@ -493,14 +510,16 @@ public class JSON2XMLTransformer implements DTETransformer {
      *
      * @return validateMap the validate map value
      */
-    public boolean validate() {
-        return validateMap;
+    @Override
+	public boolean validate() {
+        return this.validateMap;
     }
 
     /**
      * @see it.greenvulcano.gvesb.gvdte.transformers.DTETransformer#clean()
      */
-    public void clean()
+    @Override
+	public void clean()
     {
         // do nothing
     }
@@ -508,9 +527,10 @@ public class JSON2XMLTransformer implements DTETransformer {
     /**
      * @see it.greenvulcano.gvesb.gvdte.transformers.DTETransformer#destroy()
      */
-    public void destroy() {
-        templHashMap.clear();
-        dsf = null;
+    @Override
+	public void destroy() {
+        this.templHashMap.clear();
+        this.dsf = null;
     }
 
     /**
@@ -519,6 +539,6 @@ public class JSON2XMLTransformer implements DTETransformer {
     @Override
     public List<TransformerHelper> getHelpers()
     {
-        return helpers;
+        return this.helpers;
     }
 }
