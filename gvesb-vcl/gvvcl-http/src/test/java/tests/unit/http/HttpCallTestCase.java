@@ -19,13 +19,13 @@
  */
 package tests.unit.http;
 
+import org.w3c.dom.Node;
+
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.log.GVBufferDump;
 import it.greenvulcano.gvesb.virtual.http.HTTPCallOperation;
 import junit.framework.TestCase;
-
-import org.w3c.dom.Node;
 
 /**
  * @version 3.0.0 Jul 28, 2010
@@ -35,9 +35,7 @@ import org.w3c.dom.Node;
  */
 public class HttpCallTestCase extends TestCase
 {
-    static {
-        new HttpServer(8888);
-    }
+	static HttpServer server = new HttpServer(8888);
 
     /**
      * @throws Exception
