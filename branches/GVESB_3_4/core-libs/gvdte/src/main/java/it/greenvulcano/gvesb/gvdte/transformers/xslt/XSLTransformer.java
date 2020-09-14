@@ -19,23 +19,6 @@
  */
 package it.greenvulcano.gvesb.gvdte.transformers.xslt;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.gvdte.config.DataSource;
-import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
-import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
-import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
-import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
-import it.greenvulcano.gvesb.gvdte.util.UtilsException;
-import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
-import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
-import it.greenvulcano.gvesb.gvdte.util.xml.ErrorListener;
-import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.xml.ErrHandler;
-import it.greenvulcano.util.xml.XMLUtils;
-import it.greenvulcano.util.xml.XMLUtilsException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -60,6 +43,23 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.gvdte.config.DataSource;
+import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
+import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
+import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
+import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
+import it.greenvulcano.gvesb.gvdte.util.UtilsException;
+import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
+import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
+import it.greenvulcano.gvesb.gvdte.util.xml.ErrorListener;
+import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.xml.ErrHandler;
+import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xml.XMLUtilsException;
 
 /**
  * This class is dedicated to XSL transformations.
@@ -86,12 +86,16 @@ public class XSLTransformer implements DTETransformer
     private String                 dataSourceSet;
 
     private DataSourceFactory      dsf;
-    
+
     private String                 transformerFactory;
 
     private Map<String, Templates> templHashMap = null;
 
-    private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
+    private final List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
+
+    private boolean                 cacheTransformer = true;
+
+    private Transformer             transformer = null;
 
     public XSLTransformer()
     {
@@ -103,20 +107,22 @@ public class XSLTransformer implements DTETransformer
      *
      * @see DTETransformer#init(Node, DataSourceFactory)
      */
-    public void init(Node node, DataSourceFactory dsf) throws DTETransfException
+    @Override
+	public void init(Node node, DataSourceFactory dsf) throws DTETransfException
     {
         logger.debug("Init start");
         try {
             this.dsf = dsf;
-            name = XMLConfig.get(node, "@name", "NO_NAME");
-            xslMapName = XMLConfig.get(node, "@XSLMapName");
-            dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
-            
-            transformerFactory = XMLConfig.get(node, "@TransformerFactory", "");
+            this.name = XMLConfig.get(node, "@name", "NO_NAME");
+            this.xslMapName = XMLConfig.get(node, "@XSLMapName");
+            this.dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
+            this.cacheTransformer = XMLConfig.getBoolean(node, "@CacheTransformer", true);
+
+            this.transformerFactory = XMLConfig.get(node, "@TransformerFactory", "");
 
             String validateXSL = XMLConfig.get(node, "@validate");
             String validateTransformations = XMLConfig.get(node, "../@validate");
-            validateDirection = XMLConfig.get(node, "@validateDirection", "in-out");
+            this.validateDirection = XMLConfig.get(node, "@validateDirection", "in-out");
             String lvalidationType = XMLConfig.get(node, "@validationType");
             setValidationType(lvalidationType);
 
@@ -137,8 +143,8 @@ public class XSLTransformer implements DTETransformer
                     }
                 }
             }
-            logger.debug("init - loaded parameters: xslMapName = " + xslMapName + " - DataSourceSet: " + dataSourceSet
-                    + " - validate = " + validateMap + " - validateDirection = " + validateDirection + " - transformerFactory = " + transformerFactory);
+            logger.debug("init - loaded parameters: xslMapName = " + this.xslMapName + " - DataSourceSet: " + this.dataSourceSet
+                    + " - validate = " + this.validateMap + " - validateDirection = " + this.validateDirection + " - transformerFactory = " + this.transformerFactory);
 
             initTemplMap();
 
@@ -162,7 +168,7 @@ public class XSLTransformer implements DTETransformer
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     /**
@@ -174,17 +180,17 @@ public class XSLTransformer implements DTETransformer
      */
     private Map<String, Templates> initTemplMap() throws DTETransfException
     {
-        String key = dataSourceSet + "::" + xslMapName;
+        String key = this.dataSourceSet + "::" + this.xslMapName;
         try {
-            templHashMap = new HashMap<String, Templates>();
-            Templates templates = getTemplate(dataSourceSet, xslMapName);
-            templHashMap.put(key, templates);
+            this.templHashMap = new HashMap<String, Templates>();
+            Templates templates = getTemplate(this.dataSourceSet, this.xslMapName);
+            this.templHashMap.put(key, templates);
         }
         catch (Throwable exc) {
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Unexpected error." } }, exc);
         }
-        return templHashMap;
+        return this.templHashMap;
     }
 
     /**
@@ -202,15 +208,15 @@ public class XSLTransformer implements DTETransformer
         if (idx == -1) {
             mn = "gvdte://" + mn;
         }
-        DataSource reposManager = dsf.getDataSource(dss, mn);
+        DataSource reposManager = this.dsf.getDataSource(dss, mn);
         TransformerFactory tFactory = null;
-        if (transformerFactory.equals("")) {
+        if (this.transformerFactory.equals("")) {
             tFactory = TransformerFactory.newInstance();
         }
         else {
-            tFactory = TransformerFactory.newInstance(transformerFactory, null);
+            tFactory = TransformerFactory.newInstance(this.transformerFactory, null);
         }
-        tFactory.setURIResolver(new URIResolver(dss, dsf));
+        tFactory.setURIResolver(new URIResolver(dss, this.dsf));
         Source source = new StreamSource(new ByteArrayInputStream(reposManager.getResourceAsByteArray(mn)));
         source.setSystemId(reposManager.getResourceURL(mn));
         return tFactory.newTemplates(source);
@@ -226,7 +232,7 @@ public class XSLTransformer implements DTETransformer
             Node n = nl.item(i);
             TransformerHelper helper = (TransformerHelper) Class.forName(XMLConfig.get(n, "@class")).newInstance();
             helper.init(n);
-            helpers.add(helper);
+            this.helpers.add(helper);
         }
     }
 
@@ -246,23 +252,32 @@ public class XSLTransformer implements DTETransformer
      * @throws DTETransfException
      *         if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+    @Override
+	public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException,
             InterruptedException {
         logger.debug("Transform start");
-        Transformer transformer = null;
+        Transformer localTransformer = null;
         try {
-            transformer = getTransformer(mapParam);
-            setParams(transformer, mapParam);
+            if (this.cacheTransformer) {
+                if (this.transformer == null) {
+                	this.transformer = getTransformer(mapParam);
+                }
+                localTransformer = this.transformer;
+            }
+            else {
+                localTransformer = getTransformer(mapParam);
+            }
+            setParams(localTransformer, mapParam);
             Source theSource = convertInputFormat(input);
-            String outputType = transformer.getOutputProperty(OutputKeys.METHOD);
+            String outputType = localTransformer.getOutputProperty(OutputKeys.METHOD);
             if (outputType == null) {
                 outputType = "xml";
             }
             if (outputType.equals("xml")) {
                 DOMResult theDOMResult = new DOMResult();
-                transformer.transform(theSource, theDOMResult);
+                localTransformer.transform(theSource, theDOMResult);
                 Document docValidation = (Document) theDOMResult.getNode();
-                if (validate() && (validateDirection.indexOf("out") != -1)) {
+                if (validate() && (this.validateDirection.indexOf("out") != -1)) {
                     executeValidation(docValidation, mapParam);
                 }
                 logger.debug("Transform stop");
@@ -270,7 +285,7 @@ public class XSLTransformer implements DTETransformer
             }
             ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
             StreamResult theStreamResult = new StreamResult(byteOutputStream);
-            transformer.transform(theSource, theStreamResult);
+            localTransformer.transform(theSource, theStreamResult);
             byte[] byteResult = byteOutputStream.toByteArray();
 
             logger.debug("Transform stop");
@@ -294,8 +309,8 @@ public class XSLTransformer implements DTETransformer
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][]{{"msg", "Unexpected error"}}, exc);
         }
         finally {
-            if (transformer != null) {
-                transformer.clearParameters();
+            if (localTransformer != null) {
+                localTransformer.clearParameters();
             }
         }
     }
@@ -322,17 +337,17 @@ public class XSLTransformer implements DTETransformer
             mn = (String) mapParam.get("xslmapname");
         }
         if ((dss == null) || (dss.equals(""))) {
-            dss = dataSourceSet;
+            dss = this.dataSourceSet;
         }
         if ((mn == null) || (mn.equals(""))) {
-            mn = xslMapName;
+            mn = this.xslMapName;
         }
         key = dss + "::" + mn;
         try {
-            Templates templates = templHashMap.get(key);
+            Templates templates = this.templHashMap.get(key);
             if (templates == null) {
                 templates = getTemplate(dss, mn);
-                templHashMap.put(key, templates);
+                this.templHashMap.put(key, templates);
             }
             transformer = templates.newTransformer();
             transformer.setErrorListener(new ErrorListener());
@@ -368,9 +383,9 @@ public class XSLTransformer implements DTETransformer
                 dss = (String) mapParam.get("datasourceset");
             }
             if ((dss == null) || (dss.equals(""))) {
-                dss = dataSourceSet;
+                dss = this.dataSourceSet;
             }
-            XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(dss, dsf),
+            XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(dss, this.dsf),
                     new ErrorHandler());
         }
         catch (XMLUtilsException exc) {
@@ -397,7 +412,7 @@ public class XSLTransformer implements DTETransformer
      */
     private Source convertInputFormat(Object input) throws UtilsException {
         Source inputSrc = null;
-        boolean validateIn = validate() && (validateDirection.indexOf("in") != -1);
+        boolean validateIn = validate() && (this.validateDirection.indexOf("in") != -1);
         try {
             if (input instanceof Node) {
                 ByteArrayInputStream byteArrayInputStream = null;
@@ -408,7 +423,7 @@ public class XSLTransformer implements DTETransformer
                         xmlParser = XMLUtils.getParserInstance();
                         byteArrayInputStream = new ByteArrayInputStream(xmlParser.serializeDOMToByteArray((Node) input));
                         XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(
-                                dataSourceSet, dsf), new ErrHandler());
+                                this.dataSourceSet, this.dsf), new ErrHandler());
                     }
                     finally {
                         XMLUtils.releaseParserInstance(xmlParser);
@@ -435,7 +450,7 @@ public class XSLTransformer implements DTETransformer
                     String validateString = (String) input;
                     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(validateString.getBytes());
                     XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(
-                            dataSourceSet, dsf), new ErrorHandler());
+                            this.dataSourceSet, this.dsf), new ErrorHandler());
                 }
                 logger.debug("Input object is a String");
                 inputSrc = new StreamSource(new StringReader((String) input));
@@ -447,7 +462,7 @@ public class XSLTransformer implements DTETransformer
                     logger.debug("Validate input with '" + getValidationType() + "'");
                     byteArrayInputStream = new ByteArrayInputStream((byte[]) input);
                     XMLUtils.parseDOMValidating(getValidationType(), validateByteArrayInputStream, new EntityResolver(
-                            dataSourceSet, dsf), new ErrorHandler());
+                            this.dataSourceSet, this.dsf), new ErrorHandler());
                 }
                 logger.debug("Input object is a byte array");
                 inputSrc = new StreamSource(byteArrayInputStream);
@@ -457,7 +472,7 @@ public class XSLTransformer implements DTETransformer
                 InputStream inputStream = validateInputStream;
                 if (validateIn) {
                     logger.debug("Validate input with '" + getValidationType() + "'");
-                    XMLUtils.parseDOMValidating(getValidationType(), validateInputStream, new EntityResolver(dsf),
+                    XMLUtils.parseDOMValidating(getValidationType(), validateInputStream, new EntityResolver(this.dsf),
                             new ErrorHandler());
                 }
                 logger.debug("Input object is an InputStream");
@@ -513,9 +528,10 @@ public class XSLTransformer implements DTETransformer
      *
      * @return xslMapName The xslMap name
      */
-    public String getMapName()
+    @Override
+	public String getMapName()
     {
-        return xslMapName;
+        return this.xslMapName;
     }
 
     /**
@@ -524,10 +540,11 @@ public class XSLTransformer implements DTETransformer
      * @param validate
      *        if true validation is ok
      */
-    public void setValidate(String validate)
+    @Override
+	public void setValidate(String validate)
     {
         if (validate.equals("true")) {
-            validateMap = true;
+            this.validateMap = true;
         }
     }
 
@@ -540,10 +557,10 @@ public class XSLTransformer implements DTETransformer
     public void setValidationType(String type)
     {
         if (type != null) {
-            validationType = type;
+            this.validationType = type;
         }
         else {
-            validationType = "xsd";
+            this.validationType = "xsd";
         }
     }
 
@@ -554,7 +571,7 @@ public class XSLTransformer implements DTETransformer
      */
     public String getValidationType()
     {
-        return validationType;
+        return this.validationType;
     }
 
     /**
@@ -562,15 +579,17 @@ public class XSLTransformer implements DTETransformer
      *
      * @return validateMap the validate map value
      */
-    public boolean validate()
+    @Override
+	public boolean validate()
     {
-        return validateMap;
+        return this.validateMap;
     }
 
     /**
      * @see it.greenvulcano.gvesb.gvdte.transformers.DTETransformer#clean()
      */
-    public void clean()
+    @Override
+	public void clean()
     {
         // do nothing
     }
@@ -578,10 +597,11 @@ public class XSLTransformer implements DTETransformer
     /**
      * @see it.greenvulcano.gvesb.gvdte.transformers.DTETransformer#destroy()
      */
-    public void destroy()
+    @Override
+	public void destroy()
     {
-        templHashMap.clear();
-        dsf = null;
+        this.templHashMap.clear();
+        this.dsf = null;
     }
 
     /**
@@ -590,6 +610,6 @@ public class XSLTransformer implements DTETransformer
     @Override
     public List<TransformerHelper> getHelpers()
     {
-        return helpers;
+        return this.helpers;
     }
 }
