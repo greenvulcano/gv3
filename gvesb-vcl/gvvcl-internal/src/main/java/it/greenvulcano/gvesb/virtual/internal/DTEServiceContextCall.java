@@ -19,6 +19,12 @@
  */
 package it.greenvulcano.gvesb.virtual.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.gvdte.controller.DTEController;
 import it.greenvulcano.gvesb.internal.InvocationContext;
@@ -27,12 +33,6 @@ import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.log.GVLogger;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
 
 /**
  *
@@ -55,7 +55,8 @@ public class DTEServiceContextCall implements CallOperation
      * @param node
      * @throws InitializationException
      */
-    public void init(Node node) throws InitializationException
+    @Override
+	public void init(Node node) throws InitializationException
     {
         // do nothing
     }
@@ -63,7 +64,8 @@ public class DTEServiceContextCall implements CallOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.CallOperation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
-    public GVBuffer perform(GVBuffer gvBuffer) throws CallException, InterruptedException
+    @Override
+	public GVBuffer perform(GVBuffer gvBuffer) throws CallException, InterruptedException
     {
         if (gvBuffer == null) {
             return null;
@@ -98,7 +100,8 @@ public class DTEServiceContextCall implements CallOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.Operation#setKey(it.greenvulcano.gvesb.virtual.OperationKey)
      */
-    public void setKey(OperationKey key)
+    @Override
+	public void setKey(OperationKey key)
     {
         this.key = key;
     }
@@ -106,15 +109,17 @@ public class DTEServiceContextCall implements CallOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.Operation#getKey()
      */
-    public OperationKey getKey()
+    @Override
+	public OperationKey getKey()
     {
-        return key;
+        return this.key;
     }
 
     /**
      * Called when an operation is discarded from cache.
      */
-    public void destroy()
+    @Override
+	public void destroy()
     {
         // do nothing
     }
@@ -122,7 +127,8 @@ public class DTEServiceContextCall implements CallOperation
     /**
      * @see it.greenvulcano.gvesb.virtual.Operation#cleanUp()
      */
-    public void cleanUp()
+    @Override
+	public void cleanUp()
     {
         // do nothing
     }
@@ -134,7 +140,8 @@ public class DTEServiceContextCall implements CallOperation
      *        the input service GVBuffer
      * @return the configured alias
      */
-    public String getServiceAlias(GVBuffer gvBuffer)
+    @Override
+	public String getServiceAlias(GVBuffer gvBuffer)
     {
         return gvBuffer.getService();
     }
@@ -156,7 +163,9 @@ public class DTEServiceContextCall implements CallOperation
         hashMapParam.put("RET_CODE", "" + gvBuffer.getRetCode());
         for (String name : gvBuffer.getPropertyNames()) {
             String value = gvBuffer.getProperty(name);
-            parameters += "\n" + name + "=" + value;
+            if (logger.isDebugEnabled()) {
+            	parameters += "\n" + name + "=" + value;
+            }
             hashMapParam.put(name, value);
         }
         logger.debug(parameters);
