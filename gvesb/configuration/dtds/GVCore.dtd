@@ -9999,6 +9999,12 @@
 -->
 <!ATTLIST smtp-call	message-id-property CDATA #IMPLIED>
 <!--
+    GVBuffer defines the properties that will contain
+    the server specific response property of the message sent.
+    Default to 'serverResponse'.
+-->
+<!ATTLIST smtp-call server-response-property CDATA #IMPLIED>
+<!--
     The SMTP protocol provider supports the following properties, which may
     be set in the JavaMail Session object.
     The properties are always set as strings; the Type column describes
