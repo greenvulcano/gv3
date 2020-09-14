@@ -1,5 +1,16 @@
 package tests.vcl.mail;
 
+import javax.mail.Message;
+import javax.mail.Multipart;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
+import org.w3c.dom.Node;
+
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.GreenMailUtil;
+import com.icegreen.greenmail.util.ServerSetup;
+
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
@@ -25,19 +36,7 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.virtual.CallOperation;
 import it.greenvulcano.gvesb.virtual.smtp.SMTPCallOperation;
-
-import javax.mail.Message;
-import javax.mail.Multipart;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-
 import junit.framework.TestCase;
-
-import org.w3c.dom.Node;
-
-import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.GreenMailUtil;
-import com.icegreen.greenmail.util.ServerSetup;
 
 /**
  * @version 3.0.0 Apr 15, 2010
@@ -70,7 +69,7 @@ public class SMTPCallTestCase extends TestCase
         server.setUser("test3@gv.com", "password");
         server.start();
 
-        context = new InitialContext();
+        this.context = new InitialContext();
     }
 
     /**
@@ -89,8 +88,9 @@ public class SMTPCallTestCase extends TestCase
         gvBuffer.setObject(TEST_MESSAGE);
         gvBuffer.setProperty("MAIL_SENDER", "SENDER ADDITIONAL INFO");
 
-        op.perform(gvBuffer);
-        
+        GVBuffer gvBufferOut = op.perform(gvBuffer);
+        System.out.println("gvBufferOut: " + gvBufferOut);
+
         //assertTrue(server.waitForIncomingEmail(5000, 1));
 
         Message[] messages = server.getReceivedMessages();
@@ -99,7 +99,7 @@ public class SMTPCallTestCase extends TestCase
         Multipart mp = (Multipart) email.getContent();
         assertEquals("Notifica SendEmail", email.getSubject());
         assertEquals(TEST_MESSAGE, GreenMailUtil.getBody(mp.getBodyPart(0)));
-        
+
         System.out.println("---------MAIL DUMP: START");
         System.out.println("Headers:\n" + GreenMailUtil.getHeaders(email));
         System.out.println("---------");
@@ -128,7 +128,8 @@ public class SMTPCallTestCase extends TestCase
         gvBuffer.setProperty("GV_SMTP_CC",  "test2@gv.com");
         gvBuffer.setProperty("GV_SMTP_BCC", "test3@gv.com");
 
-        op.perform(gvBuffer);
+        GVBuffer gvBufferOut = op.perform(gvBuffer);
+        System.out.println("gvBufferOut: " + gvBufferOut);
 
         Message[] messages = server.getReceivedMessages();
         assertEquals(3, messages.length);
@@ -136,7 +137,7 @@ public class SMTPCallTestCase extends TestCase
         Multipart mp = (Multipart) email.getContent();
         assertEquals("Notifica SendEmailDynamicDest", email.getSubject());
         assertEquals(TEST_MESSAGE_1, GreenMailUtil.getBody(mp.getBodyPart(0)));
-        
+
         System.out.println("---------MAIL DUMP: START");
         System.out.println("Headers:\n" + GreenMailUtil.getHeaders(email));
         System.out.println("---------");
@@ -162,7 +163,8 @@ public class SMTPCallTestCase extends TestCase
         GVBuffer gvBuffer = new GVBuffer(TEST_SYSTEM, TEST_SERVICE);
         gvBuffer.setObject(TEST_MESSAGE);
 
-        op.perform(gvBuffer);
+        GVBuffer gvBufferOut = op.perform(gvBuffer);
+        System.out.println("gvBufferOut: " + gvBufferOut);
 
         Message[] messages = server.getReceivedMessages();
         assertEquals(1, messages.length);
@@ -170,7 +172,7 @@ public class SMTPCallTestCase extends TestCase
         Multipart mp = (Multipart) email.getContent();
         assertEquals("Notifica SendEmailBufferAttach", email.getSubject());
         assertEquals(TEST_MESSAGE_1, GreenMailUtil.getBody(mp.getBodyPart(0)));
-        
+
         System.out.println("---------MAIL DUMP: START");
         System.out.println("Headers:\n" + GreenMailUtil.getHeaders(email));
         System.out.println("---------");
@@ -186,9 +188,9 @@ public class SMTPCallTestCase extends TestCase
     @Override
     protected void tearDown() throws Exception
     {
-        if (context != null) {
+        if (this.context != null) {
             try {
-                context.close();
+                this.context.close();
             }
             catch (Exception exc) {
                 exc.printStackTrace();
