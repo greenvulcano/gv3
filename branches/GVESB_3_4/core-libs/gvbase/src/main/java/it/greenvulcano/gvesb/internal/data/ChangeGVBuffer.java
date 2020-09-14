@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -199,6 +200,7 @@ public class ChangeGVBuffer
      * The script.
      */
     private String                  script                    = "";
+    private Script					compiledScript            = null;
     /**
      * The execution context.
      */
@@ -379,6 +381,7 @@ public class ChangeGVBuffer
 
         try {
             PropertiesHandler.enableExceptionOnErrors();
+            PropertiesHandler.enableResourceLocalStorage();
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
             for (String fName : this.propertiesList) {
                 if (this.overwriteBodyWithProperty.equals(fName)) {
@@ -401,6 +404,7 @@ public class ChangeGVBuffer
                     exc);
         }
         finally {
+        	PropertiesHandler.disableResourceLocalStorage();
             PropertiesHandler.disableExceptionOnErrors();
         }
 
@@ -584,8 +588,15 @@ public class ChangeGVBuffer
                 Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
                 localScript = PropertiesHandler.expand(this.script, params, gvBuffer);
                 logger.debug("Executing JavaScript:\n" + localScript);
+                JavaScriptHelper.executeScript(localScript, this.scriptName, scope, this.cx);
             }
-            JavaScriptHelper.executeScript(localScript, this.scriptName, scope, this.cx);
+            else {
+            	if (this.compiledScript == null) {
+            		this.compiledScript = JavaScriptHelper.compileScript(localScript, this.scriptName, scope, this.cx);
+            	}
+                JavaScriptHelper.executeScript(this.compiledScript, scope, this.cx);
+                //JavaScriptHelper.executeScript(localScript, this.scriptName, scope, this.cx);
+            }
         }
         catch (Exception exc) {
             ThreadUtils.checkInterrupted(exc);
@@ -627,4 +638,5 @@ public class ChangeGVBuffer
             Context.exit();
         }
     }
+
 }

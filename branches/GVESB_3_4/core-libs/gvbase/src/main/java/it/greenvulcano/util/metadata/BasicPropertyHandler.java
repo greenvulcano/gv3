@@ -1,31 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.util.metadata;
-
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.expression.ognl.OGNLExpressionEvaluator;
-import it.greenvulcano.js.initializer.JSInitManager;
-import it.greenvulcano.js.util.JavaScriptHelper;
-import it.greenvulcano.util.txt.DateUtils;
-import it.greenvulcano.util.txt.TextUtils;
-import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.StringReader;
 import java.net.URLDecoder;
@@ -42,14 +34,22 @@ import org.mozilla.javascript.ScriptableObject;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.expression.ognl.OGNLExpressionEvaluator;
+import it.greenvulcano.js.initializer.JSInitManager;
+import it.greenvulcano.js.util.JavaScriptHelper;
+import it.greenvulcano.util.txt.DateUtils;
+import it.greenvulcano.util.txt.TextUtils;
+import it.greenvulcano.util.xml.XMLUtils;
+
 /**
  * Helper class for basic metadata substitution in strings.
- * 
- * 
+ *
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class BasicPropertyHandler implements PropertyHandler
 {
@@ -81,7 +81,7 @@ public class BasicPropertyHandler implements PropertyHandler
     /**
      * This method insert the correct values for the dynamic parameter found in
      * the input string. The property value can be a combination of:
-     * 
+     *
      * <pre>
      * - fixed : a text string;
      * - %{{class}}         : the obj class name;
@@ -100,7 +100,7 @@ public class BasicPropertyHandler implements PropertyHandler
      *                                 The metadata is handled by XMLConfig.
      * - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value, formatted as 'pattern'
      * - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} : reformat 'date' from 'source-pattern' to 'dest-pattern',
-     *                          and optionally from 'source-tZone' to 'dest-tZone'   
+     *                          and optionally from 'source-tZone' to 'dest-tZone'
      * - dateAdd{{date::pattern::type::value}} : add to 'date', formatted as 'pattern', 'value' element of 'type': [s]econd, [m]inute, [h]our, [d]ay, [M]onth, [y]ear
      * - dateformatAdd{{date::source-pattern::dest-pattern::type::value[::source-tZone::dest-tZone]}} : reformat 'date' from 'source-pattern' to 'dest-pattern',
      *                          and optionally from 'source-tZone' to 'dest-tZone', add to 'date' 'value' element of 'type'
@@ -125,9 +125,9 @@ public class BasicPropertyHandler implements PropertyHandler
      * - urlEnc{{string}}   : URL encode invalid characters from 'string'
      * - urlDec{{string}}   : decode URL encoded characters from 'string'
      * </pre>
-     * 
+     *
      * @param type
-     * 
+     *
      * @param str
      *        the string to value
      * @param inProperties
@@ -206,6 +206,11 @@ public class BasicPropertyHandler implements PropertyHandler
             return "xmlp" + PROP_START + str + PROP_END;
         }
         return str;
+    }
+
+    @Override
+    public void cleanupResources() {
+    	// do nothing
     }
 
     /**
@@ -803,7 +808,7 @@ public class BasicPropertyHandler implements PropertyHandler
             return "replace" + PROP_START + str + PROP_END;
         }
     }
-    
+
     /**
      * @param str
      *        the string to valorize

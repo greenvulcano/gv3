@@ -19,16 +19,17 @@
  */
 package it.greenvulcano.util.metadata;
 
-import it.greenvulcano.util.thread.ThreadMap;
-import it.greenvulcano.util.txt.TextUtils;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import org.mozilla.javascript.Scriptable;
+
+import it.greenvulcano.util.thread.ThreadMap;
+import it.greenvulcano.util.txt.TextUtils;
 
 /**
  * Helper class for metadata substitution in strings.
@@ -47,7 +48,7 @@ public final class PropertiesHandler
      */
     public final class MetaDataTokenizer
     {
-        private Vector<String> tokens  = new Vector<String>();
+        private final Vector<String> tokens  = new Vector<String>();
         private int            lastPos = 0;
 
         /**
@@ -63,7 +64,7 @@ public final class PropertiesHandler
          */
         public boolean hasNext()
         {
-            return (lastPos < tokens.size());
+            return (this.lastPos < this.tokens.size());
         }
 
         /**
@@ -71,7 +72,7 @@ public final class PropertiesHandler
          */
         public String next()
         {
-            return tokens.get(lastPos++);
+            return this.tokens.get(this.lastPos++);
         }
 
         /**
@@ -79,9 +80,9 @@ public final class PropertiesHandler
          */
         public void pushBack()
         {
-            lastPos--;
-            if (lastPos < -1) {
-                lastPos = -1;
+            this.lastPos--;
+            if (this.lastPos < -1) {
+                this.lastPos = -1;
             }
         }
 
@@ -99,7 +100,7 @@ public final class PropertiesHandler
             int pos = -1;
             if (begin == -1) {
                 if (end == -1) {
-                    tokens.add(string.substring(index));
+                    this.tokens.add(string.substring(index));
                     return;
                 }
                 terminator = PropertyHandler.PROP_END;
@@ -115,16 +116,18 @@ public final class PropertiesHandler
                     terminator = (begin < end) ? PropertyHandler.PROP_START : PropertyHandler.PROP_END;
                 }
             }
-            tokens.add(string.substring(index, pos));
-            tokens.add(terminator);
+            this.tokens.add(string.substring(index, pos));
+            this.tokens.add(terminator);
             parse(string, pos + PropertyHandler.PROP_START.length());
         }
     }
 
     private static HashMap<String, PropertyHandler> propHandlers = new HashMap<String, PropertyHandler>();
+    private static Set<PropertyHandler> propHandlersSet = new HashSet<PropertyHandler>();
     private static HashSet<String>                  propSet      = new HashSet<String>();
 
     static {
+    	String clazz = null;
         try {
             String classes = "";
 
@@ -136,19 +139,22 @@ public final class PropertiesHandler
                 classes = "";
             }
             String[] cl = classes.split("(\\n\\r|\\n)");
-            for (String clazz : cl) {
-                Class.forName(clazz);
+            for (String c : cl) {
+            	clazz = c;
+            	if (!"".equals(clazz)) {
+            		Class.forName(clazz);
+            	}
             }
         }
         catch (Exception exc) {
-            System.out.println("Error registering xxxPropertyHandler: " + exc);
+            System.out.println("Error registering xxxPropertyHandler[" + clazz + "]: " + exc);
             exc.printStackTrace();
 
             try {
                 Class.forName("it.greenvulcano.util.metadata.BasicPropertyHandler");
             }
             catch (Exception exc2) {
-                System.out.println("Error registering BasicPropertyHandler: " + exc2);
+                System.out.println("Error registering BasicPropertyHandler[" + clazz + "]: " + exc2);
                 exc2.printStackTrace();
             }
         }
@@ -170,6 +176,7 @@ public final class PropertiesHandler
     {
         System.out.println("PropertiesHandler.registerHandler: " + type + " -> " + handler);
         propHandlers.put(type, handler);
+        propHandlersSet.add(handler);
         propSet.add(type);
     }
 
@@ -436,6 +443,59 @@ public final class PropertiesHandler
     }
 
     /**
+     * Enable the external resource (like DB connection) local storage, for the current thread.
+     *
+     * Example:
+     *
+     * <pre>
+     *
+     *     ...
+     *     PropertiesHandler.enableResourceLocalStorage();
+     *     try {
+     *        ...
+     *        String value = PropertiesHandler.expand(...);
+     *        ...
+     *     }
+     *     catch (PropertiesHandlerException exc) {
+     *        ...
+     *     }
+     *     finally {
+     *        PropertiesHandler.disableResourceLocalStorage();
+     *     }
+     *
+     * </pre>
+     */
+    public static void enableResourceLocalStorage()
+    {
+        ThreadMap.put(PropertyHandler.RESOURCE_STORAGE, "true");
+    }
+
+    /**
+     * Disable the external resource local storage, for the current thread.
+     *
+     */
+    public static void disableResourceLocalStorage()
+    {
+    	for (PropertyHandler ph : propHandlersSet) {
+    		ph.cleanupResources();
+		}
+        ThreadMap.remove(PropertyHandler.RESOURCE_STORAGE);
+    }
+
+    /**
+     * Check if the exception throwing on errors is enabled for the current
+     * thread.
+     *
+     * @return if the exception throwing on errors is enabled for the current
+     *         thread.
+     *
+     */
+    public static boolean isResourceLocalStorage()
+    {
+        return "true".equals(ThreadMap.get(PropertyHandler.RESOURCE_STORAGE));
+    }
+
+    /**
      * @param str
      * @return
      */
@@ -444,7 +504,7 @@ public final class PropertiesHandler
         String type = "";
         Iterator<String> i = propSet.iterator();
         while (i.hasNext()) {
-            String currType = (String) i.next();
+            String currType = i.next();
             if (endsWith(str, currType)) {
                 type = currType;
                 break;
@@ -488,7 +548,7 @@ public final class PropertiesHandler
         }
         Iterator<String> i = propSet.iterator();
         while (i.hasNext()) {
-            if (str.indexOf(((String) i.next() + PropertyHandler.PROP_START)) != -1) {
+            if (str.indexOf((i.next() + PropertyHandler.PROP_START)) != -1) {
                 return false;
             }
         }
