@@ -32,6 +32,28 @@
       </DBOSelect>
     </DBOBuilder>
     <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestSelectExtended">
+      <DBOSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect" name="TestSelectExtended-select"
+        rowset-builder="extended">
+        <FieldFormatters id="0">
+           <FieldFormatter decimal-separator="," field-id="4" grouping-separator="."
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
+      </DBOSelect>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
+      class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestSelectExtendedDTE">
+      <DBOSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOSelect" name="TestSelectExtendedDTE-select"
+        rowset-builder="extended" transformation="removeNS">
+        <FieldFormatters id="0">
+           <FieldFormatter decimal-separator="," field-id="4" grouping-separator="."
+                           number-format="##0.00" type="field-formatter"/>
+        </FieldFormatters>
+        <statement id="0" type="select">select id, field1, field2, field3 from testtable order by id</statement>
+      </DBOSelect>
+    </DBOBuilder>
+    <DBOBuilder jdbc-connection-name="openejb:Resource/testDHDataSource" type="dbobuilder"
       class="it.greenvulcano.gvesb.datahandling.dbobuilder.DBOBuilder" name="GVESB::TestThreadSelect">
       <DBOThreadSelect type="dbo" class="it.greenvulcano.gvesb.datahandling.dbo.DBOThreadSelect" name="TestThreadSelect-select"
         transformation="identityXML">

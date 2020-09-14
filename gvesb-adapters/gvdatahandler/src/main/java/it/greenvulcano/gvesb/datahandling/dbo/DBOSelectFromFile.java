@@ -19,18 +19,17 @@
  */
 package it.greenvulcano.gvesb.datahandling.dbo;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.datahandling.DBOException;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.txt.TextUtils;
-
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.txt.TextUtils;
 
 /**
  * IDBO Class specialized in reading data from a file.
@@ -63,57 +62,55 @@ public class DBOSelectFromFile extends AbstractDBO
     {
         super.init(config);
         try {
-            fileName = XMLConfig.get(config, "@file-name");
-            readFromCP = XMLConfig.getBoolean(config, "@read-from-cp", true);
+            this.fileName = XMLConfig.get(config, "@file-name");
+            this.readFromCP = XMLConfig.getBoolean(config, "@read-from-cp", true);
         }
         catch (Exception exc) {
-            logger.error("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
         }
     }
 
     /**
      * Unsupported method for this IDBO.
      *
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.lang.Object,
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeIn(java.lang.Object,
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException
+    public void executeIn(Object input, Connection conn, Map<String, Object> props) throws DBOException
     {
         prepare();
-        throw new DBOException("Unsupported method - DBOSelectFromFile::execute(Object, Connection, Map)");
+        throw new DBOException("Unsupported method - DBOSelectFromFile::executeIn(Object, Connection, Map)");
     }
 
     /**
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.io.OutputStream,
-     *      java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeOut(java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException
+    public Object executeOut(Connection conn, Map<String, Object> props) throws DBOException
     {
         try {
             prepare();
-            rowCounter = 0;
-            logger.debug("Begin execution of file [" + fileName + "] data read through " + dboclass);
+            this.rowCounter = 0;
+            logger.debug("Begin execution of file [" + this.fileName + "] data read through " + this.dboclass);
 
             String fileData = null;
-            if (readFromCP) {
-                fileData = TextUtils.readFileFromCP(fileName);
+            if (this.readFromCP) {
+                fileData = TextUtils.readFileFromCP(this.fileName);
             }
             else {
-                fileData = TextUtils.readFile(fileName);
+                fileData = TextUtils.readFile(this.fileName);
             }
 
             fileData = PropertiesHandler.expand(fileData, props, conn, null);
 
-            dataOut.write(fileData.getBytes());
-
-            logger.debug("End execution of file [" + fileName + "] data read through " + dboclass);
+            logger.debug("End execution of file [" + this.fileName + "] data read through " + this.dboclass);
+            return fileData.getBytes();
         }
         catch (Exception exc) {
-            logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
-            throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+            logger.error("Error on execution of " + this.dboclass + " with name [" + getName() + "]", exc);
+            throw new DBOException("Error on execution of " + this.dboclass + " with name [" + getName() + "]", exc);
         }
     }
 

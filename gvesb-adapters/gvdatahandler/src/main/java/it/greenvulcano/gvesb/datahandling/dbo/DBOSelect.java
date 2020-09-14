@@ -19,7 +19,6 @@
  */
 package it.greenvulcano.gvesb.datahandling.dbo;
 
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -183,22 +182,21 @@ public class DBOSelect extends AbstractDBO
     /**
      * Unsupported method for this IDBO.
      *
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.lang.Object,
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeIn(java.lang.Object,
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException
+    public void executeIn(Object input, Connection conn, Map<String, Object> props) throws DBOException
     {
         prepare();
-        throw new DBOException("Unsupported method - DBOSelect::execute(Object, Connection, Map)");
+        throw new DBOException("Unsupported method - DBOSelect::executeIn(Object, Connection, Map)");
     }
 
     /**
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.io.OutputStream,
-     *      java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeOut(java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException,
+    public Object executeOut(Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         XMLUtils parser = null;
         String expandedSQL = null;
@@ -299,12 +297,11 @@ public class DBOSelect extends AbstractDBO
                     }
                 }
             }
-            byte[] dataDOM = parser.serializeDOMToByteArray(doc);
-            dataOut.write(dataDOM);
 
             this.dhr.setRead(this.rowCounter);
 
             logger.debug("End execution of DB data read through " + this.dboclass);
+            return doc;
         }
         catch (DBOException exc) {
         	throw exc;

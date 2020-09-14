@@ -22,7 +22,6 @@ package it.greenvulcano.gvesb.datahandling.dbo;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.math.RoundingMode;
 import java.sql.Connection;
@@ -604,7 +603,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException,
+    public void executeIn(Object input, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         try {
             prepare();
@@ -733,11 +732,10 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     }
 
     /**
-     * @see it.greenvulcano.gvesb.datahandling.IDBO#execute(java.io.OutputStream,
-     *      java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.IDBO#executeOut(java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
+    public Object executeOut(Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         try {
             prepare();
@@ -763,6 +761,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
             getStatement(null);
             executeStatement();
             logger.debug("End execution of DB data read/update through " + this.dboclass);
+            return null;
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + this.dboclass + " with name [" + this.name + "]", exc);
@@ -770,7 +769,6 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
             throw new DBOException("Error on execution of " + this.dboclass + " with name [" + this.name + "]", exc);
         }
         finally {
-
             this.dhr.setTotal(this.rowCounter);
             this.dhr.setRead(this.rowCounter);
             this.dhr.setInsert(this.rowInsOk);
@@ -780,14 +778,14 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     }
 
     /**
-     * @see it.greenvulcano.gvesb.datahandling.IDBO#execute(java.lang.Object,
-     *      java.io.OutputStream, java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.IDBO#executeInOut(java.lang.Object,
+     *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object dataIn, OutputStream dataOut, Connection conn, Map<String, Object> props)
+    public Object executeInOut(Object dataIn, Connection conn, Map<String, Object> props)
             throws DBOException, InterruptedException {
         prepare();
-        throw new DBOException("Unsupported method - DBOxxx::execute(InputStream, OutputStream, Connection, Map)");
+        throw new DBOException("Unsupported method - DBOxxx::executeInOut(Object, Connection, Map)");
     }
 
     /**
