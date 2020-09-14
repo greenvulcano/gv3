@@ -849,7 +849,10 @@
     Validation type (xsd | dtd).
 -->
 <!ATTLIST XSLTransformation validationType %validationTypes; #IMPLIED>
-
+<!--
+    Cache Transformer from XSL file, default true.
+-->
+<!ATTLIST XSLTransformation CacheTransformer (true|false) #IMPLIED>
 <!--
     Style-sheet to be used in trasformation.
 
@@ -1122,6 +1125,11 @@
 -->
 <!ATTLIST XML2JSONTransformation validationType %validationTypes; #IMPLIED>
 <!--
+    Cache Transformer from XSL file, default true.
+-->
+<!ATTLIST XML2JSONTransformation CacheTransformer (true|false) #IMPLIED>
+
+<!--
     Style-sheet to be used in trasformation.
 
     #NotNull
@@ -1236,6 +1244,10 @@
     Validation type (xsd | dtd).
 -->
 <!ATTLIST JSON2XMLTransformation validationType %validationTypes; #IMPLIED>
+<!--
+    Cache Transformer from XSL file, default true.
+-->
+<!ATTLIST JSON2XMLTransformation CacheTransformer (true|false) #IMPLIED>
 <!--
     Style-sheet to be used in trasformation.
 
