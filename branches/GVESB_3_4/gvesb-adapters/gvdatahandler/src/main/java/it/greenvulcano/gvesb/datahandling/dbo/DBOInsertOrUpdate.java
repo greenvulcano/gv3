@@ -19,17 +19,7 @@
  */
 package it.greenvulcano.gvesb.datahandling.dbo;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.datahandling.DBOException;
-import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
-import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleError;
-import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.thread.ThreadUtils;
-
 import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -51,6 +41,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
+import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleError;
+import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.thread.ThreadUtils;
 
 /**
  * IDBO Class specialized to parse the input RowSet document and in
@@ -88,9 +87,9 @@ public class DBOInsertOrUpdate extends AbstractDBO
     public DBOInsertOrUpdate()
     {
         super();
-        statements_update = new HashMap<String, String>();
-        currentInsertRowFields = new Vector<Object>(10);
-        currentUpdateRowFields = new Vector<Object>(10);
+        this.statements_update = new HashMap<String, String>();
+        this.currentInsertRowFields = new Vector<Object>(10);
+        this.currentUpdateRowFields = new Vector<Object>(10);
     }
 
     /**
@@ -101,8 +100,8 @@ public class DBOInsertOrUpdate extends AbstractDBO
     {
         super.init(config);
         try {
-            forcedMode = XMLConfig.get(config, "@force-mode", MODE_XML2DB);
-            duplicateInsertCode = XMLConfig.getInteger(config, "@duplicate-insert-code", DEFAULT_DUPLICATE_INSERT_CODE);
+            this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_XML2DB);
+            this.duplicateInsertCode = XMLConfig.getInteger(config, "@duplicate-insert-code", DEFAULT_DUPLICATE_INSERT_CODE);
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='insert']");
             String id;
             Node stmt;
@@ -110,10 +109,10 @@ public class DBOInsertOrUpdate extends AbstractDBO
                 stmt = stmts.item(i);
                 id = XMLConfig.get(stmt, "@id");
                 if (id == null) {
-                    statements.put(Integer.toString(i), XMLConfig.getNodeValue(stmt));
+                    this.statements.put(Integer.toString(i), XMLConfig.getNodeValue(stmt));
                 }
                 else {
-                    statements.put(id, XMLConfig.getNodeValue(stmt));
+                    this.statements.put(id, XMLConfig.getNodeValue(stmt));
                 }
             }
             stmts = XMLConfig.getNodeList(config, "statement[@type='update']");
@@ -121,37 +120,36 @@ public class DBOInsertOrUpdate extends AbstractDBO
                 stmt = stmts.item(i);
                 id = XMLConfig.get(stmt, "@id");
                 if (id == null) {
-                    statements_update.put(Integer.toString(i), XMLConfig.getNodeValue(stmt));
+                    this.statements_update.put(Integer.toString(i), XMLConfig.getNodeValue(stmt));
                 }
                 else {
-                    statements_update.put(id, XMLConfig.getNodeValue(stmt));
+                    this.statements_update.put(id, XMLConfig.getNodeValue(stmt));
                 }
             }
 
-            if (statements.isEmpty() || statements_update.isEmpty()) {
-                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
+            if (this.statements.isEmpty() || this.statements_update.isEmpty()) {
+                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + this.dboclass + "]");
             }
         }
         catch (DBOException exc) {
             throw exc;
         }
         catch (Exception exc) {
-            logger.error("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
         }
     }
 
     /**
      * Unsupported method for this IDBO.
      *
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.io.OutputStream,
-     *      java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeOut(java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
+    public Object executeOut(Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         prepare();
-        throw new DBOException("Unsupported method - DBOInsertOrUpdate::execute(OutputStream, Connection, HashMap)");
+        throw new DBOException("Unsupported method - DBOInsertOrUpdate::execute(Connection, HashMap)");
     }
 
     /**
@@ -161,17 +159,17 @@ public class DBOInsertOrUpdate extends AbstractDBO
     public void cleanup()
     {
         super.cleanup();
-        localCurrentRowFields = null;
-        currentInsertRowFields.clear();
-        currentUpdateRowFields.clear();
-        if (sqlStatementInfoUpdate != null) {
+        this.localCurrentRowFields = null;
+        this.currentInsertRowFields.clear();
+        this.currentUpdateRowFields.clear();
+        if (this.sqlStatementInfoUpdate != null) {
             try {
-                sqlStatementInfoUpdate.close();
+                this.sqlStatementInfoUpdate.close();
             }
             catch (Exception exc) {
                 // do nothing
             }
-            sqlStatementInfoUpdate = null;
+            this.sqlStatementInfoUpdate = null;
         }
     }
 
@@ -204,25 +202,25 @@ public class DBOInsertOrUpdate extends AbstractDBO
         if (id == null) {
             id = "0";
         }
-        if ((sqlStatementInfo == null) || (sqlStatementInfoUpdate == null) || !getCurrentId().equals(id)) {
+        if ((this.sqlStatementInfo == null) || (this.sqlStatementInfoUpdate == null) || !getCurrentId().equals(id)) {
             try {
                 ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
-                if (sqlStatementInfo != null) {
-                    sqlStatementInfo.close();
-                    sqlStatementInfo = null;
+                if (this.sqlStatementInfo != null) {
+                    this.sqlStatementInfo.close();
+                    this.sqlStatementInfo = null;
                 }
-                if (sqlStatementInfoUpdate != null) {
-                    sqlStatementInfoUpdate.close();
-                    sqlStatementInfoUpdate = null;
+                if (this.sqlStatementInfoUpdate != null) {
+                    this.sqlStatementInfoUpdate.close();
+                    this.sqlStatementInfoUpdate = null;
                 }
-                String expandedSQL = PropertiesHandler.expand(statements.get(id), getCurrentProps(), getInternalConn(),
+                String expandedSQL = PropertiesHandler.expand(this.statements.get(id), getCurrentProps(), getInternalConn(),
                         null);
                 Statement statement = getInternalConn().prepareStatement(expandedSQL);
-                sqlStatementInfo = new StatementInfo(id, expandedSQL, statement);
-                expandedSQL = PropertiesHandler.expand(statements_update.get(id), getCurrentProps(), getInternalConn(),
+                this.sqlStatementInfo = new StatementInfo(id, expandedSQL, statement);
+                expandedSQL = PropertiesHandler.expand(this.statements_update.get(id), getCurrentProps(), getInternalConn(),
                         null);
                 statement = getInternalConn().prepareStatement(expandedSQL);
-                sqlStatementInfoUpdate = new StatementInfo(id, expandedSQL, statement);
+                this.sqlStatementInfoUpdate = new StatementInfo(id, expandedSQL, statement);
                 setCurrentId(id);
             }
             catch (SQLException exc) {
@@ -244,47 +242,47 @@ public class DBOInsertOrUpdate extends AbstractDBO
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
     {
         if (ROW_NAME.equals(localName)) {
-            currentRowFields.clear();
-            currentInsertRowFields.clear();
-            currentUpdateRowFields.clear();
-            colDataExpecting = false;
-            colIdx = 0;
-            colUpdIdx = 0;
+            this.currentRowFields.clear();
+            this.currentInsertRowFields.clear();
+            this.currentUpdateRowFields.clear();
+            this.colDataExpecting = false;
+            this.colIdx = 0;
+            this.colUpdIdx = 0;
             String id = attributes.getValue(uri, ID_NAME);
             getStatement(id);
-            currentXSLMessage = attributes.getValue(uri, XSL_MSG_NAME);
-            currCriticalError = "true".equalsIgnoreCase(attributes.getValue(uri, CRITICAL_ERROR));
+            this.currentXSLMessage = attributes.getValue(uri, XSL_MSG_NAME);
+            this.currCriticalError = "true".equalsIgnoreCase(attributes.getValue(uri, CRITICAL_ERROR));
         }
         else if (COL_NAME.equals(localName) || COL_UPDATE_NAME.equals(localName)) {
-            currType = attributes.getValue(uri, TYPE_NAME);
-            if (TIMESTAMP_TYPE.equals(currType)) {
-                currDateFormat = attributes.getValue(uri, FORMAT_NAME);
-                if (currDateFormat == null) {
-                    currDateFormat = DEFAULT_DATE_FORMAT;
+            this.currType = attributes.getValue(uri, TYPE_NAME);
+            if (TIMESTAMP_TYPE.equals(this.currType)) {
+                this.currDateFormat = attributes.getValue(uri, FORMAT_NAME);
+                if (this.currDateFormat == null) {
+                    this.currDateFormat = DEFAULT_DATE_FORMAT;
                 }
             }
-            else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
-                currNumberFormat = attributes.getValue(uri, FORMAT_NAME);
-                if (currNumberFormat == null) {
-                    currNumberFormat = call_DEFAULT_NUMBER_FORMAT;
+            else if (FLOAT_TYPE.equals(this.currType) || DECIMAL_TYPE.equals(this.currType)) {
+                this.currNumberFormat = attributes.getValue(uri, FORMAT_NAME);
+                if (this.currNumberFormat == null) {
+                    this.currNumberFormat = this.call_DEFAULT_NUMBER_FORMAT;
                 }
-                currGroupSeparator = attributes.getValue(uri, GRP_SEPARATOR_NAME);
-                if (currGroupSeparator == null) {
-                    currGroupSeparator = call_DEFAULT_GRP_SEPARATOR;
+                this.currGroupSeparator = attributes.getValue(uri, GRP_SEPARATOR_NAME);
+                if (this.currGroupSeparator == null) {
+                    this.currGroupSeparator = this.call_DEFAULT_GRP_SEPARATOR;
                 }
-                currDecSeparator = attributes.getValue(uri, DEC_SEPARATOR_NAME);
-                if (currDecSeparator == null) {
-                    currDecSeparator = call_DEFAULT_DEC_SEPARATOR;
+                this.currDecSeparator = attributes.getValue(uri, DEC_SEPARATOR_NAME);
+                if (this.currDecSeparator == null) {
+                    this.currDecSeparator = this.call_DEFAULT_DEC_SEPARATOR;
                 }
             }
-            colDataExpecting = true;
+            this.colDataExpecting = true;
             if (COL_NAME.equals(localName)) {
-                colIdx++;
+                this.colIdx++;
             }
             else {
-                colUpdIdx++;
+                this.colUpdIdx++;
             }
-            textBuffer = new StringBuffer();
+            this.textBuffer = new StringBuffer();
         }
     }
 
@@ -294,8 +292,8 @@ public class DBOInsertOrUpdate extends AbstractDBO
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
     {
-        if (colDataExpecting) {
-            textBuffer.append(ch, start, length);
+        if (this.colDataExpecting) {
+            this.textBuffer.append(ch, start, length);
         }
     }
 
@@ -309,113 +307,113 @@ public class DBOInsertOrUpdate extends AbstractDBO
         if (ROW_NAME.equals(localName)) {
             int actualOk = 0;
             try {
-                rowCounter++;
+                this.rowCounter++;
 
-                if (currCriticalError) {
-                    rowDisc++;
+                if (this.currCriticalError) {
+                    this.rowDisc++;
                     // aggiunta DiscardCause al dhr...
-                    String msg = currentXSLMessage;
+                    String msg = this.currentXSLMessage;
 
-                    dhr.addDiscardCause(new DiscardCause(rowCounter, msg));
+                    this.dhr.addDiscardCause(new DiscardCause(this.rowCounter, msg));
 
-                    resultMessage.append("Data error on row ").append(rowCounter).append(": ").append(msg);
-                    resultMessage.append("SQL Statement Informations:\n" + sqlStatementInfo);
-                    resultMessage.append("Record parameters:\n").append(dumpCurrentRowFields());
-                    resultStatus = STATUS_PARTIAL;
+                    this.resultMessage.append("Data error on row ").append(this.rowCounter).append(": ").append(msg);
+                    this.resultMessage.append("SQL Statement Informations:\n" + this.sqlStatementInfo);
+                    this.resultMessage.append("Record parameters:\n").append(dumpCurrentRowFields());
+                    this.resultStatus = STATUS_PARTIAL;
                     return;
                 }
-                Statement sqlStatement = sqlStatementInfo.getStatement();
+                Statement sqlStatement = this.sqlStatementInfo.getStatement();
                 if (sqlStatement != null) {
-                    localCurrentRowFields = currentInsertRowFields;
+                    this.localCurrentRowFields = this.currentInsertRowFields;
                     actualOk = ((PreparedStatement) sqlStatement).executeUpdate();
-                    rowInsOk += actualOk;
+                    this.rowInsOk += actualOk;
                 }
             }
             catch (SQLException exc) {
-                if (exc.getErrorCode() != duplicateInsertCode) {
+                if (exc.getErrorCode() != this.duplicateInsertCode) {
                     logger.warn("Error code received for SQL insert: " + exc.getErrorCode());
-                    rowDisc++;
+                    this.rowDisc++;
                     if (isTransacted()) {
                         logger.error("Record insert parameters:\n" + dumpCurrentRowFields());
-                        logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
-                        resultStatus = STATUS_KO;
-                        throw new SAXException(new DBOException("SQLException error on insert for row " + rowCounter
+                        logger.error("SQL Statement Informations:\n" + this.sqlStatementInfo);
+                        this.resultStatus = STATUS_KO;
+                        throw new SAXException(new DBOException("SQLException error on insert for row " + this.rowCounter
                                 + ": " + exc.getMessage(), exc));
                     }
                     OracleError oraerr = OracleExceptionHandler.handleSQLException(exc);
                     if (isBlockingError(oraerr.getErrorType())) {
-                        resultStatus = STATUS_KO;
+                        this.resultStatus = STATUS_KO;
                         logger.error("Record insert parameters:\n" + dumpCurrentRowFields());
-                        logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
-                        logger.error("SQLException configurata come non bloccante per il tipo '" + serviceName
-                                + "' alla riga " + Long.toString(rowCounter) + ".", exc);
+                        logger.error("SQL Statement Informations:\n" + this.sqlStatementInfo);
+                        logger.error("SQLException configurata come non bloccante per il tipo '" + this.serviceName
+                                + "' alla riga " + Long.toString(this.rowCounter) + ".", exc);
                         throw new SAXException(new DBOException(
-                                "SQLException configured as blocking error class on row " + rowCounter + ": "
+                                "SQLException configured as blocking error class on row " + this.rowCounter + ": "
                                         + exc.getMessage(), exc));
                     }
 
-                    resultMessage.append("SQLException error on insert for row ").append(rowCounter).append(": ").append(
+                    this.resultMessage.append("SQLException error on insert for row ").append(this.rowCounter).append(": ").append(
                             exc.getMessage());
-                    resultMessage.append("SQL Statement Informations:\n" + sqlStatementInfo);
-                    resultMessage.append("Record insert parameters:\n").append(dumpCurrentRowFields());
-                    resultStatus = STATUS_PARTIAL;
+                    this.resultMessage.append("SQL Statement Informations:\n" + this.sqlStatementInfo);
+                    this.resultMessage.append("Record insert parameters:\n").append(dumpCurrentRowFields());
+                    this.resultStatus = STATUS_PARTIAL;
 
                     // aggiunto DiscardCause al dhr...
                     String msg = "";
-                    if (onlyXSLErrorMsg && (currentXSLMessage != null)) {
-                        msg += currentXSLMessage;
+                    if (this.onlyXSLErrorMsg && (this.currentXSLMessage != null)) {
+                        msg += this.currentXSLMessage;
                     }
                     else {
-                        msg += exc + " - XSL Message: " + currentXSLMessage;
+                        msg += exc + " - XSL Message: " + this.currentXSLMessage;
                     }
-                    dhr.addDiscardCause(new DiscardCause(rowCounter, msg));
+                    this.dhr.addDiscardCause(new DiscardCause(this.rowCounter, msg));
                 }
                 else {
                     // duplicate insert...trying to update
-                    PreparedStatement sqlStatement_update = (PreparedStatement) sqlStatementInfoUpdate.getStatement();
+                    PreparedStatement sqlStatement_update = (PreparedStatement) this.sqlStatementInfoUpdate.getStatement();
                     if (sqlStatement_update != null) {
-                        localCurrentRowFields = currentUpdateRowFields;
+                        this.localCurrentRowFields = this.currentUpdateRowFields;
                         try {
                             actualOk = sqlStatement_update.executeUpdate();
-                            rowUpdOk += actualOk;
+                            this.rowUpdOk += actualOk;
                         }
                         catch (SQLException excupd) {
-                            rowDisc++;
+                            this.rowDisc++;
                             if (isTransacted()) {
                                 logger.error("Record update parameters:\n" + dumpCurrentRowFields());
-                                logger.error("SQL Statement Informations:\n" + sqlStatementInfoUpdate);
-                                resultStatus = STATUS_KO;
+                                logger.error("SQL Statement Informations:\n" + this.sqlStatementInfoUpdate);
+                                this.resultStatus = STATUS_KO;
                                 throw new SAXException(new DBOException("SQLException error on update for row "
-                                        + rowCounter + ": " + excupd.getMessage(), excupd));
+                                        + this.rowCounter + ": " + excupd.getMessage(), excupd));
                             }
 
                             OracleError oraerr = OracleExceptionHandler.handleSQLException(excupd);
                             if (isBlockingError(oraerr.getErrorType())) {
-                                resultStatus = STATUS_KO;
+                                this.resultStatus = STATUS_KO;
                                 logger.error("Record update parameters:\n" + dumpCurrentRowFields());
-                                logger.error("SQL Statement Informations:\n" + sqlStatementInfoUpdate);
+                                logger.error("SQL Statement Informations:\n" + this.sqlStatementInfoUpdate);
                                 logger.error("SQLException configured as blocking error class for service '"
-                                        + serviceName + "' on row " + Long.toString(rowCounter) + ".", excupd);
+                                        + this.serviceName + "' on row " + Long.toString(this.rowCounter) + ".", excupd);
                                 throw new SAXException(new DBOException(
-                                        "SQLException configured as blocking error class on row " + rowCounter + ": "
+                                        "SQLException configured as blocking error class on row " + this.rowCounter + ": "
                                                 + excupd.getMessage(), excupd));
                             }
 
-                            resultMessage.append("SQLException error on update for row ").append(rowCounter).append(
+                            this.resultMessage.append("SQLException error on update for row ").append(this.rowCounter).append(
                                     ": ").append(excupd.getMessage());
-                            resultMessage.append("SQL Statement Informations:\n" + sqlStatementInfoUpdate);
-                            resultMessage.append("Record update parameters:\n").append(dumpCurrentRowFields());
-                            resultStatus = STATUS_PARTIAL;
+                            this.resultMessage.append("SQL Statement Informations:\n" + this.sqlStatementInfoUpdate);
+                            this.resultMessage.append("Record update parameters:\n").append(dumpCurrentRowFields());
+                            this.resultStatus = STATUS_PARTIAL;
 
                             // aggiunto DiscardCause a dhr....???????????????
                             String msg = "";
-                            if (onlyXSLErrorMsg && (currentXSLMessage != null)) {
-                                msg += currentXSLMessage;
+                            if (this.onlyXSLErrorMsg && (this.currentXSLMessage != null)) {
+                                msg += this.currentXSLMessage;
                             }
                             else {
-                                msg += excupd + " - XSL Message: " + currentXSLMessage;
+                                msg += excupd + " - XSL Message: " + this.currentXSLMessage;
                             }
-                            dhr.addDiscardCause(new DiscardCause(rowCounter, msg));
+                            this.dhr.addDiscardCause(new DiscardCause(this.rowCounter, msg));
                         }
                     }
                 }
@@ -425,127 +423,127 @@ public class DBOInsertOrUpdate extends AbstractDBO
             PreparedStatement stmt = null;
             int idx = 0;
             if (COL_NAME.equals(localName)) {
-                stmt = (PreparedStatement) sqlStatementInfo.getStatement();
-                idx = colIdx;
-                localCurrentRowFields = currentInsertRowFields;
+                stmt = (PreparedStatement) this.sqlStatementInfo.getStatement();
+                idx = this.colIdx;
+                this.localCurrentRowFields = this.currentInsertRowFields;
             }
             else {
-                stmt = (PreparedStatement) sqlStatementInfoUpdate.getStatement();
-                idx = colUpdIdx;
-                localCurrentRowFields = currentUpdateRowFields;
+                stmt = (PreparedStatement) this.sqlStatementInfoUpdate.getStatement();
+                idx = this.colUpdIdx;
+                this.localCurrentRowFields = this.currentUpdateRowFields;
             }
             try {
-                colDataExpecting = false;
-                String text = textBuffer.toString();
-                if (TIMESTAMP_TYPE.equals(currType)) {
+                this.colDataExpecting = false;
+                String text = this.textBuffer.toString();
+                if (TIMESTAMP_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.TIMESTAMP);
-                        localCurrentRowFields.add(null);
+                        this.localCurrentRowFields.add(null);
                     }
                     else {
-                        dateFormatter.applyPattern(currDateFormat);
-                        Date formattedDate = dateFormatter.parse(text);
+                        this.dateFormatter.applyPattern(this.currDateFormat);
+                        Date formattedDate = this.dateFormatter.parse(text);
                         Timestamp ts = new Timestamp(formattedDate.getTime());
                         stmt.setTimestamp(idx, ts);
-                        localCurrentRowFields.add(ts);
+                        this.localCurrentRowFields.add(ts);
                     }
                 }
-                else if (NUMERIC_TYPE.equals(currType)) {
+                else if (NUMERIC_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.NUMERIC);
-                        localCurrentRowFields.add(null);
+                        this.localCurrentRowFields.add(null);
                     }
                     else {
                         stmt.setInt(idx, Integer.parseInt(text));
-                        localCurrentRowFields.add(Integer.valueOf(text));
+                        this.localCurrentRowFields.add(Integer.valueOf(text));
                     }
                 }
-                else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+                else if (FLOAT_TYPE.equals(this.currType) || DECIMAL_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.NUMERIC);
-                        localCurrentRowFields.add(null);
+                        this.localCurrentRowFields.add(null);
                     }
                     else {
-                        DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
-                        dfs.setDecimalSeparator(currDecSeparator.charAt(0));
-                        dfs.setGroupingSeparator(currGroupSeparator.charAt(0));
-                        numberFormatter.setDecimalFormatSymbols(dfs);
-                        numberFormatter.applyPattern(currNumberFormat);
-                        boolean isBigDecimal = numberFormatter.isParseBigDecimal();
+                        DecimalFormatSymbols dfs = this.numberFormatter.getDecimalFormatSymbols();
+                        dfs.setDecimalSeparator(this.currDecSeparator.charAt(0));
+                        dfs.setGroupingSeparator(this.currGroupSeparator.charAt(0));
+                        this.numberFormatter.setDecimalFormatSymbols(dfs);
+                        this.numberFormatter.applyPattern(this.currNumberFormat);
+                        boolean isBigDecimal = this.numberFormatter.isParseBigDecimal();
                         try {
-                            numberFormatter.setParseBigDecimal(true);
-                            BigDecimal formattedNumber = (BigDecimal) numberFormatter.parse(text);
+                            this.numberFormatter.setParseBigDecimal(true);
+                            BigDecimal formattedNumber = (BigDecimal) this.numberFormatter.parse(text);
                             stmt.setBigDecimal(idx, formattedNumber);
-                            localCurrentRowFields.add(formattedNumber);
+                            this.localCurrentRowFields.add(formattedNumber);
                         }
                         finally {
-                            numberFormatter.setParseBigDecimal(isBigDecimal);
+                            this.numberFormatter.setParseBigDecimal(isBigDecimal);
                         }
                     }
                 }
-                else if (LONG_STRING_TYPE.equals(currType)) {
+                else if (LONG_STRING_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.CLOB);
-                        localCurrentRowFields.add(null);
+                        this.localCurrentRowFields.add(null);
                     }
                     else {
-                    	stmt.setCharacterStream(colIdx, new StringReader(text));
-                        localCurrentRowFields.add(text);
+                    	stmt.setCharacterStream(this.colIdx, new StringReader(text));
+                        this.localCurrentRowFields.add(text);
                     }
                 }
-                else if (LONG_NSTRING_TYPE.equals(currType)) {
+                else if (LONG_NSTRING_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
-                    	stmt.setNull(colIdx, Types.NCLOB);
-                        currentRowFields.add(null);
+                    	stmt.setNull(this.colIdx, Types.NCLOB);
+                        this.currentRowFields.add(null);
                     }
                     else {
-                    	stmt.setCharacterStream(colIdx, new StringReader(text));
-                        currentRowFields.add(text);
+                    	stmt.setCharacterStream(this.colIdx, new StringReader(text));
+                        this.currentRowFields.add(text);
                     }
                 }
-                else if (BASE64_TYPE.equals(currType)) {
+                else if (BASE64_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.BLOB);
-                        localCurrentRowFields.add(null);
+                        this.localCurrentRowFields.add(null);
                     }
                     else {
                         byte[] data = text.getBytes();
                         data = Base64.decodeBase64(data);
                         ByteArrayInputStream bais = new ByteArrayInputStream(data);
                         stmt.setBinaryStream(idx, bais, data.length);
-                        localCurrentRowFields.add(text);
+                        this.localCurrentRowFields.add(text);
                     }
                 }
-                else if (BINARY_TYPE.equals(currType)) {
+                else if (BINARY_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.BLOB);
-                        localCurrentRowFields.add(null);
+                        this.localCurrentRowFields.add(null);
                     }
                     else {
                         byte[] data = text.getBytes();
                         ByteArrayInputStream bais = new ByteArrayInputStream(data);
                         stmt.setBinaryStream(idx, bais, data.length);
-                        localCurrentRowFields.add(text);
+                        this.localCurrentRowFields.add(text);
                     }
                 }
-                else if (NSTRING_TYPE.equals(currType)) {
+                else if (NSTRING_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
-                    	stmt.setNull(colIdx, Types.NVARCHAR);
-                        currentRowFields.add(null);
+                    	stmt.setNull(this.colIdx, Types.NVARCHAR);
+                        this.currentRowFields.add(null);
                     }
                     else {
-                    	stmt.setNString(colIdx, text);
-                        currentRowFields.add(text);
+                    	stmt.setNString(this.colIdx, text);
+                        this.currentRowFields.add(text);
                     }
                 }
                 else {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.VARCHAR);
-                        localCurrentRowFields.add(null);
+                        this.localCurrentRowFields.add(null);
                     }
                     else {
                         stmt.setString(idx, text);
-                        localCurrentRowFields.add(text);
+                        this.localCurrentRowFields.add(text);
                     }
                 }
             }
@@ -566,11 +564,11 @@ public class DBOInsertOrUpdate extends AbstractDBO
     protected String dumpCurrentRowFields()
     {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < localCurrentRowFields.size(); i++) {
-            sb.append("Field(").append(i + 1).append(") value: [").append(localCurrentRowFields.elementAt(i)).append(
+        for (int i = 0; i < this.localCurrentRowFields.size(); i++) {
+            sb.append("Field(").append(i + 1).append(") value: [").append(this.localCurrentRowFields.elementAt(i)).append(
                     "]\n");
         }
-        sb.append("XSL Message: ").append(currentXSLMessage).append("\n\n");
+        sb.append("XSL Message: ").append(this.currentXSLMessage).append("\n\n");
         return sb.toString();
     }
 }

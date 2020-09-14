@@ -20,7 +20,6 @@
 package it.greenvulcano.gvesb.datahandling.dbo;
 
 import java.io.FileWriter;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -166,22 +165,21 @@ public class DBOMultiFlatSelect extends AbstractDBO
     /**
      * Unsupported method for this IDBO.
      *
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.lang.Object,
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeIn(java.lang.Object,
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException
+    public void executeIn(Object input, Connection conn, Map<String, Object> props) throws DBOException
     {
         prepare();
-        throw new DBOException("Unsupported method - DBOFlatSelect::execute(Object, Connection, Map)");
+        throw new DBOException("Unsupported method - DBOFlatSelect::executeIn(Object, Connection, Map)");
     }
 
     /**
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.io.OutputStream,
-     *      java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeOut(java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException
+    public Object executeOut(Connection conn, Map<String, Object> props) throws DBOException
     {
         FileWriter fw = null;
         try {
@@ -345,17 +343,16 @@ public class DBOMultiFlatSelect extends AbstractDBO
                     }
                 }
             }
-            if (fw == null) {
-                Charset cs = Charset.forName(this.encoding);
-                ByteBuffer bb = cs.encode(CharBuffer.wrap(sb));
-                //dataOut.write(bb.array());
-                dataOut.write(bb.array(), 0, sb.length()); // da verificare!!!
-                dataOut.flush();
-            }
 
             this.dhr.setRead(this.rowCounter);
 
             logger.debug("End execution of DB data read through " + this.dboclass);
+            if (fw == null) {
+                Charset cs = Charset.forName(this.encoding);
+                ByteBuffer bb = cs.encode(CharBuffer.wrap(sb));
+                return new String(bb.array(), 0, sb.length());
+            }
+            return null;
         }
         catch (SQLException exc) {
             OracleExceptionHandler.handleSQLException(exc);

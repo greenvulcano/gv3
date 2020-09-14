@@ -19,7 +19,6 @@
  */
 package it.greenvulcano.gvesb.datahandling;
 
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.Map;
 
@@ -79,7 +78,7 @@ public interface IDBO
      * @throws DBOException
      *         if any error occurs.
      */
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException,
+    public void executeIn(Object input, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException;
 
     /**
@@ -95,7 +94,7 @@ public interface IDBO
      * @throws DBOException
      *         if any error occurs.
      */
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
+    public Object executeOut(Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException;
 
     /**
@@ -105,7 +104,7 @@ public interface IDBO
      * @param props
      * @throws DBOException
      */
-    public void execute(Object dataIn, OutputStream dataOut, Connection conn, Map<String, Object> props)
+    public Object executeInOut(Object dataIn, Connection conn, Map<String, Object> props)
             throws DBOException, InterruptedException;
 
     /**

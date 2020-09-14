@@ -1,31 +1,24 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 
 package tests.unit.datahandler;
-
-import it.greenvulcano.gvesb.datahandling.DHResult;
-import it.greenvulcano.gvesb.datahandling.IDBOBuilder;
-import it.greenvulcano.gvesb.datahandling.factory.DHFactory;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.txt.TextUtils;
-import it.greenvulcano.util.xml.XMLUtils;
 
 import java.sql.Connection;
 
@@ -33,18 +26,24 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.gvesb.datahandling.DHResult;
+import it.greenvulcano.gvesb.datahandling.IDBOBuilder;
+import it.greenvulcano.gvesb.datahandling.factory.DHFactory;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.txt.TextUtils;
+import it.greenvulcano.util.xml.XMLUtils;
+import junit.framework.TestCase;
+
 /**
  * @version 3.0.0 Dec 13, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class DataHandlerTestCase extends TestCase
 {
@@ -62,14 +61,14 @@ public class DataHandlerTestCase extends TestCase
         Context context = new InitialContext();
         try {
             DataSource ds = (DataSource) context.lookup("openejb:Resource/testDHDataSource");
-            connection = ds.getConnection();
+            this.connection = ds.getConnection();
         }
         finally {
             context.close();
         }
-        Commons.createDB(connection);
-        dhFactory = new DHFactory();
-        dhFactory.initialize(null);
+        Commons.createDB(this.connection);
+        this.dhFactory = new DHFactory();
+        this.dhFactory.initialize(null);
     }
 
     /**
@@ -78,21 +77,21 @@ public class DataHandlerTestCase extends TestCase
     @Override
     protected void tearDown() throws Exception
     {
-        if (dhFactory != null) {
-            dhFactory.destroy();
+        if (this.dhFactory != null) {
+            this.dhFactory.destroy();
         }
-        Commons.clearDB(connection);
-        connection.close();
+        Commons.clearDB(this.connection);
+        this.connection.close();
     }
 
     /**
      * @throws Exception
-     * 
+     *
      */
     public void testDHCallSelect() throws Exception
     {
         String operation = "GVESB::TestSelect";
-        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
         DHResult result = dboBuilder.EXECUTE(operation, null, null);
         assertNotNull(result);
         assertEquals(0, result.getDiscard());
@@ -123,12 +122,109 @@ public class DataHandlerTestCase extends TestCase
 
     /**
      * @throws Exception
-     * 
+     *
+     */
+    public void testDHCallSelectExtended() throws Exception
+    {
+    	String ns = "http://www.greenvulcano.com/database";
+        String operation = "GVESB::TestSelectExtended";
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
+        DHResult result = dboBuilder.EXECUTE(operation, null, null);
+        assertNotNull(result);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(0, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(1, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+        Document output = (Document) result.getData();
+        assertNotNull(output);
+        assertTrue(output.getDocumentElement().hasChildNodes());
+        Node data = output.getDocumentElement().getChildNodes().item(0);
+        assertTrue(data.hasChildNodes());
+        Node row = data.getChildNodes().item(0);
+        assertTrue(row.hasChildNodes());
+
+        NodeList cols = row.getChildNodes();
+        assertEquals(4, cols.getLength());
+        String id = cols.item(0).getTextContent();
+        assertEquals("1", id);
+        assertEquals("ID", cols.item(0).getLocalName());
+        assertEquals(ns, cols.item(0).getNamespaceURI());
+
+        String field1 = cols.item(1).getTextContent();
+        assertEquals("testvalue", field1);
+        assertEquals("FIELD1", cols.item(1).getLocalName());
+        assertEquals(ns, cols.item(1).getNamespaceURI());
+
+        String field2 = cols.item(2).getTextContent();
+        assertEquals("20000101 12:30:45", field2);
+        //assertEquals("20000101 18:30:45", field2);
+        assertEquals("FIELD2", cols.item(2).getLocalName());
+        assertEquals(ns, cols.item(2).getNamespaceURI());
+
+        String field3 = cols.item(3).getTextContent();
+        assertEquals("123,45", field3);
+        assertEquals("FIELD3", cols.item(3).getLocalName());
+        assertEquals(ns, cols.item(3).getNamespaceURI());
+    }
+
+    /**
+     * @throws Exception
+     *
+     */
+    public void testDHCallSelectExtendedDTE() throws Exception
+    {
+        String operation = "GVESB::TestSelectExtendedDTE";
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
+        DHResult result = dboBuilder.EXECUTE(operation, null, null);
+        assertNotNull(result);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(0, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(1, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+        Document output = (Document) result.getData();
+        assertNotNull(output);
+        assertTrue(output.getDocumentElement().hasChildNodes());
+        Node data = output.getDocumentElement().getChildNodes().item(0);
+        assertTrue(data.hasChildNodes());
+        Node row = data.getChildNodes().item(0);
+        assertTrue(row.hasChildNodes());
+
+        NodeList cols = row.getChildNodes();
+        assertEquals(4, cols.getLength());
+        String id = cols.item(0).getTextContent();
+        assertEquals("1", id);
+        assertEquals("ID", cols.item(0).getNodeName());
+        assertNull(cols.item(0).getNamespaceURI());
+
+        String field1 = cols.item(1).getTextContent();
+        assertEquals("testvalue", field1);
+        assertEquals("FIELD1", cols.item(1).getNodeName());
+        assertNull("", cols.item(1).getNamespaceURI());
+
+        String field2 = cols.item(2).getTextContent();
+        assertEquals("20000101 12:30:45", field2);
+        //assertEquals("20000101 18:30:45", field2);
+        assertEquals("FIELD2", cols.item(2).getNodeName());
+        assertNull("", cols.item(2).getNamespaceURI());
+
+        String field3 = cols.item(3).getTextContent();
+        assertEquals("123,45", field3);
+        assertEquals("FIELD3", cols.item(3).getNodeName());
+        assertNull("", cols.item(3).getNamespaceURI());
+    }
+
+    /**
+     * @throws Exception
+     *
      */
     public void testDHCallThreadSelect() throws Exception
     {
         String operation = "GVESB::TestThreadSelect";
-        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
         DHResult result = dboBuilder.EXECUTE(operation, null, null);
         assertNotNull(result);
         assertEquals(0, result.getDiscard());
@@ -140,7 +236,7 @@ public class DataHandlerTestCase extends TestCase
         Document output = (Document) result.getData();
         assertNotNull(output);
         assertTrue(output.getDocumentElement().hasChildNodes());
-        
+
         NodeList datas = output.getDocumentElement().getChildNodes();
         assertEquals(2, datas.getLength());
         for (int i = 0; i < datas.getLength(); i++) {
@@ -193,7 +289,7 @@ public class DataHandlerTestCase extends TestCase
     public void testDHCallSelectMerge() throws Exception
     {
         String operation = "GVESB::TestSelectMerge";
-        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
         DHResult result = dboBuilder.EXECUTE(operation, null, null);
         assertNotNull(result);
         Document output = (Document) result.getData();
@@ -207,7 +303,7 @@ public class DataHandlerTestCase extends TestCase
     public final void testDHCallInsertOrUpdate() throws Exception
     {
         String operation = "GVESB::TestInsert";
-        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
         DHResult result = dboBuilder.EXECUTE(operation, Commons.createInsertMessage(), null);
         assertEquals(0, result.getDiscard());
         assertEquals(0, result.getUpdate());
@@ -217,7 +313,7 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("", result.getDiscardCauseListAsString());
 
         operation = "GVESB::TestInsertOrUpdate";
-        dboBuilder = dhFactory.getDBOBuilder(operation);
+        dboBuilder = this.dhFactory.getDBOBuilder(operation);
         result = dboBuilder.EXECUTE(operation, Commons.createInsertOrUpdateMessage(), null);
         assertEquals(0, result.getDiscard());
         assertEquals(1, result.getUpdate());
@@ -229,12 +325,12 @@ public class DataHandlerTestCase extends TestCase
 
     /**
      * @throws Exception
-     * 
+     *
      */
     public void testDHCallFlatSelect() throws Exception
     {
         String operation = "GVESB::TestFlatSelect";
-        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
         DHResult result = dboBuilder.EXECUTE(operation, null, null);
         assertNotNull(result);
         assertEquals(0, result.getDiscard());
@@ -245,19 +341,19 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("", result.getDiscardCauseListAsString());
         Object out = result.getData();
         assertNotNull(out);
-        String output = new String((byte[]) out);
+        String output = out instanceof String ? (String) out : new String((byte[]) out);
         assertEquals("1@testvalue.....................@20000101 123045@123,45@\n", output);
         //assertEquals("1@testvalue.....................@20000101 183045@123,45@\n", output);
     }
 
     /**
      * @throws Exception
-     * 
+     *
      */
     public void testDHCallFlatTZoneSelect() throws Exception
     {
         String operation = "GVESB::TestFlatTZoneSelect";
-        IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
         DHResult result = dboBuilder.EXECUTE(operation, null, null);
         assertNotNull(result);
         assertEquals(0, result.getDiscard());
@@ -268,19 +364,19 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("", result.getDiscardCauseListAsString());
         Object out = result.getData();
         assertNotNull(out);
-        String output = new String((byte[]) out);
+        String output = out instanceof String ? (String) out : new String((byte[]) out);
         assertEquals("1@testvalue.....................@20000101 113045@123,45@\n", output);
         //assertEquals("1@testvalue.....................@20000101 173045@123,45@\n", output);
     }
 
    /**
     * @throws Exception
-    * 
+    *
     */
    public void testDHCallFlatSelectFile() throws Exception
    {
        String operation = "GVESB::TestFlatSelectFile";
-       IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+       IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
        DHResult result = dboBuilder.EXECUTE(operation, null, null);
        assertNotNull(result);
        assertEquals(0, result.getDiscard());
@@ -290,7 +386,7 @@ public class DataHandlerTestCase extends TestCase
        assertEquals(1, result.getRead());
        assertEquals("", result.getDiscardCauseListAsString());
        Object out = result.getData();
-       assertNotNull(out);
+       assertNull(out);
        String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestFlatSelectFile.csv"));
        assertEquals("1@testvalue.....................@20000101 123045@123,45@\n", output);
        //assertEquals("1@testvalue.....................@20000101 183045@123,45@\n", output);
@@ -298,12 +394,12 @@ public class DataHandlerTestCase extends TestCase
 
    /**
     * @throws Exception
-    * 
+    *
     */
    public void testDHCallMultiFlatSelectFile() throws Exception
    {
        String operation = "GVESB::TestMultiFlatSelectFile";
-       IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+       IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
        DHResult result = dboBuilder.EXECUTE(operation, null, null);
        assertNotNull(result);
        assertEquals(0, result.getDiscard());
@@ -313,7 +409,7 @@ public class DataHandlerTestCase extends TestCase
        assertEquals(2, result.getRead());
        assertEquals("", result.getDiscardCauseListAsString());
        Object out = result.getData();
-       assertNotNull(out);
+       assertNull(out);
        String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestMultiFlatSelectFile.csv"));
        assertEquals("id@field1@field2@field3@\n1@testvalue.....................@20000101 123045@123,45@\n", output);
        //assertEquals("id@field1@field2@field3@\n1@testvalue.....................@20000101 183045@123,45@\n", output);
@@ -322,12 +418,12 @@ public class DataHandlerTestCase extends TestCase
 
    /**
     * @throws Exception
-    * 
+    *
     */
    public void testDHCallFlatTZoneSelectFile() throws Exception
    {
        String operation = "GVESB::TestFlatTZoneSelectFile";
-       IDBOBuilder dboBuilder = dhFactory.getDBOBuilder(operation);
+       IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
        DHResult result = dboBuilder.EXECUTE(operation, null, null);
        assertNotNull(result);
        assertEquals(0, result.getDiscard());
@@ -337,7 +433,7 @@ public class DataHandlerTestCase extends TestCase
        assertEquals(1, result.getRead());
        assertEquals("", result.getDiscardCauseListAsString());
        Object out = result.getData();
-       assertNotNull(out);
+       assertNull(out);
        String output = TextUtils.readFile(PropertiesHandler.expand("sp{{gv.app.home}}/log/TestFlatTZoneSelectFile.csv"));
        assertEquals("1@testvalue.....................@20000101 113045@123,45@\n", output);
        //assertEquals("1@testvalue.....................@20000101 173045@123,45@\n", output);

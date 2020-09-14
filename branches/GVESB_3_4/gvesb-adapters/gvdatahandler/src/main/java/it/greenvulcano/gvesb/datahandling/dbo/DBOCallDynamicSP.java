@@ -1000,19 +1000,19 @@ public class DBOCallDynamicSP extends AbstractDBO
     }
 
     /**
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.lang.Object,
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeIn(java.lang.Object,
      *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object input, Connection conn, Map<String, Object> props) throws DBOException,
+    public void executeIn(Object input, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
-        this.dataOut = new ByteArrayOutputStream();
         try {
             createOutDocument();
-            super.execute(input, conn, props);
-            storeResult();
+            super.executeIn(input, conn, props);
         }
         finally {
+            this.xmlOut = null;
+            this.jsonOut = null;
             this.dhr.setRead(0);
             this.dhr.setTotal(0);
             this.dhr.setInsert(0);
@@ -1022,19 +1022,19 @@ public class DBOCallDynamicSP extends AbstractDBO
     }
 
     /**
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.io.OutputStream,
-     *      java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeOut(java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
+    public Object executeOut(Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
-        this.dataOut = data;
         try {
             createOutDocument();
-            super.execute((OutputStream) null, conn, props);
-            storeResult();
+            super.executeOut(conn, props);
+            return getResult();
         }
         finally {
+            this.xmlOut = null;
+            this.jsonOut = null;
             this.dhr.setRead(0);
             this.dhr.setTotal(0);
             this.dhr.setInsert(0);
@@ -1044,19 +1044,20 @@ public class DBOCallDynamicSP extends AbstractDBO
     }
 
     /**
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.lang.Object,
-     *      java.io.OutputStream, java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeInOut(java.lang.Object,
+     *      java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(Object dataIn, OutputStream dataOut, Connection conn, Map<String, Object> props)
+    public Object executeInOut(Object dataIn, Connection conn, Map<String, Object> props)
             throws DBOException, InterruptedException {
-        this.dataOut = dataOut;
         try {
         	createOutDocument();
-            super.execute(dataIn, conn, props);
-            storeResult();
+            super.executeIn(dataIn, conn, props);
+            return getResult();
         }
         finally {
+            this.xmlOut = null;
+            this.jsonOut = null;
             this.dhr.setRead(0);
             this.dhr.setTotal(0);
             this.dhr.setInsert(0);
@@ -1069,34 +1070,19 @@ public class DBOCallDynamicSP extends AbstractDBO
      * @throws DBOException
      *
      */
-    private void storeResult() throws DBOException
+    private Object getResult() throws DBOException
     {
-        if (this.dataOut != null) {
-        	if (this.rowSetBuilderType.equals("json")) {
-        		try {
-        			this.dataOut.write(this.jsonOut.toString().getBytes());
-	            }
-	            catch (Exception exc) {
-	                throw new DBOException("Cannot store DBOCallSP JSON result.", exc);
-	            }
-        	}
-        	else {
-	            XMLUtils xml = null;
-	            try {
-	                xml = XMLUtils.getParserInstance();
-	                byte[] dataDOM = xml.serializeDOMToByteArray(this.xmlOut);
-	                this.dataOut.write(dataDOM);
-	            }
-	            catch (Exception exc) {
-	                throw new DBOException("Cannot store DBOCallSP XML result.", exc);
-	            }
-	            finally {
-	                XMLUtils.releaseParserInstance(xml);
-	            }
-        	}
-        }
-        this.xmlOut = null;
-        this.jsonOut = null;
+    	if (this.rowSetBuilderType.equals("json")) {
+    		try {
+    			return this.jsonOut.toString();
+            }
+            catch (Exception exc) {
+                throw new DBOException("Cannot store DBOCallSP JSON result.", exc);
+            }
+    	}
+    	else {
+            return this.xmlOut;
+    	}
     }
 
     /**

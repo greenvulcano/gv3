@@ -19,14 +19,7 @@
  */
 package it.greenvulcano.gvesb.datahandling.dbo;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.datahandling.DBOException;
-import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
-import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
-import it.greenvulcano.log.GVLogger;
-
 import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -45,6 +38,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.gvesb.datahandling.utils.DiscardCause;
+import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
+import it.greenvulcano.log.GVLogger;
 
 /**
  * IDBO Class specialized to parse the input RowSet document and in
@@ -65,9 +64,9 @@ public class DBOUpdate extends AbstractDBO
     public void init(Node config) throws DBOException
     {
         super.init(config);
-        isInsert = false;
+        this.isInsert = false;
         try {
-            forcedMode = XMLConfig.get(config, "@force-mode", MODE_XML2DB);
+            this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_XML2DB);
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='update']");
             String id;
             Node stmt;
@@ -75,37 +74,36 @@ public class DBOUpdate extends AbstractDBO
                 stmt = stmts.item(i);
                 id = XMLConfig.get(stmt, "@id");
                 if (id == null) {
-                    statements.put(Integer.toString(i), XMLConfig.getNodeValue(stmt));
+                    this.statements.put(Integer.toString(i), XMLConfig.getNodeValue(stmt));
                 }
                 else {
-                    statements.put(id, XMLConfig.getNodeValue(stmt));
+                    this.statements.put(id, XMLConfig.getNodeValue(stmt));
                 }
             }
 
-            if (statements.isEmpty()) {
-                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + dboclass + "]");
+            if (this.statements.isEmpty()) {
+                throw new DBOException("Empty/misconfigured statements list for [" + getName() + "/" + this.dboclass + "]");
             }
         }
         catch (DBOException exc) {
             throw exc;
         }
         catch (Exception exc) {
-            logger.error("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
-            throw new DBOException("Error reading configuration of [" + getName() + "/" + dboclass + "]", exc);
+            logger.error("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
+            throw new DBOException("Error reading configuration of [" + getName() + "/" + this.dboclass + "]", exc);
         }
     }
 
     /**
      * Unsupported method for this IDBO.
      *
-     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#execute(java.io.OutputStream,
-     *      java.sql.Connection, java.util.Map)
+     * @see it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO#executeOut(java.sql.Connection, java.util.Map)
      */
     @Override
-    public void execute(OutputStream data, Connection conn, Map<String, Object> props) throws DBOException,
+    public Object executeOut(Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         prepare();
-        throw new DBOException("Unsupported method - DBOUpdate::execute(OutputStream, Connection, Map)");
+        throw new DBOException("Unsupported method - DBOUpdate::executeOut(Connection, Map)");
     }
 
     private int          colIdx = 0;
@@ -132,42 +130,42 @@ public class DBOUpdate extends AbstractDBO
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
     {
         if (ROW_NAME.equals(localName)) {
-            currentRowFields.clear();
-            colDataExpecting = false;
-            colIdx = 0;
+            this.currentRowFields.clear();
+            this.colDataExpecting = false;
+            this.colIdx = 0;
             String id = attributes.getValue(uri, ID_NAME);
             getStatement(id);
-            currentXSLMessage = attributes.getValue(uri, XSL_MSG_NAME);
-            currCriticalError = "true".equalsIgnoreCase(attributes.getValue(uri, CRITICAL_ERROR));
-            generatedKeyID = attributes.getValue(uri, "generate-key");
-            resetGeneratedKeyID = attributes.getValue(uri, "reset-generate-key");
-            readGeneratedKey = autogenerateKeys && (generatedKeyID != null);
+            this.currentXSLMessage = attributes.getValue(uri, XSL_MSG_NAME);
+            this.currCriticalError = "true".equalsIgnoreCase(attributes.getValue(uri, CRITICAL_ERROR));
+            this.generatedKeyID = attributes.getValue(uri, "generate-key");
+            this.resetGeneratedKeyID = attributes.getValue(uri, "reset-generate-key");
+            this.readGeneratedKey = this.autogenerateKeys && (this.generatedKeyID != null);
         }
         else if (COL_NAME.equals(localName)) {
-            currType = attributes.getValue(uri, TYPE_NAME);
-            if (TIMESTAMP_TYPE.equals(currType)) {
-                currDateFormat = attributes.getValue(uri, FORMAT_NAME);
-                if (currDateFormat == null) {
-                    currDateFormat = DEFAULT_DATE_FORMAT;
+            this.currType = attributes.getValue(uri, TYPE_NAME);
+            if (TIMESTAMP_TYPE.equals(this.currType)) {
+                this.currDateFormat = attributes.getValue(uri, FORMAT_NAME);
+                if (this.currDateFormat == null) {
+                    this.currDateFormat = DEFAULT_DATE_FORMAT;
                 }
             }
-            else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
-                currNumberFormat = attributes.getValue(uri, FORMAT_NAME);
-                if (currNumberFormat == null) {
-                    currNumberFormat = call_DEFAULT_NUMBER_FORMAT;
+            else if (FLOAT_TYPE.equals(this.currType) || DECIMAL_TYPE.equals(this.currType)) {
+                this.currNumberFormat = attributes.getValue(uri, FORMAT_NAME);
+                if (this.currNumberFormat == null) {
+                    this.currNumberFormat = this.call_DEFAULT_NUMBER_FORMAT;
                 }
-                currGroupSeparator = attributes.getValue(uri, GRP_SEPARATOR_NAME);
-                if (currGroupSeparator == null) {
-                    currGroupSeparator = call_DEFAULT_GRP_SEPARATOR;
+                this.currGroupSeparator = attributes.getValue(uri, GRP_SEPARATOR_NAME);
+                if (this.currGroupSeparator == null) {
+                    this.currGroupSeparator = this.call_DEFAULT_GRP_SEPARATOR;
                 }
-                currDecSeparator = attributes.getValue(uri, DEC_SEPARATOR_NAME);
-                if (currDecSeparator == null) {
-                    currDecSeparator = call_DEFAULT_DEC_SEPARATOR;
+                this.currDecSeparator = attributes.getValue(uri, DEC_SEPARATOR_NAME);
+                if (this.currDecSeparator == null) {
+                    this.currDecSeparator = this.call_DEFAULT_DEC_SEPARATOR;
                 }
             }
-            colDataExpecting = true;
-            colIdx++;
-            textBuffer = new StringBuffer();
+            this.colDataExpecting = true;
+            this.colIdx++;
+            this.textBuffer = new StringBuffer();
         }
     }
 
@@ -177,8 +175,8 @@ public class DBOUpdate extends AbstractDBO
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
     {
-        if (colDataExpecting) {
-            textBuffer.append(ch, start, length);
+        if (this.colDataExpecting) {
+            this.textBuffer.append(ch, start, length);
         }
     }
 
@@ -190,146 +188,146 @@ public class DBOUpdate extends AbstractDBO
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
         if (ROW_NAME.equals(localName)) {
-            if (!currCriticalError) {
+            if (!this.currCriticalError) {
                 executeStatement();
             }
             else {
-                rowDisc++;
+                this.rowDisc++;
                 // aggiunta DiscardCause al dhr...
-                String msg = currentXSLMessage;
+                String msg = this.currentXSLMessage;
 
-                dhr.addDiscardCause(new DiscardCause(rowCounter, msg));
+                this.dhr.addDiscardCause(new DiscardCause(this.rowCounter, msg));
 
-                resultMessage.append("Data error on row ").append(rowCounter).append(": ").append(msg);
-                resultMessage.append("SQL Statement Informations:\n").append(sqlStatementInfo);
-                resultMessage.append("Record parameters:\n").append(dumpCurrentRowFields());
-                resultStatus = STATUS_PARTIAL;
+                this.resultMessage.append("Data error on row ").append(this.rowCounter).append(": ").append(msg);
+                this.resultMessage.append("SQL Statement Informations:\n").append(this.sqlStatementInfo);
+                this.resultMessage.append("Record parameters:\n").append(dumpCurrentRowFields());
+                this.resultStatus = STATUS_PARTIAL;
             }
         }
         else if (COL_NAME.equals(localName)) {
-            PreparedStatement ps = (PreparedStatement) sqlStatementInfo.getStatement();
+            PreparedStatement ps = (PreparedStatement) this.sqlStatementInfo.getStatement();
             try {
-                colDataExpecting = false;
+                this.colDataExpecting = false;
                 boolean autoKeySet = false;
-                String text = textBuffer.toString();
-                if (autogenerateKeys) {
+                String text = this.textBuffer.toString();
+                if (this.autogenerateKeys) {
                     if (text.startsWith(GENERATED_KEY_ID)) {
-                        Object key = generatedKeys.get(text);
-                        ps.setObject(colIdx, key);
-                        currentRowFields.add(key);
+                        Object key = this.generatedKeys.get(text);
+                        ps.setObject(this.colIdx, key);
+                        this.currentRowFields.add(key);
                         autoKeySet = true;
                     }
                 }
                 if (!autoKeySet) {
-                    if (TIMESTAMP_TYPE.equals(currType)) {
+                    if (TIMESTAMP_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.TIMESTAMP);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.TIMESTAMP);
+                            this.currentRowFields.add(null);
                         }
                         else {
-                            dateFormatter.applyPattern(currDateFormat);
-                            Date formattedDate = dateFormatter.parse(text);
+                            this.dateFormatter.applyPattern(this.currDateFormat);
+                            Date formattedDate = this.dateFormatter.parse(text);
                             Timestamp ts = new Timestamp(formattedDate.getTime());
-                            ps.setTimestamp(colIdx, ts);
-                            currentRowFields.add(ts);
+                            ps.setTimestamp(this.colIdx, ts);
+                            this.currentRowFields.add(ts);
                         }
                     }
-                    else if (NUMERIC_TYPE.equals(currType)) {
+                    else if (NUMERIC_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.NUMERIC);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.NUMERIC);
+                            this.currentRowFields.add(null);
                         }
                         else {
-                            ps.setInt(colIdx, Integer.parseInt(text));
-                            currentRowFields.add(Integer.valueOf(text));
+                            ps.setInt(this.colIdx, Integer.parseInt(text));
+                            this.currentRowFields.add(Integer.valueOf(text));
                         }
                     }
-                    else if (FLOAT_TYPE.equals(currType) || DECIMAL_TYPE.equals(currType)) {
+                    else if (FLOAT_TYPE.equals(this.currType) || DECIMAL_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.NUMERIC);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.NUMERIC);
+                            this.currentRowFields.add(null);
                         }
                         else {
-                            DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
-                            dfs.setDecimalSeparator(currDecSeparator.charAt(0));
-                            dfs.setGroupingSeparator(currGroupSeparator.charAt(0));
-                            numberFormatter.setDecimalFormatSymbols(dfs);
-                            numberFormatter.applyPattern(currNumberFormat);
-                            boolean isBigDecimal = numberFormatter.isParseBigDecimal();
+                            DecimalFormatSymbols dfs = this.numberFormatter.getDecimalFormatSymbols();
+                            dfs.setDecimalSeparator(this.currDecSeparator.charAt(0));
+                            dfs.setGroupingSeparator(this.currGroupSeparator.charAt(0));
+                            this.numberFormatter.setDecimalFormatSymbols(dfs);
+                            this.numberFormatter.applyPattern(this.currNumberFormat);
+                            boolean isBigDecimal = this.numberFormatter.isParseBigDecimal();
                             try {
-                                numberFormatter.setParseBigDecimal(true);
-                                BigDecimal formattedNumber = (BigDecimal) numberFormatter.parse(text);
-                                ps.setBigDecimal(colIdx, formattedNumber);
-                                currentRowFields.add(formattedNumber);
+                                this.numberFormatter.setParseBigDecimal(true);
+                                BigDecimal formattedNumber = (BigDecimal) this.numberFormatter.parse(text);
+                                ps.setBigDecimal(this.colIdx, formattedNumber);
+                                this.currentRowFields.add(formattedNumber);
                             }
                             finally {
-                                numberFormatter.setParseBigDecimal(isBigDecimal);
+                                this.numberFormatter.setParseBigDecimal(isBigDecimal);
                             }
                         }
                     }
-                    else if (LONG_STRING_TYPE.equals(currType)) {
+                    else if (LONG_STRING_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.CLOB);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.CLOB);
+                            this.currentRowFields.add(null);
                         }
                         else {
-                            ps.setCharacterStream(colIdx, new StringReader(text));
-                            currentRowFields.add(text);
+                            ps.setCharacterStream(this.colIdx, new StringReader(text));
+                            this.currentRowFields.add(text);
                         }
                     }
-                    else if (LONG_NSTRING_TYPE.equals(currType)) {
+                    else if (LONG_NSTRING_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.NCLOB);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.NCLOB);
+                            this.currentRowFields.add(null);
                         }
                         else {
-                            ps.setCharacterStream(colIdx, new StringReader(text));
-                            currentRowFields.add(text);
+                            ps.setCharacterStream(this.colIdx, new StringReader(text));
+                            this.currentRowFields.add(text);
                         }
                     }
-                    else if (BASE64_TYPE.equals(currType)) {
+                    else if (BASE64_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.BLOB);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.BLOB);
+                            this.currentRowFields.add(null);
                         }
                         else {
                             byte[] data = text.getBytes();
                             data = Base64.decodeBase64(data);
                             ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                            ps.setBinaryStream(colIdx, bais, data.length);
-                            currentRowFields.add(text);
+                            ps.setBinaryStream(this.colIdx, bais, data.length);
+                            this.currentRowFields.add(text);
                         }
                     }
-                    else if (BINARY_TYPE.equals(currType)) {
+                    else if (BINARY_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.BLOB);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.BLOB);
+                            this.currentRowFields.add(null);
                         }
                         else {
                             byte[] data = text.getBytes();
                             ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                            ps.setBinaryStream(colIdx, bais, data.length);
-                            currentRowFields.add(text);
+                            ps.setBinaryStream(this.colIdx, bais, data.length);
+                            this.currentRowFields.add(text);
                         }
                     }
-                    else if (NSTRING_TYPE.equals(currType)) {
+                    else if (NSTRING_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.NVARCHAR);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.NVARCHAR);
+                            this.currentRowFields.add(null);
                         }
                         else {
-                            ps.setNString(colIdx, text);
-                            currentRowFields.add(text);
+                            ps.setNString(this.colIdx, text);
+                            this.currentRowFields.add(text);
                         }
                     }
                     else {
                         if (text.equals("")) {
-                            ps.setNull(colIdx, Types.VARCHAR);
-                            currentRowFields.add(null);
+                            ps.setNull(this.colIdx, Types.VARCHAR);
+                            this.currentRowFields.add(null);
                         }
                         else {
-                            ps.setString(colIdx, text);
-                            currentRowFields.add(text);
+                            ps.setString(this.colIdx, text);
+                            this.currentRowFields.add(text);
                         }
                     }
                 }

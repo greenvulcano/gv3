@@ -20,6 +20,7 @@
       <XPathNamespace namespace="http://www.greenvulcano.it/greenvulcano" prefix="gvesbws"/>
       <XPathNamespace namespace="http://www.greenvulcano.it/jca/xml" prefix="jca" />
       <XPathNamespace namespace="http://www.greenvulcano.it/ldap" prefix="ldapc" />
+      <XPathNamespace namespace="http://www.greenvulcano.com/database" prefix="db"/>
       <XPathNamespace namespace="http://drools.org/drools-5.0/change-set" prefix="drools-cs"/>
     </XPath>
   </GVXPath>
@@ -76,6 +77,8 @@
     <Transformations>
       <XSLTransformation XSLMapName="identity.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
         name="identityXML" type="transformation"/>
+      <XSLTransformation XSLMapName="removeNS.xsl" class="it.greenvulcano.gvesb.gvdte.transformers.xslt.XSLTransformer"
+        name="removeNS" type="transformation"/>
     </Transformations>
   </GVDataTransformation>
 </GVCore>
