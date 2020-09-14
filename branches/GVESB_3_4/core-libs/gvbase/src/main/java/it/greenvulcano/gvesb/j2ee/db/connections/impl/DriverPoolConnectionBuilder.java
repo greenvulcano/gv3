@@ -19,10 +19,6 @@
  */
 package it.greenvulcano.gvesb.j2ee.db.connections.impl;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.j2ee.db.GVDBException;
-import it.greenvulcano.log.GVLogger;
-
 import java.sql.Connection;
 
 import org.apache.commons.dbcp.ConnectionFactory;
@@ -32,6 +28,10 @@ import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.j2ee.db.GVDBException;
+import it.greenvulcano.log.GVLogger;
 
 /**
  *
@@ -53,98 +53,103 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
     private GenericObjectPool connectionPool  = null;
     private boolean           debugJDBCConn   = false;
 
-    public void init(Node node) throws GVDBException
+    @Override
+	public void init(Node node) throws GVDBException
     {
         try {
-            name = XMLConfig.get(node, "@name");
-            className = XMLConfig.get(node, "@driver-class");
-            user = XMLConfig.get(node, "@user", null);
-            password = XMLConfig.getDecrypted(node, "@password", null);
-            url = XMLConfig.get(node, "@url");
+            this.name = XMLConfig.get(node, "@name");
+            this.className = XMLConfig.get(node, "@driver-class");
+            this.user = XMLConfig.get(node, "@user", null);
+            this.password = XMLConfig.getDecrypted(node, "@password", null);
+            this.url = XMLConfig.get(node, "@url");
             try {
-                debugJDBCConn = Boolean.getBoolean("it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder.debugJDBCConn");
+                this.debugJDBCConn = Boolean.getBoolean("it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder.debugJDBCConn");
             }
             catch (Exception exc) {
-                debugJDBCConn = false;
+                this.debugJDBCConn = false;
             }
-            Class.forName(className);
+            Class.forName(this.className);
 
             Node poolNode = XMLConfig.getNode(node, "PoolParameters");
-            connectionPool = new GenericObjectPool(null);
-            connectionPool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK);
-            connectionPool.setMaxWait(XMLConfig.getLong(poolNode, "@maxWait", 30) * 1000);
+            this.connectionPool = new GenericObjectPool(null);
+            this.connectionPool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK);
+            this.connectionPool.setMaxWait(XMLConfig.getLong(poolNode, "@maxWait", 30) * 1000);
 
-            connectionPool.setMinIdle(XMLConfig.getInteger(poolNode, "@minIdle", 5));
-            connectionPool.setMaxIdle(XMLConfig.getInteger(poolNode, "@maxIdle", 10));
-            connectionPool.setMaxActive(XMLConfig.getInteger(poolNode, "@maxActive", 15));
-            connectionPool.setTimeBetweenEvictionRunsMillis(XMLConfig.getLong(poolNode,
+            this.connectionPool.setMinIdle(XMLConfig.getInteger(poolNode, "@minIdle", 5));
+            this.connectionPool.setMaxIdle(XMLConfig.getInteger(poolNode, "@maxIdle", 10));
+            this.connectionPool.setMaxActive(XMLConfig.getInteger(poolNode, "@maxActive", 15));
+            this.connectionPool.setTimeBetweenEvictionRunsMillis(XMLConfig.getLong(poolNode,
                     "@timeBetweenEvictionRuns", 300) * 1000);
-            connectionPool.setMinEvictableIdleTimeMillis(XMLConfig.getLong(poolNode, "@minEvictableIdleTime",
+            this.connectionPool.setMinEvictableIdleTimeMillis(XMLConfig.getLong(poolNode, "@minEvictableIdleTime",
                     300) * 1000);
-            connectionPool.setNumTestsPerEvictionRun(XMLConfig.getInteger(poolNode, "@numTestsPerEvictionRun", 3));
+            this.connectionPool.setNumTestsPerEvictionRun(XMLConfig.getInteger(poolNode, "@numTestsPerEvictionRun", 3));
             if (XMLConfig.exists(poolNode, "validationQuery")) {
-                validationQuery = XMLConfig.get(poolNode, "validationQuery");
+                this.validationQuery = XMLConfig.get(poolNode, "validationQuery");
             }
         }
         catch (Exception exc) {
             throw new GVDBException("DriverPoolConnectionBuilder - Initialization error", exc);
         }
 
-        ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(url, user, password);
+        ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(this.url, this.user, this.password);
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory,
-                connectionPool, null, validationQuery, false, true);
-        dataSource = new PoolingDataSource(connectionPool);
+                this.connectionPool, null, this.validationQuery, false, true);
+        this.dataSource = new PoolingDataSource(this.connectionPool);
 
-        logger.debug("Crated DriverPoolConnectionBuilder(" + name + "). className: " + className + " - user: " + user
-                + " - password: ********* - url: " + url + " - Pool: [" + connectionPool.getMinIdle() + "/"
-                + connectionPool.getMaxIdle() + "/" + connectionPool.getMaxActive() + "]");
+        logger.debug("Crated DriverPoolConnectionBuilder(" + this.name + "). className: " + this.className + " - user: " + this.user
+                + " - password: ********* - url: " + this.url + " - Pool: [" + this.connectionPool.getMinIdle() + "/"
+                + this.connectionPool.getMaxIdle() + "/" + this.connectionPool.getMaxActive() + "]");
     }
 
-    public Connection getConnection() throws GVDBException
+    @Override
+	public Connection getConnection() throws GVDBException
     {
         try {
-            Connection conn = dataSource.getConnection();
-            if (debugJDBCConn && (conn != null)) {
-                logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "] [" + connectionPool.getNumActive() + "/" + connectionPool.getNumIdle() + "]");
+            Connection conn = this.dataSource.getConnection();
+            if (this.debugJDBCConn && (conn != null)) {
+                logger.debug("Created JDBC Connection [" + this.name + "]: [" + conn + "/" + conn.hashCode() + "] [" + this.connectionPool.getNumActive() + "/" + this.connectionPool.getNumIdle() + "]");
             }
 
             return conn;
         }
         catch (Exception exc) {
-            throw new GVDBException("DriverPoolConnectionBuilder - Error while creating Connection[" + name + "]", exc);
+            throw new GVDBException("DriverPoolConnectionBuilder - Error while creating Connection[" + this.name + "]", exc);
         }
     }
 
-    public void releaseConnection(Connection conn) throws GVDBException
+    @Override
+	public void releaseConnection(Connection conn) throws GVDBException
     {
         if (conn != null) {
 	    	String msg = "";
-	    	if (debugJDBCConn) {
-	    		msg = "Closed JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "]";    		
+	    	if (this.debugJDBCConn) {
+	    		msg = "Closed JDBC Connection [" + this.name + "]: [" + conn + "/" + conn.hashCode() + "]";
 	    	}
             try {
                 conn.close();
             }
             catch (Exception exc) {
-                logger.error("DriverPoolConnectionBuilder - Error while closing Connection[" + name + "]: [" + conn
+                logger.error("DriverPoolConnectionBuilder - Error while closing Connection[" + this.name + "]: [" + conn
                 		 + "/" + conn.hashCode() + "]", exc);
             }
-	        if (debugJDBCConn) {
-	            logger.debug(msg + " [" + connectionPool.getNumActive() + "/" + connectionPool.getNumIdle() + "]");
+	        if (this.debugJDBCConn) {
+	            logger.debug(msg + " [" + this.connectionPool.getNumActive() + "/" + this.connectionPool.getNumIdle() + "]");
 	        }
         }
     }
 
-    public void destroy()
+    @Override
+	public void destroy()
     {
-        if (connectionPool != null) {
+        if (this.connectionPool != null) {
             try {
-                connectionPool.close();
+                this.connectionPool.close();
+                this.connectionPool.clear();
             }
             catch (Exception exc) {
                 // do nothing
             }
         }
-        logger.debug("Destroyed DriverPoolConnectionBuilder(" + name + ")");
+        logger.debug("Destroyed DriverPoolConnectionBuilder(" + this.name + ")");
     }
 }
