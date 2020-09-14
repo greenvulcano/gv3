@@ -283,14 +283,14 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvbase</artifactId>
-            <version>3.4.0.13-Final</version>
+            <version>3.4.0.14-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdte</artifactId>
-            <version>3.4.0.3-Final</version>
+            <version>3.4.0.4-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -424,7 +424,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-mail</artifactId>
-            <version>3.4.0.3-Final</version>
+            <version>3.4.0.4-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -532,7 +532,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvdatahandler</artifactId>
-            <version>3.4.0.10-Final</version>
+            <version>3.4.0.11-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -730,7 +730,7 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
+        <!--<repository>
             <id>ibiblio</id>
             <name>ibiblio Repository</name>
             <url>http://maven.ibiblio.org/maven2</url>
@@ -740,7 +740,7 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository>-->
         <repository>
             <id>repo1</id>
             <name>Maven Repo1 Repository</name>
@@ -805,6 +805,17 @@
             </releases>
             <snapshots>
                 <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>reposnapshots</id>
+            <name>Maven Repo2 Repository</name>
+            <url>http://repository.apache.org/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
