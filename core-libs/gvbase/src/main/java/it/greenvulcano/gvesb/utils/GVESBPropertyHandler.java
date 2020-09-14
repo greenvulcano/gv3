@@ -1,30 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.utils;
-
-import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.metadata.PropertiesHandlerException;
-import it.greenvulcano.util.metadata.PropertyHandler;
-import it.greenvulcano.util.txt.DateUtils;
 
 import java.io.Reader;
 import java.io.StringWriter;
@@ -35,11 +28,21 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.mozilla.javascript.Scriptable;
+
+import it.greenvulcano.gvesb.j2ee.db.GVDBException;
+import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.metadata.PropertiesHandlerException;
+import it.greenvulcano.util.metadata.PropertyHandler;
+import it.greenvulcano.util.thread.ThreadMap;
+import it.greenvulcano.util.txt.DateUtils;
 
 /**
  * @version 3.0.0 10/giu/2010
@@ -60,7 +63,7 @@ public class GVESBPropertyHandler implements PropertyHandler
     /**
      * This method insert the correct values for the dynamic parameter found in
      * the input string. The property value can be a combination of:
-     * 
+     *
      * <pre>
      *  - sql{{[conn::]statement}}  : execute a select sql statement and return the value of
      *                                the first field of the first selected record.
@@ -100,7 +103,7 @@ public class GVESBPropertyHandler implements PropertyHandler
      *                                it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder
      *                                If 'conn' isn't defined then 'extra' must be a java.sql.Connection instance.
      * </pre>
-     * 
+     *
      * @param type
      * @param str
      * @param inProperties
@@ -122,6 +125,24 @@ public class GVESBPropertyHandler implements PropertyHandler
             return expandSQLProperties(str, inProperties, object, scope, extra);
         }
         return str;
+    }
+
+    @Override
+    public void cleanupResources() {
+    	if (PropertiesHandler.isResourceLocalStorage()) {
+    		Map<String, Connection> jdbcConns = (Map<String, Connection>) ThreadMap.get("PH_JDBC_CONN");
+    		if (jdbcConns != null) {
+    			for (String cn : jdbcConns.keySet()) {
+        			try {
+						JDBCConnectionBuilder.releaseConnection(cn, jdbcConns.get(cn));
+					} catch (GVDBException exc) {
+						// do nothing
+					}
+				}
+    			jdbcConns.clear();
+    			ThreadMap.remove("PH_JDBC_CONN");
+    		}
+    	}
     }
 
     private String expandSQLProperties(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
@@ -147,7 +168,25 @@ public class GVESBPropertyHandler implements PropertyHandler
                 sqlStatement = str;
             }
             if (intConn) {
-                conn = JDBCConnectionBuilder.getConnection(connName);
+            	if (PropertiesHandler.isResourceLocalStorage()) {
+            		Map<String, Connection> jdbcConns = (Map<String, Connection>) ThreadMap.get("PH_JDBC_CONN");
+            		if (jdbcConns == null) {
+            			jdbcConns = new HashMap<String, Connection>();
+            			ThreadMap.put("PH_JDBC_CONN", jdbcConns);
+            			conn = JDBCConnectionBuilder.getConnection(connName);
+            			jdbcConns.put(connName, conn);
+            		}
+            		else {
+            			conn = jdbcConns.get(connName);
+            			if (conn == null) {
+                			conn = JDBCConnectionBuilder.getConnection(connName);
+                			jdbcConns.put(connName, conn);
+            			}
+            		}
+            	}
+            	if (conn == null) {
+            		conn = JDBCConnectionBuilder.getConnection(connName);
+            	}
             }
             else if ((extra != null) && (extra instanceof Connection)) {
                 conn = (Connection) extra;
@@ -221,7 +260,7 @@ public class GVESBPropertyHandler implements PropertyHandler
                     // do nothing
                 }
             }
-            if (intConn && (conn != null)) {
+            if (intConn && (conn != null) && !PropertiesHandler.isResourceLocalStorage()) {
                 try {
                     JDBCConnectionBuilder.releaseConnection(connName, conn);
                 }
@@ -261,7 +300,25 @@ public class GVESBPropertyHandler implements PropertyHandler
                 sqlStatement = str;
             }
             if (intConn) {
-                conn = JDBCConnectionBuilder.getConnection(connName);
+                if (PropertiesHandler.isResourceLocalStorage()) {
+            		Map<String, Connection> jdbcConns = (Map<String, Connection>) ThreadMap.get("PH_JDBC_CONN");
+            		if (jdbcConns == null) {
+            			jdbcConns = new HashMap<String, Connection>();
+            			ThreadMap.put("PH_JDBC_CONN", jdbcConns);
+            			conn = JDBCConnectionBuilder.getConnection(connName);
+            			jdbcConns.put(connName, conn);
+            		}
+            		else {
+            			conn = jdbcConns.get(connName);
+            			if (conn == null) {
+                			conn = JDBCConnectionBuilder.getConnection(connName);
+                			jdbcConns.put(connName, conn);
+            			}
+            		}
+            	}
+            	if (conn == null) {
+            		conn = JDBCConnectionBuilder.getConnection(connName);
+            	}
             }
             else if ((extra != null) && (extra instanceof Connection)) {
                 conn = (Connection) extra;
@@ -296,7 +353,7 @@ public class GVESBPropertyHandler implements PropertyHandler
 	                    if (clob != null) {
 		                    Reader is = clob.getCharacterStream();
 	                        StringWriter strW = new StringWriter();
-	
+
 	                        IOUtils.copy(is, strW);
 	                        is.close();
 	                        paramValue += separator + strW.toString();
@@ -345,7 +402,7 @@ public class GVESBPropertyHandler implements PropertyHandler
                     // do nothing
                 }
             }
-            if (intConn && (conn != null)) {
+            if (intConn && (conn != null) && !PropertiesHandler.isResourceLocalStorage()) {
                 try {
                     JDBCConnectionBuilder.releaseConnection(connName, conn);
                 }
@@ -379,7 +436,25 @@ public class GVESBPropertyHandler implements PropertyHandler
                 sqlStatement = str;
             }
             if (intConn) {
-                conn = JDBCConnectionBuilder.getConnection(connName);
+            	if (PropertiesHandler.isResourceLocalStorage()) {
+            		Map<String, Connection> jdbcConns = (Map<String, Connection>) ThreadMap.get("PH_JDBC_CONN");
+            		if (jdbcConns == null) {
+            			jdbcConns = new HashMap<String, Connection>();
+            			ThreadMap.put("PH_JDBC_CONN", jdbcConns);
+            			conn = JDBCConnectionBuilder.getConnection(connName);
+            			jdbcConns.put(connName, conn);
+            		}
+            		else {
+            			conn = jdbcConns.get(connName);
+            			if (conn == null) {
+                			conn = JDBCConnectionBuilder.getConnection(connName);
+                			jdbcConns.put(connName, conn);
+            			}
+            		}
+            	}
+            	if (conn == null) {
+            		conn = JDBCConnectionBuilder.getConnection(connName);
+            	}
             }
             else if ((extra != null) && (extra instanceof Connection)) {
                 conn = (Connection) extra;
@@ -420,7 +495,7 @@ public class GVESBPropertyHandler implements PropertyHandler
                     // do nothing
                 }
             }
-            if (intConn && (conn != null)) {
+            if (intConn && (conn != null) && !PropertiesHandler.isResourceLocalStorage()) {
                 try {
                     JDBCConnectionBuilder.releaseConnection(connName, conn);
                 }

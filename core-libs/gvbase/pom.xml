@@ -10,7 +10,7 @@
 
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvbase</artifactId>
-    <version>3.4.0.13-Final</version>
+    <version>3.4.0.14-Final</version>
     <packaging>jar</packaging>
     <name>GreenVulcano ESB Base Library</name>
 
@@ -71,10 +71,6 @@
         <dependency>
             <groupId>ognl</groupId>
             <artifactId>ognl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javassist</groupId>
-            <artifactId>javassist</artifactId>
         </dependency>
         <dependency>
             <groupId>xml-resolver</groupId>

@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 
 /**
@@ -68,6 +69,72 @@ public final class JavaScriptHelper
         }
         try {
             return cx.evaluateString(scope, script, name, 1, null);
+        }
+        finally {
+            if (cxcreated) {
+                Context.exit();
+            }
+        }
+    }
+
+    /**
+     * Execute a script string in the given scope.
+     *
+     * @param script
+     *        a string containing a script
+     * @param name
+     *        a name for the script, used in exception message
+     * @param scope
+     *        the execution scope
+     * @param cx
+     *        the execution context, can be null
+     * @return the script execution result
+     * @throws Exception
+     *         if error occurs
+     */
+    public static Script compileScript(String script, String name, Scriptable scope, Context cx) throws Exception
+    {
+        boolean cxcreated = false;
+
+        if (cx == null) {
+            cx = ContextFactory.getGlobal().enterContext();
+            cxcreated = true;
+        }
+        try {
+            return cx.compileString(script, name, 1, null);
+        }
+        finally {
+            if (cxcreated) {
+                Context.exit();
+            }
+        }
+    }
+
+    /**
+     * Execute a script string in the given scope.
+     *
+     * @param script
+     *        a string containing a script
+     * @param name
+     *        a name for the script, used in exception message
+     * @param scope
+     *        the execution scope
+     * @param cx
+     *        the execution context, can be null
+     * @return the script execution result
+     * @throws Exception
+     *         if error occurs
+     */
+    public static Object executeScript(Script script, Scriptable scope, Context cx) throws Exception
+    {
+        boolean cxcreated = false;
+
+        if (cx == null) {
+            cx = ContextFactory.getGlobal().enterContext();
+            cxcreated = true;
+        }
+        try {
+            return script.exec(cx, scope);
         }
         finally {
             if (cxcreated) {
@@ -123,7 +190,9 @@ public final class JavaScriptHelper
      */
     public static String resultToString(Object result)
     {
-    	if (result == null) return "";
+    	if (result == null) {
+			return "";
+		}
         return Context.toString(result);
     }
 
