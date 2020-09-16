@@ -76,7 +76,7 @@
     <version.ode>1.3.5</version.ode>
     <version.ognl>3.0</version.ognl>
     <version.opencsv>2.3</version.opencsv>
-    <version.openejb>4.5.2</version.openejb>
+    <version.openejb>4.7.5</version.openejb>
     <version.openspcoop>1.4.1</version.openspcoop>
     <version.quartz>1.8.5</version.quartz>
     <version.rhino.js>1.7R2</version.rhino.js>
