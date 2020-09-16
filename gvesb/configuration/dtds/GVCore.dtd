@@ -14122,12 +14122,18 @@
 
     #SelectOnInsert
 -->
-<!ELEMENT JdbcStore (Description?, DriverPoolConnectionBuilder)>
+<!ELEMENT JdbcStore (Description?)>
 <!--
     Unmodifiable.
     Used by GreenVulcanoESB factory framework.
 -->
 <!ATTLIST JdbcStore type CDATA #FIXED "quartz-store">
+<!--
+    JDBC Connection builder name.
+
+    #NotNull
+-->
+<!ATTLIST JdbcStore  jdbcConnectionName CDATA #REQUIRED>
 <!--
     Driver delegates understand the particular 'dialects' of varies database systems.
 
