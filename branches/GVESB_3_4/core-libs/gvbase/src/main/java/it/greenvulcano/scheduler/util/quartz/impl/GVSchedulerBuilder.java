@@ -44,7 +44,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder;
 import it.greenvulcano.jmx.JMXEntryPoint;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.scheduler.TaskException;
@@ -65,7 +64,6 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     private int                   clusterCheckinInterval = 15000;
     private String                storeType              = "RamStore";
     private String                jdbcConnectionName     = "UNDEFINED";
-    private ConnectionBuilder     cBuilder               = null;
     private String                driverDelegate         = "UNDEFINED";
     private String                tablePrefix            = "UNDEFINED";
     private final List<CalendarBuilder> calendars              = new ArrayList<CalendarBuilder>();
@@ -89,11 +87,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 this.misfireThreshold = XMLConfig.getInteger(st, "@misfireThreshold", 60000);
                 this.clusterCheckinInterval = XMLConfig.getInteger(st, "@clusterCheckinInterval", 15000);
 
-                Node cbn = XMLConfig.getNode(st, "*[@type='jdbc-connection-builder']");
-                String className = XMLConfig.get(cbn, "@class");
-                this.jdbcConnectionName = XMLConfig.get(cbn, "@name");
-                this.cBuilder = (ConnectionBuilder) Class.forName(className).newInstance();
-                this.cBuilder.init(cbn);
+                this.jdbcConnectionName = XMLConfig.get(st, "@jdbcConnectionName");
             }
             else {
                 throw new TaskException("Invalid Qartz store type: " + this.storeType);
@@ -141,7 +135,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 JobStore jobStore = null;
                 if ("JdbcStore".equals(this.storeType)) {
                     DBConnectionManager.getInstance().addConnectionProvider(this.jdbcConnectionName,
-                            new GVQuartzConnectionProvider(this.cBuilder));
+                            new GVQuartzConnectionProvider(this.jdbcConnectionName));
                     jobStore = new JobStoreTX();
                     ((JobStoreTX) jobStore).setDataSource(this.jdbcConnectionName);
                     ((JobStoreTX) jobStore).setDriverDelegateClass(this.driverDelegate);
@@ -264,10 +258,6 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     @Override
     public void destroy() {
     	this.calendars.clear();
-    	if (this.cBuilder != null) {
-    		this.cBuilder.destroy();
-    		this.cBuilder = null;
-    	}
     }
 
     @Override
