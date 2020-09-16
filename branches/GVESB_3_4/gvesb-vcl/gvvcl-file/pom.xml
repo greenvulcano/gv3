@@ -27,5 +27,10 @@
             <artifactId>axiom-impl</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+        </dependency>
     </dependencies>
 </project>
