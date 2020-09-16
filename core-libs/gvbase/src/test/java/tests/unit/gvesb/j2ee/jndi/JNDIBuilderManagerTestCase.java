@@ -19,14 +19,13 @@
  */
 package tests.unit.gvesb.j2ee.jndi;
 
-import it.greenvulcano.gvesb.j2ee.JNDIHelper;
-import it.greenvulcano.gvesb.j2ee.jndi.JNDIBuilderManager;
-
 import javax.naming.InitialContext;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
+
+import it.greenvulcano.gvesb.j2ee.JNDIHelper;
+import it.greenvulcano.gvesb.j2ee.jndi.JNDIBuilderManager;
+import junit.framework.TestCase;
 
 /**
  *
