@@ -1,0 +1,66 @@
+Prerequisiti:
+- JDK 1.8.x
+
+Scaricare dal repository http://svn.code.sf.net/p/greenvulcanoesb/source/trunk il progetto 'gvesb-parent'.
+Identifichiamo come GV_PROJECT_HOME il path del progetto.
+
+Eseguidre le operazioni propedeutiche comuni come descritto in COMPILE.ita.txt, poi eseguire:
+- aprire una shell
+- modificare la variabile PATH inserendo all'inizio (GV_PROJECT_HOME)/tools/bin (Ant) e (GV_PROJECT_HOME)/tools/maven/bin (Maven2)
+- utilizzare il comando build.sh (Linux) o build.bat (Windows) per avviare la preparazione del pacchetto GV ESB base
+
+Alla fine del processo la directory target conterrà i pacchetti .tar.gz e .zip utilizzavili per l'installazione.
+
+Opzioni del comando build per compilazione pacchetto ESB base:
+- build.sh
+    - esegue 'mvn install' nella root del progetto
+    - popola thirdparty/libraries e thirdparty/licenses
+    - genera i pacchetti .tar.gz e .zip
+- build.sh -Dskip.build=true
+    - popola thirdparty/libraries e thirdparty/licenses
+    - genera i pacchetti .tar.gz e .zip
+- build.sh -Dskip.thirdparty=true
+    - esegue 'mvn install' nella root del progetto
+    - genera i pacchetti .tar.gz e .zip
+    * ATTENZIONE: al momento questa opzione NON deve essere utilizzata se sono state effettuate modifiche ai componenti GV
+- build.sh -Dskip.build=true -Dskip.thirdparty=true
+    - genera i pacchetti .tar.gz e .zip
+
+Opzioni del comando build per compilazione pacchetti extra:
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] hl7
+    - genera il pacchetto Adapter HL7 .tar.gz e .zip
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] rules
+    - genera il pacchetto Rules Engine .tar.gz e .zip
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] openspc
+    - genera il pacchetto Adapter OpenSpCoop .tar.gz e .zip
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] social
+    - genera il pacchetto Adapter Social .tar.gz e .zip
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] ode
+    - genera il pacchetto BPEL Engine ODE .tar.gz e .zip
+
+Opzioni del comando build per compilazione del pacchetto full:
+- build.sh [-Dskip.build=true] [-Dskip.thirdparty=true] full
+    - genera il pacchetto completo Base + tutti gli Extra .tar.gz e .zip
+
+Opzioni del comando build per compilazione pacchetto ESB base, pacchetti extra e full:
+- build.sh All
+    - esegue 'mvn install' nella root del progetto
+    - popola thirdparty/libraries e thirdparty/licenses
+    - genera i pacchetti .tar.gz e .zip
+- build.sh -Dskip.build=true All
+    - popola thirdparty/libraries e thirdparty/licenses
+    - genera i pacchetti .tar.gz e .zip
+- build.sh -Dskip.thirdparty=true All
+    - esegue 'mvn install' nella root del progetto
+    - genera i pacchetti .tar.gz e .zip
+    * ATTENZIONE: al momento questa opzione NON deve essere utilizzata se sono state effettuate modifiche ai componenti GV
+- build.sh -Dskip.build=true -Dskip.thirdparty=true All
+    - genera i pacchetti .tar.gz e .zip
+
+Opzioni del comando build per pulizia ambiente di compilazione:
+- build.sh clean
+    - rimuove la directory build-release/target
+- build.sh purge
+    - rimuove la directory build-release/target
+    - esegue 'mvn clean' nella root del progetto
+    - rimuove thirdparty/libraries e thirdparty/licenses

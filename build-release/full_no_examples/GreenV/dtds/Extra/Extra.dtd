@@ -1,0 +1,55 @@
+<!ENTITY % gvcommons SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVCommons.dtd">
+%gvcommons;
+
+<!ENTITY % gvdh SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVDataHandler.dtd">
+%gvdh;
+
+<!ENTITY % gvexcel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVExcel.dtd">
+%gvexcel;
+
+<!ENTITY % gvhttp SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHTTPInbound.dtd">
+%gvhttp;
+
+<!ENTITY % gvhl7 SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHL7.dtd">
+%gvhl7;
+
+<!ENTITY % gvopenspcoop SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVOpenSpCoop.dtd">
+%gvopenspcoop;
+
+<!ENTITY % gvrules SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVRules.dtd">
+%gvrules;
+
+<!ENTITY % gvsocial SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSocial.dtd">
+%gvsocial;
+
+<!ENTITY % gvbpel SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVBpel.dtd">
+%gvbpel;
+
+<!ENTITY % gvsap SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSAP.dtd">
+%gvsap;
+
+<!ENTITY % gvpush SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVPushNotification.dtd">
+%gvpush;
+
+<!ENTITY % extra-j2ee-calls "">
+<!ENTITY % extra-comm-calls "|hl7-call|openspcoop-call|%social-calls;|sap-call|%push-calls;">
+<!ENTITY % extra-file-calls "">
+<!ENTITY % extra-db-calls   "|dh-call">
+<!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call">
+
+<!ENTITY % extra-enqueue "">
+<!ENTITY % extra-dequeue "">
+
+<!ENTITY % extra-dte-transformers "|XML2HL7Transformation|HL72XMLTransformation">
+
+<!ENTITY % extra-wf-operations ",BpelOperation*">
+<!ENTITY % extra-wf-extensions ",BpelEngineConfiguration">
+
+<!ENTITY % extra-core "">
+<!ENTITY % extra-adapters ",GVAdapterHttpConfiguration,GVHL7ListenerManager,GVRulesConfigManager,GVSocialAdapterManager,GVPushNotificationManager">
+<!ENTITY % extra-support "">
+
+<!ENTITY % extra-input-services "|dh-selector-service">
+<!ENTITY % extra-output-services "">
+
+<!ENTITY % extra-pre-fwd-validators "|HL7ConnectionValidator">

@@ -1,0 +1,99 @@
+CREATE DATABASE  IF NOT EXISTS `gv_log`
+USE `gv_log`;
+
+DROP TABLE IF EXISTS `log_vcl`;
+CREATE TABLE `log_vcl` (
+  `ID_MSG` bigint(20) NOT NULL AUTO_INCREMENT,
+  `TSTAMP` datetime NOT NULL,
+  `PRIO` varchar(15) NOT NULL,
+  `IPRIO` bigint(20) NOT NULL,
+  `CAT` varchar(255) DEFAULT NULL,
+  `THREAD` varchar(255) DEFAULT NULL,
+  `SERVER` varchar(50) DEFAULT NULL,
+  `ID` varchar(50) DEFAULT NULL,
+  `SYSTEM` varchar(255) DEFAULT NULL,
+  `SERVICE` varchar(255) DEFAULT NULL,
+  `OPERATION` varchar(255) DEFAULT NULL,
+  `MSG` text,
+  `THROWABLE` text,
+  `MSG_SIZE` bigint(20) NOT NULL,
+  PRIMARY KEY (`ID_MSG`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+DROP TABLE IF EXISTS `log_core`;
+CREATE TABLE `log_core` (
+  `ID_MSG` bigint(20) NOT NULL AUTO_INCREMENT,
+  `TSTAMP` datetime NOT NULL,
+  `PRIO` varchar(15) NOT NULL,
+  `IPRIO` bigint(20) NOT NULL,
+  `CAT` varchar(255) DEFAULT NULL,
+  `THREAD` varchar(255) DEFAULT NULL,
+  `SERVER` varchar(50) DEFAULT NULL,
+  `ID` varchar(50) DEFAULT NULL,
+  `SYSTEM` varchar(255) DEFAULT NULL,
+  `SERVICE` varchar(255) DEFAULT NULL,
+  `OPERATION` varchar(255) DEFAULT NULL,
+  `MSG` text,
+  `THROWABLE` text,
+  `MSG_SIZE` bigint(20) NOT NULL,
+  PRIMARY KEY (`ID_MSG`)
+) ENGINE=InnoDB AUTO_INCREMENT=74586 DEFAULT CHARSET=latin1;
+
+
+DROP TABLE IF EXISTS `log_adp`;
+CREATE TABLE `log_adp` (
+  `ID_MSG` bigint(20) NOT NULL AUTO_INCREMENT,
+  `TSTAMP` datetime NOT NULL,
+  `PRIO` varchar(15) NOT NULL,
+  `IPRIO` bigint(20) NOT NULL,
+  `CAT` varchar(255) DEFAULT NULL,
+  `THREAD` varchar(255) DEFAULT NULL,
+  `SERVER` varchar(50) DEFAULT NULL,
+  `ID` varchar(50) DEFAULT NULL,
+  `SYSTEM` varchar(255) DEFAULT NULL,
+  `SERVICE` varchar(255) DEFAULT NULL,
+  `OPERATION` varchar(255) DEFAULT NULL,
+  `MSG` text,
+  `THROWABLE` text,
+  `MSG_SIZE` bigint(20) NOT NULL,
+  PRIMARY KEY (`ID_MSG`)
+) ENGINE=InnoDB AUTO_INCREMENT=74586 DEFAULT CHARSET=latin1;
+
+
+DROP TABLE IF EXISTS `log_dte`;
+CREATE TABLE `log_dte` (
+  `ID_MSG` bigint(20) NOT NULL AUTO_INCREMENT,
+  `TSTAMP` datetime NOT NULL,
+  `PRIO` varchar(15) NOT NULL,
+  `IPRIO` bigint(20) NOT NULL,
+  `CAT` varchar(255) DEFAULT NULL,
+  `THREAD` varchar(255) DEFAULT NULL,
+  `SERVER` varchar(50) DEFAULT NULL,
+  `ID` varchar(50) DEFAULT NULL,
+  `SYSTEM` varchar(255) DEFAULT NULL,
+  `SERVICE` varchar(255) DEFAULT NULL,
+  `OPERATION` varchar(255) DEFAULT NULL,
+  `MSG` text,
+  `THROWABLE` text,
+  `MSG_SIZE` bigint(20) NOT NULL,
+  PRIMARY KEY (`ID_MSG`)
+) ENGINE=InnoDB AUTO_INCREMENT=74586 DEFAULT CHARSET=latin1;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER
+VIEW `gv_log`.`vw_gv_log` AS
+select 'GVCORE' AS `SOURCE`,`ID_MSG`,`TSTAMP`, `PRIO`,`IPRIO`,`CAT`, `THREAD`,`SERVER`,`ID`, `SYSTEM`,`SERVICE`,
+`OPERATION`, `MSG_SIZE`, `MSG`, `THROWABLE`
+from `gv_log`.`log_core`
+union all
+select 'GVVCL' AS `SOURCE`,`ID_MSG`,`TSTAMP`, `PRIO`,`IPRIO`,`CAT`, `THREAD`,`SERVER`,`ID`, `SYSTEM`,`SERVICE`,
+`OPERATION`, `MSG_SIZE`, `MSG`, `THROWABLE`
+from `gv_log`.`log_vcl`
+union all
+select 'GVADP' AS `SOURCE`,`ID_MSG`,`TSTAMP`, `PRIO`,`IPRIO`,`CAT`, `THREAD`,`SERVER`,`ID`, `SYSTEM`,`SERVICE`,
+`OPERATION`, `MSG_SIZE`, `MSG`, `THROWABLE`
+from `gv_log`.`log_adp`
+union all
+select 'GVDTE' AS `SOURCE`,`ID_MSG`,`TSTAMP`, `PRIO`,`IPRIO`,`CAT`, `THREAD`,`SERVER`,`ID`, `SYSTEM`,`SERVICE`,
+`OPERATION`, `MSG_SIZE`, `MSG`, `THROWABLE`
+from `gv_log`.`log_dte`
