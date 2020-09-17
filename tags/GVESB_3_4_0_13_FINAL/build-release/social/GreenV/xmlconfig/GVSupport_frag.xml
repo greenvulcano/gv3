@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVSupport SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVSupport.dtd">
+
+<GVSupport version="1.0">
+    <GVLog4JConfiguration name="LOG4J" type="module">
+        <log4j:configuration debug="false" threshold="all"
+                             xmlns:log4j="http://jakarta.apache.org/log4j/">
+            ....
+            <appender class="it.greenvulcano.log.GVDailyRollingFileAppender"
+                      name="LOGGER_FOR_GVSOCIAL">
+                <param name="Append" value="true"/>
+                <param name="ImmediateFlush" value="true"/>
+                <param name="BufferedIO" value="false"/>
+                <param name="BufferSize" value="4096"/>
+                <param name="DatePattern" value="yyyy-MM-dd"/>
+                <param name="File" value="sp{{gv.app.home}}/log/GVSocial.$.log"/>
+                <layout class="org.apache.log4j.PatternLayout">
+                    <param name="ConversionPattern"
+                           value="[%d{dd MMM yyyy HH:mm:ss,SSS}][%-5.5p][%X{ID}][%X{SYSTEM}][%X{SERVICE}][%X{SERVER}][%X{OPERATION}][%t][%c] - %m %n"/>
+                </layout>
+            </appender>
+            ....
+
+            <logger additivity="false" name="it.greenvulcano.gvesb.social">
+                <level value="DEBUG"/>
+                <appender-ref ref="LOGGER_FOR_GVSOCIAL"/>
+                <!--<appender-ref ref="DB_LOGGER_FOR_GVADP"/>-->
+            </logger>
+        </log4j:configuration>
+    </GVLog4JConfiguration>
+
+    ....
+</GVSupport>

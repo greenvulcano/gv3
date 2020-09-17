@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: cromano
+Build-Jdk: 1.6.0_16
+Implementation-Title: GreenVulcano Core Administration Console
+Implementation-Version: 3.0.0
+Implementation-Vendor-Id: GreenVulcano
+Implementation-Vendor: GreenVulcano S.r.l.
+ProjectName: GreenVulcano
+ProjectUrl: http://www.greenvulcano.it
+mode: development
+

@@ -1,0 +1,33 @@
+Path definitions:
+GV_HOME: root path for GreenVulcano (example:/home/user/@base.dir@/GreenV)
+ADAPTER_HOME: Adapter_HL7/GreenV
+
+Installation instructions:
+- Copy into GV_HOME/application/deploy/gvesb-javaee5.ear/lib directory all jar libraries contained in ADAPTER_HOME/application/deploy/gvesb-javaee5.ear/lib directory
+- Copy in GV_HOME/gvdte/datasource/xsl the entire ADAPTER_HOME/gvdte/datasource/xsl/HL7 directory
+- Copy in GV_HOME/ the entire ADAPTER_HOME/TEST directory
+- Access the GV_HOME/dtds/Extra directory
+    - Copy into the current directory the ADAPTER_HOME/dtds/Extra/GVHL7.dtd file;
+    - Modify Extra.dtd file by properly inserting the code in ADAPTER_HOME/dtds/Extra/Extra_frag.dtd file.
+- Access the GV_HOME/xmlconfig directory
+    - Modify GVAdapters.xml            file by properly inserting the code in ADAPTER_HOME/xmlconfig/GVAdapters_frag.xml;
+    - Modify GVCore.xml                file by properly inserting the code in ADAPTER_HOME/xmlconfig/GVCore_frag.xml;
+    - Modify gvesb-catalog.xml         file by properly inserting the code in ADAPTER_HOME/xmlconfig/gvesb-catalog_frag.xml;
+    - Modify gv-jmx.xml                file by properly inserting the code in ADAPTER_HOME/xmlconfig/gv-jmx_frag.xml;
+    - Modify GVSupport.xml             file by properly inserting the code in ADAPTER_HOME/xmlconfig/GVSupport_frag.xml;
+    - Modify XMLConfigSplit.properties file by properly inserting the code in ADAPTER_HOME/xmlconfig/XMLConfigSplit_frag.properties.
+
+Test:
+Three GV services have been developed to test the adapter:
+- TestHL7:
+    requires in input the hl7 code stored in hl7_in.txt file;
+    performs the transformation of the hl7 code in xml format and its further re-tranformation in hl7 code;
+    to be considered a successful test, performing the RequestReply shall achieve identical output than input.
+- TestHL7_Listener:
+    is invoked by the listener.
+- TestHL7_Client:
+    requires in input the hl7 code stored in hl7_in.txt file;
+    invokes HL7Listener throug th hl7-call operation;
+    to be considered a successful test, performing the RequestReply shall produce an output file in which the second line has to be identical to the second line of hl7_out.txt;
+    this line presents the code to indicate that the message has been accepted, followed by the message ID.
+    For completeness, you can verify that the message id (1234561111) is also present in the first line of the input file (hl7_in.txt).

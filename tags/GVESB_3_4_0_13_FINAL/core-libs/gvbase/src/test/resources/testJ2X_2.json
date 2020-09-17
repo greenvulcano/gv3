@@ -1,0 +1,44 @@
+{
+  "status": "success",
+  "code": "200",
+  "message": "",
+  "token": "123qwer54",
+  "data": {
+    "userInfo": {
+      "userId": "5379741",
+      "personalDetails": {
+        "name": "FEDERICA",
+        "surname": "VALENTINI",
+        "nationalRegistration": "",
+        "email": "",
+        "telephone": "",
+        "address": "",
+        "town": "",
+        "country": "",
+        "zipCode": ""
+      }
+    },
+    "profiles": {
+      "driver": [],
+      "supervisor": [],
+      "manager": [
+        {
+          "fleetId": "1",
+          "fleetName": "Fame Fleet",
+          "company": "Fame inc",
+          "fleetCreationDate": "01/23/2016",
+          "groupId": "2",
+          "groupName": "Group_1"
+        }
+      ],
+      "administrator": [
+        {
+          "fleetId": "1",
+          "fleetName": "Fame Fleet",
+          "company": "Fame inc",
+          "fleetCreationDate": "01/23/2016"
+        }
+      ]
+    }
+  }
+}

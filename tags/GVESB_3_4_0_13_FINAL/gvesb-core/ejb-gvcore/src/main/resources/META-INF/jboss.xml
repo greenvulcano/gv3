@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE jboss PUBLIC "-//JBoss//DTD JBOSS 4.0//EN" "http://www.jboss.org/j2ee/dtd/jboss_4_0.dtd">
+
+<jboss>
+    <enterprise-beans>
+        <session>
+            <ejb-name>GreenVulcano_main</ejb-name>
+            <jndi-name>gvesb/core/GreenVulcano</jndi-name>
+            <local-jndi-name>gvesb/core/GreenVulcanoLocal</local-jndi-name>
+            <!--<security-identity>
+                <run-as-principal>
+            </security-identity>-->
+<!--
+            <clustered>True</clustered>
+            <cluster-config>
+                    <partition-name>GreenVulcanoPartition</partition-name>
+                    <home-load-balance-policy>org.jboss.ha.framework.interfaces.RoundRobin</home-load-balance-policy>
+                    <bean-load-balance-policy>org.jboss.ha.framework.interfaces.RoundRobin</bean-load-balance-policy>
+            </cluster-config>
+-->
+        </session>
+    </enterprise-beans>
+
+    <container-configurations>
+        <container-configuration extends="Standard Stateless SessionBean">
+            <container-name>Secure Stateless SessionBean</container-name>
+            <security-domain>java:/jaas/gvesb</security-domain>
+        </container-configuration>
+    </container-configurations>
+</jboss>

@@ -1,0 +1,65 @@
+Prerequisiti:
+- installazione di jdk 1.8.x SUN/Oracle
+
+Il file contiene due directory:
+(1) jboss-5.1.0.GA: application server Jboss
+(2) GreenV: applicazione GreenVulcano ESB
+
+Installazione (Windows):
+- estrarre il contenuto del file in C: (si consiglia di evitare path con spazi nei nomi delle directory)
+- modificare il file C:\@base.dir@\GreenV\bin\env_scripts.cmd settando le variabili d'ambiente:
+    - JBOSS_HOME=C:\@base.dir@\jboss-5.1.0.GA
+    - GV_HOME=C:\@base.dir@\GreenV
+    - JAVA_HOME="path del JDK 1.8"
+    - GV_SERVER=%JBOSS_HOME%\server\GreenV
+
+Installazione (Unix):
+- estrarre il contenuto del file ad es. in /home/jboss
+- modificare il file /home/jboss/@base.dir@/GreenV/bin/env_scripts.sh settando le variabili d'ambiente:
+    - JBOSS_HOME=/home/jboss/@base.dir@/jboss-5.1.0.GA
+    - GV_HOME=/home/jboss/@base.dir@/GreenV
+    - JAVA_HOME="path del JDK 1.8"
+    - GV_SERVER=$JBOSS_HOME/server/GreenV
+
+Per avviare il database HSQLDB di supporto eseguire lo script:
+<GV_HOME>\hsqldb\bin\start_DB.cmd (Windows)
+o
+<GV_HOME>/hsqldb/bin/start_DB.sh  (Unix, controllare i permessi di esecuzione)
+
+Per avviare il server di GreenVulcano eseguire lo script:
+<GV_HOME>\bin\gvstart.cmd (Windows)
+o
+<GV_HOME>/bin/gvstart.sh  (Unix, controllare i permessi di esecuzione)
+
+Per accedere alla Console di Amministrazione utilizzare l'url "http://localhost:8080/gvconsole"
+con le seguenti credenziali:
+user: gvesb
+password: gvesb
+
+Test:
+- accedere alla voce "Testing";
+- impostare "System" al valore "GVESB" e "Service" al valore "TOUPPER"
+- impostare una stringa qualsiasi nel campo "Data" (in minuscolo) e cliccare su pulsante "requestReply".
+- il risultato della chiamata e' verificabile invocando il pulsante "show as Text" (viene restituita la stringa di input trasformata in maiuscolo).
+
+
+Per accedere alle Console di Amministrazione di JBoss utilizzare le seguenti credenziali:
+user: gvesb123
+password: gvesb123
+
+
+Per arrestare il server di GreenVulcano eseguire lo script:
+<GV_HOME>\bin\gvstop.cmd gvesb123 gvesb123 (Windows)
+o
+<GV_HOME>/bin/gvstop.sh gvesb123 gvesb123  (Unix, controllare i permessi di esecuzione)
+
+
+Per arrestare il database HSQLDB di supporto eseguire lo script:
+<GV_HOME>\hsqldb\bin\stop_DB.cmd (Windows)
+o
+<GV_HOME>/hsqldb/bin/stop_DB.sh  (Unix, controllare i permessi di esecuzione)
+
+
+Saluti,
+Il Team di GreenVulcano.
+(C)Maggio 2016.
