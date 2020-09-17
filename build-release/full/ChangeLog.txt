@@ -1,4 +1,43 @@
 -------------------------------------------
+ESB version 3.4.0.13
+-------------------------------------------
+
+Commons:
+- Added support for pre-compiled javascript scripts and cached DB connection in sql*{{ metadata
+- Added utility class for managing encryption of properties file values
+- Added utility methods to handle AES/xDES IV
+- Added DB connection time in logs
+- Improved connection pool clean-up on shutdown
+- Added capability to detach shutdown handler
+
+Core:
+- Corrected resource management in GVCore and GVPolicy
+- Improved thread management in Spawn subflow call
+
+Task Scheduler:
+- Moved jdbc connection definition for TaskManagr into GVAdapters.xml
+- Improved Quartz DBStore synchronization on clustered installations
+
+DTE:
+- Added caching to XSL transformation used in json to xml and mxl to json transformers
+- Prepares transformation parameters log message only if logger at DEBUG
+
+DataHandler:
+- Improved DH logging of execution/transformation/connection times; corrected internal results cache management.
+- Added DBOCallDynamicSP useful to invoke SP know at runtime
+- Change the DataHandler to avoid data conversion like XML->byte[]/String->XML->JSON: the result of a select service is typically an XML and must remain in this format
+
+JMS Listener:
+- Improved inoperative JMS listener management
+
+GVConsole:
+- Corrected import/export services configuration in GVConsole
+
+VCL Mail:
+- Added support for specific SMTP server response property during email sending
+- Replaces invalid path chars in cache ids
+
+-------------------------------------------
 ESB version 3.4.0.12
 -------------------------------------------
 
@@ -19,7 +58,7 @@ Core:
 GVConsole:
 - Updated GVConsole in order to handle service level import/export with dependency management and visual comparison of deployment differences
 
-DTEControlled:
+DTE:
 - Improved management and logging of XML data
 - Added support to placeholders into transformers parameters
 
@@ -58,7 +97,7 @@ Commons:
 - Modified sqlX placeholder in order to return an empty string instead of null if no data found
 - Added dateAdd and dateformatAdd placeholders
 
-DTEControlled:
+DTE:
 - Added capability to specify file encoding in csv to xml DTE transformer
 - Added support at xml to json converter to use * as "all fields" for forcing conversion to string
 
@@ -347,7 +386,7 @@ GVConsole:
 
 DTE:
 - Added basic json to xml and xml to json DTE transformers
-- Improved DTEControlled clean-up on destroy.
+- Improved DTEController clean-up on destroy.
 
 DataHandler:
 - DBOBuilder: renamed Merge element to XMLMerge
