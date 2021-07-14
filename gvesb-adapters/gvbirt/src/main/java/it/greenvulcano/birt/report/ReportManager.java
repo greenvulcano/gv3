@@ -3,16 +3,6 @@
  */
 package it.greenvulcano.birt.report;
 
-import it.greenvulcano.birt.report.exception.BIRTException;
-import it.greenvulcano.birt.report.internal.ReportRenderOptions;
-import it.greenvulcano.configuration.ConfigurationEvent;
-import it.greenvulcano.configuration.ConfigurationListener;
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.event.util.shutdown.ShutdownEvent;
-import it.greenvulcano.event.util.shutdown.ShutdownEventLauncher;
-import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
-import it.greenvulcano.util.metadata.PropertiesHandler;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +21,16 @@ import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import it.greenvulcano.birt.report.exception.BIRTException;
+import it.greenvulcano.birt.report.internal.ReportRenderOptions;
+import it.greenvulcano.configuration.ConfigurationEvent;
+import it.greenvulcano.configuration.ConfigurationListener;
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.event.util.shutdown.ShutdownEvent;
+import it.greenvulcano.event.util.shutdown.ShutdownEventLauncher;
+import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
 /**
  * @version 3.1.0 19 Gen 2011
@@ -53,7 +53,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * Legge il file xml di configrazione dei report e inizializza il
      * {@link ReportManager} secondo i parametri di tale file. Crea la lista dei
      * {@link Group} e inizializza i singoli gruppi.
-     * 
+     *
      * @throws Exception
      *         in caso di errori
      */
@@ -77,25 +77,25 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
         try { // inizializzo l'engine
             Node engNode = XMLConfig.getNode(BIRT_CFG_FILE, "/GVBIRTReportConfiguration/Engine");
 
-            reportEngineHome = PropertiesHandler.expand(XMLConfig.get(engNode, "@reportEngineHome",
+            this.reportEngineHome = PropertiesHandler.expand(XMLConfig.get(engNode, "@reportEngineHome",
                     "sp{{gv.app.home}}/BIRTReportEngine"));
-            logLevel = XMLConfig.get(engNode, "@logLevel", "FINEST");
+            this.logLevel = XMLConfig.get(engNode, "@logLevel", "FINEST");
             NodeList rnl = XMLConfig.getNodeList(engNode, "Renders/*[@type='report-render']");
             if ((rnl != null) && (rnl.getLength() > 0)) {
                 for (int i = 0; i < rnl.getLength(); i++) {
                     Node n = rnl.item(i);
                     ReportRenderOptions opt = (ReportRenderOptions) Class.forName(XMLConfig.get(n, "@class")).newInstance();
                     opt.init(n);
-                    renders.put(opt.getType(), opt);
+                    this.renders.put(opt.getType(), opt);
                 }
             }
 
             EngineConfig config = new EngineConfig();
-            //config.setBIRTHome(reportEngineHome);
-            config.setLogConfig(reportEngineHome + File.separator + "log", Level.parse(logLevel));
+            //config.setBIRTHome(this.reportEngineHome);
+            config.setLogConfig(this.reportEngineHome + File.separator + "log", Level.parse(this.logLevel));
             Platform.startup(config);
             IReportEngineFactory factory = (IReportEngineFactory) Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
-            engine = factory.createReportEngine(config);
+            this.engine = factory.createReportEngine(config);
         }
         catch (Exception exc) {
             throw new BIRTException("Error initializing BIRT Engine", exc);
@@ -106,7 +106,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
 
     private void initReport() throws BIRTException
     {
-        if (isReportsInit) {
+        if (this.isReportsInit) {
             return;
         }
 
@@ -117,9 +117,9 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
                 Group g = new Group();
                 g.init(n);
 
-                groups.put(g.getName(), g);
+                this.groups.put(g.getName(), g);
             }
-            isReportsInit = true;
+            this.isReportsInit = true;
         }
         catch (Exception exc) {
             throw new BIRTException("Error initializing reports", exc);
@@ -130,7 +130,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * Restituisce una lista (List) di String contenente i nomi dei
      * {@link Group} contenuti nel {@link ReportManager}, null se non ci sono
      * gruppi
-     * 
+     *
      * @return La List dei nomi (String) degli oggetti {@link Group}, null se
      *         non ci sono gruppi
      */
@@ -141,7 +141,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
         List<String> l = new ArrayList<String>(0);
         String key = null;
 
-        for (Iterator<String> it = groups.keySet().iterator(); it.hasNext();) {
+        for (Iterator<String> it = this.groups.keySet().iterator(); it.hasNext();) {
             key = it.next();
             l.add(key);
         }
@@ -154,7 +154,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     /**
      * Restituisce una lista (List) degli oggetti {@link Group} contenuti nel
      * {@link ReportManager}, null se non ci sono gruppi
-     * 
+     *
      * @return La List degli oggetti {@link Group} contenuti nel
      *         {@link ReportManager}, null se non ci sono gruppi
      */
@@ -165,9 +165,9 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
         List<Group> l = new ArrayList<Group>(0);
         String key = null;
 
-        for (Iterator<String> it = groups.keySet().iterator(); it.hasNext();) {
+        for (Iterator<String> it = this.groups.keySet().iterator(); it.hasNext();) {
             key = it.next();
-            l.add(groups.get(key));
+            l.add(this.groups.get(key));
         }
         if (l.isEmpty()) {
             return null;
@@ -179,7 +179,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * Restituisce una lista (List) dei nomi dei {@link Report} contenuti nel
      * {@link Group} di nome <i>group</i>, null se non ci sono gruppi con quel
      * nome o se il gruppo non ha report
-     * 
+     *
      * @return La List degli oggetti {@link Group} contenuti nel
      *         {@link ReportManager}, null se non ci sono gruppi con quel nome o
      *         se il gruppo non ha report
@@ -192,7 +192,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
         initReport();
 
         List<String> l = new ArrayList<String>(0);
-        Group g = groups.get(group);
+        Group g = this.groups.get(group);
         if (g == null) {
             return null;
         }
@@ -205,7 +205,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * Restituisce una lista (List) di String contenente i nomi degli oggetti
      * {@link Report} contenuti nel {@link Group} in ingresso, null se non ci
      * sono report nel gruppo
-     * 
+     *
      * @return La List dei nomi (String) degli oggetti {@link Report} contenuti
      *         nel {@link Group} in ingresso, null se non ci sono report nel
      *         gruppo
@@ -236,7 +236,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * Restituisce una lista (List) degli oggetti {@link Report} del
      * {@link Group} con nome corrispondente al parametro in ingresso, null se
      * non ci sono gruppi con quel nome o se il gruppo non ha report
-     * 
+     *
      * @return La List degli oggetti {@link Group} contenuti nel
      *         {@link ReportManager}, null se non ci sono gruppi con quel nome o
      *         se il gruppo non ha report
@@ -250,7 +250,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
 
         List<Report> l = new ArrayList<Report>(0);
         String key = null;
-        Group g = groups.get(group);
+        Group g = this.groups.get(group);
         if (g == null) {
             return null;
         }
@@ -272,7 +272,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     /**
      * Restituisce una lista (List) degli oggetti {@link Report} contenuti nel
      * {@link Group} in ingresso, null se non ci sono report nel gruppo
-     * 
+     *
      * @return La List degli oggetti {@link Report} contenuti nel {@link Group}
      *         in ingresso, null se non ci sono report nel gruppo
      * @param g
@@ -301,7 +301,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     {
         initReport();
 
-        Group g = groups.get(group);
+        Group g = this.groups.get(group);
         if (g == null) {
             return null;
         }
@@ -316,7 +316,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * di nome <i>group</i>, null se il report non ha parametri, se il gruppo
      * non ha report, o se non esistono un gruppo o un report con nome uguale a
      * quello in ingresso
-     * 
+     *
      * @return La List degli oggetti {@link Parameter} contenuti nel
      *         {@link Report} di nome <i>report</i> che appartiene al
      *         {@link Group} di nome <i>group</i>, null se il report non ha
@@ -333,7 +333,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     {
         initReport();
 
-        Group g = groups.get(group);
+        Group g = this.groups.get(group);
         if (g == null) {
             return null;
         }
@@ -347,7 +347,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     /**
      * Restituisce una lista (List) degli oggetti {@link Parameter} contenuti
      * nel {@link Report} in ingresso, null se il report non ha parametri
-     * 
+     *
      * @return La List degli oggetti {@link Parameter} contenuti nel Report in
      *         ingresso, null se il report non ha parametri
      * @param r
@@ -365,7 +365,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * appartiene al {@link Group} di nome <i>group</i>, null se il report non
      * ha parametri, se il gruppo non ha report, o se non esistono un gruppo o
      * un report con nome uguale a quello in ingresso
-     * 
+     *
      * @return La List dei nomi (String) degli oggetti {@link Parameter}
      *         contenuti nel {@link Report} di nome <i>report</i> che appartiene
      *         al {@link Group} di nome <i>group</i>, null se il report non ha
@@ -382,7 +382,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     {
         initReport();
 
-        Group g = groups.get(group);
+        Group g = this.groups.get(group);
         if (g == null) {
             return null;
         }
@@ -397,7 +397,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * Restituisce una lista (List) di String contenente i nomi degli oggetti
      * {@link Parameter} contenuti nel {@link Report} in ingresso, null se il
      * report non ha parametri
-     * 
+     *
      * @return La List dei nomi (String) degli oggetti {@link Parameter}
      *         contenuti nel {@link Report} in ingresso, null se il report non
      *         ha parametri
@@ -418,7 +418,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      * nome <i>group</i>, null se il report non ha parametri, se il gruppo non
      * ha report, o se non esistono un gruppo o un report con nome uguale a
      * quello in ingresso
-     * 
+     *
      * @return La List dei nomi (String), oridnata alfabeticamente, degli
      *         oggetti {@link Parameter} contenuti nel {@link Report} di nome
      *         <i>report</i> che appartiene al {@link Group} di nome
@@ -444,10 +444,10 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     }
 
     /**
-     * Restituisce una lista (List) oridnata alfabeticamente di String
+     * Restituisce una lista (List) ordinata alfabeticamente di String
      * contenente i nomi degli oggetti {@link Parameter} contenuti nel
      * {@link Report} in ingresso, null se il report non ha parametri
-     * 
+     *
      * @return La List dei nomi (String) degli oggetti {@link Parameter}
      *         contenuti nel {@link Report} in ingresso, null se il report non
      *         ha parametri
@@ -469,9 +469,9 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     public IRunAndRenderTask getTask(String reportConfig) throws BIRTException
     {
         try {
-            IReportRunnable design = engine.openReportDesign(reportEngineHome + File.separator + "reports"
+            IReportRunnable design = this.engine.openReportDesign(this.reportEngineHome + File.separator + "reports"
                     + File.separator + reportConfig);
-            return engine.createRunAndRenderTask(design);
+            return this.engine.createRunAndRenderTask(design);
         }
         catch (Exception exc) {
             throw new BIRTException("Error initializing BIRT ReportRender for [" + reportConfig + "]", exc);
@@ -484,7 +484,7 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
      */
     public ReportRenderOptions getDefaultReportRender(String type)
     {
-        return renders.get(type);
+        return this.renders.get(type);
     }
 
     private synchronized void reportChosen(Report report) throws Exception
@@ -497,16 +497,16 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
             IReportRunnable design = null;
             try {
                 // Open a report design
-                design = engine.openReportDesign(reportEngineHome + File.separator + "reports" + File.separator
+                design = this.engine.openReportDesign(this.reportEngineHome + File.separator + "reports" + File.separator
                         + report.getReportConfig());
             }
             catch (Exception exc) {
                 throw new BIRTException("Error initializing BIRT ReportDesign for [" + report.getReportConfig() + "]",
                         exc);
             }
-            IGetParameterDefinitionTask task = engine.createGetParameterDefinitionTask(design);
+            IGetParameterDefinitionTask task = this.engine.createGetParameterDefinitionTask(design);
 
-            report.init(renders, engine, design, task);
+            report.init(this.renders, this.engine, design, task);
         }
 
         return;
@@ -514,18 +514,18 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
 
     private void destroy()
     {
-        renders.clear();
-        groups.clear();
+        this.renders.clear();
+        this.groups.clear();
         try {
-            if (engine != null) {
-                engine.destroy();
+            if (this.engine != null) {
+                this.engine.destroy();
             }
         }
         catch (Exception exc) {
             exc.printStackTrace();
         }
         finally {
-            engine = null;
+            this.engine = null;
         }
         try {
             Platform.shutdown();
@@ -556,8 +556,8 @@ public class ReportManager implements ShutdownEventListener, ConfigurationListen
     public void configurationChanged(ConfigurationEvent event)
     {
         if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(BIRT_CFG_FILE)) {
-            groups.clear();
-            isReportsInit = false;
+            this.groups.clear();
+            this.isReportsInit = false;
         }
     }
 }

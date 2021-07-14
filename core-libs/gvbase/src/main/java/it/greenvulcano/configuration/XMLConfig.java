@@ -1,33 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.configuration;
-
-import it.greenvulcano.event.EventHandler;
-import it.greenvulcano.util.crypto.CryptoHelper;
-import it.greenvulcano.util.crypto.CryptoHelperException;
-import it.greenvulcano.util.crypto.CryptoUtilsException;
-import it.greenvulcano.util.txt.PropertiesFileReader;
-import it.greenvulcano.util.txt.TextUtils;
-import it.greenvulcano.util.xml.XMLUtils;
-import it.greenvulcano.util.xpath.search.XPath;
-import it.greenvulcano.util.xpath.search.XPathAPI;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -55,6 +45,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+
+import it.greenvulcano.event.EventHandler;
+import it.greenvulcano.util.crypto.CryptoHelper;
+import it.greenvulcano.util.crypto.CryptoHelperException;
+import it.greenvulcano.util.crypto.CryptoUtilsException;
+import it.greenvulcano.util.txt.PropertiesFileReader;
+import it.greenvulcano.util.txt.TextUtils;
+import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xpath.search.XPath;
+import it.greenvulcano.util.xpath.search.XPathAPI;
 
 /**
  * This class is used to access the XML configuration files. <br>
@@ -86,8 +86,8 @@ import org.xml.sax.InputSource;
  * XMLConfig switches from state 1 to state 2 when a file is loaded or removed,
  * switches from state 1 to state 2 when all events are raised. During firing
  * events no requests are served to the client classes.
- * 
- * 
+ *
+ *
  * <hr>
  * <h3>Splitting configuration files</h3>
  * It is possible to split configuration files in multiple fragments:
@@ -95,7 +95,7 @@ import org.xml.sax.InputSource;
  * <p>
  * In order to split a configuration file in multiple fragments, you must
  * provide to XMLConfig an XML file described by the following DTD:
- * 
+ *
  * <pre>
  *     &lt;!ELEMENT config (document*)&gt;
  *     &lt;!ATTLIST config xmlns CDATA #FIXED &quot;http://config.eai.it&quot;&gt;
@@ -105,7 +105,7 @@ import org.xml.sax.InputSource;
  *     &lt;!ATTLIST merging src CDATA #REQUIRED&gt;
  *     &lt;!ATTLIST merging dest CDATA #REQUIRED&gt;
  * </pre>
- * 
+ *
  * <p>
  * When XMLConfig loads a configuration file it check if the root of the XML is
  * a <b>config</b> element in the <b>http://gvesb.it</b> namespace.
@@ -138,27 +138,27 @@ import org.xml.sax.InputSource;
  * Suppose to have following files:
  * <p>
  * <code>frag1.xml</code>:
- * 
+ *
  * <pre>
  *     &lt;root&gt;
  *         &lt;elem id=&quot;A&quot;/&gt;
  *         &lt;elem id=&quot;B&quot;/&gt;
  *     &lt;/root&gt;
  * </pre>
- * 
+ *
  * <p>
  * <code>frag2.xml</code>:
- * 
+ *
  * <pre>
  *     &lt;root&gt;
  *         &lt;elem id=&quot;C&quot;/&gt;
  *         &lt;elem id=&quot;D&quot;/&gt;
  *     &lt;/root&gt;
  * </pre>
- * 
+ *
  * <p>
  * <code>config.xml</code>:
- * 
+ *
  * <pre>
  *     &lt;config xmlns=&quot;http://eai.it&quot;&gt;
  *      &lt;document document=&quot;frag1.xml&quot;/&gt;
@@ -167,16 +167,16 @@ import org.xml.sax.InputSource;
  *      &lt;/document&gt;
  *     &lt;/config&gt;
  * </pre>
- * 
+ *
  * <p>
  * The statement
- * 
+ *
  * <pre>
  * XMLConfig.getDocument(&quot;config.xml&quot;)
  * </pre>
- * 
+ *
  * will result in the following XML:
- * 
+ *
  * <pre>
  *     &lt;root&gt;
  *         &lt;elem id=&quot;A&quot;/&gt;
@@ -185,19 +185,19 @@ import org.xml.sax.InputSource;
  *         &lt;elem id=&quot;D&quot;/&gt;
  *     &lt;/root&gt;
  * </pre>
- * 
+ *
  * and the following statement will be true:
- * 
+ *
  * <pre>
  * XMLConfig.get(&quot;config.xml&quot;, &quot;/root/elem[3]&quot;).equals(&quot;C&quot;)
  * </pre>
- * 
+ *
  * <hr>
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public final class XMLConfig
 {
@@ -219,7 +219,7 @@ public final class XMLConfig
      * Default entity resolver used by XMLConfig. This entity resolver does not
      * resolve any entity. To use an actual entity resolver use the
      * <code>setEntityResolver()</code> method of <code>XMLConfig</code>.
-     * 
+     *
      * @see #setDefaultEntityResolver()
      * @see #setEntityResolver(org.xml.sax.EntityResolver)
      */
@@ -250,18 +250,18 @@ public final class XMLConfig
 
         public String getFileSrc()
         {
-            return fileSrc;
+            return this.fileSrc;
         }
 
         public String getXpath()
         {
-            return xpath;
+            return this.xpath;
         }
 
         @Override
         public String toString()
         {
-            return fileSrc + " -> " + xpath;
+            return this.fileSrc + " -> " + this.xpath;
         }
     }
 
@@ -335,12 +335,12 @@ public final class XMLConfig
     /**
      * Set the entity resolver used to resolve entities into the configuration
      * files.
-     * 
+     *
      * @param entityResolver
      *        EntityResolver to use in order to resolve entity. If
      *        <code>null</code> is specified then the default XML mechanism is
      *        used.
-     * 
+     *
      * @see #setDefaultEntityResolver()
      */
     public static synchronized void setEntityResolver(EntityResolver entityResolver)
@@ -355,7 +355,7 @@ public final class XMLConfig
      * Use the default entity resolver to resolve entities into the
      * configuration files. The default entity resolver does not resolve
      * anything.
-     * 
+     *
      * @see #setEntityResolver(org.xml.sax.EntityResolver)
      */
     public static synchronized void setDefaultEntityResolver()
@@ -368,7 +368,7 @@ public final class XMLConfig
 
     /**
      * Return the entity resolver for the configuration.
-     * 
+     *
      * @return the entity resolver for the configuration
      */
     public static synchronized EntityResolver getEntityResolver()
@@ -380,7 +380,7 @@ public final class XMLConfig
      * Load a configuration file and, if necessary, notifies registered
      * listeners. This method can be used in order to preload the configuration
      * file.
-     * 
+     *
      * @param file
      *        the file to read
      * @return the complete URL used to load the file.
@@ -396,7 +396,7 @@ public final class XMLConfig
      * Load a configuration file and, if necessary, notifies registered
      * listeners. This method can be used in order to preload the configuration
      * file.
-     * 
+     *
      * @param file
      *        the file to read
      * @param classLoader
@@ -426,7 +426,7 @@ public final class XMLConfig
     /**
      * Discard all cached configuration files, notifies all registered
      * listeners, reload discarded files and notifies all registered listeners.
-     * 
+     *
      * @exception XMLConfigException
      *            if error occurs
      */
@@ -451,8 +451,8 @@ public final class XMLConfig
 
         // Reload files
         //
-        for (int i = 0; i < arr.length; ++i) {
-            load(arr[i]);
+        for (String element : arr) {
+            load(element);
         }
     }
 
@@ -460,7 +460,7 @@ public final class XMLConfig
      * If loaded discard the given file and notifies all registered listeners,
      * then reload the given file (only if it was previously loaded) and
      * notifies all registered listeners.
-     * 
+     *
      * @param file
      *        the file to reload
      * @exception XMLConfigException
@@ -502,16 +502,16 @@ public final class XMLConfig
         splitDocuments = new HashMap<String, Document>();
         urls = new HashMap<String, URL>();
 
-        for (int i = 0; i < arr.length; ++i) {
-            ConfigurationEvent event = new ConfigurationEvent(ConfigurationEvent.EVT_FILE_REMOVED, arr[i],
-                    oldUrls.get(arr[i]));
+        for (String element : arr) {
+            ConfigurationEvent event = new ConfigurationEvent(ConfigurationEvent.EVT_FILE_REMOVED, element,
+                    oldUrls.get(element));
             prepareConfigurationEvent(event, false);
 
-            List<String> splits = mainToSplitFile.get(arr[i]);
+            List<String> splits = mainToSplitFile.get(element);
             if (splits != null) {
                 for (String split : splits) {
                     ConfigurationEvent eventS = new ConfigurationEvent(ConfigurationEvent.EVT_FILE_REMOVED, split,
-                            oldUrls.get(arr[i]));
+                            oldUrls.get(element));
                     prepareConfigurationEvent(eventS, false);
                 }
             }
@@ -521,7 +521,7 @@ public final class XMLConfig
     /**
      * Discard the given file. If the file was previously loaded then the
      * listeners will be notified, otherwise no action will be taken.
-     * 
+     *
      * @param file
      *        the file to discard
      */
@@ -556,7 +556,7 @@ public final class XMLConfig
     /**
      * Returns an array of <tt>String</tt> s containing the names of the files
      * currently loaded into <tt>XMLConfig</tt> private cache.
-     * 
+     *
      * @return an array of <tt>String</tt> s containing the names of the files
      *         currently loaded into <tt>XMLConfig</tt> private cache.
      */
@@ -570,10 +570,10 @@ public final class XMLConfig
 
     /**
      * Return the value for a node.
-     * 
+     *
      * @param node
      *        input Node.
-     * 
+     *
      * @return the node value. The value for an Element is the concatenation of
      *         children values. For other nodes the value is
      *         <code>node.getNodeValue()</code>.
@@ -601,7 +601,7 @@ public final class XMLConfig
     /**
      * Return the value of a NodeList as concatenation of values of all nodes
      * contained in the list.
-     * 
+     *
      * @param node
      *        the node list
      * @return the nodes value
@@ -623,19 +623,19 @@ public final class XMLConfig
     /**
      * Reads a value. If the XPath selects many nodes the values are appended
      * together.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
      *        parameter to read specified as absolute path to the root of the
      *        file.
-     * 
+     *
      * @return the searched value or <code>null</code> if the XPath select no
      *         node.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
-     * 
+     *
      * @see #getNodeValue(org.w3c.dom.NodeList)
      * @see #getNodeList(java.lang.String, java.lang.String)
      */
@@ -651,18 +651,18 @@ public final class XMLConfig
     /**
      * Reads a value. If the XPath selects many nodes the values are appended
      * together.
-     * 
+     *
      * @param node
      *        base for XPath
      * @param xpath
      *        parameter to read specified as relative path to the node.
-     * 
+     *
      * @return the searched value or <code>null</code> if the XPath select no
      *         node.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
-     * 
+     *
      * @see #getNodeValue(org.w3c.dom.NodeList)
      * @see #getNodeList(org.w3c.dom.Node, java.lang.String)
      */
@@ -678,7 +678,7 @@ public final class XMLConfig
     /**
      * Reads a value. If the XPath selects many nodes the values are appended
      * together.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
@@ -686,10 +686,10 @@ public final class XMLConfig
      *        file.
      * @param defaultValue
      *        default value
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
      */
     public static String get(String file, String xpath, String defaultValue)
@@ -709,17 +709,17 @@ public final class XMLConfig
     /**
      * Reads a value. If the XPath selects many nodes the values are appended
      * together.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
      * @param defaultValue
      *        default value
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #get(org.w3c.dom.Node, java.lang.String)
      */
     public static String get(Node node, String xpath, String defaultValue)
@@ -738,7 +738,7 @@ public final class XMLConfig
 
     /**
      * Reads a single encrypted value.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
@@ -749,12 +749,12 @@ public final class XMLConfig
      *        DEFAULT_KEY_ID
      * @param canBeClear
      *        if true the data can be unencrypted
-     * 
+     *
      * @return the searched value or <code>null</code> if the XPath select no
      *         node.
      * @throws XMLConfigException
      *         if some error occurs.
-     * 
+     *
      * @see #getNodeValue(org.w3c.dom.NodeList)
      * @see #getNodeList(java.lang.String, java.lang.String)
      */
@@ -788,7 +788,7 @@ public final class XMLConfig
 
     /**
      * Reads a single encrypted value.
-     * 
+     *
      * @param node
      *        base for XPath
      * @param xpath
@@ -798,13 +798,13 @@ public final class XMLConfig
      *        DEFAULT_KEY_ID
      * @param canBeClear
      *        if true the data can be unencrypted
-     * 
+     *
      * @return the searched value or <code>null</code> if the XPath select no
      *         node.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
-     * 
+     *
      * @see #getNodeValue(org.w3c.dom.NodeList)
      * @see #getNodeList(org.w3c.dom.Node, java.lang.String)
      */
@@ -838,7 +838,7 @@ public final class XMLConfig
 
     /**
      * Reads a single encrypted value.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
@@ -851,10 +851,10 @@ public final class XMLConfig
      *        if true the data can be unencrypted
      * @param defaultValue
      *        default value
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #getDecrypted(java.lang.String, java.lang.String)
      */
     public static String getDecrypted(String file, String xpath, String keyId, boolean canBeClear, String defaultValue)
@@ -873,7 +873,7 @@ public final class XMLConfig
 
     /**
      * Reads a single encrypted value.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
@@ -885,10 +885,10 @@ public final class XMLConfig
      *        if true the data can be unencrypted
      * @param defaultValue
      *        default value
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #getDecrypted(org.w3c.dom.Node, java.lang.String)
      */
     public static String getDecrypted(Node node, String xpath, String keyId, boolean canBeClear, String defaultValue)
@@ -907,20 +907,20 @@ public final class XMLConfig
 
     /**
      * Reads a single encrypted value.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
      *        parameter to read specified as absolute path to the root of the
      *        file.
-     * 
+     *
      *        Sets the key id as DEFAULT_KEY_ID and canBeClear at true
-     * 
+     *
      * @return the searched value or <code>null</code> if the XPath select no
      *         node.
      * @throws XMLConfigException
      *         if some error occurs.
-     * 
+     *
      * @see #getDecrypted(java.lang.String, java.lang.String, java.lang.String,
      *      boolean)
      */
@@ -931,20 +931,20 @@ public final class XMLConfig
 
     /**
      * Reads a single encrypted value.
-     * 
+     *
      * @param node
      *        base for XPath
      * @param xpath
      *        parameter to read specified as relative path to the node.
-     * 
+     *
      *        Sets the key id as DEFAULT_KEY_ID and canBeClear at true
-     * 
+     *
      * @return the searched value or <code>null</code> if the XPath select no
      *         node.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
-     * 
+     *
      * @see #getDecrypted(org.w3c.dom.Node, java.lang.String, java.lang.String,
      *      boolean)
      */
@@ -955,7 +955,7 @@ public final class XMLConfig
 
     /**
      * Reads a single encrypted value.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
@@ -963,12 +963,12 @@ public final class XMLConfig
      *        file.
      * @param defaultValue
      *        default value
-     * 
+     *
      *        Sets the key id as DEFAULT_KEY_ID and canBeClear at true
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #getDecrypted(java.lang.String, java.lang.String, java.lang.String,
      *      boolean, java.lang.String)
      */
@@ -979,19 +979,19 @@ public final class XMLConfig
 
     /**
      * Reads a single encrypted value.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
      * @param defaultValue
      *        default value
-     * 
+     *
      *        Sets the key id as DEFAULT_KEY_ID and canBeClear at true
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #getDecrypted(org.w3c.dom.Node, java.lang.String, java.lang.String,
      *      boolean, java.lang.String)
      */
@@ -1002,14 +1002,14 @@ public final class XMLConfig
 
     /**
      * Decrypt a string encrypted by default XMLConfig key.
-     * 
+     *
      * @param value
      *        the value to decrypt
-     * 
+     *
      * @return the decrypted value or value if not encrypted
      * @throws XMLConfigException
      *         if some error occurs.
-     * 
+     *
      */
     public static String getDecrypted(String value) throws XMLConfigException
     {
@@ -1025,14 +1025,14 @@ public final class XMLConfig
 
     /**
      * Encrypt a string using default XMLConfig key.
-     * 
+     *
      * @param value
      *        the value to encrypt
-     * 
+     *
      * @return the encrypted value
      * @throws XMLConfigException
      *         if some error occurs.
-     * 
+     *
      */
     public static String getEncrypted(String value) throws XMLConfigException
     {
@@ -1050,13 +1050,13 @@ public final class XMLConfig
      * Return an integer parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to an integer.
-     * 
+     *
      * @param file
      * @param xpath
      * @return the searched integer value from the configuration.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
-     * 
+     *
      * @throws XMLConfigException
      *         if any error occurs
      */
@@ -1079,14 +1079,14 @@ public final class XMLConfig
      * Return an integer parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to an integer.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
-     * 
+     *
      * @return the searched integer value from the configuration.
-     * 
+     *
      * @throws XMLConfigException
      *         if an error occurs
      */
@@ -1108,7 +1108,7 @@ public final class XMLConfig
      * Return an integer parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to an integer.
-     * 
+     *
      * @param file
      *        the configuration file
      * @param xpath
@@ -1117,7 +1117,7 @@ public final class XMLConfig
      *        value to return if XPath not match
      * @return the parameter value. If the parameter does not exists or an error
      *         occurs then the specified default value will be returned.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
      */
     public static int getInteger(final String file, final String xpath, final int defaultValue)
@@ -1135,17 +1135,17 @@ public final class XMLConfig
      * Return an integer parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to an integer.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
      * @param defaultValue
      *        default value
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #get(org.w3c.dom.Node, java.lang.String)
      */
     public static int getInteger(Node node, String xpath, int defaultValue)
@@ -1163,13 +1163,13 @@ public final class XMLConfig
      * Return a long parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a long.
-     * 
+     *
      * @param file
      * @param xpath
      * @return the searched long value from the configuration.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
-     * 
+     *
      * @throws XMLConfigException
      *         if an error occurs
      */
@@ -1191,14 +1191,14 @@ public final class XMLConfig
      * Return a long parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a long.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
-     * 
+     *
      * @return the searched long value from the configuration.
-     * 
+     *
      * @throws XMLConfigException
      *         if an error occurs
      */
@@ -1220,14 +1220,14 @@ public final class XMLConfig
      * Return a long parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a long.
-     * 
+     *
      * @param file
      * @param xpath
      * @param defaultValue
-     * 
+     *
      * @return the parameter value. If the parameter does not exists or an error
      *         occurs then the specified default value will be returned.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
      */
     public static long getLong(String file, String xpath, long defaultValue)
@@ -1245,16 +1245,16 @@ public final class XMLConfig
      * Return a long parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a long.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
      * @param defaultValue
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #get(org.w3c.dom.Node, java.lang.String)
      */
     public static long getLong(Node node, String xpath, long defaultValue)
@@ -1272,13 +1272,13 @@ public final class XMLConfig
      * Return a double parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a double.
-     * 
+     *
      * @param file
      * @param xpath
      * @return the searched double value from the configuration.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
-     * 
+     *
      * @throws XMLConfigException
      *         if an error occurs
      */
@@ -1300,14 +1300,14 @@ public final class XMLConfig
      * Return a double parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a double.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
-     * 
+     *
      * @return the searched double value from the configuration.
-     * 
+     *
      * @throws XMLConfigException
      *         if an error occurs
      */
@@ -1329,14 +1329,14 @@ public final class XMLConfig
      * Return a double parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a double.
-     * 
+     *
      * @param file
      * @param xpath
      * @param defaultValue
-     * 
+     *
      * @return the parameter value. If the parameter does not exists or an error
      *         occurs then the specified default value will be returned.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
      */
     public static double getDouble(String file, String xpath, double defaultValue)
@@ -1354,17 +1354,17 @@ public final class XMLConfig
      * Return a double parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a double.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
      * @param defaultValue
      *        default value
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #get(org.w3c.dom.Node, java.lang.String)
      */
     public static double getDouble(Node node, String xpath, double defaultValue)
@@ -1382,13 +1382,13 @@ public final class XMLConfig
      * Return a float parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a float.
-     * 
+     *
      * @param file
      * @param xpath
      * @return the searched float value from the configuration.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
-     * 
+     *
      * @throws XMLConfigException
      *         if an error occurs
      */
@@ -1410,14 +1410,14 @@ public final class XMLConfig
      * Return a float parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a float.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
-     * 
+     *
      * @return the searched float value from the configuration.
-     * 
+     *
      * @throws XMLConfigException
      *         if an error occurs
      */
@@ -1439,14 +1439,14 @@ public final class XMLConfig
      * Return a float parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a float.
-     * 
+     *
      * @param file
      * @param xpath
      * @param defaultValue
-     * 
+     *
      * @return the parameter value. If the parameter does not exists or an error
      *         occurs then the specified default value will be returned.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
      */
     public static float getFloat(String file, String xpath, float defaultValue)
@@ -1464,17 +1464,17 @@ public final class XMLConfig
      * Return a float parameter. <br>
      * This method uses <code>get()</code> to obtain the value, then convert it
      * to a float.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
      * @param defaultValue
      *        default value
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
-     * 
+     *
      * @see #get(org.w3c.dom.Node, java.lang.String)
      */
     public static float getFloat(Node node, String xpath, float defaultValue)
@@ -1495,7 +1495,7 @@ public final class XMLConfig
      * equal, ignoring case, to "true" or "yes" or "on". Otherwise, it returns
      * <b>false</b>.
      * <p>
-     * 
+     *
      * @param file
      * @param xpath
      * @return the boolean value of the parameter.
@@ -1522,14 +1522,14 @@ public final class XMLConfig
      * equal, ignoring case, to "true" or "yes" or "on". Otherwise, it returns
      * <b>false</b>.
      * <p>
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
-     * 
+     *
      * @return the searched boolean value from the configuration.
-     * 
+     *
      * @throws XMLConfigException
      */
     public static boolean getBoolean(Node node, String xpath) throws XMLConfigException
@@ -1553,7 +1553,7 @@ public final class XMLConfig
      * equal, ignoring case, to "true" or "yes" or "on". Otherwise, it returns
      * <b>false</b>.
      * <p>
-     * 
+     *
      * @param file
      * @param xpath
      * @param defaultValue
@@ -1579,14 +1579,14 @@ public final class XMLConfig
      * equal, ignoring case, to "true" or "yes" or "on". Otherwise, it returns
      * <b>false</b>.
      * <p>
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to node.
      * @param defaultValue
      *        default value
-     * 
+     *
      * @return the searched value or the specified default value if the XPath
      *         select no node or an error occurs.
      */
@@ -1605,13 +1605,13 @@ public final class XMLConfig
      * Checks if the given parameter exists. <br>
      * It checks that <code>get()</code> method does not return
      * <code>null</code>.
-     * 
+     *
      * @param file
      * @param xpath
      * @return if the given parameter exists.
-     * 
+     *
      * @see #get(java.lang.String, java.lang.String)
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -1624,13 +1624,13 @@ public final class XMLConfig
      * Checks if the given parameter exists. <br>
      * It checks that <code>get()</code> method does not return
      * <code>null</code>.
-     * 
+     *
      * @param node
      * @param xpath
      * @return if the given parameter exists
-     * 
+     *
      * @see #get(org.w3c.dom.Node, java.lang.String)
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -1641,14 +1641,14 @@ public final class XMLConfig
 
     /**
      * Obtains a list of nodes that match the given XPath.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
      *        parameter to read specified as absolute path to the root of the
      *        file.
      * @return a list of nodes that match the given XPath.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -1674,13 +1674,13 @@ public final class XMLConfig
 
     /**
      * Obtains a list of nodes that match the given XPath.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to the node
      * @return a list of nodes that match the given XPath.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -1713,7 +1713,7 @@ public final class XMLConfig
     /**
      * Obtains a list of nodes that match the given XPath as a
      * <code>Collection</code>.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
@@ -1721,7 +1721,7 @@ public final class XMLConfig
      *        file.
      * @return a list of nodes that match the given XPath as a
      *         <code>Collection</code>.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -1740,14 +1740,14 @@ public final class XMLConfig
     /**
      * Obtains a list of nodes that match the given XPath as a
      * <code>Collection</code>.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to the node
      * @return a list of nodes that match the given XPath as a
      *         <code>Collection</code>.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -1765,14 +1765,14 @@ public final class XMLConfig
 
     /**
      * Obtains a single node that matches the given XPath.
-     * 
+     *
      * @param file
      *        file to read
      * @param xpath
      *        parameter to read specified as absolute path to the root of the
      *        file.
      * @return a single node that matches the given XPath.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -1793,13 +1793,13 @@ public final class XMLConfig
 
     /**
      * Obtains a single node that matches the given XPath.
-     * 
+     *
      * @param node
      *        base node for XPath
      * @param xpath
      *        parameter to read specified as relative path to the node
      * @return a single node that matches the given XPath.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -1827,7 +1827,7 @@ public final class XMLConfig
 
     /**
      * Add a ConfigurationListener.
-     * 
+     *
      * @param listener
      */
     public static void addConfigurationListener(ConfigurationListener listener)
@@ -1847,7 +1847,7 @@ public final class XMLConfig
     /**
      * Add a ConfigurationListener listening for events related to a single
      * particular file.
-     * 
+     *
      * @param listener
      *        a <tt>ConfigurationListener</tt> object
      * @param filename
@@ -1871,7 +1871,7 @@ public final class XMLConfig
     /**
      * Add a ConfigurationListener listening for events related to a particular
      * set of files.
-     * 
+     *
      * @param listener
      *        a <tt>ConfigurationListener</tt> object
      * @param fileList
@@ -1894,7 +1894,7 @@ public final class XMLConfig
 
     /**
      * Remove a ConfigurationListener
-     * 
+     *
      * @param listener
      */
     public static void removeConfigurationListener(ConfigurationListener listener)
@@ -1907,7 +1907,7 @@ public final class XMLConfig
 
     /**
      * Remove a ConfigurationListener listening for changes on a single file
-     * 
+     *
      * @param listener
      *        a <tt>ConfigurationListener</tt> object
      * @param filename
@@ -1925,7 +1925,7 @@ public final class XMLConfig
 
     /**
      * Remove a ConfigurationListener listening for changes on a subset of files
-     * 
+     *
      * @param listener
      *        a <tt>ConfigurationListener</tt> object
      * @param fileList
@@ -1943,7 +1943,7 @@ public final class XMLConfig
 
     /**
      * Fires a ConfigurationEvent to all registered ConfigurationListener.
-     * 
+     *
      * @param event
      *        event to fire
      * @param immediate
@@ -1962,7 +1962,7 @@ public final class XMLConfig
 
     /**
      * Fires the ConfigurationEvents to all registered ConfigurationListener.
-     * 
+     *
      */
     protected static synchronized void fireConfigurationEvents()
     {
@@ -1984,7 +1984,7 @@ public final class XMLConfig
 
     /**
      * Return the URL to be used in order to load the given file.
-     * 
+     *
      * @param file
      *        the file to read
      * @return the URL to be used in order to load the given file.
@@ -1998,7 +1998,7 @@ public final class XMLConfig
 
     /**
      * Return the URL to be used in order to load the given file.
-     * 
+     *
      * @param file
      *        the file to read
      * @param classLoader
@@ -2062,11 +2062,11 @@ public final class XMLConfig
      * <p>
      * The file is searched into the Java class path as another Java resource.
      * See Java class loader documentation to understand this mechanism.
-     * 
+     *
      * @param file
      *        the file to read
      * @return the read configuration as {@link org.w3c.dom.Document Document}.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -2080,7 +2080,7 @@ public final class XMLConfig
      * <p>
      * The file is searched into the Java class path as another Java resource.
      * See Java class loader documentation to understand this mechanism.
-     * 
+     *
      * @param file
      *        the file to read
      * @param classLoader
@@ -2091,7 +2091,7 @@ public final class XMLConfig
      *        flag that indicates if this file can be changed and can be
      *        reloaded
      * @return the read configuration as {@link org.w3c.dom.Document Document}.
-     * 
+     *
      * @throws XMLConfigException
      *         if some error occurs.
      */
@@ -2165,7 +2165,7 @@ public final class XMLConfig
 
     /**
      * Checks if configuration is composed by multiple files.
-     * 
+     *
      * @param document
      * @return if configuration is composed by multiple files.
      */
