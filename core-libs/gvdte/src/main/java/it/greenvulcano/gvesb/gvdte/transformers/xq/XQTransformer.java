@@ -19,21 +19,6 @@
  */
 package it.greenvulcano.gvesb.gvdte.transformers.xq;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.gvdte.config.DataSource;
-import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
-import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
-import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
-import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
-import it.greenvulcano.gvesb.gvdte.util.UtilsException;
-import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
-import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.xml.ErrHandler;
-import it.greenvulcano.util.xml.XMLUtils;
-import it.greenvulcano.util.xml.XMLUtilsException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -58,12 +43,26 @@ import javax.xml.xquery.XQItem;
 import javax.xml.xquery.XQPreparedExpression;
 import javax.xml.xquery.XQResultSequence;
 
-import net.sf.saxon.xqj.SaxonXQDataSource;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.gvdte.config.DataSource;
+import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
+import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
+import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
+import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
+import it.greenvulcano.gvesb.gvdte.util.UtilsException;
+import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
+import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.xml.ErrHandler;
+import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xml.XMLUtilsException;
+import net.sf.saxon.xqj.SaxonXQDataSource;
 
 /**
  * This class is dedicated to XQuery transformations.
@@ -116,14 +115,14 @@ public class XQTransformer implements DTETransformer
         logger.debug("Init start");
         try {
             this.dsf = dsf;
-            name = XMLConfig.get(node, "@name", "NO_NAME");
-            xqMapName = XMLConfig.get(node, "@XQMapName");
-            outputType = XMLConfig.get(node, "@OutputType", "xml");
-            dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
+            this.name = XMLConfig.get(node, "@name", "NO_NAME");
+            this.xqMapName = XMLConfig.get(node, "@XQMapName");
+            this.outputType = XMLConfig.get(node, "@OutputType", "xml");
+            this.dataSourceSet = XMLConfig.get(node, "@DataSourceSet", "Default");
 
             String validateXSL = XMLConfig.get(node, "@validate");
             String validateTransformations = XMLConfig.get(node, "../@validate");
-            validateDirection = XMLConfig.get(node, "@validateDirection", "in-out");
+            this.validateDirection = XMLConfig.get(node, "@validateDirection", "in-out");
             String lvalidationType = XMLConfig.get(node, "@validationType");
             setValidationType(lvalidationType);
 
@@ -144,12 +143,12 @@ public class XQTransformer implements DTETransformer
                     }
                 }
             }
-            logger.debug("init - loaded parameters: xqMapName = " + xqMapName + " - DataSourceSet: " + dataSourceSet
-                    + " - outputType = " + outputType + " - validate = " + validateMap + " - validateDirection = "
-                    + validateDirection);
+            logger.debug("init - loaded parameters: xqMapName = " + this.xqMapName + " - DataSourceSet: " + this.dataSourceSet
+                    + " - outputType = " + this.outputType + " - validate = " + this.validateMap + " - validateDirection = "
+                    + this.validateDirection);
 
-            xqDS = new SaxonXQDataSource();
-            xqConn = xqDS.getConnection();
+            this.xqDS = new SaxonXQDataSource();
+            this.xqConn = this.xqDS.getConnection();
             //xqConn.setErrorListener(new ErrorListener());
 
             initTemplMap();
@@ -178,16 +177,16 @@ public class XQTransformer implements DTETransformer
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     private void initOutFormat(Node node)
     {
-        outProps.setProperty("method", outputType);
-        if (outputType.equals("xml")) {
-            outProps.setProperty("indent", "no");
-            outProps.setProperty("omit-xml-declaration", "no");
-            outProps.setProperty("{http://saxon.sf.net/}indent-spaces", "4");
+        this.outProps.setProperty("method", this.outputType);
+        if (this.outputType.equals("xml")) {
+            this.outProps.setProperty("indent", "no");
+            this.outProps.setProperty("omit-xml-declaration", "no");
+            this.outProps.setProperty("{http://saxon.sf.net/}indent-spaces", "4");
         }
     }
 
@@ -200,17 +199,17 @@ public class XQTransformer implements DTETransformer
      */
     private Map<String, XQPreparedExpression> initTemplMap() throws DTETransfException
     {
-        String key = dataSourceSet + "::" + xqMapName;
+        String key = this.dataSourceSet + "::" + this.xqMapName;
         try {
-            templHashMap = new HashMap<String, XQPreparedExpression>();
-            XQPreparedExpression expression = getExpression(dataSourceSet, xqMapName);
-            templHashMap.put(key, expression);
+            this.templHashMap = new HashMap<String, XQPreparedExpression>();
+            XQPreparedExpression expression = getExpression(this.dataSourceSet, this.xqMapName);
+            this.templHashMap.put(key, expression);
         }
         catch (Throwable exc) {
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][]{{"msg", "Unexpected error."}}, exc);
         }
-        return templHashMap;
+        return this.templHashMap;
     }
 
     /**
@@ -228,8 +227,8 @@ public class XQTransformer implements DTETransformer
         if (idx == -1) {
             mn = "gvdte://" + mn;
         }
-        DataSource reposManager = dsf.getDataSource(dss, mn);
-        return xqConn.prepareExpression(new ByteArrayInputStream(reposManager.getResourceAsByteArray(mn)));
+        DataSource reposManager = this.dsf.getDataSource(dss, mn);
+        return this.xqConn.prepareExpression(new ByteArrayInputStream(reposManager.getResourceAsByteArray(mn)));
     }
 
     /**
@@ -242,7 +241,7 @@ public class XQTransformer implements DTETransformer
             Node n = nl.item(i);
             TransformerHelper helper = (TransformerHelper) Class.forName(XMLConfig.get(n, "@class")).newInstance();
             helper.init(n);
-            helpers.add(helper);
+            this.helpers.add(helper);
         }
     }
 
@@ -263,7 +262,7 @@ public class XQTransformer implements DTETransformer
      *         if any transformation error occurs.
      */
     @Override
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException,
             InterruptedException {
         logger.debug("Transform start");
         XQPreparedExpression expression = null;
@@ -276,11 +275,11 @@ public class XQTransformer implements DTETransformer
             result.next();
             XQItem resultItem = result.getItem();
 
-            if (outputType.equals("xml")) {
+            if (this.outputType.equals("xml")) {
                 DOMResult domRes = new DOMResult();
                 resultItem.writeItemToResult(domRes);
                 Document docValidation = (Document) domRes.getNode();
-                if (validate() && (validateDirection.indexOf("out") != -1)) {
+                if (validate() && (this.validateDirection.indexOf("out") != -1)) {
                     executeValidation(docValidation, mapParam);
                 }
                 logger.debug("Transform stop");
@@ -340,17 +339,17 @@ public class XQTransformer implements DTETransformer
             mn = (String) mapParam.get("xqmapname");
         }
         if ((dss == null) || (dss.equals(""))) {
-            dss = dataSourceSet;
+            dss = this.dataSourceSet;
         }
         if ((mn == null) || (mn.equals(""))) {
-            mn = xqMapName;
+            mn = this.xqMapName;
         }
         key = dss + "::" + mn;
         try {
-            expression = templHashMap.get(key);
+            expression = this.templHashMap.get(key);
             if (expression == null) {
                 expression = getExpression(dss, mn);
-                templHashMap.put(key, expression);
+                this.templHashMap.put(key, expression);
             }
             //expression.setErrorListener(new ErrorListener());
         }
@@ -385,9 +384,9 @@ public class XQTransformer implements DTETransformer
                 dss = (String) mapParam.get("datasourceset");
             }
             if ((dss == null) || (dss.equals(""))) {
-                dss = dataSourceSet;
+                dss = this.dataSourceSet;
             }
-            XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(dss, dsf),
+            XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(dss, this.dsf),
                     new ErrorHandler());
         }
         catch (XMLUtilsException exc) {
@@ -415,7 +414,7 @@ public class XQTransformer implements DTETransformer
     private Source convertInputFormat(Object input) throws UtilsException
     {
         Source inputSrc = null;
-        boolean validateIn = validate() && (validateDirection.indexOf("in") != -1);
+        boolean validateIn = validate() && (this.validateDirection.indexOf("in") != -1);
         try {
             if (input instanceof Node) {
                 ByteArrayInputStream bis = null;
@@ -425,7 +424,7 @@ public class XQTransformer implements DTETransformer
                         logger.debug("Validate input with '" + getValidationType() + "'");
                         xmlParser = XMLUtils.getParserInstance();
                         bis = new ByteArrayInputStream(xmlParser.serializeDOMToByteArray((Node) input));
-                        XMLUtils.parseDOMValidating(getValidationType(), bis, new EntityResolver(dataSourceSet, dsf),
+                        XMLUtils.parseDOMValidating(getValidationType(), bis, new EntityResolver(this.dataSourceSet, this.dsf),
                                 new ErrHandler());
                     }
                     finally {
@@ -443,8 +442,7 @@ public class XQTransformer implements DTETransformer
                         inputSrc = new StreamSource(bis);
                     }
                     else {
-                        inputSrc = new StreamSource(new ByteArrayInputStream(
-                                XMLUtils.serializeDOMToByteArray_S((Node) input)));
+                    	inputSrc = new DOMSource(((Node) input).cloneNode(true));
                     }
                 }
             }
@@ -453,7 +451,7 @@ public class XQTransformer implements DTETransformer
                     logger.debug("Validate input with '" + getValidationType() + "'");
                     String valStr = (String) input;
                     ByteArrayInputStream bis = new ByteArrayInputStream(valStr.getBytes());
-                    XMLUtils.parseDOMValidating(getValidationType(), bis, new EntityResolver(dataSourceSet, dsf),
+                    XMLUtils.parseDOMValidating(getValidationType(), bis, new EntityResolver(this.dataSourceSet, this.dsf),
                             new ErrorHandler());
                 }
                 logger.debug("Input object is a String");
@@ -465,7 +463,7 @@ public class XQTransformer implements DTETransformer
                 if (validateIn) {
                     logger.debug("Validate input with '" + getValidationType() + "'");
                     bis = new ByteArrayInputStream((byte[]) input);
-                    XMLUtils.parseDOMValidating(getValidationType(), valBis, new EntityResolver(dataSourceSet, dsf),
+                    XMLUtils.parseDOMValidating(getValidationType(), valBis, new EntityResolver(this.dataSourceSet, this.dsf),
                             new ErrorHandler());
                 }
                 logger.debug("Input object is a byte array");
@@ -476,7 +474,7 @@ public class XQTransformer implements DTETransformer
                 InputStream is = valIS;
                 if (validateIn) {
                     logger.debug("Validate input with '" + getValidationType() + "'");
-                    XMLUtils.parseDOMValidating(getValidationType(), valIS, new EntityResolver(dsf), new ErrorHandler());
+                    XMLUtils.parseDOMValidating(getValidationType(), valIS, new EntityResolver(this.dsf), new ErrorHandler());
                 }
                 logger.debug("Input object is an InputStream");
                 inputSrc = new StreamSource(is);
@@ -536,7 +534,7 @@ public class XQTransformer implements DTETransformer
     @Override
     public String getMapName()
     {
-        return xqMapName;
+        return this.xqMapName;
     }
 
     /**
@@ -549,7 +547,7 @@ public class XQTransformer implements DTETransformer
     public void setValidate(String validate)
     {
         if (validate.equals("true")) {
-            validateMap = true;
+            this.validateMap = true;
         }
     }
 
@@ -562,10 +560,10 @@ public class XQTransformer implements DTETransformer
     public void setValidationType(String type)
     {
         if (type != null) {
-            validationType = type;
+            this.validationType = type;
         }
         else {
-            validationType = "xsd";
+            this.validationType = "xsd";
         }
     }
 
@@ -576,7 +574,7 @@ public class XQTransformer implements DTETransformer
      */
     public String getValidationType()
     {
-        return validationType;
+        return this.validationType;
     }
 
     /**
@@ -587,7 +585,7 @@ public class XQTransformer implements DTETransformer
     @Override
     public boolean validate()
     {
-        return validateMap;
+        return this.validateMap;
     }
 
     /**
@@ -605,8 +603,8 @@ public class XQTransformer implements DTETransformer
     @Override
     public void destroy()
     {
-        templHashMap.clear();
-        dsf = null;
+        this.templHashMap.clear();
+        this.dsf = null;
     }
 
     /**
@@ -615,6 +613,6 @@ public class XQTransformer implements DTETransformer
     @Override
     public List<TransformerHelper> getHelpers()
     {
-        return helpers;
+        return this.helpers;
     }
 }

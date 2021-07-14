@@ -309,7 +309,7 @@ public class XML2JSONTransformer implements DTETransformer {
                     localTransformer = getTransformer(mapParam);
                 }
                 setParams(localTransformer, mapParam);
-                Source theSource = convertInputFormatToXSL(input);
+                Source theSource = convertInputFormat(input);
                 String outputType = localTransformer.getOutputProperty(OutputKeys.METHOD);
                 if (outputType == null) {
                     outputType = "xml";
@@ -422,7 +422,7 @@ public class XML2JSONTransformer implements DTETransformer {
      * @throws UtilsException
      *             if any error occurs while converting input object.
      */
-    private Source convertInputFormatToXSL(Object input) throws UtilsException {
+    private Source convertInputFormat(Object input) throws UtilsException {
         Source inputSrc = null;
         try {
             if (input instanceof Node) {
@@ -451,7 +451,7 @@ public class XML2JSONTransformer implements DTETransformer {
                         inputSrc = new StreamSource(byteArrayInputStream);
                     }
                     else {
-                        inputSrc = new StreamSource(new ByteArrayInputStream(XMLUtils.serializeDOMToByteArray_S((Node) input)));
+                    	inputSrc = new DOMSource(((Node) input).cloneNode(true));
                     }
                 }
             }
