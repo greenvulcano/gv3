@@ -19,23 +19,6 @@
  */
 package it.greenvulcano.gvesb.gvdte.transformers.fop;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.gvdte.config.DataSource;
-import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
-import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
-import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
-import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
-import it.greenvulcano.gvesb.gvdte.util.UtilsException;
-import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
-import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
-import it.greenvulcano.gvesb.gvdte.util.xml.ErrorListener;
-import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.xml.ErrHandler;
-import it.greenvulcano.util.xml.XMLUtils;
-import it.greenvulcano.util.xml.XMLUtilsException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -63,6 +46,23 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.gvesb.gvdte.config.DataSource;
+import it.greenvulcano.gvesb.gvdte.config.DataSourceFactory;
+import it.greenvulcano.gvesb.gvdte.transformers.DTETransfException;
+import it.greenvulcano.gvesb.gvdte.transformers.DTETransformer;
+import it.greenvulcano.gvesb.gvdte.util.TransformerHelper;
+import it.greenvulcano.gvesb.gvdte.util.UtilsException;
+import it.greenvulcano.gvesb.gvdte.util.xml.EntityResolver;
+import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
+import it.greenvulcano.gvesb.gvdte.util.xml.ErrorListener;
+import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.xml.ErrHandler;
+import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xml.XMLUtilsException;
+
 /**
  * This class is dedicated to XSL/FOP transformations.
  *
@@ -87,7 +87,7 @@ public class XSLFOPTransformer implements DTETransformer {
     private String                 dataSourceSet;
 
     private DataSourceFactory      dsf;
-    
+
     private String                 transformerFactory;
 
     private Map<String, Templates> templHashMap = null;
@@ -105,19 +105,20 @@ public class XSLFOPTransformer implements DTETransformer {
      *
      * @throws DTETransfException
      */
-    public void init(Node nodo, DataSourceFactory dsf) throws DTETransfException {
+    @Override
+	public void init(Node nodo, DataSourceFactory dsf) throws DTETransfException {
         logger.debug("Init start");
         try {
             this.dsf = dsf;
-            fopFactory = FopFactory.newInstance();
+            this.fopFactory = FopFactory.newInstance();
 
-            name = XMLConfig.get(nodo, "@name", "NO_NAME");
-            xslMapName = XMLConfig.get(nodo, "@XSLMapName");
-            outputMIME = XMLConfig.get(nodo, "@OutputMIME", "application/pdf");
-            dataSourceSet = XMLConfig.get(nodo, "@DataSourceSet", "Default");
-            
-            transformerFactory = XMLConfig.get(nodo, "@TransformerFactory", "");
-            
+            this.name = XMLConfig.get(nodo, "@name", "NO_NAME");
+            this.xslMapName = XMLConfig.get(nodo, "@XSLMapName");
+            this.outputMIME = XMLConfig.get(nodo, "@OutputMIME", "application/pdf");
+            this.dataSourceSet = XMLConfig.get(nodo, "@DataSourceSet", "Default");
+
+            this.transformerFactory = XMLConfig.get(nodo, "@TransformerFactory", "");
+
             String validateXSL = XMLConfig.get(nodo, "@validate");
             String validateTransformations = XMLConfig.get(nodo, "../@validate");
             String lvalidationType = XMLConfig.get(nodo, "@validationType");
@@ -141,8 +142,8 @@ public class XSLFOPTransformer implements DTETransformer {
                 }
             }
 
-            logger.debug("Loaded parameters: outputMIME = " + outputMIME + " - xslMapName = " + xslMapName + " - DataSourceSet: "
-                    + dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + transformerFactory);
+            logger.debug("Loaded parameters: outputMIME = " + this.outputMIME + " - xslMapName = " + this.xslMapName + " - DataSourceSet: "
+                    + this.dataSourceSet + " - validate = " + validateXSL + " - transformerFactory = " + this.transformerFactory);
 
             initTemplMap();
 
@@ -167,7 +168,7 @@ public class XSLFOPTransformer implements DTETransformer {
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     /**
@@ -178,17 +179,17 @@ public class XSLFOPTransformer implements DTETransformer {
      * @throws DTETransfException
      */
     private Map<String, Templates> initTemplMap() throws DTETransfException {
-        String key = dataSourceSet + "::" + xslMapName;
+        String key = this.dataSourceSet + "::" + this.xslMapName;
         try {
-            templHashMap = new HashMap<String, Templates>();
-            Templates templates = getTemplate(dataSourceSet, xslMapName);
-            templHashMap.put(key, templates);
+            this.templHashMap = new HashMap<String, Templates>();
+            Templates templates = getTemplate(this.dataSourceSet, this.xslMapName);
+            this.templHashMap.put(key, templates);
         }
         catch (Throwable exc) {
             logger.error("Unexpected error", exc);
             throw new DTETransfException("GVDTE_GENERIC_ERROR", new String[][] { { "msg", "Unexpected error." } }, exc);
         }
-        return templHashMap;
+        return this.templHashMap;
     }
 
     /**
@@ -205,15 +206,15 @@ public class XSLFOPTransformer implements DTETransformer {
         if (idx == -1) {
             mn = "gvdte://" + mn;
         }
-        DataSource reposManager = dsf.getDataSource(dss, mn);
+        DataSource reposManager = this.dsf.getDataSource(dss, mn);
         TransformerFactory tFactory = null;
-        if (transformerFactory.equals("")) {
+        if (this.transformerFactory.equals("")) {
             tFactory = TransformerFactory.newInstance();
         }
         else {
-            tFactory = TransformerFactory.newInstance(transformerFactory, null);
+            tFactory = TransformerFactory.newInstance(this.transformerFactory, null);
         }
-        tFactory.setURIResolver(new URIResolver(dss, dsf));
+        tFactory.setURIResolver(new URIResolver(dss, this.dsf));
         Source source = new StreamSource(new ByteArrayInputStream(reposManager.getResourceAsByteArray(mn)));
         source.setSystemId(reposManager.getResourceURL(mn));
         return tFactory.newTemplates(source);
@@ -234,7 +235,8 @@ public class XSLFOPTransformer implements DTETransformer {
      * @throws DTETransfException
      *             if any transformation error occurs.
      */
-    public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException, 
+    @Override
+	public Object transform(Object input, Object buffer, Map<String, Object> mapParam) throws DTETransfException,
             InterruptedException {
         logger.debug("Transform start");
         Transformer transformer = null;
@@ -244,10 +246,10 @@ public class XSLFOPTransformer implements DTETransformer {
 
             setParams(transformer, mapParam);
             Source theSource = convertInputFormat(input);
-            FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+            FOUserAgent foUserAgent = this.fopFactory.newFOUserAgent();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {
-                Fop fop = fopFactory.newFop(outputMIME, foUserAgent, out);
+                Fop fop = this.fopFactory.newFop(this.outputMIME, foUserAgent, out);
                 Result res = new SAXResult(fop.getDefaultHandler());
                 transformer.transform(theSource, res);
             }
@@ -304,18 +306,18 @@ public class XSLFOPTransformer implements DTETransformer {
             mn = (String) mapParam.get("xslmapname");
         }
         if ((dss == null) || (dss.equals(""))) {
-            dss = dataSourceSet;
+            dss = this.dataSourceSet;
         }
         if ((mn == null) || (mn.equals(""))) {
-            mn = xslMapName;
+            mn = this.xslMapName;
         }
         key = dss + "::" + mn;
         try {
-            Templates templates = templHashMap.get(key);
+            Templates templates = this.templHashMap.get(key);
 
             if (templates == null) {
                 templates = getTemplate(dss, mn);
-                templHashMap.put(key, templates);
+                this.templHashMap.put(key, templates);
             }
             transformer = templates.newTransformer();
         }
@@ -352,7 +354,7 @@ public class XSLFOPTransformer implements DTETransformer {
                         xmlParser = XMLUtils.getParserInstance();
                         byteArrayInputStream = new ByteArrayInputStream(xmlParser.serializeDOMToByteArray((Node) input));
                         XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(
-                                dataSourceSet, dsf), new ErrHandler());
+                                this.dataSourceSet, this.dsf), new ErrHandler());
                     }
                     finally {
                         XMLUtils.releaseParserInstance(xmlParser);
@@ -369,7 +371,7 @@ public class XSLFOPTransformer implements DTETransformer {
                         inputSrc = new StreamSource(byteArrayInputStream);
                     }
                     else {
-                        inputSrc = new StreamSource(new ByteArrayInputStream(XMLUtils.serializeDOMToByteArray_S((Node) input)));
+                    	inputSrc = new DOMSource(((Node) input).cloneNode(true));
                     }
                 }
             }
@@ -379,7 +381,7 @@ public class XSLFOPTransformer implements DTETransformer {
                     String validateString = (String) input;
                     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(validateString.getBytes());
                     XMLUtils.parseDOMValidating(getValidationType(), byteArrayInputStream, new EntityResolver(
-                            dataSourceSet, dsf), new ErrorHandler());
+                            this.dataSourceSet, this.dsf), new ErrorHandler());
                 }
                 logger.debug("Input object is a String");
                 inputSrc = new StreamSource(new StringReader((String) input));
@@ -391,7 +393,7 @@ public class XSLFOPTransformer implements DTETransformer {
                     logger.debug("Validate input with '" + getValidationType() + "'");
                     byteArrayInputStream = new ByteArrayInputStream((byte[]) input);
                     XMLUtils.parseDOMValidating(getValidationType(), validateByteArrayInputStream, new EntityResolver(
-                            dataSourceSet, dsf), new ErrorHandler());
+                            this.dataSourceSet, this.dsf), new ErrorHandler());
                 }
                 logger.debug("Input object is a byte array");
                 inputSrc = new StreamSource(byteArrayInputStream);
@@ -401,7 +403,7 @@ public class XSLFOPTransformer implements DTETransformer {
                 InputStream inputStream = validateInputStream;
                 if (validate()) {
                     logger.debug("Validate input with '" + getValidationType() + "'");
-                    XMLUtils.parseDOMValidating(getValidationType(), validateInputStream, new EntityResolver(dsf),
+                    XMLUtils.parseDOMValidating(getValidationType(), validateInputStream, new EntityResolver(this.dsf),
                             new ErrorHandler());
                 }
                 logger.debug("Input object is an InputStream");
@@ -461,7 +463,7 @@ public class XSLFOPTransformer implements DTETransformer {
             Node n = nl.item(i);
             TransformerHelper helper = (TransformerHelper) Class.forName(XMLConfig.get(n, "@class")).newInstance();
             helper.init(n);
-            helpers.add(helper);
+            this.helpers.add(helper);
         }
     }
 
@@ -470,8 +472,9 @@ public class XSLFOPTransformer implements DTETransformer {
      *
      * @return xslMapName The xslMap name
      */
-    public String getMapName() {
-        return xslMapName;
+    @Override
+	public String getMapName() {
+        return this.xslMapName;
     }
 
     /**
@@ -480,9 +483,10 @@ public class XSLFOPTransformer implements DTETransformer {
      * @param validate
      *            if true validation is ok
      */
-    public void setValidate(String validate) {
+    @Override
+	public void setValidate(String validate) {
         if (validate.equals("true")) {
-            validateMap = true;
+            this.validateMap = true;
         }
     }
 
@@ -494,10 +498,10 @@ public class XSLFOPTransformer implements DTETransformer {
      */
     public void setValidationType(String type) {
         if (type != null) {
-            validationType = type;
+            this.validationType = type;
         }
         else {
-            validationType = "xsd";
+            this.validationType = "xsd";
         }
     }
 
@@ -507,7 +511,7 @@ public class XSLFOPTransformer implements DTETransformer {
      * @return validationType the validation type
      */
     public String getValidationType() {
-        return validationType;
+        return this.validationType;
     }
 
     /**
@@ -515,14 +519,16 @@ public class XSLFOPTransformer implements DTETransformer {
      *
      * @return validateMap the validate map value
      */
-    public boolean validate() {
-        return validateMap;
+    @Override
+	public boolean validate() {
+        return this.validateMap;
     }
 
     /**
      * @see it.greenvulcano.gvesb.gvdte.transformers.DTETransformer#clean()
      */
-    public void clean()
+    @Override
+	public void clean()
     {
         // do nothing
     }
@@ -530,9 +536,10 @@ public class XSLFOPTransformer implements DTETransformer {
     /**
      * @see it.greenvulcano.gvesb.gvdte.transformers.DTETransformer#destroy()
      */
-    public void destroy() {
-        templHashMap.clear();
-        dsf = null;
+    @Override
+	public void destroy() {
+        this.templHashMap.clear();
+        this.dsf = null;
     }
 
     /**
@@ -541,6 +548,6 @@ public class XSLFOPTransformer implements DTETransformer {
     @Override
     public List<TransformerHelper> getHelpers()
     {
-        return helpers;
+        return this.helpers;
     }
 }
