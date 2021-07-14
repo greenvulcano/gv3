@@ -943,8 +943,10 @@ public class DBOCallSP extends AbstractDBO
         try {
             createOutXML();
             super.executeIn(dataIn, conn, props);
-            return this.xmlOut;
-        }
+            return XMLUtils.serializeDOM_S(this.xmlOut);
+        } catch (XMLUtilsException exc) {
+        	throw new DBOException("Cannot store DBOCallSP XML result.", exc);
+		}
         finally {
             this.dhr.setRead(0);
             this.dhr.setTotal(0);

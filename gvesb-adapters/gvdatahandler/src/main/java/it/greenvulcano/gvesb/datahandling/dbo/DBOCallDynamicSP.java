@@ -354,7 +354,7 @@ public class DBOCallDynamicSP extends AbstractDBO
 
         private boolean                   namedParameterMode;
 
-        private final RowSetBuilder             rowSetBuilder      = null;
+        private final RowSetBuilder       rowSetBuilder      = null;
         private String                    rowSetBuilderType  = null;
 
 
@@ -368,6 +368,7 @@ public class DBOCallDynamicSP extends AbstractDBO
                 this.statement = XMLConfig.get(node, ".", "");
                 this.namedParameterMode = XMLConfig.getBoolean(node, "@named-parameter-mode", false);
                 this.rowSetBuilderType = XMLConfig.get(node, "../@rowset-builder", "standard");
+                //this.rowSetBuilder = RowSetBuilderFactory.getRowSetBuilder(rsBuilder, getName(), logger);
 
                 if (this.statement.equals("")) {
                     throw new DBOException("Empty/misconfigured statements list for stored procedure call descriptor");
@@ -1081,7 +1082,11 @@ public class DBOCallDynamicSP extends AbstractDBO
             }
     	}
     	else {
-            return this.xmlOut;
+            try {
+				return XMLUtils.serializeDOM_S(this.xmlOut);
+			} catch (XMLUtilsException exc) {
+				throw new DBOException("Cannot store DBOCallSP XML result.", exc);
+			}
     	}
     }
 
