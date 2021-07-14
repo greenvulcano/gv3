@@ -26,12 +26,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import it.greenvulcano.configuration.XMLConfig;
@@ -58,9 +60,9 @@ public class GVDeploy
 	/**
 	 * @param
 	 */
-	private String          nomeZipFile     = null;
-	private GVConfig gvConfigZip = null;
-	private GVConfig gvConfigServer = null;
+	private String   nomeZipFile     = null;
+	private GVConfig gvConfigZip     = null;
+	private GVConfig gvConfigServer  = null;
 
 	private static Logger  logger    = GVLogger.getLogger(GVDeploy.class);
 
@@ -90,9 +92,9 @@ public class GVDeploy
 	public void loadParser() throws XMLConfigException
 	{
 		String path = java.lang.System.getProperty("java.io.tmpdir");
-		this.gvConfigZip = new GVConfig(path + File.separator + "conf" + File.separator + "GVCore.xml",
+		this.gvConfigZip = new GVConfig("deploy", path + File.separator + "conf" + File.separator + "GVCore.xml",
 				path + File.separator + "conf" + File.separator + "GVAdapters.xml");
-		this.gvConfigServer = new GVConfig(XMLConfig.getURL("GVCore.xml"),XMLConfig.getURL("GVAdapters.xml"));
+		this.gvConfigServer = new GVConfig("server", XMLConfig.getURL("GVCore.xml"),XMLConfig.getURL("GVAdapters.xml"));
 	}
 
 	/**
@@ -115,56 +117,74 @@ public class GVDeploy
 	{
 		List<String>  listaServizi = this.gvConfigZip.getListaServizi();
 
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVCryptoHelper");
 		Map<String, Node> mapListaCryptoHelperZip = this.gvConfigZip.getListaGVCryptoHelper();
 		Map<String, Node> mapListaCryptoHelperServer = this.gvConfigServer.getListaGVCryptoHelper();
-		for(String crytoHelper:mapListaCryptoHelperZip.keySet()){
+		for(String crytoHelper : mapListaCryptoHelperZip.keySet()){
 			Node cryptoHelperNodeZip = mapListaCryptoHelperZip.get(crytoHelper);
 			Node cryptoHelperNodeServer = mapListaCryptoHelperServer.get(crytoHelper);
 			aggiornaNode(cryptoHelperNodeZip,cryptoHelperNodeServer,"/GVCore/GVCryptoHelper");
 		}
+		logger.info("END - Deploy GVCryptoHelper (" + (System.currentTimeMillis() - start) + ")");
 
-		Map<String, Node> listaForwardZip = this.gvConfigZip.getListaForward();
-		Map<String, Node> listaForwardServer = this.gvConfigServer.getListaForward();
-		for(String servizio:listaForwardZip.keySet()){
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVForwards");
+		Map<String, Node> listaForwardZip = this.gvConfigZip.getListaForward(listaServizi);
+		Map<String, Node> listaForwardServer = this.gvConfigServer.getListaForward(listaServizi);
+		for(String servizio : listaForwardZip.keySet()){
 			Node nodeForwaredZip=listaForwardZip.get(servizio);
 			Node nodeForwardServer=listaForwardServer.get(servizio);
 			aggiornaNode(nodeForwaredZip,nodeForwardServer,"/GVCore/GVForwards");
 		}
+		logger.info("END - Deploy GVForwards (" + (System.currentTimeMillis() - start) + ")");
 
-		Map<String, Node> listaGruppiZip = this.gvConfigZip.getGroups();
-		Map<String, Node> listaGruppiServer = this.gvConfigServer.getGroups();
-		for(String servizio:listaGruppiZip.keySet()){
-			Node nodeGruppoZip=listaGruppiZip.get(servizio);
-			Node nodeGruppoServer=listaGruppiServer.get(servizio);
-			aggiornaNode(nodeGruppoZip,nodeGruppoServer,"/GVCore/GVServices/Groups");
-		}
-		Map<String, Node> listaServiziZip = this.gvConfigZip.getListaNodeServizi();
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy Services");
+		Map<String, Node> listaServiziZip = this.gvConfigZip.getListaNodeServizi(listaServizi);
 		Map<String, Node> listaServiziServer = this.gvConfigServer.getListaNodeServizi(listaServizi);
-		for(String servizio:listaServiziZip.keySet()){
+		for(String servizio : listaServiziZip.keySet()){
 			Node nodeServizioZip=listaServiziZip.get(servizio);
 			Node nodeServizioServer=listaServiziServer.get(servizio);
 			aggiornaNode(nodeServizioZip,nodeServizioServer,"/GVCore/GVServices/Services");
 		}
+		logger.info("END - Deploy Services (" + (System.currentTimeMillis() - start) + ")");
 
-		Map<String, Node> mapListaSistemiZip = this.gvConfigZip.getListaSistemi();
-		for (String sistema:mapListaSistemiZip.keySet()){
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy Groups");
+		Map<String, Node> listaGruppiZip = this.gvConfigZip.getGroups(listaServiziZip);
+		Map<String, Node> listaGruppiServer = this.gvConfigServer.getGroups(listaServiziServer);
+		for(String servizio : listaGruppiZip.keySet()){
+			Node nodeGruppoZip=listaGruppiZip.get(servizio);
+			Node nodeGruppoServer=listaGruppiServer.get(servizio);
+			aggiornaNode(nodeGruppoZip,nodeGruppoServer,"/GVCore/GVServices/Groups");
+		}
+		logger.info("END - Deploy Groups (" + (System.currentTimeMillis() - start) + ")");
+
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy Systems");
+		Map<String, Node> mapListaSistemiZip = this.gvConfigZip.getListaSistemi(listaServizi);
+		for (String sistema : mapListaSistemiZip.keySet()){
 			Node nodeSistemaZip    = mapListaSistemiZip.get(sistema);
 			Node nodeSistemaServer = this.gvConfigServer.getSistema(sistema);
-			if(nodeSistemaServer==null){
+			if(nodeSistemaServer == null){
+				logger.debug("Deployed System " + sistema);
 				aggiornaNode(nodeSistemaZip,nodeSistemaServer,"/GVCore/GVSystems/Systems");
 			}else{
 				Map<String, Node> mapListaChannelZip = this.gvConfigZip.getListaChannel(sistema);
-				for (String canale:mapListaChannelZip.keySet()){
+				for (String canale : mapListaChannelZip.keySet()){
 					Node nodeCanaleZip    = mapListaChannelZip.get(canale);
 					Node nodeCanaleServer = this.gvConfigServer.getChannel(canale, sistema);
-					if(nodeCanaleServer==null){
+					if(nodeCanaleServer == null){
+						logger.debug("Deployed System " + sistema + " Channel " + canale);
 						aggiornaNode(nodeCanaleZip,nodeCanaleServer,"/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']");
 					}else{
 						Map<String, Node> mapListaVCLOpZip = this.gvConfigZip.getListaVCLOp(sistema,canale);
 						for (String vclOp:mapListaVCLOpZip.keySet()){
 							Node nodeVclOPZip    = mapListaVCLOpZip.get(vclOp);
-							Node nodeVclOpServer =this.gvConfigServer.getVCLOp(vclOp, sistema, canale);
-							if(nodeVclOpServer==null){
+							Node nodeVclOpServer = this.gvConfigServer.getVCLOp(vclOp, sistema, canale);
+							if(nodeVclOpServer == null){
+								logger.debug("Deployed System " + sistema + " Channel " + canale + " Operation " + nodeVclOPZip.getLocalName() + "[" + vclOp + "]");
 								aggiornaNode(nodeVclOPZip,nodeVclOpServer,"/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']");
 							}else{
 								if(nodeVclOPZip.getLocalName().equals("dh-call")){
@@ -172,9 +192,11 @@ public class GVDeploy
 									for (String dboBuilder:mapListaDboBuilder.keySet()){
 										Node nodeDataHandlerZip = mapListaDboBuilder.get(dboBuilder);
 										Node nodeDataHandlerServer = this.gvConfigServer.getDboBuilder(dboBuilder, sistema, canale, vclOp);
+										logger.debug("Deployed System " + sistema + " Channel " + canale + " VCLOperation " + nodeVclOPZip.getLocalName() + "[" + vclOp + "] DBOBuilder " + dboBuilder);
 										aggiornaNode(nodeDataHandlerZip,nodeDataHandlerServer,"/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']/dh-call[@name='"+vclOp+"']");
 									}
 								}else{
+									logger.debug("Updated System " + sistema + " Channel " + canale + " VCLOperation " + nodeVclOPZip.getLocalName() + "[" + vclOp + "]");
 									aggiornaNode(nodeVclOPZip,nodeVclOpServer,"/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']");
 								}
 							}
@@ -183,58 +205,86 @@ public class GVDeploy
 				}
 			}
 		}
+		logger.info("END - Deploy Systems (" + (System.currentTimeMillis() - start) + ")");
 
-		Map<String, Node> listaAclGvZip = this.gvConfigZip.getListaAclGV();
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVPolicy/ACLGreenVulcano");
+		Map<String, Node> listaAclGvZip = this.gvConfigZip.getListaAclGV(listaServizi);
 		Map<String, Node> listaAclGvServer = this.gvConfigServer.getListaAclGV(listaServizi);
 		for(String key:listaAclGvZip.keySet()){
 			Node nodeAclGvZip=listaAclGvZip.get(key);
 			Node nodeAclGvServer=listaAclGvServer.get(key);
 			aggiornaNode(nodeAclGvZip,nodeAclGvServer,"/GVCore/GVPolicy/ACLGreenVulcano");
 		}
-		Map<String, Node> listaRoleRefZip = this.gvConfigZip.getListaRoleRef();
+		logger.info("END - Deploy GVPolicy/ACLGreenVulcano (" + (System.currentTimeMillis() - start) + ")");
+
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVPolicy/Roles");
+		Map<String, Node> listaRoleRefZip = this.gvConfigZip.getListaRoleRef(listaServizi);
 		for(String key:listaRoleRefZip.keySet()){
 			Node nodeRoleRefZip=listaRoleRefZip.get(key);
 			Node nodeRoleRefServer=this.gvConfigServer.getRoleRef(key);
 			aggiornaNode(nodeRoleRefZip,nodeRoleRefServer,"/GVCore/GVPolicy/Roles");
 		}
-		Map<String, Node> listaAddressSetZip = this.gvConfigZip.getListaAddressSet();
+		logger.info("END - Deploy GVPolicy/Roles (" + (System.currentTimeMillis() - start) + ")");
+
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVPolicy/Addresses");
+		Map<String, Node> listaAddressSetZip = this.gvConfigZip.getListaAddressSet(listaServizi);
 		for(String key:listaAddressSetZip.keySet()){
 			Node nodeAddressSetZip=listaAddressSetZip.get(key);
 			Node nodeAddressSetServer=this.gvConfigServer.getAddressSet(key);
 			aggiornaNode(nodeAddressSetZip,nodeAddressSetServer,"/GVCore/GVPolicy/Addresses");
 		}
+		logger.info("END - Deploy GVPolicy/Addresses (" + (System.currentTimeMillis() - start) + ")");
 
-		Map<String, Node> listaGVBufferDumpZip = this.gvConfigZip.getListaGVBufferDump();
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVBufferDump");
+		Map<String, Node> listaGVBufferDumpZip = this.gvConfigZip.getListaGVBufferDump(listaServizi);
 		Map<String, Node> listaGVBufferDumpServer = this.gvConfigServer.getListaGVBufferDump(listaServizi);
 		for(String gvBufferDump:listaGVBufferDumpZip.keySet()){
 			Node nodeGVBufferDumpZip=listaGVBufferDumpZip.get(gvBufferDump);
 			Node nodeGVBufferDumpServer=listaGVBufferDumpServer.get(gvBufferDump);
 			aggiornaNode(nodeGVBufferDumpZip,nodeGVBufferDumpServer,"/GVCore/GVBufferDump");
 		}
+		logger.info("END - Deploy GVBufferDump (" + (System.currentTimeMillis() - start) + ")");
 
-		Map<String, Node> listaDataSourceZip = this.gvConfigZip.getListaDataSource();
-		for(String dataSource:listaDataSourceZip.keySet()){
-			Node nodeDataSourceZip=listaDataSourceZip.get(dataSource);
-			Node nodeDataSourceServer=this.gvConfigServer.getDataSource(dataSource);
-			aggiornaNode(nodeDataSourceZip,nodeDataSourceServer,"/GVCore/GVDataTransformation/DataSourceSets");
-		}
-		Map<String, Node> listaTrasformazioniZip = this.gvConfigZip.getListaTrasformazioni();
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy Transformations");
+		Map<String, Node> listaTrasformazioniZip = this.gvConfigZip.getListaTrasformazioni(listaServiziZip);
 		for(String trasformazione:listaTrasformazioniZip.keySet()){
 			Node nodeTrasformazioneZip=listaTrasformazioniZip.get(trasformazione);
 			Node nodeTrasformszionServer=this.gvConfigServer.getTrasformazione(trasformazione);
 			aggiornaNode(nodeTrasformazioneZip,nodeTrasformszionServer,"/GVCore/GVDataTransformation/Transformations");
 		}
-		Map<String, Node> listaTaskZip = this.gvConfigZip.getListaTask();
+		logger.info("END - Deploy Transformations (" + (System.currentTimeMillis() - start) + ")");
+
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy DataSourceSets");
+		Map<String, Node> listaDataSourceZip = this.gvConfigZip.getListaDataSource(listaTrasformazioniZip);
+		for(String dataSource:listaDataSourceZip.keySet()){
+			Node nodeDataSourceZip=listaDataSourceZip.get(dataSource);
+			Node nodeDataSourceServer=this.gvConfigServer.getDataSource(dataSource);
+			aggiornaNode(nodeDataSourceZip,nodeDataSourceServer,"/GVCore/GVDataTransformation/DataSourceSets");
+		}
+		logger.info("END - Deploy DataSourceSets (" + (System.currentTimeMillis() - start) + ")");
+
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVTaskManagerConfiguration");
+		Map<String, Node> listaTaskZip = this.gvConfigZip.getListaTask(listaServizi);
 		Map<String, Node> listaTaskServer = this.gvConfigServer.getListaTask(listaServizi);
 		for(String task:listaTaskZip.keySet()){
 			Node nodeTaskZip=listaTaskZip.get(task);
 			Node nodeTaskServer=listaTaskServer.get(task);
 			aggiornaNode(nodeTaskZip,nodeTaskServer,"/GVCore/GVTaskManagerConfiguration/TaskGroups");
 		}
+		logger.info("END - Deploy GVTaskManagerConfiguration (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void aggiornaGVAdapters()
 	{
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GreenVulcanoWebServices");
 		Map<String, Node> mapListaGvWsZip = this.gvConfigZip.getListaGvWebServices();
 		Map<String, Node> mapListaGvWsServer = this.gvConfigServer.getListaGvWebServices();
 		for(String gvWs:mapListaGvWsZip.keySet()){
@@ -242,7 +292,10 @@ public class GVDeploy
 			Node nodeGvWsServer = mapListaGvWsServer.get(gvWs);
 			aggiornaNodeAdapter(nodeGvWsZip,nodeGvWsServer,"/GVAdapters/GVWebServices/GreenVulcanoWebServices");
 		}
+		logger.info("END - Deploy GreenVulcanoWebServices (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy BusinessWebServices");
 		Map<String, Node> mapListaBusinessWsZip = this.gvConfigZip.getListaBusinessWebServices();
 		Map<String, Node> mapListaBusinessWsServer = this.gvConfigServer.getListaBusinessWebServices();
 		for(String businessWs:mapListaBusinessWsZip.keySet()){
@@ -250,7 +303,10 @@ public class GVDeploy
 			Node nodeBusinessWsServer = mapListaBusinessWsServer.get(businessWs);
 			aggiornaNodeAdapter(nodeBusinessWsZip,nodeBusinessWsServer,"/GVAdapters/GVWebServices/BusinessWebServices");
 		}
+		logger.info("END - Deploy BusinessWebServices (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVDataProviderManager");
 		Map<String, Node> mapListaDataProviderZip = this.gvConfigZip.getListDataProvider();
 		Map<String, Node> mapListaDataProviderServer = this.gvConfigServer.getListDataProvider();
 		for(String dataProvider:mapListaDataProviderZip.keySet()){
@@ -258,15 +314,19 @@ public class GVDeploy
 			Node dataProviderNodeServer = mapListaDataProviderServer.get(dataProvider);
 			aggiornaNodeAdapter(dataProviderNodeZip,dataProviderNodeServer,"/GVAdapters/GVDataProviderManager/DataProviders");
 		}
+		logger.info("END - Deploy GVDataProviderManager (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVAdapterHttpConfiguration");
 		Map<String,Node> listActionMappingZip = this.gvConfigZip.getListActionMapping();
 		Map<String,Node> listActionMappingServer = this.gvConfigServer.getListActionMapping();
-		for(String action:listActionMappingZip.keySet()){
+		for(String action : listActionMappingZip.keySet()){
 			Node nodeActionMappingZip    = listActionMappingZip.get(action);
 			Node nodeActionMappingServer = listActionMappingServer.get(action);
-			if(nodeActionMappingServer==null){
-				aggiornaNodeAdapter(nodeActionMappingZip,nodeActionMappingServer,"/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/");
-			}else{
+			if (nodeActionMappingServer == null) {
+				aggiornaNodeAdapter(nodeActionMappingZip, nodeActionMappingServer, "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings");
+			}
+			else {
 				Map<String, Node> listaRestActionMappingZip = this.gvConfigZip.getListaRestActionMapping(action);
 				Map<String, Node> listaRestActionMappingServer = this.gvConfigServer.getListaRestActionMapping(action);
 				for(String rest:listaRestActionMappingZip.keySet()){
@@ -277,7 +337,10 @@ public class GVDeploy
 
 			}
 		}
+		logger.info("END - Deploy GVAdapterHttpConfiguration (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVExcelWorkbookConfiguration");
 		Map<String, Node> mapListaExcelWorkbookZip = this.gvConfigZip.getListExcelWorkBook();
 		Map<String, Node> mapListaExcelWorkbookServer = this.gvConfigServer.getListExcelWorkBook();
 		for(String excelWorkbook:mapListaExcelWorkbookZip.keySet()){
@@ -285,16 +348,22 @@ public class GVDeploy
 			Node excelWorkbookNodeServer = mapListaExcelWorkbookServer.get(excelWorkbook);
 			aggiornaNodeAdapter(excelWorkbookNodeZip,excelWorkbookNodeServer,"/GVAdapters/GVExcelWorkbookConfiguration");
 		}
+		logger.info("END - Deploy GVExcelWorkbookConfiguration (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVExcelCreatorConfiguration");
 		Map<String, Node> mapListaExcelReportZip = this.gvConfigZip.getListExcelReport();
 		Map<String, Node> mapListaExcelReportServer = this.gvConfigServer.getListExcelReport();
 		for(String excelReport:mapListaExcelReportZip.keySet()){
 			Node excelReportNodeZip = mapListaExcelReportZip.get(excelReport);
 			Node excelReportNodeServer = mapListaExcelReportServer.get(excelReport);
 			// HANDLE GROUP DEPLOY
-			aggiornaNodeAdapter(excelReportNodeZip,excelReportNodeServer,"/GVAdapters/GVExcelWorkbookConfiguration");
+			aggiornaNodeAdapter(excelReportNodeZip,excelReportNodeServer,"/GVAdapters/GVExcelCreatorConfiguration");
 		}
+		logger.info("END - Deploy GVExcelCreatorConfiguration (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVBIRTReportConfiguration");
 		Map<String, Node> mapListaBIRTReportGrpZip = this.gvConfigZip.getListBIRTReportGroup();
 		Map<String, Node> mapListaBIRTReportGrpServer = this.gvConfigServer.getListBIRTReportGroup();
 		for(String birtReportGrp:mapListaBIRTReportGrpZip.keySet()){
@@ -313,7 +382,10 @@ public class GVDeploy
 				}
 			}
 		}
+		logger.info("END - Deploy GVBIRTReportConfiguration (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy RSHServiceClientConfiguration");
 		Map<String, Node> mapListaRSHClientZip = this.gvConfigZip.getListRSHClient();
 		Map<String, Node> mapListaRSHClientServer = this.gvConfigServer.getListRSHClient();
 		for(String rshClient:mapListaRSHClientZip.keySet()){
@@ -321,7 +393,10 @@ public class GVDeploy
 			Node rshClientNodeServer = mapListaRSHClientServer.get(rshClient);
 			aggiornaNodeAdapter(rshClientNodeZip,rshClientNodeServer,"/GVAdapters/RSHServiceClientConfiguration");
 		}
+		logger.info("END - Deploy RSHServiceClientConfiguration (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVRulesConfigManager");
 		Map<String, Node> mapListaKnowledgeBaseZip = this.gvConfigZip.getListKnowledgeBase();
 		Map<String, Node> mapListaKnowledgeBaseServer = this.gvConfigServer.getListKnowledgeBase();
 		for(String knowledgeBase:mapListaKnowledgeBaseZip.keySet()){
@@ -329,7 +404,10 @@ public class GVDeploy
 			Node knowledgeBaseNodeServer = mapListaKnowledgeBaseServer.get(knowledgeBase);
 			aggiornaNodeAdapter(knowledgeBaseNodeZip,knowledgeBaseNodeServer,"/GVAdapters/GVRulesConfigManager");
 		}
+		logger.info("END - Deploy GVRulesConfigManager (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVHL7ListenerManager");
 		Map<String, Node> mapListaHL7ListenerZip = this.gvConfigZip.getListHL7Listener();
 		Map<String, Node> mapListaHL7ListenerServer = this.gvConfigServer.getListHL7Listener();
 		for(String hl7Listener:mapListaHL7ListenerZip.keySet()){
@@ -348,7 +426,10 @@ public class GVDeploy
 				}
 			}
 		}
+		logger.info("END - Deploy GVHL7ListenerManager (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVSocialAdapterManager");
 		Map<String, Node> mapListaSocialAdpZip = this.gvConfigZip.getListSocialAdp();
 		Map<String, Node> mapListaSocialAdpServer = this.gvConfigServer.getListSocialAdp();
 		for(String socialAdp:mapListaSocialAdpZip.keySet()){
@@ -367,7 +448,10 @@ public class GVDeploy
 				}
 			}
 		}
+		logger.info("END - Deploy GVSocialAdapterManager (" + (System.currentTimeMillis() - start) + ")");
 
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVPushNotificationManager");
 		Map<String, Node> mapListaPushNotificationZip = this.gvConfigZip.getListPushNotification();
 		Map<String, Node> mapListaPushNotificationServer = this.gvConfigServer.getListPushNotification();
 		for(String rshClient:mapListaPushNotificationZip.keySet()){
@@ -375,6 +459,7 @@ public class GVDeploy
 			Node pushNotificationNodeServer = mapListaPushNotificationServer.get(rshClient);
 			aggiornaNodeAdapter(pushNotificationNodeZip,pushNotificationNodeServer,"/GVAdapters/GVPushNotificationManager/NotificationEngines");
 		}
+		logger.info("END - Deploy GVPushNotificationManager (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void aggiornaNode(Node nodeZip,Node nodeServer,String baseXpath)
@@ -392,55 +477,71 @@ public class GVDeploy
 				  if (nodeServer != null) {
 					Node importedNode = base.getOwnerDocument().importNode(nodeZip, true);
 					base.replaceChild(importedNode, nodeServer);
-					logger.debug("Nodo Service gia esistente aggiornamento");
+					logger.debug("Node Core " + nodeInfo(importedNode) + " already exists on " + baseXpath + ", updating...");
 				  }
 				  else {
 					Node importedNode = base.getOwnerDocument().importNode(nodeZip, true);
 					base.appendChild(importedNode);
-					logger.debug("Nodo Service non esistente inserimento");
+					logger.debug("Node Core " + nodeInfo(importedNode) + " doesn't exist on " + baseXpath + ", inserting...");
 				  }
 				}
 			}
 		} catch (Exception e) {
 			//
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
 	private void aggiornaNodeAdapter(Node nodeZip,Node nodeServer,String baseXpath)
 	{
 		XmlDiff xmlDiff = new XmlDiff();
-		boolean ifDiff = true;
+		boolean isDiff = true;
 		try {
-			if(nodeServer!=null){
+			if (nodeServer != null){
 				List<String> listDiff = xmlDiff.compareXML(nodeZip, nodeServer);
-				ifDiff = listDiff.size()>0;
+				isDiff = listDiff.size() > 0;
 			}
-			if(ifDiff){
+			if (isDiff){
 				Node base = this.gvConfigServer.getNodeAdapter(baseXpath);
-				if(base!=null){
+				if (base != null) {
 				  if (nodeServer != null) {
 					Node importedNode = base.getOwnerDocument().importNode(nodeZip, true);
 					base.replaceChild(importedNode, nodeServer);
-					logger.debug("Nodo Service gia esistente aggiornamento");
+					logger.debug("Node Adapter " + nodeInfo(importedNode) + " already exists on " + baseXpath + ", updating...");
 				  }
 				  else {
 					Node importedNode = base.getOwnerDocument().importNode(nodeZip, true);
 					base.appendChild(importedNode);
-					logger.debug("Nodo Service non esistente inserimento");
+					logger.debug("Node Adapter " + nodeInfo(importedNode) + " doesn't exist on " + baseXpath + ", inserting...");
 				  }
 				}
 			}
 		} catch (Exception e) {
-			//
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
+	private String nodeInfo(Node node) {
+		StringBuilder sb = new StringBuilder(node.getLocalName());
+		NamedNodeMap nnm = node.getAttributes();
+		if ((nnm != null) && (nnm.getLength() > 0)) {
+			sb.append("{");
+			for (int i = 0; i < nnm.getLength(); i++) {
+				if (i > 0) {
+					sb.append("; ");
+				}
+				Node n = nnm.item(i);
+				sb.append(n.getLocalName()).append("=").append(n.getNodeValue());
+			}
+			sb.append("}");
+		}
+		return sb.toString();
+	}
 
 	public void save()
 	{
-		System.out.println("Init Save");
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Saving Deployed Configuration");
 		aggiornaGVCore();
 		aggiornaGVAdapters();
 		copiaFileGvCore();
@@ -455,14 +556,14 @@ public class GVDeploy
 		copiaFileKB();
 		copiaFileBIRT();
 		copiaFileBipel();
-		System.out.println("End Save");
+		logger.info("END - Saving Deployed Configuration (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileGvCore() {
 		try {
 			this.gvConfigServer.writeGvCore(XMLConfig.getURL("GVCore.xml"));
 		} catch (XMLConfigException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -470,70 +571,90 @@ public class GVDeploy
 		try {
 			this.gvConfigServer.writeGvAdapters(XMLConfig.getURL("GVAdapters.xml"));
 		} catch (XMLConfigException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
 	private void copiaFileXsl() {
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File Xsl");
 
-		String appoDir =getAppoDir();
+		Map<String, String> dirsZip = new HashMap<String, String>();
+		Map<String, String> dirsGV = new HashMap<String, String>();
+		String appoDir = getAppoDir();
 		String gvDir = getGvDir();
 		Map<String, String> listFileXslZip = this.gvConfigZip.getListaFileXsl();
-		for(String key:listFileXslZip.keySet()){
+		for(String key : listFileXslZip.keySet()){
 			String nomeFile = listFileXslZip.get(key);
-			String dataSourceName = this.gvConfigZip.getDataSourceValueFromTrasf(key);
-			String dirDteZip = this.gvConfigZip.getDteDir(dataSourceName,"xsl");
+			String dataSourceName = key.split("#")[1]; //this.gvConfigZip.getDataSourceValueFromTrasf(key);
+			String dirDteZip = dirsZip.computeIfAbsent(dataSourceName, k1 -> this.gvConfigZip.getDteDir(k1,"xsl"));
 			String inputFile = appoDir + File.separator + dirDteZip + File.separator +nomeFile;
 			File fin = new File(inputFile);
 			dataSourceName = this.gvConfigServer.getDataSourceValueFromTrasf(key);
-			String dirDteServer =this.gvConfigServer.getDteDir(dataSourceName,"xsl");
+			String dirDteServer = dirsGV.computeIfAbsent(dataSourceName, k1 -> this.gvConfigServer.getDteDir(k1,"xsl"));
 			String outputFile = gvDir + File.separator + dirDteServer+ File.separator +nomeFile;
 			if (fin.exists()) {
 				copiaFile(inputFile,outputFile);
 			}
 		}
+		logger.info("END - Deploy File Xsl (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileXq() {
-		String appoDir =getAppoDir();
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File Xq");
+
+		Map<String, String> dirsZip = new HashMap<String, String>();
+		Map<String, String> dirsGV = new HashMap<String, String>();
+		String appoDir = getAppoDir();
 		String gvDir = getGvDir();
 		Map<String, String> listFileXqZip = this.gvConfigZip.getListaFileXq();
 		for(String key:listFileXqZip.keySet()){
 			String nomeFile = listFileXqZip.get(key);
-			String dataSourceName = this.gvConfigZip.getDataSourceValueFromTrasf(key);
-			String dirDteZip = this.gvConfigZip.getDteDir(dataSourceName,"xq");
+			String dataSourceName = key.split("#")[1]; //this.gvConfigZip.getDataSourceValueFromTrasf(key);
+			String dirDteZip = dirsZip.computeIfAbsent(dataSourceName, k1 -> this.gvConfigZip.getDteDir(k1,"xq"));
 			String inputFile = appoDir + File.separator + dirDteZip + File.separator +nomeFile;
 			File fin = new File(inputFile);
 			dataSourceName = this.gvConfigServer.getDataSourceValueFromTrasf(key);
-			String dirDteServer =this.gvConfigServer.getDteDir(dataSourceName,"xq");
+			String dirDteServer = dirsGV.computeIfAbsent(dataSourceName, k1 -> this.gvConfigServer.getDteDir(k1,"xq"));
 			String outputFile = gvDir + File.separator + dirDteServer+ File.separator +nomeFile;
 			if (fin.exists()) {
 				copiaFile(inputFile,outputFile);
 			}
 		}
+		logger.info("END - Deploy File Xq (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileBin(){
-		String appoDir =getAppoDir();
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File Bin");
+
+		Map<String, String> dirsZip = new HashMap<String, String>();
+		Map<String, String> dirsGV = new HashMap<String, String>();
+		String appoDir = getAppoDir();
 		String gvDir = getGvDir();
 		Map<String, String> listFileBinZip = this.gvConfigZip.getListaFileBin();
 		for(String key:listFileBinZip.keySet()){
 			String nomeFile = listFileBinZip.get(key);
-			String dataSourceName = this.gvConfigZip.getDataSourceValueFromTrasf(key);
-			String dirDteZip = this.gvConfigZip.getDteDir(dataSourceName,"bin");
+			String dataSourceName = key.split("#")[1]; //this.gvConfigZip.getDataSourceValueFromTrasf(key);
+			String dirDteZip = dirsZip.computeIfAbsent(dataSourceName, k1 -> this.gvConfigZip.getDteDir(k1,"bin"));
 			String inputFile = appoDir + File.separator + dirDteZip + File.separator +nomeFile;
 			File fin = new File(inputFile);
 			dataSourceName = this.gvConfigServer.getDataSourceValueFromTrasf(key);
-			String dirDteServer =this.gvConfigServer.getDteDir(dataSourceName,"bin");
+			String dirDteServer = dirsGV.computeIfAbsent(dataSourceName, k1 -> this.gvConfigServer.getDteDir(k1,"bin"));
 			String outputFile = gvDir + File.separator + dirDteServer+ File.separator +nomeFile;
 			if (fin.exists()) {
 				copiaFile(inputFile,outputFile);
 			}
 		}
+		logger.info("END - Deploy File Bin (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileXsd() {
-		String appoDir =getAppoDir();
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File Xsd");
+
+		String appoDir = getAppoDir();
 		String gvDir = getGvDir()+ File.separator + "xmlconfig";
 		List<String> listFileXsdZip = this.gvConfigZip.getListaFileXsd();
 		for(String nomeFile:listFileXsdZip){
@@ -544,10 +665,14 @@ public class GVDeploy
 				copiaFile(inputFile,outputFile);
 			}
 		}
+		logger.info("END - Deploy File Xsd (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileJsd() {
-		String appoDir =getAppoDir();
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File Jsd");
+
+		String appoDir = getAppoDir();
 		String gvDir = getGvDir()+ File.separator + "xmlconfig";
 		List<String> listFileJsdZip = this.gvConfigZip.getListaFileJsd();
 		for(String nomeFile:listFileJsdZip){
@@ -558,9 +683,13 @@ public class GVDeploy
 				copiaFile(inputFile,outputFile);
 			}
 		}
+		logger.info("END - Deploy File Jsd (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileKB() {
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File KB");
+
 		String appoDir =getAppoDir() + File.separator + "Rules";
 		String gvDir = getGvDir() + File.separator + "Rules";
 		if ((new File(appoDir)).exists()) {
@@ -580,9 +709,13 @@ public class GVDeploy
 				copiaFile(inputFile,outputFile);
 			}
 		}*/
+		logger.info("END - Deploy File KB (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileBIRT() {
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File BIRT");
+
 		String appoDir =getAppoDir() + File.separator + "reports";
 		String gvDir = getGvDir() + File.separator + "BIRTReportEngine" + File.separator + "reports";
 		if ((new File(appoDir)).exists()) {
@@ -602,9 +735,13 @@ public class GVDeploy
 				copiaFile(inputFile,outputFile);
 			}
 		}*/
+		logger.info("END - Deploy File BIRT (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileBipel() {
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File Bipel");
+
 		String appoDir =getAppoDir() + File.separator + "BpelProcess";
 		String gvDir = getGvDir() + File.separator + "BpelProcess";
 		if ((new File(appoDir)).exists()) {
@@ -624,6 +761,7 @@ public class GVDeploy
 				copiaFile(inputFile,outputFile);
 			}
 		}*/
+		logger.info("END - Deploy File Bipel (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	public String getAppoDir() {
@@ -631,7 +769,7 @@ public class GVDeploy
 		try {
 			appoDir = PropertiesHandler.expand("${{java.io.tmpdir}}", null) + File.separator + "conf";
 		} catch (PropertiesHandlerException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return appoDir;
 	}
@@ -641,13 +779,16 @@ public class GVDeploy
 		try {
 			gvDir = PropertiesHandler.expand("${{gv.app.home}}", null); //+ File.separator + "xmlconfig";
 		} catch (PropertiesHandlerException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return gvDir;
 	}
 
 	private void copiaFileWsdl() {
-		String appoDir =getAppoDir();
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File Wsdl");
+
+		String appoDir = getAppoDir();
 		String gvDir = getGvDir()+ File.separator + "xmlconfig";
 
 		Map<String, Node> listaWs = this.gvConfigZip.getListaBusinessWebServices();
@@ -670,10 +811,14 @@ public class GVDeploy
 				copiaFile(inputFile,outputFile);
 			}
 		}
+		logger.info("END - Deploy File Wsdl (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	private void copiaFileKeyStore() {
-		String appoDir =getAppoDir() + File.separator + "keystores";
+		long start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy File Keystore");
+
+		String appoDir = getAppoDir() + File.separator + "keystores";
 		String gvDir = getGvDir() + File.separator + "keystores";
 		if ((new File(appoDir)).exists()) {
 			try {
@@ -696,6 +841,7 @@ public class GVDeploy
 				copiaFile(inputFile,outputFile);
 			}
 		}*/
+		logger.info("END - Deploy File Keystore (" + (System.currentTimeMillis() - start) + ")");
 	}
 
 	public void scriviFile()
@@ -713,11 +859,11 @@ public class GVDeploy
 			ostream.flush();
 			ostream.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			logger.error(e);
 		} catch (XMLConfigException e) {
-			e.printStackTrace();
+			logger.error(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -795,23 +941,23 @@ public class GVDeploy
 			out = new FileOutputStream(fop);
 			IOUtils.copy(in, out);
 		} catch (PropertiesHandlerException e) {
-			e.printStackTrace();
+			logger.error(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			if (in != null) {
 				try {
 					in.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(e);
 				}
 			}
 			if (out != null) {
 				try {
 					out.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(e);
 				}
 			}
 		}
@@ -828,22 +974,6 @@ public class GVDeploy
 		String tmpDir = PropertiesHandler.expand("${{java.io.tmpdir}}", null);
 		InputStream is = new FileInputStream(new File(tmpDir, this.nomeZipFile));
 		return is;
-	}
-
-	public static void main(String[] args)
-	{
-		try {
-			GVConfig gvConfigServer = new GVConfig("/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVCore.xml","/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVAdapters.xml");
-			GVConfig gvConfigZip = new GVConfig("/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/conf/GVCore.xml","/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/conf/GVAdapters.xml");
-			//List<String> listaServizi = new ArrayList<String>();
-			//listaServizi.add("PIPPO");
-
-			GVDeploy deploy = new GVDeploy(gvConfigZip,gvConfigServer);
-			deploy.save();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 }
