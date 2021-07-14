@@ -38,9 +38,8 @@ import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.datahandling.DBOException;
-import it.greenvulcano.gvesb.datahandling.dbo.utils.ExtendedRowSetBuilder;
 import it.greenvulcano.gvesb.datahandling.dbo.utils.RowSetBuilder;
-import it.greenvulcano.gvesb.datahandling.dbo.utils.StandardRowSetBuilder;
+import it.greenvulcano.gvesb.datahandling.dbo.utils.RowSetBuilderFactory;
 import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
 import it.greenvulcano.gvesb.datahandling.utils.exchandler.oracle.OracleExceptionHandler;
 import it.greenvulcano.log.GVLogger;
@@ -68,7 +67,6 @@ public class DBOSelect extends AbstractDBO
     private static final Logger                      logger                 = GVLogger.getLogger(DBOSelect.class);
 
     private RowSetBuilder                            rowSetBuilder          = null;
-    private String                                   rowSetBuilderType      = null;
 
     /**
      *
@@ -89,15 +87,8 @@ public class DBOSelect extends AbstractDBO
         try {
             this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
             this.isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
-            this.rowSetBuilderType = XMLConfig.get(config, "@rowset-builder", "standard");
-            if (this.rowSetBuilderType.equals("extended")) {
-                this.rowSetBuilder = new ExtendedRowSetBuilder();
-            }
-            else {
-                this.rowSetBuilder = new StandardRowSetBuilder();
-            }
-            this.rowSetBuilder.setName(getName());
-            this.rowSetBuilder.setLogger(logger);
+            String rsBuilder = XMLConfig.get(config, "@rowset-builder", "standard");
+            this.rowSetBuilder = RowSetBuilderFactory.getRowSetBuilder(rsBuilder, getName(), logger);
 
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='select']");
             String id = null;
@@ -301,7 +292,7 @@ public class DBOSelect extends AbstractDBO
             this.dhr.setRead(this.rowCounter);
 
             logger.debug("End execution of DB data read through " + this.dboclass);
-            return doc;
+            return XMLUtils.serializeDOM_S(doc);
         }
         catch (DBOException exc) {
         	throw exc;

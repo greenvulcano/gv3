@@ -1,28 +1,23 @@
 /*
  * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.datahandling.dbo.utils;
-
-import it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO;
-import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
-import it.greenvulcano.util.thread.ThreadUtils;
-import it.greenvulcano.util.xml.XMLUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -52,11 +47,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
+import it.greenvulcano.gvesb.datahandling.dbo.AbstractDBO;
+import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
+import it.greenvulcano.util.thread.ThreadUtils;
+import it.greenvulcano.util.xml.XMLUtils;
+
 /**
- * 
+ *
  * @version 3.4.0 06/ago/2013
  * @author GreenVulcano Developer Team
- * 
+ *
  */
 public class StandardRowSetBuilder implements RowSetBuilder
 {
@@ -69,7 +69,8 @@ public class StandardRowSetBuilder implements RowSetBuilder
     private SimpleDateFormat dateFormatter;
     private DecimalFormat    numberFormatter;
 
-    public Document createDocument(XMLUtils parser) throws NullPointerException {
+    @Override
+	public Document createDocument(XMLUtils parser) throws NullPointerException {
         if (parser == null) {
             parser = this.parser;
         }
@@ -80,7 +81,8 @@ public class StandardRowSetBuilder implements RowSetBuilder
         return doc;
     }
 
-    public int build(Document doc, String id, ResultSet rs, Set<Integer> keyField,
+    @Override
+	public int build(Document doc, String id, ResultSet rs, Set<Integer> keyField,
             Map<String, FieldFormatter> fieldNameToFormatter, Map<String, FieldFormatter> fieldIdToFormatter)
             throws Exception {
         if (rs == null) {
@@ -103,37 +105,37 @@ public class StandardRowSetBuilder implements RowSetBuilder
         String colKey = null;
         Map<String, String> keyAttr = new HashMap<String, String>();
         while (rs.next()) {
-            if (rowCounter % 10 == 0) {
-                ThreadUtils.checkInterrupted(getClass().getSimpleName(), name, logger);
+            if ((rowCounter % 10) == 0) {
+                ThreadUtils.checkInterrupted(getClass().getSimpleName(), this.name, this.logger);
             }
-            row = parser.createElement(doc, AbstractDBO.ROW_NAME);
+            row = this.parser.createElement(doc, AbstractDBO.ROW_NAME);
 
-            parser.setAttribute(row, AbstractDBO.ID_NAME, id);
+            this.parser.setAttribute(row, AbstractDBO.ID_NAME, id);
             for (int j = 1; j <= metadata.getColumnCount(); j++) {
                 FieldFormatter fF = fFormatters[j];
 
                 isNull = false;
-                col = parser.createElement(doc, AbstractDBO.COL_NAME);
+                col = this.parser.createElement(doc, AbstractDBO.COL_NAME);
                 switch (metadata.getColumnType(j)) {
                     case Types.DATE :
                     case Types.TIME :
                     case Types.TIMESTAMP : {
-                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.TIMESTAMP_TYPE);
+                        this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.TIMESTAMP_TYPE);
                         Timestamp dateVal = rs.getTimestamp(j);
                         isNull = dateVal == null;
-                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+                        this.parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
-                            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, AbstractDBO.DEFAULT_DATE_FORMAT);
+                            this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, AbstractDBO.DEFAULT_DATE_FORMAT);
                             textVal = "";
                         }
                         else {
                             if (fF != null) {
-                                parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getDateFormat());
+                                this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getDateFormat());
                                 textVal = fF.formatDate(dateVal);
                             }
                             else {
-                                parser.setAttribute(col, AbstractDBO.FORMAT_NAME, AbstractDBO.DEFAULT_DATE_FORMAT);
-                                textVal = dateFormatter.format(dateVal);
+                                this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, AbstractDBO.DEFAULT_DATE_FORMAT);
+                                textVal = this.dateFormatter.format(dateVal);
                             }
                         }
                     }
@@ -141,20 +143,20 @@ public class StandardRowSetBuilder implements RowSetBuilder
                     case Types.DOUBLE :
                     case Types.FLOAT :
                     case Types.REAL : {
-                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
+                        this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
                         float numVal = rs.getFloat(j);
-                        parser.setAttribute(col, AbstractDBO.NULL_NAME, "false");
+                        this.parser.setAttribute(col, AbstractDBO.NULL_NAME, "false");
                         if (fF != null) {
-                            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getNumberFormat());
-                            parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, fF.getGroupSeparator());
-                            parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, fF.getDecSeparator());
+                            this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getNumberFormat());
+                            this.parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, fF.getGroupSeparator());
+                            this.parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, fF.getDecSeparator());
                             textVal = fF.formatNumber(numVal);
                         }
                         else {
-                            parser.setAttribute(col, AbstractDBO.FORMAT_NAME, numberFormat);
-                            parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, groupSeparator);
-                            parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, decSeparator);
-                            textVal = numberFormatter.format(numVal);
+                            this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, this.numberFormat);
+                            this.parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, this.groupSeparator);
+                            this.parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, this.decSeparator);
+                            textVal = this.numberFormatter.format(numVal);
                         }
                     }
                         break;
@@ -165,33 +167,33 @@ public class StandardRowSetBuilder implements RowSetBuilder
                     case Types.TINYINT : {
                         BigDecimal bigdecimal = rs.getBigDecimal(j);
                         isNull = bigdecimal == null;
-                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+                        this.parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             if (metadata.getScale(j) > 0) {
-                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
+                                this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
                             }
                             else {
-                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NUMERIC_TYPE);
+                                this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NUMERIC_TYPE);
                             }
                             textVal = "";
                         }
                         else {
                             if (fF != null) {
-                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
-                                parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getNumberFormat());
-                                parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, fF.getGroupSeparator());
-                                parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, fF.getDecSeparator());
+                                this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
+                                this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getNumberFormat());
+                                this.parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, fF.getGroupSeparator());
+                                this.parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, fF.getDecSeparator());
                                 textVal = fF.formatNumber(bigdecimal);
                             }
                             else if (metadata.getScale(j) > 0) {
-                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
-                                parser.setAttribute(col, AbstractDBO.FORMAT_NAME, numberFormat);
-                                parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, groupSeparator);
-                                parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, decSeparator);
-                                textVal = numberFormatter.format(bigdecimal);
+                                this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.FLOAT_TYPE);
+                                this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, this.numberFormat);
+                                this.parser.setAttribute(col, AbstractDBO.GRP_SEPARATOR_NAME, this.groupSeparator);
+                                this.parser.setAttribute(col, AbstractDBO.DEC_SEPARATOR_NAME, this.decSeparator);
+                                textVal = this.numberFormatter.format(bigdecimal);
                             }
                             else {
-                                parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NUMERIC_TYPE);
+                                this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NUMERIC_TYPE);
                                 textVal = bigdecimal.toString();
                             }
                         }
@@ -199,7 +201,7 @@ public class StandardRowSetBuilder implements RowSetBuilder
                         break;
                     case Types.NCHAR :
                     case Types.NVARCHAR : {
-                    	parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NSTRING_TYPE);
+                    	this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.NSTRING_TYPE);
                         textVal = rs.getNString(j);
                         if (textVal == null) {
                             textVal = "";
@@ -208,17 +210,17 @@ public class StandardRowSetBuilder implements RowSetBuilder
                         break;
                     case Types.CHAR :
                     case Types.VARCHAR : {
-                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.STRING_TYPE);
+                        this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.STRING_TYPE);
                         textVal = rs.getString(j);
                         isNull = textVal == null;
-                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+                        this.parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             textVal = "";
                         }
                     }
                         break;
                     case Types.NCLOB : {
-                    	parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.LONG_NSTRING_TYPE);
+                    	this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.LONG_NSTRING_TYPE);
                         NClob clob = rs.getNClob(j);
                         if (clob != null) {
                             Reader is = clob.getCharacterStream();
@@ -234,7 +236,7 @@ public class StandardRowSetBuilder implements RowSetBuilder
                     }
                         break;
                     case Types.CLOB : {
-                    	parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.LONG_STRING_TYPE);
+                    	this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.LONG_STRING_TYPE);
                         Clob clob = rs.getClob(j);
                         if (clob != null) {
                         	Reader is = clob.getCharacterStream();
@@ -250,10 +252,10 @@ public class StandardRowSetBuilder implements RowSetBuilder
                     }
                         break;
                     case Types.BLOB : {
-                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.BASE64_TYPE);
+                        this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.BASE64_TYPE);
                         Blob blob = rs.getBlob(j);
                         isNull = blob == null;
-                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+                        this.parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             textVal = "";
                         }
@@ -273,10 +275,10 @@ public class StandardRowSetBuilder implements RowSetBuilder
                     }
                         break;
                     default : {
-                        parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.DEFAULT_TYPE);
+                        this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.DEFAULT_TYPE);
                         textVal = rs.getString(j);
                         isNull = textVal == null;
-                        parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+                        this.parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
                         if (isNull) {
                             textVal = "";
                         }
@@ -303,18 +305,18 @@ public class StandardRowSetBuilder implements RowSetBuilder
             }
             if (noKey) {
                 if (data == null) {
-                    data = parser.createElement(doc, AbstractDBO.DATA_NAME);
-                    parser.setAttribute(data, AbstractDBO.ID_NAME, id);
+                    data = this.parser.createElement(doc, AbstractDBO.DATA_NAME);
+                    this.parser.setAttribute(data, AbstractDBO.ID_NAME, id);
                 }
             }
             else if ((colKey != null) && !colKey.equals(precKey)) {
                 if (data != null) {
                     docRoot.appendChild(data);
                 }
-                data = parser.createElement(doc, AbstractDBO.DATA_NAME);
-                parser.setAttribute(data, AbstractDBO.ID_NAME, id);
+                data = this.parser.createElement(doc, AbstractDBO.DATA_NAME);
+                this.parser.setAttribute(data, AbstractDBO.ID_NAME, id);
                 for (Entry<String, String> keyAttrEntry : keyAttr.entrySet()) {
-                    parser.setAttribute(data, keyAttrEntry.getKey(), keyAttrEntry.getValue());
+                    this.parser.setAttribute(data, keyAttrEntry.getKey(), keyAttrEntry.getValue());
                 }
                 keyAttr.clear();
                 precKey = colKey;
@@ -330,59 +332,108 @@ public class StandardRowSetBuilder implements RowSetBuilder
         return rowCounter;
     }
 
-    public void cleanup() {
-        numberFormat = null;
-        groupSeparator = null;
-        decSeparator = null;
-        parser = null;
-        dateFormatter = null;
-        numberFormatter = null;
+    @Override
+	public void cleanup() {
+        this.numberFormat = null;
+        this.groupSeparator = null;
+        this.decSeparator = null;
+        this.parser = null;
+        this.dateFormatter = null;
+        this.numberFormatter = null;
     }
 
-    public void setName(String name) {
+    @Override
+	public void setName(String name) {
         this.name = name;
     }
-    
-    public void setLogger(Logger logger) {
+
+    @Override
+	public String getName() {
+		return this.name;
+	}
+
+    @Override
+	public void setLogger(Logger logger) {
         this.logger = logger;
     }
 
-    public void setDateFormatter(SimpleDateFormat dateFormatter) {
+    @Override
+    public Logger getLogger() {
+    	return this.logger;
+    }
+
+    @Override
+	public void setDateFormatter(SimpleDateFormat dateFormatter) {
         this.dateFormatter = dateFormatter;
     }
 
-    public void setNumberFormatter(DecimalFormat numberFormatter) {
+    @Override
+    public SimpleDateFormat getDateFormatter() {
+    	return this.dateFormatter;
+    }
+
+    @Override
+	public void setNumberFormatter(DecimalFormat numberFormatter) {
         this.numberFormatter = numberFormatter;
     }
 
-    public void setDecSeparator(String decSeparator) {
+    @Override
+    public DecimalFormat getNumberFormatter() {
+    	return this.numberFormatter;
+    }
+
+    @Override
+	public void setDecSeparator(String decSeparator) {
         this.decSeparator = decSeparator;
     }
 
-    public void setGroupSeparator(String groupSeparator) {
+    @Override
+    public String getDecSeparator() {
+    	return this.decSeparator;
+    }
+
+    @Override
+	public void setGroupSeparator(String groupSeparator) {
         this.groupSeparator = groupSeparator;
     }
 
-    public void setNumberFormat(String numberFormat) {
+    @Override
+    public String getGroupSeparator() {
+    	return this.groupSeparator;
+    }
+
+    @Override
+	public void setNumberFormat(String numberFormat) {
         this.numberFormat = numberFormat;
     }
 
-    public void setXMLUtils(XMLUtils parser) {
+    @Override
+    public String getNumberFormat() {
+    	return this.numberFormat;
+    }
+
+    @Override
+	public void setXMLUtils(XMLUtils parser) {
         this.parser = parser;
+    }
+
+    @Override
+    public XMLUtils getXMLUtils() {
+    	return this.parser;
     }
 
     @Override
     public RowSetBuilder getCopy() {
         StandardRowSetBuilder copy = new StandardRowSetBuilder();
-        
-        copy.name = this.name;
-        copy.logger = this.logger;
-        copy.numberFormat = this.numberFormat;
-        copy.groupSeparator = this.groupSeparator;
-        copy.decSeparator = this.decSeparator;
-        copy.parser = this.parser;
-        copy.dateFormatter = this.dateFormatter;
-        copy.numberFormatter = this.numberFormatter;
+
+        copy.setName(getName());
+        copy.setLogger(getLogger());
+        copy.setNumberFormat(getNumberFormat());
+        copy.setGroupSeparator(getGroupSeparator());
+        copy.setDecSeparator(getDecSeparator());
+        copy.setXMLUtils(getXMLUtils());
+        copy.setDateFormatter(getDateFormatter());
+        copy.setNumberFormatter(getNumberFormatter());
 
         return copy;
     }

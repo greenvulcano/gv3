@@ -721,7 +721,7 @@
     Default is standard.
 
 -->
-<!ATTLIST DBOSelect rowset-builder (standard|extended) #IMPLIED>
+<!ATTLIST DBOSelect rowset-builder (standard|extended|extended-uppercase) #IMPLIED>
 
 <!--
     DBO optimized for select operations.
@@ -788,7 +788,7 @@
     Default is standard.
 
 -->
-<!ATTLIST DBOThreadSelect rowset-builder (standard|extended) #IMPLIED>
+<!ATTLIST DBOThreadSelect rowset-builder (standard|extended|extended-uppercase) #IMPLIED>
 
 <!--
     DBO optimized for select operations and conversion in CSV rows.
@@ -1055,7 +1055,7 @@
     Default is standard.
 
 -->
-<!ATTLIST DBOCallDynamicSP rowset-builder (standard|extended|json) #IMPLIED>
+<!ATTLIST DBOCallDynamicSP rowset-builder (standard|json) #IMPLIED>
 
 <!--
     #SelectOnInsert
