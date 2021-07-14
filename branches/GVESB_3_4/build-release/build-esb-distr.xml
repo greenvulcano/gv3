@@ -220,9 +220,9 @@
             <fileset dir="${icu4j.icu4j.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${javassist.javassist.lib}">
+            <!--<fileset dir="${javassist.javassist.lib}">
                 <include name="*.jar"/>
-            </fileset>
+            </fileset>-->
             <fileset dir="${javax.xml.bind.lib}">
                 <include name="*.jar"/>
             </fileset>
