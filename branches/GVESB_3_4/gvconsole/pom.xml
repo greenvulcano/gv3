@@ -11,7 +11,7 @@
     <groupId>it.greenvulcano.gvesb</groupId>
     <artifactId>gvconsole</artifactId>
     <packaging>war</packaging>
-    <version>3.4.0.6-Final</version>
+    <version>3.4.0.7-Final</version>
     <name>GreenVulcano ESB Administration Console</name>
 
     <build>

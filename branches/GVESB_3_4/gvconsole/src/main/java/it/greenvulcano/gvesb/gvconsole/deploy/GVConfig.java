@@ -61,6 +61,7 @@ public class GVConfig
 	 */
 	private Document coreXml = null;
 	private Document adapterXml = null;
+	private String type = null;
 	private static Logger  logger    = Logger.getLogger(GVConfig.class);
 
 	public Document getCoreXml(){
@@ -71,39 +72,41 @@ public class GVConfig
 		return this.adapterXml;
 	}
 
-	public GVConfig(Document coreXml,Document adapterXml)
+	public GVConfig(String type, Document coreXml, Document adapterXml)
 	{
-			this.coreXml =coreXml;
-			this.adapterXml = adapterXml;
+		this.type = type;
+		this.coreXml =coreXml;
+		this.adapterXml = adapterXml;
 	}
 
-	public GVConfig(URL urlCore,URL urlAdapter)
+	public GVConfig(String type, URL urlCore,URL urlAdapter)
 	{
+		this.type = type;
 		try {
 			this.coreXml = parseXml(urlCore);
 			this.adapterXml = parseXml(urlAdapter);
 		} catch (Exception e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
-	public GVConfig(String fileCore,String fileAdapter)
+	public GVConfig(String type, String fileCore,String fileAdapter)
 	{
-
+		this.type = type;
 		try {
 			this.adapterXml = parseXml(fileAdapter);
 			this.coreXml = parseXml(fileCore);
 		} catch (Exception e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
 	public List<String> getListaServizi()
 	{
 		List<String> retListaServizi = new ArrayList<String>();
-		for(String servizio:getListaNodeServizi().keySet()){
+		for(String servizio : getListaNodeServizi().keySet()){
 			retListaServizi.add(servizio);
 		}
 		Collections.sort(retListaServizi);
@@ -112,7 +115,7 @@ public class GVConfig
 
 	public Map<String, Node> getListaNodeServizi()
 	{
-		logger.debug("init getListaServizi");
+		logger.debug("init getListaServizi[" + this.type + "]");
 		Map<String, Node> retListaServizi = new HashMap<String, Node>();;
 		XMLUtils parser = null;
 		try {
@@ -121,12 +124,12 @@ public class GVConfig
 			for (int i = 0; i < results.getLength(); i++) {
 				String serviceName = parser.get(results.item(i), "@id-service");
 				retListaServizi.put(serviceName, results.item(i));
-				logger.debug("Id Servizio Nuovo=" + serviceName);
+				logger.debug("Found[" + this.type + "] Service " + serviceName);
 			}
 			return retListaServizi;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -136,20 +139,21 @@ public class GVConfig
 
 	public Map<String, Node> getListaNodeServizi(List<String> listaServizi)
 	{
-		logger.debug("init getListaServizi");
+		logger.debug("init getListaServizi[" + this.type + "]");
 		Map<String, Node> retListaServizi = new HashMap<String, Node>();;
 		XMLUtils parser = null;
 		try {
 			parser = XMLUtils.getParserInstance();
 			for(String servizio:listaServizi) {
 				Node result = parser.selectSingleNode(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='"+servizio+"']");
-				if(result!=null) {
+				if(result != null) {
+					logger.debug("Found Service[" + this.type + "] " + servizio);
 					retListaServizi.put(servizio, result);
 				}
 			}
 			return retListaServizi;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -165,7 +169,7 @@ public class GVConfig
 			dirDTE = XMLUtils.get_S(this.coreXml, xpath);
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		dirDTE = dirDTE.replace("${{gv.app.home}}", "");
 		return dirDTE;
@@ -178,7 +182,7 @@ public class GVConfig
 			wsdlDir = XMLUtils.get_S(this.adapterXml, "/GVAdapters/GVWebServices/BusinessWebServices/@wsdl-directory").replace("${{gv.app.home}}", "");
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return wsdlDir;
 	}
@@ -190,7 +194,7 @@ public class GVConfig
 			wsdlDir = XMLUtils.get_S(this.adapterXml, "/GVAdapters/GVWebServices/BusinessWebServices/@services-directory").replace("${{gv.app.home}}", "");
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return wsdlDir;
 	}
@@ -210,7 +214,7 @@ public class GVConfig
 			domWriter.write(localXmlGVCore, out);
 		} catch (IOException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		String localXml = out.toString();
 		return localXml;
@@ -218,7 +222,7 @@ public class GVConfig
 
 	private Document getDocGvAdapters(List<String> listaServizi,Boolean forExport)
 	{
-		logger.debug("init getDocGvAdapters");
+		logger.debug("init getDocGvAdapters[" + this.type + "]");
 		XMLUtils parser = null;
 		try {
 			parser = XMLUtils.getParserInstance();
@@ -479,7 +483,7 @@ public class GVConfig
 			return localXmlGVAdapter;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -489,77 +493,83 @@ public class GVConfig
 
 	public Map<String, Node> getListaGvWebServices()
 	{
-		List<String> listaServizi =  getListaServizi();
-		return getListaGvWebServices(listaServizi);
+		Map<String, Node> mapService = getListaNodeServizi();
+		return getListaGvWebServices(mapService);
 
 	}
 
-	private Map<String, Node> getListaGvWebServices(List<String> listaServizi)
+	private Map<String, Node> getListaGvWebServices(List<String> listService)
+	{
+		Map<String, Node> mapService = getListaNodeServizi(listService);
+		return getListaGvWebServices(mapService);
+	}
+
+	private Map<String, Node> getListaGvWebServices(Map<String, Node> mapService)
 	{
 		XMLUtils parser = null;
-		Map<String, Node> listaGvWS = new HashMap<String, Node>();
+		Map<String, Node> mapGvWS = new HashMap<String, Node>();
 		try {
 			parser = XMLUtils.getParserInstance();
-			for (String servizio : listaServizi) {
-				Map<String, Node> listaOperazioni = getListaOperazioni(servizio);
-				for (String operazione : listaOperazioni.keySet()) {
-					String xPath = "/GVAdapters/GVWebServices/GreenVulcanoWebServices/GreenVulcanoWebService[@gv-service='"+servizio+"' and @gv-operation='"+operazione+"']";
-					Node localXml = parser.selectSingleNode(this.adapterXml, xPath);
-					if(localXml!=null) {
-						listaGvWS.put(servizio+operazione, localXml);
+			for (String service : mapService.keySet()) {
+				Node serviceNode = mapService.get(service);
+				NodeList operations = parser.selectNodeList(serviceNode, "Operation");
+				for (int i = 0; i < operations.getLength(); i++){
+					String operation = parser.get(operations.item(i), "@name");
+					String xPath = "/GVAdapters/GVWebServices/GreenVulcanoWebServices/GreenVulcanoWebService[@gv-service='" + service + "' and @gv-operation='" + operation + "']";
+					Node wsNode = parser.selectSingleNode(this.adapterXml, xPath);
+					if (wsNode != null) {
+						mapGvWS.put(service+operation, wsNode);
 					}
 				}
-
 			}
-			return listaGvWS;
+			return mapGvWS;
 		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
-		return listaGvWS;
+		return mapGvWS;
 	}
 
 	public Map<String, Node> getListaBusinessWebServices()
 	{
-		List<String> listaServizi = getListaServizi();
-		return getListaBusinessWebServices(listaServizi);
+		Map<String, Node> mapService = getListaNodeServizi();
+		return getListaBusinessWebServices(mapService);
 	}
 
-	protected Map<String, Node> getListaBusinessWebServices(List<String> listaServizi)
+	public Map<String, Node> getListaBusinessWebServices(List<String> listService)
+	{
+		Map<String, Node> mapService = getListaNodeServizi(listService);
+		return getListaBusinessWebServices(mapService);
+	}
+
+	private Map<String, Node> getListaBusinessWebServices(Map<String, Node> mapService)
 	{
 		XMLUtils parser = null;
-		Map<String, Node> listaGvWS = new HashMap<String, Node>();
+		Map<String, Node> mapGvWS = new HashMap<String, Node>();
 		try {
 			parser = XMLUtils.getParserInstance();
-			for (String servizio : listaServizi) {
-				Map<String, Node> listaOperazioni = getListaOperazioni(servizio);
-				for (String operazione : listaOperazioni.keySet()) {
-					if(operazione.equals("Forward")){
-						operazione = parser.get(listaOperazioni.get(operazione), "@forward-name");
+			for (String service : mapService.keySet()) {
+				Node serviceNode = mapService.get(service);
+				NodeList operations = parser.selectNodeList(serviceNode, "Operation");
+				for (int i = 0; i < operations.getLength(); i++){
+					String operation = parser.get(operations.item(i), "@name");
+					String xPath = "/GVAdapters/GVWebServices/BusinessWebServices/WebService[WSOperation/Binding/@gv-service='" + service + "' and WSOperation/Binding/@gv-operation='" + operation + "']";
+					Node wsNode = parser.selectSingleNode(this.adapterXml, xPath);
+					if (wsNode != null) {
+						mapGvWS.put(service+operation, wsNode);
 					}
-
-					String xPath = "/GVAdapters/GVWebServices/BusinessWebServices/WebService[WSOperation/Binding/@gv-service='"+servizio+"' and WSOperation/Binding/@gv-operation='"+operazione+"']";
-					Node localXml = parser.selectSingleNode(this.adapterXml, xPath);
-					if(localXml!=null){
-						String name = parser.get(localXml, "@web-service");
-						listaGvWS.put(name, localXml);
-					}
-
 				}
-
 			}
-			return listaGvWS;
+			return mapGvWS;
 		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
-		return listaGvWS;
+		return mapGvWS;
 	}
 
 	private Node getNodeBusinessWebServices()
@@ -573,7 +583,7 @@ public class GVConfig
 			return nodeBusinessWebServices;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -596,13 +606,10 @@ public class GVConfig
 			for (String servizio : listaServizi) {
 				Map<String, Node> listaOperazioni = getListaOperazioni(servizio);
 				for (String operazione : listaOperazioni.keySet()) {
-					if(operazione.equals("Forward")){
-						operazione = parser.get(listaOperazioni.get(operazione), "@forward-name");
-					}
-
 					String xPath = "/GVCore/GVPolicy/ACLGreenVulcano/*[@service='"+servizio+"' and (@operazione='"+operazione+"' or not(@operation))]";
 					Node localXml = parser.selectSingleNode(this.coreXml, xPath);
-					if(localXml!=null){
+					if(localXml != null){
+						logger.info("Found[" + this.type + "] ACL for Service " + servizio + "/" + operazione);
 						String oper = parser.get(localXml, "@operazione","");
 						String name = servizio+oper;
 						listaAclGV.put(name, localXml);
@@ -614,7 +621,7 @@ public class GVConfig
 			return listaAclGV;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -638,9 +645,13 @@ public class GVConfig
 			for(String key:listaAclGV.keySet()){
 				Node nodeAclGV = listaAclGV.get(key);
 				String addressesDef = parser.get(nodeAclGV, "ACL/AddressSetRef/@name");
-				if(addressesDef!=null){
+				if(addressesDef != null){
+					if (listaAddressSet.containsKey(addressesDef)) {
+						continue;
+					}
 					Node nodeAddressSet = parser.selectSingleNode(this.coreXml, "/GVCore/GVPolicy/Addresses/AddressSet[@name='"+addressesDef+"']");
-					if(nodeAddressSet!=null) {
+					if(nodeAddressSet != null) {
+						logger.info("Found[" + this.type + "] AddressSetRef " + addressesDef);
 						listaAddressSet.put(addressesDef, nodeAddressSet);
 					}
 				}
@@ -648,7 +659,7 @@ public class GVConfig
 			return listaAddressSet;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -666,7 +677,7 @@ public class GVConfig
 			return nodeAddressSet;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -686,18 +697,23 @@ public class GVConfig
 		Map<String, Node> listaAclGV = getListaAclGV(listaServizi);
 		Map<String, Node> listaRoleDef = new HashMap<String, Node>();
 		try {
-			parser = XMLUtils.getParserInstance();for(String key:listaAclGV.keySet()){
+			parser = XMLUtils.getParserInstance();
+			for(String key : listaAclGV.keySet()){
 				Node nodeAclGV = listaAclGV.get(key);
 				String roleDef = parser.get(nodeAclGV, "ACL/RoleRef/@name");
+				if (listaRoleDef.containsKey(roleDef)) {
+					continue;
+				}
 				Node nodeRoleDef = parser.selectSingleNode(this.coreXml, "/GVCore/GVPolicy/Roles/Role[@name='"+roleDef+"']");
-				if(nodeRoleDef!=null) {
+				if(nodeRoleDef != null) {
+					logger.info("Found[" + this.type + "] RoleRef " + roleDef);
 					listaRoleDef.put(roleDef, nodeRoleDef);
 				}
 			}
 			return listaRoleDef;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -715,7 +731,7 @@ public class GVConfig
 			return nodeRoleDef;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -738,11 +754,6 @@ public class GVConfig
 			for (String servizio : listaServizi) {
 				Map<String, Node> listaOperazioni = getListaOperazioni(servizio);
 				for (String operazione : listaOperazioni.keySet()) {
-					if(operazione.equals("Forward"))
-					{
-						Node forward = listaOperazioni.get(operazione);
-						operazione =parser.get(forward, "@forward-name");
-					}
 					String xPath = "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/RESTActionMapping[@Action='"+action+"']/OperationMappings/Mapping[@service='"+servizio+"' and @operation='"+operazione+"']";
 					Node localXml = parser.selectSingleNode(this.adapterXml, xPath);
 					if(localXml!=null){
@@ -755,7 +766,7 @@ public class GVConfig
 			}
 			return listaRest;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -778,11 +789,6 @@ public class GVConfig
 			for (String servizio : listaServizi) {
 				Map<String, Node> listaOperazioni = getListaOperazioni(servizio);
 				for (String operazione : listaOperazioni.keySet()) {
-					if(operazione.equals("Forward"))
-					{
-						Node forward = listaOperazioni.get(operazione);
-						operazione =parser.get(forward, "@forward-name");
-					}
 					String xPath = "/GVAdapters/GVAdapterHttpConfiguration/InboundConfiguration/ActionMappings/RESTActionMapping[OperationMappings/Mapping/@service='"+servizio+"' and OperationMappings/Mapping/@operation='"+operazione+"']";
 					Node localXml = parser.selectSingleNode(this.adapterXml, xPath);
 					if(localXml!=null){
@@ -795,7 +801,7 @@ public class GVConfig
 			}
 			return listaRest;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -825,7 +831,7 @@ public class GVConfig
 			}
 			return listaHL7;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -849,7 +855,7 @@ public class GVConfig
 			}
 			return listaHL7;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -867,12 +873,6 @@ public class GVConfig
 			for (String servizio : listaServizi) {
 				Map<String, Node> listaOperazioni = getListaOperazioni(servizio);
 				for (String operazione : listaOperazioni.keySet()) {
-					if(operazione.equals("Forward"))
-					{
-						Node forward = listaOperazioni.get(operazione);
-						operazione =parser.get(forward, "@forward-name");
-
-					}
 					String xPath = "/GVAdapters/GVHL7ListenerManager/HL7Listeners/HL7Listener/HL7Applications/GVCoreApplication[@gv-service='" + servizio + "' and @gv-operation='" + operazione +"']";
 					Node localXml = parser.selectSingleNode(this.adapterXml, xPath);
 					if(localXml!=null){
@@ -883,7 +883,7 @@ public class GVConfig
 			}
 			return listaHL7;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -922,7 +922,7 @@ public class GVConfig
 			}
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -945,7 +945,7 @@ public class GVConfig
 			}
 			return listaKb;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -978,7 +978,7 @@ public class GVConfig
 			}
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1007,7 +1007,7 @@ public class GVConfig
 			}
 			return listaSa;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1030,7 +1030,7 @@ public class GVConfig
 			}
 			return listaSa;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1062,7 +1062,7 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1086,7 +1086,7 @@ public class GVConfig
 			}
 			return listaNe;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1101,11 +1101,11 @@ public class GVConfig
 		try {
 			parser = XMLUtils.getParserInstance();
 			Map<String, Node> listaSistemi = getListaSistemi(listaServizi);
-			for (String sistema:listaSistemi.keySet()){
+			for (String sistema : listaSistemi.keySet()){
 				Map<String, Node> mapListaChannel = getListaChannel(listaServizi,sistema);
-				for(String canale:mapListaChannel.keySet()){
+				for(String canale : mapListaChannel.keySet()){
 					Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi,sistema,canale);
-					for(String operation:mapListaOperation.keySet()){
+					for(String operation : mapListaOperation.keySet()){
 						Node oper = mapListaOperation.get(operation);
 						if (oper.getNodeName().startsWith("push-")) {
 							String eng  = parser.get(oper, "@defaultEngine");
@@ -1118,7 +1118,7 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1134,13 +1134,16 @@ public class GVConfig
 			parser = XMLUtils.getParserInstance();
 			String xpath= "/GVCore/GVServices/Services/Service[@id-service='"+servizio+"']/Operation";
 			NodeList operations = parser.selectNodeList(this.coreXml, xpath);
-			for(int i=0;i<operations.getLength();i++){
+			for(int i=0; i<operations.getLength(); i++){
 				String name = parser.get(operations.item(i), "@name");
+				if (name.equals("Forward")) {
+					name = parser.get(operations.item(i), "@forward-name");
+				}
 				listaOperazioni.put(name, operations.item(i));
 			}
 			return listaOperazioni;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1156,9 +1159,10 @@ public class GVConfig
 			try {
 				gvDataDump = XMLUtils.selectSingleNode_S(this.coreXml, "/GVCore/GVBufferDump/ServiceDump[@id-service='" + nomeServizio + "']");
 			} catch (XMLUtilsException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
-			if(gvDataDump!=null) {
+			if(gvDataDump != null) {
+				logger.debug("Found[" + this.type + "] ServiceDump for Service " + nomeServizio);
 				mapGvDataDump.put(nomeServizio, gvDataDump);
 			}
 		}
@@ -1183,7 +1187,7 @@ public class GVConfig
 			ret = out.toString();
 			out.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return ret;
 	}
@@ -1201,7 +1205,7 @@ public class GVConfig
 			ret = out.toString();
 			out.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return ret;
 	}
@@ -1216,7 +1220,7 @@ public class GVConfig
 			writer.write(localXmlGVCore, out);
 			out.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -1230,14 +1234,14 @@ public class GVConfig
 			writer.write(localXmlGVAdapters, out);
 			out.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
 
 	private Document getDocGvCore(List<String> listaServizi,Boolean forExport)
 	{
-		logger.debug("init getGvCore");
+		logger.debug("init getGvCore[" + this.type + "]");
 		XMLUtils parser = null;
 		try {
 			parser = XMLUtils.getParserInstance();
@@ -1294,7 +1298,7 @@ public class GVConfig
 			}
 
 			Map<String, Node> mapListaSistemi = getListaSistemi(listaServizi);
-			if((mapListaSistemi.size()>0) || forExport){
+			if((mapListaSistemi.size() > 0) || forExport){
 				Node locSystems = localXmlGVCore.getDocumentElement().appendChild(parser.createElement(localXmlGVCore, "GVSystems"));
 				parser.setAttribute((Element) locSystems, "type", "module");
 				parser.setAttribute((Element) locSystems, "name", "SYSTEMS");
@@ -1305,21 +1309,21 @@ public class GVConfig
 					parser.setAttribute((Element) locSystem, "id-system", sistema);
 					parser.setAttribute((Element) locSystem, "system-activation", "on");
 					Map<String, Node> mapListaChannel = getListaChannel(listaServizi,sistema);
-					for(String canale:mapListaChannel.keySet()){
+					for(String canale : mapListaChannel.keySet()){
 						Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi,sistema,canale);
 						Node channel = locSystem.appendChild(parser.createElement(localXmlGVCore, "Channel"));
 						parser.setAttribute((Element) channel, "id-channel", canale);
-						for(String operation:mapListaOperation.keySet()){
+						for(String operation : mapListaOperation.keySet()){
 							Node oper = mapListaOperation.get(operation);
 							if(oper.getLocalName().equals("dh-call")){
 								String operazione = parser.get(oper,"@name");
 								Map<String, Node> mapListaServiziDhCall = getListaDboBuilder(listaServizi,sistema,canale,operazione);
-								if(mapListaServiziDhCall.size()>0){
+								if(mapListaServiziDhCall.size() > 0){
 									Node dhCall = channel.appendChild(parser.createElement(localXmlGVCore, "dh-call"));
 									parser.setAttribute((Element) dhCall, "class", "it.greenvulcano.gvesb.virtual.datahandler.DataHandlerCallOperation");
 									parser.setAttribute((Element) dhCall, "name", operazione);
 									parser.setAttribute((Element) dhCall, "type", "call");
-									for(String builder:mapListaServiziDhCall.keySet()){
+									for(String builder : mapListaServiziDhCall.keySet()){
 										Node nodeDH = mapListaServiziDhCall.get(builder);
 										dhCall.appendChild(localXmlGVCore.importNode(nodeDH, true));
 									}
@@ -1333,12 +1337,12 @@ public class GVConfig
 			}
 
 			Map<String, Node> mapGVBufferDump = getListaGVBufferDump(listaServizi);
-			if((mapGVBufferDump.size()>0) || forExport){
+			if((mapGVBufferDump.size() > 0) || forExport){
 				Node locGVBufferDump = localXmlGVCore.getDocumentElement().appendChild(parser.createElement(localXmlGVCore, "GVBufferDump"));
 				parser.setAttribute((Element) locGVBufferDump, "type", "module");
 				parser.setAttribute((Element) locGVBufferDump, "name", "BUFFER_DUMP");
 				parser.setAttribute((Element) locGVBufferDump, "log-dump-size", "-1");
-				for (String servizio:mapGVBufferDump.keySet()) {
+				for (String servizio : mapGVBufferDump.keySet()) {
 					locGVBufferDump.appendChild(localXmlGVCore.importNode(mapGVBufferDump.get(servizio), true));
 				}
 			}
@@ -1346,65 +1350,65 @@ public class GVConfig
 			Map<String, Node> mapAddressSet = getListaAddressSet(listaServizi);
 			Map<String, Node> mapRoleDef = getListaRoleRef(listaServizi);
 			Map<String, Node> mapACLGreenVulcano = getListaAclGV(listaServizi);
-			if(((mapAddressSet.size()+mapAddressSet.size()+mapACLGreenVulcano.size())>0) || forExport){
+			if(((mapAddressSet.size() + mapAddressSet.size() + mapACLGreenVulcano.size()) > 0) || forExport){
 				Node locGVPolicy = localXmlGVCore.getDocumentElement().appendChild(parser.createElement(localXmlGVCore, "GVPolicy"));
 				parser.setAttribute((Element) locGVPolicy, "type", "module");
 				parser.setAttribute((Element) locGVPolicy, "name", "POLICY_MANAGER");
 
-				if(mapRoleDef.size()>0){
+				if(mapRoleDef.size() > 0){
 					Node locGVRoles = locGVPolicy.appendChild(parser.createElement(localXmlGVCore, "Roles"));
-					for (String servizio:mapRoleDef.keySet()) {
+					for (String servizio : mapRoleDef.keySet()) {
 						locGVRoles.appendChild(localXmlGVCore.importNode(mapRoleDef.get(servizio), true));
 					}
 				}
 
-				if(mapAddressSet.size()>0){
+				if(mapAddressSet.size() > 0){
 					Node locGVAddress = locGVPolicy.appendChild(parser.createElement(localXmlGVCore, "Addresses"));
-					for (String servizio:mapAddressSet.keySet()) {
+					for (String servizio : mapAddressSet.keySet()) {
 						locGVAddress.appendChild(localXmlGVCore.importNode(mapAddressSet.get(servizio), true));
 					}
 				}
 
-				if(mapACLGreenVulcano.size()>0){
+				if(mapACLGreenVulcano.size() > 0){
 					Node nodeACLGreenVulcano = locGVPolicy.appendChild(parser.createElement(localXmlGVCore, "ACLGreenVulcano"));
 					parser.setAttribute((Element) nodeACLGreenVulcano, "class", "it.greenvulcano.gvesb.policy.impl.ACLGreenVulcano");
 					parser.setAttribute((Element) nodeACLGreenVulcano, "type", "acl-manager");
-					for (String servizio:mapACLGreenVulcano.keySet()) {
+					for (String servizio : mapACLGreenVulcano.keySet()) {
 						nodeACLGreenVulcano.appendChild(localXmlGVCore.importNode(mapACLGreenVulcano.get(servizio), true));
 					}
 				}
 			}
 
 			Map<String, Node> mapListaTrasformazioni = getListaTrasformazioni(listaServizi);
-			if((mapListaTrasformazioni.size()>0) || forExport){
+			if((mapListaTrasformazioni.size() > 0) || forExport){
 				Node localTransformation = localXmlGVCore.getDocumentElement().appendChild(parser.createElement(localXmlGVCore, "GVDataTransformation"));
 				parser.setAttribute((Element) localTransformation, "type", "module");
 				parser.setAttribute((Element) localTransformation, "name", "GVDT");
 
 				Map<String, Node> mapListaDataSource = getListaDataSource(mapListaTrasformazioni);
 				Node localNodeDataSource = localTransformation.appendChild(parser.createElement(localXmlGVCore, "DataSourceSets"));
-				for (String nomeDataSource:mapListaDataSource.keySet()) {
+				for (String nomeDataSource : mapListaDataSource.keySet()) {
 					localNodeDataSource.appendChild(localXmlGVCore.importNode(mapListaDataSource.get(nomeDataSource), true));
 				}
 				Node localNodeTrasf = localTransformation.appendChild(parser.createElement(localXmlGVCore, "Transformations"));
-				for (String nomeTrasformazione:mapListaTrasformazioni.keySet()) {
+				for (String nomeTrasformazione : mapListaTrasformazioni.keySet()) {
 					localNodeTrasf.appendChild(localXmlGVCore.importNode(mapListaTrasformazioni.get(nomeTrasformazione), true));
 				}
 			}
 
 			Map<String, Node> mapGVTask = getListaTask(listaServizi);
-			if((mapGVTask.size()>0) || forExport){
+			if((mapGVTask.size() > 0) || forExport){
 				Node localTask = localXmlGVCore.getDocumentElement().appendChild(parser.createElement(localXmlGVCore, "GVTaskManagerConfiguration"));
 				parser.setAttribute((Element) localTask, "type", "module");
 				parser.setAttribute((Element) localTask, "name", "GVTASKS");
 				Node localNodeTask = localTask.appendChild(parser.createElement(localXmlGVCore, "TaskGroups"));
-				for (String nomeTask:mapGVTask.keySet()) {
+				for (String nomeTask : mapGVTask.keySet()) {
 					localNodeTask.appendChild(localXmlGVCore.importNode(mapGVTask.get(nomeTask), true));
 				}
 			}
 			return localXmlGVCore;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1425,25 +1429,22 @@ public class GVConfig
 			for (String nomeServizio : listaServizi) {
 				Map<String, Node> listaOperazioni  = getListaOperazioni(nomeServizio);
 				for (String operazione : listaOperazioni.keySet()) {
-					if(operazione.equals("Forward"))
-					{
-						Node forward = listaOperazioni.get(operazione);
-						String  forwardName= parser.get(forward,"@forward-name");
-						String xpath= "/GVCore/GVForwards/ForwardConfiguration[@forwardName='"+forwardName+"']";
-						//System.out.println("xpath="+xpath);
-						NodeList forwards = parser.selectNodeList(this.coreXml, xpath);
-						if (forwards.getLength() > 0) {
-							for (int i = 0; i < forwards.getLength(); i++) {
-								String name = parser.get(forwards.item(i),"@name");
-								listaForward.put(name, forwards.item(i));
-							}
+					String  forwardName = operazione;
+					String xpath = "/GVCore/GVForwards/ForwardConfiguration[@forwardName='"+forwardName+"']";
+					//System.out.println("xpath="+xpath);
+					NodeList forwards = parser.selectNodeList(this.coreXml, xpath);
+					if (forwards.getLength() > 0) {
+						for (int i = 0; i < forwards.getLength(); i++) {
+							String name = parser.get(forwards.item(i),"@name");
+							logger.debug("Found[" + this.type + "] Forward " + name + " for Service " + nomeServizio + "/" + operazione);
+							listaForward.put(name, forwards.item(i));
 						}
 					}
 				}
 			}
 			return listaForward;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1451,13 +1452,45 @@ public class GVConfig
 		return listaForward;
 	}
 
-	public Map<String, Node> getListaDboBuilder(String sistema, String canale,String operazione) {
-		List<String> listaServizi = getListaServizi();
-		return getListaDboBuilder(listaServizi,sistema,canale,operazione);
+	public Map<String, Node> getListaForward(Map<String, Node> mapService) {
+		Map<String, Node> mapForward = new HashMap<String, Node>();
+		XMLUtils parser = null;
+		try {
+			parser = XMLUtils.getParserInstance();
+			for (String service : mapService.keySet()) {
+				Node serviceNode = mapService.get(service);
+				NodeList operations = parser.selectNodeList(serviceNode, "Operation");
+				for (int i = 0; i < operations.getLength(); i++){
+					String operation = parser.get(operations.item(i), "@name");
+					if (operation.equals("Forward")) {
+						String xpath = "/GVCore/GVForwards/ForwardConfiguration[@forwardName='" + operation + "']";
+						NodeList forwards = parser.selectNodeList(this.coreXml, xpath);
+						if (forwards.getLength() > 0) {
+							for (int f = 0; f < forwards.getLength(); f++) {
+								String fwName = parser.get(forwards.item(f),"@name");
+								logger.debug("Found[" + this.type + "] Forward " + fwName + " for Service " + service + "/" + operation);
+								mapForward.put(fwName, forwards.item(i));
+							}
+						}
+					}
+				}
+			}
+			return mapForward;
+		} catch (XMLUtilsException e) {
+			logger.error(e);
+		}
+		finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return mapForward;
 	}
 
-	public Map<String, Node> getListaDboBuilder(
-			List<String> listaServizi, String sistema, String canale,String operazione){
+	public Map<String, Node> getListaDboBuilder(String sistema, String canale, String operazione) {
+		List<String> listaServizi = getListaServizi();
+		return getListaDboBuilder(listaServizi, sistema, canale, operazione);
+	}
+
+	public Map<String, Node> getListaDboBuilder(List<String> listaServizi, String sistema, String canale, String operazione){
 		Map<String, Node> listaOperation = new HashMap<String, Node>();
 		XMLUtils parser = null;
 		try {
@@ -1471,13 +1504,13 @@ public class GVConfig
 						Node gvOperNode = operations.item(i);
 						Node nodeOpDH = parser.selectSingleNode(gvOperNode, "InputServices/dh-selector-service/dh-selector-call/@DH_SERVICE_NAME");
 						String nomeOpDH =null;
-						if(nodeOpDH!=null){
+						if(nodeOpDH != null){
 							nomeOpDH = nodeOpDH.getNodeValue();
 						}else{
-							nomeOpDH =nomeServizio;
+							nomeOpDH = nomeServizio;
 						}
 						xpath="/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']/dh-call/DBOBuilder[@name='"+nomeOpDH+"']";
-						logger.debug("Operation=" + nomeOpDH);
+						logger.debug("Found[" + this.type + "] Flow DBOBuilder " + nomeServizio + "/" + sistema + "/" + canale + "/" + nomeOpDH);
 						Node operation = parser.selectSingleNode(this.coreXml, xpath);
 						   if(operation!=null) {
 							listaOperation.put(nomeOpDH, operation);
@@ -1492,13 +1525,13 @@ public class GVConfig
 						Node gvOperNode = operations.item(i);
 						Node nodeOpDH = parser.selectSingleNode(gvOperNode, "InputServices/dh-selector-service/dh-selector-call/@DH_SERVICE_NAME");
 						String nomeOpDH =null;
-						if(nodeOpDH!=null){
+						if(nodeOpDH != null){
 							nomeOpDH = nodeOpDH.getNodeValue();
 						}else{
-							nomeOpDH =nomeServizio;
+							nomeOpDH = nomeServizio;
 						}
 						xpath="/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']/dh-call/DBOBuilder[@name='"+nomeOpDH+"']";
-						logger.debug("Operation=" + nomeOpDH);
+						logger.debug("Found[" + this.type + "] SubFlow DBOBuilder " + nomeServizio + "/" + sistema + "/" + canale + "/" + nomeOpDH);
 						Node operation = parser.selectSingleNode(this.coreXml, xpath);
 						   if(operation!=null) {
 							listaOperation.put(nomeOpDH, operation);
@@ -1508,7 +1541,7 @@ public class GVConfig
 			}
 			return listaOperation;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1516,7 +1549,43 @@ public class GVConfig
 		return listaOperation;
 	}
 
-	public Node getDboBuilder(String dboBuilder, String sistema, String canale,String operazione){
+	public Map<String, Node> getListaDboBuilder(Node opNode, Node vclNode){
+		Map<String, Node> dboBuilderMap = new HashMap<String, Node>();
+		XMLUtils parser = null;
+		try {
+			parser = XMLUtils.getParserInstance();
+
+			String service = parser.get(opNode.getParentNode(), "@id-service");
+			String system  = parser.get(vclNode.getParentNode().getParentNode(), "@id-system");
+			String channel = parser.get(vclNode.getParentNode(), "@id-channel");
+			String  vclOp  = parser.get(vclNode, "@name");
+
+			NodeList operNodes = parser.selectNodeList(opNode, ".//GVOperationNode[@id-system='" + system + "' and @operation-name='" + vclOp + "']");
+			if (operNodes.getLength() > 0) {
+				for (int i = 0; i < operNodes.getLength(); i++) {
+					Node gvOperNode = operNodes.item(i);
+					String dhName = parser.get(gvOperNode, "InputServices/dh-selector-service/dh-selector-call/@DH_SERVICE_NAME", "");
+					if ("".equals(dhName)){
+						dhName = service;
+					}
+					logger.debug("Found[" + this.type + "] DBOBuilder " + service + "/" + system + "/" + channel + "/" + vclOp + "/" + dhName);
+					Node dboNode = parser.selectSingleNode(vclNode, "DBOBuilder[@name='" + dhName + "']");
+					if (dboNode != null) {
+						dboBuilderMap.put(dhName, dboNode);
+					}
+				}
+			}
+			return dboBuilderMap;
+		} catch (XMLUtilsException e) {
+			logger.error(e);
+		}
+		finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return dboBuilderMap;
+	}
+
+	public Node getDboBuilder(String dboBuilder, String sistema, String canale, String operazione){
 		Node nodeDboBuilder = null;
 		XMLUtils parser = null;
 		try {
@@ -1525,7 +1594,7 @@ public class GVConfig
 			nodeDboBuilder = parser.selectSingleNode(this.coreXml, xpath);
 			return nodeDboBuilder;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1533,8 +1602,7 @@ public class GVConfig
 		return nodeDboBuilder;
 	}
 
-	public Map<String, Node> getListaServiziDhCall(
-			String servizio, String sistema, String canale,String operazione){
+	public Map<String, Node> getListaServiziDhCall(String servizio, String sistema, String canale, String operazione){
 		Map<String, Node> listaOperation = new HashMap<String, Node>();
 		XMLUtils parser = null;
 		try {
@@ -1548,9 +1616,9 @@ public class GVConfig
 						Node nameOpDH = parser.selectSingleNode(gvOperNode, "InputServices/dh-selector-service/dh-selector-call/@DH_SERVICE_NAME");
 						if(nameOpDH!=null){
 							xpath="/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']/dh-call/DBOBuilder[@name='"+nameOpDH.getNodeValue()+"']";
-							logger.debug("Operation=" + nameOpDH.getLocalName());
 							Node operation = parser.selectSingleNode(this.coreXml, xpath);
-							if(operation!=null) {
+							if(operation != null) {
+								logger.debug("Found[" + this.type + "] Service " + servizio + " uses DBOBuilder=" + sistema + "/" + canale + "/" + nameOpDH.getLocalName());
 								listaOperation.put(nameOpDH.getLocalName(), operation);
 							}
 						}
@@ -1558,7 +1626,7 @@ public class GVConfig
 				}
 			return listaOperation;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1587,7 +1655,7 @@ public class GVConfig
 			}
 			return listaCe;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1597,7 +1665,7 @@ public class GVConfig
 
 	private Map<String,Node> getListaCryptoHelper(Map <String,Node>listaTrasformazioni)
 	{
-		logger.debug("init getGVCryptoHelper");
+		logger.debug("init getGVCryptoHelper[" + this.type + "]");
 		String[] listaKeyId = getListaKeyIdTrasformazioni(listaTrasformazioni);
 		Map<String,Node> gvCryptoHelper = new HashMap<String,Node>();;
 		String strXpath = "";
@@ -1622,7 +1690,7 @@ public class GVConfig
 				String name = XMLUtils.get_S(nodeGvCryptoHelper, "@id");
 				gvCryptoHelper.put(name, nodeGvCryptoHelper);
 			} catch (XMLUtilsException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		return gvCryptoHelper;
@@ -1635,21 +1703,21 @@ public class GVConfig
 		try {
 			nodeGvCryptoHelper = XMLUtils.selectSingleNode_S(this.coreXml, strXpath);
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return nodeGvCryptoHelper;
 	}
 
 	private Node getGVKeyStoreCryptoHelper(String id)
 	{
-		logger.debug("init getGVCryptoHelper");
+		logger.debug("init getGVCryptoHelper[" + this.type + "]");
 
 		String strXpath = "/GVCore/GVCryptoHelper/KeyStoreID[@id='"+id+"']";
 		Node nodeGvCryptoHelper = null;
 		try {
 			nodeGvCryptoHelper = XMLUtils.selectSingleNode_S(this.coreXml, strXpath);
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return nodeGvCryptoHelper;
 	}
@@ -1660,7 +1728,7 @@ public class GVConfig
 		try {
 			service = XMLUtils.selectSingleNode_S(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio + "']");
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return service;
 	}
@@ -1670,11 +1738,13 @@ public class GVConfig
 		List<String> listaServizi = getListaServizi();
 		return getListaTask(listaServizi);
 	}
+
 	public Map<String, Node> getGroups()
 	{
 		List<String> listaServizi = getListaServizi();
 		return getGroups(listaServizi);
 	}
+
 	public Map<String, Node> getListaTask(List<String> listaServizi)
 	{
 		XMLUtils parser = null;
@@ -1687,6 +1757,7 @@ public class GVConfig
 				if (tasks.getLength() > 0) {
 					for (int i = 0; i < tasks.getLength(); i++) {
 						String name = parser.get(tasks.item(i), "@name");
+						logger.debug("Found[" + this.type + "] TimerTask " + name + " for Service " + servizio);
 						listTask.put(name, tasks.item(i));
 					}
 				}
@@ -1694,57 +1765,86 @@ public class GVConfig
 			return listTask;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
 		return null;
 	}
-	public Map<String, Node> getGroups(List<String> listaServizi)
-	{
-		Map<String, Node> listGroup = new HashMap<String,Node>();
-		for (String servizio : listaServizi) {
-			String xPathGroup = "/GVCore/GVServices/Services/Service[@id-service='" + servizio+ "']/@group-name";
 
-			String groupName;
-			try {
-				Node groupa = XMLUtils.selectSingleNode_S(this.coreXml, xPathGroup);
-				groupName = XMLUtils.get_S(this.coreXml, xPathGroup);
-				System.out.println(groupName);
-				if(groupName!=null){
-					Node group = XMLUtils.selectSingleNode_S(this.coreXml, "/GVCore/GVServices/Groups/Group[@id-group='" + groupName + "']");
-					if(group!=null) {
-						listGroup.put(groupName, group);
-					}
-				}
-			} catch (XMLUtilsException e) {
-
-				e.printStackTrace();
-			}
-		}
-		return listGroup;
-	}
-	public Map<String, Node> getListDataProvider()
+	public Map<String, Node> getGroups(List<String> listService)
 	{
-		List<String> listaServizi = getListaServizi();
-		return getListDataProvider(listaServizi);
-	}
-
-	private Map<String, Node> getListDataProvider(List<String> listaServizi)
-	{
-		Map<String, Node> hlistaDp = new Hashtable<String, Node>();
+		Map<String, Node> mapGroup = new HashMap<String,Node>();
 		XMLUtils parser = null;
 		try {
 			parser = XMLUtils.getParserInstance();
-			for (String nomeServizio : listaServizi) {
-				//getListDataProviderSystem(nomeServizio, hlistaDp, parser);
-				getListDataProviderCoreIterator(nomeServizio, hlistaDp, parser);
-				getListDataProviderCoreIteratorCall(nomeServizio, hlistaDp, parser);
-				getListDataProviderCoreIteratorSubFlowCall(nomeServizio, hlistaDp, parser);
-				getListDataProviderCoreSubFlowSplitted(nomeServizio, hlistaDp, parser);
-				getListDataProviderCoreFlowDefs(nomeServizio, hlistaDp, parser);
+			for (String service : listService) {
+				String group = parser.get(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + service + "']/@grop-name");
+				if((group != null) && !mapGroup.containsKey(group)){
+					Node groupNode = parser.selectSingleNode(this.coreXml, "/GVCore/GVServices/Groups/Group[@id-group='" + group + "']");
+					if (group != null) {
+						logger.debug("Found[" + this.type + "] Group " + group + " for Service " + service);
+						mapGroup.put(group, groupNode);
+					}
+				}
+			}
+			return mapGroup;
+		} catch (XMLUtilsException e) {
+			logger.error(e);
+		}
+		finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return mapGroup;
+	}
 
+	public Map<String, Node> getGroups(Map<String, Node> mapService)
+	{
+		Map<String, Node> mapGroup = new HashMap<String,Node>();
+		XMLUtils parser = null;
+		try {
+			parser = XMLUtils.getParserInstance();
+			for (String service : mapService.keySet()) {
+				String group = parser.get(mapService.get(service), "@group-name");
+				if ((group != null) && !mapGroup.containsKey(group)){
+					Node groupNode = parser.selectSingleNode(this.coreXml, "/GVCore/GVServices/Groups/Group[@id-group='" + group + "']");
+					if(group != null) {
+						logger.debug("Found[" + this.type + "] Group " + group + " for Service " + service);
+						mapGroup.put(group, groupNode);
+					}
+				}
+			}
+			return mapGroup;
+		} catch (XMLUtilsException e) {
+			logger.error(e);
+		}
+		finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return mapGroup;
+	}
+
+	public Map<String, Node> getListDataProvider()
+	{
+		Map<String, Node> mapService = getListaNodeServizi();
+		return getListDataProvider(mapService);
+	}
+
+	private Map<String, Node> getListDataProvider(List<String> listService)
+	{
+		Map<String, Node> mapService = getListaNodeServizi(listService);
+		return getListDataProvider(mapService);
+	}
+
+	private Map<String, Node> getListDataProvider(Map<String, Node> mapService)
+	{
+		Map<String, Node> mapDP = new Hashtable<String, Node>();
+		XMLUtils parser = null;
+		try {
+			parser = XMLUtils.getParserInstance();
+			for (String service : mapService.keySet()) {
+				getListDataProviderCore(mapService.get(service), mapDP, parser);
 			}
 			//j2ee-ejb-call: input-ref-dp,output-ref-dp
 			//jms-enqueue: ref-dp
@@ -1752,325 +1852,175 @@ public class GVConfig
 			//RestServiceInvoker: ref-dp
 			//http-call: ref-dp
 
-			getListDataProviderForward(listaServizi, hlistaDp, parser);
-			getListDataProviderWs(listaServizi, hlistaDp, parser);
-			getListDataProviderOperation(listaServizi, hlistaDp, parser);
-			return hlistaDp;
+			getListDataProviderForward(mapService, mapDP, parser);
+			getListDataProviderWs(mapService, mapDP, parser);
+			getListDataProviderVCLOperation(mapService, mapDP, parser);
+			return mapDP;
 		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
-		return hlistaDp;
+		return mapDP;
 	}
 
-	private void getListDataProviderForward(List<String> listaServizi,Map<String, Node> vlistaDp, XMLUtils parser)
+	private void getListDataProviderForward(Map<String, Node> mapService, Map<String, Node> mapDP, XMLUtils parser)
 	{
-		Map<String, Node> listaForward = getListaForward(listaServizi);
-		for (String forwardName:listaForward.keySet()) {
-			String dp = listaForward.get(forwardName).getAttributes().getNamedItem("ref-dp").getNodeValue();
-			Node nodeDp;
+		Map<String, Node> mapForward = getListaForward(mapService);
+		for (Node forward : mapForward.values()) {
 			try {
-				nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-				if(nodeDp!=null) {
-					vlistaDp.put(dp, nodeDp);
+				String dp = parser.get(forward, "@ref-dp", "");
+				if (!("".equals(dp) || mapDP.containsKey(dp))) {
+					Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='" + dp + "']");
+					if ( nodeDp != null) {
+						mapDP.put(dp, nodeDp);
+					}
 				}
 			} catch (XMLUtilsException e) {
-
-				e.printStackTrace();
+				logger.error(e);
 			}
-
 		}
 	}
-	private void getListDataProviderWs(List<String> listaServizi,Map<String, Node> vlistaDp, XMLUtils parser)
+
+	private void getListDataProviderWs(Map<String, Node> mapService, Map<String, Node> mapDP, XMLUtils parser)
 	{
 		try {
-			Map<String, Node> listaWs = this.getListaGvWebServices(listaServizi);
-			for (String wsName:listaWs.keySet()) {
-				if(listaWs.get(wsName).getAttributes().getNamedItem("input-dp")!=null){
-					String dp = listaWs.get(wsName).getAttributes().getNamedItem("input-dp").getNodeValue();
+			Map<String, Node> mapWs = this.getListaGvWebServices(mapService);
+			for (String wsName : mapWs.keySet()) {
+				Node wsNode = mapWs.get(wsName);
+				String dp = parser.get(wsNode, "@input-dp", "");
+				if (!("".equals(dp) || mapDP.containsKey(dp))) {
 					Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
 					if (nodeDp != null) {
-						vlistaDp.put(dp, nodeDp);
+						mapDP.put(dp, nodeDp);
 					}
 				}
-				if(listaWs.get(wsName).getAttributes().getNamedItem("output-dp")!=null){
-					String dp = listaWs.get(wsName).getAttributes().getNamedItem("output-dp").getNodeValue();
+				dp = parser.get(wsNode, "@output-dp", "");
+				if (!("".equals(dp) || mapDP.containsKey(dp))) {
 					Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
 					if (nodeDp != null) {
-						vlistaDp.put(dp, nodeDp);
+						mapDP.put(dp, nodeDp);
 					}
 				}
 			}
-			listaWs = this.getListaBusinessWebServices(listaServizi);
-			for (String wsName:listaWs.keySet()) {
-				NodeList ops = parser.selectNodeList(listaWs.get(wsName), "WSOperation");
+
+			mapWs = this.getListaBusinessWebServices(mapService);
+			for (String wsName : mapWs.keySet()) {
+				Node wsNode = mapWs.get(wsName);
+				NodeList ops = parser.selectNodeList(wsNode, "WSOperation");
 				for (int i = 0; i < ops.getLength(); i++) {
-					if(ops.item(i).getAttributes().getNamedItem("ref-dp")!=null){
-						String dp = ops.item(i).getAttributes().getNamedItem("ref-dp").getNodeValue();
+					String dp = parser.get(ops.item(i), "@ref-dp", "");
+					if (!("".equals(dp) || mapDP.containsKey(dp))) {
 						Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
 						if (nodeDp != null) {
-							vlistaDp.put(dp, nodeDp);
+							mapDP.put(dp, nodeDp);
 						}
 					}
 				}
 			}
 		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
-
-	private void getListDataProviderSystem(String nomeServizio, Map<String, Node> vlistaDp, XMLUtils parser)
+	private void getListDataProviderCore(Node service, Map<String, Node> mapDP, XMLUtils parser)
 	{
-		NodeList partecipants;
 		try {
-			partecipants = parser.selectNodeList(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
-					+ "']/Operation/Participant");
+			NodeList dps = parser.selectNodeList(service, ".//*[@collection-dp]");
+			for (int i = 0; i < dps.getLength(); i++) {
+				String dp = parser.get(dps.item(i), "@collection-dp");
+				if (!mapDP.containsKey(dp)) {
+					Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='" + dp + "']");
+					if( nodeDp != null) {
+						mapDP.put(dp, nodeDp);
+					}
+				}
+			}
 
-			logger.debug("xpath=" + "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
-					+ "']/Operation/Participant");
-			if (partecipants.getLength() > 0) {
-				for (int i = 0; i < partecipants.getLength(); i++) {
-					String sistema = parser.get(partecipants.item(i), "@id-system");
-					String canale = parser.get(partecipants.item(i), "@id-channel");
-					logger.debug("Partecipant=" + sistema);
-					logger.debug("canale=" + canale);
+			dps = parser.selectNodeList(service, ".//*[@ref-dp]");
+			for (int i = 0; i < dps.getLength(); i++) {
+				String dp = parser.get(dps.item(i), "@ref-dp");
+				if (!mapDP.containsKey(dp)) {
+					Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='" + dp + "']");
+					if( nodeDp != null) {
+						mapDP.put(dp, nodeDp);
+					}
+				}
+			}
 
-					NodeList operations = parser.selectNodeList(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='"+nomeServizio+"']/Operation/Flow/GVOperationNode[@id-system='"+sistema+"']");
-					if (operations.getLength() > 0) {
-						for (int j = 0; j < operations.getLength(); j++) {
-							String name = parser.get(operations.item(j), "@operation-name");
-							logger.debug("Operation=" + name);
-
-							NodeList dataProviders = parser.selectNodeList(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
-									+ "']/Channel[@id-channel='" + canale + "']/*[@name='"+name+"']/@ref-dp");
-							for (int d = 0; d < dataProviders.getLength(); d++) {
-								String dp = parser.get(dataProviders.item(d), ".");
-								Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-								if (nodeDp != null) {
-									vlistaDp.put(dp, nodeDp);
-								}
-							}
-							dataProviders = parser.selectNodeList(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
-									+ "']/Channel[@id-channel='" + canale + "']/*[@name='"+name+"']/*/@ref-dp");
-							for (int d = 0; d < dataProviders.getLength(); d++) {
-								String dp = parser.get(dataProviders.item(d), ".");
-								Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-								if(nodeDp!=null) {
-									vlistaDp.put(dp, nodeDp);
-								}
-							}
-							dataProviders = parser.selectNodeList(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
-									+ "']/Channel[@id-channel='" + canale + "']/*[@name='"+name+"']/@input-ref-dp");
-							for (int d = 0; d < dataProviders.getLength(); d++) {
-								String dp = parser.get(dataProviders.item(d), ".");
-								Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-								if (nodeDp != null) {
-									vlistaDp.put(dp, nodeDp);
-								}
-							}
-							dataProviders = parser.selectNodeList(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
-									+ "']/Channel[@id-channel='" + canale + "']/*[@name='"+name+"']/@output-ref-dp");
-							for (int d = 0; d < dataProviders.getLength(); d++) {
-								String dp = parser.get(dataProviders.item(d), ".");
-								Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-								if (nodeDp != null) {
-									vlistaDp.put(dp, nodeDp);
-								}
-							}
-							dataProviders = parser.selectNodeList(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
-									+ "']/Channel[@id-channel='" + canale + "']/*[@name='"+name+"']/@globals-ref-dp");
-							for (int d = 0; d < dataProviders.getLength(); d++) {
-								String dp = parser.get(dataProviders.item(d), ".");
-								Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-								if (nodeDp != null) {
-									vlistaDp.put(dp, nodeDp);
-								}
-							}
-						}
+			dps = parser.selectNodeList(service, ".//*[@partition-dp]");
+			for (int i = 0; i < dps.getLength(); i++) {
+				String dp = parser.get(dps.item(i), "@partition-dp");
+				if (!mapDP.containsKey(dp)) {
+					Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='" + dp + "']");
+					if( nodeDp != null) {
+						mapDP.put(dp, nodeDp);
 					}
 				}
 			}
 		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
+			logger.error(e);
 		}
-		//logger.debug("getListDataProviderSystem - LISTA DP=" + vlistaDp);
 	}
 
-	private void getListDataProviderCoreIterator(String nomeServizio, Map<String, Node> vlistaDp,
-			XMLUtils parser)
-	{
-		NodeList iterator;
-		try {
-			iterator = parser.selectNodeList(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
-					+ "']/Operation/*/GVIteratorOperationNode/@collection-dp");
-			logger.debug("getListDataProviderCoreIterator NUM ITERATOR=" + iterator.getLength());
-			for (int i = 0; i < iterator.getLength(); i++) {
-				String dp = parser.get(iterator.item(i), ".");
-				Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-				if(nodeDp!=null) {
-					vlistaDp.put(dp, nodeDp);
-				}
-			}
-		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
-		}
-
-	}
-
-	private void getListDataProviderCoreIteratorCall(String nomeServizio,Map<String, Node> vlistaDp, XMLUtils parser)
-	{
-		NodeList refdp;
-		try {
-			refdp = parser.selectNodeList(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
-					+ "']/Operation/*/GVIteratorOperationNode/CoreCall/@ref-dp");
-			logger.debug("getListDataProviderCoreIteratorCall NUM REFDP=" + refdp.getLength());
-			for (int i = 0; i < refdp.getLength(); i++) {
-				String dp = parser.get(refdp.item(i), ".");
-				Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-				if (nodeDp != null) {
-					vlistaDp.put(dp, nodeDp);
-				}
-			}
-		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
-		}
-
-	}
-
-	private void getListDataProviderCoreIteratorSubFlowCall(String nomeServizio,
-			Map<String, Node> vlistaDp, XMLUtils parser)
-	{
-		NodeList refdp;
-		try {
-			refdp = parser.selectNodeList(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
-					+ "']/Operation/*/GVIteratorOperationNode/SubFlowCall/@ref-dp");
-			logger.debug("getListDataProviderCoreIteratorSubFlowCall NUM REFDP=" + refdp.getLength());
-			for (int i = 0; i < refdp.getLength(); i++) {
-				String dp = parser.get(refdp.item(i), ".");
-				Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-				if(nodeDp!=null) {
-					vlistaDp.put(dp, nodeDp);
-				}
-			}
-		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
-		}
-
-	}
-	private void getListDataProviderOperation(List<String> listaServizi,
-			Map<String, Node> vlistaDp, XMLUtils parser)
+	private void getListDataProviderVCLOperation(Map<String, Node> mapService, Map<String, Node> mapDP, XMLUtils parser)
 	{
 		try {
-			Map<String, Node> listaSistemi = getListaSistemi(listaServizi);
-			for (String sistema:listaSistemi.keySet()){
-				Map<String, Node> mapListaChannel = getListaChannel(listaServizi,sistema);
-				for(String canale:mapListaChannel.keySet()){
-					Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi,sistema,canale);
-					for(String operation:mapListaOperation.keySet()){
-						Node oper = mapListaOperation.get(operation);
+			for (String servizio : mapService.keySet()){
+				Node servNode = mapService.get(servizio);
 
-						String dp = parser.get(oper, "@ref-dp");
-						if(dp!=null){
+				NodeList operations = parser.selectNodeList(servNode, ".//Operation");
+				for (int i = 0; i < operations.getLength(); i++){
+					Node opNode = operations.item(i);
+
+					Map<String, Node> mapVCLOp = getListaVCLOp(opNode);
+					for (String vclOp : mapVCLOp.keySet()){
+						Node vclNode = mapVCLOp.get(vclOp);
+
+						String dp = parser.get(vclNode, "@ref-dp");
+						if((dp != null) && !mapDP.containsKey(dp)) {
 							Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-							if(nodeDp!=null) {
-								vlistaDp.put(dp, nodeDp);
+							if(nodeDp != null) {
+								mapDP.put(dp, nodeDp);
 							}
 						}
-						dp = parser.get(oper, "*/@ref-dp");
-						if(dp!=null){
+						dp = parser.get(vclNode, "*/@ref-dp");
+						if((dp != null) && !mapDP.containsKey(dp)) {
 							Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
 							if(nodeDp!=null) {
-								vlistaDp.put(dp, nodeDp);
+								mapDP.put(dp, nodeDp);
 							}
 						}
-						dp = parser.get(oper, "@input-ref-dp");
-						if(dp!=null){
+						dp = parser.get(vclNode, "@input-ref-dp");
+						if((dp != null) && !mapDP.containsKey(dp)) {
 							Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
 							if(nodeDp!=null) {
-								vlistaDp.put(dp, nodeDp);
+								mapDP.put(dp, nodeDp);
 							}
 						}
-						dp = parser.get(oper, "@output-ref-dp");
-						if(dp!=null){
+						dp = parser.get(vclNode, "@output-ref-dp");
+						if((dp != null) && !mapDP.containsKey(dp)) {
 							Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
 							if(nodeDp!=null) {
-								vlistaDp.put(dp, nodeDp);
+								mapDP.put(dp, nodeDp);
 							}
 						}
-						dp = parser.get(oper, "@globals-ref-dp");
-						if(dp!=null){
+						dp = parser.get(vclNode, "@globals-ref-dp");
+						if((dp != null) && !mapDP.containsKey(dp)) {
 							Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
 							if(nodeDp!=null) {
-								vlistaDp.put(dp, nodeDp);
+								mapDP.put(dp, nodeDp);
 							}
 						}
 					}
 				}
 			}
 		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
-	private void getListDataProviderCoreSubFlowSplitted(String nomeServizio,
-			Map<String, Node> vlistaDp, XMLUtils parser)
-	{
-		try {
-			NodeList refdp = parser.selectNodeList(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
-					+ "']/Operation/*/GVSubFlowSplittedNode/@ref-dp");
-			logger.debug("getListDataProviderCoreSubFlowSplitted NUM REFDP=" + refdp.getLength());
-			for (int i = 0; i < refdp.getLength(); i++) {
-				String dp = parser.get(refdp.item(i), ".");
-				Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-				if (nodeDp != null) {
-					vlistaDp.put(dp, nodeDp);
-				}
-			}
-			refdp = parser.selectNodeList(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
-					+ "']/Operation/*/GVSubFlowSplittedNode/@partition-dp");
-			logger.debug("getListDataProviderCoreSubFlowSplitted NUM PARTITIONDP=" + refdp.getLength());
-			for (int i = 0; i < refdp.getLength(); i++) {
-				String dp = parser.get(refdp.item(i), ".");
-				Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-				if (nodeDp != null) {
-					vlistaDp.put(dp, nodeDp);
-				}
-			}
-		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
-		}
-	}
-
-	private void getListDataProviderCoreFlowDefs(String nomeServizio,
-			Map<String, Node> vlistaDp, XMLUtils parser)
-	{
-		try {
-			NodeList refdp = parser.selectNodeList(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
-					+ "']/Operation/*/*/FlowDefs/FlowDef/@ref-dp");
-			logger.debug("getListDataProviderCoreFlowDefs NUM REFDP=" + refdp.getLength());
-			for (int i = 0; i < refdp.getLength(); i++) {
-				String dp = parser.get(refdp.item(i), ".");
-				Node nodeDp = parser.selectSingleNode(this.adapterXml, "/GVAdapters/GVDataProviderManager/DataProviders/*[@name='"+dp+"']");
-				if (nodeDp != null) {
-					vlistaDp.put(dp, nodeDp);
-				}
-			}
-		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
-		}
-	}
 
 	public Map<String, Node> getListExcelWorkBook()
 	{
@@ -2087,7 +2037,7 @@ public class GVConfig
 			}
 			return listaWb;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2102,11 +2052,11 @@ public class GVConfig
 		try {
 			parser = XMLUtils.getParserInstance();
 			Map<String, Node> listaSistemi = getListaSistemi(listaServizi);
-			for (String sistema:listaSistemi.keySet()){
+			for (String sistema : listaSistemi.keySet()){
 				Map<String, Node> mapListaChannel = getListaChannel(listaServizi,sistema);
-				for(String canale:mapListaChannel.keySet()){
+				for(String canale : mapListaChannel.keySet()){
 					Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi,sistema,canale);
-					for(String operation:mapListaOperation.keySet()){
+					for(String operation : mapListaOperation.keySet()){
 						Node oper = mapListaOperation.get(operation);
 						if ("excel-call".equals(oper.getNodeName())) {
 							String wbName = null;
@@ -2129,7 +2079,7 @@ public class GVConfig
 			}
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2152,7 +2102,7 @@ public class GVConfig
 			}
 			return listaEr;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2167,11 +2117,11 @@ public class GVConfig
 		try {
 			parser = XMLUtils.getParserInstance();
 			Map<String, Node> listaSistemi = getListaSistemi(listaServizi);
-			for (String sistema:listaSistemi.keySet()){
+			for (String sistema : listaSistemi.keySet()){
 				Map<String, Node> mapListaChannel = getListaChannel(listaServizi,sistema);
-				for(String canale:mapListaChannel.keySet()){
+				for(String canale : mapListaChannel.keySet()){
 					Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi,sistema,canale);
-					for(String operation:mapListaOperation.keySet()){
+					for(String operation : mapListaOperation.keySet()){
 						Node oper = mapListaOperation.get(operation);
 						if ("excel-call".equals(oper.getNodeName())) {
 							String erName = null;
@@ -2189,7 +2139,7 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2218,7 +2168,7 @@ public class GVConfig
 			}
 			return listaBr;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2241,7 +2191,7 @@ public class GVConfig
 			}
 			return listaBrg;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2255,7 +2205,7 @@ public class GVConfig
 		try {
 			brg = XMLUtils.selectSingleNode_S(this.adapterXml, "/GVAdapters/GVBIRTReportConfiguration/ReportGroups/ReportGroup[@name='" + group + "']");
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return brg;
 	}
@@ -2267,11 +2217,11 @@ public class GVConfig
 		try {
 			parser = XMLUtils.getParserInstance();
 			Map<String, Node> listaSistemi = getListaSistemi(listaServizi);
-			for (String sistema:listaSistemi.keySet()){
+			for (String sistema : listaSistemi.keySet()){
 				Map<String, Node> mapListaChannel = getListaChannel(listaServizi,sistema);
-				for(String canale:mapListaChannel.keySet()){
+				for(String canale : mapListaChannel.keySet()){
 					Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi,sistema,canale);
-					for(String operation:mapListaOperation.keySet()){
+					for(String operation : mapListaOperation.keySet()){
 						Node oper = mapListaOperation.get(operation);
 						if ("birt-report-call".equals(oper.getNodeName())) {
 							String group  = parser.get(oper, "@groupName");
@@ -2285,7 +2235,7 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2308,7 +2258,7 @@ public class GVConfig
 			}
 			return listaRc;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2323,11 +2273,11 @@ public class GVConfig
 		try {
 			parser = XMLUtils.getParserInstance();
 			Map<String, Node> listaSistemi = getListaSistemi(listaServizi);
-			for (String sistema:listaSistemi.keySet()){
+			for (String sistema : listaSistemi.keySet()){
 				Map<String, Node> mapListaChannel = getListaChannel(listaServizi,sistema);
-				for(String canale:mapListaChannel.keySet()){
+				for(String canale : mapListaChannel.keySet()){
 					Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi,sistema,canale);
-					for(String operation:mapListaOperation.keySet()){
+					for(String operation : mapListaOperation.keySet()){
 						Node oper = mapListaOperation.get(operation);
 						if (("rsh-call".equals(oper.getNodeName())) || ("rsh-filereader-call".equals(oper.getNodeName())) || ("rsh-filewriter-call".equals(oper.getNodeName()))) {
 							String rshC  = parser.get(oper, "@rsh-client-name");
@@ -2340,7 +2290,7 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2366,15 +2316,18 @@ public class GVConfig
 				if (partecipants.getLength() > 0) {
 					for (int i = 0; i < partecipants.getLength(); i++) {
 						String name = parser.get(partecipants.item(i), "@id-system");
+						if (listaSistemi.containsKey(name)) {
+							continue;
+						}
 						Node sytem = parser.selectSingleNode(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='"+name+"']");
-						logger.debug("Partecipant=" + name);
+						logger.debug("Found[" + this.type + "] Partecipant " + name + " for Service " + nomeServizio);
 						listaSistemi.put(name, sytem);
 					}
 				}
 			}
 			return listaSistemi;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2391,7 +2344,7 @@ public class GVConfig
 			nodeSistema = parser.selectSingleNode(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='"+name+"']");
 			return nodeSistema;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2412,14 +2365,14 @@ public class GVConfig
 					for (int i = 0; i < partecipants.getLength(); i++) {
 						String name = parser.get(partecipants.item(i), "@id-channel");
 						Node channel = parser.selectSingleNode(this.coreXml, "/GVCore/GVSystems/Systems/System/Channel[@id-channel='"+name+"']");
-						logger.debug("CHANNEL=" + name);
+						logger.debug("Found[" + this.type + "] Partecipant " + name + " for Service " + nomeServizio);
 						listaChannel.put(name, channel);
 					}
 				}
 			}
 			return listaChannel;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2437,7 +2390,7 @@ public class GVConfig
 			nodeChannel = parser.selectSingleNode(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']");
 			return nodeChannel;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2469,9 +2422,9 @@ public class GVConfig
 				if (operations.getLength() > 0) {
 					for (int i = 0; i < operations.getLength(); i++) {
 						String name = parser.get(operations.item(i), "@operation-name");
-						logger.debug("Operation=" + name);
 						Node operation = parser.selectSingleNode(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']/*[@name='"+name+"']");
-						if(operation!=null) {
+						if(operation != null) {
+							logger.debug("Found[" + this.type + "] VCLOperation " + name + " for Service " + nomeServizio + " Operations");
 							listaOperation.put(name, operation);
 						}
 					}
@@ -2481,9 +2434,9 @@ public class GVConfig
 				if (operations.getLength() > 0) {
 					for (int i = 0; i < operations.getLength(); i++) {
 						String name = parser.get(operations.item(i), "@operation-name");
-						logger.debug("Operation=" + name);
 						Node operation = parser.selectSingleNode(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']/*[@name='"+name+"']");
-						if(operation!=null) {
+						if(operation != null) {
+							logger.debug("Found[" + this.type + "] VCLOperation " + name + " for Service " + nomeServizio + " SubFlows");
 							listaOperation.put(name, operation);
 						}
 					}
@@ -2491,7 +2444,7 @@ public class GVConfig
 			}
 			return listaOperation;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2499,7 +2452,49 @@ public class GVConfig
 		return listaOperation;
 	}
 
-	public Node getVCLOp(String vclOp,String sistema,String canale)
+
+	public Map<String, Node> getListaVCLOp(Node opNode)
+	{
+		Map<String, Node> listaOperation = new HashMap<String, Node>();
+		XMLUtils parser = null;
+		try {
+			parser = XMLUtils.getParserInstance();
+			String service = parser.get(opNode.getParentNode(), "@id-service");
+			String operation = parser.get(opNode, "@name");
+			if ("Forward".equals(operation)) {
+				operation = parser.get(opNode, "@forward-name");
+			}
+
+			NodeList partecipants = parser.selectNodeList(opNode, "Partecipant");
+			for (int i = 0; i < partecipants.getLength(); i++) {
+				Node partecipant = partecipants.item(i);
+				String system = parser.get(partecipant, "@id-system");
+				String channel = parser.get(partecipant, "@id-channel");
+
+				String xPath = ".//*[@id-system='" + system + "']";
+				NodeList operNodes = parser.selectNodeList(opNode, xPath);
+				if (operNodes.getLength() > 0) {
+					for (int o = 0; o < operNodes.getLength(); o++) {
+						String name = parser.get(operNodes.item(i), "@operation-name");
+						Node vclNode = parser.selectSingleNode(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='" + system + "']/Channel[@id-channel='" + channel + "']/*[@name='" + name + "']");
+						if(vclNode != null) {
+							logger.debug("Found[" + this.type + "] VCLOperation " + name + " for Service " + service + "/" + operation);
+							listaOperation.put(name, vclNode);
+						}
+					}
+				}
+			}
+			return listaOperation;
+		} catch (XMLUtilsException e) {
+			logger.error(e);
+		}
+		finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return listaOperation;
+	}
+
+	public Node getVCLOp(String vclOp, String sistema, String canale)
 	{
 		Node nodeOperation = null;
 		XMLUtils parser = null;
@@ -2508,7 +2503,7 @@ public class GVConfig
 			nodeOperation = parser.selectSingleNode(this.coreXml, "/GVCore/GVSystems/Systems/System[@id-system='"+sistema+"']/Channel[@id-channel='"+canale+"']/*[@name='"+vclOp+"']");
 			return nodeOperation;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2523,27 +2518,37 @@ public class GVConfig
 		return getListaDataSource(listaTrasf);
 	}
 
-	private Map<String, Node> getListaDataSource(Map<String, Node> listaTrasf)
+	public Map<String, Node> getListaDataSource(List<String> listaServizi)
+	{
+		Map<String, Node> listaTrasf = getListaTrasformazioni(listaServizi);
+		return getListaDataSource(listaTrasf);
+	}
+
+	public Map<String, Node> getListaDataSource(Map<String, Node> listaTrasf)
 	{
 		XMLUtils parser = null;
 		Map<String, Node> listaDataSource = new HashMap<String, Node>();
 		try {
 			parser = XMLUtils.getParserInstance();
-			for (String nomeTrasformazione:listaTrasf.keySet()) {
+			for (String nomeTrasformazione : listaTrasf.keySet()) {
 				Node trasf = listaTrasf.get(nomeTrasformazione);
 				String dataSourceName = "Default";
-				if((trasf!=null) && (trasf.getAttributes()!=null) && (trasf.getAttributes().getNamedItem("DataSourceSet")!=null)){
-					dataSourceName = listaTrasf.get(nomeTrasformazione).getAttributes().getNamedItem("DataSourceSet").getNodeValue();
+				if(trasf !=null ) {
+					dataSourceName = parser.get(trasf, "@DataSourceSet", "Default");
+				}
+				if (listaDataSource.containsKey(dataSourceName)) {
+					continue;
 				}
 				String xPathDataSpurce = "/GVCore/GVDataTransformation/DataSourceSets/DataSourceSet[@name='"
 						+ dataSourceName+"']";
 				Node dataSource = parser.selectSingleNode(this.coreXml, xPathDataSpurce);
+				logger.debug("Found[" + this.type + "] DataSourceSet " + dataSourceName);
 				listaDataSource.put(dataSourceName, dataSource);
 			}
 			return listaDataSource;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -2556,10 +2561,10 @@ public class GVConfig
 		Node nodeDataSource = null;
 		try {
 			parser = XMLUtils.getParserInstance();
-			Node nodeTrasf = this.getTrasformazione(nomeTrasf);
+			Node trasf = this.getTrasformazione(nomeTrasf);
 			String dataSourceName = "Default";
-			if((nodeTrasf!=null) && (nodeTrasf.getAttributes()!=null) && (nodeTrasf.getAttributes().getNamedItem("DataSourceSet")!=null)){
-				dataSourceName = parser.get(nodeTrasf, "@DataSourceSet");
+			if(trasf !=null ) {
+				dataSourceName = parser.get(trasf, "@DataSourceSet", "Default");
 			}
 			String xPathDataSpurce = "/GVCore/GVDataTransformation/DataSourceSets/DataSourceSet[@name='"
 					+ dataSourceName+"']";
@@ -2567,7 +2572,7 @@ public class GVConfig
 			return nodeDataSource;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -2580,15 +2585,15 @@ public class GVConfig
 		String dataSourceName = "Default";
 		try {
 			parser = XMLUtils.getParserInstance();
-			Node nodeTrasf = this.getTrasformazione(nomeTrasf);
+			Node trasf = this.getTrasformazione(nomeTrasf);
 
-			if((nodeTrasf!=null) && (nodeTrasf.getAttributes()!=null) && (nodeTrasf.getAttributes().getNamedItem("DataSourceSet")!=null)){
-				dataSourceName = parser.get(nodeTrasf, "@DataSourceSet");
+			if(trasf !=null ) {
+				dataSourceName = parser.get(trasf, "@DataSourceSet", "Default");
 			}
 			return dataSourceName;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -2607,44 +2612,38 @@ public class GVConfig
 			return nodeDataSource;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
 		return nodeDataSource;
 	}
 
-	public Map<String, Node> getListaDataSource(List<String> listaServizi)
-	{
-		Map<String, Node> listaTrasformazioni = getListaTrasformazioni(listaServizi);
-		return getListaDataSource(listaTrasformazioni);
-	}
-
 	private List<String> getListaTrasformazioniDH(List<String> listaServizi) {
 		Map<String, Node> mapListaSistemi = getListaSistemi(listaServizi);
 		List<String> listaTrasformazioniDH = new ArrayList<String>();
-		for (String sistema:mapListaSistemi.keySet()){
-			Map<String, Node> mapListaChannel = getListaChannel(listaServizi,sistema);
-			for(String canale:mapListaChannel.keySet()){
-				Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi,sistema,canale);
-				for(String operation:mapListaOperation.keySet()){
+		for (String sistema : mapListaSistemi.keySet()){
+			Map<String, Node> mapListaChannel = getListaChannel(listaServizi, sistema);
+			for(String canale : mapListaChannel.keySet()){
+				Map<String, Node> mapListaOperation = getListaVCLOp(listaServizi, sistema, canale);
+				for(String operation : mapListaOperation.keySet()){
 					Node oper = mapListaOperation.get(operation);
 					if(oper.getLocalName().equals("dh-call")){
 						String operazione = oper.getAttributes().getNamedItem("name").getNodeValue();
-						Map<String, Node> mapListaServiziDhCall = getListaDboBuilder(listaServizi,sistema,canale,operazione);
+						Map<String, Node> mapListaServiziDhCall = getListaDboBuilder(listaServizi, sistema, canale, operazione);
 						if(mapListaServiziDhCall.size()>0){
-							for(String builder:mapListaServiziDhCall.keySet()){
+							for(String builder : mapListaServiziDhCall.keySet()){
 								Node nodeDH = mapListaServiziDhCall.get(builder);
-								NodeList trasfsDH =nodeDH.getChildNodes();
-								for(int i=0;i<trasfsDH.getLength();i++){
-									Node dboBuilder =trasfsDH.item(i);
+								NodeList trasfsDH = nodeDH.getChildNodes();
+								for(int i = 0; i < trasfsDH.getLength(); i++){
+									Node dboBuilder = trasfsDH.item(i);
 									String trasfNAme = null;
 									try {
 										trasfNAme = XMLUtils.get_S(dboBuilder, "@transformation");
 									} catch (XMLUtilsException e) {
-										e.printStackTrace();
+										logger.error(e);
 									}
-									if((trasfNAme!=null) && !trasfNAme.equals("")){
+									if((trasfNAme != null) && !trasfNAme.equals("")){
 										if(!listaTrasformazioniDH.contains(trasfNAme)) {
 											listaTrasformazioniDH.add(trasfNAme);
 										}
@@ -2657,6 +2656,52 @@ public class GVConfig
 			}
 		}
 		return listaTrasformazioniDH;
+	}
+
+	private List<String> getListaTrasformazioniDH(Map<String, Node> serviceMap) {
+		List<String> dhTrasfList = new ArrayList<String>();
+		XMLUtils parser = null;
+		try {
+			parser = XMLUtils.getParserInstance();
+			for (String servizio : serviceMap.keySet()){
+				Node servNode = serviceMap.get(servizio);
+
+				NodeList operations = parser.selectNodeList(servNode, ".//Operation");
+				for (int i = 0; i < operations.getLength(); i++){
+					Node opNode = operations.item(i);
+
+					Map<String, Node> mapVCLOp = getListaVCLOp(opNode);
+					for (String vclOp : mapVCLOp.keySet()){
+						Node vclNode = mapVCLOp.get(vclOp);
+						if (vclNode.getLocalName().equals("dh-call")){
+							Map<String, Node> dboBuilderMap = getListaDboBuilder(opNode, vclNode);
+							if (dboBuilderMap.size()>0){
+								for (String builder : dboBuilderMap.keySet()){
+									Node nodeDH = dboBuilderMap.get(builder);
+									NodeList trasfsDH = parser.selectNodeList(nodeDH, "*[@transformation]");
+									for (int t = 0; t < trasfsDH.getLength(); t++){
+										Node dbo = trasfsDH.item(i);
+										String trasfNAme = parser.get(dbo, "@transformation", "");
+										if (!"".equals(trasfNAme)){
+											if (!dhTrasfList.contains(trasfNAme)) {
+												dhTrasfList.add(trasfNAme);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return dhTrasfList;
+		} catch (XMLUtilsException e) {
+
+			logger.error(e);
+		} finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return dhTrasfList;
 	}
 
 	public List<String> getListaFileXsd()
@@ -2692,10 +2737,8 @@ public class GVConfig
 				String xPathOutputServices = "/GVCore/GVServices/Services/Service[@id-service='"
 						+ nomeServizio
 						+ "']/Operation/*/*[@type='flow-node']/OutputServices/xml-validation-service/xml-validation-call/@default-xsd";
-				NodeList inputServices = parser.selectNodeList(this.coreXml,
-						xPathInputServices);
-				NodeList outputServices = parser.selectNodeList(this.coreXml,
-						xPathOutputServices);
+				NodeList inputServices = parser.selectNodeList(this.coreXml, xPathInputServices);
+				NodeList outputServices = parser.selectNodeList(this.coreXml, xPathOutputServices);
 
 				int i = 0;
 				for (i = 0; i < inputServices.getLength(); i++) {
@@ -2710,7 +2753,7 @@ public class GVConfig
 			return listaFileXsd;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -2737,10 +2780,8 @@ public class GVConfig
 				String xPathOutputServices = "/GVCore/GVServices/Services/Service[@id-service='"
 						+ nomeServizio
 						+ "']/Operation/*/*[@type='flow-node']/OutputServices/json-validation-service/json-validation-call/@jsd-name";
-				NodeList inputServices = parser.selectNodeList(this.coreXml,
-						xPathInputServices);
-				NodeList outputServices = parser.selectNodeList(this.coreXml,
-						xPathOutputServices);
+				NodeList inputServices = parser.selectNodeList(this.coreXml, xPathInputServices);
+				NodeList outputServices = parser.selectNodeList(this.coreXml, xPathOutputServices);
 
 				int i = 0;
 				for (i = 0; i < inputServices.getLength(); i++) {
@@ -2754,7 +2795,7 @@ public class GVConfig
 			}
 			return listaFileJsd;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -2778,6 +2819,7 @@ public class GVConfig
 				Node trasf = listaTrasformazioni.get(trasformazione);
 				String dtType = trasf.getLocalName();
 				String name = parser.get(trasf, "@name");
+				String dataSource = parser.get(trasf, "@DataSourceSet", "Default");
 
 				if ("XSLTransformation".equals(dtType) ||
 						"XSLFOPTransformation".equals(dtType) ||
@@ -2787,15 +2829,14 @@ public class GVConfig
 						"XML2JSONTransformation".equals(dtType)) {
 					String nomeFile = parser.get(trasf, "@XSLMapName", parser.get(trasf, "@InputXSLMapName",
 							parser.get(trasf, "@OutputXSLMapName", "")));
-					if((nomeFile!=null) && !nomeFile.equals("")){
-						listaFileXsl.put(name,nomeFile);;
+					if ((nomeFile != null) && !nomeFile.equals("")) {
+						listaFileXsl.put(name + "#" + dataSource, nomeFile);
 					}
 				}
 			}
 			return listaFileXsl;
 		} catch (XMLUtilsException e) {
-
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -2818,20 +2859,18 @@ public class GVConfig
 			for (String trasformazione : listaTrasformazioni.keySet()) {
 				Node trasf = listaTrasformazioni.get(trasformazione);
 				String dtType = trasf.getLocalName();
-				String dataSource = "Default";
-				if(trasf.getAttributes().getNamedItem("DataSourceSet")!=null) {
-					dataSource = parser.get(trasf, "@DataSourceSet");
-				}
+				String name = parser.get(trasf, "@name");
+				String dataSource = parser.get(trasf, "@DataSourceSet", "Default");
 
 				if ("Bin2XMLTransformation".equals(dtType) ||
 						"XML2BinTransformation".equals(dtType)) {
 					String nomeFile = parser.get(trasf, "@ConversionMapName");
-					listaFileXsl.put(nomeFile,dataSource);
+					listaFileXsl.put(name + "#" + dataSource, nomeFile);
 				}
 			}
 			return listaFileXsl;
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -2854,23 +2893,22 @@ public class GVConfig
 			for (String trasformazione : listaTrasformazioni.keySet()) {
 				Node trasf = listaTrasformazioni.get(trasformazione);
 				String dtType = trasf.getLocalName();
-				String dataSource = "Default";
-				if(trasf.getAttributes().getNamedItem("DataSourceSet")!=null) {
-					dataSource = parser.get(trasf, "@DataSourceSet");
-				}
+				String name = parser.get(trasf, "@name");
+				String dataSource = parser.get(trasf, "@DataSourceSet", "Default");
+
 				if ("XQTransformation".equals(dtType)) {
 					String nomeFile = parser.get(trasf, "@XQMapName");
 					listaFileXsl.put(nomeFile,dataSource);
 				}else if ("Bin2XMLTransformation".equals(dtType) ||
 						"XML2BinTransformation".equals(dtType)) {
 					String nomeFile = parser.get(trasf, "@ConversionMapName");
-					listaFileXsl.put(nomeFile,dataSource);
+					listaFileXsl.put(name + "#" + dataSource, nomeFile);
 				}
 			}
 			return listaFileXsl;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -2886,8 +2924,7 @@ public class GVConfig
 	protected List<String> getListaFileKeyStore(List<String> listaServizi)
 	{
 		List<String> listaFileKeyStore = new ArrayList<String>();
-		List<String> listaTrasformazioniDH = this.getListaTrasformazioniDH(listaServizi);
-		Map<String, Node> listaTrasformazioni = getListaTrasformazioni(listaServizi,listaTrasformazioniDH);
+		Map<String, Node> listaTrasformazioni = getListaTrasformazioni(listaServizi);
 		Map<String, Node> listaCrypoHelper = getListaCryptoHelper(listaTrasformazioni);
 		for(String cryptoHelper:listaCrypoHelper.keySet()){
 			Node nodeCryptoHelper = listaCrypoHelper.get(cryptoHelper);
@@ -2896,7 +2933,7 @@ public class GVConfig
 				ksn = XMLUtils.get_S(nodeCryptoHelper, "@key-store-name");
 				listaFileKeyStore.add(ksn);
 			} catch (XMLUtilsException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		Map<String, Node> listaPushNotif = getListPushNotification(listaServizi);
@@ -2909,7 +2946,7 @@ public class GVConfig
 					listaFileKeyStore.add(XMLUtils.get_S(getGVKeyStoreCryptoHelper(ksn), "@key-store-name"));
 				}
 			} catch (XMLUtilsException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		return listaFileKeyStore;
@@ -2918,8 +2955,7 @@ public class GVConfig
 	protected Map<String, Node> getListaIDKeyStore(List<String> listaServizi)
 	{
 		Map<String, Node> listaIDKeyStore = new HashMap<String, Node>();
-		List<String> listaTrasformazioniDH = this.getListaTrasformazioniDH(listaServizi);
-		Map<String, Node> listaTrasformazioni = getListaTrasformazioni(listaServizi,listaTrasformazioniDH);
+		Map<String, Node> listaTrasformazioni = getListaTrasformazioni(listaServizi);
 		Map<String, Node> listaCrypoHelper = getListaCryptoHelper(listaTrasformazioni);
 		for(String cryptoHelper:listaCrypoHelper.keySet()){
 			Node nodeCryptoHelper = listaCrypoHelper.get(cryptoHelper);
@@ -2935,7 +2971,7 @@ public class GVConfig
 					listaIDKeyStore.put(ksid, getGVKeyStoreCryptoHelper(ksid));
 				}
 			} catch (XMLUtilsException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		Map<String, Node> listaPushNotif = getListPushNotification(listaServizi);
@@ -2948,7 +2984,7 @@ public class GVConfig
 					listaIDKeyStore.put(ksid, getGVKeyStoreCryptoHelper(ksid));
 				}
 			} catch (XMLUtilsException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		return listaIDKeyStore;
@@ -2956,14 +2992,19 @@ public class GVConfig
 
 	public Map<String, Node> getListaTrasformazioni(List<String> listaServizi)
 	{
-		List<String> listaTrasformazioniDH = getListaTrasformazioniDH(listaServizi);
-		return getListaTrasformazioni(listaServizi,listaTrasformazioniDH);
+		return getListaTrasformazioni(getListaNodeServizi(listaServizi));
 	}
 
 	public Map<String, Node> getListaTrasformazioni()
 	{
-		List<String> listaServizi = getListaServizi();
-		return getListaTrasformazioni(listaServizi);
+		Map<String, Node> serviceMap = getListaNodeServizi();
+		return getListaTrasformazioni(serviceMap);
+	}
+
+	public Map<String, Node> getListaTrasformazioni(Map<String, Node> serviceMap)
+	{
+		List<String> dhTrasfList = getListaTrasformazioniDH(serviceMap);
+		return getListaTrasformazioni(serviceMap, dhTrasfList);
 	}
 
 	/**
@@ -2972,12 +3013,13 @@ public class GVConfig
 	 * @return
 	 * @
 	 */
-	private Map<String, Node> getListaTrasformazioni(List<String> listaServizi,List<String> listaTrasformazioniDH)
+	private Map<String, Node> _getListaTrasformazioni(List<String> listaServizi, List<String> listaTrasformazioniDH)
 	{
 		XMLUtils parser = null;
 		Map<String, Node> listaTrasformazioni = new HashMap<String, Node>();
 		try {
 			for (String nomeServizio : listaServizi) {
+				logger.debug("Begin[" + this.type + "] - Transformations for service["	+ nomeServizio + "]");
 				String xPathInputServices = "/GVCore/GVServices/Services/Service[@id-service='"
 						+ nomeServizio
 						+ "']/Operation/*/*[@type='flow-node']/InputServices/gvdte-service/map-name-param/@value";
@@ -2994,9 +3036,7 @@ public class GVConfig
 				int i = 0;
 				for (i = 0; i < inputServices.getLength(); i++) {
 					String name = inputServices.item(i).getNodeValue();
-					Node trasf = parser.selectSingleNode(this.coreXml,
-							"/GVCore/GVDataTransformation/Transformations/*[@name='"
-									+ name + "']");
+					Node trasf = parser.selectSingleNode(this.coreXml, "/GVCore/GVDataTransformation/Transformations/*[@name='"	+ name + "']");
 					listaTrasformazioni.put(name, trasf);
 					if(trasf.getLocalName().equals("SequenceTransformation")){
 						getListaTrasfSequence(trasf, parser, listaTrasformazioni);
@@ -3004,9 +3044,7 @@ public class GVConfig
 				}
 				for (int j = 0; j < outputServices.getLength(); j++) {
 					String name = outputServices.item(j).getNodeValue();
-					Node trasf = parser.selectSingleNode(this.coreXml,
-							"/GVCore/GVDataTransformation/Transformations/*[@name='"
-									+ name + "']");
+					Node trasf = parser.selectSingleNode(this.coreXml, "/GVCore/GVDataTransformation/Transformations/*[@name='"	+ name + "']");
 					listaTrasformazioni.put(name, trasf);
 					if((trasf!=null) && trasf.getLocalName().equals("SequenceTransformation")){
 						getListaTrasfSequence(trasf, parser, listaTrasformazioni);
@@ -3014,26 +3052,64 @@ public class GVConfig
 				}
 				for (String nameTrafDH:listaTrasformazioniDH) {
 					Node trasf = parser.selectSingleNode(this.coreXml,
-							"/GVCore/GVDataTransformation/Transformations/*[@name='"
-									+ nameTrafDH + "']");
+							"/GVCore/GVDataTransformation/Transformations/*[@name='" + nameTrafDH + "']");
 					listaTrasformazioni.put(nameTrafDH, trasf);
 					if((trasf!=null) && trasf.getLocalName().equals("SequenceTransformation")){
 						getListaTrasfSequence(trasf, parser, listaTrasformazioni);
 					}
 				}
-				logger.debug("END - Transformations for service["
-						+ nomeServizio + "]");
-
+				logger.debug("End[" + this.type + "] - Transformations for service["	+ nomeServizio + "]");
 			}
 			return listaTrasformazioni;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
 		return listaTrasformazioni;
 
+	}
+
+	private Map<String, Node> getListaTrasformazioni(Map<String, Node> serviceMap, List<String> dhTrasfList)
+	{
+		XMLUtils parser = null;
+		Map<String, Node> trasfList = new HashMap<String, Node>();
+		try {
+			for (String service : serviceMap.keySet()) {
+				Node serviceNode = serviceMap.get(service);
+				logger.debug("Begin[" + this.type + "] - Transformations for service["	+ service + "]");
+
+				String xPathDTEServices = ".//*[@type='flow-node']/*/gvdte-service/map-name-param/@value";
+				parser = XMLUtils.getParserInstance();
+				NodeList dteServices = parser.selectNodeList(serviceNode, xPathDTEServices);
+
+				int i = 0;
+				for (i = 0; i < dteServices.getLength(); i++) {
+					String name = dteServices.item(i).getNodeValue();
+					Node trasf = parser.selectSingleNode(this.coreXml, "/GVCore/GVDataTransformation/Transformations/*[@name='"	+ name + "']");
+					trasfList.put(name, trasf);
+					if(trasf.getLocalName().equals("SequenceTransformation")){
+						getListaTrasfSequence(trasf, parser, trasfList);
+					}
+				}
+				for (String nameTrafDH : dhTrasfList) {
+					Node trasf = parser.selectSingleNode(this.coreXml,	"/GVCore/GVDataTransformation/Transformations/*[@name='" + nameTrafDH + "']");
+					trasfList.put(nameTrafDH, trasf);
+					if(trasf.getLocalName().equals("SequenceTransformation")){
+						getListaTrasfSequence(trasf, parser, trasfList);
+					}
+				}
+				logger.debug("End[" + this.type + "] - Transformations for service[" + service + "]");
+			}
+			return trasfList;
+		} catch (XMLUtilsException e) {
+
+			logger.error(e);
+		} finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return trasfList;
 	}
 
 	public List<String> getListaServiziGVCall(String servizio)
@@ -3070,12 +3146,12 @@ public class GVConfig
 			for (int i = 0; i < results.getLength(); i++) {
 				String serviceName = parser.get(results.item(i), "@id-service");
 				retListaServizi.add(serviceName);
-				logger.debug("Id Servizio Nuovo=" + serviceName);
+				logger.debug("Id[" + this.type + "] Service " + serviceName);
 			}
 			return retListaServizi;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -3094,7 +3170,7 @@ public class GVConfig
 			return nodeTrasf;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
 		}
@@ -3121,7 +3197,7 @@ public class GVConfig
 			}
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -3164,7 +3240,7 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -3207,7 +3283,7 @@ public class GVConfig
 			return listaObject;
 		} catch (XMLUtilsException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -3219,7 +3295,7 @@ public class GVConfig
 		try {
 			node = XMLUtils.selectSingleNode_S(this.coreXml, xPath);
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return node;
 	}
@@ -3229,7 +3305,7 @@ public class GVConfig
 		try {
 			node = XMLUtils.selectSingleNode_S(this.adapterXml, xPath);
 		} catch (XMLUtilsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return node;
 	}
@@ -3282,7 +3358,7 @@ public class GVConfig
 			out.close();
 		} catch (IOException e) {
 
-			e.printStackTrace();
+			logger.error(e);
 		}
 
 		return ret;
@@ -3291,9 +3367,7 @@ public class GVConfig
 	public static void main(String[] args)
 	{
 		try {
-			//GVConfig gvConfigServer = new GVConfig("/Users/macbook/Desktop/DATI/GvServer-3.4.0.10/GreenV/xmlconfig/GVcore.xml","/Users/macbook/Desktop/DATI/GvServer-3.4.0.10/GreenV/xmlconfig/GVAdapters.xml");
-			//GVConfig gvConfigServer = new GVConfig("/Users/macbook/Desktop/GV/appo/conf/GVcore.xml","/Users/macbook/Desktop/GV/appo/conf/GVAdapters.xml");
-			GVConfig gvConfigServer = new GVConfig("/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVCore.xml","/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVAdapters.xml");
+			GVConfig gvConfigServer = new GVConfig("server", "/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVCore.xml","/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVAdapters.xml");
 			//System.out.println(gvConfigServer.getGvCore(true));
 			//System.out.println(gvConfigServer.getGvAdapters(true));
 			List <String> listaServizi = new ArrayList<String>();
@@ -3327,7 +3401,7 @@ public class GVConfig
 			}*/
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 

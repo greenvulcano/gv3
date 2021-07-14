@@ -38,11 +38,8 @@
 																				</tr>
 
 																				<%
-   GVConfig gvConfig = new GVConfig(XMLConfig.getURL("GVCore.xml"),XMLConfig.getURL("GVAdapters.xml"));
+   GVConfig gvConfig = new GVConfig("server", XMLConfig.getURL("GVCore.xml"),XMLConfig.getURL("GVAdapters.xml"));
    List<String> listaServizi = gvConfig.getListaServizi();
-   //List<String> listaServizi = new ArrayList<String>();
-   //listaServizi.add("UpdateDeviceStatus");
-   //listaServizi.add("getContractTypePlatform");
    for(String servizio:listaServizi){
    %>
 																					<tr>

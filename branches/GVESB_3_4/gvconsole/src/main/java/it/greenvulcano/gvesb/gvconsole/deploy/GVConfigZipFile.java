@@ -521,7 +521,7 @@ public class GVConfigZipFile
 
 	public static void main(String[] args) {
 		try {
-			GVConfig gvConfigServer = new GVConfig("/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVCore.xml","/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVAdapters.xml");
+			GVConfig gvConfigServer = new GVConfig("server", "/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVCore.xml","/home/gianluca/applicazioni/GvServer-3.4.0.12.Final/GreenV/xmlconfig/GVAdapters.xml");
 			//System.out.println(gvConfigServer.getGvCore(true));
 			//System.out.println(gvConfigServer.getGvAdapters(true));
 			List <String> listaServizi = new ArrayList<String>();
