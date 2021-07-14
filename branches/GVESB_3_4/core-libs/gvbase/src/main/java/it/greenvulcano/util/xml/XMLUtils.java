@@ -1,27 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.util.xml;
-
-import it.greenvulcano.util.txt.TextUtils;
-import it.greenvulcano.util.xpath.search.XPath;
-import it.greenvulcano.util.xpath.search.XPathAPI;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -56,6 +52,10 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 
+import it.greenvulcano.util.txt.TextUtils;
+import it.greenvulcano.util.xpath.search.XPath;
+import it.greenvulcano.util.xpath.search.XPathAPI;
+
 /**
  * XMLUtils: utility class that contains
  * <p>
@@ -64,11 +64,11 @@ import org.xml.sax.InputSource;
  * - replacement/restore of XML entities.<br/>
  * - accessor methods to elements.<br/>
  * </p>
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class XMLUtils
 {
@@ -138,7 +138,7 @@ public class XMLUtils
      * Entity resolver usable by XMLUtils. This entity resolver does not resolve
      * any entity. To use an actual entity resolver use the
      * <code>setEntityResolver()</code> method of <code>XMLUtils</code>.
-     * 
+     *
      * @see #setDefaultEntityResolver()
      * @see #setEntityResolver(org.xml.sax.EntityResolver)
      */
@@ -172,7 +172,7 @@ public class XMLUtils
     /**
      * Gets an instance of <tt>XMLUtils</tt> from the private stack. If an
      * instance is not available, a new instance will be created.
-     * 
+     *
      * @return the XMLUtils parser instance
      * @throws XMLUtilsException
      */
@@ -194,7 +194,7 @@ public class XMLUtils
 
     /**
      * Release an instance of <tt>XMLUtils</tt>.
-     * 
+     *
      * @param theInstance
      */
     public static synchronized void releaseParserInstance(XMLUtils theInstance)
@@ -207,7 +207,7 @@ public class XMLUtils
     /**
      * Replaces XML invalid chars within <tt>input</tt> String with the
      * corresponding entities.
-     * 
+     *
      * @param input
      *        the input <tt>String</tt>.
      * @return the input string, with XML invalid chars replaced by the
@@ -250,7 +250,7 @@ public class XMLUtils
     /**
      * Replaces XML entities within <tt>input</tt> String with the corresponding
      * invalid characters.
-     * 
+     *
      * @param input
      *        the input <tt>String</tt>.
      * @return the input string, with XML entities replaced by the corresponding
@@ -312,7 +312,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML string.
-     * 
+     *
      * @param xmlString
      *        A String containing an XML document
      * @return The corresponding DOM
@@ -324,7 +324,7 @@ public class XMLUtils
         try {
             xmlString = removeDocType(xmlString);
             InputSource xmlSource = new InputSource(new StringReader(xmlString));
-            return docBuilderNamespace.parse(xmlSource);
+            return this.docBuilderNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -335,7 +335,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(new ByteArrayInputStream(xml));
-            return docBuilderNamespace.parse(xmlSource);
+            return this.docBuilderNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -344,7 +344,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML input stream.
-     * 
+     *
      * @param xmlStream
      *        An InputStream containing an XML document
      * @return The corresponding DOM
@@ -354,7 +354,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(xmlStream);
-            return docBuilderNamespace.parse(xmlSource);
+            return this.docBuilderNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -363,7 +363,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML string.
-     * 
+     *
      * @param xmlString
      *        A String containing an XML document
      * @param isValidating
@@ -379,7 +379,7 @@ public class XMLUtils
 
 	/**
      * Returns a DOM parsed from the given XML string.
-     * 
+     *
      * @param xmlString
      *        A String containing an XML document
      * @param isValidating
@@ -394,7 +394,7 @@ public class XMLUtils
         try {
             xmlString = removeDocType(xmlString);
             InputSource xmlSource = new InputSource(new StringReader(xmlString));
-            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
+            DocumentBuilder docBuilderX = this.docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
             return docBuilderX.parse(xmlSource);
         }
         catch (Throwable exc) {
@@ -404,7 +404,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML string.
-     * 
+     *
      * @param xml
      *        A byte array containing an XML document
      * @param isValidating
@@ -417,10 +417,10 @@ public class XMLUtils
     {
     	return parseDOM(xml, isValidating, isNamespaceAware, true);
     }
-    
+
     /**
      * Returns a DOM parsed from the given XML string.
-     * 
+     *
      * @param xml
      *        A byte array containing an XML document
      * @param isValidating
@@ -434,7 +434,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(new ByteArrayInputStream(xml));
-            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
+            DocumentBuilder docBuilderX = this.docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
             return docBuilderX.parse(xmlSource);
         }
         catch (Throwable exc) {
@@ -444,7 +444,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML input stream.
-     * 
+     *
      * @param xmlStream
      *        input document
      * @param isValidating
@@ -461,7 +461,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML input stream.
-     * 
+     *
      * @param xmlStream
      *        input document
      * @param isValidating
@@ -477,7 +477,7 @@ public class XMLUtils
     {
     	try {
             InputSource xmlSource = new InputSource(xmlStream);
-            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
+            DocumentBuilder docBuilderX = this.docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
             return docBuilderX.parse(xmlSource);
         }
         catch (Throwable exc) {
@@ -487,7 +487,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM/Node parsed from the given input object.
-     * 
+     *
      * @param object
      *        input object
      * @param isValidating
@@ -501,10 +501,10 @@ public class XMLUtils
     {
     	return parseObject(input, isValidating, isNamespaceAware, true);
     }
-    
+
     /**
      * Returns a DOM/Node parsed from the given input object.
-     * 
+     *
      * @param object
      *        input object
      * @param isValidating
@@ -538,7 +538,7 @@ public class XMLUtils
             else {
                 throw new XMLUtilsException("Invalid input type: " + input.getClass());
             }
-            DocumentBuilder docBuilderX = docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
+            DocumentBuilder docBuilderX = this.docBuilderMap.get(getKey(isValidating, isNamespaceAware, isIgnoringComments));
             return docBuilderX.parse(xmlSource);
         }
         catch (XMLUtilsException exc) {
@@ -551,7 +551,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML string.
-     * 
+     *
      * @param xmlString
      *        A String containing an XML document
      * @param isValidating
@@ -576,7 +576,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML string.
-     * 
+     *
      * @param xmlString
      *        A String containing an XML document
      * @param isValidating
@@ -590,10 +590,10 @@ public class XMLUtils
     {
     	return parseDOM_S(xmlString, isValidating, isNamespaceAware, true);
     }
-    
+
     /**
      * Returns a DOM parsed from the given XML string.
-     * 
+     *
      * @param xmlString
      *        A String containing an XML document
      * @param isValidating
@@ -621,7 +621,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML input stream.
-     * 
+     *
      * @param xmlStream
      *        input document
      * @param isValidating
@@ -636,10 +636,10 @@ public class XMLUtils
     {
     	return parseDOM_S(xmlStream, isValidating, isNamespaceAware, true);
     }
-    
+
     /**
      * Returns a DOM parsed from the given XML input stream.
-     * 
+     *
      * @param xmlStream
      *        input document
      * @param isValidating
@@ -668,7 +668,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given byte array.
-     * 
+     *
      * @param xml
      *        A byte array containing an XML document
      * @param isValidating
@@ -685,7 +685,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given byte array.
-     * 
+     *
      * @param xml
      *        A byte array containing an XML document
      * @param isValidating
@@ -713,7 +713,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM/Node parsed from the given input object.
-     * 
+     *
      * @param object
      *        input object
      * @param isValidating
@@ -728,10 +728,10 @@ public class XMLUtils
     {
     	return parseObject_S(input, isValidating, isNamespaceAware, true);
     }
-    
+
     /**
      * Returns a DOM/Node parsed from the given input object.
-     * 
+     *
      * @param object
      *        input object
      * @param isValidating
@@ -762,7 +762,7 @@ public class XMLUtils
      * Returns a DOM parsed from the given XML string. Note: This method
      * validates the document by using as DTD the document path specified within
      * the SYSTEM directive of the XML document.
-     * 
+     *
      * @param xmlString
      *        A String containing an XML document
      * @return The corresponding DOM
@@ -773,7 +773,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(new StringReader(xmlString));
-            return docBuilderValidatingNamespace.parse(xmlSource);
+            return this.docBuilderValidatingNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -782,7 +782,7 @@ public class XMLUtils
 
     /**
      * Returns a DOM parsed from the given XML input stream.
-     * 
+     *
      * @param xmlStream
      *        An InputStream containing an XML document
      * @return The corresponding DOM
@@ -792,7 +792,7 @@ public class XMLUtils
     {
         try {
             InputSource xmlSource = new InputSource(xmlStream);
-            return docBuilderValidatingNamespace.parse(xmlSource);
+            return this.docBuilderValidatingNamespace.parse(xmlSource);
         }
         catch (Throwable exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -801,14 +801,14 @@ public class XMLUtils
 
     /**
      * Parses the DOM document and validates it.
-     * 
+     *
      * @param type
      * @param docStream
      *        the XML document do parse
      * @param gvEntityResolver
      * @param gvErrorHandler
      * @return the document parsed
-     * 
+     *
      * @throws XMLUtilsException
      */
     public static Document parseDOMValidating(String type, InputStream docStream, EntityResolver gvEntityResolver,
@@ -834,7 +834,7 @@ public class XMLUtils
 
     /**
      * Aggregate documents or elements.
-     * 
+     *
      * @param aggrRootElement
      *        aggregate document root element name
      * @param aggrNamespace
@@ -855,8 +855,7 @@ public class XMLUtils
         }
         Element root = docOut.getDocumentElement();
 
-        for (int i = 0; i < docs.length; i++) {
-            Object obj = docs[i];
+        for (Object obj : docs) {
             Node part = parseObject(obj, false, true, false);
             if (part instanceof Document) {
                 root.appendChild(docOut.importNode(((Document) part).getDocumentElement(), true));
@@ -871,7 +870,7 @@ public class XMLUtils
 
     /**
      * Aggregate an array of documents or elements.
-     * 
+     *
      * @param aggrRootElement
      *        aggregate document root element name
      * @param aggrNamespace
@@ -898,7 +897,7 @@ public class XMLUtils
 
     /**
      * Facility to aggregate two documents or elements.
-     * 
+     *
      * @param aggrRootElement
      *        aggregate document root element name
      * @param aggrNamespace
@@ -924,15 +923,15 @@ public class XMLUtils
             }
         }
     }
-    
+
     /**
      * Merge documents or elements.
-     * 
+     *
      * @param docs
      *        an array of Document, Node, String, byte[] to be merged,
      *        the first document is the destination of the merging process
      * @param xpaths
-     *        an array of source##destination xpath: for the nth document 'source' is the search xpath for node to copy 
+     *        an array of source##destination xpath: for the nth document 'source' is the search xpath for node to copy
      *        and 'destination' is the xpath of the node of the first document on which add the selected nodes,
      *        the first entry of the array is ignored
      * @return a merged Document
@@ -947,7 +946,7 @@ public class XMLUtils
         if (xpaths == null) {
         	throw new XMLUtilsException("Invalid xpaths array");
         }
-        
+
         XMLUtils parser = null;
         try {
             parser = XMLUtils.getParserInstance();
@@ -976,18 +975,18 @@ public class XMLUtils
         finally {
             XMLUtils.releaseParserInstance(parser);
         }
-        
+
         return docOut;
     }
 
     /**
      * Merge documents or elements.
-     * 
+     *
      * @param docs
      *        an array of Document, Node, String, byte[] to be merged,
      *        the first document is the destination of the merging process
      * @param xpaths
-     *        an array of source##destination xpath: for the nth document 'source' is the search xpath for node to copy 
+     *        an array of source##destination xpath: for the nth document 'source' is the search xpath for node to copy
      *        and 'destination' is the xpath of the node of the first document on which add the selected nodes,
      *        the first entry of the array is ignored
      * @return a merged Document
@@ -1012,7 +1011,7 @@ public class XMLUtils
      * Serialize a given DOM to an XML string, using default character encoding
      * UTF-8, as default omit_xml_decl property false, as default indent
      * property false. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @return the serialized document (as a <tt>String</tt> encoded using
@@ -1039,7 +1038,7 @@ public class XMLUtils
      * Serialize a given DOM to an XML string, using default character encoding
      * UTF-8, as default omit_xml_decl property false, as default indent
      * property false. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @return the serialized document (as a <tt>String</tt> encoded using
@@ -1066,7 +1065,7 @@ public class XMLUtils
      * encoding for the output XML string. If the specified encoding is not
      * supported or is null, defaults on UTF-8. Use as default omit_xml_decl
      * property false, as default indent property falseIt. uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1093,7 +1092,7 @@ public class XMLUtils
     /**
      * Serialize a given DOM to an XML string, using default character encoding
      * UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @return the serialized document (as a <tt>String</tt> encoded using
@@ -1111,7 +1110,7 @@ public class XMLUtils
      * encoding for the output XML string. If the specified encoding is not
      * supported or is null, defaults on UTF-8. Use as default omit_xml_decl
      * property false, as default indent property falseIt. uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1138,7 +1137,7 @@ public class XMLUtils
      * Serialize a given DOM to an XML string, using a specified character
      * encoding for the output XML string. If the specified encoding is not
      * supported or is null, defaults on UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1156,7 +1155,7 @@ public class XMLUtils
     /**
      * Serialize a given DOM to an XML string, using default character encoding
      * UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param omit_xml_decl
@@ -1185,7 +1184,7 @@ public class XMLUtils
      * Serialize a given DOM to an XML string, using a specified character
      * encoding for the output XML string. If the specified encoding is not
      * supported or is null, defaults on UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1211,12 +1210,12 @@ public class XMLUtils
             }
         }
     }
-    
+
     /**
      * Serialize a given DOM to an XML string, using a specified character
      * encoding for the output XML string. If the specified encoding is not
      * supported or is null, defaults on UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1245,7 +1244,7 @@ public class XMLUtils
     /**
      * Serialize a given DOM to a byte array containing an XML string, using
      * default character encoding UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @return the serialized document (as a <tt>byte</tt> array)
@@ -1271,7 +1270,7 @@ public class XMLUtils
      * specified character encoding for the output XML buffer. If the specified
      * encoding is not supported or is null, defaults on UTF-8. It uses JAXP XSL
      * APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1297,7 +1296,7 @@ public class XMLUtils
     /**
      * Serialize a given DOM to a byte array containing an XML string, using
      * default character encoding UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @return the serialized document (as a <tt>byte</tt> array)
@@ -1312,7 +1311,7 @@ public class XMLUtils
     /**
      * Serialize a given DOM to a byte array containing an XML string, using
      * default character encoding UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param omit_xml_decl
@@ -1331,7 +1330,7 @@ public class XMLUtils
      * specified character encoding for the output XML buffer. If the specified
      * encoding is not supported or is null, defaults on UTF-8. It uses JAXP XSL
      * APIs. Not Use omit_xml_decl property and indent property
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1371,7 +1370,7 @@ public class XMLUtils
      * specified character encoding for the output XML buffer. If the specified
      * encoding is not supported or is null, defaults on UTF-8. It uses JAXP XSL
      * APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1390,7 +1389,7 @@ public class XMLUtils
      * specified character encoding for the output XML buffer. If the specified
      * encoding is not supported or is null, defaults on UTF-8. It uses JAXP XSL
      * APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1416,13 +1415,13 @@ public class XMLUtils
             }
         }
     }
-    
+
     /**
      * Serialize a given DOM to a byte array containing an XML string, using a
      * specified character encoding for the output XML buffer. If the specified
      * encoding is not supported or is null, defaults on UTF-8. It uses JAXP XSL
      * APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param encoding
@@ -1452,7 +1451,7 @@ public class XMLUtils
     /**
      * Serialize a given DOM to an <tt>java.io.OutputStream</tt>, using default
      * character encoding UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param oStream
@@ -1473,11 +1472,11 @@ public class XMLUtils
             }
         }
     }
-    
+
     /**
      * Serialize a given DOM to an <tt>java.io.OutputStream</tt>, using default
      * character encoding UTF-8. It uses JAXP XSL APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param oStream
@@ -1495,7 +1494,7 @@ public class XMLUtils
      * specified character encoding for the output XML buffer. If the specified
      * encoding is not supported or is null, defaults on UTF-8. It uses JAXP XSL
      * APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param oStream
@@ -1526,7 +1525,7 @@ public class XMLUtils
      * specified character encoding for the output XML buffer. If the specified
      * encoding is not supported or is null, defaults on UTF-8. It uses JAXP XSL
      * APIs.
-     * 
+     *
      * @param doc
      *        The input DOM
      * @param oStream
@@ -1569,7 +1568,7 @@ public class XMLUtils
      * Gets the content of the given node. If the node has complex content (e.g
      * it is an Element node or a Document node), its serialization to XML
      * string is returned.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @return its content as a string (as an XML string in case of complex
@@ -1604,7 +1603,7 @@ public class XMLUtils
     /**
      * Detects if there's at least one node matching the XPath on the given
      * node.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1631,7 +1630,7 @@ public class XMLUtils
     /**
      * Detects if there's at least one node matching the XPath on the given
      * node.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1648,7 +1647,7 @@ public class XMLUtils
 
     /**
      * Gets the node matching the XPath on the given node.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1660,7 +1659,7 @@ public class XMLUtils
     public Node selectSingleNode(Node theNode, String xPath) throws XMLUtilsException
     {
         try {
-            return (Node) xpathAPI.selectSingleNode(theNode, new XPath(xPath));
+            return (Node) this.xpathAPI.selectSingleNode(theNode, new XPath(xPath));
         }
         catch (Exception exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -1669,7 +1668,7 @@ public class XMLUtils
 
     /**
      * Gets the node matching the XPath on the given node.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1694,7 +1693,7 @@ public class XMLUtils
 
     /**
      * Gets the node matching the XPath on the given xml.
-     * 
+     *
      * @param xmlString
      *        The input XML as string.
      * @param xPath
@@ -1720,7 +1719,7 @@ public class XMLUtils
 
     /**
      * Gets the list of nodes matching the XPath on the given node.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1732,7 +1731,7 @@ public class XMLUtils
     public NodeList selectNodeList(Node theNode, String xPath) throws XMLUtilsException
     {
         try {
-            return (NodeList) xpathAPI.selectNodeList(theNode, new XPath(xPath));
+            return (NodeList) this.xpathAPI.selectNodeList(theNode, new XPath(xPath));
         }
         catch (Exception exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -1741,7 +1740,7 @@ public class XMLUtils
 
     /**
      * Gets the list of nodes matching the XPath on the given node.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1774,7 +1773,7 @@ public class XMLUtils
     public NodeIterator selectNodeIterator(Node theNode, String xPath) throws XMLUtilsException
     {
         try {
-            return (NodeIterator) xpathAPI.selectNodeIterator(theNode, new XPath(xPath));
+            return (NodeIterator) this.xpathAPI.selectNodeIterator(theNode, new XPath(xPath));
         }
         catch (Exception exc) {
             throw new XMLUtilsException(exc.getMessage(), exc);
@@ -1783,7 +1782,7 @@ public class XMLUtils
 
     /**
      * Gets the string representation of the node content selected from XPath.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1796,7 +1795,7 @@ public class XMLUtils
     public String get(Node theNode, String xPath) throws XMLUtilsException
     {
         try {
-            NodeList nl = (NodeList) xpathAPI.selectNodeList(theNode, new XPath(xPath));
+            NodeList nl = (NodeList) this.xpathAPI.selectNodeList(theNode, new XPath(xPath));
             if (nl == null) {
                 return null;
             }
@@ -1809,7 +1808,7 @@ public class XMLUtils
 
     /**
      * Gets the string representation of the node content selected from XPath.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1824,7 +1823,7 @@ public class XMLUtils
     public String get(Node theNode, String xPath, String defaultValue) throws XMLUtilsException
     {
         try {
-            NodeList nl = (NodeList) xpathAPI.selectNodeList(theNode, new XPath(xPath));
+            NodeList nl = (NodeList) this.xpathAPI.selectNodeList(theNode, new XPath(xPath));
             if ((nl != null) && (nl.getLength() > 0)) {
                 return XPathAPI.getNodeValue(nl);
             }
@@ -1838,7 +1837,7 @@ public class XMLUtils
     /**
      * Static helper method the get the string representation of the node
      * content selected from XPath.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1849,7 +1848,7 @@ public class XMLUtils
      *         XPath.
      * @throws XMLUtilsException
      *         when errors occurs.
-     * 
+     *
      * @see #get(Node, String, String)
      */
     public static String get_S(Node theNode, String xPath, String defaultValue) throws XMLUtilsException
@@ -1869,7 +1868,7 @@ public class XMLUtils
     /**
      * Static helper method the get the string representation of the node
      * content selected from XPath.
-     * 
+     *
      * @param theNode
      *        The input DOM node.
      * @param xPath
@@ -1878,7 +1877,7 @@ public class XMLUtils
      *         XPath.
      * @throws XMLUtilsException
      *         when errors occurs.
-     * 
+     *
      * @see #get(Node, String)
      */
     public static String get_S(Node theNode, String xPath) throws XMLUtilsException
@@ -1897,7 +1896,7 @@ public class XMLUtils
 
     /**
      * Sets a user-defined <tt>EntityResolver</tt> for the validating parser.
-     * 
+     *
      * @param er
      *        an object implementing the <tt>EntityResolver</tt> interface
      */
@@ -1908,7 +1907,7 @@ public class XMLUtils
 
     /**
      * Sets a user-defined <tt>EntityResolver</tt> for the parser.
-     * 
+     *
      * @param er
      *        an object implementing the <tt>EntityResolver</tt> interface
      */
@@ -1918,25 +1917,25 @@ public class XMLUtils
         if (er == null) {
             erI = defaultEntityResolver;
         }
-        docBuilder.setEntityResolver(erI);
-        docBuilderNamespace.setEntityResolver(erI);
-        docBuilderValidatingNamespace.setEntityResolver(erI);
-        docBuilderValidating.setEntityResolver(erI);
+        this.docBuilder.setEntityResolver(erI);
+        this.docBuilderNamespace.setEntityResolver(erI);
+        this.docBuilderValidatingNamespace.setEntityResolver(erI);
+        this.docBuilderValidating.setEntityResolver(erI);
     }
 
     /**
      * Create a new document without a name.
-     * 
+     *
      * @return the new document created.
      */
     public Document newDocument()
     {
-        return docBuilder.newDocument();
+        return this.docBuilderNamespace.newDocument();
     }
-    
+
     /**
      * Create a new document with a name.
-     * 
+     *
      * @param rootName
      *        the name of the root element.
      * @return the new document created.
@@ -1945,7 +1944,7 @@ public class XMLUtils
     public Document newDocument(String rootName) throws NullPointerException
     {
         TextUtils.checkNull("Parmeter 'rootName' can't be null", rootName);
-        Document doc = docBuilder.newDocument();
+        Document doc = this.docBuilderNamespace.newDocument();
         Element root = doc.createElement(rootName);
         doc.appendChild(root);
         return doc;
@@ -1953,7 +1952,7 @@ public class XMLUtils
 
     /**
      * Create a new document with a name and a namespace.
-     * 
+     *
      * @param rootName
      *        the name of the root element.
      * @param namespace
@@ -1965,7 +1964,7 @@ public class XMLUtils
     {
         TextUtils.checkNull("Parmeter 'rootName' can't be null", rootName);
         TextUtils.checkNull("Parmeter 'namespace' can't be null", namespace);
-        Document doc = docBuilder.newDocument();
+        Document doc = this.docBuilderNamespace.newDocument();
         Element root = doc.createElementNS(namespace, rootName);
         doc.appendChild(root);
         return doc;
@@ -1973,7 +1972,7 @@ public class XMLUtils
 
     /**
      * Create a new document with prefix:name and a namespace.
-     * 
+     *
      * @param rootName
      *        the name of the root element.
      * @param prefix
@@ -2076,7 +2075,7 @@ public class XMLUtils
      * @param name
      * @return the parent element
      * @throws XMLUtilsException
-     * @throws NullPointerException 
+     * @throws NullPointerException
      */
     public Element insertCDATA(Element parent, String value) throws XMLUtilsException, NullPointerException
     {
@@ -2113,35 +2112,35 @@ public class XMLUtils
 
     /**
      * Initialize the DOM parser setting up all needed features.
-     * 
+     *
      * @throws ParserConfigurationException
      */
     private void setupDOMParser() throws ParserConfigurationException
     {
-        docBuilderMap = new HashMap<String, DocumentBuilder>();
+        this.docBuilderMap = new HashMap<String, DocumentBuilder>();
         // Instantiate non-validating DocumentBuilder
-        docBuilder = getDocumentBuilder(false, false, true);
-        docBuilderMap.put(getKey(false, false, true), docBuilder);
-        docBuilderComments = getDocumentBuilder(false, false, false);
-        docBuilderMap.put(getKey(false, false, false), docBuilderComments);
-        docBuilderNamespace = getDocumentBuilder(false, true, true);
-        docBuilderMap.put(getKey(false, true, true), docBuilderNamespace);
-        docBuilderNamespaceComments = getDocumentBuilder(false, true, false);
-        docBuilderMap.put(getKey(false, true, false), docBuilderNamespaceComments);
+        this.docBuilder = getDocumentBuilder(false, false, true);
+        this.docBuilderMap.put(getKey(false, false, true), this.docBuilder);
+        this.docBuilderComments = getDocumentBuilder(false, false, false);
+        this.docBuilderMap.put(getKey(false, false, false), this.docBuilderComments);
+        this.docBuilderNamespace = getDocumentBuilder(false, true, true);
+        this.docBuilderMap.put(getKey(false, true, true), this.docBuilderNamespace);
+        this.docBuilderNamespaceComments = getDocumentBuilder(false, true, false);
+        this.docBuilderMap.put(getKey(false, true, false), this.docBuilderNamespaceComments);
         // Instantiate validating DocumentBuilder
-        docBuilderValidating = getDocumentBuilder(true, false, true);
-        docBuilderMap.put(getKey(true, false, true), docBuilderValidating);
-        docBuilderValidatingComments = getDocumentBuilder(true, false, false);
-        docBuilderMap.put(getKey(true, false, false), docBuilderValidatingComments);
-        docBuilderValidatingNamespace = getDocumentBuilder(true, true, true);
-        docBuilderMap.put(getKey(true, true, true), docBuilderValidatingNamespace);
-        docBuilderValidatingNamespaceComments = getDocumentBuilder(true, true, false);
-        docBuilderMap.put(getKey(true, true, false), docBuilderValidatingNamespaceComments);
+        this.docBuilderValidating = getDocumentBuilder(true, false, true);
+        this.docBuilderMap.put(getKey(true, false, true), this.docBuilderValidating);
+        this.docBuilderValidatingComments = getDocumentBuilder(true, false, false);
+        this.docBuilderMap.put(getKey(true, false, false), this.docBuilderValidatingComments);
+        this.docBuilderValidatingNamespace = getDocumentBuilder(true, true, true);
+        this.docBuilderMap.put(getKey(true, true, true), this.docBuilderValidatingNamespace);
+        this.docBuilderValidatingNamespaceComments = getDocumentBuilder(true, true, false);
+        this.docBuilderMap.put(getKey(true, true, false), this.docBuilderValidatingNamespaceComments);
     }
 
     /**
      * Private method This method return correct access key
-     * 
+     *
      * @param sourceType
      * @param destType
      * @return String sourceType::destType
@@ -2153,7 +2152,7 @@ public class XMLUtils
 
     /**
      * Creates a new validating, or non-validating, DocumentBuilder.
-     * 
+     *
      * @param isValidating
      *        true if we want a validating DOM Parser
      * @return DocumentBuilder
@@ -2194,13 +2193,13 @@ public class XMLUtils
 
     /**
      * Recursive helper method of <tt>getNodeContent</tt> method.
-     * 
+     *
      * @param node
      *        The given DOM node.
      * @return its content as a string (as an XML string in case of complex
      *         content).
      * @throws XMLUtilsException
-     * 
+     *
      */
     private String getChildNodeContent(Node node) throws XMLUtilsException
     {
@@ -2220,7 +2219,7 @@ public class XMLUtils
             default :
                 // Create a DOM having this node
                 // as root element
-                Document theDoc = docBuilder.newDocument();
+                Document theDoc = this.docBuilder.newDocument();
                 Node importedNode = theDoc.importNode(node, true);
                 theDoc.appendChild(importedNode);
                 // Serialize this DOM
@@ -2247,11 +2246,11 @@ public class XMLUtils
     /**
      * Used if we want to parse with no validation an XML Document containing a
      * DocType tag WARNING: Can't tell if the DocType tag was commented out.
-     * 
+     *
      * @param xmlString
      *        The input XML string
      * @return The (eventually) modified XML string
-     * 
+     *
      */
     private String removeDocType(String xmlString)
     {
@@ -2273,7 +2272,7 @@ public class XMLUtils
 
     /**
      * It applies the XPath on the document and returns the result.
-     * 
+     *
      * @param doc
      *        The org.w3c.dom.Document
      * @param xpath
@@ -2307,7 +2306,7 @@ public class XMLUtils
 
     /**
      * Return a boolean value that identify if the node is text
-     * 
+     *
      * @param nodeToEvaluate
      *        the node to evaluate
      * @return boolean value
