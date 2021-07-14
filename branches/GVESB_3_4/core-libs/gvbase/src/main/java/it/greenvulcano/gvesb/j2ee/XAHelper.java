@@ -1,25 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.j2ee;
-
-import it.greenvulcano.configuration.XMLConfig;
 
 import javax.annotation.Resource;
 import javax.naming.NameNotFoundException;
@@ -33,9 +31,11 @@ import javax.transaction.xa.XAResource;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
+import it.greenvulcano.configuration.XMLConfig;
+
 /**
  * XAHelper class
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
  */
@@ -84,13 +84,19 @@ public class XAHelper
 
     //private String             userTransactionJNDI     = "java:comp/UserTransaction";
 
+    private static boolean forceNoXA = false;
+
+    static {
+    	forceNoXA = System.getProperty("it.greenvulcano.gvesb.j2ee.XAHelper.noXA", "N").equals("Y");
+    }
+
     /**
      * Constructor.
-     * 
+     *
      */
     public XAHelper()
     {
-        initialContext = new JNDIHelper();
+        this.initialContext = new JNDIHelper();
     }
 
     /**
@@ -99,12 +105,12 @@ public class XAHelper
     public XAHelper(String jndiTM)
     {
         this();
-        transactionManagerJNDI = jndiTM;
+        this.transactionManagerJNDI = jndiTM;
     }
 
     /**
      * Constructor.
-     * 
+     *
      * @param node
      *        the node from which read configuration data
      * @throws XAHelperException
@@ -114,50 +120,50 @@ public class XAHelper
     {
         if (node != null) {
             try {
-                initialContext = new JNDIHelper(XMLConfig.getNode(node, "JNDIHelper"));
+                this.initialContext = new JNDIHelper(XMLConfig.getNode(node, "JNDIHelper"));
             }
             catch (Exception exc) {
                 throw new XAHelperException("J2EE_XAHELPER_INIT_ERROR", new String[][]{{"cause", exc.getMessage()}},
                         exc);
             }
-            autoEnlist = XMLConfig.getBoolean(node, "@auto-enlist", true);
+            this.autoEnlist = XMLConfig.getBoolean(node, "@auto-enlist", true);
             String sTStatus = XMLConfig.get(node, "@transaction-status", "TMSUCCESS");
-            transactionManagerJNDI = XMLConfig.get(node, "@transaction-manager-jndi", "java:comp/TransactionManager");
+            this.transactionManagerJNDI = XMLConfig.get(node, "@transaction-manager-jndi", "java:comp/TransactionManager");
             //userTransactionJNDI = XMLConfig.get(node, "@user-transaction-jndi", "java:comp/UserTransaction");
             if (!sTStatus.equals("TMSUCCESS")) {
-                tStatus = XAResource.TMFAIL;
+                this.tStatus = XAResource.TMFAIL;
             }
         }
         else {
-            initialContext = new JNDIHelper();
+            this.initialContext = new JNDIHelper();
         }
     }
 
     /**
      * Initialize the instance.
-     * 
+     *
      * @throws XAHelperException
      *         if initialization error occurs
      */
     private void init() throws XAHelperException
     {
-        if (tManager != null) {
+        if ((this.tManager != null) || forceNoXA) {
             return;
         }
         try {
             try {
-                tManager = (TransactionManager) initialContext.lookup(transactionManagerJNDI);
+                this.tManager = (TransactionManager) this.initialContext.lookup(this.transactionManagerJNDI);
             }
             catch (NameNotFoundException exc) {
                 try {
-                    tManager = (TransactionManager) initialContext.lookup(transactionManagerJNDI2);
+                    this.tManager = (TransactionManager) this.initialContext.lookup(this.transactionManagerJNDI2);
                     return;
                 }
                 catch (NameNotFoundException exc2) {
                     // do nothing
                 }
                 //throw new XAHelperException("J2EE_XAHELPER_INIT_ERROR", new String[][]{{"cause", exc.getMessage()}}, exc);
-                noXA = true;
+                this.noXA = true;
             }
             /*try {
                 userT = (UserTransaction) initialContext.lookup(userTransactionJNDI);
@@ -171,14 +177,14 @@ public class XAHelper
             throw exc;
         }*/
         catch (NoInitialContextException exc) {
-            noXA = true;
+            this.noXA = true;
         }
         catch (Exception exc) {
             throw new XAHelperException("J2EE_XAHELPER_INIT_ERROR", new String[][]{{"cause", exc.getMessage()}}, exc);
         }
         finally {
             try {
-                initialContext.close();
+                this.initialContext.close();
             }
             catch (Exception exc) {
                 // do nothing
@@ -213,11 +219,11 @@ public class XAHelper
     public final boolean isTransactionActive() throws XAHelperException
     {
         init();
-        if (noXA) {
+        if (this.noXA || forceNoXA) {
             return false;
         }
         try {
-            Transaction transaction = tManager.getTransaction();
+            Transaction transaction = this.tManager.getTransaction();
             if (transaction == null) {
                 debug("Transaction is null");
                 return false;
@@ -241,11 +247,11 @@ public class XAHelper
     public final boolean isTransactionRunning() throws XAHelperException
     {
         init();
-        if (noXA) {
+        if (this.noXA || forceNoXA) {
             return false;
         }
         try {
-            Transaction transaction = tManager.getTransaction();
+            Transaction transaction = this.tManager.getTransaction();
             if (transaction == null) {
                 debug("Transaction is null");
                 return false;
@@ -269,11 +275,11 @@ public class XAHelper
     public final Transaction getTransaction() throws XAHelperException
     {
         init();
-        if (noXA) {
+        if (this.noXA || forceNoXA) {
             return null;
         }
         try {
-            Transaction transaction = tManager.getTransaction();
+            Transaction transaction = this.tManager.getTransaction();
             if (transaction == null) {
                 debug("Transaction not active");
                 return null;
@@ -289,7 +295,7 @@ public class XAHelper
 
     /**
      * Enlist the given resource in the current transaction.
-     * 
+     *
      * @param xaRes
      *        the resource to enlist
      * @return the operation status
@@ -307,21 +313,21 @@ public class XAHelper
             throw new XAHelperException("J2EE_BAD_XASTATUS_ERROR");
         }
         try {
-            Transaction transaction = tManager.getTransaction();
-            lastXAResource = xaRes;
-            lastEnlisted = transaction.enlistResource(xaRes);
+            Transaction transaction = this.tManager.getTransaction();
+            this.lastXAResource = xaRes;
+            this.lastEnlisted = transaction.enlistResource(xaRes);
         }
         catch (Exception exc) {
             error("Error enlisting resource", exc);
             throw new XAHelperException("J2EE_XAHELPER_ERROR", new String[][]{{"cause", exc.getMessage()}}, exc);
         }
 
-        return lastEnlisted;
+        return this.lastEnlisted;
     }
 
     /**
      * Delist the given resource from the current transaction.
-     * 
+     *
      * @param xaRes
      *        the resource to delist
      * @param flag
@@ -343,7 +349,7 @@ public class XAHelper
             throw new XAHelperException("J2EE_BAD_XASTATUS_ERROR");
         }
         try {
-            Transaction transaction = tManager.getTransaction();
+            Transaction transaction = this.tManager.getTransaction();
             result = transaction.delistResource(xaRes, flag);
         }
         catch (Exception exc) {
@@ -351,8 +357,8 @@ public class XAHelper
             throw new XAHelperException("J2EE_XAHELPER_ERROR", new String[][]{{"cause", exc.getMessage()}}, exc);
         }
         finally {
-            lastXAResource = null;
-            lastEnlisted = false;
+            this.lastXAResource = null;
+            this.lastEnlisted = false;
         }
 
         return result;
@@ -360,22 +366,22 @@ public class XAHelper
 
     /**
      * Delist the last enlisted resource.
-     * 
+     *
      * @return the operation status
      * @throws XAHelperException
      *         if error occurs
      */
     public final boolean delistResource() throws XAHelperException
     {
-        if ((lastXAResource == null) || !lastEnlisted) {
+        if ((this.lastXAResource == null) || !this.lastEnlisted) {
             return true;
         }
-        return delistResource(lastXAResource, tStatus);
+        return delistResource(this.lastXAResource, this.tStatus);
     }
 
     /**
      * Register a Synchronization instance in the current transaction.
-     * 
+     *
      * @param sync
      *        the instance to register
      * @throws XAHelperException
@@ -388,7 +394,7 @@ public class XAHelper
             throw new XAHelperException("J2EE_BAD_XASTATUS_ERROR");
         }
         try {
-            Transaction transaction = tManager.getTransaction();
+            Transaction transaction = this.tManager.getTransaction();
             transaction.registerSynchronization(sync);
         }
         catch (Exception exc) {
@@ -402,7 +408,7 @@ public class XAHelper
      */
     public final boolean isAutoEnlist()
     {
-        return autoEnlist;
+        return this.autoEnlist;
     }
 
     /**
@@ -466,20 +472,20 @@ public class XAHelper
 
     /**
      * Helper method for logging debug messages.
-     * 
+     *
      * @param obj
      *        the object to log
      */
     private void debug(Object obj)
     {
-        if (logger != null) {
-            logger.debug(obj);
+        if (this.logger != null) {
+            this.logger.debug(obj);
         }
     }
 
     /**
      * Helper method for logging error messages, with throwable.
-     * 
+     *
      * @param obj
      *        the object to log
      * @param thr
@@ -487,8 +493,8 @@ public class XAHelper
      */
     private void error(Object obj, Throwable thr)
     {
-        if (logger != null) {
-            logger.error(obj, thr);
+        if (this.logger != null) {
+            this.logger.error(obj, thr);
         }
     }
 
