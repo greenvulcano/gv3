@@ -595,6 +595,10 @@ public class JMSForwardListener implements Runnable
             catch (Exception exc) {
                 throw new JMSForwardException("The forward [" + name + "/" + forwardName + "] received a unmanageable message", exc);
             }
+            if ((flowSystem != null) && !flowSystem.equals("") && (flowService != null) && !flowService.equals("")) {
+                gvBuffer.setService(flowService);
+                gvBuffer.setSystem(flowSystem);
+            }
             GVBufferMDC.put(gvBuffer);
             if (data.isDebug()) {
                 logger.debug("Begin Core call");
@@ -608,6 +612,7 @@ public class JMSForwardListener implements Runnable
             long endTime = System.currentTimeMillis();
             logger.debug("Forward [" + name + "/" + forwardName + "]: Processed message  [" + cid + "] - ExecutionTime ("
                         + (endTime - startTime) + ")");
+            NMDC.remove("MASTER_SERVICE");
         }
     }
 
