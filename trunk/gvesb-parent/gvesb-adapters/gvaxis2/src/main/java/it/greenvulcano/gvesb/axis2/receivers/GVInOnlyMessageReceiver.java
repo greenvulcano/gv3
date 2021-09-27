@@ -30,6 +30,7 @@ import it.greenvulcano.gvesb.internal.data.ChangeGVBuffer;
 import it.greenvulcano.gvesb.j2ee.XAHelper;
 import it.greenvulcano.gvesb.j2ee.XAHelperException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.log.NMDC;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -237,6 +238,7 @@ public class GVInOnlyMessageReceiver extends AbstractInMessageReceiver
                 }
             }
             logger.info("GVInOnlyMessageReceiver - END service [" + serviceName + "/" + operationName + "]");
+            NMDC.remove("MASTER_SERVICE");
         }
     }
 
