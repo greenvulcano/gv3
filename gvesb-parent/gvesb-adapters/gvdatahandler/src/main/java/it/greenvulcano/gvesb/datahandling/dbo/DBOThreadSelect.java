@@ -77,6 +77,7 @@ public class DBOThreadSelect extends AbstractDBO
         private final static int    ERROR            = 3;
 
         private int                 state            = NEW;
+        private Throwable           throwable        = null;
         private Map<Object, Object> context          = null;
         private long                rowThreadCounter = 0;
 
@@ -95,6 +96,7 @@ public class DBOThreadSelect extends AbstractDBO
             state = RUNNING;
             Connection conn = null;
             Statement sqlStatement = null;
+            StatementInfo sqlStatementInfo = null;
             ResultSet rs = null;
             try {
                 Set<Integer> keyField = keysMap.get(key);
@@ -112,6 +114,7 @@ public class DBOThreadSelect extends AbstractDBO
                     String expandedSQL = PropertiesHandler.expand(stmt, props, null, conn);
                     sqlStatement = conn.createStatement();
                     logger.debug("Executing select statement: " + expandedSQL + ".");
+                    sqlStatementInfo = new StatementInfo(key.toString(), expandedSQL, sqlStatement);
                     rs = sqlStatement.executeQuery(expandedSQL);
                     if (rs != null) {
                         Document localDoc = rowSetBuilder.createDocument(null);
@@ -145,12 +148,16 @@ public class DBOThreadSelect extends AbstractDBO
                 }
             }
             catch (SQLException exc) {
+                logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
+                logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
                 OracleExceptionHandler.handleSQLException(exc).printLoggerInfo();
                 state = ERROR;
+                throwable = exc;
             }
             catch (Throwable exc) {
                 logger.error("Thread " + thd.getName() + " terminated with error.", exc);
                 state = ERROR;
+                throwable = exc;
             }
             finally {
                 if (rs != null) {
@@ -161,13 +168,15 @@ public class DBOThreadSelect extends AbstractDBO
                         // do nothing
                     }
                 }
-                if (sqlStatement != null) {
+                if (sqlStatementInfo != null) {
                     try {
-                        sqlStatement.close();
+                    	sqlStatementInfo.close();
                     }
                     catch (Exception exc) {
                         // do nothing
                     }
+                    sqlStatementInfo = null;
+                    sqlStatement = null;
                 }
                 if (conn != null) {
                     try {
@@ -375,6 +384,8 @@ public class DBOThreadSelect extends AbstractDBO
     public void execute(OutputStream dataOut, Connection conn, Map<String, Object> props) throws DBOException,
             InterruptedException {
         XMLUtils parser = null;
+        Throwable throwable = null;
+
         try {
             prepare();
             rowCounter = 0;
@@ -453,6 +464,7 @@ public class DBOThreadSelect extends AbstractDBO
                                 thrSelVector.remove(idx);
                                 rowCounter += to.getRowThreadCounter();
                                 error = true;
+                                throwable = to.throwable;
                                 idx = 0;
                             }
                                 break;
@@ -484,6 +496,9 @@ public class DBOThreadSelect extends AbstractDBO
                 thrVector.clear();
             }
 
+        	if (throwable != null) {
+        	   throw throwable;
+        	}
             byte[] dataDOM = parser.serializeDOMToByteArray(doc);
             dataOut.write(dataDOM);
 
@@ -492,7 +507,7 @@ public class DBOThreadSelect extends AbstractDBO
 
             logger.debug("End execution of DB data read through " + dboclass);
         }
-        catch (Exception exc) {
+        catch (Throwable exc) {
             logger.error("Error on execution of " + dboclass + " with name [" + getName() + "]", exc);
             ThreadUtils.checkInterrupted(exc);
             throw new DBOException("Error on execution of " + dboclass + " with name [" + getName() + "]: "
