@@ -74,7 +74,21 @@ public class JSONUtilsTestCase extends XMLTestCase
         String outJSON = TextUtils.readFileFromCP("testJ2X.json");
         JSONAssert.assertEquals(outJSON, json, true);
     }
-    
+
+    public void testXML2JSON_forceStr() throws Exception
+    {
+        Set<String> forceElementsArray = new HashSet<String>();
+        forceElementsArray.add("elemC");
+        forceElementsArray.add("elemD");
+        Set<String> forceStringValue = new HashSet<String>();
+        forceStringValue.add("*");
+
+        JSONObject json= JSONUtils.xmlToJson(TextUtils.readFileFromCP("testX2J.xml"), forceElementsArray, forceStringValue);
+        System.out.println("\nTestXml2Json_forceStr: " + json);
+        String outJSON = TextUtils.readFileFromCP("testJ2X_forceStr.json");
+        JSONAssert.assertEquals(outJSON, json, true);
+    }
+
     public void testXML2JSON_2() throws Exception
     {
         Set<String> forceElementsArray = new HashSet<String>();
