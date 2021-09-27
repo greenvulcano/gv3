@@ -36,6 +36,7 @@ import it.greenvulcano.gvesb.buffer.GVException;
 import it.greenvulcano.gvesb.buffer.GVPublicException;
 import it.greenvulcano.gvesb.core.pool.GreenVulcanoPool;
 import it.greenvulcano.gvesb.core.pool.GreenVulcanoPoolManager;
+import it.greenvulcano.gvesb.internal.data.ChangeGVBuffer;
 import it.greenvulcano.gvesb.log.GVBufferMDC;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
@@ -47,6 +48,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +97,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
         private String operation;
         private boolean haveOptional;
         private boolean extractHdr;
+        private ChangeGVBuffer cGVBuffer  = null;
         private List<String> propNames = new ArrayList<String>();
         private List<Pattern> patterns = new ArrayList<Pattern>();
         
@@ -122,6 +125,11 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern[" + method + "#" + pattern + "]: empty @operation");
                 }
                 this.extractHdr = XMLConfig.getBoolean(node, "@extract-headers", false);
+                Node cGVBufferNode = XMLConfig.getNode(node, "ChangeGVBuffer");
+                if (cGVBufferNode != null) {
+                    cGVBuffer = new ChangeGVBuffer();
+                    cGVBuffer.init(cGVBufferNode);
+                }
             }
             catch (XMLConfigException exc) {
                 throw new AdapterHttpInitializationException("RESTHttpServletMapping - Error initializing Pattern: error reading configuration", exc);
@@ -223,6 +231,10 @@ public class RESTHttpServletMapping implements HttpServletMapping
             return this.extractHdr;
         }
 
+        public ChangeGVBuffer getChangeGVBuffer() {
+            return this.cGVBuffer;
+        }
+
         @Override
         public String toString() {
             return method + "#" + pattern + " -> " + service + "/" + system + "/" + operation;
@@ -301,6 +313,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
             GVBuffer request = new GVBuffer();
             String operationType = null;
             PatternResolver pr = null;
+            ChangeGVBuffer cGVBuffer = null;
             Iterator<PatternResolver> i = operationMappings.iterator();
             while (i.hasNext()) {
                 pr = i.next();
@@ -385,6 +398,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
                 }
             }
             logger.log(level, gvFormatLog);
+            NMDC.remove("MASTER_SERVICE");
         }
         return status;
     }
@@ -443,7 +457,15 @@ public class RESTHttpServletMapping implements HttpServletMapping
                     XMLUtils.releaseParserInstance(parser);
                 }
             }
-            
+        	ChangeGVBuffer cGVBuffer = pr.getChangeGVBuffer();
+            if (cGVBuffer != null) {
+                try {
+                	cGVBuffer.execute(request, new HashMap<String, Object>());
+                }
+                catch (Exception exc) {
+                    cGVBuffer.cleanUp();
+                }
+            }
         }
         catch (Exception exc) {
             throw new AdapterHttpExecutionException("RESTHttpServletMapping - Error parsing request data", exc);
