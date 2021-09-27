@@ -701,4 +701,55 @@ public class GVCoreParallelTestCase extends XMLTestCase
 
     }
 
+
+    /**
+     * @throws Exception
+     */
+    public void testTestParallelNoOutput() throws Exception
+    {
+        String SYSTEM_NAME = "GVESB";
+        String SERVICE_NAME = "TestParallelNoOutput";
+        String TEST_BUFFER = "GiAnFrAnCo,NuNzIo";
+        Id id = new Id();
+        GVBuffer gvBuffer = new GVBuffer(SYSTEM_NAME, SERVICE_NAME, id);
+        gvBuffer.setObject(TEST_BUFFER);
+        GreenVulcano greenVulcano = new GreenVulcano();
+        GVBuffer gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 1----PAR");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 1----PAR");
+        List<Object> outData = (List<Object>) gvBufferout.getObject();
+        assertEquals(0, outData.size());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 2----PAR");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 2----PAR");
+        outData = (List<Object>) gvBufferout.getObject();
+        assertEquals(0, outData.size());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+
+        id = new Id();
+        gvBuffer.setId(id);
+        gvBufferout = greenVulcano.requestReply(gvBuffer);
+        assertEquals(SYSTEM_NAME, gvBufferout.getSystem());
+        assertEquals(SERVICE_NAME, gvBufferout.getService());
+        assertEquals(id, gvBufferout.getId());
+        System.out.println("TEST 3----PAR");
+        System.out.println(gvBufferout);
+        System.out.println("TEST 3----PAR");
+        outData = (List<Object>) gvBufferout.getObject();
+        assertEquals(0, outData.size());
+        assertEquals("DEFAULT", gvBufferout.getProperty("END"));
+    }
+
 }
