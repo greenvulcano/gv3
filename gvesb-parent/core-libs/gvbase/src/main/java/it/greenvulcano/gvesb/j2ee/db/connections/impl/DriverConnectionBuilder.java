@@ -28,6 +28,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.w3c.dom.Node;
 
 /**
@@ -70,6 +71,11 @@ public class DriverConnectionBuilder implements ConnectionBuilder
         }
         logger.debug("Crated DriverConnectionBuilder(" + name + "). className: " + className + " - user: " + user
                 + " - password: ********* - url: " + url);
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     public Connection getConnection() throws GVDBException
@@ -131,5 +137,17 @@ public class DriverConnectionBuilder implements ConnectionBuilder
     public void destroy()
     {
         logger.debug("Destroyed DriverConnectionBuilder(" + name + ")");
+    }
+
+    @Override
+    public String statInfo() {
+        return "";
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject cbJ = new JSONObject();
+        cbJ.put("name", getName());
+        return cbJ;
     }
 }

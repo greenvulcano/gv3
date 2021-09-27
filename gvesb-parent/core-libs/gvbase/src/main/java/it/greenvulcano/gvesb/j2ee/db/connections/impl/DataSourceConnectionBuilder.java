@@ -30,6 +30,7 @@ import java.sql.DatabaseMetaData;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.w3c.dom.Node;
 
 /**
@@ -92,6 +93,11 @@ public class DataSourceConnectionBuilder implements ConnectionBuilder
             debugJDBCConn = false;
         }
         logger.debug("Crated DataSourceConnectionBuilder(" + name + "). dsJNDI: " + dsJNDI);
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     /**
@@ -185,5 +191,17 @@ public class DataSourceConnectionBuilder implements ConnectionBuilder
         this.context = null;
         this.ds = null;
         logger.debug("Destroyed DataSourceConnectionBuilder(" + name + ")");
+    }
+
+    @Override
+    public String statInfo() {
+        return "";
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject cbJ = new JSONObject();
+        cbJ.put("name", getName());
+        return cbJ;
     }
 }

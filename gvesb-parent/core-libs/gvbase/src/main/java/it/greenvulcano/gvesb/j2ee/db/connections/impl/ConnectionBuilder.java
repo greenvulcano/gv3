@@ -23,6 +23,7 @@ import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 
 import java.sql.Connection;
 
+import org.json.JSONObject;
 import org.w3c.dom.Node;
 
 /**
@@ -38,6 +39,8 @@ public interface ConnectionBuilder {
      * @throws GVDBException
      */
     void init(Node node) throws GVDBException;
+
+    String getName();
 
     /**
      *
@@ -57,4 +60,8 @@ public interface ConnectionBuilder {
      *
      */
     void destroy();
+
+    String statInfo();
+    
+    JSONObject toJSON();
 }
