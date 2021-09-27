@@ -24,6 +24,7 @@ import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.file.FileManager;
 import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
 
@@ -41,6 +42,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import max.xml.DOMWriter;
@@ -1269,6 +1272,64 @@ public class GVCoreParser
 			XMLUtils.releaseParserInstance(parser);
 		}
     }
+    
+    private Map<String, Map<String, Set<String>>> getListaVCLOp(String nomeServizio) throws XMLUtilsException
+    {
+        Map<String, Map<String, Set<String>>> listaSistemi = new TreeMap<String, Map<String, Set<String>>>();
+        XMLUtils parser = null;
+        try {
+        	parser = XMLUtils.getParserInstance();
+        	NodeList operations = parser.selectNodeList(newXml, "/GVCore/GVServices/Services/Service[@id-service='" + nomeServizio
+        			+ "']/Operation");
+        	for (int i = 0; i < operations.getLength(); i++) {
+        		Node oper = operations.item(i);
+        		NodeList partecipants = parser.selectNodeList(oper, "Participant");
+        		for (int j = 0; j < partecipants.getLength(); j++) {
+        			Node part = partecipants.item(j);
+        			String sys = parser.get(part, "@id-system");
+        			String chn = parser.get(part, "@id-channel");
+        			Map<String, Set<String>> chnMap = listaSistemi.get(sys);
+        			if (chnMap == null) {
+        				chnMap = new TreeMap<String, Set<String>>();
+        				listaSistemi.put(sys, chnMap);
+        			}
+        			Set<String> opSet = chnMap.get(chn);
+        			if (opSet == null) {
+        				opSet = new TreeSet<String>();
+        				chnMap.put(chn, opSet);
+        			}
+        			logger.debug("Partecipant=" + sys + "/" + chn);
+        			NodeList vcls = parser.selectNodeList(oper, ".//GVOperationNode[@id-system='" + sys + "']");
+        			for (int k = 0; k < vcls.getLength(); k++) {
+        				Node opn = vcls.item(k);
+        				opSet.add(parser.get(opn, "@operation-name"));
+        			}
+        		}
+    			NodeList vcls = parser.selectNodeList(oper, ".//GVIteratorOperationNode[proxy-call or proxy-enqueue or proxy-dequeue]/*[@type='call']");
+    			for (int k = 0; k < vcls.getLength(); k++) {
+    				Node opn = vcls.item(k);
+        			String sys = parser.get(opn, "@id-system");
+        			String chn = parser.get(opn, "@id-channel");
+        			logger.debug("Partecipant=" + sys + "/" + chn);
+        			Map<String, Set<String>> chnMap = listaSistemi.get(sys);
+        			if (chnMap == null) {
+        				chnMap = new TreeMap<String, Set<String>>();
+        				listaSistemi.put(sys, chnMap);
+        			}
+        			Set<String> opSet = chnMap.get(chn);
+        			if (opSet == null) {
+        				opSet = new TreeSet<String>();
+        				chnMap.put(chn, opSet);
+        			}
+    				opSet.add(parser.get(opn, "@operation"));
+    			}
+        	}
+        	return listaSistemi;
+    	}
+		finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+    }
 
     /**
      * @param xml
@@ -2247,9 +2308,9 @@ public class GVCoreParser
 
     private void aggiornaSystem(String nomeServizio, XMLUtils parser) throws Exception
     {
-        Map<String, Node> mapListaSistemi = getListaSistemi(nomeServizio);
-        String[] listaSistemi = new String[mapListaSistemi.keySet().size()];
-        mapListaSistemi.keySet().toArray(listaSistemi);
+    	Map<String, Map<String, Set<String>>> listaVCLOp = getListaVCLOp(nomeServizio);
+        String[] listaSistemi = new String[listaVCLOp.keySet().size()];
+        listaVCLOp.keySet().toArray(listaSistemi);
         logger.debug("size listaSistemi = " + listaSistemi.length);
         
         Node base = parser.selectSingleNode(serverXml, "/GVCore/GVSystems/Systems");
@@ -2266,45 +2327,114 @@ public class GVCoreParser
             }
             else {
                 logger.debug("Nodo System[" + sistema + "] esistente, aggiornamento");
-                String channelName = parser.get(mapListaSistemi.get(sistema), "@id-channel");
-                Node resChZip = parser.selectSingleNode(newXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
-                        + "']/Channel[@id-channel='" + channelName + "']");
-                if (resChZip != null) {
-                    Node resChServer = parser.selectSingleNode(serverXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
-                            + "']/Channel[@id-channel='" + channelName + "']");
-                	if (resChServer == null) {
-                    	Node importedNode = resultsSysServer.getOwnerDocument().importNode(resChZip, true);
-                    	resultsSysServer.appendChild(importedNode);
-                        logger.debug("Nodo Channel[" + channelName + "] non esistente, inserimento");
-                        handleVCLOperationDetails(importedNode, parser);
-                    }
-                	else {
-                		logger.debug("Nodo Channel[" + channelName + "] esistente, aggiornamento");
-                        NodeList operZip = parser.selectNodeList(resChZip, "*[@type='call' or @type='enqueue' or @type='dequeue']");
-                        for (int k = 0; k < operZip.getLength(); k++) {
-                            Node operZipK = operZip.item(k);
-                            String nameOperZip = parser.get(operZipK, "@name");
-                            logger.debug("operZip[" + k + "]=" + operZipK + " - " + nameOperZip);
-                            Node operServer = parser.selectSingleNode(resChServer, "*[@name='" + nameOperZip + "']");
-                            if (operServer != null) {
-                            	Node importedNode = resChServer.getOwnerDocument().importNode(operZipK, true);
-                            	resChServer.replaceChild(importedNode, operServer);
-                                logger.debug("Nodo VCLOperation[" + nameOperZip + "] esistente, aggiornamento");
-                            }
-                            else {
-                            	Node importedNode = resChServer.getOwnerDocument().importNode(operZipK, true);
-                            	resChServer.appendChild(importedNode);
-                                logger.debug("Nodo VCLOperation[" + nameOperZip + "] non esistente, inserimento");
-                            }
-                        }
-                        handleVCLOperationDetails(resChServer, parser);
-                    }
-                }
+                Map<String, Set<String>> listaChnVCLOp = listaVCLOp.get(sistema);
+                String[] listaCanali = new String[listaChnVCLOp.keySet().size()];
+                listaChnVCLOp.keySet().toArray(listaCanali);
+                logger.debug("size listaCanali = " + listaCanali.length);
+                for (int j = 0; j < listaCanali.length; j++) {
+                    String canale = listaCanali[j];
+                    logger.debug("CANALE = " + canale);
+	                Node resChZip = parser.selectSingleNode(newXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
+	                        + "']/Channel[@id-channel='" + canale + "']");
+	                if (resChZip != null) {
+	                    Node resChServer = parser.selectSingleNode(serverXml, "/GVCore/GVSystems/Systems/System[@id-system='" + sistema
+	                            + "']/Channel[@id-channel='" + canale + "']");
+	                	if (resChServer == null) {
+	                    	Node importedNode = resultsSysServer.getOwnerDocument().importNode(resChZip, true);
+	                    	resultsSysServer.appendChild(importedNode);
+	                        logger.debug("Nodo Channel[" + canale + "] non esistente, inserimento");
+	                        handleVCLOperationDetails(importedNode, parser);
+	                    }
+	                	else {
+	                		logger.debug("Nodo Channel[" + canale + "] esistente, aggiornamento");
+	                		Set<String> setVCLOp = listaChnVCLOp.get(canale);
+	                        String[] listaVCL = new String[setVCLOp.size()];
+	                        setVCLOp.toArray(listaVCL);
+	                        logger.debug("size listaVCL = " + listaVCL.length);
+	                        for (int k = 0; k < listaVCL.length; k++) {
+	                            String vcl = listaVCL[k];
+	                            Node operZipK = parser.selectSingleNode(resChZip, "*[(@type='call' or @type='enqueue' or @type='dequeue') and @name='" + vcl + "']");
+	                            logger.debug("operZip[" + k + "]=" + operZipK.getNodeName() + " - " + vcl);
+	                            Node operServer = parser.selectSingleNode(resChServer, "*[@name='" + vcl + "']");
+	                            if (operServer != null) {
+	                            	if (operServer.getNodeName().equals("dh-call")) {
+	                            		logger.debug("Nodo VCLOperation[" + vcl + "] esistente, aggiornamento");
+	                            	    aggiornaDHCall(operServer, operZipK, parser);
+	                            	} else {
+	                            	    Node importedNode = resChServer.getOwnerDocument().importNode(operZipK, true);
+	                                    resChServer.replaceChild(importedNode, operServer);
+	                                    logger.debug("Nodo VCLOperation[" + vcl + "] esistente, aggiornamento");
+	                                    handleVCLOperationDetails(importedNode, parser);
+	                                }
+	                            }
+	                            else {
+	                            	Node importedNode = resChServer.getOwnerDocument().importNode(operZipK, true);
+	                            	resChServer.appendChild(importedNode);
+	                                logger.debug("Nodo VCLOperation[" + vcl + "] non esistente, inserimento");
+	    	                        handleVCLOperationDetails(importedNode, parser);
+	    	                    }
+	                        }
+	                    }
+	                }
+	            }
             }
         }
     }
 
-    private void handleVCLOperationDetails(Node base, XMLUtils parser) throws Exception
+    private void aggiornaDHCall(Node operServer, Node operZip, XMLUtils parser) throws XMLUtilsException {
+    	String nameDhCall = parser.get(operZip, "@name");
+    	NodeList retrCfgListZip = parser.selectNodeList(operZip, "RetrieverConfig/*[@type='retriever']");
+    	if (retrCfgListZip.getLength() != 0) {
+    		Node retrCfgServerBase = parser.selectSingleNode(operServer, "RetrieverConfig");
+    		if (retrCfgServerBase == null) {
+    			logger.debug("Nodo DH-CALL[" + nameDhCall + "]/RetrieverConfig non esistente inserimento");
+    			operServer.insertBefore(operServer.getOwnerDocument().importNode(parser.selectSingleNode(operZip, "RetrieverConfig"), true), operServer.getFirstChild());
+    		}
+    		else {
+		    	for (int i = 0; i < retrCfgListZip.getLength(); i++) {
+		    		Node retrCfgZip = retrCfgListZip.item(i);
+		    		Node retrCfgServer = parser.selectSingleNode(operServer, "RetrieverConfig/" + retrCfgZip.getNodeName());
+		    		if (retrCfgServer == null) {     				
+		    			retrCfgServerBase.appendChild(operServer.getOwnerDocument().importNode(retrCfgZip, true));
+						logger.debug("Nodo DH-CALL[" + nameDhCall + "]/RetrieverConfig/" + retrCfgZip.getNodeName() + " non esistente inserimento");
+					}
+					else {   
+						NodeList retrListZip = parser.selectNodeList(retrCfgZip, "DataRetriever");
+						for (int j = 0; j < retrListZip.getLength(); j++) {
+							Node retrZip = retrListZip.item(j);
+							String retrName = parser.get(retrZip, "@method");
+			    			Node retrServer = parser.selectSingleNode(retrCfgServer, "DataRetriever[@method='" + retrName + "']"); 
+			    			Node importedNode = retrCfgServer.getOwnerDocument().importNode(retrZip, true);
+			    			if (retrServer == null) {     				
+			    				retrCfgServer.appendChild(importedNode);
+			    				logger.debug("Nodo DH-CALL[" + nameDhCall + "]/RetrieverConfig/" + retrCfgZip.getNodeName() + "/DataRetriever[" + retrName + "] non esistente inserimento");
+			    			}
+			    			else {   
+			    				retrCfgServer.replaceChild(importedNode, retrServer);   				
+			    			}
+						}
+		    		}
+		    	}
+		    }
+	    }
+	    NodeList dboListZip = parser.selectNodeList(operZip, "*[@type='dbobuilder']");
+    	for (int i = 0; i < dboListZip.getLength(); i++) {
+    		Node dboZip = dboListZip.item(i);
+    		String dboName = parser.get(dboZip, "@name");
+    		Node dboServer = parser.selectSingleNode(operServer, "*[@type='dbobuilder' and @name='" + dboName + "']");
+    		Node importedNode = operServer.getOwnerDocument().importNode(dboZip, true);
+			if (dboServer == null) {     				
+				operServer.appendChild(importedNode);
+				logger.debug("Nodo DH-CALL[" + nameDhCall + "] dbo [" + dboName + "] non esistente inserimento");
+			}
+			else {   
+				operServer.replaceChild(importedNode, dboServer);   				
+				logger.debug("Nodo DH-CALL[" + nameDhCall + "] dbo [" + dboName + "] gia esistente aggiornamento");
+			}
+    	}
+    }
+
+	private void handleVCLOperationDetails(Node base, XMLUtils parser) throws Exception
     {
         // handle DH service's transformations
         NodeList dbos = parser.selectNodeList(base, ".//*[@type='dbo']");
