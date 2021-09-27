@@ -196,7 +196,7 @@ public class ConfigurationHandler implements ConfigurationListener
 
     private ConfigurationHandler()
     {
-        defaultWBConfName = "default";
+        // do nothing
     }
 
     private void init() throws ExcelException
@@ -205,6 +205,7 @@ public class ConfigurationHandler implements ConfigurationListener
         ConfigurationHandler.setLogContext();
         try {
             try {
+                defaultWBConfName = "default";
                 wbConfiguration = new HashMap<String, WorkbookConfiguration>();
                 NodeList nl = XMLConfig.getNodeList(EF_CONFIG_FILE, "//GVExcelWorkbook");
                 if ((nl == null) || (nl.getLength() == 0)) {
@@ -217,13 +218,13 @@ public class ConfigurationHandler implements ConfigurationListener
                     String name = wbCfg.getConfigName();
                     wbConfiguration.put(name, wbCfg);
                     logger.debug("Inizialized ExcelWorkbook '" + name + "'");
-                    if (name.compareToIgnoreCase(defaultWBConfName) == 0) {
+                    if (name.equals(defaultWBConfName)) {
                         flag = true;
                     }
                 }
 
                 if (!flag) {
-                    defaultWBConfName = XMLConfig.get(nl.item(0), "@configName");
+                    defaultWBConfName = XMLConfig.get(nl.item(0), "@configName", "default");
                 }
                 logger.debug("Default ExcelWorkbook= '" + defaultWBConfName + "'");
             }
@@ -268,9 +269,9 @@ public class ConfigurationHandler implements ConfigurationListener
             //XMLConfig.removeConfigurationListener(instance);
             //instance = null;
             
-            excelReportGroups.clear();
+        	if (excelReportGroups != null) excelReportGroups.clear();
             excelReportGroups = null;
-            wbConfiguration.clear();
+            if (wbConfiguration != null) wbConfiguration.clear();
             wbConfiguration = null;
             defaultWBConfName = null;
             // initialize after a delay
