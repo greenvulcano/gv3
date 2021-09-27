@@ -98,6 +98,29 @@
                                    point-x="700" point-y="250" type="flow-node"/>
                     </Flow>
                 </Operation>
+                <Operation name="Forward" forward-name="TOLOWER" operation-activation="on"
+                           out-check-type="sys-svc-id" type="operation" class="it.greenvulcano.gvesb.core.flow.GVFlowWF">
+                    <Description>VulCon generated Operation</Description>
+                    <Participant id-channel="TEST_CHANNEL" id-system="GVESB"/>
+                    <Flow first-node="request" point-x="40" point-y="270">
+                        <GVOperationNode class="it.greenvulcano.gvesb.core.flow.GVOperationNode"
+                                         id="request" id-system="GVESB" input="input_test"
+                                         next-node-id="check_status" op-type="call"
+                                         operation-name="tolower_call" output="output_test"
+                                         point-x="333" point-y="70" type="flow-node"/>
+                        <GVNodeCheck class="it.greenvulcano.gvesb.core.flow.GVNodeCheck"
+                                     default-id="return_status" id="check_status"
+                                     input="output_test" on-exception-id="return_error"
+                                     op-type="check" point-x="536" point-y="146"
+                                     type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_status" op-type="end" output="output_test"
+                                   point-x="700" point-y="50" type="flow-node"/>
+                        <GVEndNode class="it.greenvulcano.gvesb.core.flow.GVEndNode"
+                                   id="return_error" op-type="end" output="output_test"
+                                   point-x="700" point-y="250" type="flow-node"/>
+                    </Flow>
+                </Operation>
             </Service>
             <Service group-name="DEFAULT_GRP" id-service="TOUPPER_EXC" service-activation="on"
                      statistics="off">
