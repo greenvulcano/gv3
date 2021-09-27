@@ -203,4 +203,8 @@ public class NTLMHttpAuth implements HttpAuth
         }
     }
 
+    @Override
+    public String toString() {
+        return getClass().getName() + " - user: " + userName + " - domain: " + domain;
+    }
 }

@@ -110,4 +110,9 @@ public class DummyHttpAuth implements HttpAuth
            throw new HttpAuthException("Error using Dummy proxy authenticator", exc);
        }
    }
+
+   @Override
+    public String toString() {
+        return getClass().getName();
+    }
 }
