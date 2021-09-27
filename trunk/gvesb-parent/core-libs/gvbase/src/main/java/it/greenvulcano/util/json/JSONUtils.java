@@ -183,6 +183,7 @@ public class JSONUtils
 
     private static Object processElement(XMLUtils parser, Element el, Set<String> forceElementsArray, Set<String> forceStringValue) throws JSONUtilsException {
         try {
+        	boolean forceString = forceStringValue.contains("*");
             if (el.hasAttributes() || el.hasChildNodes()) {
                 JSONObject current = new JSONObject();
                 boolean hasAttributes = el.hasAttributes();
@@ -196,7 +197,7 @@ public class JSONUtils
                         if (!name.equals("xmlns") && !"xmlns".equals(att.getPrefix())) {
                             usableAttribute = true;
                             String value = parser.getNodeContent(att);
-                            if (forceStringValue.contains(name)) {
+                            if (forceString || forceStringValue.contains(name)) {
                                 current.put(name, value);
                             }
                             else {
@@ -238,7 +239,7 @@ public class JSONUtils
                                 if (!"".equals(n.getTextContent().trim())) {
                                 	String valStr = parser.getNodeContent(el);
                                     Object value = valStr;
-                                    if (!forceStringValue.contains(el.getLocalName())) {
+                                    if (!(forceString || forceStringValue.contains(el.getLocalName()))) {
                                     	value = stringToValue(valStr);
                                     }
                                     if (hasAttributes) {
@@ -411,6 +412,10 @@ public class JSONUtils
                     } else if (value instanceof JSONArray) {
                         JSONArray ja = (JSONArray) value;
                         int length = ja.length();
+                        if (el == null) {
+                            el = parser.createElement(doc, "DEFAULT_ROOT");
+                            doc.appendChild(el);
+                        }
                         for (int i = 0; i < length; i += 1) {
                             value = ja.get(i);
                             jsonToXml(parser, doc, value, key, el, forceAttributes);
