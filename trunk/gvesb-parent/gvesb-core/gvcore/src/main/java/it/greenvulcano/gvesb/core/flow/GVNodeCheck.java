@@ -31,6 +31,7 @@ import it.greenvulcano.util.xpath.XPathFinder;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -112,72 +113,81 @@ public class GVNodeCheck extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-        long startTime = System.currentTimeMillis();
-        logger.debug("BEGIN - Execute GVNodeCheck '" + getId() + "'");
-        checkInterrupted("GVNodeCheck", logger);
-        dumpEnvironment(logger, true, environment);
-
-        String input = getInput();
         String nextNodeId = "";
-        String conditionName = "";
-        int i = 0;
-        Throwable lastException = (Throwable) environment.get(LAST_GV_EXCEPTION);
-
-        Object inputObject = environment.get(input);
-        if (logger.isDebugEnabled() || isDumpInOut()) {
-            if (inputObject instanceof GVBuffer) {
-                GVBuffer data = (GVBuffer) inputObject;
-                logger.info(GVFormatLog.formatINPUT(data, false, false));
-            }
-            else {
-                logger.info("DUMP INPUT BUFFER NOT A GVBUFFER: " + inputObject);
-            }
-        }
-
+        Level level = GVLogger.getThreadMasterLevel();
+        if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
         try {
-            while ((i < routingVector.size()) && nextNodeId.equals("") && !isInterrupted()) {
-                GVRouting routing = routingVector.elementAt(i);
-                nextNodeId = routing.getNodeId(input, environment);
-                conditionName = routing.getConditionName();
-                i++;
-            }
+            long startTime = System.currentTimeMillis();
+            logger.debug("BEGIN - Execute GVNodeCheck '" + getId() + "'");
             checkInterrupted("GVNodeCheck", logger);
-        }
-        catch (InterruptedException exc) {
-            throw exc;
-        }
-        catch (Exception exc) {
-            logger.error("Exception caught while checking routing condition - GVNodeCheck '" + getId()
-                    + "' - Exception: " + exc);
-            nextNodeId = onExceptionId;
-            lastException = exc;
-            conditionName = "EXCEPTION";
-        }
-
-        if (nextNodeId.equals("")) {
-            if (!Throwable.class.isInstance(environment.get(input))) {
-                if (defaultId.equals("")) {
-                    lastException = new GVCoreConfException("GVCORE_BAD_ROUTING_CFG_ERROR", new String[][]{{"id",
-                            getId()}});
-                    environment.put(input, lastException);
-                    nextNodeId = onExceptionId;
-                    conditionName = "EXCEPTION";
+            dumpEnvironment(logger, true, environment);
+    
+            String input = getInput();
+            String conditionName = "";
+            int i = 0;
+            Throwable lastException = (Throwable) environment.get(LAST_GV_EXCEPTION);
+    
+            Object inputObject = environment.get(input);
+            if (logger.isDebugEnabled() || isDumpInOut()) {
+                if (inputObject instanceof GVBuffer) {
+                    GVBuffer data = (GVBuffer) inputObject;
+                    logger.info(GVFormatLog.formatINPUT(data, false, false));
                 }
                 else {
-                    nextNodeId = defaultId;
-                    conditionName = "DEFAULT";
+                    logger.info("DUMP INPUT BUFFER NOT A GVBUFFER: " + inputObject);
                 }
             }
-            else {
+    
+            try {
+                while ((i < routingVector.size()) && nextNodeId.equals("") && !isInterrupted()) {
+                    GVRouting routing = routingVector.elementAt(i);
+                    nextNodeId = routing.getNodeId(input, environment);
+                    conditionName = routing.getConditionName();
+                    i++;
+                }
+                checkInterrupted("GVNodeCheck", logger);
+            }
+            catch (InterruptedException exc) {
+                throw exc;
+            }
+            catch (Exception exc) {
+                logger.error("Exception caught while checking routing condition - GVNodeCheck '" + getId()
+                        + "' - Exception: " + exc);
                 nextNodeId = onExceptionId;
-                lastException = (Throwable) environment.get(input);
+                lastException = exc;
                 conditionName = "EXCEPTION";
             }
+    
+            if (nextNodeId.equals("")) {
+                if (!Throwable.class.isInstance(environment.get(input))) {
+                    if (defaultId.equals("")) {
+                        lastException = new GVCoreConfException("GVCORE_BAD_ROUTING_CFG_ERROR", new String[][]{{"id",
+                                getId()}});
+                        environment.put(input, lastException);
+                        nextNodeId = onExceptionId;
+                        conditionName = "EXCEPTION";
+                    }
+                    else {
+                        nextNodeId = defaultId;
+                        conditionName = "DEFAULT";
+                    }
+                }
+                else {
+                    nextNodeId = onExceptionId;
+                    lastException = (Throwable) environment.get(input);
+                    conditionName = "EXCEPTION";
+                }
+            }
+            environment.put(LAST_GV_EXCEPTION, lastException);
+            long endTime = System.currentTimeMillis();
+            logger.info("Executing GVNodeCheck '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
+            logger.info("END - Execute GVNodeCheck '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         }
-        environment.put(LAST_GV_EXCEPTION, lastException);
-        long endTime = System.currentTimeMillis();
-        logger.info("Executing GVNodeCheck '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
-        logger.info("END - Execute GVNodeCheck '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
+        finally {
+            if (isDumpInOut() && !level.equals(Level.ALL)) {
+                GVLogger.setThreadMasterLevel(level);
+            }
+        }
         return nextNodeId;
     }
 

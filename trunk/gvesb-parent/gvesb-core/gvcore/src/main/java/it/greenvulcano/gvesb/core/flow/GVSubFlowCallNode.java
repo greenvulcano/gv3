@@ -150,135 +150,144 @@ public class GVSubFlowCallNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-        long startTime = System.currentTimeMillis();
-        GVBuffer internalData = null;
-        String input = getInput();
-        String output = getOutput();
-        logger.info("Executing GVSubFlowCallNode '" + getId() + "'");
-        checkInterrupted("GVSubFlowCallNode", logger);
-        dumpEnvironment(logger, true, environment);
-
-        Object inData = environment.get(input);
-        if (Throwable.class.isInstance(inData)) {
-            environment.put(output, inData);
-            logger.debug("END - Execute GVSubFlowCallNode '" + getId() + "' with Exception input -> " + onExceptionId);
-            return onExceptionId;
-        }
+        Level level = GVLogger.getThreadMasterLevel();
+        if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
         try {
-            GVBuffer data = (GVBuffer) inData;
-            if (logger.isDebugEnabled() || isDumpInOut()) {
-                logger.info(GVFormatLog.formatINPUT(data, false, false));
+            long startTime = System.currentTimeMillis();
+            GVBuffer internalData = null;
+            String input = getInput();
+            String output = getOutput();
+            logger.info("Executing GVSubFlowCallNode '" + getId() + "'");
+            checkInterrupted("GVSubFlowCallNode", logger);
+            dumpEnvironment(logger, true, environment);
+    
+            Object inData = environment.get(input);
+            if (Throwable.class.isInstance(inData)) {
+                environment.put(output, inData);
+                logger.debug("END - Execute GVSubFlowCallNode '" + getId() + "' with Exception input -> " + onExceptionId);
+                return onExceptionId;
             }
-            if (input.equals(output)) {
-                internalData = data;
-            }
-            else {
-                internalData = new GVBuffer(data);
-            }
-
             try {
-                NMDC.push();
-
-                String localFlowOp = createSubFlow(internalData);
-
-                if (changeLogContext) {
-                    NMDC.setOperation(localFlowOp);
-                    GVBufferMDC.put(internalData);
+                GVBuffer data = (GVBuffer) inData;
+                if (logger.isDebugEnabled() || isDumpInOut()) {
+                    logger.info(GVFormatLog.formatINPUT(data, false, false));
                 }
-
-                DataProviderManager dataProviderManager = DataProviderManager.instance();
-                if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
-                    IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
-                    try {
-                        logger.debug("Working on Input data provider: " + dataProvider);
-                        dataProvider.setObject(internalData);
-                        Object inputCall = dataProvider.getResult();
-                        internalData.setObject(inputCall);
-                    }
-                    finally {
-                        dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
-                    }
-                }
-                internalData = inputServices.perform(internalData);
-                internalData = subFlow.perform(internalData, onDebug);
-                internalData = outputServices.perform(internalData);
-                if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
-                    IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
-                    try {
-                        logger.debug("Working on Output data provider: " + dataProvider);
-                        dataProvider.setObject(internalData);
-                        Object outputCall = dataProvider.getResult();
-                        internalData.setObject(outputCall);
-                    }
-                    finally {
-                        dataProviderManager.releaseDataProvider(outputRefDP, dataProvider);
-                    }
-                }
-            }
-            finally {
-                NMDC.pop();
-            }
-            environment.put(output, internalData);
-            if (logger.isDebugEnabled() || isDumpInOut()) {
-                logger.info(GVFormatLog.formatOUTPUT(internalData, false, false));
-            }
-        }
-        catch (InterruptedException exc) {
-            logger.error("GVSubFlowCallNode [" + getId() + "] interrupted!", exc);
-            throw exc;
-        }
-        catch (Exception exc) {
-            environment.put(output, exc);
-        }
-
-        String nextNodeId = "";
-        String conditionName = "";
-        int i = 0;
-        Throwable lastException = (Throwable) environment.get(GVNodeCheck.LAST_GV_EXCEPTION);
-        Object outputObject = environment.get(output);
-
-        try {
-            while ((i < routingVector.size()) && nextNodeId.equals("")) {
-                GVRouting routing = routingVector.elementAt(i);
-                nextNodeId = routing.getNodeId(output, environment);
-                conditionName = routing.getConditionName();
-                i++;
-            }
-        }
-        catch (Exception exc) {
-            logger.error("Exception caught while checking routing condition - GVSubFlowCallNode '" + getId() + "'", exc);
-            nextNodeId = onExceptionId;
-            lastException = exc;
-            conditionName = "EXCEPTION";
-        }
-
-        if (nextNodeId.equals("")) {
-            if (!Throwable.class.isInstance(outputObject)) {
-                if (defaultId.equals("")) {
-                    lastException = new GVCoreConfException("GVCORE_BAD_ROUTING_CFG_ERROR", new String[][]{{"id",
-                            getId()}});
-                    environment.put(output, lastException);
-                    nextNodeId = onExceptionId;
-                    conditionName = "EXCEPTION";
+                if (input.equals(output)) {
+                    internalData = data;
                 }
                 else {
-                    nextNodeId = defaultId;
-                    conditionName = "DEFAULT";
+                    internalData = new GVBuffer(data);
+                }
+    
+                try {
+                    NMDC.push();
+    
+                    String localFlowOp = createSubFlow(internalData);
+    
+                    if (changeLogContext) {
+                        NMDC.setOperation(localFlowOp);
+                        GVBufferMDC.put(internalData);
+                    }
+    
+                    DataProviderManager dataProviderManager = DataProviderManager.instance();
+                    if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
+                        IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
+                        try {
+                            logger.debug("Working on Input data provider: " + dataProvider);
+                            dataProvider.setObject(internalData);
+                            Object inputCall = dataProvider.getResult();
+                            internalData.setObject(inputCall);
+                        }
+                        finally {
+                            dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
+                        }
+                    }
+                    internalData = inputServices.perform(internalData);
+                    internalData = subFlow.perform(internalData, onDebug);
+                    internalData = outputServices.perform(internalData);
+                    if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
+                        IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
+                        try {
+                            logger.debug("Working on Output data provider: " + dataProvider);
+                            dataProvider.setObject(internalData);
+                            Object outputCall = dataProvider.getResult();
+                            internalData.setObject(outputCall);
+                        }
+                        finally {
+                            dataProviderManager.releaseDataProvider(outputRefDP, dataProvider);
+                        }
+                    }
+                }
+                finally {
+                    NMDC.pop();
+                }
+                environment.put(output, internalData);
+                if (logger.isDebugEnabled() || isDumpInOut()) {
+                    logger.info(GVFormatLog.formatOUTPUT(internalData, false, false));
                 }
             }
-            else {
+            catch (InterruptedException exc) {
+                logger.error("GVSubFlowCallNode [" + getId() + "] interrupted!", exc);
+                throw exc;
+            }
+            catch (Exception exc) {
+                environment.put(output, exc);
+            }
+    
+            String nextNodeId = "";
+            String conditionName = "";
+            int i = 0;
+            Throwable lastException = (Throwable) environment.get(GVNodeCheck.LAST_GV_EXCEPTION);
+            Object outputObject = environment.get(output);
+    
+            try {
+                while ((i < routingVector.size()) && nextNodeId.equals("")) {
+                    GVRouting routing = routingVector.elementAt(i);
+                    nextNodeId = routing.getNodeId(output, environment);
+                    conditionName = routing.getConditionName();
+                    i++;
+                }
+            }
+            catch (Exception exc) {
+                logger.error("Exception caught while checking routing condition - GVSubFlowCallNode '" + getId() + "'", exc);
                 nextNodeId = onExceptionId;
-                lastException = (Throwable) outputObject;
+                lastException = exc;
                 conditionName = "EXCEPTION";
             }
+    
+            if (nextNodeId.equals("")) {
+                if (!Throwable.class.isInstance(outputObject)) {
+                    if (defaultId.equals("")) {
+                        lastException = new GVCoreConfException("GVCORE_BAD_ROUTING_CFG_ERROR", new String[][]{{"id",
+                                getId()}});
+                        environment.put(output, lastException);
+                        nextNodeId = onExceptionId;
+                        conditionName = "EXCEPTION";
+                    }
+                    else {
+                        nextNodeId = defaultId;
+                        conditionName = "DEFAULT";
+                    }
+                }
+                else {
+                    nextNodeId = onExceptionId;
+                    lastException = (Throwable) outputObject;
+                    conditionName = "EXCEPTION";
+                }
+            }
+            environment.put(GVNodeCheck.LAST_GV_EXCEPTION, lastException);
+            logger.info("Executing GVSubFlowCallNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
+    
+            dumpEnvironment(logger, false, environment);
+            long endTime = System.currentTimeMillis();
+            logger.info("END - Execute GVSubFlowCallNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
+            return nextNodeId;
         }
-        environment.put(GVNodeCheck.LAST_GV_EXCEPTION, lastException);
-        logger.info("Executing GVSubFlowCallNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
-
-        dumpEnvironment(logger, false, environment);
-        long endTime = System.currentTimeMillis();
-        logger.info("END - Execute GVSubFlowCallNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-        return nextNodeId;
+        finally {
+            if (!level.equals(Level.ALL)) {
+                GVLogger.setThreadMasterLevel(level);
+            }
+        }
     }
 
     /*

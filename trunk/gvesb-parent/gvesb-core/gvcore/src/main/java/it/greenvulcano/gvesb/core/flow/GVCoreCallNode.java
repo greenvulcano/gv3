@@ -151,142 +151,151 @@ public class GVCoreCallNode extends GVFlowNode
     @Override
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
-        long startTime = System.currentTimeMillis();
-        GVBuffer internalData = null;
-        String input = getInput();
-        String output = getOutput();
-        logger.info("Executing GVCoreCallNode '" + getId() + "'");
-        checkInterrupted("GVCoreCallNode", logger);
-        dumpEnvironment(logger, true, environment);
-
-        Object inData = environment.get(input);
-        if (Throwable.class.isInstance(inData)) {
-            environment.put(output, inData);
-            logger.debug("END - Execute GVCoreCallNode '" + getId() + "'");
-            return nextNodeId;
-        }
+        Level level = GVLogger.getThreadMasterLevel();
+        if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
         try {
-        	GVBuffer data = (GVBuffer) inData;
-            if (logger.isDebugEnabled() || isDumpInOut()) {
-                logger.info(GVFormatLog.formatINPUT(data, false, false));
+            long startTime = System.currentTimeMillis();
+            GVBuffer internalData = null;
+            String input = getInput();
+            String output = getOutput();
+            logger.info("Executing GVCoreCallNode '" + getId() + "'");
+            checkInterrupted("GVCoreCallNode", logger);
+            dumpEnvironment(logger, true, environment);
+    
+            Object inData = environment.get(input);
+            if (Throwable.class.isInstance(inData)) {
+                environment.put(output, inData);
+                logger.info("END - Skip Execute GVCoreCallNode '" + getId() + "'");
+                return nextNodeId;
             }
-            if (input.equals(output)) {
-                internalData = data;
-            }
-            else {
-                internalData = new GVBuffer(data);
-            }
-            String origSystem = internalData.getSystem();
-            String origService = internalData.getService();
-            logger.debug("origSystem  = " + origSystem);
-            logger.debug("origService = " + origService);
-
-            String localSystem = (GVBuffer.DEFAULT_SYS.equals(system) ? origSystem : system);
-            String localService = service;
-            String localFlowOp = flowOp;
-
-            if (isFlowSysSvcOpDynamic) {
-                Map<String, Object> props = GVBufferPropertiesHelper.getPropertiesMapSO(internalData, true);
-                localSystem = PropertiesHandler.expand(localSystem, props, internalData);
-                localService = PropertiesHandler.expand(localService, props, internalData);
-                flowGVBuffer.setService(localService);
-                flowGVBuffer.setSystem(localSystem);
-                localFlowOp = PropertiesHandler.expand(localFlowOp, props, internalData);
-            }
-            GVServiceConf gvsConfig = null;
-            InvocationContext gvCtx = (InvocationContext) InvocationContext.getInstance();
-            ServiceConfigManager svcMgr = gvCtx.getGVServiceConfigManager();
-            gvsConfig = svcMgr.getGVSConfig(flowGVBuffer);
-            if (!ACLManager.canAccess(new GVCoreServiceKey(gvsConfig.getGroupName(), gvsConfig.getServiceName(),
-                    localFlowOp))) {
-                throw new GVCoreSecurityException("GV_SERVICE_POLICY_ERROR", new String[][]{
-                        {"service", flowGVBuffer.getService()}, {"system", flowGVBuffer.getSystem()},
-                        {"id", flowGVBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
-            }
-            GVFlow gvOp = gvsConfig.getGVOperation(flowGVBuffer, localFlowOp);
-
             try {
-                NMDC.push();
-
-                if (isFlowSysSvcSet) {
-                    internalData.setService(localService);
-                    internalData.setSystem(localSystem);
+                GVBuffer data = (GVBuffer) inData;
+                if (logger.isDebugEnabled() || isDumpInOut()) {
+                    logger.info(GVFormatLog.formatINPUT(data, false, false));
                 }
-
-                if (changeLogContext) {
-                    GVBufferMDC.put(internalData);
-                    NMDC.setOperation(localFlowOp);
-                    NMDC.put(GVBuffer.Field.SERVICE.toString(), localService);
-                    NMDC.put(GVBuffer.Field.SYSTEM.toString(), localSystem);
+                if (input.equals(output)) {
+                    internalData = data;
                 }
-                DataProviderManager dataProviderManager = DataProviderManager.instance();
-                if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
-                    IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
+                else {
+                    internalData = new GVBuffer(data);
+                }
+                String origSystem = internalData.getSystem();
+                String origService = internalData.getService();
+                logger.debug("origSystem  = " + origSystem);
+                logger.debug("origService = " + origService);
+    
+                String localSystem = (GVBuffer.DEFAULT_SYS.equals(system) ? origSystem : system);
+                String localService = service;
+                String localFlowOp = flowOp;
+    
+                if (isFlowSysSvcOpDynamic) {
+                    Map<String, Object> props = GVBufferPropertiesHelper.getPropertiesMapSO(internalData, true);
+                    localSystem = PropertiesHandler.expand(localSystem, props, internalData);
+                    localService = PropertiesHandler.expand(localService, props, internalData);
+                    flowGVBuffer.setService(localService);
+                    flowGVBuffer.setSystem(localSystem);
+                    localFlowOp = PropertiesHandler.expand(localFlowOp, props, internalData);
+                }
+                GVServiceConf gvsConfig = null;
+                InvocationContext gvCtx = (InvocationContext) InvocationContext.getInstance();
+                ServiceConfigManager svcMgr = gvCtx.getGVServiceConfigManager();
+                gvsConfig = svcMgr.getGVSConfig(flowGVBuffer);
+                if (!ACLManager.canAccess(new GVCoreServiceKey(gvsConfig.getGroupName(), gvsConfig.getServiceName(),
+                        localFlowOp))) {
+                    throw new GVCoreSecurityException("GV_SERVICE_POLICY_ERROR", new String[][]{
+                            {"service", flowGVBuffer.getService()}, {"system", flowGVBuffer.getSystem()},
+                            {"id", flowGVBuffer.getId().toString()}, {"user", GVIdentityHelper.getName()}});
+                }
+                GVFlow gvOp = gvsConfig.getGVOperation(flowGVBuffer, localFlowOp);
+    
+                try {
+                    NMDC.push();
+    
+                    if (isFlowSysSvcSet) {
+                        internalData.setService(localService);
+                        internalData.setSystem(localSystem);
+                    }
+    
+                    if (changeLogContext) {
+                        GVBufferMDC.put(internalData);
+                        NMDC.setOperation(localFlowOp);
+                        NMDC.put(GVBuffer.Field.SERVICE.toString(), localService);
+                        NMDC.put(GVBuffer.Field.SYSTEM.toString(), localSystem);
+                    }
+                    DataProviderManager dataProviderManager = DataProviderManager.instance();
+                    if ((inputRefDP != null) && (inputRefDP.length() > 0)) {
+                        IDataProvider dataProvider = dataProviderManager.getDataProvider(inputRefDP);
+                        try {
+                            logger.debug("Working on Input data provider: " + dataProvider);
+                            dataProvider.setObject(internalData);
+                            Object inputCall = dataProvider.getResult();
+                            internalData.setObject(inputCall);
+                        }
+                        finally {
+                            dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
+                        }
+                    }
+                    internalData = inputServices.perform(internalData);
+                    String masterService = null;
+                    Level locLevel = null;
                     try {
-                        logger.debug("Working on Input data provider: " + dataProvider);
-                        dataProvider.setObject(internalData);
-                        Object inputCall = dataProvider.getResult();
-                        internalData.setObject(inputCall);
+                        if (changeLogMasterService) {
+                            masterService = GVBufferMDC.changeMasterService(localService);
+                        }
+                           locLevel = GVLogger.setThreadMasterLevel(gvOp.getLoggerLevel());
+    
+                        internalData = gvOp.perform(internalData, onDebug);
                     }
                     finally {
-                        dataProviderManager.releaseDataProvider(inputRefDP, dataProvider);
+                        GVLogger.removeThreadMasterLevel(locLevel);
+                        if (changeLogMasterService) {
+                            GVBufferMDC.changeMasterService(masterService);
+                        }
                     }
-                }
-                internalData = inputServices.perform(internalData);
-                Level level = null;
-                String masterService = null;
-                try {
-                    if (changeLogMasterService) {
-                        masterService = GVBufferMDC.changeMasterService(localService);
+                    internalData = outputServices.perform(internalData);
+                    if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
+                        IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
+                        try {
+                            logger.debug("Working on Output data provider: " + dataProvider);
+                            dataProvider.setObject(internalData);
+                            Object outputCall = dataProvider.getResult();
+                            internalData.setObject(outputCall);
+                        }
+                        finally {
+                            dataProviderManager.releaseDataProvider(outputRefDP, dataProvider);
+                        }
                     }
-                    level = GVLogger.setThreadMasterLevel(gvOp.getLoggerLevel());
-
-                    internalData = gvOp.perform(internalData, onDebug);
                 }
                 finally {
-                    GVLogger.removeThreadMasterLevel(level);
-                    if (changeLogMasterService) {
-                        GVBufferMDC.changeMasterService(masterService);
+                    NMDC.pop();
+                    if (isFlowSysSvcSet) {
+                        internalData.setSystem(origSystem);
+                        internalData.setService(origService);
                     }
                 }
-                internalData = outputServices.perform(internalData);
-                if ((outputRefDP != null) && (outputRefDP.length() > 0)) {
-                    IDataProvider dataProvider = dataProviderManager.getDataProvider(outputRefDP);
-                    try {
-                        logger.debug("Working on Output data provider: " + dataProvider);
-                        dataProvider.setObject(internalData);
-                        Object outputCall = dataProvider.getResult();
-                        internalData.setObject(outputCall);
-                    }
-                    finally {
-                        dataProviderManager.releaseDataProvider(outputRefDP, dataProvider);
-                    }
+                environment.put(output, internalData);
+                if (logger.isDebugEnabled() || isDumpInOut()) {
+                    logger.info(GVFormatLog.formatOUTPUT(internalData, false, false));
                 }
             }
-            finally {
-                NMDC.pop();
-                if (isFlowSysSvcSet) {
-                    internalData.setSystem(origSystem);
-                    internalData.setService(origService);
-                }
+            catch (InterruptedException exc) {
+                logger.error("GVCoreCallNode [" + getId() + "] interrupted!", exc);
+                throw exc;
             }
-            environment.put(output, internalData);
-            if (logger.isDebugEnabled() || isDumpInOut()) {
-                logger.info(GVFormatLog.formatOUTPUT(internalData, false, false));
+            catch (Exception exc) {
+                environment.put(output, exc);
+            }
+    
+            dumpEnvironment(logger, false, environment);
+            long endTime = System.currentTimeMillis();
+            logger.info("END - Execute GVCoreCallNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
+            return nextNodeId;
+        }
+        finally {
+            if (isDumpInOut() && !level.equals(Level.ALL)) {
+                GVLogger.setThreadMasterLevel(level);
             }
         }
-        catch (InterruptedException exc) {
-            logger.error("GVCoreCallNode [" + getId() + "] interrupted!", exc);
-            throw exc;
-        }
-        catch (Exception exc) {
-            environment.put(output, exc);
-        }
-
-        dumpEnvironment(logger, false, environment);
-        long endTime = System.currentTimeMillis();
-        logger.info("END - Execute GVCoreCallNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-        return nextNodeId;
     }
 
     /* (non-Javadoc)
