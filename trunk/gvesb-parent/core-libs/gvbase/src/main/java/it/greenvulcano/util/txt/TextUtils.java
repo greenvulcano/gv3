@@ -951,7 +951,8 @@ public class TextUtils
     public static boolean parseBoolean(String s) {
         if (s == null) return false;
         return (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("si")
-                || s.equalsIgnoreCase("on") || s.equalsIgnoreCase("ok") || s.equalsIgnoreCase("1"));
+                || s.equalsIgnoreCase("on") || s.equalsIgnoreCase("ok") || s.equalsIgnoreCase("1")
+                || s.equalsIgnoreCase("y") || s.equalsIgnoreCase("s"));
     }
 
 }
