@@ -33,6 +33,7 @@ import it.greenvulcano.gvesb.gvdte.util.xml.ErrorHandler;
 import it.greenvulcano.gvesb.gvdte.util.xml.URIResolver;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.json.JSONUtils;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.xml.ErrHandler;
 import it.greenvulcano.util.xml.XMLUtils;
 import it.greenvulcano.util.xml.XMLUtilsException;
@@ -120,9 +121,11 @@ public class XML2JSONTransformer implements DTETransformer {
 
     private List<TransformerHelper> helpers = new ArrayList<TransformerHelper>();
     
-    private ConversionPolicy        policy             = ConversionPolicy.SIMPLE;
-    private Set<String>             forceElementsArray = new HashSet<String>();
-    private Set<String>             forceStringValue   = new HashSet<String>();
+    private ConversionPolicy        policy             	= ConversionPolicy.SIMPLE;
+    private String                         forceElementsArray   = "";
+    private Set<String>             forceElementsArraySet = new HashSet<String>();
+    private String                      forceStringValue    = "";
+    private Set<String>             forceStringValueSet = new HashSet<String>();
 
     public XML2JSONTransformer() {
         // do nothing
@@ -169,14 +172,10 @@ public class XML2JSONTransformer implements DTETransformer {
 
             policy = ConversionPolicy.fromString(XMLConfig.get(nodo, "@ConversionPolicy", ConversionPolicy.SIMPLE.toString()));
             if (policy == ConversionPolicy.SIMPLE) {
-                String fElem = XMLConfig.get(nodo, "@ForceElementsArray", "");
-                for (String el : fElem.split(",")) {
-                    forceElementsArray.add(el.trim());
-                }
-                String fStr = XMLConfig.get(nodo, "@ForceStringValue", "");
-                for (String str : fStr.split(",")) {
-                    forceStringValue.add(str.trim());
-                }
+                forceElementsArray = XMLConfig.get(nodo, "@ForceElementsArray", "");
+                forceElementsArraySet = listToSet(forceElementsArray);
+                forceStringValue = XMLConfig.get(nodo, "@ForceStringValue", "");
+                forceStringValueSet = listToSet(forceStringValue);
             }
 
             logger.debug("Loaded parameters: inputXslMapName = " + xslMapName + " - DataSourceSet: "
@@ -209,6 +208,14 @@ public class XML2JSONTransformer implements DTETransformer {
     @Override
     public String getName() {
         return name;
+    }
+
+    private Set<String> listToSet(String list) {
+        Set<String> set = new HashSet<String>();
+        for (String el : list.split(",")) {
+            set.add(el.trim());
+        }
+        return set;
     }
 
     /**
@@ -301,7 +308,16 @@ public class XML2JSONTransformer implements DTETransformer {
             }
             JSONObject json = null;
             if (policy == ConversionPolicy.SIMPLE) {
-                json = JSONUtils.xmlToJson(docXML, forceElementsArray, forceStringValue);
+                Set<String> currForceElementsArraySet = forceElementsArraySet;
+                if (!PropertiesHandler.isExpanded(forceElementsArray)) {
+                    currForceElementsArraySet = listToSet(PropertiesHandler.expand(forceElementsArray, mapParam));
+                }
+                Set<String> currForceStringValueSet = forceStringValueSet;
+                if (!PropertiesHandler.isExpanded(forceStringValue)) {
+                    currForceStringValueSet = listToSet(PropertiesHandler.expand(forceStringValue, mapParam));
+                }
+
+                json = JSONUtils.xmlToJson(docXML, currForceElementsArraySet, currForceStringValueSet);
             }
             else {
                 json = JSONUtils.xmlToJson_BadgerFish(docXML);
