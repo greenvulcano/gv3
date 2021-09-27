@@ -191,4 +191,9 @@ public class BasicHttpAuth implements HttpAuth
            throw new HttpAuthException("Error using Basic proxy authenticator", exc);
        }
    }
+   
+   @Override
+    public String toString() {
+        return getClass().getName() + " - user: " + userName + " - realm: " + realm;
+    }
 }
