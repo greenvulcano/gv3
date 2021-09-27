@@ -19,9 +19,6 @@
  */
 package it.greenvulcano.gvesb.core.config;
 
-import it.greenvulcano.configuration.ConfigurationEvent;
-import it.greenvulcano.configuration.ConfigurationListener;
-import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.statistics.StatisticsDataManager;
