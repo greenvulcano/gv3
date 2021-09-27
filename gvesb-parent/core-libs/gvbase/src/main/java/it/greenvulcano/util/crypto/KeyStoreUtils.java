@@ -104,7 +104,7 @@ public final class KeyStoreUtils
                 }
                 System.out.println("getKeyStore: keyStoreName[" + keyStoreName + "] keyStorePwd[HIDDEN" // +
                         // keyStorePwd
-                        + "] keyStoreType[" + keyStoreType + "] keyStorePrv[" + keyStorePrv + "] + fileName[" + fn + "]");
+                        + "] keyStoreType[" + keyStoreType + "] keyStorePrv[" + keyStorePrv + "] fileName[" + fn + "]");
 
                 File fks = new File(fn);
                 if (fks.canRead()) {
