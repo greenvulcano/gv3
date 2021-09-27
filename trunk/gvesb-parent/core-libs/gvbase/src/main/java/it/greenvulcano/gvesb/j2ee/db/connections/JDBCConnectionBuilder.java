@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -150,6 +151,24 @@ public class JDBCConnectionBuilder implements ConfigurationListener, ShutdownEve
     public static void releaseConnection(String name, Connection conn, boolean useThreadMap) throws GVDBException
     {
         JDBCConnectionBuilder.instance().intReleaseConnection(name, conn, useThreadMap);
+    }
+
+    public static String statInfo() {
+        StringBuilder sb = new StringBuilder();
+        for (ConnectionBuilder cBuilder : instance.connBuilders.values()) {
+            sb.append(cBuilder.getClass().getSimpleName()).append("[").append(cBuilder.getName()).append("]").append("\n");
+            sb.append(cBuilder.statInfo()).append("\n");
+        }
+        return sb.toString();
+    }
+    
+    public static JSONObject toJSON() {
+        JSONObject cbJ = new JSONObject();
+        for (ConnectionBuilder cBuilder : instance.connBuilders.values()) {
+            cbJ.accumulate(cBuilder.getClass().getSimpleName(), cBuilder.toJSON());
+        }
+
+        return cbJ;
     }
 
     /**
