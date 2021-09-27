@@ -50,7 +50,7 @@
 
     #SortChild
 -->
-<!ELEMENT GVCryptoHelper (Description?, KeyStoreID*, KeyID*)>
+<!ELEMENT GVCryptoHelper (Description?, (KeyStoreID|KeyID)*)>
 <!--
     Element type 'module'.
 -->
@@ -138,6 +138,19 @@
     #Encrypted
 -->
 <!ATTLIST KeyID key-pwd CDATA #IMPLIED>
+<!--
+    The Key Type Mode to be used in the Cypher.
+
+    #NotNull
+-->
+<!ATTLIST KeyID key-type-mode CDATA #IMPLIED>
+<!--
+    The Key Type Padding to use in the Cypher.
+    Default to NoPadding
+
+    #NotNull
+-->
+<!ATTLIST KeyID key-type-padding CDATA #IMPLIED>
 
 <!--
     Root element for XPath engine configuration.
@@ -1496,6 +1509,13 @@
     #NotNull
 -->
 <!ATTLIST CSV2XMLTransformation GroupBy CDATA #IMPLIED>
+<!--
+    Defines the csv file encoding to be used in conversion.
+    Default to system encoding.
+
+    #NotNull
+-->
+<!ATTLIST CSV2XMLTransformation FileEncoding CDATA #IMPLIED>
 
 <!--
     Defines a text to XML trasformation.
@@ -4705,7 +4725,6 @@
     #References: {{../GVSavePointNode[@id!=../@first-node][preceding-sibling::GVOperationNode or following-sibling::GVOperationNode or preceding-sibling::GVNodeCheck or following-sibling::GVNodeCheck or preceding-sibling::ChangeGVBufferNode or following-sibling::ChangeGVBufferNode or preceding-sibling::GVNotificationNode or following-sibling::GVNotificationNode or preceding-sibling::GVIteratorOperationNode or following-sibling::GVIteratorOperationNode or preceding-sibling::GVCoreCallNode or following-sibling::GVCoreCallNode or preceding-sibling::GVSavePointNode or following-sibling::GVSavePointNode or preceding-sibling::GVSubFlowCallNode or following-sibling::GVSubFlowCallNode or preceding-sibling::GVSubFlowSpawnNode or following-sibling::GVSubFlowSpawnNode or preceding-sibling::GVSubFlowParallelNode or following-sibling::GVSubFlowParallelNode or preceding-sibling::GVSubFlowSplittedNode or following-sibling::GVSubFlowSplittedNode]}} ../GVSubFlowSplittedNode/@output
 -->
 <!ATTLIST GVSavePointNode input CDATA #REQUIRED>
-
 <!--
     Indicates the next node in the workflow to execute
     when the operation ends.
@@ -4714,7 +4733,6 @@
     #References: following-sibling::*/@id
 -->
 <!ATTLIST GVSavePointNode next-node-id CDATA #REQUIRED>
-
 <!--
     X position of the node in the VulCon workflows editor.
     Immutable, used by VulCon.
@@ -4723,7 +4741,6 @@
     #Freezed
 -->
 <!ATTLIST GVSavePointNode point-x CDATA #IMPLIED>
-
 <!--
     Y position of the node in the VulCon workflows editor.
     Immutable, used by VulCon.
@@ -4740,13 +4757,11 @@
     #Freezed
 -->
 <!ATTLIST GVSavePointNode breakpoint (true|false) #IMPLIED>
-
 <!--
     If true enable the dump of the input/output GVBuffer.
     Default false.
 -->
 <!ATTLIST GVSavePointNode dump-in-out (true|false) #IMPLIED>
-
 <!--
     If true enable the dump of the input/output Execution Environment.
     Default false.
@@ -5170,8 +5185,11 @@
 
     If a processor is not defined, the output GVBuffer.object will contain the
     java.util.List as defined as input for Script but unwrapped.
+
+    If the value is 'nothing' cannot be defined any ResultProcessor and the output
+    will contains an empty java.util.List.
 -->
-<!ATTLIST ResultProcessor  processor-input (only-object|only-gvbuffer|object-and-error|gvbuffer-and-error) #REQUIRED>
+<!ATTLIST ResultProcessor  processor-input (only-object|only-gvbuffer|object-and-error|gvbuffer-and-error|nothing) #REQUIRED>
 <!--
     If true and any of the SubFlows output contains an Exception then the
     ResultProcessor returns an error.
@@ -6683,6 +6701,11 @@
     Default: true.
 -->
 <!ATTLIST jms-enqueue decorate-message (true|false) #IMPLIED>
+<!--
+    If true the message to be enqueued have the JMSCorrelationID forced as input GVBuffer ID value.
+    Default: false
+-->
+<!ATTLIST jms-enqueue force-correlation-id-as-id (true|false) #IMPLIED>
 
 <!--
     Used to make a routing mechanism at the level of communication channel,
