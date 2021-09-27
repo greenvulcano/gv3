@@ -380,7 +380,7 @@ public class KeyID
     @Override
     public String toString()
     {
-        String descr = "KeyID (" + keyID + "): keyStoreID = " + keyStoreID.getKeyStoreID() + " - keyAlias = "
+        String descr = "KeyID (" + keyID + "): keyType = " + getFullKeyType() + " - keyStoreID = " + keyStoreID.getKeyStoreID() + " - keyAlias = "
                 + keyAlias + " - keyPwd = HIDDEN";// + keyPwd;
         return descr;
     }
