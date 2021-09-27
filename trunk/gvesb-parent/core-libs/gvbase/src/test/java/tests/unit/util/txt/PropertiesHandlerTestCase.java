@@ -54,6 +54,11 @@ public class PropertiesHandlerTestCase extends TestCase
         String src = "..@{{pippo}}..@{{topolino}}";
         String dest = PropertiesHandler.expand(src, props);
         assertEquals(match, dest);
+
+        match = "none";
+        src = "@{{paperino::none}}";
+        dest = PropertiesHandler.expand(src, props);
+        assertEquals(match, dest);
     }
 
     /**
@@ -68,6 +73,15 @@ public class PropertiesHandlerTestCase extends TestCase
         assertEquals(match, dest);
 
         src = "sp{{java.runtime.name}}";
+        dest = PropertiesHandler.expand(src);
+        assertEquals(match, dest);
+
+        match = "none";
+        src = "${{something::none}}";
+        dest = PropertiesHandler.expand(src);
+        assertEquals(match, dest);
+        
+        src = "sp{{something::none}}";
         dest = PropertiesHandler.expand(src);
         assertEquals(match, dest);
     }
@@ -368,6 +382,11 @@ public class PropertiesHandlerTestCase extends TestCase
        match = System.getenv("HOME");
        System.out.println("----- HOME env: " + match);
        src = "env{{HOME}}";
+       dest = PropertiesHandler.expand(src);
+       assertEquals(match, dest);
+
+       match = "none";
+       src = "env{{HOME_BLABLA::none}}";
        dest = PropertiesHandler.expand(src);
        assertEquals(match, dest);
    }
