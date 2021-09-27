@@ -108,6 +108,7 @@ public class StreamPumper extends BaseThread
     @Override
     public void run()
     {
+        setRunning(true);
         try {
             try {
                 while (!endOfStream) {
@@ -122,6 +123,9 @@ public class StreamPumper extends BaseThread
         }
         catch (IOException ioe) {
             logger.warn("An error occurred: " + ioe.getMessage(), ioe);
+        }
+        finally {
+        	setRunning(false);
         }
     }
 
