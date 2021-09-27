@@ -19,8 +19,7 @@
  */
 package it.greenvulcano.log;
 
-import it.greenvulcano.util.thread.ThreadMap;
-
+import java.lang.management.ManagementFactory;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.MDC;
+
+import it.greenvulcano.util.thread.ThreadMap;
 
 /**
  * That class is a merge of the functionalities of MDC (Mapped Diagnostic Context)
@@ -89,6 +90,12 @@ public final class NMDC
     public static final String       CONTEXT_KEY      = NMDC.class.getName();
 
     /**
+     * Process ID field name. <br/>
+     * Value: <code>"PROCESSID"</code>
+     */
+    public static final String       PROCESS_ID_KEY    = "PROCESSID";
+
+    /**
      * Thread ID field name. <br/>
      * Value: <code>"THREADID"</code>
      */
@@ -136,6 +143,7 @@ public final class NMDC
     private static final Set<String> GENERAL_KEYS     = Collections.synchronizedSet(new HashSet<String>());
 
     static {
+        GENERAL_KEYS.add(PROCESS_ID_KEY);
         GENERAL_KEYS.add(THREAD_ID_KEY);
         GENERAL_KEYS.add(THREAD_GROUP_KEY);
         GENERAL_KEYS.add(THREAD_NAME_KEY);
@@ -335,10 +343,34 @@ public final class NMDC
         if (stack == null) {
             stack = new LinkedList<Map<Object, Object>>();
             ThreadMap.put(CONTEXT_KEY, stack);
+            MDC.put(PROCESS_ID_KEY, String.valueOf(getProcessId()));
             MDC.put(THREAD_ID_KEY, "" + (++threadCounter));
             MDC.put(THREAD_NAME_KEY, Thread.currentThread().getName());
             MDC.put(THREAD_GROUP_KEY, Thread.currentThread().getThreadGroup().getName());
         }
         return stack;
+    }
+
+    private static long pid = -1;
+    public static long getProcessId() {
+    	if (pid != -1) {
+    		return pid;
+    	}
+
+        // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
+        final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+        final int index = jvmName.indexOf('@');
+
+        if (index < 1) {
+        	pid = -1;
+            return -1;
+        }
+
+        try {
+            pid = Long.parseLong(jvmName.substring(0, index));
+        } catch (NumberFormatException e) {
+        	pid = -1;
+        }
+        return pid;
     }
 }

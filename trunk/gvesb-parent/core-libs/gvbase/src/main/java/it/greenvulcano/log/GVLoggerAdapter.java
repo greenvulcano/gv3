@@ -22,6 +22,9 @@ package it.greenvulcano.log;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
+import org.apache.log4j.spi.LoggingEvent;
+import org.slf4j.MDC;
 
 /**
  * 
@@ -51,4 +54,13 @@ public class GVLoggerAdapter extends Logger
         return effectiveLevel;
     }
 
+    /**
+     * Add process id to MDC
+     */
+    protected void forcedLog(String fqcn, Priority level, Object message, Throwable t) {
+    	if (NMDC.get(NMDC.PROCESS_ID_KEY) == null) {
+    		NMDC.put(NMDC.PROCESS_ID_KEY, String.valueOf(NMDC.getProcessId()));
+    	}
+    	super.forcedLog(fqcn, level, message, t);
+    }
 }
