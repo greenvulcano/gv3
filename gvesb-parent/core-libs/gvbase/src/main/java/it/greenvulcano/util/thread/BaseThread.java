@@ -34,15 +34,19 @@ public class BaseThread extends Thread
     private long              instId          = 0;
     private static boolean    dumpInstCount   = false;
     private static boolean    dumpCreateStack = false;
+    private static boolean    dumpStartStop   = false;
+    private boolean           running         = false;
 
     static {
         try {
             dumpInstCount = Boolean.getBoolean("it.greenvulcano.util.thread.BaseThread.dumpInstCount");
             dumpCreateStack = Boolean.getBoolean("it.greenvulcano.util.thread.BaseThread.dumpCreateStack");
+            dumpStartStop   = Boolean.getBoolean("it.greenvulcano.util.thread.BaseThread.dumpStartStop");
         }
         catch (Exception exc) {
             dumpInstCount = false;
             dumpCreateStack = false;
+            dumpStartStop   = false;
         }
     }
 
@@ -133,6 +137,26 @@ public class BaseThread extends Thread
         dumpCreate();
     }
 
+    public void setRunning(boolean running) {
+        this.running = running;
+        dumpSartStop();
+    }
+
+    public boolean isRunning() {
+        return this.running;
+    }
+
+    @Override
+    public void run() {
+        setRunning(true);
+        try {
+            super.run();
+        }
+        finally {
+            setRunning(false);
+        }
+    }
+
     /**
      *
      * @return
@@ -192,6 +216,13 @@ public class BaseThread extends Thread
         }
         if (dumpCreateStack) {
             System.out.println("Create Stack:\n" + getStackTrace(Thread.currentThread()));
+        }
+    }
+
+    private void dumpSartStop()
+    {
+        if (dumpStartStop) {
+            System.out.println(getClass() + " - " + (isRunning() ? "Started" : "Stopped") + "[" + getName() + "]");
         }
     }
 }
