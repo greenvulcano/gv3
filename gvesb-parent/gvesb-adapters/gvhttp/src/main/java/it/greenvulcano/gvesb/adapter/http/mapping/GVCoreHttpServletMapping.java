@@ -267,6 +267,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
             logger.log(level, gvFormatLog);
 
             environment.clear();
+            NMDC.remove("MASTER_SERVICE");
         }
         return status;
     }
