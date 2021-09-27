@@ -53,23 +53,26 @@ public class SubFlowTask implements Callable<Result>
     private String              inputRefDP;
     private boolean             spawned           = false;
     private String              spawnedName       = null;
+    private boolean             needsOutput       = true;
 
-    public SubFlowTask(GVSubFlowPool pool, GVBuffer input, boolean onDebug, boolean changeLogContext, Map<String, String> logContext, String inputRefDP) {
+    public SubFlowTask(GVSubFlowPool pool, GVBuffer input, boolean onDebug, boolean changeLogContext, Map<String, String> logContext, String inputRefDP, boolean needsOutput) {
         this.pool = pool;
         this.input = input;
         this.onDebug = onDebug;
         this.logContext = logContext;
         this.changeLogContext = changeLogContext;
         this.inputRefDP = inputRefDP;
+        this.needsOutput = needsOutput;
     }
 
-    public SubFlowTask(GVSubFlow subFlow, GVBuffer input, boolean onDebug, boolean changeLogContext, Map<String, String> logContext, String inputRefDP) {
+    public SubFlowTask(GVSubFlow subFlow, GVBuffer input, boolean onDebug, boolean changeLogContext, Map<String, String> logContext, String inputRefDP, boolean needsOutput) {
         this.subFlow = subFlow;
         this.input = input;
         this.onDebug = onDebug;
         this.logContext = logContext;
         this.changeLogContext = changeLogContext;
         this.inputRefDP = inputRefDP;
+        this.needsOutput = needsOutput;
     }
 
     public void setSpawned(boolean spawned) {
@@ -125,20 +128,35 @@ public class SubFlowTask implements Callable<Result>
                 }
 
                 GVBuffer output = currSubFlow.perform(internalData, onDebug);
-                result = new Result(Result.State.STATE_OK, input, output);
+                if (needsOutput) {
+                	result = new Result(Result.State.STATE_OK, input, output);
+                }
+                else {
+                	result = new Result(Result.State.STATE_OK);
+                }
             }
             catch (InterruptedException exc) {
                 if (spawned) {
                     logger.error("SubFlow execution interrupted", exc);
                 }
-                result = new Result(Result.State.STATE_INTERRUPTED, input, exc);
+                if (needsOutput) {
+                    result = new Result(Result.State.STATE_INTERRUPTED, input, exc);
+                }
+                else {
+                    result = new Result(Result.State.STATE_INTERRUPTED, exc);
+                }
                 Thread.currentThread().interrupt();
             }
             catch (Exception exc) {
                 if (spawned) {
                     logger.error("SubFlow execution failed", exc);
                 }
-                result = new Result(Result.State.STATE_ERROR, input, exc);
+                if (needsOutput) {
+                    result = new Result(Result.State.STATE_ERROR, input, exc);
+                }
+                else {
+                    result = new Result(Result.State.STATE_ERROR, exc);
+                }
             }
             finally {
                 if (pool != null) {
@@ -162,14 +180,23 @@ public class SubFlowTask implements Callable<Result>
     }
 
     public Result getFailureResult(Throwable cause) {
-        return new Result(Result.State.STATE_ERROR, input, cause);
+        if (needsOutput) {
+        	return new Result(Result.State.STATE_ERROR, input, cause);
+        }
+      	return new Result(Result.State.STATE_ERROR, cause);
     }
 
     public Result getTimeoutResult(InterruptedException cause) {
-        return new Result(Result.State.STATE_TIMEOUT, input, cause);
+        if (needsOutput) {
+            return new Result(Result.State.STATE_TIMEOUT, input, cause);
+        }
+        return new Result(Result.State.STATE_TIMEOUT, cause);
     }
 
     public Result getCancelledResult(CancellationException cause) {
-        return new Result(Result.State.STATE_CANCELLED, input, cause);
+        if (needsOutput) {
+        	return new Result(Result.State.STATE_CANCELLED, input, cause);
+        }
+        return new Result(Result.State.STATE_CANCELLED, cause);
     }
 }
