@@ -20,18 +20,19 @@
 package it.greenvulcano.util.txt;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.Map.Entry;
 
 /**
  * PropertiesFileReader class
@@ -72,9 +73,10 @@ public class PropertiesFileReader
             }
 
             props = new Properties();
-            FileInputStream in = null;
+            //FileInputStream in = null;
+            Reader in = null;
             try {
-                in = new FileInputStream(filename);
+            	in = new FileReader(filename);
 
                 props.load(in);
             }
@@ -129,7 +131,8 @@ public class PropertiesFileReader
 
             props = new Properties();
 
-            InputStream in = url.openStream();
+            //InputStream in = url.openStream();
+            Reader in = new InputStreamReader(url.openStream());
             try {
                 props.load(in);
             }
