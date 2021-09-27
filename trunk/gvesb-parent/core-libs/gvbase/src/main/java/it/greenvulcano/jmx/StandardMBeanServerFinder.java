@@ -20,6 +20,8 @@
 package it.greenvulcano.jmx;
 
 import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.metadata.PropertiesHandlerException;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -39,6 +41,7 @@ public class StandardMBeanServerFinder implements MBeanServerFinder
     private String mode;
     private String domain;
     private String agentId;
+    private String serverName;
 
     /**
      * Initialize the <code>MBeanServerFinder</code>.
@@ -52,6 +55,12 @@ public class StandardMBeanServerFinder implements MBeanServerFinder
         mode = XMLConfig.get(conf, "@mode", "create");
         domain = XMLConfig.get(conf, "@domain");
         agentId = XMLConfig.get(conf, "@agent-id");
+        try {
+            serverName = PropertiesHandler.expand(XMLConfig.get(conf, "@server-name", "StandardServerName"));
+        }
+        catch (PropertiesHandlerException exc) {
+            exc.printStackTrace();
+        }
     }
 
     /**
@@ -89,7 +98,7 @@ public class StandardMBeanServerFinder implements MBeanServerFinder
      */
     public String getServerName()
     {
-        return "StandardServerName";
+        return serverName;
     }
 
 }
