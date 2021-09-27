@@ -378,6 +378,8 @@ public class DateUtilsTestCase extends TestCase
     public void testTomorrowToString()
     {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        sdf.setLenient(false);
+        sdf.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, 1);
         String str = sdf.format(cal.getTime());
