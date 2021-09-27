@@ -181,7 +181,7 @@ public class MessageFormatter
         int startSubStr = 0;
         while (startSubStr < message.length()) {
             indexOfBegin = message.indexOf(beginParam, startSubStr);
-            indexOfEnd = message.indexOf(endParam, startSubStr);
+            indexOfEnd = message.indexOf(endParam, indexOfBegin);
 
             if (indexOfBegin != -1) {
                 buf.append(message.substring(startSubStr, indexOfBegin));
