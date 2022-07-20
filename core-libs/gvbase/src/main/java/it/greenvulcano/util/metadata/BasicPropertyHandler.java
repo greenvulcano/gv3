@@ -121,7 +121,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * - escJS{{string}}    : escapes invalid JavaScript characters from 'string' (ex. ' -> \')
      * - escSQL{{string}}   : escapes invalid SQL characters from 'string' (ex. ' -> '')
      * - escXML{{string}}   : escapes invalid XML characters from 'string' (ex. ' -> &apos;)
-     * - replace{{string::search::subst}}   : replace in 'string' all occurrences of 'search' with 'replace'
+     * - replace{{string::search::subst::r}}   : replace in 'string' all occurrences of 'search' with 'replace', if defined the last parameter r|R the search term can be a Java regular expression
      * - urlEnc{{string}}   : URL encode invalid characters from 'string'
      * - urlDec{{string}}   : decode URL encoded characters from 'string'
      * </pre>
@@ -788,12 +788,21 @@ public class BasicPropertyHandler implements PropertyHandler
             if (!PropertiesHandler.isExpanded(str)) {
                 str = PropertiesHandler.expand(str, inProperties, object, scope, extra);
             }
-            int pIdx = str.indexOf("::");
-            String string = str.substring(0, pIdx);
-            int pIdx2 = str.indexOf("::", pIdx + 2);
-            String search = str.substring(pIdx + 2, pIdx2);
-            String subst = str.substring(pIdx2 + 2);
-            String result = TextUtils.replaceSubstring(string, search, subst);
+            String params[] = str.split("::");
+            String string = params[0];
+            String search = params[1];
+            String subst = params[2];
+            boolean useRX = false;
+            if (params.length == 4) {
+            	useRX = "r".equalsIgnoreCase(params[3]);
+            }
+            String result = "";
+            if (useRX) {
+            	result = string.replaceAll(search, subst);
+            }
+            else {
+            	result = TextUtils.replaceSubstring(string, search, subst);
+            }
             return result;
         }
         catch (Exception exc) {
