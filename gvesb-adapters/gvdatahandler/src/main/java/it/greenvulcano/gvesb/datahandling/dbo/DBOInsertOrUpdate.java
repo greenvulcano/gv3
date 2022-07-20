@@ -458,6 +458,16 @@ public class DBOInsertOrUpdate extends AbstractDBO
                         this.localCurrentRowFields.add(Integer.valueOf(text));
                     }
                 }
+                else if (LONG_TYPE.equals(this.currType)) {
+                    if (text.equals("")) {
+                        stmt.setNull(this.colIdx, Types.BIGINT);
+                        this.localCurrentRowFields.add(null);
+                    }
+                    else {
+                        stmt.setLong(this.colIdx, Long.parseLong(text));
+                        this.localCurrentRowFields.add(Long.valueOf(text));
+                    }
+                }
                 else if (FLOAT_TYPE.equals(this.currType) || DECIMAL_TYPE.equals(this.currType)) {
                     if (text.equals("")) {
                         stmt.setNull(idx, Types.NUMERIC);

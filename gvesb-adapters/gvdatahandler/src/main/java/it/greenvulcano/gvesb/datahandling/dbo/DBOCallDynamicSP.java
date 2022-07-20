@@ -1346,6 +1346,16 @@ public class DBOCallDynamicSP extends AbstractDBO
                             this.currentRowFields.add(Integer.valueOf(text));
                         }
                     }
+                    else if (LONG_TYPE.equals(this.currType)) {
+                        if (text.equals("")) {
+                            setNull(cs, Types.BIGINT);
+                            this.currentRowFields.add(null);
+                        }
+                        else {
+                            setLong(cs, Long.parseLong(text));
+                            this.currentRowFields.add(Long.valueOf(text));
+                        }
+                    }
                     else if (FLOAT_TYPE.equals(this.currType) || DECIMAL_TYPE.equals(this.currType)) {
                         if (text.equals("")) {
                             setNull(cs, Types.NUMERIC);
@@ -1498,6 +1508,21 @@ public class DBOCallDynamicSP extends AbstractDBO
         }
         else {
             cs.setInt(this.colIdx, num);
+        }
+    }
+
+    /**
+     * @param cs
+     * @param num
+     * @throws SQLException
+     */
+    private void setLong(CallableStatement cs, long num) throws SQLException
+    {
+        if (this.useName) {
+            cs.setLong(this.currName, num);
+        }
+        else {
+            cs.setLong(this.colIdx, num);
         }
     }
 

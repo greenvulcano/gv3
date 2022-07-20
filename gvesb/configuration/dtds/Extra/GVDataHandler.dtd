@@ -1194,6 +1194,11 @@
 -->
 <!ATTLIST SPOutputParameter position CDATA #REQUIRED>
 <!--
+    If true, the output parameters will be initialized to null.
+    Default is false.
+-->
+<!ATTLIST SPOutputParameter set-null (true|false) #IMPLIED>
+<!--
     Property name.
 
     #NotNull

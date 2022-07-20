@@ -411,6 +411,10 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      *
      */
     public static final String NUMERIC_TYPE               = "numeric";
+    /**
+    *
+    */
+    public static final String LONG_TYPE                  = "long";
 
     /**
      *
