@@ -271,6 +271,9 @@ public class ChangeGVBufferNode extends GVFlowNode
     public void destroy() throws GVCoreException
     {
         cleanUp();
+        if (cGVBuffer != null) {
+            cGVBuffer.destroy();
+        }
         cGVBuffer = null;
         outputServices = null;
     }
