@@ -128,6 +128,16 @@ public class GVDeploy
 		}
 		logger.info("END - Deploy GVCryptoHelper (" + (System.currentTimeMillis() - start) + ")");
 
+		logger.info("BEGIN - Deploy GVXPath");
+		Map<String, Node> mapListaNamespaceZip = this.gvConfigZip.getListaGVXPath();
+		Map<String, Node> mapListaNamespaceServer = this.gvConfigServer.getListaGVXPath();
+		for(String namespace : mapListaNamespaceZip.keySet()){
+			Node namespaceNodeZip = mapListaNamespaceZip.get(namespace);
+			Node namespaceNodeServer = mapListaNamespaceServer.get(namespace);
+			aggiornaNode(namespaceNodeZip,namespaceNodeServer,"/GVCore/GVXPath/XPath");
+		}
+		logger.info("END - Deploy GVXPath (" + (System.currentTimeMillis() - start) + ")");
+
 		start = System.currentTimeMillis();
 		logger.info("BEGIN - Deploy GVForwards");
 		Map<String, Node> listaForwardZip = this.gvConfigZip.getListaForward(listaServizi);
@@ -304,6 +314,17 @@ public class GVDeploy
 			aggiornaNodeAdapter(nodeBusinessWsZip,nodeBusinessWsServer,"/GVAdapters/GVWebServices/BusinessWebServices");
 		}
 		logger.info("END - Deploy BusinessWebServices (" + (System.currentTimeMillis() - start) + ")");
+
+		start = System.currentTimeMillis();
+		logger.info("BEGIN - Deploy GVJDBCConnectionBuilder");
+		Map<String, Node> mapListaConnBuilderZip = this.gvConfigZip.getListConnBuilder();
+		Map<String, Node> mapListaConnBuilderServer = this.gvConfigServer.getListConnBuilder();
+		for(String connBuilder:mapListaConnBuilderZip.keySet()){
+			Node connBuilderNodeZip = mapListaConnBuilderZip.get(connBuilder);
+			Node connBuilderNodeServer = mapListaConnBuilderServer.get(connBuilder);
+			aggiornaNodeAdapter(connBuilderNodeZip,connBuilderNodeServer,"/GVAdapters/GVJDBCConnectionBuilder");
+		}
+		logger.info("END - Deploy GVJDBCConnectionBuilder (" + (System.currentTimeMillis() - start) + ")");
 
 		start = System.currentTimeMillis();
 		logger.info("BEGIN - Deploy GVDataProviderManager");
