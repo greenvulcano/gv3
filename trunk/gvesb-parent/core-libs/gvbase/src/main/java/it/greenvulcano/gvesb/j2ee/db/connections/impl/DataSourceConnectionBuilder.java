@@ -23,6 +23,7 @@ import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.j2ee.JNDIHelper;
 import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -60,7 +61,7 @@ public class DataSourceConnectionBuilder implements ConnectionBuilder
     {
         try {
             name = XMLConfig.get(node, "@name");
-            dsJNDI = XMLConfig.get(node, "@data-source-jndi");
+            dsJNDI = PropertiesHandler.expand(XMLConfig.get(node, "@data-source-jndi"));
             context = new JNDIHelper(XMLConfig.getNode(node, "JNDIHelper"));
         }
         catch (Exception exc) {

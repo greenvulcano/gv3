@@ -22,6 +22,7 @@ package it.greenvulcano.gvesb.j2ee.db.connections.impl;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -53,10 +54,10 @@ public class DriverConnectionBuilder implements ConnectionBuilder
     {
         try {
             name = XMLConfig.get(node, "@name");
-            className = XMLConfig.get(node, "@driver-class");
-            user = XMLConfig.get(node, "@user", "");
-            password = XMLConfig.getDecrypted(node, "@password", "");
-            url = XMLConfig.get(node, "@url");
+            className = PropertiesHandler.expand(XMLConfig.get(node, "@driver-class"));
+            user = PropertiesHandler.expand(XMLConfig.get(node, "@user", ""));
+            password = PropertiesHandler.expand(XMLConfig.getDecrypted(node, "@password", ""));
+            url = PropertiesHandler.expand(XMLConfig.get(node, "@url"));
 
             Class.forName(className);
         }

@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
 /**
  *
@@ -61,10 +62,10 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
     {
         try {
             name = XMLConfig.get(node, "@name");
-            className = XMLConfig.get(node, "@driver-class");
-            user = XMLConfig.get(node, "@user", null);
-            password = XMLConfig.getDecrypted(node, "@password", null);
-            url = XMLConfig.get(node, "@url");
+            className = PropertiesHandler.expand(XMLConfig.get(node, "@driver-class"));
+            user = PropertiesHandler.expand(XMLConfig.get(node, "@user", null));
+            password = PropertiesHandler.expand(XMLConfig.getDecrypted(node, "@password", null));
+            url = PropertiesHandler.expand(XMLConfig.get(node, "@url"));
             try {
                 debugJDBCConn = Boolean.getBoolean("it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder.debugJDBCConn");
             }
