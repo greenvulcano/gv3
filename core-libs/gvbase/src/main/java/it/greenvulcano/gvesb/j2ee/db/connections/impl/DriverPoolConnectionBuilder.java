@@ -20,6 +20,7 @@
 package it.greenvulcano.gvesb.j2ee.db.connections.impl;
 
 import java.sql.Connection;
+import java.util.Properties;
 
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -28,6 +29,7 @@ import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.j2ee.db.GVDBException;
@@ -49,6 +51,7 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
     private String            password        = null;
     private String            name            = null;
     private String            validationQuery = null;
+    private Properties        props           = null;
     private PoolingDataSource dataSource      = null;
     private GenericObjectPool connectionPool  = null;
     private boolean           debugJDBCConn   = false;
@@ -85,20 +88,51 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
             this.connectionPool.setNumTestsPerEvictionRun(XMLConfig.getInteger(poolNode, "@numTestsPerEvictionRun", 3));
             if (XMLConfig.exists(poolNode, "validationQuery")) {
                 this.validationQuery = XMLConfig.get(poolNode, "validationQuery");
+                this.connectionPool.setTestOnBorrow(true);
+                this.connectionPool.setTestOnReturn(true);
+            }
+            NodeList nl = XMLConfig.getNodeList(node, "ConnectionProperties/PropertyDef");
+            if (nl.getLength() > 0) {
+            	this.props = new Properties();
+            	if (this.user != null) {
+            		this.props.put("user", this.user);
+            	}
+            	if (this.password != null) {
+            		this.props.put("password", this.password);
+            	}
+            	for (int i = 0; i < nl.getLength(); i++) {
+					this.props.put(XMLConfig.get(nl.item(i), "@name"), XMLConfig.get(nl.item(i), "@value"));
+				}
             }
         }
         catch (Exception exc) {
             throw new GVDBException("DriverPoolConnectionBuilder - Initialization error", exc);
         }
 
-        ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(this.url, this.user, this.password);
+        ConnectionFactory connectionFactory = null;
+        if (this.props != null) {
+        	connectionFactory = new DriverManagerConnectionFactory(this.url, this.props);
+        }
+        else {
+        	connectionFactory = new DriverManagerConnectionFactory(this.url, this.user, this.password);
+        }
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory,
                 this.connectionPool, null, this.validationQuery, false, true);
         this.dataSource = new PoolingDataSource(this.connectionPool);
 
-        logger.debug("Crated DriverPoolConnectionBuilder(" + this.name + "). className: " + this.className + " - user: " + this.user
+        if (this.props != null) {
+        	Properties ps = new Properties();
+        	ps.putAll(this.props);
+        	ps .remove("password");
+        	logger.debug("Crated DriverPoolConnectionBuilder(" + this.name + "). className: " + this.className + " - properties: " + ps
+                + " - url: " + this.url + " - Pool: [" + this.connectionPool.getMinIdle() + "/"
+                + this.connectionPool.getMaxIdle() + "/" + this.connectionPool.getMaxActive() + "]");
+        }
+        else {
+        	logger.debug("Crated DriverPoolConnectionBuilder(" + this.name + "). className: " + this.className + " - user: " + this.user
                 + " - password: ********* - url: " + this.url + " - Pool: [" + this.connectionPool.getMinIdle() + "/"
                 + this.connectionPool.getMaxIdle() + "/" + this.connectionPool.getMaxActive() + "]");
+        }
     }
 
     @Override
