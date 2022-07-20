@@ -91,7 +91,6 @@ public class EventLauncher extends BaseThread
         NMDC.setServer(JMXEntryPoint.getServerName());
         try {
             Map<EventListener, EventListenerData> elListenersData = EventListenerHandler.getEventListeners();
-            EventListenerData elData = null;
 
             for (Entry<EventListener, EventListenerData> listener : elListenersData.entrySet()) {
                 NMDC.push();
@@ -100,7 +99,7 @@ public class EventLauncher extends BaseThread
                 }
                 catch (Exception exc) {
                     System.out.println("EventLauncher.fireEvents() - Event handling error");
-                    System.out.println("EventLauncher.fireEvents() - destination: " + elData);
+                    System.out.println("EventLauncher.fireEvents() - destination: " + listener.getValue());
                     System.out.println("EventLauncher.fireEvents() - event: " + eventD.event);
                     exc.printStackTrace();
                 }
