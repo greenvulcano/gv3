@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE GVAdapters SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVAdapters.dtd">
+
+<GVAdapters version="1.0">
+  <GVDataProviderManager name="GVDP" type="module">
+    <Description>Elenco dei Data Providers</Description>
+    <DataProviders>
+      <ObjectDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ObjectDataProvider" name="kafkaKeyDataProvider"
+        type="dataProvider">
+        <Field direction="INOUT" key="buffer" type="field">
+          <Expression type="ognl">id.toString().getBytes()</Expression>
+        </Field>
+      </ObjectDataProvider>
+    
+      <ObjectDataProvider class="it.greenvulcano.gvesb.gvdp.impl.ObjectDataProvider" name="getStringBytesDataProvider"
+        type="dataProvider">
+        <Field direction="INOUT" key="buffer" type="field">
+          <Expression type="ognl">object.getBytes()</Expression>
+        </Field>
+      </ObjectDataProvider>
+    </DataProviders>
+  </GVDataProviderManager>
+</GVAdapters>

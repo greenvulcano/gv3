@@ -96,6 +96,8 @@
     <version.xmlsec>1.4.6</version.xmlsec>
     <version.xmlunit>1.5</version.xmlunit>
     <version.zmq>2.1.0</version.zmq>
+    <version.kafka>2.2.0</version.kafka>
+    <version.kafka.junit>3.2.3</version.kafka.junit>
   </properties>
 
   <dependencyManagement>
@@ -1638,17 +1640,27 @@
             <groupId>com.ganyo</groupId>
             <artifactId>gcm-server</artifactId>
             <version>${version.gcm}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>javapns</groupId>
             <artifactId>JavaPNS</artifactId>
             <version>${version.javapns}</version>
+            <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${version.kafka}</version>
+            <scope>compile</scope>
+        </dependency>
+        
 
         <dependency>
             <groupId>junit</groupId>
@@ -1773,6 +1785,21 @@
             <version>6.0</version>
             <type>jar</type>
             <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.salesforce.kafka.test</groupId>
+            <artifactId>kafka-junit4</artifactId>
+            <version>${version.kafka.junit}</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.12</artifactId>
+            <version>${version.kafka}</version>
+            <type>jar</type>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
