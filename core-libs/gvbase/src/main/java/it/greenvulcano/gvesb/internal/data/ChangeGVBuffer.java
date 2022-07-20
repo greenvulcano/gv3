@@ -639,4 +639,20 @@ public class ChangeGVBuffer
         }
     }
 
+    /**
+     * Perform destroy operations.
+     *
+     */
+    public final void destroy()
+    {
+        if (this.bodyBuilder != null) {
+            this.bodyBuilder.cleanUp();
+            this.bodyBuilder = null;
+        }
+        if (this.cx != null) {
+            this.cx = null;
+            Context.exit();
+        }
+    }
+
 }
