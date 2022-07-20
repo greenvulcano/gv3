@@ -110,6 +110,9 @@ public final class KeyStoreUtils
                 if (fks.canRead()) {
                     is = new FileInputStream(fks);
                 }
+                else {
+                	is = url.openStream();
+                }
                 if (is == null) {
                     throw new IOException("File " + keyStoreName + " not found in ClassPath or in Path [" + fn + "]");
                 }
