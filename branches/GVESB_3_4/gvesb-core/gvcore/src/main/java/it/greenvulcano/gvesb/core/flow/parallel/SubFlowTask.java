@@ -196,9 +196,9 @@ public class SubFlowTask implements Callable<Result>
 
     public Result getTimeoutResult(InterruptedException cause) {
         if (this.needsOutput) {
-        	return new Result(Result.State.STATE_ERROR, this.input, cause);
+        	return new Result(Result.State.STATE_TIMEOUT, this.input, cause);
         }
-       	return new Result(Result.State.STATE_ERROR, cause);
+       return new Result(Result.State.STATE_TIMEOUT, cause);
     }
 
     public Result getCancelledResult(CancellationException cause) {
