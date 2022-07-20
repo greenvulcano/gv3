@@ -34,13 +34,16 @@
 <!ENTITY % gvpush SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVPushNotification.dtd">
 %gvpush;
 
+<!ENTITY % gvkafka SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVKafka.dtd">
+%gvkafka;
+
 <!ENTITY % extra-j2ee-calls "">
 <!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call|%push-calls;">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
 <!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call">
 
-<!ENTITY % extra-enqueue "">
+<!ENTITY % extra-enqueue "|kafka-enqueue">
 <!ENTITY % extra-dequeue "">
 
 <!ENTITY % extra-dte-transformers "|XML2HL7Transformation|HL72XMLTransformation">

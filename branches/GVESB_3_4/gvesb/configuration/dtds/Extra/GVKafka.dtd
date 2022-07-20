@@ -1,0 +1,87 @@
+
+<!--
+    Send a message on a Kafka topic.
+
+    Input properties can contains the following placeholders:
+     - fixed : a text string;
+     - ${{propname}}      : a System property name;
+     - sp{{propname}}     : a System property name;
+     - env{{varname}}     : an Environment variable value;
+     - @{{propname}}      : a inProperties property name;
+     - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value,
+                                        formatted as 'pattern'
+     - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} :
+                               reformat 'date' from 'source-pattern' to 'dest-pattern',
+                               and optionally from 'source-tZone' to 'dest-tZone'
+     - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+                               evaluate as if-then-else; if 'field' is equal to cond1...n,
+                               return the value of val1...n, otherwise 'default'
+     - decodeL{{sep::field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :
+                               is equivalent to 'decode', with the difference that 'condX'
+                               can be a list of values separated by 'sep'
+     - js{{scope::script}} : evaluate a JavaScript script, using the scope 'scope',
+                             the GVBuffer is added to the scope as 'object'
+     - sql{{conn::statement}}  : execute a select sql statement sql and return the value of
+                                 the first field of the first selected record.
+                                 The 'conn' parameter is the JNDI name of a DataSource
+     - ognl{{script}} : evaluate a OGNL script,
+                        the GVBuffer is added to the context as 'object' (and is also the object on which execute the script)
+
+    #Label: @name
+    #Category: Custom
+-->
+<!ELEMENT kafka-enqueue (Description?, ServiceAlias?, ProducerConfig?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST kafka-enqueue type CDATA #FIXED "enqueue">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST kafka-enqueue class CDATA #FIXED "it.greenvulcano.gvesb.virtual.kafka.KafkaEnqueueOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='enqueue' or @type='dequeue' or @type='call']/@name
+-->
+<!ATTLIST kafka-enqueue name CDATA #REQUIRED>
+<!--
+    The destination topic.
+    Can contain placeholders to be replaced at runtime.
+
+    #NotNull
+-->
+<!ATTLIST kafka-enqueue topic CDATA #REQUIRED>
+<!--
+    Name of Data Provider to be used to generate the message key
+    This Data Provider will receive in input a GVBuffer and must 
+    return a bytes array.
+
+    #References: gvesb:document('GVAdapters')/GVAdapters/GVDataProviderManager/DataProviders/*[@type='dataProvider']/@name
+-->
+<!ATTLIST kafka-enqueue key-dp CDATA #REQUIRED>
+<!--
+    Name of Data Provider to be used to generate the message payload.
+    Should be used if the GVBuffer.object field is not a bytes array,
+    a string or a XML node.
+    This Data Provider will receive in input a GVBuffer and must 
+    return a bytes array.
+
+    #References: gvesb:document('GVAdapters')/GVAdapters/GVDataProviderManager/DataProviders/*[@type='dataProvider']/@name
+-->
+<!ATTLIST kafka-enqueue value-dp CDATA #IMPLIED>
+
+<!--
+    Parameters used to connect to Kafka cluster.
+
+    Input properties can contains the following placeholders:
+     - fixed : a text string;
+     - ${{propname}}      : a System property name;
+     - sp{{propname}}     : a System property name;
+     - env{{varname}}     : an Environment variable value;
+-->
+<!ELEMENT ProducerConfig (Description?, PropertyDef*)>
