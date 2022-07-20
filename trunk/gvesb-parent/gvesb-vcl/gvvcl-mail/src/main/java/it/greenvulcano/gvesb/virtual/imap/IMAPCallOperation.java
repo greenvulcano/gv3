@@ -65,12 +65,12 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
 
     private static final Logger logger        = GVLogger.getLogger(IMAPCallOperation.class);
 
-    protected String            protocol      = "imap";
-    
+    protected String            protocol      = "imaps";
+
     private String              sortField     = null;
     private boolean             sortAscending = false;
     private List<SortTerm>      sortingTerms  = new ArrayList<SortTerm>();
-    
+
     /**
      * Invoked from <code>OperationFactory</code> when an <code>Operation</code>
      * needs initialization.<br>
@@ -106,7 +106,7 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
                 //The default value
                 sortingTerms.add(SortTerm.ARRIVAL);
             }
-            
+
             //logger.info("sortingTerms: " + sortingTerms.toString());
         }
         catch (Exception exc) {
@@ -120,12 +120,12 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
     protected String getProtocol() {
         return protocol;
     }
-    
+
     @Override
     protected void postStore(Store locStore, GVBuffer data) throws Exception {
         // do nothing
     }
-    
+
     /**
      * Receives e-mails.
      *
@@ -196,13 +196,13 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
                 } else {
                     msgs = folder.search(new FlagTerm(f, false));
                 }
-                
+
                 FetchProfile fp = new FetchProfile();
                 fp.add(FetchProfile.Item.ENVELOPE);
                 fp.add(UIDFolder.FetchProfileItem.UID);
                 fp.add("X-Mailer");
                 folder.fetch(msgs, fp);
-                
+
                 xml = XMLUtils.getParserInstance();
                 Document doc = xml.newDocument("MailMessages");
                 for (int i = 0; i < msgs.length; i++) {
@@ -221,7 +221,7 @@ public class IMAPCallOperation extends BaseReceiveMailOperation
                         b64os.close();
                         xml.insertText(eml, os.toString());
                     }
-                    
+
                     msgs[i].setFlag(Flags.Flag.SEEN, true);
                     seen.add(msgs[i]);
                     messageCount++;
