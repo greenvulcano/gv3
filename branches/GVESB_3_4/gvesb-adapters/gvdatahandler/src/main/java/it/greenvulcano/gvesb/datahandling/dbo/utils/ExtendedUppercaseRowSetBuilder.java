@@ -32,7 +32,7 @@ public class ExtendedUppercaseRowSetBuilder extends ExtendedRowSetBuilder
 {
     @Override
     public RowSetBuilder getCopy() {
-    	ExtendedUppercaseRowSetBuilder copy = new ExtendedUppercaseRowSetBuilder();
+        ExtendedUppercaseRowSetBuilder copy = new ExtendedUppercaseRowSetBuilder();
 
         copy.setName(getName());
         copy.setLogger(getLogger());
@@ -47,14 +47,14 @@ public class ExtendedUppercaseRowSetBuilder extends ExtendedRowSetBuilder
     }
 
     @Override
-	protected String getColumnName(ResultSetMetaData rsm, int i) throws SQLException {
-		String cName = rsm.getColumnLabel(i);
-		if (cName == null) {
-			return rsm.getColumnName(i).toUpperCase();
-		}
-		else if (cName.equals(rsm.getColumnName(i))) {
-			return cName.toUpperCase();
-		}
-		return cName;
-	}
+    protected String getColumnName(ResultSetMetaData rsm, int i) throws SQLException {
+        String cName = rsm.getColumnLabel(i);
+        if (cName == null) {
+            return rsm.getColumnName(i).toUpperCase();
+        }
+        else if (cName.equals(rsm.getColumnName(i))) {
+            return cName.toUpperCase();
+        }
+        return cName;
+    }
 }

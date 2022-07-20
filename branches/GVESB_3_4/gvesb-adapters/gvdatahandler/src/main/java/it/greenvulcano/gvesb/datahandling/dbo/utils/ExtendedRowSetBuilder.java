@@ -151,6 +151,7 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
                         }
                     }
                         break;
+                    case Types.DECIMAL :
                     case Types.DOUBLE :
                     case Types.FLOAT :
                     case Types.REAL : {
