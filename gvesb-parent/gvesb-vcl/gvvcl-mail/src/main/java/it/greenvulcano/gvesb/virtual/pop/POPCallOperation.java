@@ -61,7 +61,7 @@ public class POPCallOperation extends BaseReceiveMailOperation
 
     private static final Logger logger          = GVLogger.getLogger(POPCallOperation.class);
 
-    private String              protocol        = "pop3";
+    private String              protocol        = "pop3s";
     
     private String              cacheKey        = null;
 
