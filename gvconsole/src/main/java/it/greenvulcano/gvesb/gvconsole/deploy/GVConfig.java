@@ -86,7 +86,6 @@ public class GVConfig
 			this.coreXml = parseXml(urlCore);
 			this.adapterXml = parseXml(urlAdapter);
 		} catch (Exception e) {
-
 			logger.error(e);
 		}
 	}
@@ -98,7 +97,6 @@ public class GVConfig
 			this.adapterXml = parseXml(fileAdapter);
 			this.coreXml = parseXml(fileCore);
 		} catch (Exception e) {
-
 			logger.error(e);
 		}
 	}
@@ -128,7 +126,6 @@ public class GVConfig
 			}
 			return retListaServizi;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -168,7 +165,6 @@ public class GVConfig
 		try {
 			dirDTE = XMLUtils.get_S(this.coreXml, xpath);
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		dirDTE = dirDTE.replace("${{gv.app.home}}", "");
@@ -181,7 +177,6 @@ public class GVConfig
 		try {
 			wsdlDir = XMLUtils.get_S(this.adapterXml, "/GVAdapters/GVWebServices/BusinessWebServices/@wsdl-directory").replace("${{gv.app.home}}", "");
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		return wsdlDir;
@@ -193,7 +188,6 @@ public class GVConfig
 		try {
 			wsdlDir = XMLUtils.get_S(this.adapterXml, "/GVAdapters/GVWebServices/BusinessWebServices/@services-directory").replace("${{gv.app.home}}", "");
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		return wsdlDir;
@@ -213,7 +207,6 @@ public class GVConfig
 		try {
 			domWriter.write(localXmlGVCore, out);
 		} catch (IOException e) {
-
 			logger.error(e);
 		}
 		String localXml = out.toString();
@@ -482,7 +475,6 @@ public class GVConfig
 			}
 			return localXmlGVAdapter;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -495,7 +487,6 @@ public class GVConfig
 	{
 		Map<String, Node> mapService = getListaNodeServizi();
 		return getListaGvWebServices(mapService);
-
 	}
 
 	private Map<String, Node> getListaGvWebServices(List<String> listService)
@@ -591,6 +582,29 @@ public class GVConfig
 		return nodeBusinessWebServices;
 	}
 
+	public Map<String,Node> getListConnBuilder()
+	{
+		XMLUtils parser = null;
+		Map<String, Node> listaCB = new HashMap<String, Node>();
+		try {
+			parser = XMLUtils.getParserInstance();
+			String xPath = "/GVAdapters/GVJDBCConnectionBuilder/*[@type='jdbc-connection-builder']";
+			NodeList lsts = parser.selectNodeList(this.adapterXml, xPath);
+			for (int i = 0; i < lsts.getLength(); i++) {
+				Node lst = lsts.item(i);
+				String name = parser.get(lst, "@name");
+				listaCB.put(name, lst);
+			}
+			return listaCB;
+		} catch (XMLUtilsException e) {
+			logger.error(e);
+		}
+		finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return listaCB;
+	}
+
 	public Map<String, Node> getListaAclGV()
 	{
 		List<String> listaServizi = getListaServizi();
@@ -620,7 +634,6 @@ public class GVConfig
 			}
 			return listaAclGV;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -658,7 +671,6 @@ public class GVConfig
 			}
 			return listaAddressSet;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -676,7 +688,6 @@ public class GVConfig
 		    nodeAddressSet = parser.selectSingleNode(this.coreXml, "/GVCore/GVPolicy/Addresses/AddressSet[@name='"+addressesDef+"']");
 			return nodeAddressSet;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -712,7 +723,6 @@ public class GVConfig
 			}
 			return listaRoleDef;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -921,7 +931,6 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -977,7 +986,6 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -1243,6 +1251,7 @@ public class GVConfig
 	{
 		logger.debug("init getGvCore[" + this.type + "]");
 		XMLUtils parser = null;
+		String key = null;
 		try {
 			parser = XMLUtils.getParserInstance();
 
@@ -1285,6 +1294,7 @@ public class GVConfig
 				Node locGroups = locServices.appendChild(parser.createElement(localXmlGVCore, "Groups"));
 
 				for (String nomeGruppo:mapListaGruppi.keySet()) {
+					key = nomeGruppo;
 					locGroups.appendChild(localXmlGVCore.importNode(mapListaGruppi.get(nomeGruppo), true));
 				}
 			}
@@ -1407,8 +1417,8 @@ public class GVConfig
 				}
 			}
 			return localXmlGVCore;
-		} catch (XMLUtilsException e) {
-			logger.error(e);
+		} catch (Exception e) {
+			logger.error("Error importing '" + key + "'", e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -1722,6 +1732,29 @@ public class GVConfig
 		return nodeGvCryptoHelper;
 	}
 
+	public Map<String,Node> getListaGVXPath()
+	{
+		XMLUtils parser = null;
+		Map<String, Node> listaNs = new HashMap<String, Node>();
+		try {
+			parser = XMLUtils.getParserInstance();
+			String xPath = "/GVCore/GVXPath/XPath/XPathNamespace";
+			NodeList lsts = parser.selectNodeList(this.coreXml, xPath);
+			for (int i = 0; i < lsts.getLength(); i++) {
+				Node lst = lsts.item(i);
+				String name = parser.get(lst, "@prefix");
+				listaNs.put(name, lst);
+			}
+			return listaNs;
+		} catch (XMLUtilsException e) {
+			logger.error(e);
+		}
+		finally {
+			XMLUtils.releaseParserInstance(parser);
+		}
+		return listaNs;
+	}
+
 	private Node getNodeService(String nomeServizio)
 	{
 		Node service = null;
@@ -1764,7 +1797,6 @@ public class GVConfig
 			}
 			return listTask;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -1777,21 +1809,24 @@ public class GVConfig
 	{
 		Map<String, Node> mapGroup = new HashMap<String,Node>();
 		XMLUtils parser = null;
+		String key = null;
 		try {
 			parser = XMLUtils.getParserInstance();
 			for (String service : listService) {
-				String group = parser.get(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + service + "']/@grop-name");
-				if((group != null) && !mapGroup.containsKey(group)){
+				key = service;
+				String group = parser.get(this.coreXml, "/GVCore/GVServices/Services/Service[@id-service='" + service + "']/@group-name");
+				if((group != null) && (group.length() > 0) && !mapGroup.containsKey(group)){
+					key += ":" + group;
 					Node groupNode = parser.selectSingleNode(this.coreXml, "/GVCore/GVServices/Groups/Group[@id-group='" + group + "']");
-					if (group != null) {
+					if (groupNode != null) {
 						logger.debug("Found[" + this.type + "] Group " + group + " for Service " + service);
 						mapGroup.put(group, groupNode);
 					}
 				}
 			}
 			return mapGroup;
-		} catch (XMLUtilsException e) {
-			logger.error(e);
+		} catch (Exception e) {
+			logger.error("Error processing " + key, e);
 		}
 		finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2078,7 +2113,6 @@ public class GVConfig
 				}
 			}
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -2547,7 +2581,6 @@ public class GVConfig
 			}
 			return listaDataSource;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2571,7 +2604,6 @@ public class GVConfig
 			nodeDataSource = parser.selectSingleNode(this.coreXml, xPathDataSpurce);
 			return nodeDataSource;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2592,7 +2624,6 @@ public class GVConfig
 			}
 			return dataSourceName;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2611,7 +2642,6 @@ public class GVConfig
 			nodeDataSource = parser.selectSingleNode(this.coreXml, xPathDataSpurce);
 			return nodeDataSource;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2696,7 +2726,6 @@ public class GVConfig
 			}
 			return dhTrasfList;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2752,7 +2781,6 @@ public class GVConfig
 			}
 			return listaFileXsd;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -2907,7 +2935,6 @@ public class GVConfig
 			}
 			return listaFileXsl;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -3062,7 +3089,6 @@ public class GVConfig
 			}
 			return listaTrasformazioni;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -3104,7 +3130,6 @@ public class GVConfig
 			}
 			return trasfList;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -3150,7 +3175,6 @@ public class GVConfig
 			}
 			return retListaServizi;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -3169,7 +3193,6 @@ public class GVConfig
 
 			return nodeTrasf;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		} finally {
 			XMLUtils.releaseParserInstance(parser);
@@ -3187,16 +3210,13 @@ public class GVConfig
 			for (int z = 0; z < sequenceTraf.getLength(); z++) {
 				String name = parser.get(sequenceTraf.item(z), "@Transformer");
 				trasf = parser.selectSingleNode(this.coreXml,
-						"/GVCore/GVDataTransformation/Transformations/*[@name='"
-								+ name + "']");
+						"/GVCore/GVDataTransformation/Transformations/*[@name='" + name + "']");
 				listaTrasformazioni.put(name, trasf);
 				if(trasf.getLocalName().equals("SequenceTransformation")){
 					getListaTrasfSequence(trasf, parser, listaTrasformazioni);
 				}
-
 			}
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 	}
@@ -3282,7 +3302,6 @@ public class GVConfig
 			}
 			return listaObject;
 		} catch (XMLUtilsException e) {
-
 			logger.error(e);
 		}
 		finally {
@@ -3345,9 +3364,9 @@ public class GVConfig
 			XMLUtils.releaseParserInstance(parser);
 		}
 	}
+
 	public String getXmlFile(String fileName) throws Exception
 	{
-
 		Document localXmlFile = parseXml(fileName);
 		DOMWriter writer = new DOMWriter();
 		OutputStream out = new ByteArrayOutputStream();
@@ -3357,7 +3376,6 @@ public class GVConfig
 			ret = out.toString();
 			out.close();
 		} catch (IOException e) {
-
 			logger.error(e);
 		}
 
