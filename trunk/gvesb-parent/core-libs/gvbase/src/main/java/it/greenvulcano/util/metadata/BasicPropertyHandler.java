@@ -227,7 +227,7 @@ public class BasicPropertyHandler implements PropertyHandler
         	defValue = str.substring(pIdx + 2);
         }
 
-        String paramValue = System.getProperty(propName, "");
+        String paramValue = System.getProperty(propName, defValue);
         if (!PropertiesHandler.isExpanded(paramValue)) {
             paramValue = PropertiesHandler.expand(paramValue, inProperties, object, extra);
         }
