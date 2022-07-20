@@ -179,7 +179,7 @@ public class HTTPCallOperation implements CallOperation
             logger.debug("Server Host: " + currHost + " - Port: " + currPort);
             this.httpClient.getHostConfiguration().setHost(currHost, Integer.parseInt(currPort), this.protocol);
 
-            this.auth.setAuthentication(this.httpClient, this.host, Integer.parseInt(currPort), gvBuffer, params);
+            this.auth.setAuthentication(this.httpClient, currHost, Integer.parseInt(currPort), gvBuffer, params);
             this.proxy.setProxy(this.httpClient, gvBuffer, params);
 
             currMethodURI = PropertiesHandler.expand(this.contextPath + this.methodURI, params, gvBuffer);
