@@ -141,65 +141,65 @@ public class BasicPropertyHandler implements PropertyHandler
      * @throws PropertiesHandlerException
      */
     @Override
-    public String expand(String type, String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    public String expand(String type, int boundary, String str, Map<String, Object> inProperties, Object object, Scriptable scope,
             Object extra) throws PropertiesHandlerException
     {
         if (type.startsWith("%")) {
-            return expandClassProperties(str, inProperties, object, scope, extra);
+            return expandClassProperties(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("$") || type.startsWith("sp")) {
-            return expandSystemProperties(str, inProperties, object, scope, extra);
+            return expandSystemProperties(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("@")) {
-            return expandInProperties(str, inProperties, object, scope, extra);
+            return expandInProperties(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("env")) {
-            return expandEnvVariable(str, inProperties, object, scope, extra);
+            return expandEnvVariable(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("xpath")) {
-            return expandXPathProperties(str, inProperties, object, scope, extra);
+            return expandXPathProperties(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("timestamp")) {
-            return expandTimestamp(str, inProperties, object, scope, extra);
+            return expandTimestamp(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("dateformatAdd")) {
-            return expandDateFormatAdd(str, inProperties, object, scope, extra);
+            return expandDateFormatAdd(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("dateformat")) {
-            return expandDateFormat(str, inProperties, object, scope, extra);
+            return expandDateFormat(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("dateAdd")) {
-            return expandDateAdd(str, inProperties, object, scope, extra);
+            return expandDateAdd(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("decodeL")) {
-            return expandDecodeL(str, inProperties, object, scope, extra);
+            return expandDecodeL(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("decode")) {
-            return expandDecode(str, inProperties, object, scope, extra);
+            return expandDecode(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("js")) {
-            return expandJavaScript(str, inProperties, object, scope, extra);
+            return expandJavaScript(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("ognl")) {
-            return expandOGNLProperties(str, inProperties, object, scope, extra);
+            return expandOGNLProperties(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("escJS")) {
-            return expandEscJS(str, inProperties, object, scope, extra);
+            return expandEscJS(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("escSQL")) {
-            return expandEscSQL(str, inProperties, object, scope, extra);
+            return expandEscSQL(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("escXML")) {
-            return expandEscXML(str, inProperties, object, scope, extra);
+            return expandEscXML(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("replace")) {
-            return expandReplace(str, inProperties, object, scope, extra);
+            return expandReplace(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("urlEnc")) {
-            return expandUrlEnc(str, inProperties, object, scope, extra);
+            return expandUrlEnc(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("urlDec")) {
-            return expandUrlDec(str, inProperties, object, scope, extra);
+            return expandUrlDec(str, inProperties, object, scope, extra, boundary);
         }
         else if (type.startsWith("xmlp")) {
             // DUMMY replacement - Must be handled by XMLConfig
@@ -219,7 +219,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandSystemProperties(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Scriptable scope, Object extra, int boundary) throws PropertiesHandlerException
     {
         String propName = str;
         if (!PropertiesHandler.isExpanded(propName)) {
@@ -238,7 +238,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandEnvVariable(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Scriptable scope, Object extra, int boundary) throws PropertiesHandlerException
     {
         String propName = str;
         if (!PropertiesHandler.isExpanded(propName)) {
@@ -262,7 +262,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandInProperties(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Scriptable scope, Object extra, int boundary) throws PropertiesHandlerException
     {
         String propName = str;
         if (!PropertiesHandler.isExpanded(propName)) {
@@ -270,11 +270,11 @@ public class BasicPropertyHandler implements PropertyHandler
         }
         String paramValue = null;
         if (inProperties == null) {
-            return "@" + PROP_START + str + PROP_END;
+            return "@" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
         paramValue = (String) inProperties.get(propName);
         if ((paramValue == null)) {// || (paramValue.equals(""))) {
-            return "@" + PROP_START + str + PROP_END;
+            return "@" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
         if (!PropertiesHandler.isExpanded(paramValue)) {
             paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
@@ -290,12 +290,12 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandClassProperties(String str, Map<String, Object> inProperties, Object object,
-            Scriptable scope, Object extra) throws PropertiesHandlerException
+            Scriptable scope, Object extra, int boundary) throws PropertiesHandlerException
     {
         String propName = str;
         String paramValue = "";
         if (object == null) {
-            return "%" + PROP_START + str + PROP_END;
+            return "%" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
         if (!PropertiesHandler.isExpanded(propName)) {
             propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
@@ -311,14 +311,14 @@ public class BasicPropertyHandler implements PropertyHandler
             paramValue = fqClassName.substring(fqClassName.lastIndexOf(".") + 1);
         }
         if (paramValue.equals("")) {
-            return "%" + PROP_START + str + PROP_END;
+            return "%" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
         return paramValue;
     }
 
 
     private String expandXPathProperties(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         XMLUtils parser = null;
         String paramName = null;
@@ -356,7 +356,7 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'xpath' metadata '" + str + "'", exc);
             }
-            return "xpath" + PROP_START + str + PROP_END;
+            return "xpath" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
         finally {
             if (parser != null) {
@@ -366,7 +366,7 @@ public class BasicPropertyHandler implements PropertyHandler
     }
 
     private String expandTimestamp(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
@@ -395,12 +395,12 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'timestamp' metadata '" + str + "'", exc);
             }
-            return "timestamp" + PROP_START + str + PROP_END;
+            return "timestamp" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
     private String expandDateFormat(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
@@ -432,12 +432,12 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'dateformat' metadata '" + str + "'", exc);
             }
-            return "dateformat" + PROP_START + str + PROP_END;
+            return "dateformat" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
     private String expandDateAdd(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
@@ -486,12 +486,12 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'dateAdd' metadata '" + str + "'", exc);
             }
-            return "dateAdd" + PROP_START + str + PROP_END;
+            return "dateAdd" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
     private String expandDateFormatAdd(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
@@ -547,12 +547,12 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'dateformatAdd' metadata '" + str + "'", exc);
             }
-            return "dateformatAdd" + PROP_START + str + PROP_END;
+            return "dateformatAdd" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
     private String expandDecode(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
@@ -590,12 +590,12 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'decode' metadata '" + str + "'", exc);
             }
-            return "decode" + PROP_START + str + PROP_END;
+            return "decode" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
     private String expandDecodeL(String str, Map<String, Object> inProperties, Object obj, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
@@ -642,12 +642,12 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'decodeL' metadata'" + str + "'", exc);
             }
-            return "decodeL" + PROP_START + str + PROP_END;
+            return "decodeL" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
     private String expandJavaScript(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         Context cx = Context.enter();
         String lStr = str;
@@ -690,7 +690,7 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'js' metadata '" + str + "'", exc);
             }
-            return "js" + PROP_START + str + PROP_END;
+            return "js" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
         finally {
             if (cx != null) {
@@ -705,7 +705,7 @@ public class BasicPropertyHandler implements PropertyHandler
     }
 
     private String expandOGNLProperties(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
@@ -729,7 +729,7 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'ognl' metadata '" + str + "'", exc);
             }
-            return "ognl" + PROP_START + str + PROP_END;
+            return "ognl" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
@@ -739,7 +739,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandEscJS(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         String string = str;
         if (!PropertiesHandler.isExpanded(string)) {
@@ -755,7 +755,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandEscSQL(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         String string = str;
         if (!PropertiesHandler.isExpanded(string)) {
@@ -771,7 +771,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandEscXML(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         String string = str;
         if (!PropertiesHandler.isExpanded(string)) {
@@ -782,7 +782,7 @@ public class BasicPropertyHandler implements PropertyHandler
     }
 
     private String expandReplace(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
         try {
             if (!PropertiesHandler.isExpanded(str)) {
@@ -814,7 +814,7 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'replace' metadata '" + str + "'", exc);
             }
-            return "replace" + PROP_START + str + PROP_END;
+            return "replace" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
@@ -824,7 +824,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandUrlEnc(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
     	try {
     		String string = str;
@@ -832,7 +832,7 @@ public class BasicPropertyHandler implements PropertyHandler
     			string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
     		}
     		if (!PropertiesHandler.isExpanded(string)) {
-    			return "urlEnc" + PROP_START + str + PROP_END;
+    			return "urlEnc" + PROPS_START[boundary] + str + PROPS_END[boundary];
     		}
     		String encoded = URLEncoder.encode(string, "UTF-8");
     		return encoded;
@@ -846,7 +846,7 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'urlEnc' metadata '" + str + "'", exc);
             }
-            return "urlEnc" + PROP_START + str + PROP_END;
+            return "urlEnc" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 
@@ -856,7 +856,7 @@ public class BasicPropertyHandler implements PropertyHandler
      * @return the expanded string
      */
     private static String expandUrlDec(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
-            Object extra) throws PropertiesHandlerException
+            Object extra, int boundary) throws PropertiesHandlerException
     {
     	try {
     		String string = str;
@@ -864,7 +864,7 @@ public class BasicPropertyHandler implements PropertyHandler
     			string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
     		}
     		if (!PropertiesHandler.isExpanded(string)) {
-    			return "urlDec" + PROP_START + str + PROP_END;
+    			return "urlDec" + PROPS_START[boundary] + str + PROPS_END[boundary];
     		}
     		String decoded = URLDecoder.decode(string, "UTF-8");
     		return decoded;
@@ -878,7 +878,7 @@ public class BasicPropertyHandler implements PropertyHandler
                 }
                 throw new PropertiesHandlerException("Error handling 'urlDec' metadata '" + str + "'", exc);
             }
-            return "urlDec" + PROP_START + str + PROP_END;
+            return "urlDec" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
     }
 

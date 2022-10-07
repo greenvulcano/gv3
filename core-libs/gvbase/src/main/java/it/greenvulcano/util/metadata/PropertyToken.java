@@ -38,6 +38,7 @@ public class PropertyToken
     int                           end       = -1;
     String                        value     = "";
     String                        type      = "";
+    int                           trigger   = 0;
     private Vector<PropertyToken> subTokens = null;
 
     /**
@@ -45,13 +46,15 @@ public class PropertyToken
      * @param end
      * @param value
      * @param type
+     * @param trigger
      */
-    public PropertyToken(int begin, int end, String value, String type)
+    public PropertyToken(int begin, int end, String value, String type, int trigger)
     {
         this.begin = begin;
         this.end = end;
         this.value = value;
         this.type = type;
+        this.trigger = trigger;
     }
 
     /**
@@ -59,7 +62,7 @@ public class PropertyToken
      */
     public int getBegin()
     {
-        return begin;
+        return this.begin;
     }
 
     /**
@@ -67,11 +70,11 @@ public class PropertyToken
      */
     public int getEnd()
     {
-        if (subTokens != null) {
-            PropertyToken subToken = (PropertyToken) subTokens.lastElement();
+        if (this.subTokens != null) {
+            PropertyToken subToken = this.subTokens.lastElement();
             return subToken.getEnd();
         }
-        return end;
+        return this.end;
     }
 
     /**
@@ -79,7 +82,15 @@ public class PropertyToken
      */
     public String getType()
     {
-        return type;
+        return this.type;
+    }
+
+    /**
+     * @return Returns the trigger.
+     */
+    public int getTrigger()
+    {
+        return this.trigger;
     }
 
     /**
@@ -93,15 +104,15 @@ public class PropertyToken
     public String getValue(Map<String, Object> inProperties, Object obj, Scriptable scope, Object extra)
             throws PropertiesHandlerException
     {
-        String retVal = value;
-        if (subTokens != null) {
-            for (int i = 0; i < subTokens.size(); i++) {
-                PropertyToken subToken = subTokens.elementAt(i);
+        String retVal = this.value;
+        if (this.subTokens != null) {
+            for (int i = 0; i < this.subTokens.size(); i++) {
+                PropertyToken subToken = this.subTokens.elementAt(i);
                 retVal += subToken.getValue(inProperties, obj, scope, extra);
             }
         }
-        if (!type.equals("")) {
-            retVal = PropertiesHandler.expandInternal(type, retVal, inProperties, obj, scope, extra);
+        if (!this.type.equals("")) {
+            retVal = PropertiesHandler.expandInternal(this.type, this.trigger, retVal, inProperties, obj, scope, extra);
         }
         return retVal;
     }
@@ -112,10 +123,10 @@ public class PropertyToken
      */
     public void addSubToken(PropertyToken subToken)
     {
-        if (subTokens == null) {
-            subTokens = new Vector<PropertyToken>();
+        if (this.subTokens == null) {
+            this.subTokens = new Vector<PropertyToken>();
         }
-        subTokens.add(subToken);
+        this.subTokens.add(subToken);
     }
 
     /**
@@ -124,12 +135,11 @@ public class PropertyToken
     @Override
     public String toString()
     {
-        String result = "PropertyToken: type='" + type + "' - value= '" + value + "' - begin=" + begin + " - end="
-                + end;
-        if (subTokens != null) {
+        String result = "PropertyToken: type='" + this.type + "' - value= '" + this.value + "' - begin=" + this.begin + " - end=" + this.end + " - trigger=" + this.trigger;
+        if (this.subTokens != null) {
             result += "\nBEGIN SUB\n";
-            for (int i = 0; i < subTokens.size(); i++) {
-                PropertyToken subToken = (PropertyToken) subTokens.elementAt(i);
+            for (int i = 0; i < this.subTokens.size(); i++) {
+                PropertyToken subToken = this.subTokens.elementAt(i);
                 result += subToken + "\n";
             }
             result += "END SUB";

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.Vector;
 
 import org.mozilla.javascript.Scriptable;
@@ -50,6 +51,7 @@ public final class PropertiesHandler
     {
         private final Vector<String> tokens  = new Vector<String>();
         private int            lastPos = 0;
+        private Stack<Integer> lastTrigger = new Stack<Integer>();
 
         /**
          * @param string
@@ -94,8 +96,36 @@ public final class PropertiesHandler
             if (index == string.length()) {
                 return;
             }
-            int begin = string.indexOf(PropertyHandler.PROP_START, index);
-            int end = string.indexOf(PropertyHandler.PROP_END, index);
+            int begin = string.indexOf(PropertyHandler.PROPS_START[0], index);
+            int begin1 = string.indexOf(PropertyHandler.PROPS_START[1], index);
+            int end = string.indexOf(PropertyHandler.PROPS_END[0], index);
+            int end1 = string.indexOf(PropertyHandler.PROPS_END[1], index);
+
+            int trigger = 0;
+            if (begin != -1) {
+            	if (begin1 != -1) {
+            		if (begin1 < begin) { // meta #§ bafore {{
+            			trigger = 1;
+            			begin = begin1;
+            			end = end1;
+            		}
+            		// meta {{ bafore #§
+            	}
+            	// meta {{
+            }
+            else {
+            	if (begin1 != -1) { // meta #§
+            		trigger = 1;
+           			begin = begin1;
+           		}
+           		// no meta
+    			begin = begin1;
+
+            	if (end == -1) { // meta #§
+           			end = end1;
+           		}
+            }
+
             String terminator = "";
             int pos = -1;
             if (begin == -1) {
@@ -103,22 +133,30 @@ public final class PropertiesHandler
                     this.tokens.add(string.substring(index));
                     return;
                 }
-                terminator = PropertyHandler.PROP_END;
+                terminator = PropertyHandler.PROPS_END[this.lastTrigger.pop()];
                 pos = end;
             }
             else {
                 if (end == -1) {
-                    terminator = PropertyHandler.PROP_START;
+                    terminator = PropertyHandler.PROPS_START[trigger];
+                    this.lastTrigger.push(trigger);
                     pos = begin;
                 }
                 else {
-                    pos = (begin < end) ? begin : end;
-                    terminator = (begin < end) ? PropertyHandler.PROP_START : PropertyHandler.PROP_END;
+                	if (begin < end) {
+                        pos = begin;
+                        terminator = PropertyHandler.PROPS_START[trigger];
+                        this.lastTrigger.push(trigger);
+                	}
+                	else {
+                		pos = end;
+                		terminator = PropertyHandler.PROPS_END[this.lastTrigger.pop()];
+                	}
                 }
             }
             this.tokens.add(string.substring(index, pos));
             this.tokens.add(terminator);
-            parse(string, pos + PropertyHandler.PROP_START.length());
+            parse(string, pos + PropertyHandler.PROPS_START[trigger].length());
         }
     }
 
@@ -163,7 +201,7 @@ public final class PropertiesHandler
     /**
      * A private empty constructor. Is not possible to instantiate this class.
      */
-    private PropertiesHandler()
+    public PropertiesHandler()
     {
         // do nothing
     }
@@ -330,19 +368,19 @@ public final class PropertiesHandler
      * @return the expanded string
      * @throws PropertiesHandlerException
      */
-    public static String expandInternal(String type, String value, Map<String, Object> inProperties, Object obj,
+    public static String expandInternal(String type, int trigger, String value, Map<String, Object> inProperties, Object obj,
             Scriptable scope, Object extra) throws PropertiesHandlerException
     {
         PropertyHandler handler = propHandlers.get(type);
         if (handler == null) {
             return value;
         }
-        return handler.expand(type, value, inProperties, obj, scope, extra);
+        return handler.expand(type, trigger, value, inProperties, obj, scope, extra);
     }
 
     private static PropertyToken parse(String str)
     {
-        PropertyToken token = new PropertyToken(0, 0, "", "");
+        PropertyToken token = new PropertyToken(0, 0, "", "", 0);
         MetaDataTokenizer mdt = new PropertiesHandler().new MetaDataTokenizer(str);
         parse(token, mdt);
         return token;
@@ -357,35 +395,39 @@ public final class PropertiesHandler
         String pToken = null;
         while (mdt.hasNext()) {
             String sToken = mdt.next();
-            if (sToken.equals(PropertyHandler.PROP_START)) {
+            if (sToken.equals(PropertyHandler.PROPS_START[0])
+             || sToken.equals(PropertyHandler.PROPS_START[1])) {
+            	int trigger = sToken.equals(PropertyHandler.PROPS_START[0]) ? 0 : 1;
                 String type = extractType(pToken);
                 String staticToken = pToken.substring(0, pToken.lastIndexOf(type));
                 PropertyToken subToken = null;
                 if (staticToken.length() > 0) {
-                    subToken = new PropertyToken(0, 0, staticToken, "");
+                    subToken = new PropertyToken(0, 0, staticToken, "", trigger);
                     token.addSubToken(subToken);
                 }
-                subToken = new PropertyToken(0, 0, "", type);
+                subToken = new PropertyToken(0, 0, "", type, trigger);
                 token.addSubToken(subToken);
                 parse(subToken, mdt);
             }
-            else if (sToken.equals(PropertyHandler.PROP_END)) {
+            else if (sToken.equals(PropertyHandler.PROPS_END[0])
+            	  || sToken.equals(PropertyHandler.PROPS_END[1])) {
                 break;
             }
             else {
                 if (mdt.hasNext()) {
                     String nToken = mdt.next();
-                    if (nToken.equals(PropertyHandler.PROP_START)) {
+                    if (nToken.equals(PropertyHandler.PROPS_START[0])
+                     || nToken.equals(PropertyHandler.PROPS_START[1])) {
                         pToken = sToken;
                     }
                     else {
-                        PropertyToken subToken = new PropertyToken(0, 0, sToken, "");
+                        PropertyToken subToken = new PropertyToken(0, 0, sToken, "", 0);
                         token.addSubToken(subToken);
                     }
                     mdt.pushBack();
                 }
                 else {
-                    PropertyToken subToken = new PropertyToken(0, 0, sToken, "");
+                    PropertyToken subToken = new PropertyToken(0, 0, sToken, "", 0);
                     token.addSubToken(subToken);
                 }
             }
@@ -548,7 +590,9 @@ public final class PropertiesHandler
         }
         Iterator<String> i = propSet.iterator();
         while (i.hasNext()) {
-            if (str.indexOf((i.next() + PropertyHandler.PROP_START)) != -1) {
+        	String p = i.next();
+            if ((str.indexOf((p + PropertyHandler.PROPS_START[0])) != -1)
+             || (str.indexOf((p + PropertyHandler.PROPS_START[1])) != -1)) {
                 return false;
             }
         }

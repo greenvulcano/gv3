@@ -1,26 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package tests.unit.util.txt;
-
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.txt.DateUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,12 +25,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.txt.DateUtils;
+import junit.framework.TestCase;
+
 /**
- * 
+ *
  * @version 3.0.0 10/giu/2010
  * @author GreenVulcano Developer Team
  */
@@ -242,10 +241,86 @@ public class PropertiesHandlerTestCase extends TestCase
     }
 
     /**
+    *
+    */
+   @Test
+   public void testExpand10b() throws Exception
+   {
+       HashMap<String, Object> props = new HashMap<String, Object>();
+       String src = "decodeL§#|::@{{prop1}}::1|3::AAA::2|4::BBB::CCC#§";
+
+       props.put("prop1", "1");
+       String dest = PropertiesHandler.expand(src, props);
+       assertEquals("AAA", dest);
+       props.put("prop1", "3");
+       dest = PropertiesHandler.expand(src, props);
+       assertEquals("AAA", dest);
+
+       props.put("prop1", "2");
+       dest = PropertiesHandler.expand(src, props);
+       assertEquals("BBB", dest);
+       props.put("prop1", "4");
+       dest = PropertiesHandler.expand(src, props);
+       assertEquals("BBB", dest);
+
+       props.put("prop1", "5");
+       dest = PropertiesHandler.expand(src, props);
+       assertEquals("CCC", dest);
+   }
+
+   /**
+   *
+   */
+  @Test
+  public void testExpand10c() throws Exception
+  {
+      HashMap<String, Object> props = new HashMap<String, Object>();
+      String src = "decodeL§#|::@§#prop1#§::1|3::AAA::2|4::BBB::CCC#§";
+
+      props.put("prop1", "1");
+      String dest = PropertiesHandler.expand(src, props);
+      assertEquals("AAA", dest);
+      props.put("prop1", "3");
+      dest = PropertiesHandler.expand(src, props);
+      assertEquals("AAA", dest);
+
+      props.put("prop1", "2");
+      dest = PropertiesHandler.expand(src, props);
+      assertEquals("BBB", dest);
+      props.put("prop1", "4");
+      dest = PropertiesHandler.expand(src, props);
+      assertEquals("BBB", dest);
+
+      props.put("prop1", "5");
+      dest = PropertiesHandler.expand(src, props);
+      assertEquals("CCC", dest);
+  }
+
+    /**
      *
      */
     @Test
     public void testExpand11() throws Exception
+    {
+        String obj = "";
+        String src = "%§#class#§";
+        String dest = PropertiesHandler.expand(src, null, obj);
+        assertEquals("String", dest);
+
+        src = "%§#fqclass#§";
+        dest = PropertiesHandler.expand(src, null, obj);
+        assertEquals("java.lang.String", dest);
+
+        src = "%§#package#§";
+        dest = PropertiesHandler.expand(src, null, obj);
+        assertEquals("java.lang", dest);
+    }
+
+    /**
+    *
+    */
+    @Test
+    public void testExpand11b() throws Exception
     {
         String obj = "";
         String src = "%{{class}}";
@@ -345,7 +420,7 @@ public class PropertiesHandlerTestCase extends TestCase
       String dest = PropertiesHandler.expand(src, null);
       assertEquals("aa bb&c/.=", dest);
   }
-  
+
   /**
   *
   */
@@ -353,16 +428,65 @@ public class PropertiesHandlerTestCase extends TestCase
   public void testExpand19() throws Exception
   {
      String src = "http://www.report.com/report?VAL_SESSIONID=urlEnc{{@{{VAL_SESSIONID}}}}&DAT_RIFERIMENTO=urlEnc{{@{{DAT_RIFERIMENTO}}}}&DAT_CARICAMENTO=urlEnc{{@{{DAT_CARICAMENTO}}}}";
-     
+
      HashMap<String, Object> props = new HashMap<String, Object>();
-     props.put("DAT_CARICAMENTO", "2013-10-16T17:36:38.620"); 
+     props.put("DAT_CARICAMENTO", "2013-10-16T17:36:38.620");
      props.put("DAT_RIFERIMENTO", "2013-10-16");
      props.put("VAL_SESSIONID", "AC12FAB8526003FD0E9D4425");
-     
+
      String dest = PropertiesHandler.expand(src);
      assertEquals("No encode", src, dest);
-     
+
      dest = PropertiesHandler.expand(src, props);
      assertEquals("Encode", "http://www.report.com/report?VAL_SESSIONID=AC12FAB8526003FD0E9D4425&DAT_RIFERIMENTO=2013-10-16&DAT_CARICAMENTO=2013-10-16T17%3A36%3A38.620", dest);
   }
+
+  /**
+  *
+  */
+  @Test
+  public void testExpand20() throws Exception
+  {
+	  HashMap<String, Object> props = new HashMap<String, Object>();
+	  props.put("pippo", "pluto");
+	  props.put("topolino", "paperoga");
+      props.put("pluto", "boom");
+
+	  String match = "..boom..";
+	  String src = "..@{{@{{pippo}}}}..";
+	  String dest = PropertiesHandler.expand(src, props);
+	  assertEquals(match, dest);
+  }
+
+  /**
+  *
+  */
+   @Test
+  public void testExpand21() throws Exception
+  {
+	  HashMap<String, Object> props = new HashMap<String, Object>();
+	  props.put("pippo", "pluto");
+	  props.put("topolino", "paperoga");
+      props.put("pluto", "boom");
+
+	  String match = "..boom..";
+	  String src = "..@§#@{{pippo}}#§..";
+	  String dest = PropertiesHandler.expand(src, props);
+	  assertEquals(match, dest);
+  }
+
+   /**
+   *
+   */
+    @Test
+   public void testExpand22() throws Exception
+   {
+ 	  HashMap<String, Object> props = new HashMap<String, Object>();
+ 	  props.put("blabla", "{bla bla:[{bla bla},{bla bla}],bla bla:{bla bla}},bla bla");
+
+ 	  String match = "..[{bla bla:[{bla bla},{bla bla}],bla bla:{bla bla}},bla bla]..";
+ 	  String src = "..[@§#blabla#§]..";
+ 	  String dest = PropertiesHandler.expand(src, props);
+ 	  assertEquals(match, dest);
+   }
 }

@@ -43,6 +43,9 @@ public interface PropertyHandler
      */
     public static final String PROP_END         = "}}";
 
+    public static final String[] PROPS_START    = new String[]{"{{", "§#"};
+    public static final String[] PROPS_END      = new String[]{"}}", "#§"};
+
     /**
      * ThreadMap key to enable the exception throwing on handler errors.
      */
@@ -59,6 +62,8 @@ public interface PropertyHandler
      *
      * @param type
      *        the type
+     * @param trigger
+     *        the trigger type {{ or §#
      * @param str
      *        the string to value
      * @param inProperties
@@ -75,7 +80,7 @@ public interface PropertyHandler
      *         if error occurs and the flag THROWS_EXCEPTION is set for the
      *         current thread
      */
-    public String expand(String type, String str, Map<String, Object> inProperties, Object object, Scriptable scope,
+    public String expand(String type, int trigger, String str, Map<String, Object> inProperties, Object object, Scriptable scope,
             Object extra) throws PropertiesHandlerException;
 
     public void cleanupResources();
