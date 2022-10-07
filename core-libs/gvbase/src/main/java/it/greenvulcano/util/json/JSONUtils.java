@@ -303,18 +303,28 @@ public class JSONUtils
      * @throws JSONUtilsException
      */
     public static Node jsonToXml(Object json, String rootName, Set<String> forceAttributes) throws JSONUtilsException {
-            XMLUtils parser = null;
+        XMLUtils parser = null;
         Document doc = null;
         try {
             parser = XMLUtils.getParserInstance();
 
             if (json instanceof String) {
-                json = new JSONObject((String) json);
+            	try {
+            		json = new JSONObject((String) json);
+            	}
+            	catch(JSONException exc) {
+            		json = new JSONArray((String) json);
+            	}
             }
             else if (json instanceof byte[]) {
-                json = new JSONObject(new String((byte[]) json));
+            	try {
+	            	json = new JSONObject(new String((byte[]) json));
+	        	}
+	        	catch(JSONException exc) {
+	        		json = new JSONArray(new String((byte[]) json));
+	        	}
             }
-            if ((rootName == null) && (json.getClass().isArray() || ((json instanceof JSONObject) && (((JSONObject) json).length() != 1)))) {
+            if ((rootName == null) && (json.getClass().isArray() || (json instanceof JSONArray) || ((json instanceof JSONObject) && (((JSONObject) json).length() != 1)))) {
                 rootName = "DEFAULT_ROOT";
             }
 
