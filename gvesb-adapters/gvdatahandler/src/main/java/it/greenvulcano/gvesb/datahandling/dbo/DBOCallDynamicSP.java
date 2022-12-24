@@ -911,7 +911,7 @@ public class DBOCallDynamicSP extends AbstractDBO
                     }
                     if (resultSet != null) {
                         try {
-                        	JSONArray rows = ResultSetTransformer.toJSONArray(resultSet);
+                        	JSONArray rows = ResultSetTransformer.toJSONArray(resultSet, statementId);
                         	data.append(ROW_NAME, rows);
                         }
                         finally {

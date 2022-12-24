@@ -410,6 +410,16 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
      *
      */
+    public static final String DATE_TYPE                  = "date";
+
+    /**
+    *
+    */
+    public static final String TIME_TYPE                  = "time";
+
+    /**
+     *
+     */
     public static final String NUMERIC_TYPE               = "numeric";
     /**
     *
@@ -445,6 +455,11 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
      *
      */
     public static final String DEFAULT_DATE_FORMAT        = "yyyyMMdd HH:mm:ss";
+
+    /**
+    *
+    */
+    public static final String DEFAULT_TIME_FORMAT        = "HH:mm:ss";
 
     /**
      *
@@ -494,6 +509,11 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
     /**
      *
      */
+    protected SimpleDateFormat    timeFormatter           = null;
+
+    /**
+     *
+     */
     protected DecimalFormat       numberFormatter         = new DecimalFormat();
 
     private XMLReader             xr;
@@ -507,6 +527,7 @@ public abstract class AbstractDBO extends DefaultHandler implements IDBO
         this.dboclass = this.getClass().getName();
         this.dboclass = this.dboclass.substring(this.dboclass.lastIndexOf('.') + 1);
         this.dateFormatter = new SimpleDateFormat(DEFAULT_DATE_FORMAT, DateUtils.getDefaultLocale());
+        this.timeFormatter = new SimpleDateFormat(DEFAULT_TIME_FORMAT, DateUtils.getDefaultLocale());
         this.currentRowFields = new Vector<Object>(10);
         this.statements = new HashMap<String, String>();
         this.uuids = new HashMap<String, String>();

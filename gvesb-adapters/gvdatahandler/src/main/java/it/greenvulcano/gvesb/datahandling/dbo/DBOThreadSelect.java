@@ -34,6 +34,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
+import org.json.JSONArray;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -41,6 +42,7 @@ import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.gvesb.datahandling.dbo.utils.ResultSetTransformer;
 import it.greenvulcano.gvesb.datahandling.dbo.utils.RowSetBuilder;
 import it.greenvulcano.gvesb.datahandling.dbo.utils.RowSetBuilderFactory;
 import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
@@ -50,6 +52,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xml.XMLUtilsException;
 
 /**
  * IDBO Class specialized in selecting data from the DB using multiple Threads.
@@ -63,11 +66,13 @@ public class DBOThreadSelect extends AbstractDBO
 
     private class ThreadSelect implements Runnable
     {
-    	private String              localJdbcConnName = null;
+        private String              localJdbcConnName = null;
         private String              stmt             = null;
-        private Document            doc              = null;
-        private Object              key              = null;
+        private String              key              = null;
         private RowSetBuilder       rowSetBuilder    = null;
+        private String              rowSetBuilderType = null;
+        private Document            xmlOut;
+        private JSONArray           jsonOut;
         private Map<String, Object> props            = null;
 
         private final static int    NEW              = 0;
@@ -113,13 +118,19 @@ public class DBOThreadSelect extends AbstractDBO
                     String expandedSQL = PropertiesHandler.expand(this.stmt, this.props, conn, null);
                     sqlStatement = conn.createStatement();
                     logger.debug("Executing select statement: " + expandedSQL + ".");
-                    sqlStatementInfo = new StatementInfo(this.key.toString(), expandedSQL, sqlStatement);
+                    sqlStatementInfo = new StatementInfo(this.key, expandedSQL, sqlStatement);
                     rs = sqlStatement.executeQuery(expandedSQL);
                     if (rs != null) {
-                        Document localDoc = this.rowSetBuilder.createDocument(null);
+                        Document localXmlOut = null;
+                        JSONArray localJsonOut = null;
                         try {
-                            this.rowThreadCounter += this.rowSetBuilder.build(localDoc, "" + this.key, rs, keyField,
-                                    fieldNameToFormatter, fieldIdToFormatter);
+                            if ("json".equals(this.rowSetBuilderType)) {
+                                localJsonOut = ResultSetTransformer.toJSONArray(rs, this.key);
+                                this.rowThreadCounter += localJsonOut.length();
+                            } else {
+                                localXmlOut = this.rowSetBuilder.createDocument(null);
+                                this.rowThreadCounter += this.rowSetBuilder.build(localXmlOut, this.key, rs, keyField, fieldNameToFormatter,  fieldIdToFormatter);
+                            }
                         }
                         finally {
                             if (rs != null) {
@@ -133,13 +144,20 @@ public class DBOThreadSelect extends AbstractDBO
                             }
                         }
                         if (!thd.isInterrupted()) {
-                            synchronized (this.doc) {
-                                Element docRoot = this.doc.getDocumentElement();
-                                Element localDocRoot = localDoc.getDocumentElement();
-                                NodeList nodes = localDocRoot.getChildNodes();
-                                for (int i = 0; i < nodes.getLength(); i++) {
-                                    Node dataNode = this.doc.importNode(nodes.item(i), true);
-                                    docRoot.appendChild(dataNode);
+                            if (localXmlOut != null) {
+                                synchronized (this.xmlOut) {
+                                    Element docRoot = this.xmlOut.getDocumentElement();
+                                    Element localDocRoot = localXmlOut.getDocumentElement();
+                                    NodeList nodes = localDocRoot.getChildNodes();
+                                    for (int i = 0; i < nodes.getLength(); i++) {
+                                        Node dataNode = this.xmlOut.importNode(nodes.item(i), true);
+                                        docRoot.appendChild(dataNode);
+                                    }
+                                }
+                            }
+                            else {
+                                while (localJsonOut.length() > 0) {
+                                    this.jsonOut.put(localJsonOut.remove(0));
                                 }
                             }
                         }
@@ -147,7 +165,7 @@ public class DBOThreadSelect extends AbstractDBO
                 }
             }
             catch (SQLException exc) {
-            	logger.error("Error on execution of " + DBOThreadSelect.this.dboclass + " with name [" + getName() + "]", exc);
+                logger.error("Error on execution of " + DBOThreadSelect.this.dboclass + " with name [" + getName() + "]", exc);
                 logger.error("SQL Statement Informations:\n" + sqlStatementInfo);
                 OracleExceptionHandler.handleSQLException(exc).printLoggerInfo();
                 this.state = ERROR;
@@ -169,7 +187,7 @@ public class DBOThreadSelect extends AbstractDBO
                 }
                 if (sqlStatementInfo != null) {
                     try {
-                    	sqlStatementInfo.close();
+                        sqlStatementInfo.close();
                     }
                     catch (Exception exc) {
                         // do nothing
@@ -195,14 +213,19 @@ public class DBOThreadSelect extends AbstractDBO
             }
         }
 
-        private void setKey(Object key)
+        private void setKey(String key)
         {
             this.key = key;
         }
 
-        private void setDocument(Document doc)
+        private void setDocument(Object doc)
         {
-            this.doc = doc;
+            if (doc instanceof Document) {
+                this.xmlOut = (Document) doc;
+            }
+            else {
+                this.jsonOut = (JSONArray) doc;
+            }
         }
 
         private void setProps(Map<String, Object> props)
@@ -213,6 +236,11 @@ public class DBOThreadSelect extends AbstractDBO
         private void setStatement(String stmt)
         {
             this.stmt = stmt;
+        }
+
+        private void setRowSetBuilderType(String rowSetBuilderType)
+        {
+            this.rowSetBuilderType = rowSetBuilderType;
         }
 
         private void setRowSetBuilder(RowSetBuilder rowSetBuilder)
@@ -227,11 +255,11 @@ public class DBOThreadSelect extends AbstractDBO
 
         private Connection getConnection() throws Exception
         {
-        	long startConn = System.currentTimeMillis();
+            long startConn = System.currentTimeMillis();
             Connection conn = JDBCConnectionBuilder.getConnection(this.localJdbcConnName);
             long duration = System.currentTimeMillis() - startConn;
             if (duration > DBOThreadSelect.this.timeConn) {
-            	DBOThreadSelect.this.timeConn = duration;
+                DBOThreadSelect.this.timeConn = duration;
             }
             return conn;
         }
@@ -260,7 +288,11 @@ public class DBOThreadSelect extends AbstractDBO
 
     private static final Logger                      logger                 = GVLogger.getLogger(DBOThreadSelect.class);
 
-    private RowSetBuilder                            rowSetBuilder          = null;
+
+    private RowSetBuilder       rowSetBuilder    = null;
+    private String              rowSetBuilderType = null;
+    private Document            xmlOut;
+    private JSONArray           jsonOut;
     private final Object                             synchObj               = new Object();
 
     /**
@@ -282,8 +314,11 @@ public class DBOThreadSelect extends AbstractDBO
         try {
             this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
             this.isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
-            String rsBuilder = XMLConfig.get(config, "@rowset-builder", "standard");
-            this.rowSetBuilder = RowSetBuilderFactory.getRowSetBuilder(rsBuilder, getName(), logger);
+            this.rowSetBuilderType = XMLConfig.get(config, "@rowset-builder", "standard");
+
+            if (!"json".equals(this.rowSetBuilderType)) {
+                this.rowSetBuilder = RowSetBuilderFactory.getRowSetBuilder(this.rowSetBuilderType, getName(), logger);
+            }
 
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='select']");
             String id = null;
@@ -415,15 +450,18 @@ public class DBOThreadSelect extends AbstractDBO
             this.numberFormatter.setDecimalFormatSymbols(dfs);
             this.numberFormatter.applyPattern(this.numberFormat);
 
-            parser = XMLUtils.getParserInstance();
-            Document doc = this.rowSetBuilder.createDocument(parser);
+            createOutDocument() ;
 
-            this.rowSetBuilder.setXMLUtils(parser);
-            this.rowSetBuilder.setDateFormatter(this.dateFormatter);
-            this.rowSetBuilder.setNumberFormatter(this.numberFormatter);
-            this.rowSetBuilder.setDecSeparator(this.decSeparator);
-            this.rowSetBuilder.setGroupSeparator(this.groupSeparator);
-            this.rowSetBuilder.setNumberFormat(this.numberFormat);
+            if (this.rowSetBuilder != null) {
+                parser = XMLUtils.getParserInstance();
+                this.rowSetBuilder.setXMLUtils(parser);
+                this.rowSetBuilder.setDateFormatter(this.dateFormatter);
+                this.rowSetBuilder.setTimeFormatter(this.timeFormatter);
+                this.rowSetBuilder.setNumberFormatter(this.numberFormatter);
+                this.rowSetBuilder.setDecSeparator(this.decSeparator);
+                this.rowSetBuilder.setGroupSeparator(this.groupSeparator);
+                this.rowSetBuilder.setNumberFormat(this.numberFormat);
+            }
 
             String localJdbcConnName = PropertiesHandler.expand(getJdbcConnectionName(), props);
             logger.info("Using Connection: " + localJdbcConnName);
@@ -431,14 +469,20 @@ public class DBOThreadSelect extends AbstractDBO
             Vector<ThreadSelect> thrSelVector = new Vector<ThreadSelect>();
             Vector<Thread> thrVector = new Vector<Thread>();
             for (Entry<String, String> entry : this.statements.entrySet()) {
-                Object key = entry.getKey();
+                String key = entry.getKey();
                 String stmt = entry.getValue();
                 ThreadSelect ts = new ThreadSelect(MDC.getContext());
-                ts.setDocument(doc);
+                ts.setRowSetBuilderType(this.rowSetBuilderType);
+                if (this.rowSetBuilder != null) {
+                    ts.setRowSetBuilder(this.rowSetBuilder.getCopy());
+                    ts.setDocument(this.xmlOut);
+                }
+                else {
+                    ts.setDocument(this.jsonOut);
+                }
                 ts.setStatement(stmt);
                 ts.setKey(key);
                 ts.setProps(localProps);
-                ts.setRowSetBuilder(this.rowSetBuilder.getCopy());
                 ts.setLocalJdbcConnName(localJdbcConnName);
                 thrSelVector.add(ts);
 
@@ -501,13 +545,13 @@ public class DBOThreadSelect extends AbstractDBO
                 thrVector.clear();
             }
 
-        	if (throwable != null) {
-        		throw throwable;
-        	}
+            if (throwable != null) {
+                throw throwable;
+            }
             this.dhr.setRead(this.rowCounter);
 
             logger.debug("End execution of DB data read through " + this.dboclass);
-            return XMLUtils.serializeDOM_S(doc);
+            return getResult();
         }
         catch (Throwable exc) {
             logger.error("Error on execution of " + this.dboclass + " with name [" + getName() + "]", exc);
@@ -517,6 +561,55 @@ public class DBOThreadSelect extends AbstractDBO
         }
         finally {
             XMLUtils.releaseParserInstance(parser);
+        }
+    }
+
+    /**
+     * @throws DBOException
+     *
+     */
+    private void createOutDocument() throws DBOException
+    {
+        if (this.rowSetBuilderType.equals("json")) {
+            this.xmlOut = null;
+            this.jsonOut = new JSONArray();
+        }
+        else {
+            this.jsonOut = null;
+            XMLUtils xml = null;
+            try {
+                xml = XMLUtils.getParserInstance();
+                this.xmlOut = this.rowSetBuilder.createDocument(xml);
+            }
+            catch (XMLUtilsException exc) {
+                throw new DBOException("Cannot instantiate XMLUtils.", exc);
+            }
+            finally {
+                XMLUtils.releaseParserInstance(xml);
+            }
+        }
+    }
+
+    /**
+     * @throws DBOException
+     *
+     */
+    private Object getResult() throws DBOException
+    {
+        if (this.rowSetBuilderType.equals("json")) {
+            try {
+                return this.jsonOut.toString();
+            }
+            catch (Exception exc) {
+                throw new DBOException("Cannot store DBOSelect JSON result.", exc);
+            }
+        }
+        else {
+            try {
+                return XMLUtils.serializeDOM_S(this.xmlOut);
+            } catch (XMLUtilsException exc) {
+                throw new DBOException("Cannot store DBOSelect XML result.", exc);
+            }
         }
     }
 

@@ -1,28 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.datahandling.utils;
-
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.util.txt.DateUtils;
-import it.greenvulcano.util.txt.TextUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -33,13 +28,18 @@ import java.util.List;
 
 import org.w3c.dom.Node;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.configuration.XMLConfigException;
+import it.greenvulcano.util.txt.DateUtils;
+import it.greenvulcano.util.txt.TextUtils;
+
 /**
  * FieldFormatter class
- * 
+ *
  * @version 3.0.0 Mar 30, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class FieldFormatter
 {
@@ -59,16 +59,16 @@ public class FieldFormatter
 
     private String        fieldName;
     private String        fieldId;
-    private String        numberFormat            = DEFAULT_NUMBER_FORMAT;
-    private String        groupSeparator          = DEFAULT_GRP_SEPARATOR;
-    private String        decSeparator            = DEFAULT_DEC_SEPARATOR;
-    private String        dateFormat              = DEFAULT_DATE_FORMAT;
+    private String        numberFormat            = this.DEFAULT_NUMBER_FORMAT;
+    private String        groupSeparator          = this.DEFAULT_GRP_SEPARATOR;
+    private String        decSeparator            = this.DEFAULT_DEC_SEPARATOR;
+    private String        dateFormat              = this.DEFAULT_DATE_FORMAT;
     private String        dateTZoneOut            = DateUtils.getDefaultTimeZone().getID();
-    private int           fieldLength             = DEFAULT_LENGTH;
-    private String        fillerChar              = DEFAULT_FILLER_CHAR;
-    private String        terminatorChar          = DEFAULT_TERMINATOR_CHAR;
-    private String        trim                    = DEFAULT_TRIM;
-    private String        padding                 = DEFAULT_PADDING;
+    private int           fieldLength             = this.DEFAULT_LENGTH;
+    private String        fillerChar              = this.DEFAULT_FILLER_CHAR;
+    private String        terminatorChar          = this.DEFAULT_TERMINATOR_CHAR;
+    private String        trim                    = this.DEFAULT_TRIM;
+    private String        padding                 = this.DEFAULT_PADDING;
     private boolean       isDefaultFillerChar     = false;
 
     /**
@@ -76,7 +76,7 @@ public class FieldFormatter
      */
     public FieldFormatter()
     {
-        numberFormatter.setRoundingMode(RoundingMode.FLOOR);
+        this.numberFormatter.setRoundingMode(RoundingMode.FLOOR);
     }
 
     /**
@@ -85,24 +85,24 @@ public class FieldFormatter
      */
     public void init(Node node) throws XMLConfigException
     {
-        fieldName = XMLConfig.get(node, "@field-name", "NO_FIELD").toUpperCase();
-        fieldId = XMLConfig.get(node, "@field-id", "-1");
-        numberFormat = XMLConfig.get(node, "@number-format", DEFAULT_NUMBER_FORMAT);
-        groupSeparator = XMLConfig.get(node, "@grouping-separator", DEFAULT_GRP_SEPARATOR);
-        decSeparator = XMLConfig.get(node, "@decimal-separator", DEFAULT_DEC_SEPARATOR);
-        dateFormat = XMLConfig.get(node, "@date-format", DEFAULT_DATE_FORMAT);
-        List<String> dateParts = TextUtils.splitByStringSeparator(dateFormat, "::");
-        dateFormat = dateParts.get(0);
+        this.fieldName = XMLConfig.get(node, "@field-name", "NO_FIELD").toUpperCase();
+        this.fieldId = XMLConfig.get(node, "@field-id", "-1");
+        this.numberFormat = XMLConfig.get(node, "@number-format", this.DEFAULT_NUMBER_FORMAT);
+        this.groupSeparator = XMLConfig.get(node, "@grouping-separator", this.DEFAULT_GRP_SEPARATOR);
+        this.decSeparator = XMLConfig.get(node, "@decimal-separator", this.DEFAULT_DEC_SEPARATOR);
+        this.dateFormat = XMLConfig.get(node, "@date-format", this.DEFAULT_DATE_FORMAT);
+        List<String> dateParts = TextUtils.splitByStringSeparator(this.dateFormat, "::");
+        this.dateFormat = dateParts.get(0);
         if (dateParts.size() > 1) {
-            dateTZoneOut = dateParts.get(1);
+            this.dateTZoneOut = dateParts.get(1);
         }
-        fieldLength = XMLConfig.getInteger(node, "@field-length", DEFAULT_LENGTH);
-        fillerChar = XMLConfig.get(node, "@filler-char", DEFAULT_FILLER_CHAR);
-        isDefaultFillerChar = DEFAULT_FILLER_CHAR.equals(fillerChar);
-        terminatorChar = XMLConfig.get(node, "@terminator-char", DEFAULT_TERMINATOR_CHAR).replaceAll("\\\\n", "\n").replaceAll(
+        this.fieldLength = XMLConfig.getInteger(node, "@field-length", this.DEFAULT_LENGTH);
+        this.fillerChar = XMLConfig.get(node, "@filler-char", this.DEFAULT_FILLER_CHAR);
+        this.isDefaultFillerChar = this.DEFAULT_FILLER_CHAR.equals(this.fillerChar);
+        this.terminatorChar = XMLConfig.get(node, "@terminator-char", this.DEFAULT_TERMINATOR_CHAR).replaceAll("\\\\n", "\n").replaceAll(
                 "\\\\r", "\r").replaceAll("\\\\t", "\t");
-        trim = XMLConfig.get(node, "@trim", DEFAULT_TRIM);
-        padding = XMLConfig.get(node, "@padding", DEFAULT_PADDING);
+        this.trim = XMLConfig.get(node, "@trim", this.DEFAULT_TRIM);
+        this.padding = XMLConfig.get(node, "@padding", this.DEFAULT_PADDING);
     }
 
     /**
@@ -110,7 +110,7 @@ public class FieldFormatter
      */
     public String getFieldName()
     {
-        return fieldName;
+        return this.fieldName;
     }
 
     /**
@@ -118,7 +118,7 @@ public class FieldFormatter
      */
     public String getFieldId()
     {
-        return fieldId;
+        return this.fieldId;
     }
 
     /**
@@ -126,7 +126,7 @@ public class FieldFormatter
      */
     public String getNumberFormat()
     {
-        return numberFormat;
+        return this.numberFormat;
     }
 
     /**
@@ -134,7 +134,7 @@ public class FieldFormatter
      */
     public String getGroupSeparator()
     {
-        return groupSeparator;
+        return this.groupSeparator;
     }
 
     /**
@@ -142,7 +142,7 @@ public class FieldFormatter
      */
     public String getDecSeparator()
     {
-        return decSeparator;
+        return this.decSeparator;
     }
 
     /**
@@ -150,7 +150,7 @@ public class FieldFormatter
      */
     public String getDateFormat()
     {
-        return dateFormat;
+        return this.dateFormat;
     }
 
     /**
@@ -202,7 +202,7 @@ public class FieldFormatter
     }
 
     /**
-     * 
+     *
      * @param number
      * @return the formatted number
      * @throws Exception
@@ -213,18 +213,18 @@ public class FieldFormatter
     }
 
     /**
-     * 
+     *
      * @param number
      * @return the formatted number
      * @throws Exception
      */
-    public String formatNumber(float number) throws Exception
+    public String formatNumber(double number) throws Exception
     {
         return formatField(formatNumber(number, null, null, null));
     }
 
     /**
-     * 
+     *
      * @param number
      * @param currNumberFormat
      * @param currGroupSeparator
@@ -235,24 +235,24 @@ public class FieldFormatter
     public String formatNumber(BigDecimal number, String currNumberFormat, String currGroupSeparator,
             String currDecSeparator) throws Exception
     {
-        currNumberFormat = (currNumberFormat != null) ? currNumberFormat : numberFormat;
-        currGroupSeparator = (currGroupSeparator != null) ? currGroupSeparator : groupSeparator;
-        currDecSeparator = (currDecSeparator != null) ? currDecSeparator : decSeparator;
+        currNumberFormat = (currNumberFormat != null) ? currNumberFormat : this.numberFormat;
+        currGroupSeparator = (currGroupSeparator != null) ? currGroupSeparator : this.groupSeparator;
+        currDecSeparator = (currDecSeparator != null) ? currDecSeparator : this.decSeparator;
 
         String formattedNumber = null;
 
-        DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
+        DecimalFormatSymbols dfs = this.numberFormatter.getDecimalFormatSymbols();
         dfs.setDecimalSeparator(currDecSeparator.charAt(0));
         dfs.setGroupingSeparator(currGroupSeparator.charAt(0));
-        numberFormatter.setDecimalFormatSymbols(dfs);
-        numberFormatter.applyPattern(currNumberFormat);
-        formattedNumber = numberFormatter.format(number);
+        this.numberFormatter.setDecimalFormatSymbols(dfs);
+        this.numberFormatter.applyPattern(currNumberFormat);
+        formattedNumber = this.numberFormatter.format(number);
 
         return formattedNumber;
     }
 
     /**
-     * 
+     *
      * @param number
      * @param currNumberFormat
      * @param currGroupSeparator
@@ -260,27 +260,27 @@ public class FieldFormatter
      * @return the formatted number
      * @throws Exception
      */
-    public String formatNumber(float number, String currNumberFormat, String currGroupSeparator, String currDecSeparator)
+    public String formatNumber(double number, String currNumberFormat, String currGroupSeparator, String currDecSeparator)
             throws Exception
     {
-        currNumberFormat = (currNumberFormat != null) ? currNumberFormat : numberFormat;
-        currGroupSeparator = (currGroupSeparator != null) ? currGroupSeparator : groupSeparator;
-        currDecSeparator = (currDecSeparator != null) ? currDecSeparator : decSeparator;
+        currNumberFormat = (currNumberFormat != null) ? currNumberFormat : this.numberFormat;
+        currGroupSeparator = (currGroupSeparator != null) ? currGroupSeparator : this.groupSeparator;
+        currDecSeparator = (currDecSeparator != null) ? currDecSeparator : this.decSeparator;
 
         String formattedNumber = null;
 
-        DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
+        DecimalFormatSymbols dfs = this.numberFormatter.getDecimalFormatSymbols();
         dfs.setDecimalSeparator(currDecSeparator.charAt(0));
         dfs.setGroupingSeparator(currGroupSeparator.charAt(0));
-        numberFormatter.setDecimalFormatSymbols(dfs);
-        numberFormatter.applyPattern(currNumberFormat);
-        formattedNumber = numberFormatter.format(number);
+        this.numberFormatter.setDecimalFormatSymbols(dfs);
+        this.numberFormatter.applyPattern(currNumberFormat);
+        formattedNumber = this.numberFormatter.format(number);
 
         return formattedNumber;
     }
 
     /**
-     * 
+     *
      * @param number
      * @return the parsed String as {@link BigDecimal}
      * @throws Exception
@@ -291,7 +291,7 @@ public class FieldFormatter
     }
 
     /**
-     * 
+     *
      * @param number
      * @param currNumberFormat
      * @param currGroupSeparator
@@ -302,30 +302,30 @@ public class FieldFormatter
     public BigDecimal parseToBigDecimal(String number, String currNumberFormat, String currGroupSeparator,
             String currDecSeparator) throws Exception
     {
-        currNumberFormat = (currNumberFormat != null) ? currNumberFormat : numberFormat;
-        currGroupSeparator = (currGroupSeparator != null) ? currGroupSeparator : groupSeparator;
-        currDecSeparator = (currDecSeparator != null) ? currDecSeparator : decSeparator;
+        currNumberFormat = (currNumberFormat != null) ? currNumberFormat : this.numberFormat;
+        currGroupSeparator = (currGroupSeparator != null) ? currGroupSeparator : this.groupSeparator;
+        currDecSeparator = (currDecSeparator != null) ? currDecSeparator : this.decSeparator;
 
         BigDecimal parsedNumber = null;
 
-        DecimalFormatSymbols dfs = numberFormatter.getDecimalFormatSymbols();
+        DecimalFormatSymbols dfs = this.numberFormatter.getDecimalFormatSymbols();
         dfs.setDecimalSeparator(currDecSeparator.charAt(0));
         dfs.setGroupingSeparator(currGroupSeparator.charAt(0));
-        numberFormatter.setDecimalFormatSymbols(dfs);
-        numberFormatter.applyPattern(currNumberFormat);
-        boolean isBigDecimal = numberFormatter.isParseBigDecimal();
+        this.numberFormatter.setDecimalFormatSymbols(dfs);
+        this.numberFormatter.applyPattern(currNumberFormat);
+        boolean isBigDecimal = this.numberFormatter.isParseBigDecimal();
         try {
-            numberFormatter.setParseBigDecimal(true);
-            parsedNumber = (BigDecimal) numberFormatter.parse(number);
+            this.numberFormatter.setParseBigDecimal(true);
+            parsedNumber = (BigDecimal) this.numberFormatter.parse(number);
         }
         finally {
-            numberFormatter.setParseBigDecimal(isBigDecimal);
+            this.numberFormatter.setParseBigDecimal(isBigDecimal);
         }
         return parsedNumber;
     }
 
     /**
-     * 
+     *
      * @param dateTime
      * @return the formatted {@link Date}
      * @throws Exception
@@ -336,7 +336,7 @@ public class FieldFormatter
     }
 
     /**
-     * 
+     *
      * @param dateTime
      * @param currDateFormat
      * @return the formatted {@link Date}
@@ -344,15 +344,15 @@ public class FieldFormatter
      */
     public String formatDate(Date dateTime, String currDateFormat) throws Exception
     {
-        currDateFormat = (currDateFormat != null) ? currDateFormat : dateFormat;
+        currDateFormat = (currDateFormat != null) ? currDateFormat : this.dateFormat;
 
-        String formattedDate = DateUtils.dateToString(dateTime, currDateFormat, dateTZoneOut);
+        String formattedDate = DateUtils.dateToString(dateTime, currDateFormat, this.dateTZoneOut);
 
         return formattedDate;
     }
 
     /**
-     * 
+     *
      * @param dateTime
      * @return the parsed {@link Date}
      * @throws Exception
@@ -363,7 +363,7 @@ public class FieldFormatter
     }
 
     /**
-     * 
+     *
      * @param dateTime
      * @param currDateFormat
      * @return the parsed {@link Date}
@@ -371,15 +371,15 @@ public class FieldFormatter
      */
     public Date parseDate(String dateTime, String currDateFormat) throws Exception
     {
-        currDateFormat = (currDateFormat != null) ? currDateFormat : dateFormat;
+        currDateFormat = (currDateFormat != null) ? currDateFormat : this.dateFormat;
 
-        Date parsedDate = DateUtils.stringToDate(dateTime, currDateFormat, dateTZoneOut);
+        Date parsedDate = DateUtils.stringToDate(dateTime, currDateFormat, this.dateTZoneOut);
 
         return parsedDate;
     }
 
     /**
-     * 
+     *
      * @param field
      * @return
      */
@@ -388,34 +388,34 @@ public class FieldFormatter
         if (field != null) {
             field = trim(field);
             int l = field.length();
-            if (l >= fieldLength) {
-                field.substring(0, fieldLength);
+            if (l >= this.fieldLength) {
+                field.substring(0, this.fieldLength);
             }
             field = pad(field);
         }
         else {
             field = "";
         }
-        return field + terminatorChar;
+        return field + this.terminatorChar;
     }
 
     /**
-     * 
+     *
      * @param field
      * @return
      */
     private String trim(String field)
     {
-        if (!"none".equals(trim)) {
-            if ("both".equals(trim)) {
+        if (!"none".equals(this.trim)) {
+            if ("both".equals(this.trim)) {
                 field.trim();
             }
-            if ("left".equals(trim)) {
+            if ("left".equals(this.trim)) {
                 while (" ".equals(field.charAt(0))) {
                     field = field.substring(1, field.length());
                 }
             }
-            if ("right".equals(trim)) {
+            if ("right".equals(this.trim)) {
                 while (" ".equals(field.charAt(field.length() - 1))) {
                     field = field.substring(0, field.length() - 1);
                 }
@@ -425,33 +425,33 @@ public class FieldFormatter
     }
 
     /**
-     * 
+     *
      * @param field
      * @return
      */
     private String pad(String field)
     {
-        if (!"none".equals(padding)) {
+        if (!"none".equals(this.padding)) {
             StringBuffer pad = new StringBuffer();
 
-            if (isDefaultFillerChar) {
-                int l = fieldLength - field.length();
+            if (this.isDefaultFillerChar) {
+                int l = this.fieldLength - field.length();
                 while (pad.length() < l) {
-                    pad.append(((pad.length() + DEFAULT_FILLER_LENGTH) < l)
-                            ? DEFAULT_FILLER_STRING
-                            : DEFAULT_FILLER_STRING.substring(0, l - pad.length()));
+                    pad.append(((pad.length() + this.DEFAULT_FILLER_LENGTH) < l)
+                            ? this.DEFAULT_FILLER_STRING
+                            : this.DEFAULT_FILLER_STRING.substring(0, l - pad.length()));
                 }
             }
             else {
                 int l = field.length();
-                for (int i = l; i < fieldLength; i++) {
-                    pad.append(fillerChar);
+                for (int i = l; i < this.fieldLength; i++) {
+                    pad.append(this.fillerChar);
                 }
             }
-            if ("right".equals(padding)) {
+            if ("right".equals(this.padding)) {
                 field = field + pad;
             }
-            if ("left".equals(padding)) {
+            if ("left".equals(this.padding)) {
                 field = pad + field;
             }
         }
@@ -464,9 +464,9 @@ public class FieldFormatter
     @Override
     public String toString()
     {
-        return "FieldFormatter: fieldName[" + fieldName + "] fieldId[" + fieldId + "] numberFormat[" + numberFormat
-                + "] groupSeparator[" + groupSeparator + "] decSeparator[" + decSeparator + "] dateFormat["
-                + dateFormat + "] fieldLength[" + fieldLength + "] fillerChar[" + fillerChar + "] terminatorChar["
-                + terminatorChar + "] padding[" + padding + "]";
+        return "FieldFormatter: fieldName[" + this.fieldName + "] fieldId[" + this.fieldId + "] numberFormat[" + this.numberFormat
+                + "] groupSeparator[" + this.groupSeparator + "] decSeparator[" + this.decSeparator + "] dateFormat["
+                + this.dateFormat + "] fieldLength[" + this.fieldLength + "] fillerChar[" + this.fillerChar + "] terminatorChar["
+                + this.terminatorChar + "] padding[" + this.padding + "]";
     }
 }

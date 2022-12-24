@@ -26,6 +26,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -118,6 +120,42 @@ public class DataHandlerTestCase extends TestCase
         //assertEquals("20000101 18:30:45", field2);
         String field3 = cols.item(3).getTextContent();
         assertEquals("123,45", field3);
+    }
+
+    /**
+     * @throws Exception
+     *
+     */
+    public void testDHCallSelectJSON() throws Exception
+    {
+        String operation = "GVESB::TestSelectJSON";
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
+        DHResult result = dboBuilder.EXECUTE(operation, null, null);
+        assertNotNull(result);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(0, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(1, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        System.out.println("testDHCallSelectJSON: " + result.getData());
+
+        String output = (String) result.getData();
+        assertNotNull(output);
+        JSONArray jsa = new JSONArray(output);
+        assertTrue(jsa.length() > 0);
+        JSONObject data = jsa.getJSONObject(0);
+        assertEquals(4 + 1, JSONObject.getNames(data).length);
+        int id = data.getInt("ID");
+        assertEquals(1, id);
+        String field1 = data.getString("FIELD1");
+        assertEquals("testvalue", field1);
+        String field2 = data.getString("FIELD2");
+        assertEquals("2000-01-01 12:30:45.0", field2);
+        //assertEquals("20000101 18:30:45", field2);
+        double field3 = data.getDouble("FIELD3");
+        assertEquals(123,45, field3);
     }
 
     /**
@@ -283,6 +321,69 @@ public class DataHandlerTestCase extends TestCase
         assertEquals("20000101 12:30:45", field2);
         //assertEquals("20000101 18:30:45", field2);
     }
+
+    /**
+     * @throws Exception
+     *
+     */
+    public void testDHCallThreadSelectJSON() throws Exception
+    {
+        String operation = "GVESB::TestThreadSelectJSON";
+        IDBOBuilder dboBuilder = this.dhFactory.getDBOBuilder(operation);
+        DHResult result = dboBuilder.EXECUTE(operation, null, null);
+        assertNotNull(result);
+        assertEquals(0, result.getDiscard());
+        assertEquals(0, result.getUpdate());
+        assertEquals(0, result.getTotal());
+        assertEquals(0, result.getInsert());
+        assertEquals(2, result.getRead());
+        assertEquals("", result.getDiscardCauseListAsString());
+
+        System.out.println("testDHCallThreadSelectJSON: " + result.getData());
+
+        String output = (String) result.getData();
+        assertNotNull(output);
+        JSONArray jsa = new JSONArray(output);
+        assertTrue(jsa.length() > 0);
+
+        assertEquals(2, jsa.length());
+        for (int i = 0; i < jsa.length(); i++) {
+            JSONObject data = jsa.getJSONObject(i);
+            if ("0".equals(data.getString("dhId"))){
+                testData0_json(data);
+            }
+            else {
+                testData1_json(data);
+            }
+        }
+    }
+
+    private void testData0_json(JSONObject data) {
+        assertEquals(4 + 1, JSONObject.getNames(data).length);
+        int id = data.getInt("ID");
+        assertEquals(1, id);
+        String field1 = data.getString("FIELD1");
+        assertEquals("testvalue", field1);
+        String field2 = data.getString("FIELD2");
+        assertEquals("2000-01-01 12:30:45.0", field2);
+        //assertEquals("20000101 18:30:45", field2);
+        double field3 = data.getDouble("FIELD3");
+        assertEquals(123,45, field3);
+    }
+
+    private void testData1_json(JSONObject data) {
+        assertEquals(4 + 1, JSONObject.getNames(data).length);
+        int id = data.getInt("ID");
+        assertEquals(1, id);
+        String field1 = data.getString("FIELD1");
+        assertEquals("testvalue", field1);
+        String field2 = data.getString("FIELD2");
+        assertEquals("2000-01-01 12:30:45.0", field2);
+        //assertEquals("20000101 18:30:45", field2);
+        double field3 = data.getDouble("FIELD3");
+        assertEquals(123,45, field3);
+    }
+
     /**
      * @throws Exception
      */

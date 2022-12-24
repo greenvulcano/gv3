@@ -32,12 +32,14 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.datahandling.DBOException;
+import it.greenvulcano.gvesb.datahandling.dbo.utils.ResultSetTransformer;
 import it.greenvulcano.gvesb.datahandling.dbo.utils.RowSetBuilder;
 import it.greenvulcano.gvesb.datahandling.dbo.utils.RowSetBuilderFactory;
 import it.greenvulcano.gvesb.datahandling.utils.FieldFormatter;
@@ -46,6 +48,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xml.XMLUtilsException;
 
 /**
  * IDBO Class specialized in selecting data from the DB.
@@ -67,6 +70,9 @@ public class DBOSelect extends AbstractDBO
     private static final Logger                      logger                 = GVLogger.getLogger(DBOSelect.class);
 
     private RowSetBuilder                            rowSetBuilder          = null;
+    private String                                   rowSetBuilderType      = null;
+    private Document                            	 xmlOut;
+    private JSONArray                          		 jsonOut;
 
     /**
      *
@@ -87,8 +93,11 @@ public class DBOSelect extends AbstractDBO
         try {
             this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
             this.isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
-            String rsBuilder = XMLConfig.get(config, "@rowset-builder", "standard");
-            this.rowSetBuilder = RowSetBuilderFactory.getRowSetBuilder(rsBuilder, getName(), logger);
+            this.rowSetBuilderType = XMLConfig.get(config, "@rowset-builder", "standard");
+
+            if (!"json".equals(this.rowSetBuilderType)) {
+                this.rowSetBuilder = RowSetBuilderFactory.getRowSetBuilder(this.rowSetBuilderType, getName(), logger);
+            }
 
             NodeList stmts = XMLConfig.getNodeList(config, "statement[@type='select']");
             String id = null;
@@ -217,19 +226,22 @@ public class DBOSelect extends AbstractDBO
             this.numberFormatter.setDecimalFormatSymbols(dfs);
             this.numberFormatter.applyPattern(this.numberFormat);
 
-            parser = XMLUtils.getParserInstance();
-            Document doc = this.rowSetBuilder.createDocument(parser);
+            createOutDocument() ;
 
-            this.rowSetBuilder.setXMLUtils(parser);
-            this.rowSetBuilder.setDateFormatter(this.dateFormatter);
-            this.rowSetBuilder.setNumberFormatter(this.numberFormatter);
-            this.rowSetBuilder.setDecSeparator(this.decSeparator);
-            this.rowSetBuilder.setGroupSeparator(this.groupSeparator);
-            this.rowSetBuilder.setNumberFormat(this.numberFormat);
+            if (this.rowSetBuilder != null) {
+            	parser = XMLUtils.getParserInstance();
+                this.rowSetBuilder.setXMLUtils(parser);
+                this.rowSetBuilder.setDateFormatter(this.dateFormatter);
+                this.rowSetBuilder.setTimeFormatter(this.timeFormatter);
+                this.rowSetBuilder.setNumberFormatter(this.numberFormatter);
+                this.rowSetBuilder.setDecSeparator(this.decSeparator);
+                this.rowSetBuilder.setGroupSeparator(this.groupSeparator);
+                this.rowSetBuilder.setNumberFormat(this.numberFormat);
+            }
 
             for (Entry<String, String> entry : this.statements.entrySet()) {
                 ThreadUtils.checkInterrupted(getClass().getSimpleName(), getName(), logger);
-                Object key = entry.getKey();
+                String key = entry.getKey();
                 String stmt = entry.getValue();
                 Set<Integer> keyField = this.keysMap.get(key);
                 Map<String, FieldFormatter> fieldNameToFormatter = new HashMap<String, FieldFormatter>();
@@ -247,12 +259,16 @@ public class DBOSelect extends AbstractDBO
                     try {
                         statement = getInternalConn(conn, localProps).createStatement();
                         logger.debug("Executing select:\n" + expandedSQL);
-                        this.sqlStatementInfo = new StatementInfo(key.toString(), expandedSQL, statement);
+                        this.sqlStatementInfo = new StatementInfo(key, expandedSQL, statement);
                         ResultSet rs = statement.executeQuery(expandedSQL);
                         if (rs != null) {
                             try {
-                                this.rowCounter += this.rowSetBuilder.build(doc, "" + key, rs, keyField, fieldNameToFormatter,
-                                                                  fieldIdToFormatter);
+                                if ("json".equals(this.rowSetBuilderType)) {
+                                	this.jsonOut = ResultSetTransformer.toJSONArray(rs, key);
+                                    this.rowCounter += this.jsonOut.length();
+                                } else {
+                                	this.rowCounter += this.rowSetBuilder.build(this.xmlOut, key, rs, keyField, fieldNameToFormatter,  fieldIdToFormatter);
+                                }
                             }
                             finally {
                                 if (rs != null) {
@@ -292,7 +308,7 @@ public class DBOSelect extends AbstractDBO
             this.dhr.setRead(this.rowCounter);
 
             logger.debug("End execution of DB data read through " + this.dboclass);
-            return XMLUtils.serializeDOM_S(doc);
+            return getResult();
         }
         catch (DBOException exc) {
         	throw exc;
@@ -311,7 +327,58 @@ public class DBOSelect extends AbstractDBO
             if (parser != null) {
                 XMLUtils.releaseParserInstance(parser);
             }
-            this.rowSetBuilder.cleanup();
+            if (this.rowSetBuilder != null) {
+            	this.rowSetBuilder.cleanup();
+            }
+        }
+    }
+
+    /**
+     * @throws DBOException
+     *
+     */
+    private void createOutDocument() throws DBOException
+    {
+        if (this.rowSetBuilderType.equals("json")) {
+            this.xmlOut = null;
+            this.jsonOut = new JSONArray();
+        }
+        else {
+            this.jsonOut = null;
+            XMLUtils xml = null;
+            try {
+                xml = XMLUtils.getParserInstance();
+                this.xmlOut = this.rowSetBuilder.createDocument(xml);
+            }
+            catch (XMLUtilsException exc) {
+                throw new DBOException("Cannot instantiate XMLUtils.", exc);
+            }
+            finally {
+                XMLUtils.releaseParserInstance(xml);
+            }
+        }
+    }
+
+    /**
+     * @throws DBOException
+     *
+     */
+    private Object getResult() throws DBOException
+    {
+        if (this.rowSetBuilderType.equals("json")) {
+            try {
+                return this.jsonOut.toString();
+            }
+            catch (Exception exc) {
+                throw new DBOException("Cannot store DBOSelect JSON result.", exc);
+            }
+        }
+        else {
+            try {
+                return XMLUtils.serializeDOM_S(this.xmlOut);
+            } catch (XMLUtilsException exc) {
+                throw new DBOException("Cannot store DBOSelect XML result.", exc);
+            }
         }
     }
 }

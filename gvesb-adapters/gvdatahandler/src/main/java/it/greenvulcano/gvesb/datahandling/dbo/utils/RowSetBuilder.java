@@ -40,28 +40,31 @@ import it.greenvulcano.util.xml.XMLUtils;
 public interface RowSetBuilder
 {
     public void setName(String name);
-    public String getName();
+    //public String getName();
 
     public void setLogger(Logger logger);
-    public Logger getLogger();
+    //public Logger getLogger();
 
     public void setXMLUtils(XMLUtils parser);
-    public XMLUtils getXMLUtils();
+    //public XMLUtils getXMLUtils();
 
     public void setDateFormatter(SimpleDateFormat dateFormatter);
-    public SimpleDateFormat getDateFormatter();
+    //public SimpleDateFormat getDateFormatter();
+
+    public void setTimeFormatter(SimpleDateFormat timeFormatter);
+    //public SimpleDateFormat getTimeFormatter();
 
     public void setNumberFormatter(DecimalFormat numberFormatter);
-    public DecimalFormat getNumberFormatter();
+    //public DecimalFormat getNumberFormatter();
 
     public void setDecSeparator(String decSeparator);
-    public String getDecSeparator();
+    //public String getDecSeparator();
 
     public void setGroupSeparator(String groupSeparator);
-    public String getGroupSeparator();
+    //public String getGroupSeparator();
 
     public void setNumberFormat(String numberFormat);
-    public String getNumberFormat();
+    //public String getNumberFormat();
 
     public Document createDocument(XMLUtils parser) throws NullPointerException;
 

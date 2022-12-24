@@ -31,11 +31,13 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -64,18 +66,19 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
     private static final String VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
     private static final String NS          = "http://www.greenvulcano.com/database";
     protected String           name;
-    private Logger           logger;
-    private String           numberFormat;
-    private String           groupSeparator;
-    private String           decSeparator;
-    private XMLUtils         parser;
-    private SimpleDateFormat dateFormatter;
-    private DecimalFormat    numberFormatter;
-    private FieldFormatter[] fFormatters;
-    private String[]         colNames;
+    protected Logger           logger;
+    protected String           numberFormat;
+    protected String           groupSeparator;
+    protected String           decSeparator;
+    protected XMLUtils         parser;
+    protected SimpleDateFormat dateFormatter;
+    protected SimpleDateFormat timeFormatter;
+    protected DecimalFormat    numberFormatter;
+    protected FieldFormatter[] fFormatters;
+    protected String[]         colNames;
 
     @Override
-	public Document createDocument(XMLUtils parser) throws NullPointerException {
+    public Document createDocument(XMLUtils parser) throws NullPointerException {
         if (parser == null) {
             parser = this.parser;
         }
@@ -87,7 +90,7 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
     }
 
     @Override
-	public int build(Document doc, String id, ResultSet rs, Set<Integer> keyField,
+    public int build(Document doc, String id, ResultSet rs, Set<Integer> keyField,
             Map<String, FieldFormatter> fieldNameToFormatter, Map<String, FieldFormatter> fieldIdToFormatter)
             throws Exception {
         if (rs == null) {
@@ -128,27 +131,17 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
                     this.parser.setAttribute(col, AbstractDBO.ID_NAME, String.valueOf(j));
                 }
                 switch (metadata.getColumnType(j)) {
+                    case Types.TIME : {
+                        this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.TIME_TYPE);
+                        java.sql.Time dateVal = rs.getTime(j);
+                        textVal = processDateTime(col, fF, dateVal, AbstractDBO.DEFAULT_TIME_FORMAT);
+                    }
+                        break;
                     case Types.DATE :
-                    case Types.TIME :
                     case Types.TIMESTAMP : {
                         this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.TIMESTAMP_TYPE);
                         Timestamp dateVal = rs.getTimestamp(j);
-                        isNull = dateVal == null;
-                        this.parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
-                        if (isNull) {
-                            this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, AbstractDBO.DEFAULT_DATE_FORMAT);
-                            textVal = "";
-                        }
-                        else {
-                            if (fF != null) {
-                                this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getDateFormat());
-                                textVal = fF.formatDate(dateVal);
-                            }
-                            else {
-                                this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, AbstractDBO.DEFAULT_DATE_FORMAT);
-                                textVal = this.dateFormatter.format(dateVal);
-                            }
-                        }
+                        textVal = processDateTime(col, fF, dateVal, AbstractDBO.DEFAULT_DATE_FORMAT);
                     }
                         break;
                     case Types.DECIMAL :
@@ -234,7 +227,7 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
                     }
                         break;
                     case Types.NCLOB : {
-                    	this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.LONG_NSTRING_TYPE);
+                        this.parser.setAttribute(col, AbstractDBO.TYPE_NAME, AbstractDBO.LONG_NSTRING_TYPE);
                         NClob clob = rs.getNClob(j);
                         isNull = clob == null;
                         this.parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
@@ -260,7 +253,7 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
                             textVal = "";
                         }
                         else {
-                        	Reader is = clob.getCharacterStream();
+                            Reader is = clob.getCharacterStream();
                             StringWriter str = new StringWriter();
 
                             IOUtils.copy(is, str);
@@ -353,109 +346,121 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
     }
 
     @Override
-	public void cleanup() {
+    public void cleanup() {
         this.numberFormat = null;
         this.groupSeparator = null;
         this.decSeparator = null;
         this.parser = null;
         this.dateFormatter = null;
+        this.timeFormatter = null;
         this.numberFormatter = null;
         this.fFormatters = null;
         this.colNames = null;
     }
 
     @Override
-	public void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
+/*
+    @Override
+    public String getName() {
+        return this.name;
+    }*/
 
     @Override
-	public String getName() {
-		return this.name;
-	}
-
-    @Override
-	public void setLogger(Logger logger) {
+    public void setLogger(Logger logger) {
         this.logger = logger;
     }
-
+/*
     @Override
     public Logger getLogger() {
-    	return this.logger;
-    }
+        return this.logger;
+    }*/
 
     @Override
-	public void setDateFormatter(SimpleDateFormat dateFormatter) {
+    public void setDateFormatter(SimpleDateFormat dateFormatter) {
         this.dateFormatter = dateFormatter;
     }
-
+/*
     @Override
     public SimpleDateFormat getDateFormatter() {
-    	return this.dateFormatter;
-    }
+        return this.dateFormatter;
+    }*/
 
     @Override
-	public void setNumberFormatter(DecimalFormat numberFormatter) {
+    public void setTimeFormatter(SimpleDateFormat timeFormatter) {
+        this.timeFormatter = timeFormatter;
+    }
+/*
+    @Override
+    public SimpleDateFormat getTimeFormatter() {
+        return this.timeFormatter;
+    }*/
+
+    @Override
+    public void setNumberFormatter(DecimalFormat numberFormatter) {
         this.numberFormatter = numberFormatter;
     }
-
+/*
     @Override
     public DecimalFormat getNumberFormatter() {
-    	return this.numberFormatter;
-    }
+        return this.numberFormatter;
+    }*/
 
     @Override
-	public void setDecSeparator(String decSeparator) {
+    public void setDecSeparator(String decSeparator) {
         this.decSeparator = decSeparator;
     }
-
+/*
     @Override
     public String getDecSeparator() {
-    	return this.decSeparator;
-    }
+        return this.decSeparator;
+    }*/
 
     @Override
-	public void setGroupSeparator(String groupSeparator) {
+    public void setGroupSeparator(String groupSeparator) {
         this.groupSeparator = groupSeparator;
     }
-
+/*
     @Override
     public String getGroupSeparator() {
-    	return this.groupSeparator;
-    }
+        return this.groupSeparator;
+    }*/
 
     @Override
-	public void setNumberFormat(String numberFormat) {
+    public void setNumberFormat(String numberFormat) {
         this.numberFormat = numberFormat;
     }
-
+/*
     @Override
     public String getNumberFormat() {
-    	return this.numberFormat;
-    }
+        return this.numberFormat;
+    }*/
 
     @Override
-	public void setXMLUtils(XMLUtils parser) {
+    public void setXMLUtils(XMLUtils parser) {
         this.parser = parser;
     }
-
+/*
     @Override
     public XMLUtils getXMLUtils() {
-    	return this.parser;
-    }
+        return this.parser;
+    }*/
 
     @Override
     public RowSetBuilder getCopy() {
         ExtendedRowSetBuilder copy = new ExtendedRowSetBuilder();
 
-        copy.setName(getName());
-        copy.setLogger(getLogger());
-        copy.setNumberFormat(getNumberFormat());
-        copy.setGroupSeparator(getGroupSeparator());
-        copy.setDecSeparator(getDecSeparator());
-        copy.setXMLUtils(getXMLUtils());
-        copy.setDateFormatter(getDateFormatter());
-        copy.setNumberFormatter(getNumberFormatter());
+        copy.name = this.name;
+        copy.logger = this.logger;
+        copy.numberFormat = this.numberFormat;
+        copy.groupSeparator = this.groupSeparator;
+        copy.decSeparator = this.decSeparator;
+        copy.parser = this.parser;
+        copy.dateFormatter = this.dateFormatter;
+        copy.timeFormatter = this.timeFormatter;
+        copy.numberFormatter = this.numberFormatter;
 
         return copy;
     }
@@ -467,7 +472,7 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
         this.colNames = new String[rsm.getColumnCount() + 1];
 
         for (int i = 1; i < this.fFormatters.length; i++) {
-        	String cName = getColumnName(rsm, i);
+            String cName = getColumnName(rsm, i);
             this.colNames[i] = adaptName(cName);
             FieldFormatter fF = fieldNameToFormatter.get(cName);
             if (fF == null) {
@@ -477,13 +482,13 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
         }
     }
 
-	protected String getColumnName(ResultSetMetaData rsm, int i) throws SQLException {
-		String cName = rsm.getColumnLabel(i);
-		if (cName == null) {
-			cName = rsm.getColumnName(i);
-		}
-		return cName;
-	}
+    protected String getColumnName(ResultSetMetaData rsm, int i) throws SQLException {
+        String cName = rsm.getColumnLabel(i);
+        if (cName == null) {
+            cName = rsm.getColumnName(i);
+        }
+        return cName;
+    }
 
     protected String adaptName(String cName) {
         String res = "";
@@ -497,5 +502,39 @@ public class ExtendedRowSetBuilder implements RowSetBuilder
             }
         }
         return res;
+    }
+
+    /**
+     * @param col
+     * @param fF
+     * @param dateVal
+     * @return
+     * @throws Exception
+     */
+    private String processDateTime(Element col, FieldFormatter fF, Date dateVal, String format)
+            throws Exception {
+        String textVal;
+        boolean isNull = dateVal == null;
+        this.parser.setAttribute(col, AbstractDBO.NULL_NAME, String.valueOf(isNull));
+        if (isNull) {
+            this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, format);
+            textVal = "";
+        }
+        else {
+            if (fF != null) {
+                this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, fF.getDateFormat());
+                textVal = fF.formatDate(dateVal);
+            }
+            else {
+                this.parser.setAttribute(col, AbstractDBO.FORMAT_NAME, format);
+                if (dateVal instanceof Time) {
+                    textVal = this.timeFormatter.format(dateVal);
+                }
+                else {
+                    textVal = this.dateFormatter.format(dateVal);
+                }
+            }
+        }
+        return textVal;
     }
 }

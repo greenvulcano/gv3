@@ -221,10 +221,10 @@
 
     Can contains the following placeholders:
      - fixed : a text string;
-     - ${{propname}}      : a System property name;
-     - sp{{propname}}     : a System property name;
-     - env{{varname}}     : an Environment variable value;
-     - @{{propname}}      : a inProperties property name;
+     - ${{propname[::fallback]}}  : a System property value, 'fallback' (def empty string) if not found;
+     - sp{{propname[::fallback]}} : a System property value, 'fallback' (def empty string) if not found;
+     - env{{varname[::fallback]}} : an Environment variable value, 'fallback' (def empty string) if not found;
+     - @{{propname[::fallback]}}  : a inProperties property value, 'fallback' if not found;
      - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value,
                                         formatted as 'pattern'
      - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} :
@@ -720,8 +720,10 @@
     Tell the engine the RowSet document creation policy.
     Default is standard.
 
+    If the builder is json, to each extracted record is added a string 
+    property dhId containing the id of the statement that generates it.
 -->
-<!ATTLIST DBOSelect rowset-builder (standard|extended|extended-uppercase) #IMPLIED>
+<!ATTLIST DBOSelect rowset-builder (standard|json|extended|extended-uppercase) #IMPLIED>
 
 <!--
     DBO optimized for select operations.
@@ -787,8 +789,10 @@
     Tell the engine the RowSet document creation policy.
     Default is standard.
 
+    If the builder is json, to each extracted record is added a string 
+    property dhId containing the id of the statement that generates it.
 -->
-<!ATTLIST DBOThreadSelect rowset-builder (standard|extended|extended-uppercase) #IMPLIED>
+<!ATTLIST DBOThreadSelect rowset-builder (standard|json|extended|extended-uppercase) #IMPLIED>
 
 <!--
     DBO optimized for select operations and conversion in CSV rows.
@@ -1247,10 +1251,10 @@
     Variable value.
     Can contains the following placeholders:
      - fixed : a text string;
-     - ${{propname}}      : a System property name;
-     - sp{{propname}}     : a System property name;
-     - env{{varname}}     : an Environment variable value;
-     - @{{propname}}      : a inProperties property name;
+     - ${{propname[::fallback]}}  : a System property value, 'fallback' (def empty string) if not found;
+     - sp{{propname[::fallback]}} : a System property value, 'fallback' (def empty string) if not found;
+     - env{{varname[::fallback]}} : an Environment variable value, 'fallback' (def empty string) if not found;
+     - @{{propname[::fallback]}}  : a inProperties property value, 'fallback' if not found;
      - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value,
                                         formatted as 'pattern'
      - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} :

@@ -34,14 +34,15 @@ public class ExtendedUppercaseRowSetBuilder extends ExtendedRowSetBuilder
     public RowSetBuilder getCopy() {
         ExtendedUppercaseRowSetBuilder copy = new ExtendedUppercaseRowSetBuilder();
 
-        copy.setName(getName());
-        copy.setLogger(getLogger());
-        copy.setNumberFormat(getNumberFormat());
-        copy.setGroupSeparator(getGroupSeparator());
-        copy.setDecSeparator(getDecSeparator());
-        copy.setXMLUtils(getXMLUtils());
-        copy.setDateFormatter(getDateFormatter());
-        copy.setNumberFormatter(getNumberFormatter());
+        copy.name = this.name;
+        copy.logger = this.logger;
+        copy.numberFormat = this.numberFormat;
+        copy.groupSeparator = this.groupSeparator;
+        copy.decSeparator = this.decSeparator;
+        copy.parser = this.parser;
+        copy.dateFormatter = this.dateFormatter;
+        copy.timeFormatter = this.timeFormatter;
+        copy.numberFormatter = this.numberFormatter;
 
         return copy;
     }
