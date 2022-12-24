@@ -51,7 +51,7 @@ public abstract class BaseTest extends TestCase {
     {
         super.setUp();
         if (instance == null) {
-            instance = new RSHServer(3099);
+            instance = new RSHServer(3099, 3199);
             instance.startUp();
         }
         FileUtils.deleteQuietly(new File(TEST_FILE_DEST_RESOURCES));

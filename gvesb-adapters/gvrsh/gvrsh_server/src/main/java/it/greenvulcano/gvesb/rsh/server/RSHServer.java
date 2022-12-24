@@ -20,6 +20,13 @@
 package it.greenvulcano.gvesb.rsh.server;
 
 
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+
+import org.apache.log4j.Logger;
+
 import it.greenvulcano.event.util.shutdown.ShutdownEvent;
 import it.greenvulcano.event.util.shutdown.ShutdownEventLauncher;
 import it.greenvulcano.event.util.shutdown.ShutdownEventListener;
@@ -27,13 +34,6 @@ import it.greenvulcano.gvesb.rsh.server.rmi.RSHService;
 import it.greenvulcano.gvesb.rsh.server.rmi.RSHServiceImpl;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.ArgsManager;
-
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-
-import org.apache.log4j.Logger;
 
 /**
  * @version 3.2.0 06/10/2011
@@ -47,11 +47,18 @@ public class RSHServer implements ShutdownEventListener
 
     private Registry         registry = null;
     private RSHService       srvc     = null;
-    private int              port     = 1099;
+    private int              regPort  = 1099;
+    private int              srvcPort = 0;
 
-    public RSHServer(int port) throws RemoteException
+    public RSHServer(int regPort) throws RemoteException
     {
-        this.port = port;
+        this.regPort = regPort;
+    }
+
+    public RSHServer(int regPort, int srvcPort) throws RemoteException
+    {
+        this.regPort = regPort;
+        this.srvcPort = srvcPort;
     }
 
     public void startUp() throws RemoteException
@@ -59,17 +66,17 @@ public class RSHServer implements ShutdownEventListener
         ShutdownEventLauncher.addEventListener(this);
 
         try {
-            registry = LocateRegistry.createRegistry(port);
+            this.registry = LocateRegistry.createRegistry(this.regPort);
         }
         catch (Exception exc) {
             // do nothing
             exc.printStackTrace();
         }
-        if (registry == null) {
-            registry = LocateRegistry.getRegistry(port);
+        if (this.registry == null) {
+            this.registry = LocateRegistry.getRegistry(this.regPort);
         }
-        srvc = new RSHServiceImpl("RSHService");
-        registry.rebind(RSHService.class.getName(), srvc);
+        this.srvc = new RSHServiceImpl("RSHService", this.srvcPort);
+        this.registry.rebind(RSHService.class.getName(), this.srvc);
     }
 
     public void shutDown()
@@ -77,14 +84,14 @@ public class RSHServer implements ShutdownEventListener
         ShutdownEventLauncher.removeEventListener(this);
 
         try {
-            logger.info("Unregistering " + srvc);
-            if (registry != null) {
-                registry.unbind(RSHService.class.getName());
+            logger.info("Unregistering " + this.srvc);
+            if (this.registry != null) {
+                this.registry.unbind(RSHService.class.getName());
             }
-            UnicastRemoteObject.unexportObject(srvc, true);
+            UnicastRemoteObject.unexportObject(this.srvc, true);
         }
         catch (Exception exc) {
-            logger.warn("Error unregistering " + srvc, exc);
+            logger.warn("Error unregistering " + this.srvc, exc);
         }
     }
 
@@ -102,9 +109,14 @@ public class RSHServer implements ShutdownEventListener
     {
         logger.info("Starting RSH Server");
         try {
-            ArgsManager am = new ArgsManager("p:", args);
-            int port = am.getInteger("p", 1099);
-            instance = new RSHServer(port);
+            ArgsManager am = new ArgsManager("p:P:h", args);
+            if (am.exist("h")) {
+            	usage();
+            	return;
+            }
+            int regPort = am.getInteger("p", 1099);
+            int srvcPort = am.getInteger("P", 0);
+            instance = new RSHServer(regPort, srvcPort);
             instance.startUp();
         }
         catch (Exception exc) {
@@ -113,5 +125,9 @@ public class RSHServer implements ShutdownEventListener
         }
         logger.info("Started RSH Server");
     }
+
+	private static void usage() {
+		System.out.println("Usage: RSHServer [-p <registry port | 1099>] [-P <service port | random>] [-h (this help)]");
+	}
 
 }

@@ -1,23 +1,36 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.virtual.rsh;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.rmi.NotBoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -37,19 +50,6 @@ import it.greenvulcano.gvesb.virtual.InvalidDataException;
 import it.greenvulcano.gvesb.virtual.OperationKey;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.rmi.NotBoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * @version 3.2.0 06/10/2011
@@ -82,6 +82,8 @@ public class RemoteShellCallOperation implements CallOperation
      */
     private Map<String, String> propsList     = null;
 
+    private boolean             isDeamon      = false;
+
     private String              clientName    = "";
 
     /**
@@ -92,29 +94,30 @@ public class RemoteShellCallOperation implements CallOperation
     private boolean             dumpOutput    = false;
 
     /**
-     * 
+     *
      * @param node
      *        configuration node.
      * @exception InitializationException
      *            if an error occurs during initialization
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#init(org.w3c.dom.Node)
      */
     @Override
     public void init(Node node) throws InitializationException
     {
         try {
-            clientName = XMLConfig.get(node, "@rsh-client-name");
-            dumpOutput = XMLConfig.getBoolean(node, "@dump-output", false);
+            this.clientName = XMLConfig.get(node, "@rsh-client-name");
+            this.dumpOutput = XMLConfig.getBoolean(node, "@dump-output", false);
+            this.isDeamon = XMLConfig.getBoolean(node, "@is-deamon", false);
 
             if (XMLConfig.exists(node, "@directory")) {
-                baseDirectory = XMLConfig.get(node, "@directory");
-                logger.debug("Configured base directory for command execution: " + baseDirectory);
+                this.baseDirectory = XMLConfig.get(node, "@directory");
+                logger.debug("Configured base directory for command execution: " + this.baseDirectory);
             }
 
             if (XMLConfig.exists(node, "@encoding")) {
-                encoding = XMLConfig.get(node, "@encoding");
-                logger.debug("Configured encoding is:" + encoding);
+                this.encoding = XMLConfig.get(node, "@encoding");
+                logger.debug("Configured encoding is:" + this.encoding);
             }
 
             initCommand(node);
@@ -128,7 +131,7 @@ public class RemoteShellCallOperation implements CallOperation
 
     /**
      * Initializes the command string.
-     * 
+     *
      * @param node
      *        the configuration node.
      * @throws XMLConfigException
@@ -136,10 +139,10 @@ public class RemoteShellCallOperation implements CallOperation
      */
     private void initCommand(Node node) throws XMLConfigException
     {
-        commandList = new ArrayList<String>();
+        this.commandList = new ArrayList<String>();
         if (XMLConfig.exists(node, "cmd")) {
             String currCommand = XMLConfig.get(node, "cmd/text()", "").trim();
-            commandList.add(currCommand);
+            this.commandList.add(currCommand);
             logger.debug("Configured command: " + currCommand);
         }
         else {
@@ -148,7 +151,7 @@ public class RemoteShellCallOperation implements CallOperation
             StringBuilder cmdL = new StringBuilder();
             for (int i = 0; i < size; i++) {
                 String currCommand = XMLConfig.get(list.item(i), "text()", "").trim();
-                commandList.add(currCommand);
+                this.commandList.add(currCommand);
                 cmdL.append(currCommand).append(" ");
             }
             logger.debug("Configured command: " + cmdL);
@@ -158,7 +161,7 @@ public class RemoteShellCallOperation implements CallOperation
     /**
      * Initializes the environment properties to be set before invoking the
      * shell command.
-     * 
+     *
      * @param node
      *        the configuration node.
      * @throws XMLConfigException
@@ -169,12 +172,12 @@ public class RemoteShellCallOperation implements CallOperation
         NodeList list = XMLConfig.getNodeList(node, "env-property");
         int size = list.getLength();
         if (size > 0) {
-            propsList = new HashMap<String, String>();
+            this.propsList = new HashMap<String, String>();
             for (int i = 0; i < size; i++) {
                 Node item = list.item(i);
                 String name = XMLConfig.get(item, "@name");
                 String value = XMLConfig.get(item, "@value");
-                propsList.put(name, value);
+                this.propsList.put(name, value);
                 logger.debug("Configured environment property: " + name + "=" + value);
             }
         }
@@ -183,15 +186,15 @@ public class RemoteShellCallOperation implements CallOperation
     /**
      * Execute the operation using an <code>GVBuffer</code>. Usually this method
      * is used in order to call external systems.
-     * 
+     *
      * @param gvBuffer
      *        input data for the operation.
-     * 
+     *
      * @return an <code>GVBuffer</code> containing the operation result.
-     * 
-     * 
+     *
+     *
      * @exception Exception
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#perform(it.greenvulcano.gvesb.buffer.GVBuffer)
      */
     @Override
@@ -204,22 +207,22 @@ public class RemoteShellCallOperation implements CallOperation
 
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
 
-            for (int i = 0; i < commandList.size(); i++) {
-                realCommand.add(PropertiesHandler.expand(commandList.get(i), params, gvBuffer));
+            for (int i = 0; i < this.commandList.size(); i++) {
+                realCommand.add(PropertiesHandler.expand(this.commandList.get(i), params, gvBuffer));
             }
 
-            if (propsList != null) {
+            if (this.propsList != null) {
                 realProps = new HashMap<String, String>();
-                Iterator<String> it = propsList.keySet().iterator();
+                Iterator<String> it = this.propsList.keySet().iterator();
                 while (it.hasNext()) {
                     String name = it.next();
-                    String value = propsList.get(name);
+                    String value = this.propsList.get(name);
                     realProps.put(name, PropertiesHandler.expand(value, params, gvBuffer));
                 }
             }
 
-            if (baseDirectory != null) {
-                realDirectory = PropertiesHandler.expand(baseDirectory, params, gvBuffer);
+            if (this.baseDirectory != null) {
+                realDirectory = PropertiesHandler.expand(this.baseDirectory, params, gvBuffer);
             }
 
             if (logger.isDebugEnabled()) {
@@ -266,7 +269,7 @@ public class RemoteShellCallOperation implements CallOperation
 
     /**
      * Executes the shell command.
-     * 
+     *
      * @param id
      *        The GV transaction ID
      * @param cmds
@@ -276,9 +279,9 @@ public class RemoteShellCallOperation implements CallOperation
      * @param directory
      *        The execution directory. If null, command will be executed within
      *        current working directory.
-     * 
+     *
      * @return the shell command output, as read from the standard output.
-     * 
+     *
      * @throws IOException
      *         if an error occurs while performing the shell command.
      * @throws CallException
@@ -291,13 +294,13 @@ public class RemoteShellCallOperation implements CallOperation
     {
         RSHServiceClient svcClient = null;
         try {
-            svcClient = RSHServiceClientManager.instance().getRSHServiceClient(clientName);
+            svcClient = RSHServiceClientManager.instance().getRSHServiceClient(this.clientName);
 
-            ShellCommandDef cmdD = new ShellCommandDef(id, cmds, directory, props);
+            ShellCommandDef cmdD = new ShellCommandDef(id, cmds, directory, props, this.isDeamon);
 
             ShellCommandResult cmdR = svcClient.shellExec(cmdD);
 
-            if (logger.isDebugEnabled() && dumpOutput) {
+            if (logger.isDebugEnabled() && this.dumpOutput) {
                 logger.debug("Remote Shell command execution terminated:");
                 logger.debug("ExitCode: " + cmdR.getExitCode());
                 logger.debug("StdOut:\n" + cmdR.getStdOut());
@@ -319,7 +322,7 @@ public class RemoteShellCallOperation implements CallOperation
 
 
     /**
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#cleanUp()
      */
     @Override
@@ -329,7 +332,7 @@ public class RemoteShellCallOperation implements CallOperation
     }
 
     /**
-     * 
+     *
      * @see it.greenvulcano.gvesb.virtual.Operation#destroy()
      */
     @Override
@@ -340,7 +343,7 @@ public class RemoteShellCallOperation implements CallOperation
 
     /**
      * Sets the Operation key.
-     * 
+     *
      * @param key
      *        the key to set
      * @see it.greenvulcano.gvesb.virtual.Operation#setKey(it.greenvulcano.gvesb.virtual.OperationKey)
@@ -357,12 +360,12 @@ public class RemoteShellCallOperation implements CallOperation
     @Override
     public OperationKey getKey()
     {
-        return key;
+        return this.key;
     }
 
     /**
      * Return the alias for the given service
-     * 
+     *
      * @param gvBuffer
      *        the input service data
      * @return the configured alias
