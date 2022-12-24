@@ -34,6 +34,7 @@ import org.w3c.dom.NodeList;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
 /**
  *
@@ -57,14 +58,14 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
     private boolean           debugJDBCConn   = false;
 
     @Override
-	public void init(Node node) throws GVDBException
+    public void init(Node node) throws GVDBException
     {
         try {
             this.name = XMLConfig.get(node, "@name");
             this.className = XMLConfig.get(node, "@driver-class");
-            this.user = XMLConfig.get(node, "@user", null);
-            this.password = XMLConfig.getDecrypted(node, "@password", null);
-            this.url = XMLConfig.get(node, "@url");
+            this.user = PropertiesHandler.expand(XMLConfig.get(node, "@user", null));
+            this.password = PropertiesHandler.expand(XMLConfig.getDecrypted(node, "@password", null));
+            this.url = PropertiesHandler.expand(XMLConfig.get(node, "@url"));
             try {
                 this.debugJDBCConn = Boolean.getBoolean("it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder.debugJDBCConn");
             }
@@ -93,16 +94,16 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
             }
             NodeList nl = XMLConfig.getNodeList(node, "ConnectionProperties/PropertyDef");
             if (nl.getLength() > 0) {
-            	this.props = new Properties();
-            	if (this.user != null) {
-            		this.props.put("user", this.user);
-            	}
-            	if (this.password != null) {
-            		this.props.put("password", this.password);
-            	}
-            	for (int i = 0; i < nl.getLength(); i++) {
-					this.props.put(XMLConfig.get(nl.item(i), "@name"), XMLConfig.get(nl.item(i), "@value"));
-				}
+                this.props = new Properties();
+                if (this.user != null) {
+                    this.props.put("user", this.user);
+                }
+                if (this.password != null) {
+                    this.props.put("password", this.password);
+                }
+                for (int i = 0; i < nl.getLength(); i++) {
+                    this.props.put(XMLConfig.get(nl.item(i), "@name"), XMLConfig.get(nl.item(i), "@value"));
+                }
             }
         }
         catch (Exception exc) {
@@ -111,32 +112,32 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
 
         ConnectionFactory connectionFactory = null;
         if (this.props != null) {
-        	connectionFactory = new DriverManagerConnectionFactory(this.url, this.props);
+            connectionFactory = new DriverManagerConnectionFactory(this.url, this.props);
         }
         else {
-        	connectionFactory = new DriverManagerConnectionFactory(this.url, this.user, this.password);
+            connectionFactory = new DriverManagerConnectionFactory(this.url, this.user, this.password);
         }
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory,
                 this.connectionPool, null, this.validationQuery, false, true);
         this.dataSource = new PoolingDataSource(this.connectionPool);
 
         if (this.props != null) {
-        	Properties ps = new Properties();
-        	ps.putAll(this.props);
-        	ps .remove("password");
-        	logger.debug("Crated DriverPoolConnectionBuilder(" + this.name + "). className: " + this.className + " - properties: " + ps
+            Properties ps = new Properties();
+            ps.putAll(this.props);
+            ps .remove("password");
+            logger.debug("Crated DriverPoolConnectionBuilder(" + this.name + "). className: " + this.className + " - properties: " + ps
                 + " - url: " + this.url + " - Pool: [" + this.connectionPool.getMinIdle() + "/"
                 + this.connectionPool.getMaxIdle() + "/" + this.connectionPool.getMaxActive() + "]");
         }
         else {
-        	logger.debug("Crated DriverPoolConnectionBuilder(" + this.name + "). className: " + this.className + " - user: " + this.user
+            logger.debug("Crated DriverPoolConnectionBuilder(" + this.name + "). className: " + this.className + " - user: " + this.user
                 + " - password: ********* - url: " + this.url + " - Pool: [" + this.connectionPool.getMinIdle() + "/"
                 + this.connectionPool.getMaxIdle() + "/" + this.connectionPool.getMaxActive() + "]");
         }
     }
 
     @Override
-	public Connection getConnection() throws GVDBException
+    public Connection getConnection() throws GVDBException
     {
         try {
             Connection conn = this.dataSource.getConnection();
@@ -152,28 +153,28 @@ public class DriverPoolConnectionBuilder implements ConnectionBuilder
     }
 
     @Override
-	public void releaseConnection(Connection conn) throws GVDBException
+    public void releaseConnection(Connection conn) throws GVDBException
     {
         if (conn != null) {
-	    	String msg = "";
-	    	if (this.debugJDBCConn) {
-	    		msg = "Closed JDBC Connection [" + this.name + "]: [" + conn + "/" + conn.hashCode() + "]";
-	    	}
+            String msg = "";
+            if (this.debugJDBCConn) {
+                msg = "Closed JDBC Connection [" + this.name + "]: [" + conn + "/" + conn.hashCode() + "]";
+            }
             try {
                 conn.close();
             }
             catch (Exception exc) {
                 logger.error("DriverPoolConnectionBuilder - Error while closing Connection[" + this.name + "]: [" + conn
-                		 + "/" + conn.hashCode() + "]", exc);
+                         + "/" + conn.hashCode() + "]", exc);
             }
-	        if (this.debugJDBCConn) {
-	            logger.debug(msg + " [" + this.connectionPool.getNumActive() + "/" + this.connectionPool.getNumIdle() + "]");
-	        }
+            if (this.debugJDBCConn) {
+                logger.debug(msg + " [" + this.connectionPool.getNumActive() + "/" + this.connectionPool.getNumIdle() + "]");
+            }
         }
     }
 
     @Override
-	public void destroy()
+    public void destroy()
     {
         if (this.connectionPool != null) {
             try {

@@ -22,6 +22,7 @@ package it.greenvulcano.gvesb.j2ee.db.connections.impl;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.j2ee.db.GVDBException;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -46,66 +47,70 @@ public class DriverConnectionBuilder implements ConnectionBuilder
     private String        name          = null;
     private boolean       debugJDBCConn = false;
 
+    @Override
     public void init(Node node) throws GVDBException
     {
         try {
-            name = XMLConfig.get(node, "@name");
-            className = XMLConfig.get(node, "@driver-class");
-            user = XMLConfig.get(node, "@user", "");
-            password = XMLConfig.getDecrypted(node, "@password", "");
-            url = XMLConfig.get(node, "@url");
+            this.name = XMLConfig.get(node, "@name");
+            this.className = XMLConfig.get(node, "@driver-class");
+            this.user = PropertiesHandler.expand(XMLConfig.get(node, "@user", null));
+            this.password = PropertiesHandler.expand(XMLConfig.getDecrypted(node, "@password", null));
+            this.url = PropertiesHandler.expand(XMLConfig.get(node, "@url"));
 
-            Class.forName(className);
+            Class.forName(this.className);
         }
         catch (Exception exc) {
             throw new GVDBException("DriverConnectionBuilder - Initialization error", exc);
         }
         try {
-            debugJDBCConn = Boolean.getBoolean("it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder.debugJDBCConn");
+        	this.debugJDBCConn = Boolean.getBoolean("it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder.debugJDBCConn");
         }
         catch (Exception exc) {
-            debugJDBCConn = false;
+        	this.debugJDBCConn = false;
         }
-        logger.debug("Crated DriverConnectionBuilder(" + name + "). className: " + className + " - user: " + user
-                + " - password: ********* - url: " + url);
+        logger.debug("Crated DriverConnectionBuilder(" + this.name + "). className: " + this.className + " - user: " + this.user
+                + " - password: ********* - url: " + this.url);
     }
 
+    @Override
     public Connection getConnection() throws GVDBException
     {
         try {
             Connection conn = null;
-            if (!user.equals("")) {
-                conn = DriverManager.getConnection(url, user, password);
+            if (!this.user.equals("")) {
+                conn = DriverManager.getConnection(this.url, this.user, this.password);
             }
             else {
-                conn = DriverManager.getConnection(url);
+                conn = DriverManager.getConnection(this.url);
             }
-            if (debugJDBCConn && (conn != null)) {
-                logger.debug("Created JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "]");
+            if (this.debugJDBCConn && (conn != null)) {
+                logger.debug("Created JDBC Connection [" + this.name + "]: [" + conn + "/" + conn.hashCode() + "]");
             }
             return conn;
         }
         catch (Exception exc) {
-            throw new GVDBException("DriverConnectionBuilder - Error while creating Connection[" + name + "]", exc);
+            throw new GVDBException("DriverConnectionBuilder - Error while creating Connection[" + this.name + "]", exc);
         }
     }
 
+    @Override
     public void releaseConnection(Connection conn) throws GVDBException
     {
         if (conn != null) {
-		    if (debugJDBCConn) {
-		        logger.debug("Closed JDBC Connection [" + name + "]: [" + conn + "/" + conn.hashCode() + "]");
-		    }
+            if (this.debugJDBCConn) {
+                logger.debug("Closed JDBC Connection [" + this.name + "]: [" + conn + "/" + conn.hashCode() + "]");
+            }
             try {
                 conn.close();
             }
             catch (Exception exc) {
-                logger.error("DriverConnectionBuilder - Error while closing Connection[" + name + "]: [" + conn + "/" + conn.hashCode() + "]",
+                logger.error("DriverConnectionBuilder - Error while closing Connection[" + this.name + "]: [" + conn + "/" + conn.hashCode() + "]",
                         exc);
             }
         }
     }
 
+    @Override
     public void destroy()
     {
         logger.debug("Destroyed DriverConnectionBuilder(" + name + ")");
