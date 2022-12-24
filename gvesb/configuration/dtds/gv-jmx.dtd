@@ -48,45 +48,45 @@
 
     #Template:
         <xsl:template match="jboss-distributed-mbean-server-finder">
-        	<xsl:if test="@user or @password or @login-context or @hajndi-mbean-name or @RMIAdaptor-jndi-name">
-        		<table cellspacing ="0" cellpadding="0">
-        			<xsl:if test="@user">
-        				<tr>
-		                    <td>User:</td>
-		                    <td width="20"></td>
-		                    <td><b><xsl:value-of select="@user"/></b></td>
-		                </tr>
-        			</xsl:if>
-        			<xsl:if test="@password">
-        				<tr>
-		                    <td>Password:</td>
-		                    <td width="20"></td>
-		                    <td><b><xsl:value-of select="@password"/></b></td>
-		                </tr>
-        			</xsl:if>
-        			<xsl:if test="@login-context">
-        				<tr>
-		                    <td>Login Context:</td>
-		                    <td width="20"></td>
-		                    <td><b><xsl:value-of select="@login-context"/></b></td>
-		                </tr>
-        			</xsl:if>
-        			<xsl:if test="@hajndi-mbean-name">
-        				<tr>
-		                    <td>HA JNDI MBean Name:</td>
-		                    <td width="20"></td>
-		                    <td><b><xsl:value-of select="@hajndi-mbean-name"/></b></td>
-		                </tr>
-        			</xsl:if>
-        			<xsl:if test="@RMIAdaptor-jndi-name">
-        				<tr>
-		                    <td>RMIAdaptor JNDI Name:</td>
-		                    <td width="20"></td>
-		                    <td><b><xsl:value-of select="@RMIAdaptor-jndi-name"/></b></td>
-		                </tr>
-        			</xsl:if>
-        		</table>
-        	</xsl:if>
+            <xsl:if test="@user or @password or @login-context or @hajndi-mbean-name or @RMIAdaptor-jndi-name">
+                <table cellspacing ="0" cellpadding="0">
+                    <xsl:if test="@user">
+                        <tr>
+                            <td>User:</td>
+                            <td width="20"></td>
+                            <td><b><xsl:value-of select="@user"/></b></td>
+                        </tr>
+                    </xsl:if>
+                    <xsl:if test="@password">
+                        <tr>
+                            <td>Password:</td>
+                            <td width="20"></td>
+                            <td><b><xsl:value-of select="@password"/></b></td>
+                        </tr>
+                    </xsl:if>
+                    <xsl:if test="@login-context">
+                        <tr>
+                            <td>Login Context:</td>
+                            <td width="20"></td>
+                            <td><b><xsl:value-of select="@login-context"/></b></td>
+                        </tr>
+                    </xsl:if>
+                    <xsl:if test="@hajndi-mbean-name">
+                        <tr>
+                            <td>HA JNDI MBean Name:</td>
+                            <td width="20"></td>
+                            <td><b><xsl:value-of select="@hajndi-mbean-name"/></b></td>
+                        </tr>
+                    </xsl:if>
+                    <xsl:if test="@RMIAdaptor-jndi-name">
+                        <tr>
+                            <td>RMIAdaptor JNDI Name:</td>
+                            <td width="20"></td>
+                            <td><b><xsl:value-of select="@RMIAdaptor-jndi-name"/></b></td>
+                        </tr>
+                    </xsl:if>
+                </table>
+            </xsl:if>
         </xsl:template>
 
 -->
@@ -102,33 +102,33 @@
 -->
 <!ATTLIST jboss-distributed-mbean-server-finder class CDATA #FIXED "it.greenvulcano.jboss.jmx.DistributedMBeanServerFinder">
 <!--
-	Default to: admin
+    Default to: admin
 
-	#NotNull
+    #NotNull
 -->
 <!ATTLIST jboss-distributed-mbean-server-finder user CDATA #IMPLIED>
 <!--
-	Default to: admin
+    Default to: admin
 
-	#NotNull
+    #NotNull
 -->
 <!ATTLIST jboss-distributed-mbean-server-finder password CDATA #IMPLIED>
 <!--
-	Default to : jboss
+    Default to : jboss
 
-	#NotNull
+    #NotNull
 -->
 <!ATTLIST jboss-distributed-mbean-server-finder login-context CDATA #IMPLIED>
 <!--
-	Default to : jboss:service=HAJNDI
+    Default to : jboss:service=HAJNDI
 
-	#NotNull
+    #NotNull
 -->
 <!ATTLIST jboss-distributed-mbean-server-finder hajndi-mbean-name CDATA #IMPLIED>
 <!--
-	Default to : jmx/rmi/RMIAdaptor
+    Default to : jmx/rmi/RMIAdaptor
 
-	#NotNull
+    #NotNull
 -->
 <!ATTLIST jboss-distributed-mbean-server-finder RMIAdaptor-jndi-name CDATA #IMPLIED>
 
@@ -380,10 +380,10 @@
      - %{{class}}         : the obj class name;
      - %{{fqclass}}       : the obj fully qualified class name;
      - %{{package}}       : the obj package name;
-     - ${{propname}}      : a System property name;
-     - sp{{propname}}     : a System property name;
-     - env{{varname}}     : an Environment variable value;
-     - @{{propname}}      : a inProperties property name;
+     - ${{propname[::fallback]}}  : a System property value, 'fallback' (def empty string) if not found;
+     - sp{{propname[::fallback]}} : a System property value, 'fallback' (def empty string) if not found;
+     - env{{varname[::fallback]}} : an Environment variable value, 'fallback' (def empty string) if not found;
+     - @{{propname[::fallback]}}  : a inProperties property value, 'fallback' if not found;
      - timestamp{{pattern}} : return the current timestamp formatted as 'pattern'
      - dateformat{{date::source-pattern::dest-pattern}} : reformat 'date' from 'source-pattern' to 'dest-pattern'
      - decode{{field[::cond1::val1][::cond2::val2][cond...n::val...n]::default}} :

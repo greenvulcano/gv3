@@ -589,10 +589,10 @@
 
     Can contains the following placeholders:
      - fixed : a text string;
-     - ${{propname}}      : a System property name;
-     - sp{{propname}}     : a System property name;
-     - env{{varname}}     : an Environment variable value;
-     - @{{propname}}      : a inProperties property name;
+     - ${{propname[::fallback]}}  : a System property value, 'fallback' (def empty string) if not found;
+     - sp{{propname[::fallback]}} : a System property value, 'fallback' (def empty string) if not found;
+     - env{{varname[::fallback]}} : an Environment variable value, 'fallback' (def empty string) if not found;
+     - @{{propname[::fallback]}}  : a inProperties property value, 'fallback' if not found;
      - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value,
                                         formatted as 'pattern'
      - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} :
@@ -1149,10 +1149,10 @@
      - %{{class}}         : the obj class name;
      - %{{fqclass}}       : the obj fully qualified class name;
      - %{{package}}       : the obj package name;
-     - ${{propname}}      : a System property name;
-     - sp{{propname}}     : a System property name;
-     - env{{varname}}     : an Environment variable value;
-     - @{{propname}}      : a inProperties property name;
+     - ${{propname[::fallback]}}  : a System property value, 'fallback' (def empty string) if not found;
+     - sp{{propname[::fallback]}} : a System property value, 'fallback' (def empty string) if not found;
+     - env{{varname[::fallback]}} : an Environment variable value, 'fallback' (def empty string) if not found;
+     - @{{propname[::fallback]}}  : a inProperties property value, 'fallback' if not found;
      - timestamp{{pattern[::tZone]]}} : return the current timestamp, in optional tZone value,
                                         formatted as 'pattern'
      - dateformat{{date::source-pattern::dest-pattern[::source-tZone::dest-tZone]}} :

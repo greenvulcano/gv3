@@ -80,6 +80,12 @@
         </dependency>
 
         <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvdatahandler</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
             <scope>provided</scope>

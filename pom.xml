@@ -437,6 +437,13 @@
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-postmark</artifactId>
+            <version>3.4.0-Final</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-ldap</artifactId>
             <version>3.4.0-Final</version>
             <type>jar</type>
@@ -631,7 +638,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvrsh_client</artifactId>
-            <version>3.4.0-Final</version>
+            <version>3.4.0.1-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -669,7 +676,15 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-kafka</artifactId>
-            <version>3.4.0.0-Final</version>
+            <version>3.4.0-Final</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-postmark</artifactId>
+            <version>3.4.0-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

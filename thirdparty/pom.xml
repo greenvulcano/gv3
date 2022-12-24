@@ -301,45 +301,45 @@
                                 <componentId>openspcoop</componentId>
                             </mapping>
                         </dependency>
-				        <dependency>
-				            <groupId>com.microsoft.ews-java-api</groupId>
-				            <artifactId>ews-java-api</artifactId>
+                        <dependency>
+                            <groupId>com.microsoft.ews-java-api</groupId>
+                            <artifactId>ews-java-api</artifactId>
                             <mapping>
                                 <componentId>ewsjavaapi</componentId>
                             </mapping>
-				        </dependency>
-				        <dependency>
-				            <groupId>com.microsoft.azure</groupId>
-				            <artifactId>adal4j</artifactId>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.microsoft.azure</groupId>
+                            <artifactId>adal4j</artifactId>
                             <mapping>
                                 <componentId>azure</componentId>
                             </mapping>
-				        </dependency>
-				        <dependency>
-				            <groupId>joda-time</groupId>
-				            <artifactId>joda-time</artifactId>
+                        </dependency>
+                        <dependency>
+                            <groupId>joda-time</groupId>
+                            <artifactId>joda-time</artifactId>
                             <mapping>
                                 <componentId>jodatime</componentId>
                             </mapping>
-				        </dependency>
-				        <dependency>
-				            <groupId>org.apache.httpcomponents</groupId>
-				            <artifactId>*</artifactId>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.httpcomponents</groupId>
+                            <artifactId>*</artifactId>
                             <mapping>
                                 <componentId>httpcomponents</componentId>
                             </mapping>
-				        </dependency>
-				        <dependency>
-				            <groupId>com.nimbusds</groupId>
-				            <artifactId>*</artifactId>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.nimbusds</groupId>
+                            <artifactId>*</artifactId>
                             <mapping>
                                 <componentId>nimbusds</componentId>
                             </mapping>
-				        </dependency>
-				        <dependency>
-				            <groupId>xmlunit</groupId>
-				            <artifactId>xmlunit</artifactId>
-				        </dependency>
+                        </dependency>
+                        <dependency>
+                            <groupId>xmlunit</groupId>
+                            <artifactId>xmlunit</artifactId>
+                        </dependency>
                         <dependency>
                             <groupId>org.springframework</groupId>
                             <artifactId>*</artifactId>
@@ -354,13 +354,13 @@
                                 <componentId>json</componentId>
                             </mapping>
                         </dependency>
-				        <dependency>
-				            <groupId>com.jayway.jsonpath</groupId>
-				            <artifactId>json-path</artifactId>
+                        <dependency>
+                            <groupId>com.jayway.jsonpath</groupId>
+                            <artifactId>json-path</artifactId>
                             <mapping>
                                 <componentId>jsonpath</componentId>
                             </mapping>
-				        </dependency>
+                        </dependency>
                         <dependency>
                             <groupId>com.github.fge</groupId>
                             <artifactId>*</artifactId>
@@ -400,6 +400,36 @@
                             <artifactId>*</artifactId>
                             <mapping>
                                 <componentId>xerces</componentId>
+                            </mapping>
+                        </dependency>
+
+
+                        <dependency>
+                            <groupId>org.apache.kafka</groupId>
+                            <artifactId>kafka-clients</artifactId>
+                            <mapping>
+                                <componentId>kafka</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.github.luben</groupId>
+                            <artifactId>zstd-jni</artifactId>
+                            <mapping>
+                                <componentId>kafka</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.lz4</groupId>
+                            <artifactId>lz4-java</artifactId>
+                            <mapping>
+                                <componentId>kafka</componentId>
+                            </mapping>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.xerial.snappy</groupId>
+                            <artifactId>snappy-java</artifactId>
+                            <mapping>
+                                <componentId>kafka</componentId>
                             </mapping>
                         </dependency>
 
@@ -528,8 +558,8 @@
             <artifactId>quartz-oracle</artifactId>
         </dependency>
         <dependency>
-            <groupId>rhino</groupId>
-            <artifactId>js</artifactId>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
         </dependency>
         <dependency>
             <groupId>jcifs</groupId>
@@ -552,7 +582,7 @@
             <artifactId>ognl</artifactId>
         </dependency>
         <dependency>
-            <groupId>javassist</groupId>
+            <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
         <dependency>
@@ -1069,6 +1099,10 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.wildbit.java</groupId>
+            <artifactId>postmark</artifactId>
+        </dependency>
 
         <!-- GVESB -->
         <dependency>
@@ -1170,6 +1204,14 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-openspcoop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-postmark</artifactId>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>

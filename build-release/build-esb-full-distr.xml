@@ -82,6 +82,7 @@
                 <include name="Extra/GVBpel.dtd"/>
                 <include name="Extra/GVSAP.dtd"/>
                 <include name="Extra/GVPushNotification.dtd"/>
+                <include name="Extra/GVKafka.dtd"/>
             </fileset>
         </copy>
 
@@ -259,9 +260,9 @@
             <fileset dir="${icu4j.icu4j.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <!--<fileset dir="${javassist.javassist.lib}">
+            <fileset dir="${org.javassist.lib}">
                 <include name="*.jar"/>
-            </fileset>-->
+            </fileset>
             <fileset dir="${javax.xml.bind.lib}">
                 <include name="*.jar"/>
             </fileset>
@@ -304,7 +305,14 @@
             <fileset dir="${fge.fge.lib}">
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${rhino.rhino.lib}">
+            <!-- Rhino -->
+            <fileset dir="${org.mozilla.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${kafka.kafka.lib}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${com.wildbit.java.lib}">
                 <include name="*.jar"/>
             </fileset>
             <fileset dir="${com.jcraft.lib}">

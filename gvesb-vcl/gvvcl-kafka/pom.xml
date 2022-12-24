@@ -27,7 +27,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>javassist</groupId>
+            <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
         <dependency>
@@ -36,16 +36,16 @@
         </dependency>
         
         <!-- Declare kafka-junit4 dependency -->
-		<dependency>
-		    <groupId>com.salesforce.kafka.test</groupId>
-		    <artifactId>kafka-junit4</artifactId>
-		    <scope>test</scope>
-		</dependency>
-		<dependency>
-		    <groupId>org.apache.kafka</groupId>
-		    <artifactId>kafka_2.12</artifactId>
-		    <scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>com.salesforce.kafka.test</groupId>
+            <artifactId>kafka-junit4</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.12</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -183,6 +183,7 @@
 																												<th>Used in</th>
 																											</tr>
 																											<%
+   String key = null;					
    try { 
     GVDeploy deploy = (GVDeploy)session.getAttribute("deploy");
 	GVConfig gvConfigZip = deploy.getZipGVConfig();
@@ -194,6 +195,7 @@
 	for(int i=0;i<operations.getLength();i++){
 	  String system = XMLUtils.get_S(operations.item(i), "@id-system");
       String operation = XMLUtils.get_S(operations.item(i), "@operation-name");
+      key = servizio + ":" + operation + ":" + system;
 	  String channel = XMLUtils.selectSingleNode_S(nodeServizio,"Operation/Participant[@id-system='"+system+"']/@id-channel").getNodeValue();
 	  List<String> listaServizi = gvConfigServer.getListaServiziVclOP(system, channel,operation);
 	  if(listaServizi.size()>0){
@@ -212,7 +214,8 @@
 	 }
    }
    catch (Exception e) {
-			e.printStackTrace();
+	   System.err.println("Error searching Partecipant for " + key);
+		e.printStackTrace();
    }
  %>
 																										</table>
