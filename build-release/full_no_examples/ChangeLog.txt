@@ -1,4 +1,52 @@
 -------------------------------------------
+ESB version 3.4.0.14
+-------------------------------------------
+
+Commons:
+- Added capability to use §#...#§ or ?#...#? instead of {{...}} in placeholder usage, to avoid conflict with json strings
+- Added fallback (default) value for ${{ sp{{ @{{ env{{ metadata
+- Added capability to use regular expressions in replace{{ placeholder
+- Added destroy() method to do internal clean-up
+- Added capability to configure connection properties for JDBC driver
+- Now can be used metadata in DriverConnectionBuilder and DriverPoolConnectionBuilder configuration parameters
+- Added local file statistics writer
+- Added support for running in no-XA environments
+- Updated Oracle, MySQL, PosgreSQL drivers
+- Updated javascript engine
+
+Core:
+- Explicitly called destroy() on contained ChangeGVBuffer instance
+- Corrected Result state in case of timeout
+
+DTE:
+- Improved support to JSON array on XML<->JSON converter
+- Improved management of Node input objects.
+
+RSH Handler:
+- Added parameter to define service port listener for RSH Server
+- Added parameter to define an rsh-call operation as deamon (runs in back-ground)
+
+DataHandler:
+- Added support for JSON RowSet Builder
+- Added support for new SQL types formatter
+- Added support for Extended Uppercase RowSet Builder
+- Added explicit support to DECIMAL and LONG values, added capability to set as NULL in/out parameters on procedure calls
+
+VCL:
+- Added VCL Kafka enqueue operation
+
+VCL Mail:
+- Added support for metadata in to, cc, bcc definition
+- Added implementation for Postmark provider
+
+VCL Http:
+- Associated credentials to actual remote host value (after placeholder resolution)
+
+GVConsole:
+- Improved deployment of XPath and ConnectionBuilder configurations
+- Improved configuration deployment
+
+-------------------------------------------
 ESB version 3.4.0.13
 -------------------------------------------
 
@@ -58,7 +106,7 @@ Core:
 GVConsole:
 - Updated GVConsole in order to handle service level import/export with dependency management and visual comparison of deployment differences
 
-DTEControlled:
+DTE:
 - Improved management and logging of XML data
 - Added support to placeholders into transformers parameters
 
@@ -97,7 +145,7 @@ Commons:
 - Modified sqlX placeholder in order to return an empty string instead of null if no data found
 - Added dateAdd and dateformatAdd placeholders
 
-DTEControlled:
+DTE:
 - Added capability to specify file encoding in csv to xml DTE transformer
 - Added support at xml to json converter to use * as "all fields" for forcing conversion to string
 
@@ -386,7 +434,7 @@ GVConsole:
 
 DTE:
 - Added basic json to xml and xml to json DTE transformers
-- Improved DTEControlled clean-up on destroy.
+- Improved DTEController clean-up on destroy.
 
 DataHandler:
 - DBOBuilder: renamed Merge element to XMLMerge

@@ -1,4 +1,52 @@
 -------------------------------------------
+ESB version 3.4.0.14
+-------------------------------------------
+
+Commons:
+- Added capability to use §#...#§ or ?#...#? instead of {{...}} in placeholder usage, to avoid conflict with json strings
+- Added fallback (default) value for ${{ sp{{ @{{ env{{ metadata
+- Added capability to use regular expressions in replace{{ placeholder
+- Added destroy() method to do internal clean-up
+- Added capability to configure connection properties for JDBC driver
+- Now can be used metadata in DriverConnectionBuilder and DriverPoolConnectionBuilder configuration parameters
+- Added local file statistics writer
+- Added support for running in no-XA environments
+- Updated Oracle, MySQL, PosgreSQL drivers
+- Updated javascript engine
+
+Core:
+- Explicitly called destroy() on contained ChangeGVBuffer instance
+- Corrected Result state in case of timeout
+
+DTE:
+- Improved support to JSON array on XML<->JSON converter
+- Improved management of Node input objects.
+
+RSH Handler:
+- Added parameter to define service port listener for RSH Server
+- Added parameter to define an rsh-call operation as deamon (runs in back-ground)
+
+DataHandler:
+- Added support for JSON RowSet Builder
+- Added support for new SQL types formatter
+- Added support for Extended Uppercase RowSet Builder
+- Added explicit support to DECIMAL and LONG values, added capability to set as NULL in/out parameters on procedure calls
+
+VCL:
+- Added VCL Kafka enqueue operation
+
+VCL Mail:
+- Added support for metadata in to, cc, bcc definition
+- Added implementation for Postmark provider
+
+VCL Http:
+- Associated credentials to actual remote host value (after placeholder resolution)
+
+GVConsole:
+- Improved deployment of XPath and ConnectionBuilder configurations
+- Improved configuration deployment
+
+-------------------------------------------
 ESB version 3.4.0.13
 -------------------------------------------
 
