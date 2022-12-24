@@ -35,7 +35,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Node;
@@ -573,7 +572,7 @@ public class ChangeGVBuffer
      */
     private void handleJavaScript(GVBuffer gvBuffer, Map<String, Object> environment) throws GVInternalException, InterruptedException
     {
-        this.cx = ContextFactory.getGlobal().enterContext();
+        this.cx = Context.enter();
         Scriptable scope = null;
         try {
             scope = JSInitManager.instance().getJSInit(this.scopeName).getScope();

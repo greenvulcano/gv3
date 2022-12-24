@@ -30,7 +30,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 
@@ -55,7 +54,7 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
     {
         try {
             initContext();
-            scope = JSInit.setProperty(scope, key, value);
+            this.scope = JSInit.setProperty(this.scope, key, value);
         }
         catch (Exception exc) {
             logger.error("JavaScriptExpressionEvaluator - Error setting key[" + key + "] in context", exc);
@@ -72,7 +71,7 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
             initContext();
             for (Map.Entry<String, Object> element : context.entrySet()) {
                 try {
-                    scope = JSInit.setProperty(scope, element.getKey(), element.getValue());
+                    this.scope = JSInit.setProperty(this.scope, element.getKey(), element.getValue());
                 }
                 catch (Exception exc) {
                     logger.error("JavaScriptExpressionEvaluator - Error setting key[" + element.getKey() + "] in context", exc);
@@ -91,9 +90,9 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
     public Object getValue(String expression, Object object) throws ExpressionEvaluatorException
     {
         try {
-        	initContext();
-            scope = JSInit.setProperty(scope, "root", object);
-            Object result = JavaScriptHelper.executeScript(expression, "JavaScriptExpressionEvaluator", scope, context);
+            initContext();
+            this.scope = JSInit.setProperty(this.scope, "root", object);
+            Object result = JavaScriptHelper.executeScript(expression, "JavaScriptExpressionEvaluator", this.scope, this.context);
             if (result instanceof NativeJavaObject) {
                 result = ((NativeJavaObject) result).unwrap();
             }
@@ -120,18 +119,18 @@ public class JavaScriptExpressionEvaluator implements ExpressionEvaluator
     @Override
     public void cleanUp()
     {
-        if (context != null) {
-            context = null;
+        if (this.context != null) {
+            this.context = null;
             Context.exit();
         }
     }
 
     private void initContext() throws Exception
     {
-        if (context == null) {
-            context = ContextFactory.getGlobal().enterContext();
-            scope = JSInitManager.instance().getJSInit(scopeName).getScope();
-            scope = JSInit.setProperty(scope, "logger", logger);
+        if (this.context == null) {
+            this.context = Context.enter();
+            this.scope = JSInitManager.instance().getJSInit(this.scopeName).getScope();
+            this.scope = JSInit.setProperty(this.scope, "logger", logger);
         }
     }
 }

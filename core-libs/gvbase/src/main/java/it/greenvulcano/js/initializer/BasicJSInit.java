@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
@@ -72,7 +71,7 @@ public class BasicJSInit extends JSInit
      */
     public BasicJSInit(String script) throws Exception
     {
-        name = script;
+        this.name = script;
         init(script);
     }
 
@@ -84,12 +83,12 @@ public class BasicJSInit extends JSInit
     @Override
     public final Scriptable getScope()
     {
-        Context cx = ContextFactory.getGlobal().enterContext();
+        Context cx = Context.enter();
         try {
             getBasicScope(cx);
-            Scriptable newScope = cx.newObject(basicScope);
-            newScope.setPrototype(basicScope);
-            newScope.setParentScope(null);
+            Scriptable newScope = cx.newObject(this.basicScope);
+            newScope.setPrototype(this.basicScope);
+            //newScope.setParentScope(null);
             return newScope;
         }
         finally {
@@ -111,9 +110,9 @@ public class BasicJSInit extends JSInit
         if ((script == null) || (script.equals(""))) {
             throw new IllegalArgumentException("The 'script' argument can't be null or empty");
         }
-        name = script;
-        Context cx = ContextFactory.getGlobal().enterContext();
-        basicScope = null;
+        this.name = script;
+        Context cx = Context.enter();
+        this.basicScope = null;
         try {
             getBasicScope(cx);
             InputStream scriptStream = ClassLoader.getSystemResourceAsStream(script);
@@ -122,7 +121,7 @@ public class BasicJSInit extends JSInit
             }
             InputStreamReader isr = new InputStreamReader(scriptStream);
             Script initscript = cx.compileReader(isr, script, 1, null);
-            initscript.exec(cx, basicScope);
+            initscript.exec(cx, this.basicScope);
         }
         finally {
             Context.exit();
@@ -140,18 +139,18 @@ public class BasicJSInit extends JSInit
     @Override
     public final void init(Node node) throws Exception
     {
-        Context cx = ContextFactory.getGlobal().enterContext();
-        basicScope = null;
+        Context cx = Context.enter();
+        this.basicScope = null;
         try {
             String scriptfile = XMLConfig.get(node, "@script-file", "");
             if (!scriptfile.equals("")) {
                 init(scriptfile);
             }
-            name = XMLConfig.get(node, "@name", node.getLocalName());
+            this.name = XMLConfig.get(node, "@name", node.getLocalName());
             getBasicScope(cx);
             String script = XMLConfig.get(node, "Script", "");
             if (!script.equals("")) {
-                cx.evaluateString(basicScope, script, name, 1, null);
+                cx.evaluateString(this.basicScope, script, this.name, 1, null);
             }
         }
         finally {
@@ -165,7 +164,7 @@ public class BasicJSInit extends JSInit
     @Override
     public final void destroy()
     {
-        basicScope = null;
+        this.basicScope = null;
     }
 
     /**
@@ -177,13 +176,15 @@ public class BasicJSInit extends JSInit
      */
     protected final Scriptable getBasicScope(Context cx)
     {
-        if (basicScope == null) {
+        if (this.basicScope == null) {
             cx.initStandardObjects();
-            cx.setLanguageVersion(Context.VERSION_1_6);
-            basicScope = new ImporterTopLevel(cx);
+            cx.setLanguageVersion(Context.VERSION_1_8);
+            this.basicScope = new ImporterTopLevel(cx);
+            //ImporterTopLevel.init(cx, this.basicScope, false);
+            //this.basicScope = cx.newObject(null);
             setBasicProperties();
         }
-        return basicScope;
+        return this.basicScope;
     }
 
     /**
@@ -191,12 +192,12 @@ public class BasicJSInit extends JSInit
      */
     protected final void setBasicProperties()
     {
-        Object jsOut = Context.javaToJS(System.out, basicScope);
-        ScriptableObject.putProperty(basicScope, "out", jsOut);
-        Object jsErr = Context.javaToJS(System.err, basicScope);
-        ScriptableObject.putProperty(basicScope, "err", jsErr);
+        Object jsOut = Context.javaToJS(System.out, this.basicScope);
+        ScriptableObject.putProperty(this.basicScope, "out", jsOut);
+        Object jsErr = Context.javaToJS(System.err, this.basicScope);
+        ScriptableObject.putProperty(this.basicScope, "err", jsErr);
 
-        ScriptableObject.putProperty(basicScope, "include", new IncludeFunction());
-        ScriptableObject.putProperty(basicScope, "instanceOf", new InstanceOfFunction());
+        ScriptableObject.putProperty(this.basicScope, "include", new IncludeFunction());
+        ScriptableObject.putProperty(this.basicScope, "instanceOf", new InstanceOfFunction());
     }
 }

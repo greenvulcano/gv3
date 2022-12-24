@@ -21,7 +21,6 @@
 package it.greenvulcano.js.initializer;
 
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.w3c.dom.Node;
@@ -80,7 +79,7 @@ public abstract class JSInit {
      *             if error occurs
      */
     public static Scriptable getScope(Scriptable prototype) throws Exception {
-        Context cx = ContextFactory.getGlobal().enterContext();
+        Context cx = Context.enter();
         try {
             if (prototype == null) {
                 throw new IllegalArgumentException("The 'prototype' field can't be null");
@@ -109,7 +108,7 @@ public abstract class JSInit {
      *             if error occurs
      */
     public static Scriptable compileFunction(Scriptable scope, String functionName, String function) throws Exception {
-        Context cx = ContextFactory.getGlobal().enterContext();
+        Context cx = Context.enter();
         try {
             if (scope == null) {
                 throw new IllegalArgumentException("The 'scope' field can't be null");
