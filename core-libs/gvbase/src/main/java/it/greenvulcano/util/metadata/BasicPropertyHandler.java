@@ -87,10 +87,10 @@ public class BasicPropertyHandler implements PropertyHandler
      * - %{{class}}         : the obj class name;
      * - %{{fqclass}}       : the obj fully qualified class name;
      * - %{{package}}       : the obj package name;
-     * - ${{propname}}      : a System property value;
-     * - sp{{propname}}     : a System property value;
-     * - env{{varname}}     : an Environment variable value;
-     * - @{{propname}}      : a inProperties property value;
+     * - ${{propname[::fallback]}}  : a System property value, 'fallback' (def empty string) if not found;
+     * - sp{{propname[::fallback]}} : a System property value, 'fallback' (def empty string) if not found;
+     * - env{{varname[::fallback]}} : an Environment variable value, 'fallback' (def empty string) if not found;
+     * - @{{propname[::fallback]}}  : a inProperties property value, 'fallback' if not found;
      * - xmlp{{propname}}   : a inProperties property value, only used by
      *                        XMLConfig on xml files reading;
      * - xpath{{field::path}} : parse the inProperties 'field' value, then
@@ -210,7 +210,7 @@ public class BasicPropertyHandler implements PropertyHandler
 
     @Override
     public void cleanupResources() {
-    	// do nothing
+        // do nothing
     }
 
     /**
@@ -222,10 +222,19 @@ public class BasicPropertyHandler implements PropertyHandler
             Scriptable scope, Object extra, int boundary) throws PropertiesHandlerException
     {
         String propName = str;
+        String fallback = "";
         if (!PropertiesHandler.isExpanded(propName)) {
             propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
         }
-        String paramValue = System.getProperty(propName, "");
+        if (str.matches("^.+::.+$")) {
+            String[] values = str.split("::");
+            propName = values[0];
+            fallback = values[1];
+        } else {
+            propName = str;
+            fallback = "";
+        }
+        String paramValue = System.getProperty(propName, fallback);
         if (!PropertiesHandler.isExpanded(paramValue)) {
             paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
         }
@@ -241,12 +250,21 @@ public class BasicPropertyHandler implements PropertyHandler
             Scriptable scope, Object extra, int boundary) throws PropertiesHandlerException
     {
         String propName = str;
+        String fallback = "";
         if (!PropertiesHandler.isExpanded(propName)) {
             propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
         }
+        if (str.matches("^.+::.+$")) {
+            String[] values = str.split("::");
+            propName = values[0];
+            fallback = values[1];
+        } else {
+            propName = str;
+            fallback = "";
+        }
         String paramValue = System.getenv(propName);
         if (paramValue == null) {
-            paramValue = "";
+            return PropertiesHandler.isExpanded(fallback) ? fallback : PropertiesHandler.expand(fallback, inProperties, object, scope, extra);
         }
         if (!PropertiesHandler.isExpanded(paramValue)) {
             paramValue = PropertiesHandler.expand(paramValue, inProperties, object, scope, extra);
@@ -265,6 +283,7 @@ public class BasicPropertyHandler implements PropertyHandler
             Scriptable scope, Object extra, int boundary) throws PropertiesHandlerException
     {
         String propName = str;
+        String fallback = null;
         if (!PropertiesHandler.isExpanded(propName)) {
             propName = PropertiesHandler.expand(propName, inProperties, object, scope, extra);
         }
@@ -272,8 +291,19 @@ public class BasicPropertyHandler implements PropertyHandler
         if (inProperties == null) {
             return "@" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
+        if (str.matches("^.+::.+$")) {
+            String[] values = str.split("::");
+            propName = values[0];
+            fallback = values[1];
+        } else {
+            propName = str;
+            fallback = null;
+        }
         paramValue = (String) inProperties.get(propName);
         if ((paramValue == null)) {// || (paramValue.equals(""))) {
+            if (fallback != null) {
+                return PropertiesHandler.isExpanded(fallback) ? fallback : PropertiesHandler.expand(fallback, inProperties, object, scope, extra);
+            }
             return "@" + PROPS_START[boundary] + str + PROPS_END[boundary];
         }
         if (!PropertiesHandler.isExpanded(paramValue)) {
@@ -449,25 +479,25 @@ public class BasicPropertyHandler implements PropertyHandler
             String sourcePattern = parts.get(1);
             String type = parts.get(2);
             if ("s".equals(type)) {
-            	intType = String.valueOf(Calendar.SECOND);
+                intType = String.valueOf(Calendar.SECOND);
             }
             else if ("m".equals(type)) {
-            	intType = String.valueOf(Calendar.MINUTE);
+                intType = String.valueOf(Calendar.MINUTE);
             }
             else if ("h".equals(type)) {
-            	intType = String.valueOf(Calendar.HOUR_OF_DAY);
+                intType = String.valueOf(Calendar.HOUR_OF_DAY);
             }
             else if ("d".equals(type)) {
-            	intType = String.valueOf(Calendar.DAY_OF_MONTH);
+                intType = String.valueOf(Calendar.DAY_OF_MONTH);
             }
             else if ("M".equals(type)) {
-            	intType = String.valueOf(Calendar.MONTH);
+                intType = String.valueOf(Calendar.MONTH);
             }
             else if ("y".equals(type)) {
-            	intType = String.valueOf(Calendar.YEAR);
+                intType = String.valueOf(Calendar.YEAR);
             }
             else {
-            	throw new PropertiesHandlerException("Invalid value[" + type + "] for 'type'");
+                throw new PropertiesHandlerException("Invalid value[" + type + "] for 'type'");
             }
             String value = parts.get(3);
             String paramValue = DateUtils.addTime(date, sourcePattern, intType, value);
@@ -506,25 +536,25 @@ public class BasicPropertyHandler implements PropertyHandler
             String destPattern = parts.get(2);
             String type = parts.get(3);
             if ("s".equals(type)) {
-            	intType = String.valueOf(Calendar.SECOND);
+                intType = String.valueOf(Calendar.SECOND);
             }
             else if ("m".equals(type)) {
-            	intType = String.valueOf(Calendar.MINUTE);
+                intType = String.valueOf(Calendar.MINUTE);
             }
             else if ("h".equals(type)) {
-            	intType = String.valueOf(Calendar.HOUR_OF_DAY);
+                intType = String.valueOf(Calendar.HOUR_OF_DAY);
             }
             else if ("d".equals(type)) {
-            	intType = String.valueOf(Calendar.DAY_OF_MONTH);
+                intType = String.valueOf(Calendar.DAY_OF_MONTH);
             }
             else if ("M".equals(type)) {
-            	intType = String.valueOf(Calendar.MONTH);
+                intType = String.valueOf(Calendar.MONTH);
             }
             else if ("y".equals(type)) {
-            	intType = String.valueOf(Calendar.YEAR);
+                intType = String.valueOf(Calendar.YEAR);
             }
             else {
-            	throw new PropertiesHandlerException("Invalid value[" + type + "] for 'type'");
+                throw new PropertiesHandlerException("Invalid value[" + type + "] for 'type'");
             }
             String value = parts.get(4);
             if (parts.size() > 5) {
@@ -794,14 +824,14 @@ public class BasicPropertyHandler implements PropertyHandler
             String subst = params[2];
             boolean useRX = false;
             if (params.length == 4) {
-            	useRX = "r".equalsIgnoreCase(params[3]);
+                useRX = "r".equalsIgnoreCase(params[3]);
             }
             String result = "";
             if (useRX) {
-            	result = string.replaceAll(search, subst);
+                result = string.replaceAll(search, subst);
             }
             else {
-            	result = TextUtils.replaceSubstring(string, search, subst);
+                result = TextUtils.replaceSubstring(string, search, subst);
             }
             return result;
         }
@@ -826,17 +856,17 @@ public class BasicPropertyHandler implements PropertyHandler
     private static String expandUrlEnc(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
             Object extra, int boundary) throws PropertiesHandlerException
     {
-    	try {
-    		String string = str;
-    		if (!PropertiesHandler.isExpanded(string)) {
-    			string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
-    		}
-    		if (!PropertiesHandler.isExpanded(string)) {
-    			return "urlEnc" + PROPS_START[boundary] + str + PROPS_END[boundary];
-    		}
-    		String encoded = URLEncoder.encode(string, "UTF-8");
-    		return encoded;
-    	}
+        try {
+            String string = str;
+            if (!PropertiesHandler.isExpanded(string)) {
+                string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+            }
+            if (!PropertiesHandler.isExpanded(string)) {
+                return "urlEnc" + PROPS_START[boundary] + str + PROPS_END[boundary];
+            }
+            String encoded = URLEncoder.encode(string, "UTF-8");
+            return encoded;
+        }
         catch (Exception exc) {
             System.out.println("Error handling 'urlEnc' metadata '" + str + "': " + exc);
             exc.printStackTrace();
@@ -858,17 +888,17 @@ public class BasicPropertyHandler implements PropertyHandler
     private static String expandUrlDec(String str, Map<String, Object> inProperties, Object object, Scriptable scope,
             Object extra, int boundary) throws PropertiesHandlerException
     {
-    	try {
-    		String string = str;
-    		if (!PropertiesHandler.isExpanded(string)) {
-    			string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
-    		}
-    		if (!PropertiesHandler.isExpanded(string)) {
-    			return "urlDec" + PROPS_START[boundary] + str + PROPS_END[boundary];
-    		}
-    		String decoded = URLDecoder.decode(string, "UTF-8");
-    		return decoded;
-    	}
+        try {
+            String string = str;
+            if (!PropertiesHandler.isExpanded(string)) {
+                string = PropertiesHandler.expand(string, inProperties, object, scope, extra);
+            }
+            if (!PropertiesHandler.isExpanded(string)) {
+                return "urlDec" + PROPS_START[boundary] + str + PROPS_END[boundary];
+            }
+            String decoded = URLDecoder.decode(string, "UTF-8");
+            return decoded;
+        }
         catch (Exception exc) {
             System.out.println("Error handling 'urlDec' metadata '" + str + "': " + exc);
             exc.printStackTrace();

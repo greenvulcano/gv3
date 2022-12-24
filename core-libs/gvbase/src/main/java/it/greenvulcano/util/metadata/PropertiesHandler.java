@@ -98,18 +98,28 @@ public final class PropertiesHandler
             }
             int begin = string.indexOf(PropertyHandler.PROPS_START[0], index);
             int begin1 = string.indexOf(PropertyHandler.PROPS_START[1], index);
+            int begin2 = string.indexOf(PropertyHandler.PROPS_START[2], index);
             int end = string.indexOf(PropertyHandler.PROPS_END[0], index);
             int end1 = string.indexOf(PropertyHandler.PROPS_END[1], index);
+            int end2 = string.indexOf(PropertyHandler.PROPS_END[2], index);
 
             int trigger = 0;
             if (begin != -1) {
             	if (begin1 != -1) {
-            		if (begin1 < begin) { // meta #§ bafore {{
+            		if (begin1 < begin) { // meta #§ before {{
             			trigger = 1;
             			begin = begin1;
             			end = end1;
             		}
-            		// meta {{ bafore #§
+            		// meta {{ before #§ or ?#
+            	}
+            	else if (begin2 != -1) {
+            		if (begin2 < begin) { // meta ?# before {{
+            			trigger = 2;
+            			begin = begin2;
+            			end = end2;
+            		}
+            		// meta {{ before #§ or ?#
             	}
             	// meta {{
             }
@@ -118,11 +128,20 @@ public final class PropertiesHandler
             		trigger = 1;
            			begin = begin1;
            		}
+            	else if (begin2 != -1) { // meta ?#
+            		trigger = 2;
+           			begin = begin2;
+           		}
            		// no meta
-    			begin = begin1;
+    			//begin = begin1;
 
-            	if (end == -1) { // meta #§
-           			end = end1;
+            	if (end == -1) {
+            		if (end1 != -1) { // meta #§
+            			end = end1;
+            		}
+            		else if (end2 != -1) { // meta ?#
+            			end = end2;
+            		}
            		}
             }
 
@@ -396,8 +415,9 @@ public final class PropertiesHandler
         while (mdt.hasNext()) {
             String sToken = mdt.next();
             if (sToken.equals(PropertyHandler.PROPS_START[0])
-             || sToken.equals(PropertyHandler.PROPS_START[1])) {
-            	int trigger = sToken.equals(PropertyHandler.PROPS_START[0]) ? 0 : 1;
+             || sToken.equals(PropertyHandler.PROPS_START[1])
+             || sToken.equals(PropertyHandler.PROPS_START[2])) {
+            	int trigger = sToken.equals(PropertyHandler.PROPS_START[0]) ? 0 : (sToken.equals(PropertyHandler.PROPS_START[1]) ? 1 : 2);
                 String type = extractType(pToken);
                 String staticToken = pToken.substring(0, pToken.lastIndexOf(type));
                 PropertyToken subToken = null;
@@ -410,14 +430,16 @@ public final class PropertiesHandler
                 parse(subToken, mdt);
             }
             else if (sToken.equals(PropertyHandler.PROPS_END[0])
-            	  || sToken.equals(PropertyHandler.PROPS_END[1])) {
+            	  || sToken.equals(PropertyHandler.PROPS_END[1])
+            	  || sToken.equals(PropertyHandler.PROPS_END[2])) {
                 break;
             }
             else {
                 if (mdt.hasNext()) {
                     String nToken = mdt.next();
                     if (nToken.equals(PropertyHandler.PROPS_START[0])
-                     || nToken.equals(PropertyHandler.PROPS_START[1])) {
+                     || nToken.equals(PropertyHandler.PROPS_START[1])
+                     || nToken.equals(PropertyHandler.PROPS_START[2])) {
                         pToken = sToken;
                     }
                     else {
@@ -592,7 +614,8 @@ public final class PropertiesHandler
         while (i.hasNext()) {
         	String p = i.next();
             if ((str.indexOf((p + PropertyHandler.PROPS_START[0])) != -1)
-             || (str.indexOf((p + PropertyHandler.PROPS_START[1])) != -1)) {
+             || (str.indexOf((p + PropertyHandler.PROPS_START[1])) != -1)
+             || (str.indexOf((p + PropertyHandler.PROPS_START[2])) != -1)) {
                 return false;
             }
         }

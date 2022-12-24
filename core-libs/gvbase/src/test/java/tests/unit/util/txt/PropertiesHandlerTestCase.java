@@ -59,6 +59,21 @@ public class PropertiesHandlerTestCase extends TestCase
      *
      */
     @Test
+    public void testExpand1b() throws Exception
+    {
+        HashMap<String, Object> props = new HashMap<String, Object>();
+        props.put("pippo", "pluto");
+
+        String match = "..pluto..topolina";
+        String src = "..@{{pippo}}..@{{topolino::topolina}}";
+        String dest = PropertiesHandler.expand(src, props);
+        assertEquals(match, dest);
+    }
+
+    /**
+     *
+     */
+    @Test
     public void testExpand2() throws Exception
     {
         String match = System.getProperty("java.runtime.name");
@@ -70,6 +85,22 @@ public class PropertiesHandlerTestCase extends TestCase
         dest = PropertiesHandler.expand(src, null);
         assertEquals(match, dest);
     }
+
+    /**
+    *
+    */
+   @Test
+   public void testExpand2b() throws Exception
+   {
+       String match = "pippo";
+       String src = "${{java.runtime.nameABC::pippo}}";
+       String dest = PropertiesHandler.expand(src, null);
+       assertEquals(match, dest);
+
+       src = "sp{{java.runtime.nameABC::pippo}}";
+       dest = PropertiesHandler.expand(src, null);
+       assertEquals(match, dest);
+   }
 
     /**
      *
@@ -271,9 +302,9 @@ public class PropertiesHandlerTestCase extends TestCase
    /**
    *
    */
-  @Test
-  public void testExpand10c() throws Exception
-  {
+   @Test
+   public void testExpand10c() throws Exception
+   {
       HashMap<String, Object> props = new HashMap<String, Object>();
       String src = "decodeL§#|::@§#prop1#§::1|3::AAA::2|4::BBB::CCC#§";
 
@@ -294,27 +325,27 @@ public class PropertiesHandlerTestCase extends TestCase
       props.put("prop1", "5");
       dest = PropertiesHandler.expand(src, props);
       assertEquals("CCC", dest);
-  }
+   }
 
-    /**
-     *
-     */
-    @Test
-    public void testExpand11() throws Exception
-    {
-        String obj = "";
-        String src = "%§#class#§";
-        String dest = PropertiesHandler.expand(src, null, obj);
-        assertEquals("String", dest);
+  /**
+   *
+   */
+   @Test
+   public void testExpand11() throws Exception
+   {
+      String obj = "";
+      String src = "%§#class#§";
+      String dest = PropertiesHandler.expand(src, null, obj);
+      assertEquals("String", dest);
 
-        src = "%§#fqclass#§";
-        dest = PropertiesHandler.expand(src, null, obj);
-        assertEquals("java.lang.String", dest);
+      src = "%§#fqclass#§";
+      dest = PropertiesHandler.expand(src, null, obj);
+      assertEquals("java.lang.String", dest);
 
-        src = "%§#package#§";
-        dest = PropertiesHandler.expand(src, null, obj);
-        assertEquals("java.lang", dest);
-    }
+      src = "%§#package#§";
+      dest = PropertiesHandler.expand(src, null, obj);
+      assertEquals("java.lang", dest);
+   }
 
     /**
     *
@@ -334,6 +365,26 @@ public class PropertiesHandlerTestCase extends TestCase
         src = "%{{package}}";
         dest = PropertiesHandler.expand(src, null, obj);
         assertEquals("java.lang", dest);
+    }
+
+    /**
+    *
+    */
+    @Test
+    public void testExpand11c() throws Exception
+    {
+       String obj = "";
+       String src = "%?#class#?";
+       String dest = PropertiesHandler.expand(src, null, obj);
+       assertEquals("String", dest);
+
+       src = "%?#fqclass#?";
+       dest = PropertiesHandler.expand(src, null, obj);
+       assertEquals("java.lang.String", dest);
+
+       src = "%?#package#?";
+       dest = PropertiesHandler.expand(src, null, obj);
+       assertEquals("java.lang", dest);
     }
 
     /**
@@ -398,6 +449,18 @@ public class PropertiesHandlerTestCase extends TestCase
        dest = PropertiesHandler.expand(src, null);
        assertEquals(match, dest);
    }
+
+   /**
+   *
+   */
+  @Test
+  public void testExpand16b() throws Exception
+  {
+      String match = "pluto";
+      String src = "env{{PATHABC::pluto}}";
+      String dest = PropertiesHandler.expand(src, null);
+      assertEquals(match, dest);
+  }
 
 /**
     *
@@ -479,14 +542,46 @@ public class PropertiesHandlerTestCase extends TestCase
    *
    */
     @Test
-   public void testExpand22() throws Exception
+   public void testExpand21b() throws Exception
    {
  	  HashMap<String, Object> props = new HashMap<String, Object>();
- 	  props.put("blabla", "{bla bla:[{bla bla},{bla bla}],bla bla:{bla bla}},bla bla");
+ 	  props.put("pippo", "pluto");
+ 	  props.put("topolino", "paperoga");
+       props.put("pluto", "boom");
 
- 	  String match = "..[{bla bla:[{bla bla},{bla bla}],bla bla:{bla bla}},bla bla]..";
- 	  String src = "..[@§#blabla#§]..";
+ 	  String match = "..boom..";
+ 	  String src = "..@?#@{{pippo}}#?..";
  	  String dest = PropertiesHandler.expand(src, props);
  	  assertEquals(match, dest);
    }
+
+    /**
+    *
+    */
+     @Test
+    public void testExpand22() throws Exception
+    {
+  	  HashMap<String, Object> props = new HashMap<String, Object>();
+  	  props.put("blabla", "{bla bla:[{bla bla},{bla bla}],bla bla:{bla bla}},bla bla");
+
+  	  String match = "..[{bla bla:[{bla bla},{bla bla}],bla bla:{bla bla}},bla bla]..";
+  	  String src = "..[@§#blabla#§]..";
+  	  String dest = PropertiesHandler.expand(src, props);
+  	  assertEquals(match, dest);
+    }
+
+     /**
+     *
+     */
+      @Test
+     public void testExpand22b() throws Exception
+     {
+   	  HashMap<String, Object> props = new HashMap<String, Object>();
+   	  props.put("blabla", "{bla bla:[{bla bla},{bla bla}],bla bla:{bla bla}},bla bla");
+
+   	  String match = "..[{bla bla:[{bla bla},{bla bla}],bla bla:{bla bla}},bla bla]..";
+   	  String src = "..[@?#blabla#?]..";
+   	  String dest = PropertiesHandler.expand(src, props);
+   	  assertEquals(match, dest);
+     }
 }

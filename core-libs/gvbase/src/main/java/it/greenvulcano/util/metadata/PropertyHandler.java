@@ -43,8 +43,8 @@ public interface PropertyHandler
      */
     public static final String PROP_END         = "}}";
 
-    public static final String[] PROPS_START    = new String[]{"{{", "§#"};
-    public static final String[] PROPS_END      = new String[]{"}}", "#§"};
+    public static final String[] PROPS_START    = new String[]{"{{", "§#", "?#"};
+    public static final String[] PROPS_END      = new String[]{"}}", "#§", "#?"};
 
     /**
      * ThreadMap key to enable the exception throwing on handler errors.
@@ -63,7 +63,7 @@ public interface PropertyHandler
      * @param type
      *        the type
      * @param trigger
-     *        the trigger type {{ or §#
+     *        the trigger type {{ or §# or ##
      * @param str
      *        the string to value
      * @param inProperties
