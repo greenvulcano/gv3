@@ -36,5 +36,7 @@
         <module>gvvcl-msexchange</module>
         <module>gvvcl-ldap</module>
         <module>gvvcl-openspcoop</module>
+        <module>gvvcl-kafka</module>
+        <module>gvvcl-postmark</module>
     </modules>
 </project>
