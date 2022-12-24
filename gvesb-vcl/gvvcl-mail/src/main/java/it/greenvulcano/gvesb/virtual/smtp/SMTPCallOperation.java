@@ -22,7 +22,6 @@ package it.greenvulcano.gvesb.virtual.smtp;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -479,6 +478,7 @@ public class SMTPCallOperation implements CallOperation
                 if ((appoTO == null) || "".equals(appoTO)) {
                     appoTO = this.to;
                 }
+                appoTO = PropertiesHandler.expand(appoTO, params, gvBuffer);
                 if (!appoTO.equals("")) {
                     msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(appoTO, false));
                     logger.debug("Send TO: " + appoTO);
@@ -488,6 +488,7 @@ public class SMTPCallOperation implements CallOperation
                 if ((appoCC == null) || "".equals(appoCC)) {
                     appoCC = this.cc;
                 }
+                appoCC = PropertiesHandler.expand(appoCC, params, gvBuffer);
                 if (!appoCC.equals("")) {
                     msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(appoCC, false));
                     logger.debug("Send CC: " + appoCC);
@@ -497,6 +498,7 @@ public class SMTPCallOperation implements CallOperation
                 if ((appoBCC == null) || "".equals(appoBCC)) {
                     appoBCC = this.bcc;
                 }
+                appoBCC = PropertiesHandler.expand(appoBCC, params, gvBuffer);
                 if (!appoBCC.equals("")) {
                     msg.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(appoBCC, false));
                     logger.debug("Send BCC: " + appoBCC);
@@ -584,6 +586,10 @@ public class SMTPCallOperation implements CallOperation
                 }
             }
         }
+        catch(Exception exc) {
+            logger.error("Error preparing/sending email", exc);
+            throw exc;
+        }
         finally {
             PropertiesHandler.disableExceptionOnErrors();
         }
@@ -600,8 +606,8 @@ public class SMTPCallOperation implements CallOperation
 
         try {
             Properties localProps = new Properties();
-            for (Iterator iterator = this.serverProps.keySet().iterator(); iterator.hasNext();) {
-                String name = (String) iterator.next();
+            for (Object element : this.serverProps.keySet()) {
+                String name = (String) element;
                 String value = PropertiesHandler.expand(this.serverProps.getProperty(name), params, data);
                 if (name.contains(".host")) {
                     logger.debug("Logging-in to host: " + value);
