@@ -146,4 +146,20 @@ public class PropertyToken
         }
         return result;
     }
+
+    public String toString(int offset)
+    {
+        String tmp = "";
+        for (int i = 0; i < offset; i++) {
+            tmp += "\t";
+        }
+        tmp += "PropertyToken: type=\"" + this.type + "\" - value= \"" + this.value + "\" - begin=" + this.begin + " - end=" + this.end + " - trigger=" + this.trigger;
+        String tmpC = "";
+        if (this.subTokens != null) {
+            for (PropertyToken subToken : this.subTokens) {
+                tmpC += "\n" + subToken.toString(offset + 1);
+            }
+        }
+        return tmp + tmpC;
+    }
 }
