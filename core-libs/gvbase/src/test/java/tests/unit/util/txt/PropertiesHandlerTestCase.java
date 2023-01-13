@@ -71,6 +71,36 @@ public class PropertiesHandlerTestCase extends TestCase
     }
 
     /**
+    *
+    */
+   @Test
+   public void testExpand1c() throws Exception
+   {
+       HashMap<String, Object> props = new HashMap<String, Object>();
+       props.put("pippo", "pluto");
+
+       String match = "..pluto..decode";
+       String src = "..@{{pippo}}..decode";
+       String dest = PropertiesHandler.expand(src, props);
+       assertEquals(match, dest);
+   }
+
+   /**
+   *
+   */
+  @Test
+  public void testExpand1d() throws Exception
+  {
+      HashMap<String, Object> props = new HashMap<String, Object>();
+      props.put("pippo", "pluto");
+
+      String match = "..pluto..decode  ";
+      String src = "..@{{pippo}}..decode  ";
+      String dest = PropertiesHandler.expand(src, props);
+      assertEquals(match, dest);
+  }
+
+    /**
      *
      */
     @Test
