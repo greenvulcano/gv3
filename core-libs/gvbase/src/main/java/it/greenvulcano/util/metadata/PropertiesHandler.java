@@ -485,18 +485,23 @@ public final class PropertiesHandler
             while ((start != -1) && (start < str.length())) {
                 start = str.indexOf(type, start);
                 if (start != -1) {
-                    String trigger = str.substring(start + type.length(), start + type.length() + 2);
-                    if (trigger.equals(PropertyHandler.PROPS_START[0])) {
-                        types.add(new TypeDef(type, 0, start));
-                        start += type.length() + 2;
-                    }
-                    else if (trigger.equals(PropertyHandler.PROPS_START[1])) {
-                        types.add(new TypeDef(type, 1, start));
-                        start += type.length() + 2;
-                    }
-                    else if (trigger.equals(PropertyHandler.PROPS_START[2])) {
-                       types.add(new TypeDef(type, 2, start));
-                       start += type.length() + 2;
+                    if ((start + type.length() + 2) < str.length()) {
+                        String trigger = str.substring(start + type.length(), start + type.length() + 2);
+                        if (trigger.equals(PropertyHandler.PROPS_START[0])) {
+                            types.add(new TypeDef(type, 0, start));
+                            start += type.length() + 2;
+                        }
+                        else if (trigger.equals(PropertyHandler.PROPS_START[1])) {
+                            types.add(new TypeDef(type, 1, start));
+                            start += type.length() + 2;
+                        }
+                        else if (trigger.equals(PropertyHandler.PROPS_START[2])) {
+                           types.add(new TypeDef(type, 2, start));
+                           start += type.length() + 2;
+                        }
+                        else {
+                            start++;
+                        }
                     }
                     else {
                         start++;
