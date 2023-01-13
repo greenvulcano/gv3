@@ -19,13 +19,15 @@
  */
 package it.greenvulcano.util.metadata;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.Vector;
 
 import org.mozilla.javascript.Scriptable;
 
@@ -42,140 +44,100 @@ import it.greenvulcano.util.txt.TextUtils;
  **/
 public final class PropertiesHandler
 {
-    /**
-     * @version 3.0.0 Feb 27, 2010
-     * @author nunzio
-     *
-     */
-    public final class MetaDataTokenizer
-    {
-        private final Vector<String> tokens  = new Vector<String>();
-        private int            lastPos = 0;
-        private Stack<Integer> lastTrigger = new Stack<Integer>();
+    private static class TypeDef {
+        public String type;
+        public int start;
+        public int end = -1;
+        public int trigger;
+        public List<TypeDef> children = new ArrayList<TypeDef>();
 
-        /**
-         * @param string
-         */
-        public MetaDataTokenizer(String string)
-        {
-            parse(string, 0);
+        public TypeDef(String type, int trigger, int start) {
+            this.type = type;
+            this.trigger = trigger;
+            this.start = start;
         }
 
-        /**
-         * @return it there is another token
-         */
-        public boolean hasNext()
-        {
-            return (this.lastPos < this.tokens.size());
+        public TypeDef(String type, int trigger, int start, int end) {
+            this.type = type;
+            this.trigger = trigger;
+            this.start = start;
+            this.end = end;
         }
 
-        /**
-         * @return the next token
-         */
-        public String next()
-        {
-            return this.tokens.get(this.lastPos++);
-        }
-
-        /**
-         *
-         */
-        public void pushBack()
-        {
-            this.lastPos--;
-            if (this.lastPos < -1) {
-                this.lastPos = -1;
-            }
-        }
-
-        private void parse(String string, int index)
-        {
-            if (string == null) {
-                return;
-            }
-            if (index == string.length()) {
-                return;
-            }
-            int begin = string.indexOf(PropertyHandler.PROPS_START[0], index);
-            int begin1 = string.indexOf(PropertyHandler.PROPS_START[1], index);
-            int begin2 = string.indexOf(PropertyHandler.PROPS_START[2], index);
-            int end = string.indexOf(PropertyHandler.PROPS_END[0], index);
-            int end1 = string.indexOf(PropertyHandler.PROPS_END[1], index);
-            int end2 = string.indexOf(PropertyHandler.PROPS_END[2], index);
-
-            int trigger = 0;
-            if (begin != -1) {
-            	if (begin1 != -1) {
-            		if (begin1 < begin) { // meta #§ before {{
-            			trigger = 1;
-            			begin = begin1;
-            			end = end1;
-            		}
-            		// meta {{ before #§ or ?#
-            	}
-            	else if (begin2 != -1) {
-            		if (begin2 < begin) { // meta ?# before {{
-            			trigger = 2;
-            			begin = begin2;
-            			end = end2;
-            		}
-            		// meta {{ before #§ or ?#
-            	}
-            	// meta {{
-            }
-            else {
-            	if (begin1 != -1) { // meta #§
-            		trigger = 1;
-           			begin = begin1;
-           		}
-            	else if (begin2 != -1) { // meta ?#
-            		trigger = 2;
-           			begin = begin2;
-           		}
-           		// no meta
-    			//begin = begin1;
-
-            	if (end == -1) {
-            		if (end1 != -1) { // meta #§
-            			end = end1;
-            		}
-            		else if (end2 != -1) { // meta ?#
-            			end = end2;
-            		}
-           		}
-            }
-
-            String terminator = "";
-            int pos = -1;
-            if (begin == -1) {
-                if (end == -1) {
-                    this.tokens.add(string.substring(index));
-                    return;
+        public boolean addChild(TypeDef td) {
+            if ((this.start <= td.start) && (td.end <= this.end)) {
+                for (TypeDef tdi : this.children) {
+                    if (tdi.addChild(td)) {
+                        return true;
+                    }
                 }
-                terminator = PropertyHandler.PROPS_END[this.lastTrigger.pop()];
-                pos = end;
+                this.children.add(td);
+                Collections.sort(this.children, (t1, t2) -> Integer.compare(t1.start, t2.start));
+                return true;
+            }
+            return false;
+        }
+
+        public void addToken(String str, PropertyToken parent) {
+            int idx = this.start;
+            PropertyToken token = null;
+            if (this.trigger == -2) {
+                token = new PropertyToken(this.start, this.end, "", this.type, -1);
+            }
+            else if (this.trigger == -1) {
+                token = new PropertyToken(this.start, this.end, str.substring(this.start, this.end), this.type, this.trigger);
             }
             else {
-                if (end == -1) {
-                    terminator = PropertyHandler.PROPS_START[trigger];
-                    this.lastTrigger.push(trigger);
-                    pos = begin;
+                if (this.children.isEmpty()) {
+                    token = new PropertyToken(this.start, this.end, str.substring(this.start + this.type.length() + 2, this.end -2), this.type, this.trigger);
                 }
                 else {
-                	if (begin < end) {
-                        pos = begin;
-                        terminator = PropertyHandler.PROPS_START[trigger];
-                        this.lastTrigger.push(trigger);
-                	}
-                	else {
-                		pos = end;
-                		terminator = PropertyHandler.PROPS_END[this.lastTrigger.pop()];
-                	}
+                    token = new PropertyToken(this.start, this.end, "", this.type, this.trigger);
+                    idx += this.type.length() + 2;
                 }
             }
-            this.tokens.add(string.substring(index, pos));
-            this.tokens.add(terminator);
-            parse(string, pos + PropertyHandler.PROPS_START[trigger].length());
+            parent.addSubToken(token);
+
+            for (TypeDef tdi : this.children) {
+                if (tdi.start > idx) {
+                    PropertyToken sToken = new PropertyToken(idx, tdi.start, str.substring(idx, tdi.start), "", -1);
+                    token.addSubToken(sToken);
+                }
+                idx = tdi.end;
+                tdi.addToken(str, token);
+            }
+            if (this.trigger >= 0) {
+                if (!this.children.isEmpty()) {
+                    if (idx < (this.end -2)) {
+                        PropertyToken sToken = new PropertyToken(idx, this.end -2, str.substring(idx, this.end -2), "", -1);
+                        token.addSubToken(sToken);
+                    }
+                }
+            }
+            if (this.trigger == -2) {
+                if (idx < (this.end)) {
+                    PropertyToken sToken = new PropertyToken(idx, this.end, str.substring(idx, this.end), "", -1);
+                    token.addSubToken(sToken);
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "TypeDef [type=" + this.type + ", trigger=" + this.trigger + ", start=" + this.start  + ", end=" + this.end + "]";
+        }
+
+        public String toString(int offset) {
+            String tmp = "";
+            for (int i = 0; i < offset; i++) {
+                tmp += "\t";
+            }
+            tmp += toString();
+            String tmpC = "";
+            for (TypeDef tdi : this.children) {
+                tmpC += "\n" + tdi.toString(offset + 1);
+            }
+            return tmp + tmpC;
         }
     }
 
@@ -184,7 +146,7 @@ public final class PropertiesHandler
     private static HashSet<String>                  propSet      = new HashSet<String>();
 
     static {
-    	String clazz = null;
+        String clazz = null;
         try {
             String classes = "";
 
@@ -197,10 +159,10 @@ public final class PropertiesHandler
             }
             String[] cl = classes.split("(\\n\\r|\\n)");
             for (String c : cl) {
-            	clazz = c;
-            	if (!"".equals(clazz)) {
-            		Class.forName(clazz);
-            	}
+                clazz = c;
+                if (!"".equals(clazz)) {
+                    Class.forName(clazz);
+                }
             }
         }
         catch (Exception exc) {
@@ -399,61 +361,10 @@ public final class PropertiesHandler
 
     private static PropertyToken parse(String str)
     {
+        TypeDef root = PropertiesHandler.extractTypesTree(str);
         PropertyToken token = new PropertyToken(0, 0, "", "", 0);
-        MetaDataTokenizer mdt = new PropertiesHandler().new MetaDataTokenizer(str);
-        parse(token, mdt);
+        root.addToken(str, token);
         return token;
-    }
-
-    /**
-     * @param token
-     * @param mdt
-     */
-    private static void parse(PropertyToken token, MetaDataTokenizer mdt)
-    {
-        String pToken = null;
-        while (mdt.hasNext()) {
-            String sToken = mdt.next();
-            if (sToken.equals(PropertyHandler.PROPS_START[0])
-             || sToken.equals(PropertyHandler.PROPS_START[1])
-             || sToken.equals(PropertyHandler.PROPS_START[2])) {
-            	int trigger = sToken.equals(PropertyHandler.PROPS_START[0]) ? 0 : (sToken.equals(PropertyHandler.PROPS_START[1]) ? 1 : 2);
-                String type = extractType(pToken);
-                String staticToken = pToken.substring(0, pToken.lastIndexOf(type));
-                PropertyToken subToken = null;
-                if (staticToken.length() > 0) {
-                    subToken = new PropertyToken(0, 0, staticToken, "", trigger);
-                    token.addSubToken(subToken);
-                }
-                subToken = new PropertyToken(0, 0, "", type, trigger);
-                token.addSubToken(subToken);
-                parse(subToken, mdt);
-            }
-            else if (sToken.equals(PropertyHandler.PROPS_END[0])
-            	  || sToken.equals(PropertyHandler.PROPS_END[1])
-            	  || sToken.equals(PropertyHandler.PROPS_END[2])) {
-                break;
-            }
-            else {
-                if (mdt.hasNext()) {
-                    String nToken = mdt.next();
-                    if (nToken.equals(PropertyHandler.PROPS_START[0])
-                     || nToken.equals(PropertyHandler.PROPS_START[1])
-                     || nToken.equals(PropertyHandler.PROPS_START[2])) {
-                        pToken = sToken;
-                    }
-                    else {
-                        PropertyToken subToken = new PropertyToken(0, 0, sToken, "", 0);
-                        token.addSubToken(subToken);
-                    }
-                    mdt.pushBack();
-                }
-                else {
-                    PropertyToken subToken = new PropertyToken(0, 0, sToken, "", 0);
-                    token.addSubToken(subToken);
-                }
-            }
-        }
     }
 
     /**
@@ -540,9 +451,9 @@ public final class PropertiesHandler
      */
     public static void disableResourceLocalStorage()
     {
-    	for (PropertyHandler ph : propHandlersSet) {
-    		ph.cleanupResources();
-		}
+        for (PropertyHandler ph : propHandlersSet) {
+            ph.cleanupResources();
+        }
         ThreadMap.remove(PropertyHandler.RESOURCE_STORAGE);
     }
 
@@ -559,43 +470,117 @@ public final class PropertiesHandler
         return "true".equals(ThreadMap.get(PropertyHandler.RESOURCE_STORAGE));
     }
 
+
     /**
      * @param str
      * @return
      */
-    private static String extractType(String str)
+    public static List<TypeDef> extractTypes(String str)
     {
-        String type = "";
-        Iterator<String> i = propSet.iterator();
-        while (i.hasNext()) {
-            String currType = i.next();
-            if (endsWith(str, currType)) {
-                type = currType;
-                break;
+        List<TypeDef> types = new ArrayList<TypeDef>();
+
+        for (String type : propSet) {
+            int start = 0;
+
+            while ((start != -1) && (start < str.length())) {
+                start = str.indexOf(type, start);
+                if (start != -1) {
+                    String trigger = str.substring(start + type.length(), start + type.length() + 2);
+                    if (trigger.equals(PropertyHandler.PROPS_START[0])) {
+                        types.add(new TypeDef(type, 0, start));
+                        start += type.length() + 2;
+                    }
+                    else if (trigger.equals(PropertyHandler.PROPS_START[1])) {
+                        types.add(new TypeDef(type, 1, start));
+                        start += type.length() + 2;
+                    }
+                    else if (trigger.equals(PropertyHandler.PROPS_START[2])) {
+                       types.add(new TypeDef(type, 2, start));
+                       start += type.length() + 2;
+                    }
+                    else {
+                        start++;
+                    }
+                }
             }
         }
-        return type;
+
+        Collections.sort(types, (t1, t2) -> Integer.compare(t1.start, t2.start));
+
+        Stack<TypeDef> typeStack = new Stack<TypeDef>();
+
+        for (int i = 0; i < types.size(); i++) {
+            TypeDef td = types.get(i);
+            boolean canClose = true;
+            int end = str.indexOf(PropertyHandler.PROPS_END[td.trigger], td.start);
+            for (int j = i +1; j < types.size(); j++) {
+                TypeDef td2 = types.get(j);
+                if (td.trigger == td2.trigger) {
+                    canClose = false;
+                    if (end > td2.start) {
+                        typeStack.push(td);
+                    }
+                    else {
+                        td.end = end + 2;
+                        while (!typeStack.empty()) {
+                            TypeDef td3 = typeStack.pop();
+                            if (td.trigger == td3.trigger) {
+                                end = str.indexOf(PropertyHandler.PROPS_END[td.trigger], td.end);
+                                td3.end = end + 2;
+                            }
+                            else {
+                                typeStack.push(td3);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            if (canClose) {
+                td.end = end + 2;
+            }
+        }
+
+        while (!typeStack.isEmpty()) {
+            TypeDef td = typeStack.pop();
+
+            boolean canClose = true;
+            int i = types.indexOf(td);
+            int end = str.indexOf(PropertyHandler.PROPS_END[td.trigger], td.start);
+            for (int j = i+1; j < types.size(); j++) {
+                TypeDef td2 = types.get(j);
+                if (td.trigger == td2.trigger) {
+                    if ((td2.start < end) && (end < td2.end)) {
+                        end = str.indexOf(PropertyHandler.PROPS_END[td.trigger], td2.end);
+                        continue;
+                    }
+                    canClose = false;
+                    td.end = end + 2;
+                    break;
+                }
+            }
+            if (canClose) {
+                td.end = end + 2;
+            }
+        }
+
+        return types;
     }
 
-    private static boolean endsWith(String str, String value)
+    /**
+     * @param str
+     * @return
+     */
+    public static TypeDef extractTypesTree(String str)
     {
-        if (value.length() == 0) {
-            return false;
+        TypeDef root = new TypeDef("", -2, 0, str.length());
+        List<TypeDef> types = PropertiesHandler.extractTypes(str);
+
+        for (TypeDef td : types) {
+            root.addChild(td);
         }
-        int begin = str.length() - 1;
-        int end = begin - value.length();
-        int index = value.length() - 1;
-        if (begin < index) {
-            return false;
-        }
-        while (begin > end) {
-            if (str.charAt(begin) != value.charAt(index)) {
-                return false;
-            }
-            index--;
-            begin--;
-        }
-        return true;
+        return root;
     }
 
     /**
@@ -612,7 +597,7 @@ public final class PropertiesHandler
         }
         Iterator<String> i = propSet.iterator();
         while (i.hasNext()) {
-        	String p = i.next();
+            String p = i.next();
             if ((str.indexOf((p + PropertyHandler.PROPS_START[0])) != -1)
              || (str.indexOf((p + PropertyHandler.PROPS_START[1])) != -1)
              || (str.indexOf((p + PropertyHandler.PROPS_START[2])) != -1)) {
