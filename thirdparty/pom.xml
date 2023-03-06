@@ -1103,6 +1103,10 @@
             <groupId>com.wildbit.java</groupId>
             <artifactId>postmark</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+        </dependency>
 
         <!-- GVESB -->
         <dependency>
@@ -1212,6 +1216,10 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvvcl-postmark</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-chart</artifactId>
         </dependency>
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
