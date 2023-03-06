@@ -38,5 +38,6 @@
         <module>gvvcl-openspcoop</module>
         <module>gvvcl-kafka</module>
         <module>gvvcl-postmark</module>
+        <module>gvvcl-chart</module>
     </modules>
 </project>

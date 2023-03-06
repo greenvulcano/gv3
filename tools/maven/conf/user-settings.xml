@@ -47,7 +47,7 @@ under the License.
    |
    | Default: ~/.m2/repository
   -->
-  <localRepository>/home/gianluca/applicazioni/Test_JBOSS/GreenVulcanoOS/maven-repository</localRepository>
+  <localRepository>/home/gianluca/lavoro/EAI/Eclipse-GreenVulcano-OS-git-3.4.0/gvesb-parent/maven-repository</localRepository>
 
   <!-- interactiveMode
    | This will determine whether maven prompts you when it needs input. If set to false,
@@ -235,7 +235,7 @@ under the License.
       </activation>
 
       <properties>
-        <greenv.project.home>/home/gianluca/applicazioni/Test_JBOSS/GreenVulcanoOS</greenv.project.home>
+        <greenv.project.home>/home/gianluca/lavoro/EAI/Eclipse-GreenVulcano-OS-git-3.4.0/gvesb-parent</greenv.project.home>
       </properties>
     </profile>
   </profiles>

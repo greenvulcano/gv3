@@ -100,6 +100,7 @@
     <version.kafka>2.2.0</version.kafka>
     <version.kafka.junit>3.2.3</version.kafka.junit>
     <version.postmark>1.8.4</version.postmark>
+    <version.jfreechart>1.5.4</version.jfreechart>
   </properties>
 
   <dependencyManagement>
@@ -1811,6 +1812,12 @@
             <groupId>com.wildbit.java</groupId>
             <artifactId>postmark</artifactId>
             <version>${version.postmark}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>${version.jfreechart}</version>
         </dependency>
 
     </dependencies>

@@ -470,6 +470,13 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>it.greenvulcano.gvesb</groupId>
+            <artifactId>gvvcl-chart</artifactId>
+            <version>3.4.0-Final</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>

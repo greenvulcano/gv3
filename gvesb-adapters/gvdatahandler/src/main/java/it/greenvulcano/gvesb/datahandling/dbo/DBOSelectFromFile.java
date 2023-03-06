@@ -62,6 +62,8 @@ public class DBOSelectFromFile extends AbstractDBO
     {
         super.init(config);
         try {
+            this.forcedMode = XMLConfig.get(config, "@force-mode", MODE_DB2XML);
+            this.isReturnData = XMLConfig.getBoolean(config, "@return-data", true);
             this.fileName = XMLConfig.get(config, "@file-name");
             this.readFromCP = XMLConfig.getBoolean(config, "@read-from-cp", true);
         }
@@ -106,7 +108,9 @@ public class DBOSelectFromFile extends AbstractDBO
             fileData = PropertiesHandler.expand(fileData, props, conn, null);
 
             logger.debug("End execution of file [" + this.fileName + "] data read through " + this.dboclass);
-            return fileData.getBytes();
+            this.dhr.setRead(this.rowCounter);
+
+            return fileData;
         }
         catch (Exception exc) {
             logger.error("Error on execution of " + this.dboclass + " with name [" + getName() + "]", exc);
