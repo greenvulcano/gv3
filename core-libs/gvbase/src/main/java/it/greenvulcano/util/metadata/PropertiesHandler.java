@@ -44,7 +44,7 @@ import it.greenvulcano.util.txt.TextUtils;
  **/
 public final class PropertiesHandler
 {
-    private static class TypeDef {
+    public static class TypeDef {
         public String type;
         public int start;
         public int end = -1;
@@ -527,17 +527,6 @@ public final class PropertiesHandler
                     }
                     else {
                         td.end = end + 2;
-                        while (!typeStack.empty()) {
-                            TypeDef td3 = typeStack.pop();
-                            if (td.trigger == td3.trigger) {
-                                end = str.indexOf(PropertyHandler.PROPS_END[td.trigger], td.end);
-                                td3.end = end + 2;
-                            }
-                            else {
-                                typeStack.push(td3);
-                                break;
-                            }
-                        }
                     }
                     break;
                 }
@@ -560,9 +549,6 @@ public final class PropertiesHandler
                         end = str.indexOf(PropertyHandler.PROPS_END[td.trigger], td2.end);
                         continue;
                     }
-                    canClose = false;
-                    td.end = end + 2;
-                    break;
                 }
             }
             if (canClose) {
