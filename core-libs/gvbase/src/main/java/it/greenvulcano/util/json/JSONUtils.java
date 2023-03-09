@@ -461,6 +461,9 @@ public class JSONUtils
         try {
             // create tagName element, if needed
             if (tagName != null) {
+                if ((tagName.charAt(0) >= '0') && (tagName.charAt(0) <= '9')) {
+                    tagName = "_" + tagName;
+                }
                 el = parser.insertElement(context, tagName);
             }
             else {
