@@ -1,38 +1,37 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package tests.unit.util.file;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.util.file.monitor.AnalysisReport;
-import it.greenvulcano.util.file.monitor.FileSystemMonitor;
-import it.greenvulcano.util.txt.TextUtils;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.w3c.dom.Node;
+
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.util.file.monitor.AnalysisReport;
+import it.greenvulcano.util.file.monitor.FileSystemMonitor;
+import it.greenvulcano.util.txt.TextUtils;
+import junit.framework.TestCase;
 
 /**
  * @version 3.0.0 Feb 17, 2010
@@ -165,7 +164,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("1) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FILE_CHANGED);
+        TextUtils.writeFile("new content 1", TEST_FILE_CHANGED);
         TextUtils.writeFile("new file", TEST_FILE_CREATED);
         FileUtils.deleteQuietly(new File(TEST_FILE_DELETED));
 
@@ -188,7 +187,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("3) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FILE_CHANGED);
+        TextUtils.writeFile("new content 2", TEST_FILE_CHANGED);
         TextUtils.writeFile("new file", TEST_FILE_CREATED_2);
         FileUtils.deleteQuietly(new File(TEST_FILE_DELETED_2));
 
@@ -234,7 +233,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("1b) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FILE_CHANGED_AA);
+        TextUtils.writeFile("new content aa", TEST_FILE_CHANGED_AA);
         FileUtils.deleteQuietly(new File(TEST_FILE_DELETED_AA));
 
         optProperties.put("PATH", TEST_FILE_DIR + "_AA");
@@ -247,7 +246,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("2a) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 1);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FILE_CHANGED_BB);
+        TextUtils.writeFile("new content bb", TEST_FILE_CHANGED_BB);
         TextUtils.writeFile("new file", TEST_FILE_CREATED_BB);
 
         optProperties.put("PATH", TEST_FILE_DIR + "_BB");
@@ -307,7 +306,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("1) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FP_FILE_CHANGED);
+        TextUtils.writeFile("new content fp 1", TEST_FP_FILE_CHANGED);
         TextUtils.writeFile("new file", TEST_FP_FILE_CREATED);
         FileUtils.deleteQuietly(new File(TEST_FP_FILE_DELETED));
 
@@ -328,7 +327,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("3) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FP_FILE_CHANGED);
+        TextUtils.writeFile("new content fp 2", TEST_FP_FILE_CHANGED);
         TextUtils.writeFile("new file", TEST_FP_FILE_CREATED_2);
         FileUtils.deleteQuietly(new File(TEST_FP_FILE_DELETED_2));
 
@@ -375,7 +374,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("1b) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FP_FILE_CHANGED_AA);
+        TextUtils.writeFile("new content fp aa", TEST_FP_FILE_CHANGED_AA);
         TextUtils.writeFile("new file", TEST_FP_FILE_CREATED_AA);
 
         optProperties.put("PATH", TEST_FILE_DIR + "_AA");
@@ -388,7 +387,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("2a) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FP_FILE_CHANGED_BB);
+        TextUtils.writeFile("new content fp bb", TEST_FP_FILE_CHANGED_BB);
         TextUtils.writeFile("new file", TEST_FP_FILE_CREATED_BB);
 
         optProperties.put("PATH", TEST_FILE_DIR + "_BB");
@@ -438,7 +437,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("1) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FILE_CHANGED);
+        TextUtils.writeFile("new content 1", TEST_FILE_CHANGED);
         TextUtils.writeFile("new file", TEST_FILE_CREATED);
         FileUtils.deleteQuietly(new File(TEST_FILE_DELETED));
 
@@ -459,7 +458,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("3) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FILE_CHANGED);
+        TextUtils.writeFile("new content 2", TEST_FILE_CHANGED);
         TextUtils.writeFile("new file", TEST_FILE_CREATED_2);
         FileUtils.deleteQuietly(new File(TEST_FILE_DELETED_2));
 
@@ -500,7 +499,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("1b) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 0);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FILE_CHANGED_AA);
+        TextUtils.writeFile("new content aa", TEST_FILE_CHANGED_AA);
         FileUtils.deleteQuietly(new File(TEST_FILE_DELETED_AA));
 
         optProperties.put("PATH", TEST_FILE_DIR + "_AA");
@@ -512,7 +511,7 @@ public class FileSystemMonitorTestCase extends TestCase
         assertTrue("2a) Deleted  Files invalid [" + rep.getDeletedFilesCount() + "]", rep.getDeletedFilesCount() == 1);
 
         Thread.sleep(1000);
-        TextUtils.writeFile("new content", TEST_FILE_CHANGED_BB);
+        TextUtils.writeFile("new content bb", TEST_FILE_CHANGED_BB);
         TextUtils.writeFile("new file", TEST_FILE_CREATED_BB);
 
         optProperties.put("PATH", TEST_FILE_DIR + "_BB");
