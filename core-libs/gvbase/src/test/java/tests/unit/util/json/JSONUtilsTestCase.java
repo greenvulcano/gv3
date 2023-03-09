@@ -313,4 +313,33 @@ public class JSONUtilsTestCase extends XMLTestCase
         JSONAssert.assertEquals(outJSON, json, true);
     }
 
+    /**
+     * Test the JSON2XML numeric element names.
+     *
+     * @throws Exception
+     */
+    public void testJSON_numeric_names_2XML() throws Exception
+    {
+        JSONObject root = new JSONObject();
+        JSONObject j1 = new JSONObject();
+        j1.put("id", 10);
+        j1.put("string", "0010");
+        JSONObject j2 = new JSONObject();
+        j2.put("id", 20);
+        j2.put("string", "0020");
+        JSONObject j3 = new JSONObject();
+        j3.put("id", 30);
+        j3.put("string", "0030");
+
+        root.append("10", j1);
+        root.append("20", j2);
+        root.append("30", j3);
+
+        Node xml= JSONUtils.jsonToXml(root);
+        String dom = XMLUtils.serializeDOM_S(xml);
+        System.out.println("\nTestJSON_numeric_names_2XML: " + dom);
+        String outXML = TextUtils.readFileFromCP("testJ2X_numeric_names.xml");
+        assertXMLEqual("TestJSON_numeric_names_2XML failed", outXML, dom);
+    }
+
 }
