@@ -20,6 +20,7 @@
  */
 package it.greenvulcano.js.function;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.mozilla.javascript.BaseFunction;
@@ -72,12 +73,17 @@ public class IncludeFunction extends BaseFunction {
         }
         String script = (String) args[0];
         try {
-            InputStreamReader isr = new InputStreamReader(ClassLoader.getSystemResourceAsStream(script));
+            InputStream is = ClassLoader.getSystemResourceAsStream(script);
+            if (is == null) {
+                is = getClass().getClassLoader().getResourceAsStream(script);
+            }
+            InputStreamReader isr = new InputStreamReader(is);
             Script initscript = cx.compileReader(isr, script, 1, null);
             initscript.exec(cx, scope);
         }
         catch (Exception exc) {
             System.out.println("Error compiling js script '" + script + "': " + exc.getMessage());
+            exc.printStackTrace();
         }
         return scope;
     }
