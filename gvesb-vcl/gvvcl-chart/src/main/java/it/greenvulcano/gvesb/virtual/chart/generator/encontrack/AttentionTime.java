@@ -10,12 +10,9 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.chart.renderer.xy.XYSplineRenderer;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.IntervalXYDataset;
+import org.jfree.data.time.TimeTableXYDataset;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -26,7 +23,7 @@ import it.greenvulcano.util.xml.XMLUtils;
  * @author gianluca
  *
  */
-public class Idling extends BaseGenerator implements ChartGenerator{
+public class AttentionTime extends BaseGenerator implements ChartGenerator {
 
     /**
      * Creates a new chart.
@@ -36,7 +33,7 @@ public class Idling extends BaseGenerator implements ChartGenerator{
      */
     @Override
     public JFreeChart[] generateCharts(Node xmlData) throws Exception {
-        IntervalXYDataset[] dataset = createDataset(xmlData);
+        TimeTableXYDataset dataset = createDataset(xmlData);
         JFreeChart chart = createChart(dataset);
         return new JFreeChart[] {chart};
     }
@@ -47,52 +44,46 @@ public class Idling extends BaseGenerator implements ChartGenerator{
      * @return The dataset.
      * @throws Exception
      */
-    private IntervalXYDataset[] createDataset(Node xmlData) throws Exception {
-        TimeSeries tsKm = new TimeSeries("Kilòmetros recorridos");
-        TimeSeries tsIdl = new TimeSeries("Tiempo en ralenti");
+    private TimeTableXYDataset createDataset(Node xmlData) throws Exception {
+        TimeTableXYDataset dataset = new TimeTableXYDataset();
         String aggrType = XMLUtils.get_S(xmlData, "/DEFAULT_ROOT/data/report_info/aggregation_type");
         NodeList aggrList = XMLUtils.selectNodeList_S(xmlData, "/DEFAULT_ROOT/data/aggregated");
 
         for (int i = 0; i < aggrList.getLength(); i++) {
             Node n = aggrList.item(i);
 
-            Float v = Float.parseFloat(XMLUtils.get_S(n, "covered_km"));
-            String d = XMLUtils.get_S(n, "event_date");
-            addTSentry(tsKm, aggrType, d, v);
+            Float v = Float.parseFloat(XMLUtils.get_S(n, "average_attention_time")) / 60;
+            String d = XMLUtils.get_S(n, "date");
+            addTSentry(dataset, aggrType, d, v, "Tiempo promedio de atenciòn");
 
-            v = Float.parseFloat(XMLUtils.get_S(n, "duration_min")) / 60;
-            d = XMLUtils.get_S(n, "event_date");
-            addTSentry(tsIdl, aggrType, d, v);
+            v = Float.parseFloat(XMLUtils.get_S(n, "average_closing_time")) / 60;
+            d = XMLUtils.get_S(n, "date");
+            addTSentry(dataset, aggrType, d, v, "Tiempo promedio de cierre");
         }
 
-        TimeSeriesCollection[] dataset = new TimeSeriesCollection[2];
-        dataset[0] = new TimeSeriesCollection();
-        dataset[0].addSeries(tsKm);
-        dataset[1] = new TimeSeriesCollection();
-        dataset[1].addSeries(tsIdl);
         return dataset;
     }
 
     /**
-     * Creates a sample chart.
+     * Creates a chart.
      *
      * @param dataset  the dataset.
      *
      * @return The chart.
      */
-    private JFreeChart createChart(IntervalXYDataset[] dataset) {
+    private JFreeChart createChart(TimeTableXYDataset dataset) {
         //construct the plot
         XYPlot plot = new XYPlot();
-        plot.setDataset(0, dataset[0]);
-        plot.setDataset(1, dataset[1]);
+        plot.setDataset(0, dataset);
 
         ValueAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
         timeAxis.setUpperMargin(0.02);
 
         //customize the plot with renderers and axis
-        XYBarRenderer barrenderer = new XYBarRenderer(0.10);
-        barrenderer.setSeriesPaint(0, Color.LIGHT_GRAY);
+        StackedXYBarRenderer barrenderer = new StackedXYBarRenderer(0.20);
+        barrenderer.setSeriesPaint(0, Color.RED);
+        barrenderer.setSeriesPaint(1, Color.BLUE);
         barrenderer.setBarAlignmentFactor(0.5);
         barrenderer.setDrawBarOutline(false);
         barrenderer.setShadowVisible(false);
@@ -100,18 +91,12 @@ public class Idling extends BaseGenerator implements ChartGenerator{
         barrenderer.setGradientPaintTransformer(null);
         barrenderer.setBarPainter(new StandardXYBarPainter());
         plot.setRenderer(0, barrenderer);
-        plot.setRangeAxis(0, new NumberAxis("Km recorridos"));
-
-        XYSplineRenderer splinerenderer = new XYSplineRenderer();
-        splinerenderer.setSeriesPaint(0, Color.BLUE);
-        plot.setRenderer(1, splinerenderer);
-        plot.setRangeAxis(1, new NumberAxis("N° de horas"));
+        plot.setRangeAxis(0, new NumberAxis("Alertas atendidas"));
 
         plot.setDomainAxis(timeAxis);
 
         //Map the data to the appropriate axis
         plot.mapDatasetToRangeAxis(0, 0);
-        plot.mapDatasetToRangeAxis(1, 1);
 
         //generate the chart
         JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, true);

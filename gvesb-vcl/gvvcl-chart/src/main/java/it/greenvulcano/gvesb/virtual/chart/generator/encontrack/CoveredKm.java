@@ -5,9 +5,12 @@ package it.greenvulcano.gvesb.virtual.chart.generator.encontrack;
 
 import java.awt.Color;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -23,17 +26,18 @@ import it.greenvulcano.util.xml.XMLUtils;
  *
  */
 public class CoveredKm extends BaseGenerator implements ChartGenerator{
+
     /**
-     * Creates a new demo instance.
+     * Creates a new chart.
      *
-     * @param title  the frame title.
+     * @param the data set
      * @throws Exception
      */
     @Override
-    public JFreeChart generateChart(Node xmlData) throws Exception {
+    public JFreeChart[] generateCharts(Node xmlData) throws Exception {
         IntervalXYDataset dataset = createDataset(xmlData);
         JFreeChart chart = createChart(dataset);
-        return chart;
+        return new JFreeChart[] {chart};
     }
 
     /**
@@ -68,17 +72,53 @@ public class CoveredKm extends BaseGenerator implements ChartGenerator{
      * @return The chart.
      */
     private JFreeChart createChart(IntervalXYDataset dataset) {
-        JFreeChart chart = ChartFactory.createXYBarChart(
-            null /* title */, null /* x-axis label*/, true,
-                "Km recorridos" /* y-axis label */, dataset);
-        Color bg = new Color(192, 192, 192, 0);
+        //construct the plot
+        XYPlot plot = new XYPlot();
+        plot.setDataset(0, dataset);
+
+        ValueAxis timeAxis = new DateAxis(null);
+        timeAxis.setLowerMargin(0.02);  // reduce the default margins
+        timeAxis.setUpperMargin(0.02);
+
+        //customize the plot with renderers and axis
+        XYBarRenderer barrenderer = new XYBarRenderer(0.10);
+        barrenderer.setSeriesPaint(0, Color.LIGHT_GRAY);
+        barrenderer.setBarAlignmentFactor(0.5);
+        barrenderer.setDrawBarOutline(false);
+        barrenderer.setShadowVisible(false);
+        //barrenderer.setMaximumBarWidth(0.5);
+        barrenderer.setGradientPaintTransformer(null);
+        barrenderer.setBarPainter(new StandardXYBarPainter());
+        plot.setRenderer(0, barrenderer);
+        plot.setRangeAxis(0, new NumberAxis("Km recorridos"));
+
+        plot.setDomainAxis(timeAxis);
+
+        //Map the data to the appropriate axis
+        plot.mapDatasetToRangeAxis(0, 0);
+
+//        JFreeChart chart = ChartFactory.createXYBarChart(
+//            null /* title */, null /* x-axis label*/, true,
+//                "Km recorridos" /* y-axis label */, dataset);
+/*        Color bg = new Color(192, 192, 192, 0);
         chart.setBackgroundPaint(bg);
         chart.getLegend().visible = false;
 
         XYBarRenderer barrenderer = (XYBarRenderer) ((XYPlot) chart.getPlot()).getRenderer(0);
-        barrenderer.setSeriesPaint(0, Color.GRAY);
+        barrenderer.setSeriesPaint(0, Color.LIGHT_GRAY);
         barrenderer.setBarAlignmentFactor(0.5);
-        barrenderer.setMargin(0.2);
+        barrenderer.setDrawBarOutline(false);
+        barrenderer.setShadowVisible(false);
+        //barrenderer.setMaximumBarWidth(0.5);
+        barrenderer.setGradientPaintTransformer(null);
+        barrenderer.setBarPainter(new StandardXYBarPainter());
+        barrenderer.setMargin(0.2);*/
+
+        // generate the chart
+        JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
+        Color bg = new Color(192, 192, 192, 0);
+        chart.setBackgroundPaint(bg);
+        //chart.getLegend().visible = false;
 
         return chart;
     }

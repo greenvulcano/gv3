@@ -6,11 +6,11 @@ import org.w3c.dom.Node;
 public interface ChartGenerator {
 
     /**
-     * Creates a new demo instance.
+     * Creates a list of charts.
      *
-     * @param title  the frame title.
+     * @param the data set
      * @throws Exception
      */
-    JFreeChart generateChart(Node xmlData) throws Exception;
+    JFreeChart[] generateCharts(Node xmlData) throws Exception;
 
 }

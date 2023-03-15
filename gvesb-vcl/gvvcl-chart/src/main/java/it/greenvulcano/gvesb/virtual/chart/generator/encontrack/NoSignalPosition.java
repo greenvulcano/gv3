@@ -26,7 +26,7 @@ import it.greenvulcano.util.xml.XMLUtils;
  * @author gianluca
  *
  */
-public class Idling extends BaseGenerator implements ChartGenerator{
+public class NoSignalPosition extends BaseGenerator implements ChartGenerator{
 
     /**
      * Creates a new chart.
@@ -48,19 +48,19 @@ public class Idling extends BaseGenerator implements ChartGenerator{
      * @throws Exception
      */
     private IntervalXYDataset[] createDataset(Node xmlData) throws Exception {
-        TimeSeries tsKm = new TimeSeries("Kilòmetros recorridos");
-        TimeSeries tsIdl = new TimeSeries("Tiempo en ralenti");
+        TimeSeries tsKm = new TimeSeries("Numero de vehiculos");
+        TimeSeries tsIdl = new TimeSeries("Tiempo sin posicion");
         String aggrType = XMLUtils.get_S(xmlData, "/DEFAULT_ROOT/data/report_info/aggregation_type");
         NodeList aggrList = XMLUtils.selectNodeList_S(xmlData, "/DEFAULT_ROOT/data/aggregated");
 
         for (int i = 0; i < aggrList.getLength(); i++) {
             Node n = aggrList.item(i);
 
-            Float v = Float.parseFloat(XMLUtils.get_S(n, "covered_km"));
+            Float v = Float.parseFloat(XMLUtils.get_S(n, "num_vehicle"));
             String d = XMLUtils.get_S(n, "event_date");
             addTSentry(tsKm, aggrType, d, v);
 
-            v = Float.parseFloat(XMLUtils.get_S(n, "duration_min")) / 60;
+            v = Float.parseFloat(XMLUtils.get_S(n, "total_no_pos_min")) / 60;
             d = XMLUtils.get_S(n, "event_date");
             addTSentry(tsIdl, aggrType, d, v);
         }
@@ -100,7 +100,7 @@ public class Idling extends BaseGenerator implements ChartGenerator{
         barrenderer.setGradientPaintTransformer(null);
         barrenderer.setBarPainter(new StandardXYBarPainter());
         plot.setRenderer(0, barrenderer);
-        plot.setRangeAxis(0, new NumberAxis("Km recorridos"));
+        plot.setRangeAxis(0, new NumberAxis("N° vehiculos"));
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
