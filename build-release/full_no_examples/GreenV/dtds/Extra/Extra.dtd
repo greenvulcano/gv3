@@ -37,11 +37,14 @@
 <!ENTITY % gvkafka SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVKafka.dtd">
 %gvkafka;
 
+<!ENTITY % gvpdf SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVPdf.dtd">
+%gvpdf;
+
 <!ENTITY % extra-j2ee-calls "">
 <!ENTITY % extra-comm-calls "|hl7-call|zmq-call|zmq-publish|openspcoop-call|%social-calls;|sap-call|%push-calls;">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
-<!ENTITY % extra-util-calls "|excel-call|excelreader-call|rules-call">
+<!ENTITY % extra-util-calls "|excel-call|excelreader-call|html2pdf-call|rules-call">
 
 <!ENTITY % extra-enqueue "|kafka-enqueue">
 <!ENTITY % extra-dequeue "">

@@ -10,11 +10,14 @@
 <!ENTITY % gvhttp SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVHTTPInbound.dtd">
 %gvhttp;
 
+<!ENTITY % gvpdf SYSTEM "http://www.greenvulcano.com/gvesb/dtds/GVPdf.dtd">
+%gvpdf;
+
 <!ENTITY % extra-j2ee-calls "">
 <!ENTITY % extra-comm-calls "">
 <!ENTITY % extra-file-calls "">
 <!ENTITY % extra-db-calls   "|dh-call">
-<!ENTITY % extra-util-calls "|excel-call|excelreader-call">
+<!ENTITY % extra-util-calls "|excel-call|excelreader-call|html2pdf-call">
 
 <!ENTITY % extra-enqueue "">
 <!ENTITY % extra-dequeue "">
