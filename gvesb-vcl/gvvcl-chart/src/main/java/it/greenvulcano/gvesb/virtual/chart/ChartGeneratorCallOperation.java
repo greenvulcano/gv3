@@ -146,15 +146,17 @@ public class ChartGeneratorCallOperation implements CallOperation
             Node xmlData = XMLUtils.parseObject_S(data, false, true);
 
             ChartGenerator cg = this.cgFactory.getChartGenerator(chartType);
-            JFreeChart jc = cg.generateChart(xmlData);
+            JFreeChart[] jcs = cg.generateCharts(xmlData);
 
-            File targetFile = buildTargetPathname(gvBuffer);
-            if (targetFile != null) {
-                ChartUtils.saveChartAsPNG(targetFile, jc, localWidth, localHeight);
-                logger.info("Generated chart[" + chartType + "] into " + targetFile);
-            }
-            else {
-                gvBuffer.setObject(ChartUtils.encodeAsPNG(jc.createBufferedImage(localWidth, localHeight)));
+            for (int i = 0; i < jcs.length; i++) {
+                File targetFile = buildTargetPathname(gvBuffer, i);
+                if (targetFile != null) {
+                    ChartUtils.saveChartAsPNG(targetFile, jcs[i], localWidth, localHeight);
+                    logger.info("Generated chart[" + chartType + "][" + i + "] into " + targetFile);
+                }
+                else {
+                    //gvBuffer.setObject(ChartUtils.encodeAsPNG(jcs[0].createBufferedImage(localWidth, localHeight)));
+                }
             }
 
             return gvBuffer;
@@ -213,11 +215,12 @@ public class ChartGeneratorCallOperation implements CallOperation
         return gvBuffer.getService();
     }
 
-    private File buildTargetPathname(GVBuffer gvBuffer) throws Exception
+    private File buildTargetPathname(GVBuffer gvBuffer, int idx) throws Exception
     {
         try {
             PropertiesHandler.enableExceptionOnErrors();
             Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO(gvBuffer, true);
+            params.put("CHART_IDX", String.valueOf(idx));
 
             String targetDirectory = gvBuffer.getProperty("GVCG_DIRECTORY");
             if (targetDirectory == null) {

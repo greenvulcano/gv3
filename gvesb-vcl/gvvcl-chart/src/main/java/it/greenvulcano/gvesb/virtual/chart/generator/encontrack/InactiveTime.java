@@ -26,7 +26,7 @@ import it.greenvulcano.util.xml.XMLUtils;
  * @author gianluca
  *
  */
-public class Idling extends BaseGenerator implements ChartGenerator{
+public class InactiveTime extends BaseGenerator implements ChartGenerator{
 
     /**
      * Creates a new chart.
@@ -49,18 +49,18 @@ public class Idling extends BaseGenerator implements ChartGenerator{
      */
     private IntervalXYDataset[] createDataset(Node xmlData) throws Exception {
         TimeSeries tsKm = new TimeSeries("Kilòmetros recorridos");
-        TimeSeries tsIdl = new TimeSeries("Tiempo en ralenti");
+        TimeSeries tsIdl = new TimeSeries("Tiempo sin actividad");
         String aggrType = XMLUtils.get_S(xmlData, "/DEFAULT_ROOT/data/report_info/aggregation_type");
         NodeList aggrList = XMLUtils.selectNodeList_S(xmlData, "/DEFAULT_ROOT/data/aggregated");
 
         for (int i = 0; i < aggrList.getLength(); i++) {
             Node n = aggrList.item(i);
 
-            Float v = Float.parseFloat(XMLUtils.get_S(n, "covered_km"));
+            Float v = Float.parseFloat(XMLUtils.get_S(n, "total_km"));
             String d = XMLUtils.get_S(n, "event_date");
             addTSentry(tsKm, aggrType, d, v);
 
-            v = Float.parseFloat(XMLUtils.get_S(n, "duration_min")) / 60;
+            v = Float.parseFloat(XMLUtils.get_S(n, "total_inactive_minutes")) / 60;
             d = XMLUtils.get_S(n, "event_date");
             addTSentry(tsIdl, aggrType, d, v);
         }
