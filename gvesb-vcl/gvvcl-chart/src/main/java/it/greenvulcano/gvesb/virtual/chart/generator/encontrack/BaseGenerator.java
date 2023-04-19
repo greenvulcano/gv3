@@ -32,7 +32,8 @@ public abstract class BaseGenerator implements ChartGenerator {
             ts.add(new Day(DateUtils.stringToDate(d, "yyyy-MM-dd"), this.tz, this.loc), v);
         }
         else if ("W".equals(aggrType)) {
-            ts.add(new Week(DateUtils.stringToDate(d, "yyyy-MM-dd"), this.tz, this.loc), v);
+            //ts.add(new Week(DateUtils.stringToDate(d, "yyyy-MM-dd"), this.tz, this.loc), v);
+            ts.add(new Day(DateUtils.stringToDate(d, "yyyy-MM-dd"), this.tz, this.loc), v);
         }
         else if ("M".equals(aggrType)) {
             ts.add(new Month(DateUtils.stringToDate(d, "yyyy-MM"), this.tz, this.loc), v);
