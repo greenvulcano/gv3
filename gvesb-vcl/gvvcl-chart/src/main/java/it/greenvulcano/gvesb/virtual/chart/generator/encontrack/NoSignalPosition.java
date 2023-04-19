@@ -8,7 +8,6 @@ import java.awt.Color;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
@@ -102,7 +101,7 @@ public class NoSignalPosition extends BaseGenerator implements ChartGenerator{
         barrenderer.setBarPainter(new StandardXYBarPainter());
         plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("N° vehiculos"));
-        ((NumberAxis) plot.getRangeAxis(0)).setTickUnit(new NumberTickUnit(1.0));
+        //((NumberAxis) plot.getRangeAxis(0)).setTickUnit(new NumberTickUnit(1.0));
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
