@@ -1,0 +1,52 @@
+
+<!--
+    HTML 2 PDF call operation
+    Generates a document in PDF format taking informations, struictures and stylse from 
+    an XHTML file or a well formed HTML file (all open tags must be explicitly closed).
+    It can operate:
+    - from GVBuffer to GVBuffer
+    - from source HTML file to GVBuffer
+    - from GVBuffer to target PDF file
+    - from source to target file
+
+        
+    #Label: @name
+    #Category: Custom
+    #SelectOnInsert
+-->
+<!ELEMENT html2pdf-call (Description?, ServiceAlias?)>
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST html2pdf-call type CDATA #FIXED "call">
+<!--
+    Unmodifiable.
+    Used by GreenVulcanoESB factory framework.
+-->
+<!ATTLIST html2pdf-call class CDATA #FIXED "it.greenvulcano.gvesb.virtual.pdf.converter.HTML2PDFCallOperation">
+<!--
+    Operation name.
+    Used in the 'Flow' section to associate workflow nodes to VCL operations.
+
+    #NotNull
+    #Unique: ../*[@type='call' or @type='dequeue' or @type='enqueue']/@name
+-->
+<!ATTLIST html2pdf-call name CDATA #REQUIRED>
+<!--
+    The source file absolute path.
+    If this field is specified, the input GVBuffer is ignored from the operation.
+    Otherwise the incoming data is taken from the current GVBuffer
+
+    #NotNull
+-->
+<!ATTLIST html2pdf-call source CDATA #IMPLIED>
+<!--
+    The target file absolute path.
+    If this field is specified, the output GVBuffer is NOT involved in data manipulation.
+    Otherwise the outcoming PDF data is taken from the current GVBuffer
+
+    #NotNull
+-->
+<!ATTLIST html2pdf-call target CDATA #IMPLIED>
+

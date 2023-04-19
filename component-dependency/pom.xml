@@ -101,6 +101,9 @@
     <version.kafka.junit>3.2.3</version.kafka.junit>
     <version.postmark>1.8.4</version.postmark>
     <version.jfreechart>1.5.4</version.jfreechart>
+    <version.xhtmlrenderer>9.1.22</version.xhtmlrenderer>
+    <version.itextpdf>5.5.12</version.itextpdf>
+    <version.itext-asian>5.2.0</version.itext-asian>
   </properties>
 
   <dependencyManagement>
@@ -1818,6 +1821,22 @@
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
             <version>${version.jfreechart}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf-itext5</artifactId>
+            <version>${version.xhtmlrenderer}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>${version.itextpdf}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext-asian</artifactId>
+            <version>${version.itext-asian}</version>
         </dependency>
 
     </dependencies>

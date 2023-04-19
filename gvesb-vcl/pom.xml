@@ -39,5 +39,6 @@
         <module>gvvcl-kafka</module>
         <module>gvvcl-postmark</module>
         <module>gvvcl-chart</module>
+        <module>gvvcl-pdf</module>
     </modules>
 </project>
