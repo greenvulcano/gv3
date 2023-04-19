@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,8 +22,6 @@ package tests.unit.util.txt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import it.greenvulcano.util.txt.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -33,8 +31,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import it.greenvulcano.util.txt.TextUtils;
+
 /**
- * 
+ *
  * @version 3.4.0 10/mar/2013
  * @author GreenVulcano Developer Team
  */
@@ -93,7 +93,7 @@ public class TextUtilsTestCase
         phValues.put("AA", "11");
         phValues.put("BB", "22");
         phValues.put("CC", "33");
-        
+
         String input = "aaph{{AA}}aa ph{{BB}} ph{{DD}} ccph{{CC}}";
         String output = "aa11aa 22 ph{{DD}} cc33";
         assertEquals(output, TextUtils.replacePlaceholder(input, "ph{{", "}}", phValues));
@@ -112,7 +112,7 @@ public class TextUtilsTestCase
         output.add("s2");
         output.add("s3");
         output.add("s4");
-        
+
         assertEquals("split failed: " + input1, output, TextUtils.splitByStringSeparator(input1, ";"));
         assertEquals("split failed: " + input2, output, TextUtils.splitByStringSeparator(input2, " "));
         assertEquals("split failed: " + input3, output, TextUtils.splitByStringSeparator(input3, "aa"));
@@ -123,7 +123,18 @@ public class TextUtilsTestCase
      */
     @Test
     public void testReplaceJSInvalidChars() {
-        // TODO
+        assertEquals("\\\"", TextUtils.replaceJSInvalidChars("\""));
+        assertEquals("\\'", TextUtils.replaceJSInvalidChars("'"));
+        assertEquals("", TextUtils.replaceJSInvalidChars("\r"));
+        assertEquals("\\n", TextUtils.replaceJSInvalidChars("\n"));
+        assertEquals("&gt;", TextUtils.replaceJSInvalidChars(">"));
+        assertEquals("&lt;", TextUtils.replaceJSInvalidChars("<"));
+        assertEquals("\\u00E0", TextUtils.replaceJSInvalidChars("\u00E0"));
+        assertEquals("\\u00E8", TextUtils.replaceJSInvalidChars("\u00E8"));
+        assertEquals("\\u00E9", TextUtils.replaceJSInvalidChars("\u00E9"));
+        assertEquals("\\u00EC", TextUtils.replaceJSInvalidChars("\u00EC"));
+        assertEquals("\\u00F2", TextUtils.replaceJSInvalidChars("\u00F2"));
+        assertEquals("\\u00F9", TextUtils.replaceJSInvalidChars("\u00F9"));
     }
 
     /**
@@ -131,7 +142,10 @@ public class TextUtilsTestCase
      */
     @Test
     public void testReplaceSQLInvalidChars() {
-        // TODO
+        assertEquals("''aaa''", TextUtils.replaceSQLInvalidChars("'aaa'"));
+        //assertEquals("a\\_a", TextUtils.replaceSQLInvalidChars("a_a"));
+        //assertEquals("a\\%a", TextUtils.replaceSQLInvalidChars("a%a"));
+        //assertEquals("a\\[a]", TextUtils.replaceSQLInvalidChars("a[a]"));
     }
 
     /**

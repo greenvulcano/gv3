@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -46,11 +46,11 @@ import org.apache.commons.io.IOUtils;
 
 /**
  * This class contains static utility methods to manage text strings.
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class TextUtils
 {
@@ -59,7 +59,7 @@ public class TextUtils
     /**
      * A string containing (some) invalid JS chars.
      */
-    private static String              jsInvalid  = null;                                  // "&<>\"'\n";
+    private static String jsInvalid  = null; // "&<>\"'\n";
     private static Map<String, String> jsReplacements;
     static {
         jsReplacements = new HashMap<String, String>();
@@ -88,11 +88,14 @@ public class TextUtils
      * A string containing (some) invalid SQL chars.
      */
 
-    private static String              sqlInvalid = null;                                  // "'";
+    private static String sqlInvalid = null; // "'_%[";
     private static Map<String, String> sqlReplacements;
     static {
         sqlReplacements = new HashMap<String, String>();
         sqlReplacements.put("'", "''");
+        //sqlReplacements.put("_", "\\_");
+        //sqlReplacements.put("%", "\\%");
+        //sqlReplacements.put("[", "\\[");
 
         StringBuffer sbuf = new StringBuffer(sqlReplacements.size());
         Iterator<String> it = sqlReplacements.keySet().iterator();
@@ -105,7 +108,7 @@ public class TextUtils
     /**
      * Simply calls
      * {@link java.util.regex.Pattern#matches(String, CharSequence)}.
-     * 
+     *
      * @param pattern
      * @param text
      * @return
@@ -120,7 +123,7 @@ public class TextUtils
      * Replaces within <tt>input</tt> string all the occurrences of the
      * substring <tt>toBeReplaced</tt> with occurrences of the substring
      * <tt>replacement</tt>.
-     * 
+     *
      * @param input
      *        the input <tt>String</tt>.
      * @param toBeReplaced
@@ -187,7 +190,7 @@ public class TextUtils
      * @param phSuffix
      * @param phValues
      * @return the string with placeholders replaced
-     * 
+     *
      */
     public static String replacePlaceholder(String input, String phPrefix, String phSuffix,
             Hashtable<String, String> phValues)
@@ -250,7 +253,7 @@ public class TextUtils
      * This method tokenizes a given string using another given string as
      * separator and returns a <tt>List</tt> containing found tokens. The
      * returned <tt>List</tt> is NEVER null (it may have zero elements, anyway).
-     * 
+     *
      * @param theString
      *        the <tt>String</tt> to be tokenized.
      * @param separatorString
@@ -313,7 +316,7 @@ public class TextUtils
     /**
      * Replaces JS invalid chars within <tt>input</tt> String with the
      * corresponding entities.
-     * 
+     *
      * @param input
      *        the input <tt>String</tt>.
      * @return the input string, with JS invalid chars replaced by the
@@ -343,7 +346,7 @@ public class TextUtils
     /**
      * Replaces SQL invalid chars within <tt>input</tt> String with the
      * corresponding entities.
-     * 
+     *
      * @param input
      *        the input <tt>String</tt>.
      * @return the input string, with SQL invalid chars replaced by the
@@ -376,7 +379,7 @@ public class TextUtils
      * - \r or CR : carriage return
      * - \r\n or CR-LF : carriage return and line feed
      * - native : OS native EOL
-     * 
+     *
      * @param def
      *        the definition to convert
      * @return the EOL char or null
@@ -405,7 +408,7 @@ public class TextUtils
 
     /**
      * Opens and loads the content of a text file into a String
-     * 
+     *
      * @param filename
      *        the name of the file
      * @return The content of the text file as a String
@@ -428,7 +431,7 @@ public class TextUtils
 
     /**
      * Opens and loads the content of a text file into a String
-     * 
+     *
      * @param file
      * @return The content of the text file as a String
      * @throws FileNotFoundException
@@ -451,7 +454,7 @@ public class TextUtils
     /**
      * Opens and loads the content of a text file (read from classpath) into a
      * String
-     * 
+     *
      * @param filename
      *        the name of the file
      * @return The content of the text file as a String
@@ -479,11 +482,11 @@ public class TextUtils
             }
         }
     }
-    
+
     /**
      * Opens and loads the content of a text file (read from URL) into a
      * String
-     * 
+     *
      * @param url
      *        the url of the file
      * @return The content of the text file as a String
@@ -505,7 +508,7 @@ public class TextUtils
 
     /**
      * Opens and loads the content of a text file into a list of String
-     * 
+     *
      * @param filename
      *        the name of the file
      * @return The content of the text file as a list of String
@@ -529,7 +532,7 @@ public class TextUtils
     /**
      * Opens and loads the content of a text file (read from classpath) into a
      * list of String
-     * 
+     *
      * @param filename
      *        the name of the file
      * @return The content of the text file as a list of String
@@ -560,7 +563,7 @@ public class TextUtils
     /**
      * Opens and loads the content of a text file (read from URL) into a
      * list of String
-     * 
+     *
      * @param url
      *        the url of the file
      * @return The content of the text file as a list of String
@@ -582,7 +585,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a new file
-     * 
+     *
      * @param contentString
      *        The String to be written into the file
      * @param filename
@@ -596,7 +599,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a file
-     * 
+     *
      * @param contentString
      *        The String to be written into the file
      * @param filename
@@ -622,7 +625,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a new file
-     * 
+     *
      * @param contentString
      *        The StringBuffer to be written into the file
      * @param filename
@@ -636,7 +639,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a file
-     * 
+     *
      * @param contentString
      *        The StringBuffer to be written into the file
      * @param filename
@@ -662,7 +665,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a new file
-     * 
+     *
      * @param contentStrings
      *        The list of strings to be written into the file
      * @param filename
@@ -678,7 +681,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a file
-     * 
+     *
      * @param contentStrings
      *        The list of strings to be written into the file
      * @param filename
@@ -710,7 +713,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a new file
-     * 
+     *
      * @param contentString
      *        The String to be written into the file
      * @param file
@@ -724,7 +727,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a file
-     * 
+     *
      * @param contentString
      *        The String to be written into the file
      * @param file
@@ -750,7 +753,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a new file
-     * 
+     *
      * @param contentString
      *        The StringBuffer to be written into the file
      * @param file
@@ -764,7 +767,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a file
-     * 
+     *
      * @param contentString
      *        The StringBuffer to be written into the file
      * @param file
@@ -790,7 +793,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a new file
-     * 
+     *
      * @param contentStrings
      *        The StringBuffer to be written into the file
      * @param file
@@ -806,7 +809,7 @@ public class TextUtils
 
     /**
      * Writes a text String into a file
-     * 
+     *
      * @param contentStrings
      *        The StringBuffer to be written into the file
      * @param file
@@ -838,7 +841,7 @@ public class TextUtils
 
     /**
      * Dumps the content of a byte array as chars
-     * 
+     *
      * @param arr
      *        a byte array
      * @return A representation of the given byte array as a sequence of chars
@@ -854,7 +857,7 @@ public class TextUtils
 
     /**
      * Generate random chars string of given <code>length</code>.
-     * 
+     *
      * @param length
      * @return a random string of given <code>length</code>.
      */
@@ -867,10 +870,10 @@ public class TextUtils
         return new String(Base64.encodeBase64(bval), 0, length).replace('/', '$');
     }
 
-    
+
     /**
      * Check if a given string is null and if so returns an empty string.
-     * 
+     *
      * @param value
      * @return the input value or an empty string if input is null
      */
@@ -881,7 +884,7 @@ public class TextUtils
         }
         return value;
     }
-    
+
     public static void checkNull(String message, Object value) throws NullPointerException
     {
         if (value == null) {
