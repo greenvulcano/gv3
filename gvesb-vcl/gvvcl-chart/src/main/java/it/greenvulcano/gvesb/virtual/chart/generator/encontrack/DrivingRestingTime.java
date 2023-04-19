@@ -19,6 +19,8 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.util.UnitType;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.jfree.data.time.TimeSeries;
@@ -191,8 +193,11 @@ public class DrivingRestingTime extends BaseGenerator implements ChartGenerator{
         plot.setOuterSeparatorExtension(0);
         plot.setInnerSeparatorExtension(0);
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{1}",new DecimalFormat("#"), new DecimalFormat("0%")));
-        plot.setLabelBackgroundPaint(null);
+        plot.setSimpleLabelOffset(new RectangleInsets(
+                UnitType.RELATIVE, 0.09, 0.09, 0.09, 0.09));
+        //plot.setLabelBackgroundPaint(null);
         plot.setLabelOutlinePaint(null);
+        plot.setLabelShadowPaint(null);
         plot.setSectionPaint("Conducciòn", Color.BLUE);
         plot.setSectionPaint("Apagado", Color.GRAY);
 

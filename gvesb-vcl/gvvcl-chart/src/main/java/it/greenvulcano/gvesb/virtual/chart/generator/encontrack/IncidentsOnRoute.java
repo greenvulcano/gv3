@@ -11,7 +11,6 @@ import java.util.Map;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.ColumnArrangement;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
@@ -22,6 +21,8 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.util.UnitType;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -69,7 +70,7 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
             Node n = aggrList.item(i);
 
             Float v = Float.parseFloat(XMLUtils.get_S(n, "vehicles"));
-            String d = XMLUtils.get_S(n, "alarm_date");
+            String d = XMLUtils.get_S(n, "event_date");
             addTSentry(tsN, aggrType, d, v);
 
             int total = 0;
@@ -146,7 +147,7 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         barrenderer.setBarPainter(new StandardXYBarPainter());
         plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("N° vehiculos"));
-        ((NumberAxis) plot.getRangeAxis(0)).setTickUnit(new NumberTickUnit(1.0));
+        //((NumberAxis) plot.getRangeAxis(0)).setTickUnit(new NumberTickUnit(1.0));
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
@@ -191,8 +192,12 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         plot.setOuterSeparatorExtension(0);
         plot.setInnerSeparatorExtension(0);
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{1}",new DecimalFormat("#"), new DecimalFormat("0%")));
-        plot.setLabelBackgroundPaint(null);
+        plot.setSimpleLabelOffset(new RectangleInsets(
+                UnitType.RELATIVE, 0.09, 0.09, 0.09, 0.09));
+        //plot.setLabelBackgroundPaint(null);
         plot.setLabelOutlinePaint(null);
+        plot.setLabelShadowPaint(null);
+        //Font font = plot.getLabelFont();
         //plot.setSectionPaint("Exceso de velocidad", Color.BLUE);
         //plot.setSectionPaint("Freanado brusco", Color.GRAY);
 
