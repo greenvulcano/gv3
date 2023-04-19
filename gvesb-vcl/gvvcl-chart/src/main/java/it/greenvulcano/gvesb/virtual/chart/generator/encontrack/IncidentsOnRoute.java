@@ -11,6 +11,7 @@ import java.util.Map;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.ColumnArrangement;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
@@ -127,8 +128,8 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
 
         //construct the plot
         XYPlot plot = new XYPlot();
-        plot.setDataset(0, dataset[0]);
-        plot.setDataset(1, dataset[1]);
+        plot.setDataset(1, dataset[0]);
+        plot.setDataset(0, dataset[1]);
 
         ValueAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
@@ -143,19 +144,20 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         //barrenderer.setMaximumBarWidth(0.5);
         barrenderer.setGradientPaintTransformer(null);
         barrenderer.setBarPainter(new StandardXYBarPainter());
-        plot.setRenderer(0, barrenderer);
+        plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("N° vehiculos"));
+        ((NumberAxis) plot.getRangeAxis(0)).setTickUnit(new NumberTickUnit(1.0));
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
-        plot.setRenderer(1, splinerenderer);
+        plot.setRenderer(0, splinerenderer);
         plot.setRangeAxis(1, new NumberAxis("N° incidencias"));
 
         plot.setDomainAxis(timeAxis);
 
         //Map the data to the appropriate axis
-        plot.mapDatasetToRangeAxis(0, 0);
-        plot.mapDatasetToRangeAxis(1, 1);
+        plot.mapDatasetToRangeAxis(0, 1);
+        plot.mapDatasetToRangeAxis(1, 0);
 
         //generate the chart
         JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
