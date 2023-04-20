@@ -120,7 +120,7 @@ public class DrivingRestingTime extends BaseGenerator implements ChartGenerator{
 
         DefaultPieDataset dataset = new DefaultPieDataset();
         dataset.setValue("Apagado", hourResting);
-        dataset.setValue("Conducciòn", hourResting);
+        dataset.setValue("Conducciòn", hourDriving);
 
         return dataset;
     }
@@ -158,6 +158,7 @@ public class DrivingRestingTime extends BaseGenerator implements ChartGenerator{
         splinerenderer.setSeriesPaint(0, Color.BLUE);
         plot.setRenderer(0, splinerenderer);
         plot.setRangeAxis(1, new NumberAxis("N° de trayectos"));
+        ((NumberAxis) plot.getRangeAxis(1)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         plot.setDomainAxis(timeAxis);
 
