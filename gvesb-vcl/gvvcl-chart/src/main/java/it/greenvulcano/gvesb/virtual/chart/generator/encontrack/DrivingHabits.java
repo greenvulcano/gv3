@@ -144,6 +144,7 @@ public class DrivingHabits extends BaseGenerator implements ChartGenerator{
         barrenderer.setBarPainter(new StandardXYBarPainter());
         plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("N° incidentes"));
+        ((NumberAxis) plot.getRangeAxis(0)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);

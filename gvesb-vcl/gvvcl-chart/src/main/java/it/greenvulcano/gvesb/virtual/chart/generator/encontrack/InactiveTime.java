@@ -106,6 +106,7 @@ public class InactiveTime extends BaseGenerator implements ChartGenerator{
         splinerenderer.setSeriesPaint(0, Color.BLUE);
         plot.setRenderer(0, splinerenderer);
         plot.setRangeAxis(1, new NumberAxis("N° de horas"));
+        ((NumberAxis) plot.getRangeAxis(1)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         plot.setDomainAxis(timeAxis);
 

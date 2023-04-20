@@ -8,7 +8,6 @@ import java.awt.Color;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
@@ -86,7 +85,7 @@ public class NoSignalPosition extends BaseGenerator implements ChartGenerator{
         plot.setDataset(1, dataset[0]);
         plot.setDataset(0, dataset[1]);
 
-        ValueAxis timeAxis = new DateAxis(null);
+        DateAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
         timeAxis.setUpperMargin(0.02);
 
@@ -101,12 +100,13 @@ public class NoSignalPosition extends BaseGenerator implements ChartGenerator{
         barrenderer.setBarPainter(new StandardXYBarPainter());
         plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("N° vehiculos"));
-        //((NumberAxis) plot.getRangeAxis(0)).setTickUnit(new NumberTickUnit(1.0));
+        ((NumberAxis) plot.getRangeAxis(0)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
         plot.setRenderer(0, splinerenderer);
         plot.setRangeAxis(1, new NumberAxis("N° de horas"));
+        ((NumberAxis) plot.getRangeAxis(1)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         plot.setDomainAxis(timeAxis);
 

@@ -147,12 +147,13 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         barrenderer.setBarPainter(new StandardXYBarPainter());
         plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("N° vehiculos"));
-        //((NumberAxis) plot.getRangeAxis(0)).setTickUnit(new NumberTickUnit(1.0));
+        ((NumberAxis) plot.getRangeAxis(0)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
         plot.setRenderer(0, splinerenderer);
         plot.setRangeAxis(1, new NumberAxis("N° incidencias"));
+        ((NumberAxis) plot.getRangeAxis(1)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         plot.setDomainAxis(timeAxis);
 
