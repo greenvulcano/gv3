@@ -11,7 +11,6 @@ import org.jfree.data.time.Hour;
 import org.jfree.data.time.Month;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeTableXYDataset;
-import org.jfree.data.time.Week;
 
 import it.greenvulcano.gvesb.virtual.chart.generator.ChartGenerator;
 import it.greenvulcano.util.txt.DateUtils;
@@ -54,7 +53,8 @@ public abstract class BaseGenerator implements ChartGenerator {
             ts.add(new Day(DateUtils.stringToDate(d, "yyyy-MM-dd"), this.tz, this.loc), v, serieName);
         }
         else if ("W".equals(aggrType)) {
-            ts.add(new Week(DateUtils.stringToDate(d, "yyyy-MM-dd"), this.tz, this.loc), v, serieName);
+            ts.add(new Day(DateUtils.stringToDate(d, "yyyy-MM-dd"), this.tz, this.loc), v, serieName);
+            //ts.add(new Week(DateUtils.stringToDate(d, "yyyy-MM-dd"), this.tz, this.loc), v, serieName);
         }
         else if ("M".equals(aggrType)) {
             ts.add(new Month(DateUtils.stringToDate(d, "yyyy-MM"), this.tz, this.loc), v, serieName);
