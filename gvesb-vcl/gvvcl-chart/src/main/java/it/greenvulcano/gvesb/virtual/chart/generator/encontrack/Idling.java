@@ -83,8 +83,8 @@ public class Idling extends BaseGenerator implements ChartGenerator{
     private JFreeChart createChart(IntervalXYDataset[] dataset) {
         //construct the plot
         XYPlot plot = new XYPlot();
-        plot.setDataset(0, dataset[0]);
-        plot.setDataset(1, dataset[1]);
+        plot.setDataset(1, dataset[0]);
+        plot.setDataset(0, dataset[1]);
 
         ValueAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
@@ -99,19 +99,20 @@ public class Idling extends BaseGenerator implements ChartGenerator{
         //barrenderer.setMaximumBarWidth(0.5);
         barrenderer.setGradientPaintTransformer(null);
         barrenderer.setBarPainter(new StandardXYBarPainter());
-        plot.setRenderer(0, barrenderer);
+        plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("Km recorridos"));
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
-        plot.setRenderer(1, splinerenderer);
+        plot.setRenderer(0, splinerenderer);
         plot.setRangeAxis(1, new NumberAxis("N° de horas"));
+        ((NumberAxis) plot.getRangeAxis(1)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         plot.setDomainAxis(timeAxis);
 
         //Map the data to the appropriate axis
-        plot.mapDatasetToRangeAxis(0, 0);
-        plot.mapDatasetToRangeAxis(1, 1);
+        plot.mapDatasetToRangeAxis(0, 1);
+        plot.mapDatasetToRangeAxis(1, 0);
 
         //generate the chart
         JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, true);

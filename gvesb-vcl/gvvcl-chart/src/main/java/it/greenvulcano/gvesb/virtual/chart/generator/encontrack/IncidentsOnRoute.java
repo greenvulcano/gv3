@@ -21,6 +21,8 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.util.UnitType;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -68,7 +70,7 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
             Node n = aggrList.item(i);
 
             Float v = Float.parseFloat(XMLUtils.get_S(n, "vehicles"));
-            String d = XMLUtils.get_S(n, "alarm_date");
+            String d = XMLUtils.get_S(n, "event_date");
             addTSentry(tsN, aggrType, d, v);
 
             int total = 0;
@@ -127,8 +129,8 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
 
         //construct the plot
         XYPlot plot = new XYPlot();
-        plot.setDataset(0, dataset[0]);
-        plot.setDataset(1, dataset[1]);
+        plot.setDataset(1, dataset[0]);
+        plot.setDataset(0, dataset[1]);
 
         ValueAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
@@ -143,19 +145,21 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         //barrenderer.setMaximumBarWidth(0.5);
         barrenderer.setGradientPaintTransformer(null);
         barrenderer.setBarPainter(new StandardXYBarPainter());
-        plot.setRenderer(0, barrenderer);
+        plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("N° vehiculos"));
+        ((NumberAxis) plot.getRangeAxis(0)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
-        plot.setRenderer(1, splinerenderer);
+        plot.setRenderer(0, splinerenderer);
         plot.setRangeAxis(1, new NumberAxis("N° incidencias"));
+        ((NumberAxis) plot.getRangeAxis(1)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         plot.setDomainAxis(timeAxis);
 
         //Map the data to the appropriate axis
-        plot.mapDatasetToRangeAxis(0, 0);
-        plot.mapDatasetToRangeAxis(1, 1);
+        plot.mapDatasetToRangeAxis(0, 1);
+        plot.mapDatasetToRangeAxis(1, 0);
 
         //generate the chart
         JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
@@ -189,8 +193,12 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         plot.setOuterSeparatorExtension(0);
         plot.setInnerSeparatorExtension(0);
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{1}",new DecimalFormat("#"), new DecimalFormat("0%")));
-        plot.setLabelBackgroundPaint(null);
+        plot.setSimpleLabelOffset(new RectangleInsets(
+                UnitType.RELATIVE, 0.09, 0.09, 0.09, 0.09));
+        //plot.setLabelBackgroundPaint(null);
         plot.setLabelOutlinePaint(null);
+        plot.setLabelShadowPaint(null);
+        //Font font = plot.getLabelFont();
         //plot.setSectionPaint("Exceso de velocidad", Color.BLUE);
         //plot.setSectionPaint("Freanado brusco", Color.GRAY);
 

@@ -19,6 +19,8 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.util.UnitType;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.jfree.data.time.TimeSeries;
@@ -118,7 +120,7 @@ public class DrivingRestingTime extends BaseGenerator implements ChartGenerator{
 
         DefaultPieDataset dataset = new DefaultPieDataset();
         dataset.setValue("Apagado", hourResting);
-        dataset.setValue("Conducciòn", hourResting);
+        dataset.setValue("Conducciòn", hourDriving);
 
         return dataset;
     }
@@ -133,8 +135,8 @@ public class DrivingRestingTime extends BaseGenerator implements ChartGenerator{
     private JFreeChart createChartBarLine(IntervalXYDataset[] dataset) {
         //construct the plot
         XYPlot plot = new XYPlot();
-        plot.setDataset(0, dataset[0]);
-        plot.setDataset(1, dataset[1]);
+        plot.setDataset(1, dataset[0]);
+        plot.setDataset(0, dataset[1]);
 
         ValueAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
@@ -149,19 +151,20 @@ public class DrivingRestingTime extends BaseGenerator implements ChartGenerator{
         //barrenderer.setMaximumBarWidth(0.5);
         barrenderer.setGradientPaintTransformer(null);
         barrenderer.setBarPainter(new StandardXYBarPainter());
-        plot.setRenderer(0, barrenderer);
+        plot.setRenderer(1, barrenderer);
         plot.setRangeAxis(0, new NumberAxis("Km recorridos"));
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
         splinerenderer.setSeriesPaint(0, Color.BLUE);
-        plot.setRenderer(1, splinerenderer);
+        plot.setRenderer(0, splinerenderer);
         plot.setRangeAxis(1, new NumberAxis("N° de trayectos"));
+        ((NumberAxis) plot.getRangeAxis(1)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         plot.setDomainAxis(timeAxis);
 
         //Map the data to the appropriate axis
-        plot.mapDatasetToRangeAxis(0, 0);
-        plot.mapDatasetToRangeAxis(1, 1);
+        plot.mapDatasetToRangeAxis(0, 1);
+        plot.mapDatasetToRangeAxis(1, 0);
 
         //generate the chart
         JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
@@ -191,8 +194,11 @@ public class DrivingRestingTime extends BaseGenerator implements ChartGenerator{
         plot.setOuterSeparatorExtension(0);
         plot.setInnerSeparatorExtension(0);
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{1}",new DecimalFormat("#"), new DecimalFormat("0%")));
-        plot.setLabelBackgroundPaint(null);
+        plot.setSimpleLabelOffset(new RectangleInsets(
+                UnitType.RELATIVE, 0.09, 0.09, 0.09, 0.09));
+        //plot.setLabelBackgroundPaint(null);
         plot.setLabelOutlinePaint(null);
+        plot.setLabelShadowPaint(null);
         plot.setSectionPaint("Conducciòn", Color.BLUE);
         plot.setSectionPaint("Apagado", Color.GRAY);
 
