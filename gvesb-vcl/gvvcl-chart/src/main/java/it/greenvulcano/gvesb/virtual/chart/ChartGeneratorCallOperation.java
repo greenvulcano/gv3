@@ -133,16 +133,6 @@ public class ChartGeneratorCallOperation implements CallOperation
 
             String chartType = gvBuffer.getProperty("GVCG_TYPE");
 
-            int localWidth = this.width;
-            int localHeight = this.height;
-
-            if (gvBuffer.getProperty("GVCG_WIDTH") != null) {
-                localWidth = Integer.parseInt(gvBuffer.getProperty("GVCG_WIDTH"));
-            }
-            if (gvBuffer.getProperty("GVCG_HEIGHT") != null) {
-                localHeight = Integer.parseInt(gvBuffer.getProperty("GVCG_HEIGHT"));
-            }
-
             Node xmlData = XMLUtils.parseObject_S(data, false, true);
 
             ChartGenerator cg = this.cgFactory.getChartGenerator(chartType);
@@ -151,6 +141,15 @@ public class ChartGeneratorCallOperation implements CallOperation
             for (int i = 0; i < jcs.length; i++) {
                 File targetFile = buildTargetPathname(gvBuffer, i);
                 if (targetFile != null) {
+                    int localWidth = cg.getPreferredWidth()[i] > 0 ? cg.getPreferredWidth()[i] : this.width;
+                    int localHeight = cg.getPreferredHeight()[i] > 0 ? cg.getPreferredHeight()[i] : this.height;
+
+                    if (gvBuffer.getProperty("GVCG_WIDTH") != null) {
+                        localWidth = Integer.parseInt(gvBuffer.getProperty("GVCG_WIDTH"));
+                    }
+                    if (gvBuffer.getProperty("GVCG_HEIGHT") != null) {
+                        localHeight = Integer.parseInt(gvBuffer.getProperty("GVCG_HEIGHT"));
+                    }
                     ChartUtils.saveChartAsPNG(targetFile, jcs[i], localWidth, localHeight);
                     logger.info("Generated chart[" + chartType + "][" + i + "] into " + targetFile);
                 }

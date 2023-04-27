@@ -6,11 +6,12 @@ package it.greenvulcano.gvesb.virtual.chart.generator.encontrack;
 import java.awt.Color;
 import java.text.DecimalFormat;
 
+import org.apache.log4j.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.block.ColumnArrangement;
+import org.jfree.chart.block.GridArrangement;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.RingPlot;
 import org.jfree.chart.plot.XYPlot;
@@ -28,7 +29,9 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.chart.generator.ChartGenerator;
+import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xml.XMLUtils;
 
 /**
@@ -36,6 +39,25 @@ import it.greenvulcano.util.xml.XMLUtils;
  *
  */
 public class DrivingHabits extends BaseGenerator implements ChartGenerator{
+    private static final Logger logger     = GVLogger.getLogger(DrivingHabits.class);
+
+    @Override
+    public Logger getLogger() {
+        return logger;
+    }
+
+    @Override
+    public void init(Node node) throws InitializationException {
+        super.init(node);
+        if (this.width.length < 2) {
+            int[] tmp = new int[] { this.width[0], -1};
+            this.width = tmp;
+        }
+        if (this.height.length < 2) {
+            int[] tmp = new int[] { this.height[0], -1};
+            this.height = tmp;
+        }
+    }
 
     /**
      * Creates a new chart.
@@ -106,9 +128,9 @@ public class DrivingHabits extends BaseGenerator implements ChartGenerator{
             total += Integer.parseInt(XMLUtils.get_S(n, "total", "0"));
         }
 
-        dataset.setValue("Exceso de velocidad", speeding);
-        dataset.setValue("Aceleración brusca", acceleration);
-        dataset.setValue("Frenado brusco", braking);
+        dataset.setValue(gwtEventLabel.get("speeding"), speeding);
+        dataset.setValue(gwtEventLabel.get("acceleration"), acceleration);
+        dataset.setValue(gwtEventLabel.get("braking"), braking);
 
         return total;
     }
@@ -123,6 +145,8 @@ public class DrivingHabits extends BaseGenerator implements ChartGenerator{
      */
     private JFreeChart createChartBarLine(Node xmlData) throws Exception {
         IntervalXYDataset[] dataset = createDatasetBarLine(xmlData);
+        String aggrType = XMLUtils.get_S(xmlData, "/DEFAULT_ROOT/data/report_info/aggregation_type");
+        long delta = getDelta(aggrType);
 
         //construct the plot
         XYPlot plot = new XYPlot();
@@ -132,6 +156,7 @@ public class DrivingHabits extends BaseGenerator implements ChartGenerator{
         ValueAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
         timeAxis.setUpperMargin(0.02);
+        timeAxis.setFixedAutoRange((dataset[0].getItemCount(0) +1) * delta);
 
         //customize the plot with renderers and axis
         XYBarRenderer barrenderer = new XYBarRenderer(0.10);
@@ -203,11 +228,13 @@ public class DrivingHabits extends BaseGenerator implements ChartGenerator{
         chart.setBackgroundPaint(bg);
         //chart.getLegend().visible = false;
 
+        // remove default legend
         chart.removeLegend();
-        LegendTitle legend = new LegendTitle(plot, new ColumnArrangement(), new ColumnArrangement());
+
+        // create and add legend
+        LegendTitle legend = new LegendTitle(plot, new GridArrangement(1+ (dataset.getItemCount()/2), 2), new GridArrangement(1, 1));
         legend.setPosition(RectangleEdge.BOTTOM);
         chart.addLegend(legend);
-
 
         return chart;
     }
