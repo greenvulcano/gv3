@@ -8,11 +8,12 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.block.ColumnArrangement;
+import org.jfree.chart.block.GridArrangement;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.RingPlot;
 import org.jfree.chart.plot.XYPlot;
@@ -30,7 +31,9 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.gvesb.virtual.InitializationException;
 import it.greenvulcano.gvesb.virtual.chart.generator.ChartGenerator;
+import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xml.XMLUtils;
 
 /**
@@ -38,6 +41,25 @@ import it.greenvulcano.util.xml.XMLUtils;
  *
  */
 public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
+    private static final Logger logger     = GVLogger.getLogger(IncidentsOnRoute.class);
+
+    @Override
+    public Logger getLogger() {
+        return logger;
+    }
+
+    @Override
+    public void init(Node node) throws InitializationException {
+        super.init(node);
+        if (this.width.length < 2) {
+            int[] tmp = new int[] { this.width[0], -1};
+            this.width = tmp;
+        }
+        if (this.height.length < 2) {
+            int[] tmp = new int[] { this.height[0], -1};
+            this.height = tmp;
+        }
+    }
 
     /**
      * Creates a new chart.
@@ -61,7 +83,7 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
      * @throws Exception
      */
     private IntervalXYDataset[] createDatasetBarLine(Node xmlData) throws Exception {
-        TimeSeries tsN = new TimeSeries("N° vehiculos");
+        TimeSeries tsN = new TimeSeries("N° vehículos");
         TimeSeries tsE = new TimeSeries("N° incidencias");
         String aggrType = XMLUtils.get_S(xmlData, "/DEFAULT_ROOT/data/report_info/aggregation_type");
         NodeList aggrList = XMLUtils.selectNodeList_S(xmlData, "/DEFAULT_ROOT/data/aggregated");
@@ -103,7 +125,7 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         for (int i = 0; i < aggrList.getLength(); i++) {
             Node n = aggrList.item(i);
 
-            String event = XMLUtils.get_S(n, "event_type");
+            String event = eventLabel.get(XMLUtils.get_S(n, "id_event_type"));
             Integer count = events.computeIfAbsent(event, s -> 0);
             events.put(event, count + Integer.parseInt(XMLUtils.get_S(n, "total", "0")));
             total += Integer.parseInt(XMLUtils.get_S(n, "total", "0"));
@@ -126,6 +148,8 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
      */
     private JFreeChart createChartBarLine(Node xmlData) throws Exception {
         IntervalXYDataset[] dataset = createDatasetBarLine(xmlData);
+        String aggrType = XMLUtils.get_S(xmlData, "/DEFAULT_ROOT/data/report_info/aggregation_type");
+        long delta = getDelta(aggrType);
 
         //construct the plot
         XYPlot plot = new XYPlot();
@@ -135,6 +159,7 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         ValueAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
         timeAxis.setUpperMargin(0.02);
+        timeAxis.setFixedAutoRange((dataset[0].getItemCount(0) +1) * delta);
 
         //customize the plot with renderers and axis
         XYBarRenderer barrenderer = new XYBarRenderer(0.10);
@@ -146,7 +171,7 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         barrenderer.setGradientPaintTransformer(null);
         barrenderer.setBarPainter(new StandardXYBarPainter());
         plot.setRenderer(1, barrenderer);
-        plot.setRangeAxis(0, new NumberAxis("N° vehiculos"));
+        plot.setRangeAxis(0, new NumberAxis("N° vehículos"));
         ((NumberAxis) plot.getRangeAxis(0)).setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         XYSplineRenderer splinerenderer = new XYSplineRenderer();
@@ -199,8 +224,6 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         plot.setLabelOutlinePaint(null);
         plot.setLabelShadowPaint(null);
         //Font font = plot.getLabelFont();
-        //plot.setSectionPaint("Exceso de velocidad", Color.BLUE);
-        //plot.setSectionPaint("Freanado brusco", Color.GRAY);
 
         //generate the chart
         JFreeChart chart = new JFreeChart("Total incidentes " + total, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
@@ -208,8 +231,11 @@ public class IncidentsOnRoute extends BaseGenerator implements ChartGenerator{
         chart.setBackgroundPaint(bg);
         //chart.getLegend().visible = false;
 
+        // remove default legend
         chart.removeLegend();
-        LegendTitle legend = new LegendTitle(plot, new ColumnArrangement(), new ColumnArrangement());
+
+        // create and add legend
+        LegendTitle legend = new LegendTitle(plot, new GridArrangement(1+ (dataset.getItemCount()/2), 2), new GridArrangement(1, 1));
         legend.setPosition(RectangleEdge.BOTTOM);
         chart.addLegend(legend);
 

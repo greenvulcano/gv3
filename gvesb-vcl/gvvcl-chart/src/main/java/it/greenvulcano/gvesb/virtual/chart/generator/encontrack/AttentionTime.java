@@ -5,6 +5,7 @@ package it.greenvulcano.gvesb.virtual.chart.generator.encontrack;
 
 import java.awt.Color;
 
+import org.apache.log4j.Logger;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -17,6 +18,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import it.greenvulcano.gvesb.virtual.chart.generator.ChartGenerator;
+import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xml.XMLUtils;
 
 /**
@@ -24,6 +26,12 @@ import it.greenvulcano.util.xml.XMLUtils;
  *
  */
 public class AttentionTime extends BaseGenerator implements ChartGenerator {
+    private static final Logger logger     = GVLogger.getLogger(AttentionTime.class);
+
+    @Override
+    public Logger getLogger() {
+        return logger;
+    }
 
     /**
      * Creates a new chart.
@@ -33,8 +41,10 @@ public class AttentionTime extends BaseGenerator implements ChartGenerator {
      */
     @Override
     public JFreeChart[] generateCharts(Node xmlData) throws Exception {
+        String aggrType = XMLUtils.get_S(xmlData, "/DEFAULT_ROOT/data/report_info/aggregation_type");
+        long delta = getDelta(aggrType);
         TimeTableXYDataset dataset = createDataset(xmlData);
-        JFreeChart chart = createChart(dataset);
+        JFreeChart chart = createChart(dataset, delta);
         return new JFreeChart[] {chart};
     }
 
@@ -71,7 +81,7 @@ public class AttentionTime extends BaseGenerator implements ChartGenerator {
      *
      * @return The chart.
      */
-    private JFreeChart createChart(TimeTableXYDataset dataset) {
+    private JFreeChart createChart(TimeTableXYDataset dataset, long delta) {
         //construct the plot
         XYPlot plot = new XYPlot();
         plot.setDataset(0, dataset);
@@ -79,6 +89,7 @@ public class AttentionTime extends BaseGenerator implements ChartGenerator {
         ValueAxis timeAxis = new DateAxis(null);
         timeAxis.setLowerMargin(0.02);  // reduce the default margins
         timeAxis.setUpperMargin(0.02);
+        timeAxis.setFixedAutoRange((dataset.getItemCount(0) +1) * delta);
 
         //customize the plot with renderers and axis
         StackedXYBarRenderer barrenderer = new StackedXYBarRenderer(0.20);

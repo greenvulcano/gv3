@@ -33,7 +33,9 @@ public class ChartGeneratorFactory {
                 String type = XMLConfig.get(n, "@type");
                 String cls = XMLConfig.get(n, "@class");
                 logger.debug("Adding ChartGenerator[" + type + "]: " + cls);
-                this.generators.put(type, (ChartGenerator) Class.forName(cls).newInstance());
+                ChartGenerator cg = (ChartGenerator) Class.forName(cls).newInstance();
+                cg.init(n);
+                this.generators.put(type, cg);
             }
             logger.debug("ChartGeneratorFactory configured");
         }
