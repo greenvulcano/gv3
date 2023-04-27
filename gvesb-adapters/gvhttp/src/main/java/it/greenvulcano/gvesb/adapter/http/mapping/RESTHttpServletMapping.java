@@ -83,6 +83,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
     private HttpServletTransactionManager transactionManager  = null;
     private String                        action              = null;
     private boolean                       dump                = false;
+    private boolean                       logBeginEnd         = false;
     private String                        responseContentType = null;
     private String                        responseCharacterEncoding = null;
     private final List<PatternResolver>         operationMappings   = new ArrayList<PatternResolver>();
@@ -149,8 +150,8 @@ public class RESTHttpServletMapping implements HttpServletMapping
                 locPattern = locPattern.substring(1);
             }
             String[] list = locPattern.split("/");
-            for (int i = 0; i < list.length; i++) {
-                String elem = list[i].trim();
+            for (String element : list) {
+                String elem = element.trim();
                 if (!"".equals(elem)) {
                     logger.debug("Element: " + elem);
                     String pN = elem.split("=")[0].trim();
@@ -304,6 +305,8 @@ public class RESTHttpServletMapping implements HttpServletMapping
         try {
             this.action = XMLConfig.get(configurationNode, "@Action");
             this.dump = XMLConfig.getBoolean(configurationNode, "@dump-in-out", false);
+            this.logBeginEnd = XMLConfig.getBoolean(configurationNode, "@log-begin-end", false);
+
             this.responseContentType = XMLConfig.get(configurationNode, "@RespContentType",
                     AdapterHttpConstants.APPXML_MIMETYPE_NAME);
             this.responseCharacterEncoding = XMLConfig.get(configurationNode, "@RespCharacterEncoding", "UTF-8");
@@ -375,7 +378,8 @@ public class RESTHttpServletMapping implements HttpServletMapping
 
             if (operationType == null) {
                 logger.error(this.action + " - handleRequest - Error while handling request parameters: unable to decode requested operation [" + methodName + "#" + path + "]");
-                resp.sendError(400, "Unable to decode the requested operation [" + methodName + "#" + path + "]");
+                resp.sendError(500, "Unable to decode the requested operation [" + methodName + "#" + path + "]");
+                NMDC.put("HTTP_STATUS", 500);
                 return false;
             }
 
@@ -396,7 +400,9 @@ public class RESTHttpServletMapping implements HttpServletMapping
 
             GVBufferMDC.put(request);
             NMDC.setOperation(operationType);
-            logger.info(GVFormatLog.formatBEGINOperation(request));
+            if (this.logBeginEnd) {
+                logger.info(GVFormatLog.formatBEGINOperation(request));
+            }
 
             this.transactionManager.begin(transInfo);
 
@@ -424,6 +430,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
             logger.debug("handleRequest stop");
         }
         catch (Throwable exc) {
+            NMDC.put("HTTP_STATUS", 500);
         	exception = exc;
             level = Level.ERROR;
             logger.error("handleRequest - Service request failed", exc);
@@ -447,19 +454,27 @@ public class RESTHttpServletMapping implements HttpServletMapping
 
             long endTime = System.currentTimeMillis();
             long totalTime = endTime - startTime;
-            GVFormatLog gvFormatLog = null;
-            if (exception != null) {
-                gvFormatLog = GVFormatLog.formatENDOperation(exception, totalTime);
-            }
-            else {
-                if (response != null) {
-                    gvFormatLog = GVFormatLog.formatENDOperation(response, totalTime);
+
+            if (this.logBeginEnd) {
+                GVFormatLog gvFormatLog = null;
+                if (exception != null) {
+                    gvFormatLog = GVFormatLog.formatENDOperation(exception, totalTime);
                 }
                 else {
-                    gvFormatLog = GVFormatLog.formatENDOperation(totalTime);
+                    if (response != null) {
+                        gvFormatLog = GVFormatLog.formatENDOperation(response, totalTime);
+                    }
+                    else {
+                        gvFormatLog = GVFormatLog.formatENDOperation(totalTime);
+                    }
+                }
+                logger.log(level, gvFormatLog);
+            }
+            else {
+                if (level == Level.ERROR) {
+                    logger.error("Error performing service call: " + exception);
                 }
             }
-            logger.log(level, gvFormatLog);
             NMDC.remove("MASTER_SERVICE");
             NMDC.remove("GV_MASTER_ID");
         }
@@ -567,6 +582,11 @@ public class RESTHttpServletMapping implements HttpServletMapping
         return this.dump;
     }
 
+    @Override
+    public boolean isLogBeginEnd() {
+        return this.logBeginEnd;
+    }
+
     /**
      *
      */
@@ -619,7 +639,9 @@ public class RESTHttpServletMapping implements HttpServletMapping
     private GVBuffer executeService(String operationType, GVBuffer gvInput) throws GVRequestException,
             GVPublicException
     {
-        logger.info("BEGIN - Perform Remote Call(GVCore) - Operation(" + operationType + ")");
+        if (this.logBeginEnd) {
+            logger.info("BEGIN - Perform Remote Call(GVCore) - Operation(" + operationType + ")");
+        }
         GVBuffer gvOutput = null;
         String status = "OK";
         long startTime = System.currentTimeMillis();
@@ -646,8 +668,10 @@ public class RESTHttpServletMapping implements HttpServletMapping
                 NMDC.pop();
                 endTime = System.currentTimeMillis();
                 totalTime = endTime - startTime;
-                logger.log(level, "END - Perform Remote Call(GVCore) - Operation(" + operationType
-                        + ") - ExecutionTime (" + totalTime + ") - Status: " + status);
+                if (this.logBeginEnd) {
+                    logger.log(level, "END - Perform Remote Call(GVCore) - Operation(" + operationType
+                            + ") - ExecutionTime (" + totalTime + ") - Status: " + status);
+                }
             }
         }
         catch (GVPublicException exc) {
@@ -675,6 +699,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
             String respStatusCode = response.getProperty("HTTP_RESP_STATUS_CODE");
             String respStatusMsg = response.getProperty("HTTP_RESP_STATUS_MSG");
             if (respStatusCode != null) {
+                NMDC.put("HTTP_STATUS", respStatusCode);
                 if (respStatusMsg == null) {
                     resp.setStatus(Integer.parseInt(respStatusCode));
                 }

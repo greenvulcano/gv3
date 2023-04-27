@@ -19,16 +19,6 @@
  */
 package it.greenvulcano.gvesb.adapter.http.mapping;
 
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.adapter.http.HttpServletMapping;
-import it.greenvulcano.gvesb.adapter.http.HttpServletTransactionManager;
-import it.greenvulcano.gvesb.adapter.http.exc.InboundHttpResponseException;
-import it.greenvulcano.gvesb.adapter.http.formatters.FormatterManager;
-import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpInitializationException;
-import it.greenvulcano.gvesb.adapter.http.utils.DumpUtils;
-import it.greenvulcano.gvesb.http.ProtocolFactory;
-import it.greenvulcano.log.GVLogger;
-
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -55,6 +45,16 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.adapter.http.HttpServletMapping;
+import it.greenvulcano.gvesb.adapter.http.HttpServletTransactionManager;
+import it.greenvulcano.gvesb.adapter.http.exc.InboundHttpResponseException;
+import it.greenvulcano.gvesb.adapter.http.formatters.FormatterManager;
+import it.greenvulcano.gvesb.adapter.http.utils.AdapterHttpInitializationException;
+import it.greenvulcano.gvesb.adapter.http.utils.DumpUtils;
+import it.greenvulcano.gvesb.http.ProtocolFactory;
+import it.greenvulcano.log.GVLogger;
+
 /**
  *
  * @version 3.4.0 23/mar/2014
@@ -69,6 +69,7 @@ public class ForwardHttpServletMapping implements HttpServletMapping
 
     private String              action;
     private boolean             dump                   = false;
+    private boolean             logBeginEnd            = false;
     private HttpClient          httpClient;
     private String              host;
     private String              port;
@@ -77,10 +78,10 @@ public class ForwardHttpServletMapping implements HttpServletMapping
 
     private int                 connTimeout            = DEFAULT_CONN_TIMEOUT;
     private int                 soTimeout              = DEFAULT_SO_TIMEOUT;
-    
-    
+
+
     /**
-     * 
+     *
      */
     public ForwardHttpServletMapping() {
         // do nothing
@@ -92,31 +93,32 @@ public class ForwardHttpServletMapping implements HttpServletMapping
     @Override
     public void init(HttpServletTransactionManager transactionManager, FormatterManager formatterMgr,
             Node configurationNode) throws AdapterHttpInitializationException {
-        httpClient = new HttpClient();
-        HostConfiguration hostConfiguration = httpClient.getHostConfiguration();
+        this.httpClient = new HttpClient();
+        HostConfiguration hostConfiguration = this.httpClient.getHostConfiguration();
 
         try {
-            action = XMLConfig.get(configurationNode, "@Action");
-            dump = XMLConfig.getBoolean(configurationNode, "@dump-in-out", false);
-            
+            this.action = XMLConfig.get(configurationNode, "@Action");
+            this.dump = XMLConfig.getBoolean(configurationNode, "@dump-in-out", false);
+            this.logBeginEnd = XMLConfig.getBoolean(configurationNode, "@log-begin-end", false);
+
             Node endpointNode = XMLConfig.getNode(configurationNode, "endpoint");
-            host = XMLConfig.get(endpointNode, "@host");
-            port = XMLConfig.get(endpointNode, "@port", "80");
-            contextPath = XMLConfig.get(endpointNode, "@context-path", "");
+            this.host = XMLConfig.get(endpointNode, "@host");
+            this.port = XMLConfig.get(endpointNode, "@port", "80");
+            this.contextPath = XMLConfig.get(endpointNode, "@context-path", "");
             boolean secure = XMLConfig.getBoolean(endpointNode, "@secure", false);
-            connTimeout = XMLConfig.getInteger(endpointNode, "@conn-timeout", DEFAULT_CONN_TIMEOUT);
-            soTimeout = XMLConfig.getInteger(endpointNode, "@so-timeout", DEFAULT_SO_TIMEOUT);
-            
-            HttpConnectionManagerParams params = httpClient.getHttpConnectionManager().getParams();
-            params.setConnectionTimeout(connTimeout);
-            params.setSoTimeout(soTimeout);
+            this.connTimeout = XMLConfig.getInteger(endpointNode, "@conn-timeout", DEFAULT_CONN_TIMEOUT);
+            this.soTimeout = XMLConfig.getInteger(endpointNode, "@so-timeout", DEFAULT_SO_TIMEOUT);
+
+            HttpConnectionManagerParams params = this.httpClient.getHttpConnectionManager().getParams();
+            params.setConnectionTimeout(this.connTimeout);
+            params.setSoTimeout(this.soTimeout);
 
             Node protocolNode = XMLConfig.getNode(endpointNode, "CustomProtocol");
             if (protocolNode != null) {
-                protocol = ProtocolFactory.create(protocolNode);
+                this.protocol = ProtocolFactory.create(protocolNode);
             }
             else {
-                protocol = Protocol.getProtocol(secure ? "https" : "http");
+                this.protocol = Protocol.getProtocol(secure ? "https" : "http");
             }
 
             Node proxyConfigNode = XMLConfig.getNode(endpointNode, "Proxy");
@@ -127,12 +129,12 @@ public class ForwardHttpServletMapping implements HttpServletMapping
                 String proxyPassword = XMLConfig.getDecrypted(proxyConfigNode, "@password", "");
                 hostConfiguration.setProxy(proxyHost, proxyPort);
                 if (proxyUser != null) {
-                    httpClient.getState().setProxyCredentials(new AuthScope(proxyHost, proxyPort),
+                    this.httpClient.getState().setProxyCredentials(new AuthScope(proxyHost, proxyPort),
                             new UsernamePasswordCredentials(proxyUser, proxyPassword));
                 }
             }
-            
-            httpClient.getHostConfiguration().setHost(host, Integer.parseInt(port), protocol);
+
+            this.httpClient.getHostConfiguration().setHost(this.host, Integer.parseInt(this.port), this.protocol);
         }
         catch (Exception exc) {
             throw new AdapterHttpInitializationException("GVHTTP_CONFIGURATION_ERROR", new String[][]{{"message", exc.getMessage()}},
@@ -150,7 +152,7 @@ public class ForwardHttpServletMapping implements HttpServletMapping
         logger.debug("BEGIN forward: " + req.getRequestURI());
         try {
             //httpClient.getHostConfiguration().setHost(host, Integer.parseInt(port), protocol);
-        	
+
         	ByteArrayOutputStream bodyOut = new ByteArrayOutputStream();
 
             if (methodName.equals("GET")) {
@@ -175,7 +177,7 @@ public class ForwardHttpServletMapping implements HttpServletMapping
                 throw new InboundHttpResponseException("GV_CALL_SERVICE_ERROR", new String[][]{{"message", "Unknown method = " + methodName}});
             }
 
-            if (dump) {
+            if (this.dump) {
             	StringBuffer sb = new StringBuffer();
             	DumpUtils.dump(req, sb);
             	logger.info(sb);
@@ -185,17 +187,17 @@ public class ForwardHttpServletMapping implements HttpServletMapping
             if (mapping == null) {
                 mapping = "/";
             }
-            String destPath = contextPath + mapping;
-            String queryString = req.getQueryString(); 
+            String destPath = this.contextPath + mapping;
+            String queryString = req.getQueryString();
             if (queryString != null) {
-                destPath += "?" + queryString; 
+                destPath += "?" + queryString;
             }
             if (!destPath.startsWith("/")) {
-                destPath = "/" + destPath; 
+                destPath = "/" + destPath;
             }
             logger.info("Resulting QueryString: " + destPath);
             method.setURI(new URI(destPath, true));
-            
+
             Enumeration<String> headerNames = req.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String hN = headerNames.nextElement();
@@ -204,26 +206,26 @@ public class ForwardHttpServletMapping implements HttpServletMapping
                     method.addRequestHeader(hN, headers.nextElement());
                 }
             }
-            
+
             if (methodName.equals("POST")) {
                 ((PostMethod) method).setRequestBody(req.getInputStream());
             }
             else if (methodName.equals("PUT")) {
                 ((PutMethod) method).setRequestBody(req.getInputStream());
             }
-            
-            int status = httpClient.executeMethod(method);
+
+            int status = this.httpClient.executeMethod(method);
 
             IOUtils.copy(method.getResponseBodyAsStream(), bodyOut);
-            
-            if (dump) {
+
+            if (this.dump) {
             	StringBuffer sb = new StringBuffer();
             	DumpUtils.dump(method, bodyOut, sb);
             	logger.info(sb);
             }
-            
+
             resp.setStatus(status, method.getStatusText());
-            
+
             Header[] responseHeaders = method.getResponseHeaders();
             for (Header header : responseHeaders) {
                 String hN = header.getName();
@@ -233,13 +235,13 @@ public class ForwardHttpServletMapping implements HttpServletMapping
                 }
                 resp.addHeader(hN, hV);
             }
-            
+
             OutputStream out = resp.getOutputStream();
             out.write(bodyOut.toByteArray());
             //IOUtils.copy(method.getResponseBodyAsStream(), out);
             out.flush();
             out.close();
-            
+
             return true;
         }
         catch (Exception exc) {
@@ -261,9 +263,14 @@ public class ForwardHttpServletMapping implements HttpServletMapping
 
     @Override
     public boolean isDumpInOut() {
-        return dump;
+        return this.dump;
     }
-    
+
+    @Override
+    public boolean isLogBeginEnd() {
+        return this.logBeginEnd;
+    }
+
     /* (non-Javadoc)
      * @see it.greenvulcano.gvesb.adapter.http.HttpServletMapping#destroy()
      */
@@ -277,7 +284,7 @@ public class ForwardHttpServletMapping implements HttpServletMapping
      */
     @Override
     public String getAction() {
-        return action;
+        return this.action;
     }
-    
+
 }
