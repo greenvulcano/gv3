@@ -1,0 +1,8 @@
+maven-repository
+core-libs/gvbase/derby.log
+**/target/**
+gvesb-adapters/gvbirt/derby.log
+gvesb-adapters/gvhl7/id_file
+thirdparty/libraries.ent
+thirdparty/libraries/**
+thirdparty/licenses/**
