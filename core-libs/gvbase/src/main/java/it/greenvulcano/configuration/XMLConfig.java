@@ -46,6 +46,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
+import it.greenvulcano.configuration.util.ConfigCryptoInterface;
 import it.greenvulcano.event.EventHandler;
 import it.greenvulcano.util.crypto.CryptoHelper;
 import it.greenvulcano.util.crypto.CryptoHelperException;
@@ -323,6 +324,21 @@ public final class XMLConfig
      * List of ConfigurationEvents to fire.
      */
     private static LinkedList<ConfigurationEvent> configurationEvents = new LinkedList<ConfigurationEvent>();
+
+    private static ConfigCryptoInterface cryptoInterface = null;
+
+    static {
+        String clazz = "";
+        try {
+            clazz = System.getProperty("it.greenvulcano.configuration.util.ConfigCryptoInterface", "it.greenvulcano.configuration.util.impl.CryptoHelperInterface");
+            cryptoInterface = (ConfigCryptoInterface) Class.forName(clazz).newInstance();
+            System.out.println("Initialized XMLConfig ConfigCryptoInterface[" + clazz + "]");
+        } catch (Throwable exc) {
+            System.err.println("Error initializing XMLConfig ConfigCryptoInterface[" + clazz + "]");
+            exc.printStackTrace();
+            System.exit(1);
+        }
+    }
 
     /**
      * Constructor
@@ -770,7 +786,7 @@ public final class XMLConfig
             keyId = DEFAULT_KEY_ID;
         }
         try {
-            value = CryptoHelper.decrypt(keyId, value, canBeClear);
+            value = cryptoInterface.decrypt(value, keyId, canBeClear);
         }
         catch (CryptoUtilsException exc) {
             throw new XMLConfigException("Error occurred decrypting value (XPath " + xpath + " - keyId " + keyId
@@ -820,7 +836,7 @@ public final class XMLConfig
             keyId = DEFAULT_KEY_ID;
         }
         try {
-            value = CryptoHelper.decrypt(keyId, value, canBeClear);
+            value = cryptoInterface.decrypt(value, keyId, canBeClear);
         }
         catch (CryptoUtilsException exc) {
             throw new XMLConfigException("Error occurred decrypting value (XPath " + xpath + " - keyId " + keyId
@@ -1015,7 +1031,7 @@ public final class XMLConfig
     {
         String out = value;
         try {
-            out = CryptoHelper.decrypt(DEFAULT_KEY_ID, value, true);
+            out = cryptoInterface.decrypt(value, DEFAULT_KEY_ID, true);
         }
         catch (Exception exc) {
             throw new XMLConfigException("Error occurred decrypting value [" + value + "]", exc);
@@ -1038,7 +1054,7 @@ public final class XMLConfig
     {
         String out = value;
         try {
-            out = CryptoHelper.encrypt(DEFAULT_KEY_ID, value, true);
+            out = cryptoInterface.encrypt(value, DEFAULT_KEY_ID, true);
         }
         catch (Exception exc) {
             throw new XMLConfigException("Error occurred encrypting value [" + value + "]", exc);
