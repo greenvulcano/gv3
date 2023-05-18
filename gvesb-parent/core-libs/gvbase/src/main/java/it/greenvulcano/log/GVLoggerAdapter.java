@@ -23,8 +23,6 @@ package it.greenvulcano.log;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
-import org.apache.log4j.spi.LoggingEvent;
-import org.slf4j.MDC;
 
 /**
  * 
