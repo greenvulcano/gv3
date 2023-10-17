@@ -19,6 +19,14 @@
  */
 package it.greenvulcano.gvesb.core.flow;
 
+import java.util.Map;
+import java.util.Vector;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
@@ -27,14 +35,6 @@ import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
-
-import java.util.Map;
-import java.util.Vector;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * GVFlow node for check.
@@ -77,9 +77,9 @@ public class GVNodeCheck extends GVFlowNode
     {
         super.init(defNode);
 
-        defaultId = XMLConfig.get(defNode, "@default-id", "");
+        this.defaultId = XMLConfig.get(defNode, "@default-id", "");
         try {
-            onExceptionId = XMLConfig.get(defNode, "@on-exception-id");
+            this.onExceptionId = XMLConfig.get(defNode, "@on-exception-id");
         }
         catch (XMLConfigException exc) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{
@@ -97,11 +97,11 @@ public class GVNodeCheck extends GVFlowNode
             for (int i = 0; i < nl.getLength(); i++) {
                 GVRouting routing = new GVRouting();
                 routing.init(nl.item(i), defNode);
-                routingVector.add(routing);
+                this.routingVector.add(routing);
             }
         }
 
-        if (defaultId.equals("") && (routingVector.size() == 0)) {
+        if (this.defaultId.equals("") && (this.routingVector.size() == 0)) {
             throw new GVCoreConfException("GVCORE_BAD_ROUTING_CFG_ERROR", new String[][]{{"id", getId()}});
         }
     }
@@ -115,19 +115,22 @@ public class GVNodeCheck extends GVFlowNode
     {
         String nextNodeId = "";
         Level level = GVLogger.getThreadMasterLevel();
-    	if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
+    	if (isDumpInOut()) {
+            GVLogger.setThreadMasterLevel(Level.DEBUG);
+        }
+    	Object inputObject = null;
     	try {
 	    	long startTime = System.currentTimeMillis();
 	        logger.debug("BEGIN - Execute GVNodeCheck '" + getId() + "'");
-	        checkInterrupted("GVNodeCheck", logger);
-	        dumpEnvironment(logger, true, environment);
-	
+	        checkInterrupted("GVNodeCheck");
+	        dumpEnvironment(true, environment);
+
 	        String input = getInput();
 	        String conditionName = "";
 	        int i = 0;
 	        Throwable lastException = (Throwable) environment.get(LAST_GV_EXCEPTION);
-	
-	        Object inputObject = environment.get(input);
+
+	        inputObject = environment.get(input);
 	        if (logger.isDebugEnabled() || isDumpInOut()) {
 	            if (inputObject instanceof GVBuffer) {
 	                GVBuffer data = (GVBuffer) inputObject;
@@ -137,15 +140,15 @@ public class GVNodeCheck extends GVFlowNode
 	                logger.info("DUMP INPUT BUFFER NOT A GVBUFFER: " + inputObject);
 	            }
 	        }
-	
+
 	        try {
-	            while ((i < routingVector.size()) && nextNodeId.equals("") && !isInterrupted()) {
-	                GVRouting routing = routingVector.elementAt(i);
+	            while ((i < this.routingVector.size()) && nextNodeId.equals("") && !isInterrupted()) {
+	                GVRouting routing = this.routingVector.elementAt(i);
 	                nextNodeId = routing.getNodeId(input, environment);
 	                conditionName = routing.getConditionName();
 	                i++;
 	            }
-	            checkInterrupted("GVNodeCheck", logger);
+	            checkInterrupted("GVNodeCheck");
 	        }
 	        catch (InterruptedException exc) {
 	            throw exc;
@@ -153,27 +156,35 @@ public class GVNodeCheck extends GVFlowNode
 	        catch (Exception exc) {
 	            logger.error("Exception caught while checking routing condition - GVNodeCheck '" + getId()
 	                    + "' - Exception: " + exc);
-	            nextNodeId = onExceptionId;
+	            nextNodeId = this.onExceptionId;
 	            lastException = exc;
 	            conditionName = "EXCEPTION";
+                if (this.isDumpEnvOnError()) {
+                    dumpEnvironment(Level.ERROR, true, environment);
+                }
+                else {
+                    if (!(logger.isDebugEnabled() || isDumpInOut()) && GVBuffer.class.isInstance(inputObject)) {
+                        logger.error(GVFormatLog.formatINPUT((GVBuffer) inputObject, true, false));
+                    }
+                }
 	        }
-	
+
 	        if (nextNodeId.equals("")) {
 	            if (!Throwable.class.isInstance(environment.get(input))) {
-	                if (defaultId.equals("")) {
+	                if (this.defaultId.equals("")) {
 	                    lastException = new GVCoreConfException("GVCORE_BAD_ROUTING_CFG_ERROR", new String[][]{{"id",
 	                            getId()}});
 	                    environment.put(input, lastException);
-	                    nextNodeId = onExceptionId;
+	                    nextNodeId = this.onExceptionId;
 	                    conditionName = "EXCEPTION";
 	                }
 	                else {
-	                    nextNodeId = defaultId;
+	                    nextNodeId = this.defaultId;
 	                    conditionName = "DEFAULT";
 	                }
 	            }
 	            else {
-	                nextNodeId = onExceptionId;
+	                nextNodeId = this.onExceptionId;
 	                lastException = (Throwable) environment.get(input);
 	                conditionName = "EXCEPTION";
 	            }
@@ -197,7 +208,7 @@ public class GVNodeCheck extends GVFlowNode
     @Override
     public String getDefaultNextNodeId()
     {
-        return defaultId;
+        return this.defaultId;
     }
 
     /**
@@ -208,7 +219,7 @@ public class GVNodeCheck extends GVFlowNode
     @Override
     public void cleanUp() throws GVCoreException
     {
-        for (GVRouting r : routingVector) {
+        for (GVRouting r : this.routingVector) {
             r.cleanUp();
         }
     }
@@ -221,6 +232,14 @@ public class GVNodeCheck extends GVFlowNode
     @Override
     public void destroy() throws GVCoreException
     {
-        routingVector.clear();
+        this.routingVector.clear();
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 }

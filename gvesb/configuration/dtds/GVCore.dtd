@@ -2758,6 +2758,13 @@
 
 -->
 <!ATTLIST GVOperationNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVOperationNode dump-env-on-error (true|false) #IMPLIED>
+
 
 <!--
     Used in 'GVOperationNode' with 'op-type' set to 'dequeue',
@@ -3212,6 +3219,12 @@
     Default false.
 -->
 <!ATTLIST ChangeGVBufferNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST ChangeGVBufferNode dump-env-on-error (true|false) #IMPLIED>
 
 
 <!--
@@ -3558,6 +3571,12 @@
     Default false.
 -->
 <!ATTLIST GVNodeCheck dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVNodeCheck dump-env-on-error (true|false) #IMPLIED>
 
 <!--
     Associates a condition to a node of the workflow.
@@ -3729,6 +3748,12 @@
     Default false.
 -->
 <!ATTLIST GVNotificationNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVNotificationNode dump-env-on-error (true|false) #IMPLIED>
 
 <!--
     The GVWaitNode allows you to enter the delays in the
@@ -3834,6 +3859,12 @@
     Default false.
 -->
 <!ATTLIST GVWaitNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVWaitNode dump-env-on-error (true|false) #IMPLIED>
 
 <!--
     The element 'Participant' denotes a system and its channel
@@ -4063,6 +4094,12 @@
     Default false.
 -->
 <!ATTLIST GVIteratorOperationNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVIteratorOperationNode dump-env-on-error (true|false) #IMPLIED>
 
 <!--
     Defines the parameters to invoke a GreenVulcanoESB service.
@@ -4481,6 +4518,12 @@
     Default false.
 -->
 <!ATTLIST GVCoreCallNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVCoreCallNode dump-env-on-error (true|false) #IMPLIED>
 
 
 <!--
@@ -4675,6 +4718,12 @@
     Default false.
 -->
 <!ATTLIST GVSubFlowCallNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVSubFlowCallNode dump-env-on-error (true|false) #IMPLIED>
 
 <!--
     Is a operative node indicating that GreenVulcanoESB must save flow state in DB.
@@ -4771,6 +4820,12 @@
     Default false.
 -->
 <!ATTLIST GVSavePointNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVSavePointNode dump-env-on-error (true|false) #IMPLIED>
 
 <!--
     Defines additional properties of the SavePoint.
@@ -5347,6 +5402,12 @@
     Default false.
 -->
 <!ATTLIST GVSubFlowSpawnNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVSubFlowSpawnNode dump-env-on-error (true|false) #IMPLIED>
 
 <!--
     Node that allows direct invocation of a GreenVulcanoESB core workflow sub-flows as parallel process.
@@ -5512,6 +5573,12 @@
     Default false.
 -->
 <!ATTLIST GVSubFlowParallelNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVSubFlowParallelNode dump-env-on-error (true|false) #IMPLIED>
 
 
 <!--
@@ -5697,6 +5764,12 @@
     Default false.
 -->
 <!ATTLIST GVSubFlowSplittedNode dump-env-in-out (true|false) #IMPLIED>
+<!--
+    If true enable the dump of the Execution Environment in case of error.
+    Default false.
+
+-->
+<!ATTLIST GVSubFlowSplittedNode dump-env-on-error (true|false) #IMPLIED>
 
 <!--
     The element 'Conditions' defines the conditions that allow
@@ -11081,6 +11154,11 @@
     Default is false.
 -->
 <!ATTLIST rsh-call dump-output (true|false) #IMPLIED>
+<!--
+    If true the command execution is limited to 5s, then the shell process is killed: if the process requires more time, run it in a detached shell (like nohup ... &).
+    Default is false.
+-->
+<!ATTLIST rsh-call is-deamon (true|false) #IMPLIED>
 
 <!--
     This plug-in reads a file's content, through RSH local/remote service, and saves it in

@@ -19,6 +19,12 @@
  */
 package it.greenvulcano.gvesb.core.flow;
 
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
@@ -28,12 +34,6 @@ import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.gvesb.virtual.VCLException;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
-
-import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
 
 /**
  *
@@ -73,8 +73,8 @@ public class GVIteratorOperationNode extends GVFlowNode
     {
         super.init(defNode);
 
-        nextNodeId = XMLConfig.get(defNode, "@next-node-id", "");
-        if (nextNodeId.equals("")) {
+        this.nextNodeId = XMLConfig.get(defNode, "@next-node-id", "");
+        if (this.nextNodeId.equals("")) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'next-node-id'"},
                     {"node", XPathFinder.buildXPath(defNode)}});
         }
@@ -93,14 +93,14 @@ public class GVIteratorOperationNode extends GVFlowNode
         try {
             Node intSvcNode = XMLConfig.getNode(defNode, "InputServices");
             if (intSvcNode != null) {
-                inputServices.init(intSvcNode, this, true);
+                this.inputServices.init(intSvcNode, this, true);
             }
             intSvcNode = XMLConfig.getNode(defNode, "OutputServices");
             if (intSvcNode != null) {
-                outputServices.init(intSvcNode, this, false);
+                this.outputServices.init(intSvcNode, this, false);
             }
-            gvController = new IteratorController();
-            gvController.doInit(defNode, getId());
+            this.gvController = new IteratorController();
+            this.gvController.doInit(defNode, getId());
         }
         catch (GVCoreConfException exc) {
             throw exc;
@@ -120,23 +120,25 @@ public class GVIteratorOperationNode extends GVFlowNode
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
         Level level = GVLogger.getThreadMasterLevel();
-    	if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
+    	if (isDumpInOut()) {
+            GVLogger.setThreadMasterLevel(Level.DEBUG);
+        }
     	try {
 	        long startTime = System.currentTimeMillis();
 	        Object data = null;
 	        String input = getInput();
 	        String output = getOutput();
-	        logger.info("Executing OperationNode '" + getId() + "'");
-	        checkInterrupted("OperationNode", logger);
-	        dumpEnvironment(logger, true, environment);
-	
+	        logger.info("Executing GVIteratorOperationNode '" + getId() + "'");
+	        checkInterrupted("GVIteratorOperationNode");
+	        dumpEnvironment(true, environment);
+
 	        data = environment.get(input);
 	        if (Throwable.class.isInstance(data)) {
 	            environment.put(output, data);
-	            logger.debug("END - Execute OperationNode '" + getId() + "'");
-	            return nextNodeId;
+	            logger.debug("END - Execute GVIteratorOperationNode '" + getId() + "'");
+	            return this.nextNodeId;
 	        }
-	
+
 	        try {
 	            GVBuffer internalData = null;
 	            if (input.equals(output)) {
@@ -145,10 +147,10 @@ public class GVIteratorOperationNode extends GVFlowNode
 	            else {
 	                internalData = new GVBuffer((GVBuffer) data);
 	            }
-	
-	            internalData = inputServices.perform(internalData);
+
+	            internalData = this.inputServices.perform(internalData);
 	            internalData = performVCLOpCall(internalData, onDebug);
-	            internalData = outputServices.perform(internalData);
+	            internalData = this.outputServices.perform(internalData);
 	            environment.put(output, internalData);
 	        }
 	        catch (InterruptedException exc) {
@@ -156,13 +158,22 @@ public class GVIteratorOperationNode extends GVFlowNode
 	            throw exc;
 	        }
 	        catch (Exception exc) {
+                logger.error("Error in GVIteratorOperationNode[" + getId() + "]", exc);
+                if (this.isDumpEnvOnError()) {
+                    dumpEnvironment(Level.ERROR, true, environment);
+                }
+                else {
+                    if (!(logger.isDebugEnabled() || isDumpInOut())) {
+                        logger.error(GVFormatLog.formatINPUT((GVBuffer) data, true, false));
+                    }
+                }
 	            environment.put(output, exc);
 	        }
-	
-	        dumpEnvironment(logger, false, environment);
+
+	        dumpEnvironment(false, environment);
 	        long endTime = System.currentTimeMillis();
-	        logger.info("END - Execute OperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-	        return nextNodeId;
+	        logger.info("END - Execute GVIteratorOperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
+	        return this.nextNodeId;
     	}
         finally {
         	if (isDumpInOut() && !level.equals(Level.ALL)) {
@@ -177,7 +188,7 @@ public class GVIteratorOperationNode extends GVFlowNode
     @Override
     public String getDefaultNextNodeId()
     {
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /**
@@ -188,9 +199,9 @@ public class GVIteratorOperationNode extends GVFlowNode
     @Override
     public void cleanUp() throws GVCoreException
     {
-        gvController.cleanUp();
-        inputServices.cleanUp();
-        outputServices.cleanUp();
+        this.gvController.cleanUp();
+        this.inputServices.cleanUp();
+        this.outputServices.cleanUp();
     }
 
     /**
@@ -202,9 +213,9 @@ public class GVIteratorOperationNode extends GVFlowNode
     public void destroy() throws GVCoreException
     {
         cleanUp();
-        gvController = null;
-        inputServices = null;
-        outputServices = null;
+        this.gvController = null;
+        this.inputServices = null;
+        this.outputServices = null;
     }
 
     /**
@@ -213,7 +224,7 @@ public class GVIteratorOperationNode extends GVFlowNode
      * @param data
      *        The GreenVulcano GVBuffer coming from the client (the request
      *        buffer)
-     * @param onDebug 
+     * @param onDebug
      * @return The GreenVulcano GVBuffer elaborated by the service called (it
      *         may be a server, a PlugIn, ...)
      * @throws GVCoreException
@@ -232,7 +243,7 @@ public class GVIteratorOperationNode extends GVFlowNode
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatINPUT(data, false, false));
             }
-            outputGVBuffer = gvController.doPerform(data, onDebug);
+            outputGVBuffer = this.gvController.doPerform(data, onDebug);
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatOUTPUT(outputGVBuffer, false, false));
             }
@@ -263,5 +274,13 @@ public class GVIteratorOperationNode extends GVFlowNode
 
         logger.info("END - Perform Remote Call - ExecutionTime (" + totalTime + ")");
         return outputGVBuffer;
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 }

@@ -19,6 +19,12 @@
  */
 package it.greenvulcano.gvesb.core.flow;
 
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
@@ -26,13 +32,7 @@ import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.log.GVBufferDump;
 import it.greenvulcano.util.thread.ThreadUtils;
-import it.greenvulcano.util.txt.TextUtils;
 import it.greenvulcano.util.xpath.XPathFinder;
-
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
 
 /**
  * GVFlowNode base class.
@@ -69,6 +69,10 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      * dump environment input/output
      */
     private boolean dumpEnvInOut           = false;
+    /**
+     * dump environment on error
+     */
+    private boolean dumpEnvOnError         = false;
 
     /**
      * Initialize the instance
@@ -78,33 +82,36 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      * @throws GVCoreConfException
      *         if errors occurs
      */
+    @Override
     public void init(Node defNode) throws GVCoreConfException
     {
         try {
-            id = XMLConfig.get(defNode, "@id");
+            this.id = XMLConfig.get(defNode, "@id");
         }
         catch (XMLConfigException exc) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'id'"},
                     {"node", XPathFinder.buildXPath(defNode)}}, exc);
         }
-        input = XMLConfig.get(defNode, "@input", "");
-        output = XMLConfig.get(defNode, "@output", input);
+        this.input = XMLConfig.get(defNode, "@input", "");
+        this.output = XMLConfig.get(defNode, "@output", this.input);
 
-        if (input.equals("") && output.equals("")) {
+        if (this.input.equals("") && this.output.equals("")) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{
                     {"name", "'input' or 'output'"}, {"node", XPathFinder.buildXPath(defNode)}});
         }
 
-        dumpInOut = XMLConfig.getBoolean(defNode, "@dump-in-out", false);
-        dumpEnvInOut = XMLConfig.getBoolean(defNode, "@dump-env-in-out", false);
+        this.dumpInOut = XMLConfig.getBoolean(defNode, "@dump-in-out", false);
+        this.dumpEnvInOut = XMLConfig.getBoolean(defNode, "@dump-env-in-out", false);
+        this.dumpEnvOnError = XMLConfig.getBoolean(defNode, "@dump-env-on-error", false);
     }
 
     /**
      * @return the flow node id
      */
+    @Override
     public String getId()
     {
-        return id;
+        return this.id;
     }
 
     /**
@@ -112,15 +119,16 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      */
     public String getInput()
     {
-        return input;
+        return this.input;
     }
 
     /**
      * @return the output object name
      */
+    @Override
     public String getOutput()
     {
-        return output;
+        return this.output;
     }
 
     /**
@@ -133,7 +141,7 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      */
     public boolean isBusinessFlowTerminated()
     {
-        return businessFlowTerminated;
+        return this.businessFlowTerminated;
     }
 
     /**
@@ -142,7 +150,7 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      */
     public void setBusinessFlowTerminated(boolean b)
     {
-        businessFlowTerminated = b;
+        this.businessFlowTerminated = b;
     }
 
     /**
@@ -156,6 +164,7 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      * @throws InterruptedException
      *         if the current Thread is interrupted
      */
+    @Override
     public String execute(Map<String, Object> environment) throws GVCoreException, InterruptedException {
         return execute(environment, false);
     }
@@ -171,7 +180,8 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      * @throws InterruptedException
      *         if the current Thread is interrupted
      */
-    public abstract String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, 
+    @Override
+    public abstract String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException,
         InterruptedException;
 
     /**
@@ -192,11 +202,20 @@ public abstract class GVFlowNode implements GVFlowNodeIF
     }
 
     /**
+     * @return if Execution Environment should be dumped for error
+     */
+    public boolean isDumpEnvOnError()
+    {
+        return this.dumpEnvOnError;
+    }
+
+    /**
      * Perform the flow node cleanup operation
      *
      * @throws GVCoreException
      *         if errors occurs
      */
+    @Override
     public abstract void cleanUp() throws GVCoreException;
 
     /**
@@ -205,10 +224,11 @@ public abstract class GVFlowNode implements GVFlowNodeIF
      * @throws GVCoreException
      *         if errors occurs
      */
+    @Override
     public abstract void destroy() throws GVCoreException;
 
     /**
-     * 
+     *
      * @return
      *        the current Thread interrupted state
      */
@@ -216,17 +236,33 @@ public abstract class GVFlowNode implements GVFlowNodeIF
         return Thread.currentThread().isInterrupted();
     }
 
-    public void checkInterrupted(String type, Logger logger) throws InterruptedException {
-        ThreadUtils.checkInterrupted(type, getId(), logger);
+    public void checkInterrupted(String type) throws InterruptedException {
+        ThreadUtils.checkInterrupted(type, getId(), getLogger());
     }
-    
+
+    protected abstract Logger getLogger();
+
     /**
      * @param logger
      * @param isInput
      * @param environment
      */
-    protected void dumpEnvironment(Logger logger, boolean isInput, Map<String, Object> environment)
+    protected void dumpEnvironment(boolean isInput, Map<String, Object> environment)
     {
+        dumpEnvironment(Level.INFO, isInput, environment);
+    }
+
+    /**
+     * @param level
+     * @param isInput
+     * @param environment
+     */
+    protected void dumpEnvironment(Level level, boolean isInput, Map<String, Object> environment)
+    {
+        /*if (getLogger().isDebugEnabled()) {
+            // at debug in/out are already dumped
+            return;
+        }*/
         if (isDumpEnvInOut()) {
             StringBuffer msg = new StringBuffer(10000);
             if (isInput) {
@@ -261,7 +297,7 @@ public abstract class GVFlowNode implements GVFlowNodeIF
             else {
                 msg.append("END OUTPUT - Node[" + getId() + "] Execution Environment dump\n");
             }
-            logger.info(msg);
+            getLogger().log(level, msg);
         }
     }
 

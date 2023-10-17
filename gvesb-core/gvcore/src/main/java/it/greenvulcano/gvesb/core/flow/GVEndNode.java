@@ -1,23 +1,28 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.flow;
+
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -31,19 +36,14 @@ import it.greenvulcano.gvesb.internal.data.ChangeGVBuffer;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
 
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-
 /**
  * GVFlow node indicating a flow end.
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
- * 
+ *
+ *
+ *
  */
 public class GVEndNode extends GVFlowNode
 {
@@ -62,7 +62,7 @@ public class GVEndNode extends GVFlowNode
 
     /**
      * Initialize the instance
-     * 
+     *
      * @param defNode
      *        the flow node definition
      * @throws GVCoreConfException
@@ -75,7 +75,7 @@ public class GVEndNode extends GVFlowNode
 
         setBusinessFlowTerminated(XMLConfig.getBoolean(defNode, "@end-business-process", false));
 
-        keepSavepoint = XMLConfig.getBoolean(defNode, "@keep-savepoint", false);
+        this.keepSavepoint = XMLConfig.getBoolean(defNode, "@keep-savepoint", false);
 
         Node endOp = null;
         try {
@@ -86,9 +86,9 @@ public class GVEndNode extends GVFlowNode
         }
         if (endOp != null) {
             if (endOp.getNodeName().equals("ChangeGVBuffer")) {
-                endOpCGVBuffer = new ChangeGVBuffer();
+                this.endOpCGVBuffer = new ChangeGVBuffer();
                 try {
-                    endOpCGVBuffer.init(endOp);
+                    this.endOpCGVBuffer.init(endOp);
                 }
                 catch (XMLConfigException exc) {
                     throw new GVCoreConfException("GVCORE_END_OPERATION_INIT_ERROR", new String[][]{{"id", getId()},
@@ -96,9 +96,9 @@ public class GVEndNode extends GVFlowNode
                 }
             }
             else if (endOp.getNodeName().equals("GVThrowException")) {
-                endOpTException = new GVThrowException();
+                this.endOpTException = new GVThrowException();
                 try {
-                    endOpTException.init(endOp);
+                    this.endOpTException.init(endOp);
                 }
                 catch (XMLConfigException exc) {
                     throw new GVCoreConfException("GVCORE_END_OPERATION_INIT_ERROR", new String[][]{{"id", getId()},
@@ -117,13 +117,13 @@ public class GVEndNode extends GVFlowNode
     {
         long startTime = System.currentTimeMillis();
         logger.info("Executing GVEndNode '" + getId() + "'");
-        checkInterrupted("GVEndNode", logger);
-        dumpEnvironment(logger, true, environment);
+        checkInterrupted("GVEndNode");
+        dumpEnvironment(true, environment);
 
         String output = getOutput();
         Object obj = environment.get(output);
 
-        if (endOpCGVBuffer != null) {
+        if (this.endOpCGVBuffer != null) {
             if (obj == null) {
                 logger.error("GVCORE_INVALID_GVBUFFER_ERROR - Empty '" + output + "' environment field.");
                 environment.put(output, new GVCoreWrongInterfaceException("GVCORE_INVALID_GVBUFFER_ERROR",
@@ -132,7 +132,7 @@ public class GVEndNode extends GVFlowNode
             }
             if (obj instanceof GVBuffer) {
                 try {
-                    obj = endOpCGVBuffer.execute((GVBuffer) obj, environment);
+                    obj = this.endOpCGVBuffer.execute((GVBuffer) obj, environment);
                     environment.put(output, obj);
                 }
                 catch (Exception exc) {
@@ -140,18 +140,18 @@ public class GVEndNode extends GVFlowNode
                 }
             }
         }
-        else if (endOpTException != null) {
+        else if (this.endOpTException != null) {
             try {
                 if (obj != null) {
                     if (obj instanceof Exception) {
-                        obj = endOpTException.execute((Exception) obj, null);
+                        obj = this.endOpTException.execute((Exception) obj, null);
                     }
                     else {
-                        obj = endOpTException.execute(null, (GVBuffer) obj);
+                        obj = this.endOpTException.execute(null, (GVBuffer) obj);
                     }
                 }
                 else {
-                    obj = endOpTException.execute(null, null);
+                    obj = this.endOpTException.execute(null, null);
                 }
                 environment.put(output, obj);
             }
@@ -169,8 +169,8 @@ public class GVEndNode extends GVFlowNode
             // must check the output object type???
             try {
                 logger.debug("Handling SavePoint information for Flow");
-                InvocationContext ctx = (InvocationContext) InvocationContext.getInstance();
-                if (keepSavepoint) {
+                InvocationContext ctx = (InvocationContext) it.greenvulcano.gvesb.internal.InvocationContext.getInstance();
+                if (this.keepSavepoint) {
                     SavePointController.instance().confirm(ctx.getId().toString(), ctx.getSystem(), ctx.getService(),
                             ctx.getOperation());
                 }
@@ -201,7 +201,7 @@ public class GVEndNode extends GVFlowNode
     }
 
     /**
-     * 
+     *
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#cleanUp()
      */
     @Override
@@ -211,12 +211,20 @@ public class GVEndNode extends GVFlowNode
     }
 
     /**
-     * 
+     *
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#destroy()
      */
     @Override
     public void destroy() throws GVCoreException
     {
         // do nothing
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 }

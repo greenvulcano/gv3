@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -138,9 +139,10 @@ public class GVSubFlowSpawnNode extends GVFlowNode
         String input = getInput();
         String output = getOutput();
         logger.info("Executing GVSubFlowSpawnNode '" + getId() + "'");
-        checkInterrupted("GVSubFlowSpawnNode", logger);
-        dumpEnvironment(logger, true, environment);
+        checkInterrupted("GVSubFlowSpawnNode");
+        dumpEnvironment(true, environment);
 
+        GVBuffer data = null;
         Object inData = environment.get(input);
         if (Throwable.class.isInstance(inData)) {
             environment.put(output, inData);
@@ -148,7 +150,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
             return this.onExceptionId;
         }
         try {
-            GVBuffer data = (GVBuffer) inData;
+            data = (GVBuffer) inData;
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatINPUT(data, false, false));
             }
@@ -165,7 +167,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
                 internalData = this.inputServices.perform(internalData);
 
                 processSubFlow(internalData, onDebug);
-                checkInterrupted("GVSubFlowSpawnNode", logger);
+                checkInterrupted("GVSubFlowSpawnNode");
             }
             catch (GVCoreSkippedException exc) {
                 logger.warn("Get Skipped notification");
@@ -181,6 +183,15 @@ public class GVSubFlowSpawnNode extends GVFlowNode
             throw exc;
         }
         catch (Exception exc) {
+            logger.error("Error in GVSubFlowSpawnNode[" + getId() + "]", exc);
+            if (this.isDumpEnvOnError()) {
+                dumpEnvironment(Level.ERROR, true, environment);
+            }
+            else {
+                if (!(logger.isDebugEnabled() || isDumpInOut())) {
+                    logger.error(GVFormatLog.formatINPUT(data, true, false));
+                }
+            }
             environment.put(output, exc);
             isError = true;
         }
@@ -201,7 +212,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
 
         logger.info("Executing GVSubFlowSpawnNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
 
-        dumpEnvironment(logger, false, environment);
+        dumpEnvironment(false, environment);
         long endTime = System.currentTimeMillis();
         logger.info("END - Execute GVSubFlowSpawnNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
@@ -238,6 +249,14 @@ public class GVSubFlowSpawnNode extends GVFlowNode
             this.subFlowPool.clear();
         }
         this.subFlowPool = null;
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 
 
@@ -321,7 +340,7 @@ public class GVSubFlowSpawnNode extends GVFlowNode
                 }
             }
 
-            checkInterrupted("GVSubFlowSpawnNode", logger);
+            checkInterrupted("GVSubFlowSpawnNode");
 
             if (tasks.isEmpty()) {
                 throw new GVCoreSkippedException("GV_SKIPPED_SPAWN_SERVICE_ERROR", new String[][]{
