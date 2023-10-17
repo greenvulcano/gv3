@@ -1,23 +1,29 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.flow;
+
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -37,20 +43,14 @@ import it.greenvulcano.gvesb.virtual.pool.OperationManagerPool;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
 
-import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-
 /**
  * GVOperationNode class.
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
- * 
+ *
+ *
+ *
  */
 public class GVOperationNode extends GVFlowNode
 {
@@ -96,8 +96,8 @@ public class GVOperationNode extends GVFlowNode
     {
         super.init(defNode);
 
-        nextNodeId = XMLConfig.get(defNode, "@next-node-id", "");
-        if (nextNodeId.equals("")) {
+        this.nextNodeId = XMLConfig.get(defNode, "@next-node-id", "");
+        if (this.nextNodeId.equals("")) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'next-node-id'"},
                     {"node", XPathFinder.buildXPath(defNode)}});
         }
@@ -115,7 +115,7 @@ public class GVOperationNode extends GVFlowNode
     {
         String idSystem = XMLConfig.get(defNode, "@id-system", "");
         String vmOpName = XMLConfig.get(defNode, "@operation-name", "");
-        vclOpType = XMLConfig.get(defNode, "@op-type", "call");
+        this.vclOpType = XMLConfig.get(defNode, "@op-type", "call");
 
         if (idSystem.equals("") || vmOpName.equals("")) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{
@@ -138,19 +138,19 @@ public class GVOperationNode extends GVFlowNode
                     {"node", XPathFinder.buildXPath(defNode)}, {"xpath", xPath}});
         }
         try {
-            operationManager = ((InvocationContext) InvocationContext.getInstance()).getOperationManager();
-            coreOperationKey = new GVCoreOperationKey(GreenVulcanoConfig.getSystemsConfigFileName(),
+            this.operationManager = ((InvocationContext) it.greenvulcano.gvesb.internal.InvocationContext.getInstance()).getOperationManager();
+            this.coreOperationKey = new GVCoreOperationKey(GreenVulcanoConfig.getSystemsConfigFileName(),
                     XPathFinder.buildXPath(vmOpNode));
             checkVCLOperation();
             Node intSvcNode = XMLConfig.getNode(defNode, "InputServices");
             if (intSvcNode != null) {
-                inputServices.init(intSvcNode, this, true);
+                this.inputServices.init(intSvcNode, this, true);
             }
             intSvcNode = XMLConfig.getNode(defNode, "OutputServices");
             if (intSvcNode != null) {
-                outputServices.init(intSvcNode, this, false);
+                this.outputServices.init(intSvcNode, this, false);
             }
-            if (vclOpType.equals("dequeue")) {
+            if (this.vclOpType.equals("dequeue")) {
                 Node filterDef = null;
                 try {
                     filterDef = XMLConfig.getNode(defNode, "DequeueFilter");
@@ -159,8 +159,8 @@ public class GVOperationNode extends GVFlowNode
                     // do nothing
                 }
                 if (filterDef != null) {
-                    filter = new GVDequeueFilter();
-                    filter.init(filterDef);
+                    this.filter = new GVDequeueFilter();
+                    this.filter.init(filterDef);
                 }
             }
         }
@@ -173,7 +173,7 @@ public class GVOperationNode extends GVFlowNode
                     {"node", XPathFinder.buildXPath(defNode)}, {"message", "" + exc}}, exc);
         }
         finally {
-            operationManager = null;
+            this.operationManager = null;
         }
     }
 
@@ -185,23 +185,25 @@ public class GVOperationNode extends GVFlowNode
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
         Level level = GVLogger.getThreadMasterLevel();
-    	if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
+    	if (isDumpInOut()) {
+            GVLogger.setThreadMasterLevel(Level.DEBUG);
+        }
     	try {
 	        long startTime = System.currentTimeMillis();
 	        Object data = null;
 	        String input = getInput();
 	        String output = getOutput();
 	        logger.info("Executing GVOperationNode '" + getId() + "'");
-	        checkInterrupted("GVOperationNode", logger);
-	        dumpEnvironment(logger, true, environment);
-	
+	        checkInterrupted("GVOperationNode");
+	        dumpEnvironment(true, environment);
+
 	        data = environment.get(input);
 	        if (Throwable.class.isInstance(data)) {
 	            environment.put(output, data);
 	            logger.info("END - Skip Execute GVOperationNode '" + getId() + "'");
-	            return nextNodeId;
+	            return this.nextNodeId;
 	        }
-	
+
 	        boolean isError = false;
 	        Exception error = null;
 	        try {
@@ -212,23 +214,23 @@ public class GVOperationNode extends GVFlowNode
 	            else {
 	                internalData = new GVBuffer((GVBuffer) data);
 	            }
-	
-	            internalData = inputServices.perform(internalData);
-	            operationManager = ((InvocationContext) InvocationContext.getInstance()).getOperationManager();
-	            vclOperation = createVCLOperation();
-	            if (filter != null) {
-	                ((DequeueOperation) vclOperation).setFilter(filter.getFilterDef(internalData, vclOperation));
+
+	            internalData = this.inputServices.perform(internalData);
+	            this.operationManager = ((InvocationContext) it.greenvulcano.gvesb.internal.InvocationContext.getInstance()).getOperationManager();
+	            this.vclOperation = createVCLOperation();
+	            if (this.filter != null) {
+	                ((DequeueOperation) this.vclOperation).setFilter(this.filter.getFilterDef(internalData, this.vclOperation));
 	            }
 	            try {
 	                internalData = performVCLOpCall(internalData);
 	            }
 	            catch (GVCoreWrongInterfaceException exc) {
-	                if (vclOpType.equals("dequeue")) {
+	                if (this.vclOpType.equals("dequeue")) {
 	                    throw new GVCoreTimeoutException("GVCORE_VCLOP_OUT_NULL_ERROR", exc);
 	                }
 	                throw exc;
 	            }
-	            internalData = outputServices.perform(internalData);
+	            internalData = this.outputServices.perform(internalData);
 	            environment.put(output, internalData);
 	        }
 	        catch (InterruptedException exc) {
@@ -238,10 +240,19 @@ public class GVOperationNode extends GVFlowNode
 	        catch (Exception exc) {
 	            isError = true;
 	            error = exc;
+                logger.error("Error in GVOperationNode[" + getId() + "]", exc);
+                if (this.isDumpEnvOnError()) {
+                    dumpEnvironment(Level.ERROR, true, environment);
+                }
+                else {
+                    if (!(logger.isDebugEnabled() || isDumpInOut())) {
+                        logger.error(GVFormatLog.formatINPUT((GVBuffer) data, true, false));
+                    }
+                }
 	            environment.put(output, exc);
 	        }
-	
-	        dumpEnvironment(logger, false, environment);
+
+	        dumpEnvironment(false, environment);
 	        long endTime = System.currentTimeMillis();
 	        if (isError) {
 	            logger.error("END - Execute GVOperationNode '" + getId() + "'. Exception: " + error);
@@ -249,7 +260,7 @@ public class GVOperationNode extends GVFlowNode
 	        else {
 	            logger.info("END - Execute GVOperationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
 	        }
-	        return nextNodeId;
+	        return this.nextNodeId;
     	}
         finally {
         	if (isDumpInOut() && !level.equals(Level.ALL)) {
@@ -266,53 +277,61 @@ public class GVOperationNode extends GVFlowNode
     @Override
     public String getDefaultNextNodeId()
     {
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /**
      * Call cleanUp() of VCLOperations.
-     * 
+     *
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#cleanUp()
      */
     @Override
     public void cleanUp() throws GVCoreException
     {
-        if (vclOperation != null) {
-            vclOperation.cleanUp();
-            if (operationManager != null) {
+        if (this.vclOperation != null) {
+            this.vclOperation.cleanUp();
+            if (this.operationManager != null) {
                 try {
-                    operationManager.releaseOperation(vclOperation);
+                    this.operationManager.releaseOperation(this.vclOperation);
                 }
                 catch (Exception exc) {
                     throw new GVCoreException("GVCORE_GVVCL_RELEASE_ERROR", exc);
                 }
                 finally {
-                    vclOperation = null;
-                    operationManager = null;
+                    this.vclOperation = null;
+                    this.operationManager = null;
                 }
             }
         }
-        vclOperation = null;
-        inputServices.cleanUp();
-        outputServices.cleanUp();
+        this.vclOperation = null;
+        this.inputServices.cleanUp();
+        this.outputServices.cleanUp();
     }
 
     /**
      * Call cleanUp() and release VCLOperations
-     * 
+     *
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#destroy()
      */
     @Override
     public void destroy() throws GVCoreException
     {
         cleanUp();
-        inputServices = null;
-        outputServices = null;
+        this.inputServices = null;
+        this.outputServices = null;
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 
     /**
      * Perform of the Virtual Communication Layer for External Services.
-     * 
+     *
      * @param gvBuffer
      *        The GreenVulcano GVBuffer coming from the client (the request
      *        buffer)
@@ -335,7 +354,7 @@ public class GVOperationNode extends GVFlowNode
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatINPUT(gvBuffer, false, false));
             }
-            outputGVBuffer = vclOperation.perform(gvBuffer);
+            outputGVBuffer = this.vclOperation.perform(gvBuffer);
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatOUTPUT(outputGVBuffer, false, false));
             }
@@ -360,8 +379,8 @@ public class GVOperationNode extends GVFlowNode
         }
 
         try {
-            if (vclOpType.equals("dequeue")) {
-                ((DequeueOperation) vclOperation).acknowledge(outputGVBuffer.getId());
+            if (this.vclOpType.equals("dequeue")) {
+                ((DequeueOperation) this.vclOperation).acknowledge(outputGVBuffer.getId());
             }
         }
         catch (Throwable exc) {
@@ -379,17 +398,17 @@ public class GVOperationNode extends GVFlowNode
 
     /**
      * Check the correct configuration of the requested VCLOperation
-     * 
+     *
      * @throws GVCoreConfException
      *         if error occurs
      */
     private void checkVCLOperation() throws GVCoreException
     {
         try {
-            if (!operationManager.checkOperation(coreOperationKey, coreOperationKey.getType())) {
+            if (!this.operationManager.checkOperation(this.coreOperationKey, this.coreOperationKey.getType())) {
                 logger.error("GVCORE_VCL_OPERATION_INIT_ERROR");
                 throw new GVCoreConfException("GVCORE_VCL_OPERATION_INIT_ERROR", new String[][]{{"node",
-                        XPathFinder.buildXPath(coreOperationKey.getNode())}});
+                        XPathFinder.buildXPath(this.coreOperationKey.getNode())}});
             }
         }
         catch (GVCoreConfException exc) {
@@ -398,13 +417,13 @@ public class GVOperationNode extends GVFlowNode
         catch (GVException exc) {
             logger.error("GVCORE_VCL_OPERATION_INIT_ERROR", exc);
             throw new GVCoreConfException("GVCORE_VCL_OPERATION_INIT_ERROR", new String[][]{{"node",
-                    XPathFinder.buildXPath(coreOperationKey.getNode())}}, exc);
+                    XPathFinder.buildXPath(this.coreOperationKey.getNode())}}, exc);
         }
     }
 
     /**
      * Initialize the requested VCLOperation
-     * 
+     *
      * @return the required VCLOperation
      * @throws GVCoreConfException
      *         if error occurs
@@ -414,12 +433,12 @@ public class GVOperationNode extends GVFlowNode
         Operation operation = null;
 
         try {
-            operation = operationManager.getOperation(coreOperationKey, coreOperationKey.getType());
+            operation = this.operationManager.getOperation(this.coreOperationKey, this.coreOperationKey.getType());
         }
         catch (GVException exc) {
             logger.error("GVCORE_VCL_OPERATION_INIT_ERROR", exc);
             throw new GVCoreConfException("GVCORE_VCL_OPERATION_INIT_ERROR", new String[][]{{"node",
-                    XPathFinder.buildXPath(coreOperationKey.getNode())}}, exc);
+                    XPathFinder.buildXPath(this.coreOperationKey.getNode())}}, exc);
         }
         return operation;
     }

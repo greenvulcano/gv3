@@ -1,23 +1,31 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.flow;
+
+import java.util.Map;
+import java.util.Vector;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -30,21 +38,14 @@ import it.greenvulcano.gvesb.notification.GVNotificationException;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
 
-import java.util.Map;
-import java.util.Vector;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
- * 
- * 
+ *
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
- * 
+ *
+ *
+ *
  */
 public class GVNotificationNode extends GVFlowNode
 {
@@ -67,7 +68,7 @@ public class GVNotificationNode extends GVFlowNode
 
     /**
      * The inititalization method creates the vector list of notifications.
-     * 
+     *
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#init(org.w3c.dom.Node)
      */
     @Override
@@ -76,7 +77,7 @@ public class GVNotificationNode extends GVFlowNode
         super.init(defNode);
 
         try {
-            nextNodeId = XMLConfig.get(defNode, "@next-node-id");
+            this.nextNodeId = XMLConfig.get(defNode, "@next-node-id");
         }
         catch (XMLConfigException exc) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'next-node-id'"},
@@ -85,7 +86,7 @@ public class GVNotificationNode extends GVFlowNode
 
         try {
             checkOnCriticalErrorBehavior(defNode);
-            notificationVector = buildNotificationVector(defNode);
+            this.notificationVector = buildNotificationVector(defNode);
         }
         catch (GVCoreConfException exc) {
             throw exc;
@@ -101,7 +102,7 @@ public class GVNotificationNode extends GVFlowNode
      * in the notificationVector. If a critical exception occurs, it's put in
      * the environment, and the execution can be terminated, dependently on the
      * value of the "onCriticalErrorBreak" parameter.
-     * 
+     *
      * @param environment
      *        the flow environment
      * @return the next flow node id
@@ -114,23 +115,23 @@ public class GVNotificationNode extends GVFlowNode
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
-        if ((notificationVector.size() == 0)) {
+        if ((this.notificationVector.size() == 0)) {
             logger.info("Skipping execution of GVNotificationNode '" + getId()
                     + "': No GVNotification configured for this GVNotificationNode");
-            return nextNodeId;
+            return this.nextNodeId;
         }
         logger.info("Executing GVNotificationNode '" + getId() + "'");
-        checkInterrupted("GVNotificationNode", logger);
-        dumpEnvironment(logger, true, environment);
+        checkInterrupted("GVNotificationNode");
+        dumpEnvironment(true, environment);
 
+        Object inputObj = environment.get(getInput());
         try {
-            Object inputObj = environment.get(getInput());
             if (GVBuffer.class.isInstance(inputObj) && (logger.isDebugEnabled() || isDumpInOut())) {
                 logger.info(GVFormatLog.formatINPUT((GVBuffer) inputObj, false, false));
             }
             GVNotificationException criticalExc = null;
-            for (int ind = 0; (ind < notificationVector.size()) && !isInterrupted(); ind++) {
-                GVNotification notification = notificationVector.elementAt(ind);
+            for (int ind = 0; (ind < this.notificationVector.size()) && !isInterrupted(); ind++) {
+                GVNotification notification = this.notificationVector.elementAt(ind);
                 try {
                     notification.execute(environment);
                 }
@@ -140,17 +141,26 @@ public class GVNotificationNode extends GVFlowNode
                             + ". The exception message is: " + exc.getMessage());
                     if (notification.isCritical()) {
                         criticalExc = exc;
-                        if (onCriticalErrorBreak) {
+                        if (this.onCriticalErrorBreak) {
                             break;
                         }
                     }
                 }
             }
-            checkInterrupted("GVNotificationNode", logger);
+            checkInterrupted("GVNotificationNode");
             if (criticalExc != null) {
+                logger.error("Error in GVNotificationNode[" + getId() + "]", criticalExc);
+                if (this.isDumpEnvOnError()) {
+                    dumpEnvironment(Level.ERROR, true, environment);
+                }
+                else {
+                    if (!(logger.isDebugEnabled() || isDumpInOut())&& GVBuffer.class.isInstance(inputObj)) {
+                        logger.error(GVFormatLog.formatINPUT((GVBuffer) inputObj, true, false));
+                    }
+                }
                 environment.put(getOutput(), criticalExc);
             }
-            else if (getInput() != null && environment.get(getInput()) != null && environment.get(getOutput()) == null) {
+            else if ((getInput() != null) && (environment.get(getInput()) != null) && (environment.get(getOutput()) == null)) {
                 environment.put(getOutput(), environment.get(getInput()));
             }
             Object outputObj = environment.get(getInput());
@@ -162,14 +172,23 @@ public class GVNotificationNode extends GVFlowNode
             throw exc;
         }
         catch (Exception exc) {
+            logger.error("Error in GVNotificationNode[" + getId() + "]", exc);
+            if (this.isDumpEnvOnError()) {
+                dumpEnvironment(Level.ERROR, true, environment);
+            }
+            else {
+                if (!(logger.isDebugEnabled() || isDumpInOut()) && GVBuffer.class.isInstance(inputObj)) {
+                    logger.error(GVFormatLog.formatINPUT((GVBuffer) inputObj, true, false));
+                }
+            }
             environment.put(getOutput(), exc);
         }
 
-        dumpEnvironment(logger, false, environment);
+        dumpEnvironment(false, environment);
         long endTime = System.currentTimeMillis();
         logger.info("END - Execute GVNotificationNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
 
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /**
@@ -178,12 +197,12 @@ public class GVNotificationNode extends GVFlowNode
     @Override
     public String getDefaultNextNodeId()
     {
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /**
      * Do nothing.
-     * 
+     *
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#cleanUp()
      */
     @Override
@@ -193,7 +212,7 @@ public class GVNotificationNode extends GVFlowNode
     }
 
     /**
-     * 
+     *
      * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#destroy()
      */
     @Override
@@ -203,9 +222,17 @@ public class GVNotificationNode extends GVFlowNode
     }
 
     /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
+    }
+
+    /**
      * This method returns an Object that implements the Notification interface,
      * obtained from its Class name.
-     * 
+     *
      * @param notificationNode
      *        the node from which read configuration data
      * @return the configured notification
@@ -237,7 +264,7 @@ public class GVNotificationNode extends GVFlowNode
     /**
      * This method returns the Vector with the Notification to be performed,
      * obtained from its Class name.
-     * 
+     *
      * @param definitionNode
      *        the node definition
      * @return the notifications vector
@@ -262,7 +289,7 @@ public class GVNotificationNode extends GVFlowNode
 
     /**
      * This is the setter method for the "onCriticalErrorBreak" parameter
-     * 
+     *
      * @param definitionNode
      *        the node from which read the flag value
      * @throws GVCoreConfException
@@ -280,10 +307,10 @@ public class GVNotificationNode extends GVFlowNode
                     {"name", "'on-critical-error'"}, {"node", XPathFinder.buildXPath(definitionNode)}}, exc);
         }
         if (onCriticalErrorValue.equalsIgnoreCase("break")) {
-            onCriticalErrorBreak = true;
+            this.onCriticalErrorBreak = true;
         }
         else if (onCriticalErrorValue.equalsIgnoreCase("continue")) {
-            onCriticalErrorBreak = false;
+            this.onCriticalErrorBreak = false;
         }
         else {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{

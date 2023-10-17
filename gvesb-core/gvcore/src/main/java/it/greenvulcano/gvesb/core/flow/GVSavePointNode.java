@@ -19,22 +19,24 @@
  */
 package it.greenvulcano.gvesb.core.flow;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.core.savepoint.SavePointController;
+import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.xpath.XPathFinder;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * GVFlow node indicating a flow end.
@@ -66,8 +68,8 @@ public class GVSavePointNode extends GVFlowNode
     {
         super.init(defNode);
 
-        nextNodeId = XMLConfig.get(defNode, "@next-node-id", "");
-        if (nextNodeId.equals("")) {
+        this.nextNodeId = XMLConfig.get(defNode, "@next-node-id", "");
+        if (this.nextNodeId.equals("")) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'next-node-id'"},
                     {"node", XPathFinder.buildXPath(defNode)}});
         }
@@ -77,7 +79,7 @@ public class GVSavePointNode extends GVFlowNode
             if ((pnl != null) && (pnl.getLength() > 0)) {
                 for (int i = 0; i < pnl.getLength(); i++) {
                     Node n = pnl.item(i);
-                    propDefs.put(XMLConfig.get(n, "@name"), XMLConfig.get(n, "@value"));
+                    this.propDefs.put(XMLConfig.get(n, "@name"), XMLConfig.get(n, "@value"));
                 }
             }
         }
@@ -96,15 +98,15 @@ public class GVSavePointNode extends GVFlowNode
     {
         long startTime = System.currentTimeMillis();
         logger.info("Executing GVSavePointNode '" + getId() + "'");
-        checkInterrupted("GVSavePointNode", logger);
-        dumpEnvironment(logger, true, environment);
+        checkInterrupted("GVSavePointNode");
+        dumpEnvironment(true, environment);
 
         Object data = environment.get(getInput());
         if (Throwable.class.isInstance(data)) {
             // TODO: dovrebbe lanciare una eccezione???
             environment.put(getOutput(), data);
             logger.debug("SKIP - Execute GVSavePointNode '" + getId() + "'");
-            return nextNodeId;
+            return this.nextNodeId;
         }
 
         try {
@@ -112,24 +114,33 @@ public class GVSavePointNode extends GVFlowNode
 
             GVBuffer internalData = (GVBuffer) data;
 
-            for (Map.Entry<String, String> p : propDefs.entrySet()) {
+            for (Map.Entry<String, String> p : this.propDefs.entrySet()) {
                 String value = p.getValue();
                 properties.put(p.getKey(), PropertiesHandler.expand(value, null, internalData));
             }
             // must be set prior to save the environment!!!
             environment.put("IS_SAVE_POINT", new Boolean(true));
 
-            InvocationContext ctx = (InvocationContext) InvocationContext.getInstance();
+            InvocationContext ctx = (InvocationContext) it.greenvulcano.gvesb.internal.InvocationContext.getInstance();
             SavePointController.instance().save(internalData.getId().toString(), ctx.getSystem(), ctx.getService(),
                     ctx.getOperation(), getId(), environment, properties);
         }
         catch (Exception exc) {
+            logger.error("Error in GVSavePointNode[" + getId() + "]", exc);
+            if (this.isDumpEnvOnError()) {
+                dumpEnvironment(Level.ERROR, true, environment);
+            }
+            else {
+                if (!(logger.isDebugEnabled() || isDumpInOut())) {
+                    logger.error(GVFormatLog.formatINPUT((GVBuffer) data, true, false));
+                }
+            }
             environment.put(getOutput(), exc);
         }
 
         long endTime = System.currentTimeMillis();
         logger.info("END - Execute GVSavePointNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /*
@@ -140,7 +151,7 @@ public class GVSavePointNode extends GVFlowNode
     @Override
     public String getDefaultNextNodeId()
     {
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /**
@@ -161,5 +172,13 @@ public class GVSavePointNode extends GVFlowNode
     public void destroy() throws GVCoreException
     {
         // do nothing
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 }

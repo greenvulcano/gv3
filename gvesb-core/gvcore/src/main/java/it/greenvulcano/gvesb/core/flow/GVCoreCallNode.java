@@ -169,8 +169,8 @@ public class GVCoreCallNode extends GVFlowNode
             String localId = null;
             boolean localSuccess = false;
 	        logger.info("Executing GVCoreCallNode '" + getId() + "'");
-	        checkInterrupted("GVCoreCallNode", logger);
-	        dumpEnvironment(logger, true, environment);
+	        checkInterrupted("GVCoreCallNode");
+	        dumpEnvironment(true, environment);
 
 	        Object inData = environment.get(input);
 	        if (Throwable.class.isInstance(inData)) {
@@ -294,6 +294,15 @@ public class GVCoreCallNode extends GVFlowNode
 	            throw exc;
 	        }
 	        catch (Exception exc) {
+                logger.error("Error in GVCoreCallNode[" + getId() + "]", exc);
+                if (this.isDumpEnvOnError()) {
+                    dumpEnvironment(Level.ERROR, true, environment);
+                }
+                else {
+                    if (!(logger.isDebugEnabled() || isDumpInOut())) {
+                        logger.error(GVFormatLog.formatINPUT((GVBuffer) inData, true, false));
+                    }
+                }
 	            environment.put(output, exc);
 	        }
 
@@ -308,7 +317,7 @@ public class GVCoreCallNode extends GVFlowNode
             	}
             }
 
-	        dumpEnvironment(logger, false, environment);
+	        dumpEnvironment(false, environment);
 	        long endTime = System.currentTimeMillis();
 	        logger.info("END - Execute GVCoreCallNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
 	        return this.nextNodeId;
@@ -327,6 +336,14 @@ public class GVCoreCallNode extends GVFlowNode
     public String getDefaultNextNodeId()
     {
         return this.nextNodeId;
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 
     /**
@@ -380,7 +397,5 @@ public class GVCoreCallNode extends GVFlowNode
             throw new GVCoreConfException("GVCORE_VCL_OPERATION_SEARCH_ERROR", new String[][]{{"id", getId()},
                     {"node", XPathFinder.buildXPath(defNode)}});
         }
-
     }
-
 }

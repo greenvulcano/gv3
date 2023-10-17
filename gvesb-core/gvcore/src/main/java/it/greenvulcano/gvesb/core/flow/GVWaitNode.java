@@ -1,23 +1,29 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.flow;
+
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
@@ -26,24 +32,20 @@ import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreException;
 import it.greenvulcano.gvesb.core.exc.GVCoreWrongInterfaceException;
 import it.greenvulcano.gvesb.internal.data.GVBufferPropertiesHelper;
+import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.thread.ThreadUtils;
 import it.greenvulcano.util.xpath.XPathFinder;
 
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-
 /**
  * GVFlow node for GVWaitNode.
- * 
+ *
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
- * 
+ *
+ *
+ *
  */
 public class GVWaitNode extends GVFlowNode
 {
@@ -65,7 +67,7 @@ public class GVWaitNode extends GVFlowNode
     {
         super.init(defNode);
         try {
-            nextNodeId = XMLConfig.get(defNode, "@next-node-id");
+            this.nextNodeId = XMLConfig.get(defNode, "@next-node-id");
         }
         catch (XMLConfigException exc) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'next-node-id'"},
@@ -75,28 +77,28 @@ public class GVWaitNode extends GVFlowNode
         String sSleepIf = XMLConfig.get(defNode, "@sleep-if", "exception");
 
         if (sSleepIf.equals("exception")) {
-            sleepIf = SLEEP_IF_EXCEPTION;
+            this.sleepIf = SLEEP_IF_EXCEPTION;
         }
         else if (sSleepIf.equals("gvbuffer")) {
-            sleepIf = SLEEP_IF_GVBUFFER;
+            this.sleepIf = SLEEP_IF_GVBUFFER;
         }
         else if (sSleepIf.equals("both")) {
-            sleepIf = SLEEP_IF_BOTH;
+            this.sleepIf = SLEEP_IF_BOTH;
         }
         else {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'sleep-if'"},
                     {"node", XPathFinder.buildXPath(defNode)}});
         }
 
-        timeout = 0;
-        timeoutMeta = XMLConfig.get(defNode, "@timeout", null);
-        if ((timeoutMeta != null) && !"".equals(timeoutMeta)) {
-            if (PropertiesHandler.isExpanded(timeoutMeta)) {
-                timeout = Long.parseLong(timeoutMeta);
-                timeoutMeta = null;
+        this.timeout = 0;
+        this.timeoutMeta = XMLConfig.get(defNode, "@timeout", null);
+        if ((this.timeoutMeta != null) && !"".equals(this.timeoutMeta)) {
+            if (PropertiesHandler.isExpanded(this.timeoutMeta)) {
+                this.timeout = Long.parseLong(this.timeoutMeta);
+                this.timeoutMeta = null;
             }
         }
-        logger.debug("GVWaitNode(" + getId() + ") timeout: " + timeout + " [" + timeoutMeta + "]");
+        logger.debug("GVWaitNode(" + getId() + ") timeout: " + this.timeout + " [" + this.timeoutMeta + "]");
     }
 
     /**
@@ -108,20 +110,19 @@ public class GVWaitNode extends GVFlowNode
     {
         long startTime = System.currentTimeMillis();
         Object data = null;
-        long locTimeout = timeout;
-        boolean sleep = (sleepIf == SLEEP_IF_BOTH);
+        long locTimeout = this.timeout;
+        boolean sleep = (this.sleepIf == SLEEP_IF_BOTH);
 
         logger.info("Executing GVWaitNode '" + getId() + "'");
-        checkInterrupted("GVWaitNode", logger);
-        dumpEnvironment(logger, true, environment);
+        checkInterrupted("GVWaitNode");
+        dumpEnvironment(true, environment);
 
         data = environment.get(getInput());
         try {
-
-            if (timeoutMeta != null) {
+            if (this.timeoutMeta != null) {
                 if (GVBuffer.class.isInstance(data)) {
                     Map<String, Object> params = GVBufferPropertiesHelper.getPropertiesMapSO((GVBuffer) data, true);
-                    locTimeout = Long.parseLong(PropertiesHandler.expand(timeoutMeta, params, data));
+                    locTimeout = Long.parseLong(PropertiesHandler.expand(this.timeoutMeta, params, data));
                 }
                 else {
                     throw new GVCoreWrongInterfaceException("GVCORE_INVALID_GVBUFFER_ERROR", new String[][]{
@@ -130,10 +131,10 @@ public class GVWaitNode extends GVFlowNode
             }
             if (locTimeout > 0) {
                 if (!sleep) {
-                    if (Throwable.class.isInstance(data) && (sleepIf == SLEEP_IF_EXCEPTION)) {
+                    if (Throwable.class.isInstance(data) && (this.sleepIf == SLEEP_IF_EXCEPTION)) {
                         sleep = true;
                     }
-                    else if (GVBuffer.class.isInstance(data) && (sleepIf == SLEEP_IF_GVBUFFER)) {
+                    else if (GVBuffer.class.isInstance(data) && (this.sleepIf == SLEEP_IF_GVBUFFER)) {
                         sleep = true;
                     }
                 }
@@ -152,12 +153,20 @@ public class GVWaitNode extends GVFlowNode
         catch (Exception exc) {
             ThreadUtils.checkInterrupted(exc);
             logger.error("Error in GVWaitNode[" + getId() + "]", exc);
+            if (this.isDumpEnvOnError()) {
+                dumpEnvironment(Level.ERROR, true, environment);
+            }
+            else {
+                if (!(logger.isDebugEnabled() || isDumpInOut()) && GVBuffer.class.isInstance(data)) {
+                    logger.error(GVFormatLog.formatINPUT((GVBuffer) data, true, false));
+                }
+            }
             environment.put(getInput(), exc);
         }
 
         long endTime = System.currentTimeMillis();
         logger.info("END - Execute GVWaitNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /* (non-Javadoc)
@@ -166,7 +175,7 @@ public class GVWaitNode extends GVFlowNode
     @Override
     public String getDefaultNextNodeId()
     {
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /**
@@ -185,5 +194,13 @@ public class GVWaitNode extends GVFlowNode
     public void destroy() throws GVCoreException
     {
         // do nothing
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 }

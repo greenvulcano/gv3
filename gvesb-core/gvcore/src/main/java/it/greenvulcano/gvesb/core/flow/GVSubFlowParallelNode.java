@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -166,9 +167,10 @@ public class GVSubFlowParallelNode extends BaseParallelNode
         String input = getInput();
         String output = getOutput();
         logger.info("Executing GVSubFlowParallelNode '" + getId() + "'");
-        checkInterrupted("GVSubFlowParallelNode", logger);
-        dumpEnvironment(logger, true, environment);
+        checkInterrupted("GVSubFlowParallelNode");
+        dumpEnvironment(true, environment);
 
+        GVBuffer data = null;
         Object inData = environment.get(input);
         if (Throwable.class.isInstance(inData)) {
             environment.put(output, inData);
@@ -176,7 +178,7 @@ public class GVSubFlowParallelNode extends BaseParallelNode
             return this.onExceptionId;
         }
         try {
-            GVBuffer data = (GVBuffer) inData;
+            data = (GVBuffer) inData;
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatINPUT(data, false, false));
             }
@@ -193,7 +195,7 @@ public class GVSubFlowParallelNode extends BaseParallelNode
                 internalData = this.inputServices.perform(internalData);
 
                 results = processSubFlow(internalData, onDebug);
-                checkInterrupted("GVSubFlowParallelNode", logger);
+                checkInterrupted("GVSubFlowParallelNode");
                 internalData = processOutput(internalData, results);
 
                 internalData = this.outputServices.perform(internalData);
@@ -215,6 +217,15 @@ public class GVSubFlowParallelNode extends BaseParallelNode
             throw exc;
         }
         catch (Exception exc) {
+            logger.error("Error in GVSubFlowParallelNode[" + getId() + "]", exc);
+            if (this.isDumpEnvOnError()) {
+                dumpEnvironment(Level.ERROR, true, environment);
+            }
+            else {
+                if (!(logger.isDebugEnabled() || isDumpInOut())) {
+                    logger.error(GVFormatLog.formatINPUT(data, true, false));
+                }
+            }
             environment.put(output, exc);
             isError = true;
         }
@@ -239,7 +250,7 @@ public class GVSubFlowParallelNode extends BaseParallelNode
 
         logger.info("Executing GVSubFlowParallelNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
 
-        dumpEnvironment(logger, false, environment);
+        dumpEnvironment(false, environment);
         long endTime = System.currentTimeMillis();
         logger.info("END - Execute GVSubFlowParallelNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
@@ -285,6 +296,14 @@ public class GVSubFlowParallelNode extends BaseParallelNode
         this.subFlowPool = null;
         this.inputServices = null;
         this.outputServices = null;
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 
 
@@ -371,7 +390,7 @@ public class GVSubFlowParallelNode extends BaseParallelNode
                 }
             }
 
-            checkInterrupted("GVSubFlowParallelNode", logger);
+            checkInterrupted("GVSubFlowParallelNode");
 
             if (tasks.isEmpty()) {
                 throw new GVCoreSkippedException("GV_SKIPPED_SPLITTED_SERVICE_ERROR", new String[][]{

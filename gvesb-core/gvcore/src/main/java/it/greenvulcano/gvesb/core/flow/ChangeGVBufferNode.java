@@ -19,6 +19,12 @@
  */
 package it.greenvulcano.gvesb.core.flow;
 
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
@@ -31,12 +37,6 @@ import it.greenvulcano.gvesb.internal.data.ChangeGVBuffer;
 import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
-
-import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
 
 /**
  * GVFlow node for change data.
@@ -62,7 +62,7 @@ public class ChangeGVBufferNode extends GVFlowNode
      * the output services
      */
     private GVInternalServiceHandler outputServices = new GVInternalServiceHandler();
-    
+
     private XMLMerge xmlMerge = null;
     private XMLAggregate xmlAggregate = null;
 
@@ -80,7 +80,7 @@ public class ChangeGVBufferNode extends GVFlowNode
         super.init(defNode);
 
         try {
-            nextNodeId = XMLConfig.get(defNode, "@next-node-id");
+            this.nextNodeId = XMLConfig.get(defNode, "@next-node-id");
         }
         catch (XMLConfigException exc) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'next-node-id'"},
@@ -92,7 +92,7 @@ public class ChangeGVBufferNode extends GVFlowNode
         try {
             Node intSvcNode = XMLConfig.getNode(defNode, "OutputServices");
             if (intSvcNode != null) {
-                outputServices.init(intSvcNode, this, false);
+                this.outputServices.init(intSvcNode, this, false);
             }
         }
         catch (Exception exc) {
@@ -104,7 +104,7 @@ public class ChangeGVBufferNode extends GVFlowNode
         try {
         	Node mNode = XMLConfig.getNode(defNode, "ExecXMLMerge");
             if (mNode != null) {
-                xmlMerge = new XMLMerge(mNode);
+                this.xmlMerge = new XMLMerge(mNode);
             }
 		} catch (Exception exc) {
         	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "] ExecXMLMerge", exc);
@@ -114,7 +114,7 @@ public class ChangeGVBufferNode extends GVFlowNode
         try {
         	Node aNode = XMLConfig.getNode(defNode, "ExecXMLAggregate");
             if (aNode != null) {
-                xmlAggregate = new XMLAggregate(aNode);
+                this.xmlAggregate = new XMLAggregate(aNode);
             }
 		} catch (Exception exc) {
         	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "] ExecXMLAggregate", exc);
@@ -123,9 +123,9 @@ public class ChangeGVBufferNode extends GVFlowNode
 		}
 
         if (cGVBufferNode != null) {
-            cGVBuffer = new ChangeGVBuffer();
+            this.cGVBuffer = new ChangeGVBuffer();
             try {
-                cGVBuffer.init(cGVBufferNode);
+                this.cGVBuffer.init(cGVBufferNode);
             }
             catch (XMLConfigException exc) {
             	logger.error("Error initializing ChangeGVBufferNode[" + getId() + "] ChangeGVBuffer", exc);
@@ -146,55 +146,59 @@ public class ChangeGVBufferNode extends GVFlowNode
     public String execute(Map<String, Object> environment, boolean onDebug) throws GVCoreException, InterruptedException
     {
     	Level level = GVLogger.getThreadMasterLevel();
-    	if (isDumpInOut()) GVLogger.setThreadMasterLevel(Level.DEBUG);
+    	if (isDumpInOut()) {
+            GVLogger.setThreadMasterLevel(Level.DEBUG);
+        }
     	try {
 	    	long startTime = System.currentTimeMillis();
 	        logger.info("Executing ChangeGVBufferNode '" + getId() + "'");
-	        checkInterrupted("ChangeGVBufferNode", logger);
-	        dumpEnvironment(logger, true, environment);
-	
+	        checkInterrupted("ChangeGVBufferNode");
+	        dumpEnvironment(true, environment);
+
 	        String input = getInput();
 	        String output = getOutput();
-	
+
 	        Object obj = environment.get(input);
 	        if (obj == null) {
 	            environment.put(output, new GVCoreWrongInterfaceException("GVCORE_NULL_DATA_ERROR",
 	                    new String[][]{{"id", getId()}}));
 	            logger.debug("END - Execute ChangeGVBufferNode '" + getId() + "'");
-	            return nextNodeId;
+	            return this.nextNodeId;
 	        }
 	        if (Throwable.class.isInstance(obj)) {
 	            environment.put(output, obj);
 	            logger.info("END - Skip Execute ChangeGVBufferNode '" + getId() + "'");
-	            return nextNodeId;
+	            return this.nextNodeId;
 	        }
-	        if ((cGVBuffer != null) || outputServices.isValid() || (xmlMerge != null) || (xmlAggregate != null)) {
+	        if ((this.cGVBuffer != null) || this.outputServices.isValid() || (this.xmlMerge != null) || (this.xmlAggregate != null)) {
 	            if (obj instanceof GVBuffer) {
+                    GVBuffer inData = null;
+                    GVBuffer outData = null;
 	                try {
-	                    GVBuffer data = (GVBuffer) obj;
+	                    inData = (GVBuffer) obj;
 	                    if (logger.isDebugEnabled() || isDumpInOut()) {
-	                        logger.info(GVFormatLog.formatINPUT(data, false, false));
+	                        logger.info(GVFormatLog.formatINPUT(inData, false, false));
 	                    }
 	                    if (!output.equals("")) {
-	                        data = new GVBuffer(data);
+	                        outData = new GVBuffer(inData);
 	                    }
-	
-	                    if (xmlAggregate != null) {
-	                    	data.setObject(xmlAggregate.aggregate(input, environment));
+
+	                    if (this.xmlAggregate != null) {
+	                        outData.setObject(this.xmlAggregate.aggregate(input, environment));
 	                    }
-	                    else if (xmlMerge != null) {
-	                    	data.setObject(xmlMerge.merge(input, environment));
-	                    } 
-	
-	                    if (cGVBuffer != null) {
-	                        data = cGVBuffer.execute(data, environment);
+	                    else if (this.xmlMerge != null) {
+	                        outData.setObject(this.xmlMerge.merge(input, environment));
 	                    }
-	                    if (outputServices.isValid()) {
-	                        data = outputServices.perform(data);
+
+	                    if (this.cGVBuffer != null) {
+	                        outData = this.cGVBuffer.execute(outData, environment);
 	                    }
-	                    environment.put(output, data);
+	                    if (this.outputServices.isValid()) {
+	                        outData = this.outputServices.perform(outData);
+	                    }
+	                    environment.put(output, outData);
 	                    if (logger.isDebugEnabled() || isDumpInOut()) {
-	                        logger.info(GVFormatLog.formatOUTPUT(data, false, false));
+	                        logger.info(GVFormatLog.formatOUTPUT(outData, false, false));
 	                    }
 	                }
 	                catch (InterruptedException exc) {
@@ -203,6 +207,14 @@ public class ChangeGVBufferNode extends GVFlowNode
 	                }
 	                catch (Throwable exc) {
 	                    logger.error("Error in ChangeGVBufferNode[" + getId() + "]", exc);
+	                    if (this.isDumpEnvOnError()) {
+	                        dumpEnvironment(Level.ERROR, true, environment);
+	                    }
+	                    else {
+	                        if (!(logger.isDebugEnabled() || isDumpInOut())) {
+	                            logger.error(GVFormatLog.formatINPUT(inData, true, false));
+	                        }
+	                    }
 	                    environment.put(output, exc);
 	                }
 	            }
@@ -210,11 +222,11 @@ public class ChangeGVBufferNode extends GVFlowNode
 	        else {
 	            environment.put(output, environment.get(input));
 	        }
-	
-	        dumpEnvironment(logger, false, environment);
+
+	        dumpEnvironment(false, environment);
 	        long endTime = System.currentTimeMillis();
 	        logger.info("END - Execute ChangeGVBufferNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
-	        return nextNodeId;
+	        return this.nextNodeId;
         }
         finally {
         	if (isDumpInOut() && !level.equals(Level.ALL)) {
@@ -229,7 +241,7 @@ public class ChangeGVBufferNode extends GVFlowNode
     @Override
     public String getDefaultNextNodeId()
     {
-        return nextNodeId;
+        return this.nextNodeId;
     }
 
     /**
@@ -258,10 +270,10 @@ public class ChangeGVBufferNode extends GVFlowNode
     @Override
     public void cleanUp() throws GVCoreException
     {
-        if (cGVBuffer != null) {
-            cGVBuffer.cleanUp();
+        if (this.cGVBuffer != null) {
+            this.cGVBuffer.cleanUp();
         }
-        outputServices.cleanUp();
+        this.outputServices.cleanUp();
     }
 
     /**
@@ -271,10 +283,18 @@ public class ChangeGVBufferNode extends GVFlowNode
     public void destroy() throws GVCoreException
     {
         cleanUp();
-        if (cGVBuffer != null) {
-            cGVBuffer.destroy();
+        if (this.cGVBuffer != null) {
+            this.cGVBuffer.destroy();
         }
-        cGVBuffer = null;
-        outputServices = null;
+        this.cGVBuffer = null;
+        this.outputServices = null;
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 }

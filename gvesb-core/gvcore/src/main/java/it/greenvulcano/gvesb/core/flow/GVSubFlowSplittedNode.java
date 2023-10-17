@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
@@ -181,9 +182,10 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
         String input = getInput();
         String output = getOutput();
         logger.info("Executing GVSubFlowSplittedNode '" + getId() + "'");
-        checkInterrupted("GVSubFlowSplittedNode", logger);
-        dumpEnvironment(logger, true, environment);
+        checkInterrupted("GVSubFlowSplittedNode");
+        dumpEnvironment(true, environment);
 
+        GVBuffer data = null;
         Object inData = environment.get(input);
         if (Throwable.class.isInstance(inData)) {
             environment.put(output, inData);
@@ -191,7 +193,7 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
             return this.onExceptionId;
         }
         try {
-            GVBuffer data = (GVBuffer) inData;
+            data = (GVBuffer) inData;
             if (logger.isDebugEnabled() || isDumpInOut()) {
                 logger.info(GVFormatLog.formatINPUT(data, false, false));
             }
@@ -213,7 +215,7 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
                 internalData = this.inputServices.perform(internalData);
 
                 results = processSubFlow(internalData, onDebug);
-                checkInterrupted("GVSubFlowSplittedNode", logger);
+                checkInterrupted("GVSubFlowSplittedNode");
                 internalData = processOutput(internalData, results);
 
                 internalData = this.outputServices.perform(internalData);
@@ -235,6 +237,15 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
             throw exc;
         }
         catch (Exception exc) {
+            logger.error("Error in GVSubFlowSplittedNode[" + getId() + "]", exc);
+            if (this.isDumpEnvOnError()) {
+                dumpEnvironment(Level.ERROR, true, environment);
+            }
+            else {
+                if (!(logger.isDebugEnabled() || isDumpInOut())) {
+                    logger.error(GVFormatLog.formatINPUT(data, true, false));
+                }
+            }
             environment.put(output, exc);
             isError = true;
         }
@@ -259,7 +270,7 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
 
         logger.info("Executing GVSubFlowSplittedNode '" + getId() + "' - '" + conditionName + "' -> '" + nextNodeId + "'");
 
-        dumpEnvironment(logger, false, environment);
+        dumpEnvironment(false, environment);
         long endTime = System.currentTimeMillis();
         logger.info("END - Execute GVSubFlowSplittedNode '" + getId() + "' - ExecutionTime (" + (endTime - startTime) + ")");
         return nextNodeId;
@@ -302,6 +313,14 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
         this.subFlowPool = null;
         this.inputServices = null;
         this.outputServices = null;
+    }
+
+    /**
+     * @see it.greenvulcano.gvesb.core.flow.GVFlowNode#getLogger()
+     */
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 
 
@@ -377,7 +396,7 @@ public class GVSubFlowSplittedNode extends BaseParallelNode
                     tasks.add(new SubFlowTask(this.subFlowPool, currInput, onDebug, this.changeLogContext, logContext, null, this.resultProcessor.needsOutput()));
                 }
 
-                checkInterrupted("GVSubFlowSplittedNode", logger);
+                checkInterrupted("GVSubFlowSplittedNode");
 
                 if (tasks.isEmpty()) {
                     throw new GVCoreSkippedException("GV_SKIPPED_SPLITTED_SERVICE_ERROR", new String[][]{

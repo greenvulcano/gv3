@@ -114,6 +114,7 @@ public class JMSForwardData
     private long                   sleepTimeout         = -1;
     private long                   receiveTimeout       = 1000;
 
+    private boolean                forceSessionTX       = false;
     private boolean                transacted           = false;
     private int                    transactionTimeout   = 0;
 
@@ -130,11 +131,11 @@ public class JMSForwardData
     /**
      * If true the incoming message is dumped on log.
      */
-    private boolean                dumpMessage          = false;
-    private boolean                debug                = false;
+    private boolean                      dumpMessage          = false;
+    private boolean                      debug                = false;
 
     private final AtomicInteger          working              = new AtomicInteger(0);
-    private String                 descr                = "";
+    private String                       descr                = "";
 
     private final List<Validator>        validators           = new ArrayList<Validator>();
 
@@ -173,6 +174,7 @@ public class JMSForwardData
             Node fdNode = XMLConfig.getNode(node, "ForwardDeployment");
             this.connectionFactory = XMLConfig.get(fdNode, "@connection-factory");
             this.transacted = XMLConfig.getBoolean(fdNode, "@transacted", false);
+            this.forceSessionTX = XMLConfig.getBoolean(fdNode, "@force-session-tx", false);
 
             this.connectionHolder = new JMSConnectionHolder(this.connectionFactory, this.transacted);
             this.connectionHolder.setDebug(this.debug);
@@ -192,7 +194,6 @@ public class JMSForwardData
             this.destinationName = XMLConfig.get(fdNode, "@destination");
             this.messageSelector = XMLConfig.get(fdNode, "message-selector", "");
             this.reconnectInterval = XMLConfig.getLong(fdNode, "@reconnect-interval-sec", 10) * 1000;
-            this.transacted = XMLConfig.getBoolean(fdNode, "@transacted", false);
             this.transactionTimeout = XMLConfig.getInteger(fdNode, "@transaction-timeout-sec", 30);
             this.receiveTimeout = XMLConfig.getInteger(fdNode, "@receive-timeout-sec", 1) * 1000;
             this.readBlockCount = XMLConfig.getInteger(fdNode, "@read-block-count", 60);
@@ -216,6 +217,7 @@ public class JMSForwardData
                 sb.append("] - using messageSelector [").append(this.messageSelector);
             }
             sb.append("] - connectionFactory [").append(this.connectionFactory);
+            sb.append("] - forceSessionTX [").append(this.forceSessionTX);
             sb.append("] - transacted [").append(this.transacted);
             sb.append("] - transactionTimeout [").append(this.transactionTimeout);
             sb.append("] - readBlockCount [").append(this.readBlockCount);
