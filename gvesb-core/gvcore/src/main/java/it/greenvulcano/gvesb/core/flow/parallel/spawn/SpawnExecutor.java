@@ -37,6 +37,7 @@ import it.greenvulcano.gvesb.buffer.Id;
 import it.greenvulcano.gvesb.core.flow.parallel.Result;
 import it.greenvulcano.gvesb.core.flow.parallel.SubFlowTask;
 import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.log.NMDC;
 import it.greenvulcano.util.thread.BaseThreadFactory;
 
 /**
@@ -62,18 +63,17 @@ public class SpawnExecutor implements ShutdownEventListener
         @Override
         public void run() {
         	if (!(this.future.isDone() || this.future.isCancelled())) {
-        		logger.debug("Cancelling Spawned task: " + this.id);
+        		logger.warn("Cancelling Spawned task: " + this.id);
         		this.future.cancel(true);
         	}
         }
     }
 
-    private static final Logger  logger      = GVLogger.getLogger(SpawnExecutor.class);
+    private static final Logger    logger = GVLogger.getLogger(SpawnExecutor.class);
 
-    private static SpawnExecutor instance    = null;
-    //private ThreadFactory        cancelerTF  = new BaseThreadFactory("SpawnExecutor#TaskCanceler", true);
-    private Timer           cancelerTimer    = new Timer("SpawnExecutor#TaskCanceler", true);
-    private final int                  threadMax   = 10;
+    private static SpawnExecutor instance = null;
+    private Timer           cancelerTimer = new Timer("SpawnExecutor#TaskCanceler", true);
+    private int                 threadMax = 10;
 
     /**
      * Executor of SubFlowTask instances.
@@ -89,9 +89,19 @@ public class SpawnExecutor implements ShutdownEventListener
     }
 
     private SpawnExecutor() {
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        this.executor = new ThreadPoolExecutor(this.threadMax / 2, this.threadMax, 2L, TimeUnit.MINUTES, queue, new BaseThreadFactory(
-                "SpawnExecutor#NONE", true));
+        try {
+            NMDC.push();
+            NMDC.remove("MASTER_SERVICE");
+
+            this.threadMax = Integer.getInteger("it.greenvulcano.gvesb.core.flow.parallel.spawn.SpawnExecutor.threadMax", 10);
+            logger.info("SpawnExecutor.threadMax: " + this.threadMax);
+            BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
+            this.executor = new ThreadPoolExecutor(this.threadMax, this.threadMax, 2L, TimeUnit.MINUTES, queue, new BaseThreadFactory(
+                    "SpawnExecutor#NONE", true));
+        }
+        finally {
+            NMDC.pop();
+        }
     }
 
     public void execute(String owner, Id ownerId, SubFlowTask task, long timeout)
@@ -158,8 +168,6 @@ public class SpawnExecutor implements ShutdownEventListener
 
         Future<Result> future = this.executor.submit(task);
         this.cancelerTimer.schedule(new TaskCanceler(future, task.getSpawnedName()), timeout * 1000);
-        //Thread cth = cancelerTF.newThread(new TaskCanceler(future, timeout, TimeUnit.SECONDS));
-        //cth.start();
     }
 
 }
