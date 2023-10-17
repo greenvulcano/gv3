@@ -86,7 +86,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
     private boolean                       logBeginEnd         = false;
     private String                        responseContentType = null;
     private String                        responseCharacterEncoding = null;
-    private final List<PatternResolver>         operationMappings   = new ArrayList<PatternResolver>();
+    private final List<PatternResolver>   operationMappings   = new ArrayList<PatternResolver>();
 
     /*
      * /APP=prova/ELEMENT=test{{/DATA=\d+{{/SUB_DATA=blabla}}}}
@@ -435,7 +435,7 @@ public class RESTHttpServletMapping implements HttpServletMapping
             level = Level.ERROR;
             logger.error("handleRequest - Service request failed", exc);
             try {
-                resp.sendError(500, "" + exc);
+                resp.sendError(500, "Internal server error");
             }
             catch (IOException exc1) {
                 throw new InboundHttpResponseException("GVHTTP_INBOUND_HTTP_RESPONSE_ERROR", new String[][]{{"errorName",
