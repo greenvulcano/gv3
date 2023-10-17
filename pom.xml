@@ -503,7 +503,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvcore</artifactId>
-            <version>3.4.0.7-Final</version>
+            <version>3.4.0.8-Final</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -574,7 +574,7 @@
         <dependency>
             <groupId>it.greenvulcano.gvesb</groupId>
             <artifactId>gvhttp</artifactId>
-            <version>3.4.0.9-Final</version>
+            <version>3.4.0.10-Final</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
