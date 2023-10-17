@@ -157,7 +157,9 @@ public class DBOThreadSelect extends AbstractDBO
                             }
                             else {
                                 while (localJsonOut.length() > 0) {
-                                    this.jsonOut.put(localJsonOut.remove(0));
+                                    synchronized (this.jsonOut) {
+                                        this.jsonOut.put(localJsonOut.remove(0));
+                                    }
                                 }
                             }
                         }
