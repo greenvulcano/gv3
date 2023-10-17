@@ -19,16 +19,6 @@
  */
 package it.greenvulcano.configuration;
 
-import it.greenvulcano.event.EventHandler;
-import it.greenvulcano.util.crypto.CryptoHelper;
-import it.greenvulcano.util.crypto.CryptoHelperException;
-import it.greenvulcano.util.crypto.CryptoUtilsException;
-import it.greenvulcano.util.txt.PropertiesFileReader;
-import it.greenvulcano.util.txt.TextUtils;
-import it.greenvulcano.util.xml.XMLUtils;
-import it.greenvulcano.util.xpath.search.XPath;
-import it.greenvulcano.util.xpath.search.XPathAPI;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -55,6 +45,17 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+
+import it.greenvulcano.configuration.util.ConfigCryptoInterface;
+import it.greenvulcano.event.EventHandler;
+import it.greenvulcano.util.crypto.CryptoHelper;
+import it.greenvulcano.util.crypto.CryptoHelperException;
+import it.greenvulcano.util.crypto.CryptoUtilsException;
+import it.greenvulcano.util.txt.PropertiesFileReader;
+import it.greenvulcano.util.txt.TextUtils;
+import it.greenvulcano.util.xml.XMLUtils;
+import it.greenvulcano.util.xpath.search.XPath;
+import it.greenvulcano.util.xpath.search.XPathAPI;
 
 /**
  * This class is used to access the XML configuration files. <br>
@@ -323,6 +324,21 @@ public final class XMLConfig
      * List of ConfigurationEvents to fire.
      */
     private static LinkedList<ConfigurationEvent> configurationEvents = new LinkedList<ConfigurationEvent>();
+
+    private static ConfigCryptoInterface cryptoInterface = null;
+
+    static {
+        String clazz = "";
+        try {
+            clazz = System.getProperty("it.greenvulcano.configuration.util.ConfigCryptoInterface", "it.greenvulcano.configuration.util.impl.CryptoHelperInterface");
+            cryptoInterface = (ConfigCryptoInterface) Class.forName(clazz).newInstance();
+            System.out.println("Initialized XMLConfig ConfigCryptoInterface[" + clazz + "]");
+        } catch (Throwable exc) {
+            System.err.println("Error initializing XMLConfig ConfigCryptoInterface[" + clazz + "]");
+            exc.printStackTrace();
+            System.exit(1);
+        }
+    }
 
     /**
      * Constructor
@@ -770,7 +786,7 @@ public final class XMLConfig
             keyId = DEFAULT_KEY_ID;
         }
         try {
-            value = CryptoHelper.decrypt(keyId, value, canBeClear);
+            value = cryptoInterface.decrypt(value, keyId, canBeClear);
         }
         catch (CryptoUtilsException exc) {
             throw new XMLConfigException("Error occurred decrypting value (XPath " + xpath + " - keyId " + keyId
@@ -820,7 +836,7 @@ public final class XMLConfig
             keyId = DEFAULT_KEY_ID;
         }
         try {
-            value = CryptoHelper.decrypt(keyId, value, canBeClear);
+            value = cryptoInterface.decrypt(value, keyId, canBeClear);
         }
         catch (CryptoUtilsException exc) {
             throw new XMLConfigException("Error occurred decrypting value (XPath " + xpath + " - keyId " + keyId
@@ -1015,7 +1031,7 @@ public final class XMLConfig
     {
         String out = value;
         try {
-            out = CryptoHelper.decrypt(DEFAULT_KEY_ID, value, true);
+            out = cryptoInterface.decrypt(value, DEFAULT_KEY_ID, true);
         }
         catch (Exception exc) {
             throw new XMLConfigException("Error occurred decrypting value [" + value + "]", exc);
@@ -1038,7 +1054,7 @@ public final class XMLConfig
     {
         String out = value;
         try {
-            out = CryptoHelper.encrypt(DEFAULT_KEY_ID, value, true);
+            out = cryptoInterface.encrypt(value, DEFAULT_KEY_ID, true);
         }
         catch (Exception exc) {
             throw new XMLConfigException("Error occurred encrypting value [" + value + "]", exc);
