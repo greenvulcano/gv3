@@ -35,6 +35,66 @@
         <location>/ErrorHandler</location>
     </error-page>-->
 
+   <!-- Custom error pages -->
+   <error-page>
+      <error-code>400</error-code>
+      <location>/400.html</location>
+   </error-page>
+   <error-page>
+      <error-code>401</error-code>
+      <location>/401.html</location>
+   </error-page>
+   <error-page>
+      <error-code>403</error-code>
+      <location>/403.html</location>
+   </error-page>
+   <error-page>
+      <error-code>404</error-code>
+      <location>/404.html</location>
+   </error-page>
+   <error-page>
+      <error-code>405</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <error-page>
+      <error-code>406</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <error-page>
+      <error-code>406</error-code>
+      <location>/error.html</location>
+   </error-page>
+
+   <error-page>
+      <error-code>500</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <error-page>
+      <error-code>501</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <error-page>
+      <error-code>502</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <error-page>
+      <error-code>503</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <error-page>
+      <error-code>504</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <error-page>
+      <error-code>505</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <error-page>
+      <error-code>509</error-code>
+      <location>/error.html</location>
+   </error-page>
+   <!-- Custom error pages -->
+
     <security-constraint>
         <display-name>GVHttp</display-name>
         <web-resource-collection>

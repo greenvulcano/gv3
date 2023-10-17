@@ -1,23 +1,37 @@
 /*
  * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.adapter.http.mapping;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
 
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.gvesb.adapter.http.HttpServletMapping;
@@ -43,27 +57,13 @@ import it.greenvulcano.gvesb.log.GVFormatLog;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.log.NMDC;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-
 /**
  * GVCoreHttpServletMapping class
- * 
+ *
  * @version 3.1.0 Feb 07, 2011
  * @author GreenVulcano Developer Team
- * 
- * 
+ *
+ *
  */
 public class GVCoreHttpServletMapping implements HttpServletMapping
 {
@@ -73,6 +73,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
     private HttpServletTransactionManager transactionManager  = null;
     private String                        action              = null;
     private boolean                       dump                = false;
+    private boolean                       logBeginEnd         = false;
     private RetCodeHandler                retCodeHandlerIn    = null;
     private RetCodeHandler                retCodeHandlerOut   = null;
     private String                        responseContentType = null;
@@ -84,29 +85,32 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
      * @param configurationFile
      * @throws AdapterHttpInitializationException
      */
+    @Override
     public void init(HttpServletTransactionManager transactionManager, FormatterManager formatterMgr,
             Node configurationNode) throws AdapterHttpInitializationException
     {
         this.transactionManager = transactionManager;
 
         try {
-            action = XMLConfig.get(configurationNode, "@Action");
-            dump = XMLConfig.getBoolean(configurationNode, "@dump-in-out", false);
+            this.action = XMLConfig.get(configurationNode, "@Action");
+            this.dump = XMLConfig.getBoolean(configurationNode, "@dump-in-out", false);
+            this.logBeginEnd = XMLConfig.getBoolean(configurationNode, "@log-begin-end", false);
+
             String formatterID = XMLConfig.get(configurationNode, "@FormatterID");
-            formatter = formatterMgr.getFormatter(formatterID);
-            retCodeHandlerIn = new RetCodeHandler();
-            retCodeHandlerIn.init(XMLConfig.getNode(configurationNode, "RetCodeConversionIn"));
-            retCodeHandlerOut = new RetCodeHandler();
-            retCodeHandlerOut.init(XMLConfig.getNode(configurationNode, "RetCodeConversionOut"));
-            responseContentType = XMLConfig.get(configurationNode, "@RespContentType",
+            this.formatter = formatterMgr.getFormatter(formatterID);
+            this.retCodeHandlerIn = new RetCodeHandler();
+            this.retCodeHandlerIn.init(XMLConfig.getNode(configurationNode, "RetCodeConversionIn"));
+            this.retCodeHandlerOut = new RetCodeHandler();
+            this.retCodeHandlerOut.init(XMLConfig.getNode(configurationNode, "RetCodeConversionOut"));
+            this.responseContentType = XMLConfig.get(configurationNode, "@RespContentType",
                     AdapterHttpConstants.TEXTHTML_MIMETYPE_NAME);
         }
         catch (AdapterHttpInitializationException exc) {
             throw exc;
         }
         catch (Exception exc) {
-            logger.error("GVCoreHttpServletMapping - Error initializing action '" + action + "'", exc);
-            throw new AdapterHttpInitializationException("GVCoreHttpServletMapping - Error initializing action '" + action
+            logger.error("GVCoreHttpServletMapping - Error initializing action '" + this.action + "'", exc);
+            throw new AdapterHttpInitializationException("GVCoreHttpServletMapping - Error initializing action '" + this.action
                     + "'", exc);
         }
     }
@@ -117,6 +121,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
      * @return if request handling was successful
      * @throws InboundHttpResponseException
      */
+    @Override
     public boolean handleRequest(String methodName, HttpServletRequest req, HttpServletResponse resp) throws InboundHttpResponseException
     {
         logger.debug("handleRequest start");
@@ -129,9 +134,9 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
         Throwable exception = null;
     	GVBuffer response = null;
     	Level level = Level.INFO;
-    	
+
         try {
-            if (dump) {
+            if (this.dump) {
                 StringBuffer sb = new StringBuffer();
                 DumpUtils.dump(req, sb);
                 logger.info(sb);
@@ -141,9 +146,9 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
             environment.put(AdapterHttpConstants.ENV_KEY_HTTP_SERVLET_REQUEST, req);
             environment.put(AdapterHttpConstants.ENV_KEY_HTTP_SERVLET_RESPONSE, resp);
 
-            formatter.marshall(environment);
+            this.formatter.marshall(environment);
 
-            GVBuffer request = retCodeHandlerIn.transformInput((GVBuffer) environment.get(AdapterHttpConstants.ENV_KEY_GVBUFFER_INPUT));
+            GVBuffer request = this.retCodeHandlerIn.transformInput((GVBuffer) environment.get(AdapterHttpConstants.ENV_KEY_GVBUFFER_INPUT));
 
             String path = req.getPathInfo();
             if (path == null) {
@@ -155,7 +160,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
                 query = "";
             }
 
-            request.setProperty("HTTP_ACTION", action);
+            request.setProperty("HTTP_ACTION", this.action);
             request.setProperty("HTTP_PATH", path);
             request.setProperty("HTTP_QUERY", query);
             request.setProperty("HTTP_METHOD", methodName);
@@ -163,27 +168,27 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
             String remAddr = req.getRemoteAddr();
             request.setProperty("HTTP_REMOTE_ADDR", (remAddr != null ? remAddr : ""));
 
-            
+
             GVBufferMDC.put(request);
             String operationType = (String) environment.get(AdapterHttpConstants.ENV_KEY_OP_TYPE);
             NMDC.setOperation(operationType);
             logger.info(GVFormatLog.formatBEGINOperation(request));
 
-            transactionManager.begin(request);
+            this.transactionManager.begin(request);
 
             response = executeService(operationType, request);
 
             if (response != null) {
-                response = retCodeHandlerOut.transformInput(response);
+                response = this.retCodeHandlerOut.transformInput(response);
             }
             environment.put(AdapterHttpConstants.ENV_KEY_GVBUFFER_OUTPUT, response);
 
-            transactionManager.commit(transInfo, true);
+            this.transactionManager.commit(transInfo, true);
 
             manageHttpResponse(environment);
             responseSent = true;
 
-            transactionManager.commit(transInfo, false);
+            this.transactionManager.commit(transInfo, false);
             mustRollback = false;
             status = true;
             logger.debug("handleRequest stop");
@@ -206,7 +211,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
             level = Level.ERROR;
             mustRollback = false;
             environment.put(AdapterHttpConstants.ENV_KEY_GVBUFFER_OUTPUT, exc);
-            logger.error(action + " - handleRequest - Error while handling request parameters: " + exc);
+            logger.error(this.action + " - handleRequest - Error while handling request parameters: " + exc);
             transInfo.setErrorCode(exc.getErrorCode());
             transInfo.setErrorMessage(exc.getMessage());
             manageHttpResponse(environment);
@@ -243,7 +248,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
         finally {
             if (mustRollback) {
                 try {
-                    transactionManager.rollback(transInfo, false);
+                    this.transactionManager.rollback(transInfo, false);
                 }
                 catch (Exception exc) {
                     logger.error("handleRequest - Transaction failed: " + exc);
@@ -274,26 +279,33 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
 
     @Override
     public boolean isDumpInOut() {
-        return dump;
+        return this.dump;
+    }
+
+    @Override
+    public boolean isLogBeginEnd() {
+        return this.logBeginEnd;
     }
 
     /**
      *
      */
+    @Override
     public void destroy()
     {
-        formatter = null;
-        transactionManager = null;
-        retCodeHandlerIn = null;
-        retCodeHandlerOut = null;
+        this.formatter = null;
+        this.transactionManager = null;
+        this.retCodeHandlerIn = null;
+        this.retCodeHandlerOut = null;
     }
 
     /**
      * @return the servlet action
      */
+    @Override
     public String getAction()
     {
-        return action;
+        return this.action;
     }
 
     /**
@@ -309,7 +321,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
      * operationType passing it the <code>GVBuffer</code> object
      * <code>gvdInput</code> as input. Returns an <code>GVBuffer</code> object
      * encapsulating response.
-     * 
+     *
      * @param operationType
      *        the type of communication paradigm to be used.
      * @param gvdInput
@@ -366,7 +378,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
     /**
      * Handle GreenVulcano response to service request from external systems
      * communicating via HTTP.
-     * 
+     *
      * @throws InboundHttpResponseException
      *         if any error occurs.
      */
@@ -376,7 +388,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
         logger.debug("manageHttpResponse start");
         String respCharacterEncoding = null;
         try {
-            formatter.unMarshall(environment);
+            this.formatter.unMarshall(environment);
             String responseString = (String) environment.get(AdapterHttpConstants.ENV_KEY_RESPONSE_STRING);
             HttpServletResponse resp = (HttpServletResponse) environment.get(AdapterHttpConstants.ENV_KEY_HTTP_SERVLET_RESPONSE);
 
@@ -391,13 +403,13 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
 
             Integer status = (Integer) environment.get(AdapterHttpConstants.ENV_KEY_RESPONSE_STATUS);
             if (status != null) {
-                resp.sendError(status.intValue(), responseString);
+                resp.sendError(status, responseString);
                 return;
             }
             respCharacterEncoding = (String) environment.get(AdapterHttpConstants.ENV_KEY_UNMARSHALL_ENCODING);
             String contentType = (String) environment.get(AdapterHttpConstants.ENV_KEY_RESPONSE_CONTENT_TYPE);
             if (contentType == null) {
-                contentType = responseContentType;
+                contentType = this.responseContentType;
             }
             setRespContentTypeAndCharset(resp, contentType, respCharacterEncoding);
 
@@ -405,8 +417,8 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
             out.write(responseString);
             out.flush();
             out.close();
-            
-            if (dump) {
+
+            if (this.dump) {
                 StringBuffer sb = new StringBuffer();
                 DumpUtils.dump(resp, sb);
                 logger.info(sb);
@@ -434,7 +446,7 @@ public class GVCoreHttpServletMapping implements HttpServletMapping
 
     /**
      * Sets content type and charset header fields of the servlet response.
-     * 
+     *
      * @param resp
      *        An HttpServletResponse object
      * @param contentType
