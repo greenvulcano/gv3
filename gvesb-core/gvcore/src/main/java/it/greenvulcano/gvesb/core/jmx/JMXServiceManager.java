@@ -19,25 +19,25 @@
  */
 package it.greenvulcano.gvesb.core.jmx;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import it.greenvulcano.configuration.ConfigurationEvent;
 import it.greenvulcano.configuration.ConfigurationListener;
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.core.config.GreenVulcanoConfig;
+import it.greenvulcano.gvesb.core.config.ServiceLoggerLevelManager;
 import it.greenvulcano.gvesb.throughput.ThroughputData;
 import it.greenvulcano.jmx.JMXUtils;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathDOMBuilder;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * @version 3.0.0 Feb 17, 2010
@@ -77,9 +77,9 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     private JMXServiceManager()
     {
-        mapSvc = new TreeMap<String, ServiceInfo>();
-        mapSys = new TreeMap<String, SystemInfo>();
-        groupMap = new TreeMap<String, GroupInfo>();
+        this.mapSvc = new TreeMap<String, ServiceInfo>();
+        this.mapSys = new TreeMap<String, SystemInfo>();
+        this.groupMap = new TreeMap<String, GroupInfo>();
 
         ServiceOperationInfoManager.instance().setAdministrator(true);
 
@@ -113,14 +113,14 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     private synchronized void init() throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             logger.debug("Executing JMXServiceManager.init()");
             initGroupList();
             initSystemList();
             initServicesList();
             initServiceOperationList();
 
-            confChangedFlag = false;
+            this.confChangedFlag = false;
             logger.debug("END - JMXServiceManager.init()");
         }
     }
@@ -146,7 +146,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void synchronizeStatus() throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         Object[] params = new Object[0];
@@ -166,7 +166,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void synchronizeStatus(String service) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         Object[] params = new Object[]{service};
@@ -184,7 +184,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void resetCounter() throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         Object[] params = new Object[0];
@@ -204,7 +204,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void resetCounter(String service) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         Object[] params = new Object[]{service};
@@ -228,7 +228,7 @@ public final class JMXServiceManager implements ConfigurationListener
         logger.debug("BEGIN -  JMXServiceManager.getServiceOperationInfoData()");
         ServiceOperationInfo serviceInfo = null;
 
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
 
@@ -254,7 +254,7 @@ public final class JMXServiceManager implements ConfigurationListener
         logger.debug("BEGIN - JMXServiceManager.getOperationInfoData()");
         OperationInfo operationInfo = null;
 
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
 
@@ -265,7 +265,7 @@ public final class JMXServiceManager implements ConfigurationListener
         logger.debug("END - JMXServiceManager.getOperationInfoData()");
         return operationInfoData;
     }
-    
+
     /**
      * Returns the configuration data of the requested SubFlowInfo instance
      *
@@ -280,7 +280,7 @@ public final class JMXServiceManager implements ConfigurationListener
         logger.debug("BEGIN - JMXServiceManager.getSubFlowInfoData()");
         SubFlowInfo subflowInfo = null;
 
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
 
@@ -302,14 +302,14 @@ public final class JMXServiceManager implements ConfigurationListener
     public String getGroups() throws Exception
     {
         logger.debug("BEGIN - JMXServiceManager.getGroups()");
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         XPathDOMBuilder xpdb = new XPathDOMBuilder();
         Document document = xpdb.createNewDocument();
 
         int i = 1;
-        for (GroupInfo groupInfo : groupMap.values()) {
+        for (GroupInfo groupInfo : this.groupMap.values()) {
             xpdb.addAttribute(document, "/GreenVulcanoStatus[1]/Groups[1]/Group[" + i + "]", "group",
                     groupInfo.getName());
             String activation = groupInfo.getIsActive() ? "on" : "off";
@@ -331,14 +331,14 @@ public final class JMXServiceManager implements ConfigurationListener
     public String getSystems() throws Exception
     {
         logger.debug("BEGIN - JMXServiceManager.getSystems()");
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         XPathDOMBuilder xpdb = new XPathDOMBuilder();
         Document document = xpdb.createNewDocument();
 
         int i = 1;
-        for (SystemInfo systemInfo : mapSys.values()) {
+        for (SystemInfo systemInfo : this.mapSys.values()) {
             xpdb.addAttribute(document, "/GreenVulcanoStatus[1]/Systems[1]/System[" + i + "]", "system",
                     systemInfo.getName());
             String activation = systemInfo.getActivation() ? "on" : "off";
@@ -360,14 +360,14 @@ public final class JMXServiceManager implements ConfigurationListener
     public String getServices() throws Exception
     {
         logger.debug("BEGIN - JMXServiceManager.getServices()");
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         XPathDOMBuilder xpdb = new XPathDOMBuilder();
         Document document = xpdb.createNewDocument();
 
         int i = 1;
-        for (ServiceInfo serviceInfo : mapSvc.values()) {
+        for (ServiceInfo serviceInfo : this.mapSvc.values()) {
             xpdb.addAttribute(document, "/GreenVulcanoStatus[1]/Services[1]/Service[" + i + "]", "service",
                     serviceInfo.getName());
             String activation = serviceInfo.getActivation() ? "on" : "off";
@@ -380,6 +380,10 @@ public final class JMXServiceManager implements ConfigurationListener
         return XPathDOMBuilder.printDoc(document);
     }
 
+    public ServiceInfo getServiceInfo(String service) {
+        return this.mapSvc.get(service);
+    }
+
     /**
      * Returns a XML descriptions of the configured Services:Operations
      *
@@ -389,7 +393,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public String getServicesOperations() throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         return ServiceOperationInfoManager.instance().getServicesOperations();
@@ -405,10 +409,10 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void groupOn(String name) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
-        GroupInfo groupInfo = groupMap.get(name);
+        GroupInfo groupInfo = this.groupMap.get(name);
         groupInfo.setIsActive(true);
     }
 
@@ -422,10 +426,10 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void groupOff(String name) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
-        GroupInfo groupInfo = groupMap.get(name);
+        GroupInfo groupInfo = this.groupMap.get(name);
         groupInfo.setIsActive(false);
     }
 
@@ -439,10 +443,10 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void systemOn(String name) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
-        SystemInfo systemInfo = mapSys.get(name);
+        SystemInfo systemInfo = this.mapSys.get(name);
         systemInfo.setActivation(true);
     }
 
@@ -456,10 +460,10 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void systemOff(String name) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
-        SystemInfo systemInfo = mapSys.get(name);
+        SystemInfo systemInfo = this.mapSys.get(name);
         systemInfo.setActivation(false);
     }
 
@@ -473,10 +477,10 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void serviceOn(String name) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
-        ServiceInfo serviceInfo = mapSvc.get(name);
+        ServiceInfo serviceInfo = this.mapSvc.get(name);
         serviceInfo.setActivation(true);
     }
 
@@ -490,10 +494,10 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void serviceOff(String name) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
-        ServiceInfo serviceInfo = mapSvc.get(name);
+        ServiceInfo serviceInfo = this.mapSvc.get(name);
         serviceInfo.setActivation(false);
     }
 
@@ -509,7 +513,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void serviceOperationOn(String service, String operation) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         OperationInfo operationInfo = ServiceOperationInfoManager.instance().getOperationInfo(service, operation, true);
@@ -528,7 +532,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void serviceOperationOff(String service, String operation) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         OperationInfo operationInfo = ServiceOperationInfoManager.instance().getOperationInfo(service, operation, true);
@@ -545,7 +549,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void statisticsOn(String service) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         ServiceOperationInfo serviceInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(service, true);
@@ -562,7 +566,7 @@ public final class JMXServiceManager implements ConfigurationListener
      */
     public void statisticsOff(String service) throws Exception
     {
-        if (confChangedFlag) {
+        if (this.confChangedFlag) {
             init();
         }
         ServiceOperationInfo serviceInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(service, true);
@@ -576,7 +580,7 @@ public final class JMXServiceManager implements ConfigurationListener
     {
         logger.debug("Executing JMXServiceManager.initGroupList()");
         try {
-            groupMap.clear();
+            this.groupMap.clear();
             NodeList groups = XMLConfig.getNodeList(GreenVulcanoConfig.getServicesConfigFileName(),
             "/GVServices/Groups/Group");
 
@@ -584,12 +588,12 @@ public final class JMXServiceManager implements ConfigurationListener
             for (int i = 0; i < num; i++) {
                 String name = XMLConfig.get(groups.item(i), "@id-group");
                 boolean activation = XMLConfig.getBoolean(groups.item(i), "@group-activation", true);
-                groupMap.put(name, new GroupInfo(name, activation));
+                this.groupMap.put(name, new GroupInfo(name, activation));
             }
         }
         catch (XMLConfigException exc) {
             logger.error("Unable to initialize Groups list.", exc);
-            groupMap.clear();
+            this.groupMap.clear();
         }
         logger.debug("END - JMXServiceManager.initGroupList()");
     }
@@ -601,7 +605,7 @@ public final class JMXServiceManager implements ConfigurationListener
     {
         logger.debug("BEGIN - JMXServiceManager.initSystemList()");
         try {
-            mapSys.clear();
+            this.mapSys.clear();
             NodeList systems = XMLConfig.getNodeList(GreenVulcanoConfig.getSystemsConfigFileName(),
             "/GVSystems/Systems/System");
 
@@ -609,12 +613,12 @@ public final class JMXServiceManager implements ConfigurationListener
             for (int i = 0; i < num; i++) {
                 String name = XMLConfig.get(systems.item(i), "@id-system");
                 boolean activation = XMLConfig.getBoolean(systems.item(i), "@system-activation", true);
-                mapSys.put(name, new SystemInfo(name, activation));
+                this.mapSys.put(name, new SystemInfo(name, activation));
             }
         }
         catch (XMLConfigException exc) {
             logger.error("Unable to initialize Systems list.", exc);
-            mapSys.clear();
+            this.mapSys.clear();
         }
         logger.debug("END - JMXServiceManager.initSystemList()");
     }
@@ -626,7 +630,7 @@ public final class JMXServiceManager implements ConfigurationListener
     {
         logger.debug("BEGIN - JMXServiceManager.initServicesList()");
         try {
-            mapSvc.clear();
+            this.mapSvc.clear();
             NodeList services = XMLConfig.getNodeList(GreenVulcanoConfig.getServicesConfigFileName(),
             "/GVServices/Services/Service");
 
@@ -634,13 +638,13 @@ public final class JMXServiceManager implements ConfigurationListener
             for (int i = 0; i < num; i++) {
                 String name = XMLConfig.get(services.item(i), "@id-service");
                 boolean activation = XMLConfig.getBoolean(services.item(i), "@service-activation", true);
-                String loggerLevel = XMLConfig.get(services.item(i), "@loggerLevel", XMLConfig.get(services.item(i), "../@loggerLevel", "ALL"));
-                mapSvc.put(name, new ServiceInfo(name, activation, loggerLevel));
+                String loggerLevel = ServiceLoggerLevelManager.instance().getLoggerLevel(name).toString();
+                this.mapSvc.put(name, new ServiceInfo(name, activation, loggerLevel));
             }
         }
         catch (XMLConfigException exc) {
             logger.error("Unable to initialize Services list.", exc);
-            mapSvc.clear();
+            this.mapSvc.clear();
         }
         logger.debug("END - JMXServiceManager.initServicesList()");
     }
@@ -688,7 +692,7 @@ public final class JMXServiceManager implements ConfigurationListener
             initSubFlowList(service, operation, operations.item(x));
         }
     }
-    
+
     /**
      * @param service
      *        the service name
@@ -723,7 +727,7 @@ public final class JMXServiceManager implements ConfigurationListener
                 && (event.getFile().equals(GreenVulcanoConfig.getServicesConfigFileName()) || event.getFile().equals(
                         GreenVulcanoConfig.getSystemsConfigFileName()))) {
             logger.debug("JMXServiceManager - Operation (configurationChanged)");
-            confChangedFlag = true;
+            this.confChangedFlag = true;
             /*try {
                 clearMap();
             }

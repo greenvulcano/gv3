@@ -19,6 +19,17 @@
  */
 package it.greenvulcano.gvesb.core.config;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
@@ -33,17 +44,6 @@ import it.greenvulcano.gvesb.core.jmx.ServiceOperationInfoManager;
 import it.greenvulcano.gvesb.statistics.StatisticsDataManager;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * <code>GVServiceConf</code> contains all the generic informations of a
@@ -143,25 +143,23 @@ public class GVServiceConf
      */
     public void init(GVBuffer gvBuffer) throws GVCoreConfException, GVCoreWrongInterfaceException,  GVCoreServiceNotFoundException
     {
-        file = GreenVulcanoConfig.getServicesConfigFileName();
-        serviceName = gvBuffer.getService();
-        gvOperationMap = new HashMap<String, GVFlow>();
-        gvOperationNames = new HashSet<String>();
+        this.file = GreenVulcanoConfig.getServicesConfigFileName();
+        this.serviceName = gvBuffer.getService();
+        this.gvOperationMap = new HashMap<String, GVFlow>();
+        this.gvOperationNames = new HashSet<String>();
 
-        logger.debug("BEGIN - Init Service Configuration - " + serviceName);
+        logger.debug("BEGIN - Init Service Configuration - " + this.serviceName);
 
-        serviceNode = findServiceNode();
-        Node groupNode = findGroupNode(serviceNode);
+        this.serviceNode = findServiceNode();
+        Node groupNode = findGroupNode(this.serviceNode);
 
-        groupActivation = XMLConfig.getBoolean(groupNode, "@group-activation", true);
-        serviceActivation = XMLConfig.getBoolean(serviceNode, "@service-activation", true);
-        statisticsEnabled = XMLConfig.getBoolean(serviceNode, "@statistics", false);
-        String masterLevel = XMLConfig.get(serviceNode, "../@loggerLevel", "ALL");
-        loggerLevel = Level.toLevel(XMLConfig.get(serviceNode, "@loggerLevel", masterLevel));
-
+        this.groupActivation = XMLConfig.getBoolean(groupNode, "@group-activation", true);
+        this.serviceActivation = XMLConfig.getBoolean(this.serviceNode, "@service-activation", true);
+        this.statisticsEnabled = XMLConfig.getBoolean(this.serviceNode, "@statistics", false);
+        this.loggerLevel = ServiceLoggerLevelManager.instance().getLoggerLevel(this.serviceName);
         checkGVOperations();
 
-        key = serviceName;
+        this.key = this.serviceName;
 
         logger.debug("END - Init Service Configuration");
     }
@@ -176,22 +174,22 @@ public class GVServiceConf
     private Node findGroupNode(Node svcNode) throws GVCoreConfException
     {
         String xPath;
-        groupName = XMLConfig.get(svcNode, "@group-name", "");
-        if (groupName.equals("")) {
+        this.groupName = XMLConfig.get(svcNode, "@group-name", "");
+        if (this.groupName.equals("")) {
             throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'group-name'"},
                     {"node", XPathFinder.buildXPath(svcNode)}});
         }
 
-        xPath = "/GVServices/Groups/Group[@id-group='" + groupName + "']";
+        xPath = "/GVServices/Groups/Group[@id-group='" + this.groupName + "']";
         Node groupNode = null;
         try {
-            groupNode = XMLConfig.getNode(file, xPath);
+            groupNode = XMLConfig.getNode(this.file, xPath);
         }
         catch (XMLConfigException exc) {
             // do nothing
         }
         if (groupNode == null) {
-            throw new GVCoreConfException("GVCORE_GROUP_NOT_FOUND_ERROR", new String[][]{{"group", groupName}});
+            throw new GVCoreConfException("GVCORE_GROUP_NOT_FOUND_ERROR", new String[][]{{"group", this.groupName}});
         }
         return groupNode;
     }
@@ -207,15 +205,15 @@ public class GVServiceConf
      */
     private Node findServiceNode() throws GVCoreWrongInterfaceException, GVCoreServiceNotFoundException, GVCoreConfException
     {
-        String xPath = "/GVServices/Services/Service[@id-service='" + serviceName + "']";
-        String xPathAlias = "/GVServices/Services/Service[AliasList/Alias/@alias='" + serviceName + "']";
+        String xPath = "/GVServices/Services/Service[@id-service='" + this.serviceName + "']";
+        String xPathAlias = "/GVServices/Services/Service[AliasList/Alias/@alias='" + this.serviceName + "']";
 
         boolean isAlias = false;
         Node svcNode = null;
         try {
-            svcNode = XMLConfig.getNode(file, xPath);
+            svcNode = XMLConfig.getNode(this.file, xPath);
             if (svcNode == null) {
-                svcNode = XMLConfig.getNode(file, xPathAlias);
+                svcNode = XMLConfig.getNode(this.file, xPathAlias);
                 isAlias = true;
             }
             if (svcNode == null) {
@@ -230,7 +228,7 @@ public class GVServiceConf
         }
 
         if (isAlias) {
-            serviceName = XMLConfig.get(svcNode, "@id-service", "");
+            this.serviceName = XMLConfig.get(svcNode, "@id-service", "");
         }
 
         buildAliasList(svcNode);
@@ -245,12 +243,12 @@ public class GVServiceConf
      */
     private void manageServiceNodeErrors() throws GVCoreWrongInterfaceException, GVCoreServiceNotFoundException
     {
-        if (serviceName.equals("")) {
+        if (this.serviceName.equals("")) {
             throw new GVCoreWrongInterfaceException("GVCORE_MALFORMED_GVBUFFER_ERROR", new String[][]{{"field",
             "Service"}});
         }
         throw new GVCoreServiceNotFoundException("GVCORE_SERVICE_NOT_FOUND_ERROR", new String[][]{{"service",
-            serviceName}});
+            this.serviceName}});
     }
 
     /**
@@ -258,14 +256,14 @@ public class GVServiceConf
      */
     public void destroy()
     {
-        logger.debug("serviceConfig destroy " + serviceName + " : Start");
+        logger.debug("serviceConfig destroy " + this.serviceName + " : Start");
 
-        for (GVFlow ebOp : gvOperationMap.values()) {
+        for (GVFlow ebOp : this.gvOperationMap.values()) {
             ebOp.destroy();
         }
-        gvOperationMap.clear();
+        this.gvOperationMap.clear();
 
-        logger.debug("serviceConfig destroy " + serviceName + ": End");
+        logger.debug("serviceConfig destroy " + this.serviceName + ": End");
     }
 
     /**
@@ -275,7 +273,7 @@ public class GVServiceConf
      */
     public String getConfigFileName()
     {
-        return file;
+        return this.file;
     }
 
     /**
@@ -285,7 +283,7 @@ public class GVServiceConf
      */
     public String getServiceName()
     {
-        return serviceName;
+        return this.serviceName;
     }
 
     /**
@@ -295,7 +293,7 @@ public class GVServiceConf
      */
     public String getGroupName()
     {
-        return groupName;
+        return this.groupName;
     }
 
     /**
@@ -305,7 +303,7 @@ public class GVServiceConf
      */
     public boolean getGroupActivation()
     {
-        return groupActivation;
+        return this.groupActivation;
     }
 
     /**
@@ -315,7 +313,7 @@ public class GVServiceConf
      */
     public boolean getServiceActivation()
     {
-        return serviceActivation;
+        return this.serviceActivation;
     }
 
     /**
@@ -326,10 +324,10 @@ public class GVServiceConf
     public boolean getActivation()
     {
         getServiceOperationInfo();
-        if (gvServiceOperationInfo != null) {
-            return gvServiceOperationInfo.getActivation();
+        if (this.gvServiceOperationInfo != null) {
+            return this.gvServiceOperationInfo.getActivation();
         }
-        return (serviceActivation && groupActivation);
+        return (this.serviceActivation && this.groupActivation);
     }
 
     /**
@@ -339,8 +337,8 @@ public class GVServiceConf
      */
     public String[] getGVOperationNames()
     {
-        String[] names = new String[gvOperationNames.size()];
-        gvOperationNames.toArray(names);
+        String[] names = new String[this.gvOperationNames.size()];
+        this.gvOperationNames.toArray(names);
         return names;
     }
 
@@ -359,16 +357,16 @@ public class GVServiceConf
      */
     public GVFlow getGVOperation(GVBuffer gvBuffer, String name) throws GVCoreConfException, GVCoreWrongOpException, GVCoreDisabledServiceException
     {
-        GVFlow gvOp = gvOperationMap.get(name);
+        GVFlow gvOp = this.gvOperationMap.get(name);
         if (gvOp == null) {
             gvOp = initGVOperation(name);
         }
         if (!(getActivation() && gvOp.getActivation())) {
             throw new GVCoreDisabledServiceException("GVCORE_GVOPERATION_NOT_ACTIVE_ERROR", new String[][]{
-                    {"service", serviceName}, {"operation", name}});
+                    {"service", this.serviceName}, {"operation", name}});
         }
-        if (gvServiceOperationInfo != null) {
-            setStatisticsEnabled(gvServiceOperationInfo.getStatisticsEnabled());
+        if (this.gvServiceOperationInfo != null) {
+            setStatisticsEnabled(this.gvServiceOperationInfo.getStatisticsEnabled());
         }
         return gvOp;
     }
@@ -385,7 +383,7 @@ public class GVServiceConf
     private void buildAliasList(Node svcNode) throws GVCoreConfException
     {
         logger.debug("BEGIN - Build Alias List");
-        aliasList = new Vector<String>();
+        this.aliasList = new Vector<String>();
 
         NodeList aliasNodeList = null;
         try {
@@ -405,7 +403,7 @@ public class GVServiceConf
                     throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'alias'"},
                             {"node", XPathFinder.buildXPath(node)}}, exc);
                 }
-                aliasList.add(alias);
+                this.aliasList.add(alias);
             }
         }
         logger.debug("END - Build Alias List");
@@ -419,19 +417,19 @@ public class GVServiceConf
      */
     private void checkGVOperations() throws GVCoreConfException
     {
-        logger.debug("BEGIN - Check GVOperations - " + serviceName + "");
+        logger.debug("BEGIN - Check GVOperations - " + this.serviceName + "");
 
         NodeList gvOpList = null;
         try {
-            gvOpList = XMLConfig.getNodeList(serviceNode, "*[@type='operation']");
+            gvOpList = XMLConfig.getNodeList(this.serviceNode, "*[@type='operation']");
         }
         catch (XMLConfigException exc) {
             throw new GVCoreConfException("GVCORE_EMPTY_GVOPERATION_LIST_ERROR",
-                    new String[][]{{"service", serviceName}});
+                    new String[][]{{"service", this.serviceName}});
         }
         if ((gvOpList == null) || (gvOpList.getLength() == 0)) {
             throw new GVCoreConfException("GVCORE_EMPTY_GVOPERATION_LIST_ERROR",
-                    new String[][]{{"service", serviceName}});
+                    new String[][]{{"service", this.serviceName}});
         }
 
         for (int i = 0; i < gvOpList.getLength(); i++) {
@@ -446,7 +444,7 @@ public class GVServiceConf
                             {"node", XPathFinder.buildXPath(node)}}, exc);
                 }
             }
-            gvOperationNames.add(gvOpName);
+            this.gvOperationNames.add(gvOpName);
         }
         logger.debug("END - Check GVOperations");
     }
@@ -466,33 +464,33 @@ public class GVServiceConf
     {
         Level level = null;
         try {
-            level = GVLogger.setThreadMasterLevel(loggerLevel);
+            level = GVLogger.setThreadMasterLevel(this.loggerLevel);
 
-            logger.debug("BEGIN - Init GVOperation - " + serviceName + ":" + name);
+            logger.debug("BEGIN - Init GVOperation - " + this.serviceName + ":" + name);
             GVFlow gvOp = null;
             Node opNode = null;
             try {
-                opNode = XMLConfig.getNode(serviceNode, "*[@type='operation' and (@name='" + name + "' or @forward-name='"
+                opNode = XMLConfig.getNode(this.serviceNode, "*[@type='operation' and (@name='" + name + "' or @forward-name='"
                         + name + "')]");
             }
             catch (XMLConfigException exc) {
                 throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
-                        {"service", serviceName}, {"operation", name}}, exc);
+                        {"service", this.serviceName}, {"operation", name}}, exc);
             }
             if (opNode == null) {
                 throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
-                        {"service", serviceName}, {"operation", name}});
+                        {"service", this.serviceName}, {"operation", name}});
             }
             String clazz = null;
             try{
             	clazz = XMLConfig.get(opNode, "@class");
     	        gvOp = (GVFlow) Class.forName(clazz).newInstance();
     	        gvOp.init(opNode);
-    	        gvOp.setStatisticsEnabled(statisticsEnabled);
-    	        gvOp.setStatisticsDataManager(statisticsDataManager);
-    	        gvOperationMap.put(name, gvOp);
+    	        gvOp.setStatisticsEnabled(this.statisticsEnabled);
+    	        gvOp.setStatisticsDataManager(this.statisticsDataManager);
+    	        this.gvOperationMap.put(name, gvOp);
     	        logger.debug("Set GreenVulcano Operation : " + name + " (" + gvOp.toString() + ")");
-    	
+
     	        logger.debug("END - Init GVOperation");
             }
             catch(GVCoreConfException exc){
@@ -500,9 +498,9 @@ public class GVServiceConf
             }
             catch(Exception exc){
             	 throw new GVCoreWrongOpException("GVCORE_BAD_GVOPERATION_NAME_ERROR", new String[][]{
-                         {"service", serviceName}, {"operation", name}, {"class", clazz}});
+                         {"service", this.serviceName}, {"operation", name}, {"class", clazz}});
             }
-            
+
             return gvOp;
         }
         finally {
@@ -515,7 +513,7 @@ public class GVServiceConf
      */
     public StatisticsDataManager getStatisticsDataManager()
     {
-        return statisticsDataManager;
+        return this.statisticsDataManager;
     }
 
     /**
@@ -524,7 +522,7 @@ public class GVServiceConf
      */
     public void setStatisticsDataManager(StatisticsDataManager manager)
     {
-        statisticsDataManager = manager;
+        this.statisticsDataManager = manager;
     }
 
     /**
@@ -532,7 +530,7 @@ public class GVServiceConf
      */
     public boolean getStatisticsEnabled()
     {
-        return statisticsEnabled;
+        return this.statisticsEnabled;
     }
 
     /**
@@ -541,23 +539,23 @@ public class GVServiceConf
      */
     public void setStatisticsEnabled(boolean statEnabled)
     {
-        if (statisticsEnabled != statEnabled) {
-            statisticsEnabled = statEnabled;
-            for (GVFlow gvOp : gvOperationMap.values()) {
-                gvOp.setStatisticsEnabled(statisticsEnabled);
+        if (this.statisticsEnabled != statEnabled) {
+            this.statisticsEnabled = statEnabled;
+            for (GVFlow gvOp : this.gvOperationMap.values()) {
+                gvOp.setStatisticsEnabled(this.statisticsEnabled);
             }
         }
     }
-    
+
     /**
      * @return the actual logger level
      */
     public Level getLoggerLevel() {
         return this.loggerLevel;
     }
-    
+
     /**
-     * 
+     *
      * @param loggerLevel
      *        the logger level to set
      */
@@ -570,7 +568,7 @@ public class GVServiceConf
      */
     public String getKey()
     {
-        return key;
+        return this.key;
     }
 
     /**
@@ -578,7 +576,7 @@ public class GVServiceConf
      */
     public Vector<String> getAliasList()
     {
-        return aliasList;
+        return this.aliasList;
     }
 
     /**
@@ -590,8 +588,8 @@ public class GVServiceConf
     public void manageAliasInput(GVBuffer gvData)
     {
         try {
-            aliasName = gvData.getService();
-            gvData.setService(serviceName);
+            this.aliasName = gvData.getService();
+            gvData.setService(this.serviceName);
         }
         catch (Exception exc) {
             // do nothing
@@ -607,13 +605,13 @@ public class GVServiceConf
     public void manageAliasOutput(GVBuffer gvData)
     {
         try {
-            gvData.setService(aliasName);
+            gvData.setService(this.aliasName);
         }
         catch (Exception exc) {
             // do nothing
         }
         finally {
-            aliasName = "";
+            this.aliasName = "";
         }
     }
 
@@ -622,14 +620,14 @@ public class GVServiceConf
      */
     private void getServiceOperationInfo()
     {
-        if (gvServiceOperationInfo == null) {
+        if (this.gvServiceOperationInfo == null) {
             try {
-                gvServiceOperationInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(serviceName,
+                this.gvServiceOperationInfo = ServiceOperationInfoManager.instance().getServiceOperationInfo(this.serviceName,
                         true);
             }
             catch (Exception exc) {
                 logger.warn("Error on MBean registration", exc);
-                gvServiceOperationInfo = null;
+                this.gvServiceOperationInfo = null;
             }
         }
     }

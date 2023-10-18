@@ -1,30 +1,23 @@
 /*
  * Copyright (c) 2009-2010 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.pool;
-
-import it.greenvulcano.configuration.ConfigurationEvent;
-import it.greenvulcano.configuration.ConfigurationListener;
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.gvesb.core.jmx.GreenVulcanoPoolInfo;
-import it.greenvulcano.jmx.JMXEntryPoint;
-import it.greenvulcano.log.GVLogger;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -33,12 +26,19 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.configuration.ConfigurationEvent;
+import it.greenvulcano.configuration.ConfigurationListener;
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.core.jmx.GreenVulcanoPoolInfo;
+import it.greenvulcano.jmx.JMXEntryPoint;
+import it.greenvulcano.log.GVLogger;
+
 /**
  * @version 3.0.0 Feb 17, 2010
  * @author GreenVulcano Developer Team
- * 
- * 
- * 
+ *
+ *
+ *
  */
 public final class GreenVulcanoPoolManager implements ConfigurationListener
 {
@@ -60,7 +60,7 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
 
     /**
      * The singleton entry point.
-     * 
+     *
      * @return the singleton instance
      */
     public static synchronized GreenVulcanoPoolManager instance()
@@ -83,7 +83,7 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
     /**
      * Configuration changed. When the configuration changes, the internal
      * chache is removed.
-     * 
+     *
      * @param event
      *        The configuration event received
      */
@@ -91,15 +91,15 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
     public synchronized void configurationChanged(ConfigurationEvent event)
     {
         if ((event.getCode() == ConfigurationEvent.EVT_FILE_REMOVED) && event.getFile().equals(CONF_FILE_NAME)) {
-            initialized = false;
+            this.initialized = false;
         }
     }
 
     /**
      * Obtain a GreenVulcanoPool instance.
-     * 
+     *
      * @param subsystem
-     * 
+     *
      * @return the required instance
      * @throws Exception
      *         if error occurs
@@ -109,11 +109,11 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
         initGreenVulcanoPool();
 
         logger.debug("Requested GreenVulcanoPool(" + subsystem + ")");
-        return greenVulcanoPools.get(subsystem);
+        return this.greenVulcanoPools.get(subsystem);
     }
 
     /**
-     * 
+     *
      * @see java.lang.Object#finalize()
      */
     @Override
@@ -126,33 +126,33 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
 
     /**
      * Initialize the pool.
-     * 
+     *
      * @throws Exception
      *         if error occurs
      */
     private void initGreenVulcanoPool() throws Exception
     {
-        if (initialized) {
+        if (this.initialized) {
             return;
         }
 
         synchronized (_instance) {
-            if (initialized) {
+            if (this.initialized) {
                 return;
             }
 
             logger.debug("Initializing GreenVulcanoPoolManager");
             // no already initialized pools...
-            if (greenVulcanoPools.isEmpty()) {
+            if (this.greenVulcanoPools.isEmpty()) {
                 NodeList nl = XMLConfig.getNodeList(CONF_FILE_NAME, "//GreenVulcanoPool");
                 // initialize all configured pools
                 for (int i = 0; i < nl.getLength(); i++) {
                     GreenVulcanoPool pool = new GreenVulcanoPool(nl.item(i));
                     logger.debug("Initialized GreenVulcanoPool(" + pool.getSubsystem() + ")");
                     register(pool);
-                    greenVulcanoPools.put(pool.getSubsystem(), pool);
+                    this.greenVulcanoPools.put(pool.getSubsystem(), pool);
                 }
-                initialized = true;
+                this.initialized = true;
                 return;
             }
 
@@ -160,7 +160,7 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
             Map<String, GreenVulcanoPool> tmp = new HashMap<String, GreenVulcanoPool>();
             NodeList nl = XMLConfig.getNodeList(CONF_FILE_NAME, "//GreenVulcanoPool");
             for (int p = 0; p < nl.getLength(); p++) {
-                GreenVulcanoPool pool = greenVulcanoPools.remove(XMLConfig.get(nl.item(p), "@subsystem"));
+                GreenVulcanoPool pool = this.greenVulcanoPools.remove(XMLConfig.get(nl.item(p), "@subsystem"));
                 if (pool == null) {
                     // add new configured pools...
                     pool = new GreenVulcanoPool(nl.item(p));
@@ -176,7 +176,7 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
             }
 
             // destroy pools removed from configuration...
-            for (GreenVulcanoPool pool : greenVulcanoPools.values()) {
+            for (GreenVulcanoPool pool : this.greenVulcanoPools.values()) {
                 logger.debug("Destroying GreenVulcanoPool(" + pool.getSubsystem() + ")");
                 deregister(pool, true);
                 try {
@@ -187,19 +187,19 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
                 }
             }
 
-            greenVulcanoPools.putAll(tmp);
+            this.greenVulcanoPools.putAll(tmp);
 
-            initialized = true;
+            this.initialized = true;
         }
     }
 
     /**
      * Destroy the pools.
-     * 
+     *
      */
     private void destroyGreenVulcanoPools()
     {
-        for (GreenVulcanoPool pool : greenVulcanoPools.values()) {
+        for (GreenVulcanoPool pool : this.greenVulcanoPools.values()) {
             try {
                 logger.debug("Destroying GreenVulcanoPool(" + pool.getSubsystem() + ")");
                 deregister(pool, true);
@@ -209,12 +209,12 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
                 // do nothing
             }
         }
-        greenVulcanoPools.clear();
+        this.greenVulcanoPools.clear();
     }
 
     /**
      * Register the pool as MBean.
-     * 
+     *
      * @param pool
      *        the instance to register.
      */
@@ -234,7 +234,7 @@ public final class GreenVulcanoPoolManager implements ConfigurationListener
 
     /**
      * Deregister the pool as MBean.
-     * 
+     *
      * @param pool
      *        the instance to deregister.
      */

@@ -1,34 +1,23 @@
 /*
  * Copyright (c) 2009-2011 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.jmx;
-
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.configuration.XMLConfigException;
-import it.greenvulcano.gvesb.core.config.GreenVulcanoConfig;
-import it.greenvulcano.jmx.JMXEntryPoint;
-import it.greenvulcano.jmx.JMXUtils;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.management.component.StartComponentAction;
-import it.greenvulcano.management.component.StopComponentAction;
-import it.greenvulcano.util.MapUtils;
-import it.greenvulcano.util.Stats;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,12 +27,23 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.gvesb.core.config.GreenVulcanoConfig;
+import it.greenvulcano.gvesb.core.config.ServiceLoggerLevelManager;
+import it.greenvulcano.jmx.JMXEntryPoint;
+import it.greenvulcano.jmx.JMXUtils;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.management.component.StartComponentAction;
+import it.greenvulcano.management.component.StopComponentAction;
+import it.greenvulcano.util.MapUtils;
+import it.greenvulcano.util.Stats;
+
 /**
  * ServiceOperationInfo class.
- * 
+ *
  * @version 3.2.0 Set 10, 2011
  * @author GreenVulcano Developer Team
- * 
+ *
  */
 public class ServiceOperationInfo
 {
@@ -113,7 +113,7 @@ public class ServiceOperationInfo
 
     /**
      * Constructor
-     * 
+     *
      * @param srv
      *        the service name
      * @param grp
@@ -121,17 +121,17 @@ public class ServiceOperationInfo
      */
     public ServiceOperationInfo(String srv, String grp)
     {
-        service = srv;
-        group = grp;
-        jmxSrvcKey = ",Group=management,Internal=Yes,IDGroup=" + group + ",IDService=" + service;
-        jmxFilter = "GreenVulcano:*,Component=" + DESCRIPTOR_NAME + jmxSrvcKey;
+        this.service = srv;
+        this.group = grp;
+        this.jmxSrvcKey = ",Group=management,Internal=Yes,IDGroup=" + this.group + ",IDService=" + this.service;
+        this.jmxFilter = "GreenVulcano:*,Component=" + DESCRIPTOR_NAME + this.jmxSrvcKey;
         // perform calculation with: 1 sec, 1 sec, 30 sec
-        statService = new Stats(1000, 1000, 30);
+        this.statService = new Stats(1000, 1000, 30);
     }
 
     /**
      * Initialize the instance
-     * 
+     *
      * @param initData
      *        initialization data
      */
@@ -140,14 +140,14 @@ public class ServiceOperationInfo
         if (initData == null) {
             return;
         }
-        setGroupActivation(((Boolean) initData.get("groupActivation")).booleanValue());
-        setServiceActivation(((Boolean) initData.get("serviceActivation")).booleanValue());
-        setStatisticsEnabled(((Boolean) initData.get("statisticsEnabled")).booleanValue());
+        setGroupActivation(((Boolean) initData.get("groupActivation")));
+        setServiceActivation(((Boolean) initData.get("serviceActivation")));
+        setStatisticsEnabled(((Boolean) initData.get("statisticsEnabled")));
     }
 
     /**
      * Register the instance on JMX server
-     * 
+     *
      * @param register
      *        the registration flag
      * @throws Exception
@@ -156,7 +156,7 @@ public class ServiceOperationInfo
     public void register(boolean register) throws Exception
     {
         if (register) {
-            String key = service + ":" + group;
+            String key = this.service + ":" + this.group;
             Map<String, String> properties = getJMXProperties(null);
             deregister(false);
             JMXEntryPoint jmx = JMXEntryPoint.instance();
@@ -169,7 +169,7 @@ public class ServiceOperationInfo
 
     /**
      * Deregister the instance from JMX server
-     * 
+     *
      * @param clearOps
      *        if true cancel the child op
      * @throws Exception
@@ -192,7 +192,7 @@ public class ServiceOperationInfo
             // do nothing
         }
 
-        for (OperationInfo operationInfo : opMap.values()) {
+        for (OperationInfo operationInfo : this.opMap.values()) {
             try {
                 operationInfo.deregister(properties);
             }
@@ -201,13 +201,13 @@ public class ServiceOperationInfo
             }
         }
         if (clearOps) {
-            opMap.clear();
+            this.opMap.clear();
         }
     }
 
     /**
      * Return the instance properties
-     * 
+     *
      * @param properties
      *        properties list to enrich
      * @param full
@@ -219,12 +219,12 @@ public class ServiceOperationInfo
         if (properties == null) {
             properties = new HashMap<String, Object>();
         }
-        properties.put("IDService", service);
-        properties.put("IDGroup", group);
+        properties.put("IDService", this.service);
+        properties.put("IDGroup", this.group);
         if (full) {
-            properties.put("groupActivation", new Boolean(groupActivation));
-            properties.put("serviceActivation", new Boolean(serviceActivation));
-            properties.put("statisticsEnabled", new Boolean(statisticsEnabled));
+            properties.put("groupActivation", new Boolean(this.groupActivation));
+            properties.put("serviceActivation", new Boolean(this.serviceActivation));
+            properties.put("statisticsEnabled", new Boolean(this.statisticsEnabled));
         }
         return properties;
     }
@@ -234,8 +234,8 @@ public class ServiceOperationInfo
         if (properties == null) {
             properties = new HashMap<String, String>();
         }
-        properties.put("IDService", service);
-        properties.put("IDGroup", group);
+        properties.put("IDService", this.service);
+        properties.put("IDGroup", this.group);
         return properties;
     }
 
@@ -246,7 +246,7 @@ public class ServiceOperationInfo
     {
         long totalSuccess = 0;
 
-        for (OperationInfo operationInfo : opMap.values()) {
+        for (OperationInfo operationInfo : this.opMap.values()) {
             try {
                 totalSuccess += operationInfo.getTotalSuccess();
             }
@@ -264,7 +264,7 @@ public class ServiceOperationInfo
     {
         long totalFailure = 0;
 
-        for (OperationInfo operationInfo : opMap.values()) {
+        for (OperationInfo operationInfo : this.opMap.values()) {
             try {
                 totalFailure += operationInfo.getTotalFailure();
             }
@@ -282,7 +282,7 @@ public class ServiceOperationInfo
     {
         int total = 0;
 
-        for (OperationInfo operationInfo : opMap.values()) {
+        for (OperationInfo operationInfo : this.opMap.values()) {
             try {
                 total += operationInfo.getTotal();
             }
@@ -298,7 +298,7 @@ public class ServiceOperationInfo
      */
     public void resetCounter()
     {
-        for (OperationInfo operationInfo : opMap.values()) {
+        for (OperationInfo operationInfo : this.opMap.values()) {
             try {
                 operationInfo.resetCounter();
             }
@@ -311,12 +311,12 @@ public class ServiceOperationInfo
     /**
      * Return a sting representing a matrix of Id/Thread/GVFlowNode id for the
      * associated flow status
-     * 
+     *
      * @return the current associated flow status
      */
     public String getFlowsStatus()
     {
-        Set<String> keySet = opMap.keySet();
+        Set<String> keySet = this.opMap.keySet();
         if (keySet.size() == 0) {
             return "";
         }
@@ -347,7 +347,7 @@ public class ServiceOperationInfo
 
     /**
      * Mark an associated flow as terminated
-     * 
+     *
      * @param operation
      *        the operation name
      * @param flowId
@@ -358,7 +358,7 @@ public class ServiceOperationInfo
     public void flowTerminated(String operation, String flowId, boolean success)
     {
         try {
-            statService.hint();
+            this.statService.hint();
             statServices.hint();
             getOperationInfo(operation, true).flowTerminated(flowId, success);
         }
@@ -369,7 +369,7 @@ public class ServiceOperationInfo
 
     /**
      * Return the required OperationInfo instance
-     * 
+     *
      * @param operation
      *        the operation name
      * @param register
@@ -380,15 +380,15 @@ public class ServiceOperationInfo
      */
     public synchronized OperationInfo getOperationInfo(String operation, boolean register) throws Exception
     {
-        OperationInfo opInfo = opMap.get(operation);
+        OperationInfo opInfo = this.opMap.get(operation);
         if (opInfo == null) {
             Map<String, Object> properties = getProperties(null, false);
             properties.put("IDOperation", operation);
-            opInfo = new OperationInfo(group, service, operation, jmxSrvcKey);
-            opInfo.setAdministrator(isAdministrator);
-            opInfo.setCallAdministratorOnInit(callAdministratorOnInit);
+            opInfo = new OperationInfo(this.group, this.service, operation, this.jmxSrvcKey);
+            opInfo.setAdministrator(this.isAdministrator);
+            opInfo.setCallAdministratorOnInit(this.callAdministratorOnInit);
 
-            if (isAdministrator || !callAdministratorOnInit) {
+            if (this.isAdministrator || !this.callAdministratorOnInit) {
                 Map<String, Object> objectData = getLocalObjectData(operation);
                 opInfo.init(objectData);
             }
@@ -412,14 +412,14 @@ public class ServiceOperationInfo
 
             opInfo.setServiceActivation(getActivation());
             opInfo.register(MapUtils.convertToHMStringString(properties), register);
-            opMap.put(operation, opInfo);
+            this.opMap.put(operation, opInfo);
         }
         return opInfo;
     }
 
     /**
      * Read configuration data from a remote object
-     * 
+     *
      * @param properties
      *        the object name / configuration data
      * @param jmxFilterLocal
@@ -444,23 +444,26 @@ public class ServiceOperationInfo
 
     /**
      * Read configuration data from a local configuration file
-     * 
+     *
      * @param operation
      *        the operation name
      * @return the required data
-     * @throws XMLConfigException
+     * @throws Exception
      *         if errors occurs
      */
-    private Map<String, Object> getLocalObjectData(String operation) throws XMLConfigException
+    private Map<String, Object> getLocalObjectData(String operation) throws Exception
     {
         Map<String, Object> objectData = new HashMap<String, Object>();
         String fileName = GreenVulcanoConfig.getServicesConfigFileName();
-        Node svcNode = XMLConfig.getNode(fileName, "/GVServices/Services/Service[@id-service='" + service + "']");
+        Node svcNode = XMLConfig.getNode(fileName, "/GVServices/Services/Service[@id-service='" + this.service + "']");
         Node opNode = XMLConfig.getNode(svcNode, "Operation[(@name='" + operation + "') or (@forward-name='" + operation
                 + "')]");
         boolean activation = XMLConfig.getBoolean(opNode, "@operation-activation", true);
         objectData.put("operationActivation", new Boolean(activation));
-        objectData.put("loggerLevel", XMLConfig.get(opNode, "@loggerLevel", XMLConfig.get(svcNode, "@loggerLevel", XMLConfig.get(svcNode, "../@loggerLevel", "ALL"))));
+
+        String loggerLevel = ServiceLoggerLevelManager.instance().getLoggerLevel(this.service, operation).toString();
+        objectData.put("loggerLevel", loggerLevel);
+
         if (XMLConfig.exists(opNode, "OperationManagement/FailureAction")) {
             String component = XMLConfig.get(opNode, "OperationManagement/FailureAction/@component", "");
             int failureRateo = XMLConfig.getInteger(opNode, "OperationManagement/FailureAction/@max-failure-rate",
@@ -482,7 +485,7 @@ public class ServiceOperationInfo
             disableAction.setComponent(component);
             objectData.put("disableAction", disableAction);
         }
-        logger.debug("ServiceOperationInfo - Reading local configuration data for " + service + "#" + operation);
+        logger.debug("ServiceOperationInfo - Reading local configuration data for " + this.service + "#" + operation);
         return objectData;
     }
 
@@ -494,9 +497,9 @@ public class ServiceOperationInfo
      */
     public void synchronizeStatus(Node node) throws Exception
     {
-        serviceActivation = XMLConfig.getBoolean(node, "@serviceActivation", true);
-        groupActivation = XMLConfig.getBoolean(node, "@groupActivation", true);
-        statisticsEnabled = XMLConfig.getBoolean(node, "@statisticsEnabled", false);
+        this.serviceActivation = XMLConfig.getBoolean(node, "@serviceActivation", true);
+        this.groupActivation = XMLConfig.getBoolean(node, "@groupActivation", true);
+        this.statisticsEnabled = XMLConfig.getBoolean(node, "@statisticsEnabled", false);
         NodeList operationList = XMLConfig.getNodeList(node, "Operation");
 
         int num = operationList.getLength();
@@ -527,7 +530,7 @@ public class ServiceOperationInfo
         String jmxFilterLocal = "GreenVulcano:*,Group=management,Internal=Yes,Component="
                 + JMXServiceManager.getDescriptorName();
 
-        for (OperationInfo operationInfo : opMap.values()) {
+        for (OperationInfo operationInfo : this.opMap.values()) {
             String operation = operationInfo.getOperation();
             properties.put("IDOperation", operation);
             try {
@@ -536,7 +539,7 @@ public class ServiceOperationInfo
             }
             catch (Exception exc) {
                 logger.warn("Error occurred contacting '" + jmxFilterLocal
-                        + "'. Syncronization failed for serviceOperation '" + service + ":" + operation + "'.");
+                        + "'. Syncronization failed for serviceOperation '" + this.service + ":" + operation + "'.");
             }
             operationInfo.synchronizeStatus(properties);
         }
@@ -548,7 +551,7 @@ public class ServiceOperationInfo
      */
     public String getService()
     {
-        return service;
+        return this.service;
     }
 
     /**
@@ -556,23 +559,23 @@ public class ServiceOperationInfo
      */
     public String getGroup()
     {
-        return group;
+        return this.group;
     }
 
     /**
      * Get the status of the group activation. <br/>
      * <br/>
-     * 
+     *
      * @return The Group activation flag
      */
     public boolean getGroupActivation()
     {
-        return groupActivation;
+        return this.groupActivation;
     }
 
     /**
      * Get the history average througput for services.
-     * 
+     *
      * @return the history throughput
      */
     public static float getHistoryThroughputSvc()
@@ -582,7 +585,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the maximum througput for services.
-     * 
+     *
      * @return the maximum througput
      */
     public static float getMaxThroughputSvc()
@@ -592,7 +595,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the minimum througput for services.
-     * 
+     *
      * @return the minimum throughtput
      */
     public static float getMinThroughputSvc()
@@ -602,7 +605,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the througput for services.
-     * 
+     *
      * @return the throughput
      */
     public static float getThroughputSvc()
@@ -612,7 +615,7 @@ public class ServiceOperationInfo
 
     /**
      * Get the total hint for services.
-     * 
+     *
      * @return the total hints
      */
     public static long getTotalHintsSvc()
@@ -622,62 +625,62 @@ public class ServiceOperationInfo
 
     /**
      * Get the history average througput for one service.
-     * 
+     *
      * @return the history throughput
      */
     public float getHistoryThroughput()
     {
-        return statService.getHistoryThroughput();
+        return this.statService.getHistoryThroughput();
     }
 
     /**
      * Get the maximum througput for one service.
-     * 
+     *
      * @return the max throughput
      */
     public float getMaxThroughput()
     {
-        return statService.getMaxThroughput();
+        return this.statService.getMaxThroughput();
     }
 
     /**
      * Get the minimum througput for one service.
-     * 
+     *
      * @return the minimum throughput
      */
     public float getMinThroughput()
     {
-        return statService.getMinThroughput();
+        return this.statService.getMinThroughput();
     }
 
     /**
      * Get the throughput for one service.
-     * 
+     *
      * @return the throughput
      */
     public float getThroughput()
     {
-        return statService.getThroughput();
+        return this.statService.getThroughput();
     }
 
     /**
      * Get the total hint for one service.
-     * 
+     *
      * @return the total hints
      */
     public long getTotalHints()
     {
-        return statService.getTotalHints();
+        return this.statService.getTotalHints();
     }
 
     /**
      * Get the status of the service activation.
-     * 
+     *
      * @return The Service activation flag
      */
     public boolean getServiceActivation()
     {
-        return serviceActivation;
+        return this.serviceActivation;
     }
 
     /**
@@ -685,13 +688,13 @@ public class ServiceOperationInfo
      */
     public boolean getActivation()
     {
-        return (serviceActivation && groupActivation);
+        return (this.serviceActivation && this.groupActivation);
     }
 
     private void updateOpActivation()
     {
         boolean activation = getActivation();
-        for (OperationInfo operationInfo : opMap.values()) {
+        for (OperationInfo operationInfo : this.opMap.values()) {
             operationInfo.setServiceActivation(activation);
         }
     }
@@ -702,7 +705,7 @@ public class ServiceOperationInfo
      */
     public void setGroupActivation(boolean gActivation)
     {
-        groupActivation = gActivation;
+        this.groupActivation = gActivation;
         updateOpActivation();
     }
 
@@ -712,7 +715,7 @@ public class ServiceOperationInfo
      */
     public void setServiceActivation(boolean sActivation)
     {
-        serviceActivation = sActivation;
+        this.serviceActivation = sActivation;
         updateOpActivation();
     }
 
@@ -721,7 +724,7 @@ public class ServiceOperationInfo
      */
     public boolean isAdministrator()
     {
-        return isAdministrator;
+        return this.isAdministrator;
     }
 
     /**
@@ -730,7 +733,7 @@ public class ServiceOperationInfo
      */
     public boolean canCallAdministratorOnInit()
     {
-        return callAdministratorOnInit;
+        return this.callAdministratorOnInit;
     }
 
     /**
@@ -740,9 +743,9 @@ public class ServiceOperationInfo
      */
     public void setCallAdministratorOnInit(boolean call)
     {
-        callAdministratorOnInit = call;
-        for (OperationInfo operationInfo : opMap.values()) {
-            operationInfo.setCallAdministratorOnInit(callAdministratorOnInit);
+        this.callAdministratorOnInit = call;
+        for (OperationInfo operationInfo : this.opMap.values()) {
+            operationInfo.setCallAdministratorOnInit(this.callAdministratorOnInit);
         }
     }
 
@@ -751,7 +754,7 @@ public class ServiceOperationInfo
      */
     public Map<String, OperationInfo> getGVOperationMap()
     {
-        return opMap;
+        return this.opMap;
     }
 
     /**
@@ -760,53 +763,53 @@ public class ServiceOperationInfo
      */
     public void setAdministrator(boolean isAdmin)
     {
-        isAdministrator = isAdmin;
+        this.isAdministrator = isAdmin;
     }
 
     /**
      * Set the activation status at true for the given service on every server
-     * 
+     *
      * @throws Exception
      *         if errors occurs
      */
     public void on() throws Exception
     {
-        JMXUtils.set(jmxFilter, "serviceActivation", new Boolean(true), false, logger);
+        JMXUtils.set(this.jmxFilter, "serviceActivation", new Boolean(true), false, logger);
     }
 
     /**
      * Set the activation status at false for the given service on every server
-     * 
+     *
      * @throws Exception
      *         if errors occurs
      */
     public void off() throws Exception
     {
-        JMXUtils.set(jmxFilter, "serviceActivation", new Boolean(false), false, logger);
+        JMXUtils.set(this.jmxFilter, "serviceActivation", new Boolean(false), false, logger);
     }
 
     /**
      * Set the statistics activation status at true for the given
      * system::service on every server
-     * 
+     *
      * @throws Exception
      *         if errors occurs
      */
     public void statisticsOn() throws Exception
     {
-        JMXUtils.set(jmxFilter, "statisticsEnabled", new Boolean(true), false, logger);
+        JMXUtils.set(this.jmxFilter, "statisticsEnabled", new Boolean(true), false, logger);
     }
 
     /**
      * Set the statistics activation status at false for the given
      * system::service on every server
-     * 
+     *
      * @throws Exception
      *         if errors occurs
      */
     public void statisticsOff() throws Exception
     {
-        JMXUtils.set(jmxFilter, "statisticsEnabled", new Boolean(false), false, logger);
+        JMXUtils.set(this.jmxFilter, "statisticsEnabled", new Boolean(false), false, logger);
     }
 
     /**
@@ -814,7 +817,7 @@ public class ServiceOperationInfo
      */
     public boolean getStatisticsEnabled()
     {
-        return statisticsEnabled;
+        return this.statisticsEnabled;
     }
 
     /**
@@ -823,6 +826,6 @@ public class ServiceOperationInfo
      */
     public void setStatisticsEnabled(boolean statEnabled)
     {
-        statisticsEnabled = statEnabled;
+        this.statisticsEnabled = statEnabled;
     }
 }
