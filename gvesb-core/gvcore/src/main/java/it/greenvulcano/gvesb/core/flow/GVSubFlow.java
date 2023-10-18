@@ -32,6 +32,7 @@ import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
 import it.greenvulcano.gvesb.core.config.ServiceConfigManager;
+import it.greenvulcano.gvesb.core.config.ServiceLoggerLevelManager;
 import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
 import it.greenvulcano.gvesb.core.debug.DebuggingInvocationHandler;
 import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
@@ -128,8 +129,7 @@ public class GVSubFlow
                     {"node", XPathFinder.buildXPath(gvsfNode)}});
         }
 
-        Level opLoggerLevel = GVLogger.getThreadMasterLevel();
-        this.loggerLevel = Level.toLevel(XMLConfig.get(gvsfNode, "@loggerLevel", (opLoggerLevel == null) ? "ALL" : opLoggerLevel.toString()));
+        this.loggerLevel = ServiceLoggerLevelManager.instance().getLoggerLevel(this.serviceName, this.operationName, this.flowName);
 
         this.isSingleThread = isSingleThread;
 

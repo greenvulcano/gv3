@@ -33,6 +33,7 @@ import it.greenvulcano.gvesb.core.config.GVServiceConf;
 import it.greenvulcano.gvesb.core.config.GreenVulcanoConfig;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
 import it.greenvulcano.gvesb.core.config.ServiceConfigManager;
+import it.greenvulcano.gvesb.core.config.ServiceLoggerLevelManager;
 import it.greenvulcano.gvesb.core.exc.GVCoreCallSvcException;
 import it.greenvulcano.gvesb.core.exc.GVCoreConfException;
 import it.greenvulcano.gvesb.core.exc.GVCoreDisabledServiceException;
@@ -117,6 +118,8 @@ public class GreenVulcano
             logger.debug("GreenVulcano Services Configuration File: " + GreenVulcanoConfig.getServicesConfigFileName());
             XMLConfig.load(GreenVulcanoConfig.getSystemsConfigFileName());
             logger.debug("GreenVulcano Systems Configuration File: " + GreenVulcanoConfig.getSystemsConfigFileName());
+
+            ServiceLoggerLevelManager.instance();
 
             this.statisticsDataManager = new StatisticsDataManager();
             try {

@@ -1,28 +1,38 @@
 /*
  * Copyright (c) 2009-2012 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.flow;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import it.greenvulcano.configuration.XMLConfig;
 import it.greenvulcano.configuration.XMLConfigException;
 import it.greenvulcano.gvesb.buffer.GVBuffer;
 import it.greenvulcano.gvesb.core.config.InvocationContext;
+import it.greenvulcano.gvesb.core.config.ServiceLoggerLevelManager;
 import it.greenvulcano.gvesb.core.debug.DebugSynchObject;
 import it.greenvulcano.gvesb.core.debug.DebuggingInvocationHandler;
 import it.greenvulcano.gvesb.core.debug.ExecutionInfo;
@@ -37,18 +47,9 @@ import it.greenvulcano.gvesb.statistics.StatisticsDataManager;
 import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.util.xpath.XPathFinder;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
  * GVFlow Workflow.
- * 
+ *
  * @version 3.3.0 Nov 19, 2012
  * @author GreenVulcano Developer Team
  */
@@ -116,36 +117,36 @@ public class GVFlowWF implements GVFlow
 
     /**
      * Initialize the instance
-     * 
+     *
      * @param gvopNode
      *        the node from which read configuration data
      * @throws GVCoreConfException
      *         if errors occurs
      */
+    @Override
     public void init(Node gvopNode) throws GVCoreConfException {
         logger.debug("BEGIN - GVFlow init");
         logger.debug("gvopNode=" + gvopNode.toString());
         try {
-            serviceName = XMLConfig.get(gvopNode, "../@id-service", "NO_SERVICE");
+            this.serviceName = XMLConfig.get(gvopNode, "../@id-service", "NO_SERVICE");
 
-            flowName = XMLConfig.get(gvopNode, "@name", "");
-            if (flowName.equals("")) {
+            this.flowName = XMLConfig.get(gvopNode, "@name", "");
+            if (this.flowName.equals("")) {
                 throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{{"name", "'name'"},
                         {"node", XPathFinder.buildXPath(gvopNode)}});
             }
-            if (flowName.equals("Forward")) {
-                flowName = XMLConfig.get(gvopNode, "@forward-name", "");
-                if (flowName.equals("")) {
+            if (this.flowName.equals("Forward")) {
+                this.flowName = XMLConfig.get(gvopNode, "@forward-name", "");
+                if (this.flowName.equals("")) {
                     throw new GVCoreConfException("GVCORE_MISSED_CFG_PARAM_ERROR", new String[][]{
                             {"name", "'forward-name'"}, {"node", XPathFinder.buildXPath(gvopNode)}});
                 }
             }
 
-            outCheckType = XMLConfig.get(gvopNode, "@out-check-type", OUT_CHECK_NONE);
-            operationActivation = XMLConfig.getBoolean(gvopNode, "@operation-activation", true);
-            
-            Level opLoggerLevel = GVLogger.getThreadMasterLevel();
-            loggerLevel = Level.toLevel(XMLConfig.get(gvopNode, "@loggerLevel", (opLoggerLevel == null) ? "ALL" : opLoggerLevel.toString()));
+            this.outCheckType = XMLConfig.get(gvopNode, "@out-check-type", OUT_CHECK_NONE);
+            this.operationActivation = XMLConfig.getBoolean(gvopNode, "@operation-activation", true);
+
+            this.loggerLevel = ServiceLoggerLevelManager.instance().getLoggerLevel(this.serviceName, this.flowName);
 
             Node instNode = XMLConfig.getNode(gvopNode, "Flow");
             if (instNode == null) {
@@ -174,14 +175,14 @@ public class GVFlowWF implements GVFlow
             level = GVLogger.setThreadMasterLevel(getLoggerLevel());
 
             try {
-                firstNode = XMLConfig.get(instNode, "@first-node");
-    
+                this.firstNode = XMLConfig.get(instNode, "@first-node");
+
                 NodeList nl = null;
                 nl = XMLConfig.getNodeList(instNode, "*[@type='flow-node']");
                 if ((nl == null) || (nl.getLength() == 0)) {
-                    throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
+                    throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", this.flowName}});
                 }
-    
+
                 Node defNode = null;
                 try {
                     for (int i = 0; i < nl.getLength(); i++) {
@@ -192,20 +193,20 @@ public class GVFlowWF implements GVFlow
                         logger.debug("creating GVFlowNode(" + i + ")[" + nodeId + "] of class " + nodeClass);
                         flowNode = (GVFlowNode) Class.forName(nodeClass).newInstance();
                         flowNode.init(defNode);
-                        flowNodes.put(flowNode.getId(), flowNode);
+                        this.flowNodes.put(flowNode.getId(), flowNode);
                     }
                 }
                 catch (GVCoreConfException exc) {
                     throw exc;
                 }
                 catch (Exception exc) {
-                    logger.error("Error initiliazing FlowNode " + flowName, exc);
-                    throw new GVCoreConfException("GVCORE_INIT_FLOW_NODE_ERROR", new String[][]{{"name", flowName},
+                    logger.error("Error initiliazing FlowNode " + this.flowName, exc);
+                    throw new GVCoreConfException("GVCORE_INIT_FLOW_NODE_ERROR", new String[][]{{"name", this.flowName},
                             {"node", XPathFinder.buildXPath(defNode)}}, exc);
                 }
             }
             catch (XMLConfigException exc) {
-                throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", flowName}});
+                throw new GVCoreConfException("GVCORE_EMPTY_FLOW_DEFITION_ERROR", new String[][]{{"name", this.flowName}});
             }
         }
         finally {
@@ -215,20 +216,21 @@ public class GVFlowWF implements GVFlow
 
     /**
      * Execute the flow
-     * 
+     *
      * @param gvBuffer
      *        the input data
      * @return the output data
      * @throws GVCoreException
      *         if errors occurs
      */
+    @Override
     public GVBuffer perform(GVBuffer gvBuffer) throws GVCoreException, InterruptedException {
         return perform(gvBuffer, false);
     }
 
     /**
      * Execute the flow
-     * 
+     *
      * @param gvBuffer
      *        the input data
      * @param onDebug
@@ -236,33 +238,34 @@ public class GVFlowWF implements GVFlow
      * @throws GVCoreException
      *         if errors occurs
      */
+    @Override
     public GVBuffer perform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException, InterruptedException {
-        
+
         if (!onDebug) {
             onDebug = "true".equalsIgnoreCase(gvBuffer.getProperty("GV_FLOW_DEBUG"));
             if (!onDebug) {
-                ExecutionInfo execInfo = new ExecutionInfo(serviceName, flowName, null, null, null);
+                ExecutionInfo execInfo = new ExecutionInfo(this.serviceName, this.flowName, null, null, null);
                 onDebug = DebugSynchObject.checkWaitingDebug(execInfo);
             }
         }
-        boolean useStatistics = statisticsEnabled && (statisticsDataManager != null) && !onDebug;
+        boolean useStatistics = this.statisticsEnabled && (this.statisticsDataManager != null) && !onDebug;
         StatisticsData sd = null;
 
         try {
-            businessFlowTerminated = false;
+            this.businessFlowTerminated = false;
 
             if (useStatistics) {
-                sd = statisticsDataManager.startStatistics(gvBuffer, "core", flowName);
+                sd = this.statisticsDataManager.startStatistics(gvBuffer, "core", this.flowName);
             }
             GVBuffer outData = internalPerform(gvBuffer, onDebug);
 
             if (useStatistics) {
                 try {
-                    if (businessFlowTerminated) {
-                        statisticsDataManager.stopStatistics(sd, outData, 1);
+                    if (this.businessFlowTerminated) {
+                        this.statisticsDataManager.stopStatistics(sd, outData, 1);
                     }
                     else {
-                        statisticsDataManager.stopStatistics(sd, outData);
+                        this.statisticsDataManager.stopStatistics(sd, outData);
                     }
                 }
                 catch (Exception exc) {
@@ -272,17 +275,17 @@ public class GVFlowWF implements GVFlow
             return outData;
         }
         catch (InterruptedException exc) {
-            logger.error("GVFlowWF[" + flowName + "] interrupted.");
+            logger.error("GVFlowWF[" + this.flowName + "] interrupted.");
             throw exc;
         }
         catch (GVCoreException exc) {
             if (useStatistics) {
                 try {
-                    if (businessFlowTerminated) {
-                        statisticsDataManager.stopStatistics(sd, exc, 0);
+                    if (this.businessFlowTerminated) {
+                        this.statisticsDataManager.stopStatistics(sd, exc, 0);
                     }
                     else {
-                        statisticsDataManager.stopStatistics(sd, exc);
+                        this.statisticsDataManager.stopStatistics(sd, exc);
                     }
                 }
                 catch (Exception exc1) {
@@ -298,34 +301,35 @@ public class GVFlowWF implements GVFlow
 
     /**
      * Execute the flow
-     * 
+     *
      * @param gvBuffer
      *        the input data
      * @return the output data
      * @throws GVCoreException
      *         if errors occurs
      */
+    @Override
     public GVBuffer recover(String recoveryNode, Map<String, Object> environment) throws GVCoreException, InterruptedException {
-        boolean useStatistics = statisticsEnabled && (statisticsDataManager != null);
+        boolean useStatistics = this.statisticsEnabled && (this.statisticsDataManager != null);
         StatisticsData sd = null;
 
         try {
-            businessFlowTerminated = false;
+            this.businessFlowTerminated = false;
 
-            GVBuffer gvBuffer = (GVBuffer) environment.get(flowNodes.get(recoveryNode).getInput());
+            GVBuffer gvBuffer = (GVBuffer) environment.get(this.flowNodes.get(recoveryNode).getInput());
 
             if (useStatistics) {
-                sd = statisticsDataManager.startStatistics(gvBuffer, "core", flowName);
+                sd = this.statisticsDataManager.startStatistics(gvBuffer, "core", this.flowName);
             }
             GVBuffer outData = internalRecover(gvBuffer, recoveryNode, environment);
 
             if (useStatistics) {
                 try {
-                    if (businessFlowTerminated) {
-                        statisticsDataManager.stopStatistics(sd, outData, 1);
+                    if (this.businessFlowTerminated) {
+                        this.statisticsDataManager.stopStatistics(sd, outData, 1);
                     }
                     else {
-                        statisticsDataManager.stopStatistics(sd, outData);
+                        this.statisticsDataManager.stopStatistics(sd, outData);
                     }
                 }
                 catch (Exception exc) {
@@ -335,17 +339,17 @@ public class GVFlowWF implements GVFlow
             return outData;
         }
         catch (InterruptedException exc) {
-            logger.error("GVFlowWF[" + flowName + "] interrupted.");
+            logger.error("GVFlowWF[" + this.flowName + "] interrupted.");
             throw exc;
         }
         catch (GVCoreException exc) {
             if (useStatistics) {
                 try {
-                    if (businessFlowTerminated) {
-                        statisticsDataManager.stopStatistics(sd, exc, 0);
+                    if (this.businessFlowTerminated) {
+                        this.statisticsDataManager.stopStatistics(sd, exc, 0);
                     }
                     else {
-                        statisticsDataManager.stopStatistics(sd, exc);
+                        this.statisticsDataManager.stopStatistics(sd, exc);
                     }
                 }
                 catch (Exception exc1) {
@@ -361,7 +365,7 @@ public class GVFlowWF implements GVFlow
 
     /**
      * Execute the flow
-     * 
+     *
      * @param gvBuffer
      *        the input data
      * @return the output data
@@ -370,38 +374,38 @@ public class GVFlowWF implements GVFlow
      */
     private GVBuffer internalPerform(GVBuffer gvBuffer, boolean onDebug) throws GVCoreException, InterruptedException {
         if (logger.isDebugEnabled()) {
-            logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
+            logger.debug(GVFormatLog.formatBEGIN(this.flowName, gvBuffer));
         }
 
-        inSystem = gvBuffer.getSystem();
-        inService = gvBuffer.getService();
-        inID = gvBuffer.getId().toString();
+        this.inSystem = gvBuffer.getSystem();
+        this.inService = gvBuffer.getService();
+        this.inID = gvBuffer.getId().toString();
 
         getGVOperationInfo();
 
-        GVFlowNode flowNode = flowNodes.get(firstNode);
+        GVFlowNode flowNode = this.flowNodes.get(this.firstNode);
         if (flowNode == null) {
-            logger.error("FlowNode " + firstNode + " not configured. Check configuration.");
-            throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
-                    {"flownode", firstNode}});
+            logger.error("FlowNode " + this.firstNode + " not configured. Check configuration.");
+            throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", this.flowName},
+                    {"flownode", this.firstNode}});
         }
 
         Map<String, Object> environment = new HashMap<String, Object>();
         environment.put(flowNode.getInput(), gvBuffer);
-        String nextNode = firstNode;
+        String nextNode = this.firstNode;
 
         if (onDebug) {
-            ExecutionInfo info = new ExecutionInfo(serviceName, flowName, nextNode, null, environment);
-            DebugSynchObject synchObj = DebugSynchObject.getSynchObject(inID, info);
+            ExecutionInfo info = new ExecutionInfo(this.serviceName, this.flowName, nextNode, null, environment);
+            DebugSynchObject synchObj = DebugSynchObject.getSynchObject(this.inID, info);
             if (synchObj == null) {
-                synchObj = DebugSynchObject.createNew(Thread.currentThread().getName(), inID, info);
+                synchObj = DebugSynchObject.createNew(Thread.currentThread().getName(), this.inID, info);
             }
             while (!nextNode.equals("") && !isInterrupted()) {
-                operationInfo.setFlowStatus(inID, nextNode);
-                flowNode = flowNodes.get(nextNode);
+                this.operationInfo.setFlowStatus(this.inID, nextNode);
+                flowNode = this.flowNodes.get(nextNode);
                 if (flowNode == null) {
                     logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
-                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", this.flowName},
                             {"flownode", nextNode}});
                 }
                 GVFlowNodeIF proxy = DebuggingInvocationHandler.getProxy(GVFlowNodeIF.class, flowNode, synchObj);
@@ -411,13 +415,13 @@ public class GVFlowWF implements GVFlow
         }
         else {
             while (!nextNode.equals("") && !isInterrupted()) {
-                if (operationInfo != null) {
-                    operationInfo.setFlowStatus(inID, nextNode);
+                if (this.operationInfo != null) {
+                    this.operationInfo.setFlowStatus(this.inID, nextNode);
                 }
-                flowNode = flowNodes.get(nextNode);
+                flowNode = this.flowNodes.get(nextNode);
                 if (flowNode == null) {
                     logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
-                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                    throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", this.flowName},
                             {"flownode", nextNode}});
                 }
                 nextNode = flowNode.execute(environment);
@@ -425,25 +429,25 @@ public class GVFlowWF implements GVFlow
         }
 
         if (isInterrupted()) {
-            logger.error("GVFlowWF[" + flowName + "] interrupted.");
-            throw new InterruptedException("GVFlowWF[" + flowName + "] interrupted.");
+            logger.error("GVFlowWF[" + this.flowName + "] interrupted.");
+            throw new InterruptedException("GVFlowWF[" + this.flowName + "] interrupted.");
         }
 
         Object output = environment.get(flowNode.getOutput());
-        businessFlowTerminated = flowNode.isBusinessFlowTerminated();
+        this.businessFlowTerminated = flowNode.isBusinessFlowTerminated();
 
         if (output instanceof Throwable) {
             if (output instanceof GVCoreException) {
                 throw (GVCoreException) output;
             }
-            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}, 
+            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", this.flowName},
                     {"message", "" + output}}, (Throwable) output);
         }
 
         performOutputCheck(output);
 
         if (logger.isDebugEnabled()) {
-            logger.debug(GVFormatLog.formatEND(flowName, (GVBuffer) output));
+            logger.debug(GVFormatLog.formatEND(this.flowName, (GVBuffer) output));
         }
 
         return (GVBuffer) output;
@@ -451,7 +455,7 @@ public class GVFlowWF implements GVFlow
 
     /**
      * Execute the flow
-     * 
+     *
      * @param gvBuffer
      *        the input data
      * @return the output data
@@ -461,19 +465,19 @@ public class GVFlowWF implements GVFlow
     private GVBuffer internalRecover(GVBuffer gvBuffer, String recoveryNode, Map<String, Object> environment)
             throws GVCoreException, InterruptedException {
         if (logger.isDebugEnabled()) {
-            logger.debug(GVFormatLog.formatBEGIN(flowName, gvBuffer));
+            logger.debug(GVFormatLog.formatBEGIN(this.flowName, gvBuffer));
         }
 
-        inSystem = gvBuffer.getSystem();
-        inService = gvBuffer.getService();
-        inID = gvBuffer.getId().toString();
+        this.inSystem = gvBuffer.getSystem();
+        this.inService = gvBuffer.getService();
+        this.inID = gvBuffer.getId().toString();
 
         getGVOperationInfo();
 
-        GVFlowNode flowNode = flowNodes.get(recoveryNode);
+        GVFlowNode flowNode = this.flowNodes.get(recoveryNode);
         if (flowNode == null) {
             logger.error("FlowNode " + recoveryNode + " not configured. Check configuration.");
-            throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+            throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", this.flowName},
                     {"flownode", recoveryNode}});
         }
 
@@ -481,38 +485,38 @@ public class GVFlowWF implements GVFlow
         String nextNode = flowNode.getDefaultNextNodeId();
 
         while (!nextNode.equals("") && !isInterrupted()) {
-            if (operationInfo != null) {
-                operationInfo.setFlowStatus(inID, nextNode);
+            if (this.operationInfo != null) {
+                this.operationInfo.setFlowStatus(this.inID, nextNode);
             }
-            flowNode = flowNodes.get(nextNode);
+            flowNode = this.flowNodes.get(nextNode);
             if (flowNode == null) {
                 logger.error("FlowNode " + nextNode + " not configured. Check configuration.");
-                throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", flowName},
+                throw new GVCoreException("GVCORE_MISSED_FLOW_NODE_ERROR", new String[][]{{"operation", this.flowName},
                         {"flownode", nextNode}});
             }
             nextNode = flowNode.execute(environment);
         }
 
         if (isInterrupted()) {
-            logger.error("GVFlowWF[" + flowName + "] interrupted.");
-            throw new InterruptedException("GVFlowWF[" + flowName + "] interrupted.");
+            logger.error("GVFlowWF[" + this.flowName + "] interrupted.");
+            throw new InterruptedException("GVFlowWF[" + this.flowName + "] interrupted.");
         }
 
         Object output = environment.get(flowNode.getOutput());
-        businessFlowTerminated = flowNode.isBusinessFlowTerminated();
+        this.businessFlowTerminated = flowNode.isBusinessFlowTerminated();
 
         if (output instanceof Throwable) {
             if (output instanceof GVCoreException) {
                 throw (GVCoreException) output;
             }
-            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", flowName}},
+            throw new GVCoreException("GVCORE_FLOW_EXCEPTION_ERROR", new String[][]{{"operation", this.flowName}},
                     (Throwable) output);
         }
 
         performOutputCheck(output);
 
         if (logger.isDebugEnabled()) {
-            logger.debug(GVFormatLog.formatEND(flowName, (GVBuffer) output));
+            logger.debug(GVFormatLog.formatEND(this.flowName, (GVBuffer) output));
         }
 
         return (GVBuffer) output;
@@ -525,20 +529,20 @@ public class GVFlowWF implements GVFlow
      *         if check fail
      */
     private void performOutputCheck(Object output) throws GVCoreWrongInterfaceException {
-        if (!outCheckType.equals(OUT_CHECK_NONE)) {
+        if (!this.outCheckType.equals(OUT_CHECK_NONE)) {
             GVBuffer outData = (GVBuffer) output;
             boolean checkFailed = false;
-            if (outCheckType.equals(OUT_CHECK_SYS_SVC)) {
-                checkFailed = !(inSystem.equals(outData.getSystem()) && inService.equals(outData.getService()));
+            if (this.outCheckType.equals(OUT_CHECK_SYS_SVC)) {
+                checkFailed = !(this.inSystem.equals(outData.getSystem()) && this.inService.equals(outData.getService()));
             }
-            else if (outCheckType.equals(OUT_CHECK_SYS_SVC_ID)) {
-                checkFailed = !(inSystem.equals(outData.getSystem()) && inService.equals(outData.getService()) && inID.equals(outData.getId().toString()));
+            else if (this.outCheckType.equals(OUT_CHECK_SYS_SVC_ID)) {
+                checkFailed = !(this.inSystem.equals(outData.getSystem()) && this.inService.equals(outData.getService()) && this.inID.equals(outData.getId().toString()));
             }
             if (checkFailed) {
                 throw new GVCoreWrongInterfaceException("GVCORE_FAILED_OUTPUT_CHECK_ERROR", new String[][]{
-                        {"in-service", inService}, {"in-system", inSystem}, {"in-id", inID},
+                        {"in-service", this.inService}, {"in-system", this.inSystem}, {"in-id", this.inID},
                         {"out-service", outData.getService()}, {"out-system", outData.getSystem()},
-                        {"out-id", outData.getId().toString()}, {"check-type", outCheckType}});
+                        {"out-id", outData.getId().toString()}, {"check-type", this.outCheckType}});
             }
         }
     }
@@ -547,13 +551,13 @@ public class GVFlowWF implements GVFlow
      * Initialize the associated OperationInfo instance
      */
     private void getGVOperationInfo() {
-        if (operationInfo == null) {
+        if (this.operationInfo == null) {
             try {
-                operationInfo = ServiceOperationInfoManager.instance().getOperationInfo(serviceName, flowName, true);
+                this.operationInfo = ServiceOperationInfoManager.instance().getOperationInfo(this.serviceName, this.flowName, true);
             }
             catch (Exception exc) {
                 logger.warn("Error on MBean registration: " + exc);
-                operationInfo = null;
+                this.operationInfo = null;
             }
         }
     }
@@ -561,49 +565,55 @@ public class GVFlowWF implements GVFlow
     /**
      * @return the statistics data manager
      */
+    @Override
     public StatisticsDataManager getStatisticsDataManager() {
-        return statisticsDataManager;
+        return this.statisticsDataManager;
     }
 
     /**
      * @param manager
      *        the statistics data manager
      */
+    @Override
     public void setStatisticsDataManager(StatisticsDataManager manager) {
-        statisticsDataManager = manager;
+        this.statisticsDataManager = manager;
     }
 
     /**
      * @return the statistics activation flag value
      */
+    @Override
     public boolean isStatisticsEnabled() {
-        return statisticsEnabled;
+        return this.statisticsEnabled;
     }
 
     /**
      * @param b
      *        set the statistics activation flag
      */
+    @Override
     public void setStatisticsEnabled(boolean b) {
-        statisticsEnabled = b;
+        this.statisticsEnabled = b;
     }
 
     /**
      * @return the actual logger level
      */
+    @Override
     public Level getLoggerLevel() {
         getGVOperationInfo();
-        if (operationInfo != null) {
-            return operationInfo.getLoggerLevelj();
+        if (this.operationInfo != null) {
+            return this.operationInfo.getLoggerLevelj();
         }
         return this.loggerLevel;
     }
 
     /**
-     * 
+     *
      * @param loggerLevel
      *        the logger level to set
      */
+    @Override
     public void setLoggerLevel(Level loggerLevel) {
         this.loggerLevel = loggerLevel;
     }
@@ -611,19 +621,20 @@ public class GVFlowWF implements GVFlow
     /**
      * @return the flow activation flag value
      */
+    @Override
     public boolean getActivation() {
         getGVOperationInfo();
-        if (operationInfo != null) {
-            return operationInfo.getOperationActivation();
+        if (this.operationInfo != null) {
+            return this.operationInfo.getOperationActivation();
         }
-        return operationActivation;
+        return this.operationActivation;
     }
 
     /**
      * Execute cleanup operations
      */
     private void cleanUp() {
-        for (GVFlowNode node : flowNodes.values()) {
+        for (GVFlowNode node : this.flowNodes.values()) {
             try {
                 node.cleanUp();
             }
@@ -632,7 +643,7 @@ public class GVFlowWF implements GVFlow
             }
         }
         try {
-            ((InvocationContext) InvocationContext.getInstance()).cleanup();
+            ((InvocationContext) it.greenvulcano.gvesb.internal.InvocationContext.getInstance()).cleanup();
         }
         catch (Exception exc) {
             logger.warn("Failed cleanUp() of InvocationContext on GVFlow " + this.flowName, exc);
@@ -642,8 +653,9 @@ public class GVFlowWF implements GVFlow
     /**
      * Execute destroy operations
      */
+    @Override
     public void destroy() {
-        for (GVFlowNode node : flowNodes.values()) {
+        for (GVFlowNode node : this.flowNodes.values()) {
             try {
                 node.destroy();
             }
@@ -651,11 +663,11 @@ public class GVFlowWF implements GVFlow
                 logger.warn("Failed destroy() operation on GVFlowNode " + node.getId(), exc);
             }
         }
-        flowNodes.clear();
+        this.flowNodes.clear();
     }
-    
+
     /**
-     * 
+     *
      * @return
      *        the current Thread interrupted state
      */

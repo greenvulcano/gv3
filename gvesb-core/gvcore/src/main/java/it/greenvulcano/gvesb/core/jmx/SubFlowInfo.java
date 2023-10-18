@@ -1,30 +1,23 @@
 /*
  * Copyright (c) 2009-2014 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.gvesb.core.jmx;
-
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.jmx.JMXEntryPoint;
-import it.greenvulcano.jmx.JMXUtils;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.Stats;
-import it.greenvulcano.util.thread.ThreadUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,12 +28,18 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 
+import it.greenvulcano.jmx.JMXEntryPoint;
+import it.greenvulcano.jmx.JMXUtils;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.Stats;
+import it.greenvulcano.util.thread.ThreadUtils;
+
 /**
  * SubFlowInfo class.
- * 
+ *
  * @version 3.4.0 Jan 17, 2014
  * @author GreenVulcano Developer Team
- * 
+ *
  */
 public class SubFlowInfo
 {
@@ -104,7 +103,7 @@ public class SubFlowInfo
 
     /**
      * Constructor
-     * 
+     *
      * @param flow
      *        the subflow name
      * @param jmxSrvcKey
@@ -113,13 +112,13 @@ public class SubFlowInfo
     public SubFlowInfo(String flow, String jmxOperKey)
     {
         this.flow= flow;
-        jmxFilter = "GreenVulcano:*,Component=" + DESCRIPTOR_NAME + jmxOperKey + ",IDSubFlow=" + flow;
-        statFailures = new Stats(1000, 1000, 1);
+        this.jmxFilter = "GreenVulcano:*,Component=" + DESCRIPTOR_NAME + jmxOperKey + ",IDSubFlow=" + flow;
+        this.statFailures = new Stats(1000, 1000, 1);
     }
 
     /**
      * Initialize the instance
-     * 
+     *
      * @param initData
      *        initialization data
      */
@@ -130,18 +129,18 @@ public class SubFlowInfo
         }
         Integer integer = (Integer) initData.get("failureRateo");
         if (integer != null) {
-            maxFailuresRateo = integer.intValue();
+            this.maxFailuresRateo = integer;
         }
         else {
-            maxFailuresRateo = Integer.MAX_VALUE;
+            this.maxFailuresRateo = Integer.MAX_VALUE;
         }
-        loggerLevel = (String) initData.get("loggerLevel");
-        loggerLevelj = Level.toLevel(loggerLevel);
+        this.loggerLevel = (String) initData.get("loggerLevel");
+        this.loggerLevelj = Level.toLevel(this.loggerLevel);
     }
 
     /**
      * Register the instance on JMX server
-     * 
+     *
      * @param properties
      *        the object name properties
      * @param register
@@ -152,7 +151,7 @@ public class SubFlowInfo
     public void register(Map<String, String> properties, boolean register) throws Exception
     {
         if (register) {
-            String key = properties.get("IDService") + ":" + properties.get("IDGroup") + "#" + properties.get("IDOperation") + "#" + flow;
+            String key = properties.get("IDService") + ":" + properties.get("IDGroup") + "#" + properties.get("IDOperation") + "#" + this.flow;
             properties = getJMXProperties(properties);
             deregister(properties);
             JMXEntryPoint jmx = JMXEntryPoint.instance();
@@ -166,7 +165,7 @@ public class SubFlowInfo
 
     /**
      * Deregister the instance from JMX server
-     * 
+     *
      * @param properties
      *        the object name properties
      * @throws Exception
@@ -192,7 +191,7 @@ public class SubFlowInfo
 
     /**
      * Return the instance properties
-     * 
+     *
      * @param properties
      *        properties list to enrich
      * @param full
@@ -204,7 +203,7 @@ public class SubFlowInfo
         if (properties == null) {
             properties = new HashMap<String, Object>();
         }
-        properties.put("IDSubFlow", flow);
+        properties.put("IDSubFlow", this.flow);
         if (full) {
             /*if (failureAction != null) {
                 properties.put("failureAction", failureAction);
@@ -219,7 +218,7 @@ public class SubFlowInfo
         if (properties == null) {
             properties = new HashMap<String, String>();
         }
-        properties.put("IDSubFlow", flow);
+        properties.put("IDSubFlow", this.flow);
         return properties;
     }
 
@@ -231,8 +230,8 @@ public class SubFlowInfo
      */
     public void synchronizeStatus(Node node) throws Exception
     {
-        loggerLevel = XMLConfig.get(node, "@loggerLevel", "ALL");
-        loggerLevelj = Level.toLevel(loggerLevel);
+        //loggerLevel = XMLConfig.get(node, "@loggerLevel", "ALL");
+        //loggerLevelj = Level.toLevel(loggerLevel);
     }
 
     /**
@@ -251,7 +250,7 @@ public class SubFlowInfo
      */
     public long getTotalSuccess()
     {
-        return totalSuccess;
+        return this.totalSuccess;
     }
 
     /**
@@ -259,7 +258,7 @@ public class SubFlowInfo
      */
     public long getTotalFailure()
     {
-        return totalFailure;
+        return this.totalFailure;
     }
 
     /**
@@ -267,7 +266,7 @@ public class SubFlowInfo
      */
     public long getTotal()
     {
-        return (totalSuccess + totalFailure);
+        return (this.totalSuccess + this.totalFailure);
     }
 
     /**
@@ -275,24 +274,24 @@ public class SubFlowInfo
      */
     public void resetCounter()
     {
-        totalSuccess = 0;
-        totalFailure = 0;
+        this.totalSuccess = 0;
+        this.totalFailure = 0;
     }
 
     /**
      * Return a matrix of Id/GVFlowNode id for the associated flow status, by ID
      * and Thread
-     * 
+     *
      * @return the current associated flow status
      */
     public Map<String, Map<String, String>> getFlowsStatus()
     {
-        return Collections.unmodifiableMap(flowsStatusMap);
+        return Collections.unmodifiableMap(this.flowsStatusMap);
     }
 
     /**
      * Set the status of an associated flow
-     * 
+     *
      * @param flowId
      *        the flow id
      * @param id
@@ -301,11 +300,11 @@ public class SubFlowInfo
     public void setFlowStatus(String flowId, String id)
     {
         statNodes.hint();
-        synchronized (flowsStatusMap) {
-            Map<String, String> thFlows = flowsStatusMap.get(flowId);
+        synchronized (this.flowsStatusMap) {
+            Map<String, String> thFlows = this.flowsStatusMap.get(flowId);
             if (thFlows == null) {
                 thFlows = new ConcurrentHashMap<String, String>();
-                flowsStatusMap.put(flowId, thFlows);
+                this.flowsStatusMap.put(flowId, thFlows);
             }
             String threadName = Thread.currentThread().getName();
             thFlows.put(threadName, id);
@@ -314,18 +313,18 @@ public class SubFlowInfo
 
     /**
      * Gets the status of an associated flow
-     * 
+     *
      * @param flowId
      *        the flow id
      * @return the flow node id
      */
     public String getFlowStatus(String threadName, String flowId)
     {
-        synchronized (flowsStatusMap) {
-            Map<String, String> thFlows = flowsStatusMap.get(flowId);
+        synchronized (this.flowsStatusMap) {
+            Map<String, String> thFlows = this.flowsStatusMap.get(flowId);
             if (thFlows == null) {
                 thFlows = new ConcurrentHashMap<String, String>();
-                flowsStatusMap.put(flowId, thFlows);
+                this.flowsStatusMap.put(flowId, thFlows);
             }
             String flowStatus = thFlows.get(threadName);
             return flowStatus;
@@ -334,7 +333,7 @@ public class SubFlowInfo
 
     /**
      * Mark an associated flow as terminated
-     * 
+     *
      * @param flowId
      *        the flow id
      * @param success
@@ -343,30 +342,30 @@ public class SubFlowInfo
     public void flowTerminated(String flowId, boolean success)
     {
         if (success) {
-            totalSuccess++;
+            this.totalSuccess++;
         }
         else {
-            statFailures.hint();
-            totalFailure++;
+            this.statFailures.hint();
+            this.totalFailure++;
         }
         String threadName = Thread.currentThread().getName();
-        synchronized (flowsStatusMap) {
-            Map<String, String> thFlows = flowsStatusMap.get(flowId);
+        synchronized (this.flowsStatusMap) {
+            Map<String, String> thFlows = this.flowsStatusMap.get(flowId);
             if (thFlows != null) {
                 thFlows.remove(threadName);
                 if (thFlows.isEmpty()) {
-                    flowsStatusMap.remove(flowId);
+                    this.flowsStatusMap.remove(flowId);
                 }
             }
         }
     }
-    
+
     public boolean interruptFlow(String threadName, String flowId) {
         try {
-            logger.info("Interrupting flow [" + flowId + "/" + threadName + "] on SubFlow [" + flow + "]");
+            logger.info("Interrupting flow [" + flowId + "/" + threadName + "] on SubFlow [" + this.flow + "]");
             boolean found = false;
-            synchronized (flowsStatusMap) {
-                Map<String, String> thFlows = flowsStatusMap.get(flowId);
+            synchronized (this.flowsStatusMap) {
+                Map<String, String> thFlows = this.flowsStatusMap.get(flowId);
                 if (thFlows != null) {
                     found = thFlows.containsKey(threadName);
                 }
@@ -376,11 +375,11 @@ public class SubFlowInfo
                 Thread th = ThreadUtils.getThread(threadName);
                 if (th != null) {
                     th.interrupt();
-                    logger.info("Interrupted flow [" + flowId + "/" + threadName + "] on SubFlow [" + flow + "]");
+                    logger.info("Interrupted flow [" + flowId + "/" + threadName + "] on SubFlow [" + this.flow + "]");
                     return true;
                 }
             }
-            logger.info("Failed interruption of flow [" + flowId + "/" + threadName + "] on SubFlow [" + flow + "] - Not found active flows");
+            logger.info("Failed interruption of flow [" + flowId + "/" + threadName + "] on SubFlow [" + this.flow + "] - Not found active flows");
         }
         catch (Exception exc) {
             logger.error("Error occurred executing Flow interruption", exc);
@@ -393,10 +392,10 @@ public class SubFlowInfo
      */
     public String getSubFlow()
     {
-        return flow;
+        return this.flow;
     }
 
-    
+
     /**
      * @param loggerLevel
      *        the master logger level value
@@ -405,7 +404,7 @@ public class SubFlowInfo
     {
         this.loggerLevel = loggerLevel;
         this.loggerLevelj = Level.toLevel(loggerLevel);
-        JMXUtils.set(jmxFilter, "loggerLevelj", loggerLevelj, false, logger);
+        JMXUtils.set(this.jmxFilter, "loggerLevelj", this.loggerLevelj, false, logger);
     }
 
     /**
@@ -413,9 +412,9 @@ public class SubFlowInfo
      */
     public String getLoggerLevel()
     {
-        return loggerLevel;
+        return this.loggerLevel;
     }
-    
+
     public void setLoggerLevelj(Level loggerLevelj) throws Exception
     {
         this.loggerLevelj = loggerLevelj;
@@ -424,7 +423,7 @@ public class SubFlowInfo
 
     public Level getLoggerLevelj()
     {
-        return loggerLevelj;
+        return this.loggerLevelj;
     }
 
     /**
@@ -432,7 +431,7 @@ public class SubFlowInfo
      */
     public boolean isAdministrator()
     {
-        return isAdministrator;
+        return this.isAdministrator;
     }
 
     /**
@@ -441,7 +440,7 @@ public class SubFlowInfo
      */
     public void setAdministrator(boolean isAdmin)
     {
-        isAdministrator = isAdmin;
+        this.isAdministrator = isAdmin;
     }
 
     /**
@@ -450,7 +449,7 @@ public class SubFlowInfo
      */
     public boolean canCallAdministratorOnInit()
     {
-        return callAdministratorOnInit;
+        return this.callAdministratorOnInit;
     }
 
     /**
@@ -460,13 +459,13 @@ public class SubFlowInfo
      */
     public void setCallAdministratorOnInit(boolean call)
     {
-        callAdministratorOnInit = call;
+        this.callAdministratorOnInit = call;
     }
 
 
     /**
      * Get the history average throughput for Nodes.
-     * 
+     *
      * @return the history average throughput value
      */
     public static float getHistoryThroughputNod()
@@ -476,7 +475,7 @@ public class SubFlowInfo
 
     /**
      * Get the maximum throughput for Nodes.
-     * 
+     *
      * @return the maximum throughput value
      */
     public static float getMaxThroughputNod()
@@ -486,7 +485,7 @@ public class SubFlowInfo
 
     /**
      * Get the minimum average throughput for Nodes.
-     * 
+     *
      * @return minimum average throughput value
      */
     public static float getMinThroughputNod()
@@ -496,7 +495,7 @@ public class SubFlowInfo
 
     /**
      * Get the throughput for Nodes.
-     * 
+     *
      * @return throughput value
      */
     public static float getThroughputNod()
@@ -506,7 +505,7 @@ public class SubFlowInfo
 
     /**
      * Get the total hints for Nodes.
-     * 
+     *
      * @return total hints value
      */
     public static long getTotalHintsNod()
