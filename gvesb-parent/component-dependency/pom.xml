@@ -101,7 +101,7 @@
     <version.paho>1.0.1</version.paho>
     <version.pdfbox>1.8.7</version.pdfbox>
     <version.quartz>1.8.5</version.quartz>
-    <version.rhino.js>1.7R2</version.rhino.js>
+    <version.rhino.js>1.7.14</version.rhino.js>
     <version.rmiio>2.0.2</version.rmiio>
     <version.sandesha2>1.4</version.sandesha2>
     <version.saxon>9.1.0.8</version.saxon>
@@ -409,8 +409,8 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>rhino</groupId>
-            <artifactId>js</artifactId>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
             <version>${version.rhino.js}</version>
             <type>jar</type>
             <scope>compile</scope>
