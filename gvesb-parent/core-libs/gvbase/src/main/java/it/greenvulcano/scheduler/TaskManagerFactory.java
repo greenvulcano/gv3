@@ -19,14 +19,10 @@
  */
 package it.greenvulcano.scheduler;
 
-import it.greenvulcano.configuration.ConfigurationEvent;
-import it.greenvulcano.configuration.ConfigurationListener;
-import it.greenvulcano.configuration.XMLConfig;
-import it.greenvulcano.log.GVLogger;
-import it.greenvulcano.util.thread.BaseThread;
-
 import java.lang.reflect.Constructor;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -34,6 +30,12 @@ import org.apache.log4j.Logger;
 import org.quartz.JobExecutionContext;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import it.greenvulcano.configuration.ConfigurationEvent;
+import it.greenvulcano.configuration.ConfigurationListener;
+import it.greenvulcano.configuration.XMLConfig;
+import it.greenvulcano.log.GVLogger;
+import it.greenvulcano.util.thread.BaseThread;
 
 /**
  * @version 3.2.0 09/11/2011
@@ -47,10 +49,18 @@ public class TaskManagerFactory implements ConfigurationListener
     private Map<String, TaskManager>  managers        = new HashMap<String, TaskManager>();
     private boolean                   confChangedFlag = false;
     private String                    descriptorName;
+    private static Collection<String> managerNames    = new HashSet<String>();
 
     private TaskManagerFactory()
     {
         // do nothing
+    }
+
+    public static void setManagerNames(Collection<String> managerNames) throws TaskException {
+    	if (instance != null) {
+    		throw new TaskException("Already initialized.");
+    	}
+    	TaskManagerFactory.managerNames = managerNames;
     }
 
     public static synchronized TaskManagerFactory instance() throws TaskException
@@ -140,13 +150,15 @@ public class TaskManagerFactory implements ConfigurationListener
                     try {
                         Node n = nl.item(i);
                         name = XMLConfig.get(n, "@name");
-                        String cname = XMLConfig.get(n, "@class");
-                        String cfile = XMLConfig.get(n, "@config-file");
-                        Constructor<?> ctr = Class.forName(cname).getConstructor(
-                                new Class[]{String.class, String.class});
-                        TaskManager taskM = (TaskManager) ctr.newInstance(new Object[]{name, cfile});
-                        logger.info("Initialized TaskManager[" + taskM.getName() + "]");
-                        managers.put(taskM.getName(), taskM);
+                        if (managerNames.isEmpty() || managerNames.contains(name)) {
+	                        String cname = XMLConfig.get(n, "@class");
+	                        String cfile = XMLConfig.get(n, "@config-file");
+	                        Constructor<?> ctr = Class.forName(cname).getConstructor(
+	                                new Class[]{String.class, String.class});
+	                        TaskManager taskM = (TaskManager) ctr.newInstance(new Object[]{name, cfile});
+	                        logger.info("Initialized TaskManager[" + taskM.getName() + "]");
+	                        managers.put(taskM.getName(), taskM);
+                        }
                     }
                     catch (Exception exc) {
                         logger.error("Error initializing TaskManager[" + name + "]", exc);

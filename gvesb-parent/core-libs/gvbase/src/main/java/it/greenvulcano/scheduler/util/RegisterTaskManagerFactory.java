@@ -26,6 +26,9 @@ import it.greenvulcano.log.NMDC;
 import it.greenvulcano.scheduler.TaskManagerFactory;
 import it.greenvulcano.util.metadata.PropertiesHandler;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 
 import javax.management.MBeanServer;
@@ -84,6 +87,12 @@ public class RegisterTaskManagerFactory implements MBeanServerInitializer
         NMDC.push();
         try {
             NMDC.setServer(JMXEntryPoint.getServerName());
+
+            Collection<String> managerNames = new HashSet<String>();
+            if (properties.containsKey("managerNames")) {
+            	managerNames.addAll(Arrays.asList(properties.get("managerNames").split(",")));
+            }
+            TaskManagerFactory.setManagerNames(managerNames);
 
             TaskManagerFactory managerF = TaskManagerFactory.instance();
 
