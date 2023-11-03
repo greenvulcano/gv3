@@ -49,6 +49,7 @@ import it.greenvulcano.log.GVLogger;
 import it.greenvulcano.scheduler.TaskException;
 import it.greenvulcano.scheduler.util.quartz.CalendarBuilder;
 import it.greenvulcano.scheduler.util.quartz.SchedulerBuilder;
+import it.greenvulcano.util.metadata.PropertiesHandler;
 import it.greenvulcano.util.txt.DateUtils;
 
 /**
@@ -75,19 +76,19 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     public void init(Node node) throws TaskException
     {
         try {
-            this.maxThreads = XMLConfig.getInteger(node, "@maxThreads", 5);
+            this.maxThreads = Integer.parseInt(PropertiesHandler.expand(XMLConfig.get(node, "@maxThreads", "5")));
             Node st = XMLConfig.getNode(node, "*[@type='quartz-store']");
             this.storeType = st.getLocalName();
             if ("RamStore".equals(this.storeType)) {
                 this.misfireThreshold = XMLConfig.getInteger(st, "@misfireThreshold", 60000);
             }
             else if ("JdbcStore".equals(this.storeType)) {
-                this.driverDelegate = XMLConfig.get(st, "@driverDelegate");
-                this.tablePrefix = XMLConfig.get(st, "@tablePrefix");
+                this.driverDelegate = PropertiesHandler.expand(XMLConfig.get(st, "@driverDelegate"));
+                this.tablePrefix = PropertiesHandler.expand(XMLConfig.get(st, "@tablePrefix"));
                 this.misfireThreshold = XMLConfig.getInteger(st, "@misfireThreshold", 60000);
                 this.clusterCheckinInterval = XMLConfig.getInteger(st, "@clusterCheckinInterval", 15000);
 
-                this.jdbcConnectionName = XMLConfig.get(st, "@jdbcConnectionName");
+                this.jdbcConnectionName = PropertiesHandler.expand(XMLConfig.get(st, "@jdbcConnectionName"));
             }
             else {
                 throw new TaskException("Invalid Qartz store type: " + this.storeType);
