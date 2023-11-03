@@ -63,6 +63,8 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
 
     protected boolean             useMasterService   = true;
 
+    protected boolean             addHostnameToDefaultService   = false;
+
     private String                serviceKey         = MASTER_SERVICE_KEY;
 
 
@@ -102,7 +104,11 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
         }
         if ((datePattern != null) && (fileName != null)) {
             try {
-                appenders.put(DEFAULT_SERVICE, buildAppender(DEFAULT_SERVICE));
+            	String defService = DEFAULT_SERVICE;
+            	if (addHostnameToDefaultService) {
+            		defService = DEFAULT_SERVICE + ".env{{HOSTNAME}}"; 
+            	}
+                appenders.put(defService, buildAppender(defService));
             }
             catch (Exception exc) {
                 LogLog.error("Error initializing appender [" + name + "].", exc);
@@ -117,7 +123,18 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
     @Override
     protected void append(LoggingEvent event) {
         Object s = event.getMDC(serviceKey);
-        String service = (s == null) ? DEFAULT_SERVICE : s.toString();
+        String service = "";
+        if (s == null) {
+        	if (addHostnameToDefaultService) {
+        		service = DEFAULT_SERVICE + ".env{{HOSTNAME}}"; 
+        	}
+        	else {
+        		service = DEFAULT_SERVICE;
+        	}
+        }
+        else {
+        	service = s.toString();
+        }
 
         Appender app = appenders.get(service);
         if (app == null) {
@@ -215,6 +232,14 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
 
     public void setUseMasterService(boolean useMasterService) {
         this.useMasterService = useMasterService;
+    }
+
+    public boolean getAddHostnameToDefaultService() {
+        return this.addHostnameToDefaultService;
+    }
+
+    public void setAddHostnameToDefaultService(boolean addHostnameToDefaultService) {
+        this.addHostnameToDefaultService = addHostnameToDefaultService;
     }
 
     /*
