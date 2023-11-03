@@ -19,12 +19,14 @@
  */
 package it.greenvulcano.scheduler.util.quartz.impl;
 
-import it.greenvulcano.gvesb.j2ee.db.connections.impl.ConnectionBuilder;
-
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.quartz.utils.ConnectionProvider;
+
+import it.greenvulcano.gvesb.j2ee.db.connections.JDBCConnectionBuilder;
 
 /**
  * @version 3.2.0 20/nov/2011
@@ -32,11 +34,12 @@ import org.quartz.utils.ConnectionProvider;
  */
 public class GVQuartzConnectionProvider implements ConnectionProvider
 {
-    private ConnectionBuilder cBuilder = null;
+    private String jdbcConnectionName = null;
+    private List<Connection> connections = new ArrayList<Connection>();
 
-    public GVQuartzConnectionProvider(ConnectionBuilder cBuilder)
+    public GVQuartzConnectionProvider(String jdbcConnectionName)
     {
-        this.cBuilder = cBuilder;
+        this.jdbcConnectionName = jdbcConnectionName;
     }
 
     /* (non-Javadoc)
@@ -46,7 +49,9 @@ public class GVQuartzConnectionProvider implements ConnectionProvider
     public Connection getConnection() throws SQLException
     {
         try {
-            return cBuilder.getConnection();
+            Connection conn = JDBCConnectionBuilder.getConnection(this.jdbcConnectionName);
+            this.connections.add(conn);
+            return conn;
         }
         catch (Exception exc) {
             throw new SQLException(exc);
@@ -60,7 +65,10 @@ public class GVQuartzConnectionProvider implements ConnectionProvider
     public void shutdown() throws SQLException
     {
         try {
-            cBuilder.destroy();
+            while (!this.connections.isEmpty()) {
+                Connection conn = this.connections.remove(0);
+                JDBCConnectionBuilder.releaseConnection(this.jdbcConnectionName, conn);
+            }
         }
         catch (Exception exc) {
             throw new SQLException(exc);

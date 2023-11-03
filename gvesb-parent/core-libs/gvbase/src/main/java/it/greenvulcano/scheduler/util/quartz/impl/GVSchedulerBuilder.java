@@ -65,7 +65,6 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     private int                   clusterCheckinInterval = 15000;
     private String                storeType              = "RamStore";
     private String                jdbcConnectionName     = "UNDEFINED";
-    private ConnectionBuilder     cBuilder               = null;
     private String                driverDelegate         = "UNDEFINED";
     private String                tablePrefix            = "UNDEFINED";
     private List<CalendarBuilder> calendars              = new ArrayList<CalendarBuilder>();
@@ -89,11 +88,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 misfireThreshold = XMLConfig.getInteger(st, "@misfireThreshold", 60000);
                 clusterCheckinInterval = XMLConfig.getInteger(st, "@clusterCheckinInterval", 15000);
 
-                Node cbn = XMLConfig.getNode(st, "*[@type='jdbc-connection-builder']");
-                String className = XMLConfig.get(cbn, "@class");
-                jdbcConnectionName = XMLConfig.get(cbn, "@name");
-                cBuilder = (ConnectionBuilder) Class.forName(className).newInstance();
-                cBuilder.init(cbn);
+                jdbcConnectionName = XMLConfig.get(st, "@jdbcConnectionName");
             }
             else {
                 throw new TaskException("Invalid Qartz store type: " + storeType);
@@ -141,7 +136,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 JobStore jobStore = null;
                 if ("JdbcStore".equals(storeType)) {
                     DBConnectionManager.getInstance().addConnectionProvider(jdbcConnectionName,
-                            new GVQuartzConnectionProvider(cBuilder));
+                            new GVQuartzConnectionProvider(jdbcConnectionName));
                     jobStore = new JobStoreTX();
                     ((JobStoreTX) jobStore).setDataSource(jdbcConnectionName);
                     ((JobStoreTX) jobStore).setDriverDelegateClass(driverDelegate);
@@ -207,7 +202,7 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                     }
 
                 }*/
-                logger.info("Quartz scheduler '" + scheduler.getSchedulerName());
+                logger.info("Quartz scheduler '" + scheduler.getSchedulerName() + "'");
                 logger.info("Quartz scheduler version: " + qs.getVersion());
 
                 qs.addNoGCObject(schedRep);
@@ -218,10 +213,10 @@ public class GVSchedulerBuilder implements SchedulerBuilder
                 }
 
                 schedRep.bind(scheduler);
-                
+
                 // Add default trigger listener
                 scheduler.addGlobalTriggerListener(new GVTriggerListener());
-                
+
                 scheduler.start();
                 logger.debug("END - created Scheduler[" + instanceId + "]");
             }
@@ -262,10 +257,6 @@ public class GVSchedulerBuilder implements SchedulerBuilder
     @Override
     public void destroy() {
         calendars.clear();
-        if (cBuilder != null) {
-        cBuilder.destroy();
-        cBuilder = null;
-        }
     }
 
     @Override
