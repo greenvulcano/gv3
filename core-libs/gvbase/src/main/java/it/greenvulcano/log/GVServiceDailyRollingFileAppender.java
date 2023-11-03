@@ -1,25 +1,23 @@
 /*
  * Copyright (c) 2009-2013 GreenVulcano ESB Open Source Project. All rights
  * reserved.
- * 
+ *
  * This file is part of GreenVulcano ESB.
- * 
+ *
  * GreenVulcano ESB is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * GreenVulcano ESB is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GreenVulcano ESB. If not, see <http://www.gnu.org/licenses/>.
  */
 package it.greenvulcano.log;
-
-import it.greenvulcano.util.metadata.PropertiesHandlerException;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -34,11 +32,14 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
 
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.metadata.PropertiesHandlerException;
+
 /**
- * 
+ *
  * @version 3.4.0 28/mag/2013
  * @author GreenVulcano Developer Team
- * 
+ *
  */
 public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
 {
@@ -69,7 +70,7 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
     private Map<String, Appender> appenders          = new HashMap<String, Appender>();
 
     /**
-     * 
+     *
      */
     public GVServiceDailyRollingFileAppender() {
         // do nothing
@@ -77,7 +78,7 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
 
     /**
      * Instantiate a <code>GVServiceDailyRollingFileAppender</code>.
-     * 
+     *
      * @param layout
      * @param fileName
      * @param datePattern
@@ -94,35 +95,35 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
 
     @Override
     public void activateOptions() {
-        if (useMasterService) {
-            serviceKey = MASTER_SERVICE_KEY;
+        if (this.useMasterService) {
+            this.serviceKey = MASTER_SERVICE_KEY;
         }
         else {
-            serviceKey = SERVICE_KEY;
+            this.serviceKey = SERVICE_KEY;
         }
-        if ((datePattern != null) && (fileName != null)) {
+        if ((this.datePattern != null) && (this.fileName != null)) {
             try {
-                appenders.put(DEFAULT_SERVICE, buildAppender(DEFAULT_SERVICE));
+                this.appenders.put(DEFAULT_SERVICE, buildAppender(DEFAULT_SERVICE));
             }
             catch (Exception exc) {
-                LogLog.error("Error initializing appender [" + name + "].", exc);
+                LogLog.error("Error initializing appender [" + this.name + "].", exc);
             }
         }
         else {
-            LogLog.error("Either File or DatePattern options are not set for appender [" + name + "].");
+            LogLog.error("Either File or DatePattern options are not set for appender [" + this.name + "].");
         }
     }
 
 
     @Override
     protected void append(LoggingEvent event) {
-        Object s = event.getMDC(serviceKey);
+        Object s = event.getMDC(this.serviceKey);
         String service = (s == null) ? DEFAULT_SERVICE : s.toString();
 
-        Appender app = appenders.get(service);
+        Appender app = this.appenders.get(service);
         if (app == null) {
             app = buildAppender(service);
-            appenders.put(service, app);
+            this.appenders.put(service, app);
         }
 
         app.doAppend(event);
@@ -130,13 +131,13 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.log4j.Appender#close()
      */
     @Override
     public void close() {
-        for (Iterator<String> it = appenders.keySet().iterator(); it.hasNext();) {
-            Appender app = appenders.get(it.next());
+        for (Iterator<String> it = this.appenders.keySet().iterator(); it.hasNext();) {
+            Appender app = this.appenders.get(it.next());
             app.close();
         }
     }
@@ -144,49 +145,49 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
     /**
      * The <b>DatePattern</b> takes a string in the same format as expected by
      * {@link SimpleDateFormat}. This options determines the rollover schedule.
-     * 
+     *
      * @param pattern
      */
     public void setDatePattern(String pattern) {
-        datePattern = pattern;
+        this.datePattern = pattern;
     }
 
     /**
      * Returns the value of the <b>DatePattern</b> option.
-     * 
+     *
      * @return the value of the <b>DatePattern</b> option.
      */
     public String getDatePattern() {
-        return datePattern;
+        return this.datePattern;
     }
 
     public String getEncoding() {
-        return encoding;
+        return this.encoding;
     }
 
     public void setEncoding(String value) {
-        encoding = value;
+        this.encoding = value;
     }
 
     public void setImmediateFlush(boolean value) {
-        immediateFlush = value;
+        this.immediateFlush = value;
     }
 
     public boolean getImmediateFlush() {
-        return immediateFlush;
+        return this.immediateFlush;
     }
 
     public void setFile(String file) {
         String val = file.trim();
-        fileName = val;
+        this.fileName = val;
     }
 
     public boolean getAppend() {
-        return fileAppend;
+        return this.fileAppend;
     }
 
     public String getFile() {
-        return fileName;
+        return this.fileName;
     }
 
     public boolean getBufferedIO() {
@@ -198,7 +199,7 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
     }
 
     public void setAppend(boolean flag) {
-        fileAppend = flag;
+        this.fileAppend = flag;
     }
 
     public void setBufferedIO(boolean bufferedIO) {
@@ -219,7 +220,7 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.log4j.Appender#requiresLayout()
      */
     @Override
@@ -229,14 +230,14 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
 
     /**
      * encode a String replacing the "#" with Service name<br>
-     * 
+     *
      * @param string
      *        the string to encode
      * @return string the encoded string
      */
     private String encode(String service) {
         StringBuilder output = new StringBuilder();
-        StringTokenizer tokenizer = new StringTokenizer(fileName, "#", true);
+        StringTokenizer tokenizer = new StringTokenizer(this.fileName, "#", true);
         boolean found = false;
 
         while (tokenizer.hasMoreTokens()) {
@@ -254,7 +255,13 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
             output.append(service);
         }
 
-        return output.toString();
+        try {
+            return PropertiesHandler.expand(output.toString());
+        }
+        catch (Exception exc) {
+            exc.printStackTrace();
+            return output.toString();
+        }
     }
 
     /**
@@ -263,14 +270,14 @@ public class GVServiceDailyRollingFileAppender extends AppenderSkeleton
     private Appender buildAppender(String service) {
         GVDailyRollingFileAppender app = new GVDailyRollingFileAppender();
         app.setName(service);
-        app.setLayout(layout);
-        app.setEncoding(encoding);
+        app.setLayout(this.layout);
+        app.setEncoding(this.encoding);
         app.setFileName(encode(service));
-        app.setDatePattern(datePattern);
-        app.setAppend(fileAppend);
-        app.setBufferedIO(bufferedIO);
-        app.setBufferSize(bufferSize);
-        app.setImmediateFlush(immediateFlush);
+        app.setDatePattern(this.datePattern);
+        app.setAppend(this.fileAppend);
+        app.setBufferedIO(this.bufferedIO);
+        app.setBufferSize(this.bufferSize);
+        app.setImmediateFlush(this.immediateFlush);
         app.activateOptions();
         return app;
     }

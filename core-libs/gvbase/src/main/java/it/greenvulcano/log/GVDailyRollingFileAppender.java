@@ -19,9 +19,6 @@
  */
 package it.greenvulcano.log;
 
-import it.greenvulcano.util.metadata.PropertiesHandler;
-import it.greenvulcano.util.metadata.PropertiesHandlerException;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -36,6 +33,9 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
+
+import it.greenvulcano.util.metadata.PropertiesHandler;
+import it.greenvulcano.util.metadata.PropertiesHandlerException;
 
 /**
  * GVDailyRollingFileAppender extends {@link FileAppender} so that the
@@ -231,7 +231,7 @@ public class GVDailyRollingFileAppender extends FileAppender
      */
     public void setDatePattern(String pattern)
     {
-        datePattern = pattern;
+        this.datePattern = pattern;
     }
 
     /**
@@ -241,7 +241,7 @@ public class GVDailyRollingFileAppender extends FileAppender
      */
     public String getDatePattern()
     {
-        return datePattern;
+        return this.datePattern;
     }
 
     /**
@@ -250,21 +250,21 @@ public class GVDailyRollingFileAppender extends FileAppender
     @Override
     public void activateOptions()
     {
-        if ((datePattern != null) && (origFileName != null)) {
-            now.setTime(System.currentTimeMillis());
-            sdf = new SimpleDateFormat(datePattern);
+        if ((this.datePattern != null) && (this.origFileName != null)) {
+            this.now.setTime(System.currentTimeMillis());
+            this.sdf = new SimpleDateFormat(this.datePattern);
             int type = computeCheckPeriod();
             printPeriodicity(type);
-            rc.setType(type);
+            this.rc.setType(type);
 
-            super.setFile(completeFileName(now));
+            super.setFile(completeFileName(this.now));
             super.activateOptions();
 
-            File file = new File(fileName);
-            scheduledFilename = fileName + sdf.format(new Date(file.lastModified()));
+            File file = new File(this.fileName);
+            this.scheduledFilename = this.fileName + this.sdf.format(new Date(file.lastModified()));
         }
         else {
-            LogLog.error("Either File or DatePattern options are not set for appender [" + name + "].");
+            LogLog.error("Either File or DatePattern options are not set for appender [" + this.name + "].");
         }
     }
 
@@ -272,25 +272,25 @@ public class GVDailyRollingFileAppender extends FileAppender
     {
         switch (type) {
             case TOP_OF_MINUTE :
-                LogLog.debug("Appender [" + name + "] to be rolled every minute.");
+                LogLog.debug("Appender [" + this.name + "] to be rolled every minute.");
                 break;
             case TOP_OF_HOUR :
-                LogLog.debug("Appender [" + name + "] to be rolled on top of every hour.");
+                LogLog.debug("Appender [" + this.name + "] to be rolled on top of every hour.");
                 break;
             case HALF_DAY :
-                LogLog.debug("Appender [" + name + "] to be rolled at midday and midnight.");
+                LogLog.debug("Appender [" + this.name + "] to be rolled at midday and midnight.");
                 break;
             case TOP_OF_DAY :
-                LogLog.debug("Appender [" + name + "] to be rolled at midnight.");
+                LogLog.debug("Appender [" + this.name + "] to be rolled at midnight.");
                 break;
             case TOP_OF_WEEK :
-                LogLog.debug("Appender [" + name + "] to be rolled at start of week.");
+                LogLog.debug("Appender [" + this.name + "] to be rolled at start of week.");
                 break;
             case TOP_OF_MONTH :
-                LogLog.debug("Appender [" + name + "] to be rolled at start of every month.");
+                LogLog.debug("Appender [" + this.name + "] to be rolled at start of every month.");
                 break;
             default :
-                LogLog.warn("Unknown periodicity for appender [" + name + "].");
+                LogLog.warn("Unknown periodicity for appender [" + this.name + "].");
         }
     }
 
@@ -311,9 +311,9 @@ public class GVDailyRollingFileAppender extends FileAppender
         //
         Date epoch = new Date(0);
 
-        if (datePattern != null) {
+        if (this.datePattern != null) {
             for (int i = TOP_OF_MINUTE; i <= TOP_OF_MONTH; i++) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(this.datePattern);
 
                 // do all date formatting in GMT
                 //
@@ -341,17 +341,17 @@ public class GVDailyRollingFileAppender extends FileAppender
     {
         // Compute filename, but only if datePattern is specified
         //
-        if (datePattern == null) {
-            errorHandler.error("Missing DatePattern option in rollOver().");
+        if (this.datePattern == null) {
+            this.errorHandler.error("Missing DatePattern option in rollOver().");
             return;
         }
-        String datedFilename = completeFileName(now);
+        String datedFilename = completeFileName(this.now);
 
         // It is too early to roll over because we are still within the
         // bounds of the current interval. Rollover will occur once the
         // next interval is reached.
         //
-        if (scheduledFilename.equals(datedFilename)) {
+        if (this.scheduledFilename.equals(datedFilename)) {
             return;
         }
 
@@ -362,12 +362,12 @@ public class GVDailyRollingFileAppender extends FileAppender
             // This will also close the file. This is OK since multiple
             // close operations are safe.
             //
-            this.setFile(datedFilename, fileAppend, bufferedIO, bufferSize);
+            this.setFile(datedFilename, this.fileAppend, this.bufferedIO, this.bufferSize);
         }
         catch (IOException e) {
-            errorHandler.error("setFile(" + fileName + ", false) call failed.");
+            this.errorHandler.error("setFile(" + this.fileName + ", false) call failed.");
         }
-        scheduledFilename = datedFilename;
+        this.scheduledFilename = datedFilename;
     }
 
     /**
@@ -383,9 +383,9 @@ public class GVDailyRollingFileAppender extends FileAppender
     protected void subAppend(LoggingEvent event)
     {
         long n = System.currentTimeMillis();
-        if (n >= nextCheck) {
-            now.setTime(n);
-            nextCheck = rc.getNextCheckMillis(now);
+        if (n >= this.nextCheck) {
+            this.now.setTime(n);
+            this.nextCheck = this.rc.getNextCheckMillis(this.now);
             try {
                 rollOver();
             }
@@ -402,10 +402,10 @@ public class GVDailyRollingFileAppender extends FileAppender
     @Override
     public void setFile(String file)
     {
-        origFileName = file;
+        this.origFileName = file;
 
         try {
-            origFileName = PropertiesHandler.expand(file, null);
+            this.origFileName = PropertiesHandler.expand(file);
         }
         catch (PropertiesHandlerException exc) {
             exc.printStackTrace();
@@ -419,10 +419,10 @@ public class GVDailyRollingFileAppender extends FileAppender
      */
     public void setFileName(String file)
     {
-        origFileName = file;
+        this.origFileName = file;
 
         try {
-            origFileName = PropertiesHandler.expand(file, null);
+            this.origFileName = PropertiesHandler.expand(file);
         }
         catch (PropertiesHandlerException exc) {
             exc.printStackTrace();
@@ -448,14 +448,14 @@ public class GVDailyRollingFileAppender extends FileAppender
     private String encode(Date date)
     {
         StringBuilder output = new StringBuilder();
-        StringTokenizer tokenizer = new StringTokenizer(origFileName, "$", true);
+        StringTokenizer tokenizer = new StringTokenizer(this.origFileName, "$", true);
         boolean found = false;
 
         while (tokenizer.hasMoreTokens()) {
             String tk = tokenizer.nextToken();
             if (tk.equals("$")) {
                 found = true;
-                output.append(sdf.format(date));
+                output.append(this.sdf.format(date));
             }
             else {
                 output.append(tk);
@@ -463,46 +463,10 @@ public class GVDailyRollingFileAppender extends FileAppender
         }
 
         if (!found) {
-            output.append(sdf.format(date));
+            output.append(this.sdf.format(date));
         }
 
         return output.toString();
-    }
-
-    /**
-     * Create the file name with the property inserted on the configuration file
-     * For Example with the server name
-     *
-     * @param name
-     * @return the translated file name
-     */
-    protected String _translateFileName(String name)
-    {
-        String beginParam = "${";
-        String endParam = "}";
-
-        String resultName = name;
-
-        while (true) {
-            int beginIndex = resultName.indexOf(beginParam);
-            if (beginIndex != -1) {
-                int endIndex = resultName.indexOf(endParam, beginIndex);
-                if (endIndex != -1) {
-                    String propName = resultName.substring(beginIndex + 2, endIndex);
-                    String paramValue = System.getProperty(propName, "Property '" + propName + "' not found");
-                    resultName = resultName.substring(0, beginIndex) + paramValue + resultName.substring(endIndex);
-                }
-                else {
-                    LogLog.error("translateFileName(): Invalid property substitution required ("
-                            + resultName.substring(beginIndex, resultName.length() - 1) + ")");
-                    break;
-                }
-            }
-            else {
-                break;
-            }
-        }
-        return resultName;
     }
 }
 
@@ -541,7 +505,7 @@ class RollingCalendar extends GregorianCalendar
     {
         setTime(now);
 
-        switch (type) {
+        switch (this.type) {
             case GVDailyRollingFileAppender.TOP_OF_MINUTE :
                 this.set(Calendar.SECOND, 0);
                 this.set(Calendar.MILLISECOND, 0);
