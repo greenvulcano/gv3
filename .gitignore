@@ -6,3 +6,5 @@ gvesb-adapters/gvhl7/id_file
 thirdparty/libraries.ent
 thirdparty/libraries/**
 thirdparty/licenses/**
+
+gvesb-parent/core-libs/gvbase/derby.log
